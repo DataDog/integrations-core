@@ -234,18 +234,18 @@
                     },
                     {
                       "name": "query2",
-                      "query": "sum:krakend.api.http_server.duration.count{*}.as_count()",
+                      "query": "sum:krakend.api.http_server.response_size.count{*}.as_count()",
                       "data_source": "metrics"
                     }
                   ],
                   "formulas": [
                     {
-                      "alias": "Duration",
+                      "alias": "Average response size",
                       "formula": "query1 / query2",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
-                          "unit_name": "kibibyte"
+                          "unit_name": "byte"
                         }
                       }
                     }
@@ -827,7 +827,7 @@
                     "indexes": [],
                     "storage": "hot",
                     "data_source": "logs_stream",
-                    "query_string": "source:krakend @krakend.module:GIN status:error"
+                    "query_string": "source:krakend @krakend.module:GIN @http.status_code:[500 TO 599]"
                   },
                   "columns": [
                     {
@@ -1003,7 +1003,7 @@
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
-                          "unit_name": "kibibyte"
+                          "unit_name": "byte"
                         }
                       }
                     }
@@ -1179,12 +1179,12 @@
                   "queries": [
                     {
                       "name": "query1",
-                      "query": "sum:krakend.api.http_client.response_read_time_seconds.sum{*}.as_count()",
+                      "query": "sum:krakend.api.http_client.response_read_time_hist_seconds.sum{*}.as_count()",
                       "data_source": "metrics"
                     },
                     {
                       "name": "query2",
-                      "query": "sum:krakend.api.http_client.response_read_time_seconds.count{*}.as_count()",
+                      "query": "sum:krakend.api.http_client.response_read_time_hist_seconds.count{*}.as_count()",
                       "data_source": "metrics"
                     },
                     {

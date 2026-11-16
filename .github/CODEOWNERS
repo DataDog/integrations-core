@@ -392,9 +392,9 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 
 /kai_scheduler/                                                      @DataDog/accelerator-telemetry
 /kai_scheduler/*.md                                                  @DataDog/accelerator-telemetry @DataDog/documentation
-/kueue/                                                                @DataDog/gpu-monitoring-agent
-/kueue/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
-/kueue/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+/kueue/                                                                @DataDog/accelerator-telemetry
+/kueue/*.md                                                            @DataDog/accelerator-telemetry @DataDog/documentation
+/kueue/manifest.json                                                   @DataDog/accelerator-telemetry @DataDog/agent-integrations @DataDog/documentation
 
 /dynamo/                                                               @DataDog/gpu-monitoring-agent
 /dynamo/*.md                                                           @DataDog/gpu-monitoring-agent @DataDog/documentation
@@ -410,6 +410,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /sglang/*.md                                                           @DataDog/gpu-monitoring-agent @DataDog/documentation
 /sglang/manifest.json                                                  @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 /sglang/metadata.csv                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+
+/llm_d/                                                                @DataDog/gpu-monitoring-agent
+/llm_d/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
+/llm_d/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+/llm_d/metadata.csv                                                    @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 
 /linux_audit_logs/                                                  @DataDog/agent-integrations
 /linux_audit_logs/*.md                                              @DataDog/agent-integrations @DataDog/documentation

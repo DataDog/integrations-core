@@ -10,7 +10,7 @@
       "integration:krakend"
     ],
     "type": "query alert",
-    "query": "max(last_5m):sum:krakend.api.backend_duration.count{error:true} by {host,http_route,krakend.service_name}.as_rate() > 0.1",
+    "query": "sum(last_5m):sum:krakend.api.backend_duration.count{error:true} by {host,http_route,krakend.service_name}.as_count() / sum:krakend.api.backend_duration.count{*} by {host,http_route,krakend.service_name}.as_count() > 0.1",
     "message": "Your KrakenD API Gateway is experiencing an error rate {{comparator}} {{threshold}} in the backend endpoint `{{http_route.name}}`.\n\n- **Service**: {{[krakend.service_name].name}}\n- **Host**: {{host.name}}\n\nMonitor triggered at {{first_triggered_at}}",
     "options": {
       "silenced": {},
@@ -27,5 +27,5 @@
   },
   "created_at": "2025-07-31",
   "description": "This monitor warns when more than 5% of the requests served by a backend endpoint are errors and goes into alert when it is over 10%",
-  "last_updated_at": "2025-08-07"
+  "last_updated_at": "2026-11-13"
 }

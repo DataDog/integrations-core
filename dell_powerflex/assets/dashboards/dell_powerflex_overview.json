@@ -122,7 +122,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:dell_powerflex.api.can_connect{$system_id,$scope}"
+                      "query": "min:dell_powerflex.api.can_connect{$scope}"
                     }
                   ],
                   "response_format": "scalar"
@@ -147,21 +147,9 @@
               "title": "Cluster state",
               "title_size": "16",
               "title_align": "left",
-              "type": "query_value",
+              "type": "toplist",
               "requests": [
                 {
-                  "conditional_formats": [
-                    {
-                      "comparator": ">=",
-                      "palette": "white_on_green",
-                      "value": 1
-                    },
-                    {
-                      "comparator": "<",
-                      "palette": "white_on_red",
-                      "value": 1
-                    }
-                  ],
                   "formulas": [
                     {
                       "formula": "query1"
@@ -172,17 +160,12 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:dell_powerflex.mdm_cluster.cluster_state{$system_id,$scope}"
+                      "query": "sum:dell_powerflex.mdm_cluster.cluster_state{$system_id,$scope} by {cluster_state}"
                     }
                   ],
                   "response_format": "scalar"
                 }
-              ],
-              "autoscale": true,
-              "precision": 2,
-              "timeseries_background": {
-                "type": "bars"
-              }
+              ]
             },
             "layout": {
               "x": 2,
@@ -385,7 +368,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:dell_powerflex.num_dev_errors{dell_type:system,$scope}"
+                      "query": "sum:dell_powerflex.num_dev_errors{dell_type:system,$system_id,$scope}"
                     }
                   ],
                   "response_format": "scalar"
@@ -415,21 +398,36 @@
                 {
                   "formulas": [
                     {
-                      "formula": "reads + writes"
+                      "formula": "reduce(sum(clamp_min(reads_weight / reads_window, 0), {dell_type}) + sum(clamp_min(writes_weight / writes_window, 0), {dell_type}), 'last')",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
-                      "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "sum:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:system,$scope}"
+                      "name": "reads_weight",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
                     },
                     {
-                      "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "sum:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:system,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_weight",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
                     }
                   ],
                   "response_format": "scalar"
@@ -459,15 +457,27 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "(query1_weight / query1_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:dell_powerflex.user_data_sdc_write_latency.num_seconds{dell_type:system,$scope}"
+                      "name": "query1_weight",
+                      "query": "sum:dell_powerflex.user_data_sdc_write_latency.total_weight_in_kb{dell_type:system,$system_id,$scope}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1_count",
+                      "query": "sum:dell_powerflex.user_data_sdc_write_latency.num_occured{dell_type:system,$system_id,$scope}"
                     }
                   ],
                   "response_format": "scalar"
@@ -497,21 +507,29 @@
                 {
                   "formulas": [
                     {
-                      "formula": "reads + writes"
+                      "formula": "reduce(sum(clamp_min(reads_ops / reads_window, 0), {dell_type}) + sum(clamp_min(writes_ops / writes_window, 0), {dell_type}), 'last')"
                     }
                   ],
                   "queries": [
                     {
-                      "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "sum:dell_powerflex.user_data_read_bwc.num_occured{dell_type:system,$scope}"
+                      "name": "reads_ops",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.num_occured{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
                     },
                     {
-                      "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "sum:dell_powerflex.user_data_write_bwc.num_occured{dell_type:system,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_ops",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.num_occured{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
                     }
                   ],
                   "response_format": "scalar"
@@ -676,23 +694,33 @@
                   "formulas": [
                     {
                       "alias": "Read IOPS",
-                      "formula": "reads"
+                      "formula": "sum(clamp_min(reads_ops / reads_window, 0), {dell_type})"
                     },
                     {
                       "alias": "Write IOPS",
-                      "formula": "writes"
+                      "formula": "sum(clamp_min(writes_ops / writes_window, 0), {dell_type})"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.num_occured{dell_type:system,$system_id,$scope}"
+                      "name": "reads_ops",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.num_occured{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.num_occured{dell_type:system,$system_id,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_ops",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.num_occured{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -728,23 +756,47 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "reads"
+                      "formula": "sum(clamp_min(reads_weight / reads_window, 0), {dell_type})",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "writes"
+                      "formula": "sum(clamp_min(writes_weight / writes_window, 0), {dell_type})",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:system,$system_id,$scope}"
+                      "name": "reads_weight",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:system,$system_id,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_weight",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:system,$system_id,$scope} by {system_id,dell_type}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -780,23 +832,45 @@
                   "formulas": [
                     {
                       "alias": "Read Latency",
-                      "formula": "r"
+                      "formula": "(r_weight / r_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     },
                     {
                       "alias": "Write Latency",
-                      "formula": "w"
+                      "formula": "(w_weight / w_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "r",
-                      "query": "avg:dell_powerflex.user_data_sdc_read_latency.num_seconds{dell_type:system,$system_id,$scope}"
+                      "name": "r_weight",
+                      "query": "sum:dell_powerflex.user_data_sdc_read_latency.total_weight_in_kb{dell_type:system,$system_id,$scope}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "w",
-                      "query": "avg:dell_powerflex.user_data_sdc_write_latency.num_seconds{dell_type:system,$system_id,$scope}"
+                      "name": "r_count",
+                      "query": "sum:dell_powerflex.user_data_sdc_read_latency.num_occured{dell_type:system,$system_id,$scope}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "w_weight",
+                      "query": "sum:dell_powerflex.user_data_sdc_write_latency.total_weight_in_kb{dell_type:system,$system_id,$scope}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "w_count",
+                      "query": "sum:dell_powerflex.user_data_sdc_write_latency.num_occured{dell_type:system,$system_id,$scope}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -886,19 +960,19 @@
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "dev_err",
-                      "query": "avg:dell_powerflex.num_dev_errors{dell_type:system,$scope} by {system_id}"
+                      "query": "avg:dell_powerflex.num_dev_errors{dell_type:system,$system_id,$scope} by {system_id}"
                     },
                     {
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "sds_recon",
-                      "query": "avg:dell_powerflex.num_sds_reconnections{dell_type:system,$scope} by {system_id}"
+                      "query": "avg:dell_powerflex.num_sds_reconnections{dell_type:system,$system_id,$scope} by {system_id}"
                     },
                     {
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "fixed_err",
-                      "query": "avg:dell_powerflex.fixed_read_error_count{dell_type:system,$scope} by {system_id}"
+                      "query": "avg:dell_powerflex.fixed_read_error_count{dell_type:system,$system_id,$scope} by {system_id}"
                     }
                   ],
                   "response_format": "scalar",
@@ -1061,23 +1135,33 @@
                   "formulas": [
                     {
                       "alias": "Read IOPS",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_ops / reads_window, 0)"
                     },
                     {
                       "alias": "Write IOPS",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_ops / writes_window, 0)"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.num_occured{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "name": "reads_ops",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.num_occured{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.num_occured{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_ops",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.num_occured{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1113,23 +1197,47 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_weight / reads_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_weight / writes_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "name": "reads_weight",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_weight",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1165,41 +1273,89 @@
                   "formulas": [
                     {
                       "alias": "Fwd Rebuild Read",
-                      "formula": "fwd_r"
+                      "formula": "clamp_min(fwd_r_weight / fwd_r_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Fwd Rebuild Write",
-                      "formula": "fwd_w"
+                      "formula": "clamp_min(fwd_w_weight / fwd_w_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Bck Rebuild Read",
-                      "formula": "bck_r"
+                      "formula": "clamp_min(bck_r_weight / bck_r_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Bck Rebuild Write",
-                      "formula": "bck_w"
+                      "formula": "clamp_min(bck_w_weight / bck_w_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "fwd_r",
-                      "query": "avg:dell_powerflex.fwd_rebuild_read_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "name": "fwd_r_weight",
+                      "query": "sum:dell_powerflex.fwd_rebuild_read_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "fwd_w",
-                      "query": "avg:dell_powerflex.fwd_rebuild_write_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "name": "fwd_r_window",
+                      "query": "avg:dell_powerflex.fwd_rebuild_read_bwc.num_seconds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "bck_r",
-                      "query": "avg:dell_powerflex.bck_rebuild_read_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "name": "fwd_w_weight",
+                      "query": "sum:dell_powerflex.fwd_rebuild_write_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "bck_w",
-                      "query": "avg:dell_powerflex.bck_rebuild_write_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "name": "fwd_w_window",
+                      "query": "avg:dell_powerflex.fwd_rebuild_write_bwc.num_seconds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "bck_r_weight",
+                      "query": "sum:dell_powerflex.bck_rebuild_read_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "bck_r_window",
+                      "query": "avg:dell_powerflex.bck_rebuild_read_bwc.num_seconds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "bck_w_weight",
+                      "query": "sum:dell_powerflex.bck_rebuild_write_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "bck_w_window",
+                      "query": "avg:dell_powerflex.bck_rebuild_write_bwc.num_seconds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1235,23 +1391,47 @@
                   "formulas": [
                     {
                       "alias": "Rebalance Read",
-                      "formula": "rebal_r"
+                      "formula": "clamp_min(rebal_r_weight / rebal_r_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Rebalance Write",
-                      "formula": "rebal_w"
+                      "formula": "clamp_min(rebal_w_weight / rebal_w_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "rebal_r",
-                      "query": "avg:dell_powerflex.rebalance_read_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "name": "rebal_r_weight",
+                      "query": "sum:dell_powerflex.rebalance_read_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "rebal_w",
-                      "query": "avg:dell_powerflex.rebalance_write_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "name": "rebal_r_window",
+                      "query": "avg:dell_powerflex.rebalance_read_bwc.num_seconds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "rebal_w_weight",
+                      "query": "sum:dell_powerflex.rebalance_write_bwc.total_weight_in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "rebal_w_window",
+                      "query": "avg:dell_powerflex.rebalance_write_bwc.num_seconds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1298,12 +1478,12 @@
                     {
                       "data_source": "metrics",
                       "name": "protected",
-                      "query": "avg:dell_powerflex.protected_capacity.in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "query": "avg:dell_powerflex.protected_capacity.in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "failed",
-                      "query": "avg:dell_powerflex.failed_capacity.in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "query": "avg:dell_powerflex.failed_capacity.in_kb{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1332,19 +1512,19 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "sds_count",
-                      "query": "avg:dell_powerflex.num_of_sds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "query": "avg:dell_powerflex.num_of_sds{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     },
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "pool_count",
-                      "query": "avg:dell_powerflex.num_of_storage_pools{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "query": "avg:dell_powerflex.num_of_storage_pools{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     },
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "fault_sets",
-                      "query": "avg:dell_powerflex.num_of_fault_sets{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name,$scope}"
+                      "query": "avg:dell_powerflex.num_of_fault_sets{dell_type:protection_domain,$protection_domain_name,$scope} by {protection_domain_name}"
                     }
                   ],
                   "response_format": "scalar",
@@ -1461,17 +1641,17 @@
                     {
                       "data_source": "metrics",
                       "name": "max_cap",
-                      "query": "avg:dell_powerflex.max_capacity.in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "query": "avg:dell_powerflex.max_capacity.in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "in_use",
-                      "query": "avg:dell_powerflex.capacity.in_use_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "query": "avg:dell_powerflex.capacity.in_use_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "unused",
-                      "query": "avg:dell_powerflex.unused_capacity.in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "query": "avg:dell_powerflex.unused_capacity.in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1507,23 +1687,47 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_weight / reads_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_weight / writes_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "name": "reads_weight",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_weight",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1559,23 +1763,33 @@
                   "formulas": [
                     {
                       "alias": "Read IOPS",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_ops / reads_window, 0)"
                     },
                     {
                       "alias": "Write IOPS",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_ops / writes_window, 0)"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.num_occured{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "name": "reads_ops",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.num_occured{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.num_occured{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_ops",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.num_occured{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1604,13 +1818,13 @@
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "thin",
-                      "query": "avg:dell_powerflex.thin_capacity.in_use_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "query": "avg:dell_powerflex.thin_capacity.in_use_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     },
                     {
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "thick",
-                      "query": "avg:dell_powerflex.thick_capacity.in_use_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "query": "avg:dell_powerflex.thick_capacity.in_use_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     }
                   ],
                   "response_format": "scalar",
@@ -1661,14 +1875,18 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "unused",
-                      "query": "avg:dell_powerflex.unused_capacity.in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "query": "avg:dell_powerflex.unused_capacity.in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     }
                   ],
                   "response_format": "scalar",
                   "formulas": [
                     {
                       "alias": "Free Capacity",
-                      "formula": "unused"
+                      "formula": "unused",
+                      "limit": {
+                        "order": "asc",
+                        "count": 10
+                      }
                     }
                   ]
                 }
@@ -1695,19 +1913,19 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "vols",
-                      "query": "avg:dell_powerflex.num_of_volumes{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "query": "avg:dell_powerflex.num_of_volumes{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     },
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "snaps",
-                      "query": "avg:dell_powerflex.num_of_snapshots{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "query": "avg:dell_powerflex.num_of_snapshots{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     },
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "unmapped",
-                      "query": "avg:dell_powerflex.num_of_unmapped_volumes{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "query": "avg:dell_powerflex.num_of_unmapped_volumes{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     }
                   ],
                   "response_format": "scalar",
@@ -1763,7 +1981,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "in_use",
-                      "query": "avg:dell_powerflex.capacity.in_use_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "query": "avg:dell_powerflex.capacity.in_use_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     }
                   ],
                   "response_format": "scalar",
@@ -1804,23 +2022,45 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "r"
+                      "formula": "(r_weight / r_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "w"
+                      "formula": "(w_weight / w_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "r",
-                      "query": "avg:dell_powerflex.user_data_sdc_read_latency.num_seconds{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "name": "r_weight",
+                      "query": "sum:dell_powerflex.user_data_sdc_read_latency.total_weight_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "w",
-                      "query": "avg:dell_powerflex.user_data_sdc_write_latency.num_seconds{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "name": "r_count",
+                      "query": "sum:dell_powerflex.user_data_sdc_read_latency.num_occured{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "w_weight",
+                      "query": "sum:dell_powerflex.user_data_sdc_write_latency.total_weight_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "w_count",
+                      "query": "sum:dell_powerflex.user_data_sdc_write_latency.num_occured{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1856,23 +2096,47 @@
                   "formulas": [
                     {
                       "alias": "Rebuild",
-                      "formula": "reb"
+                      "formula": "clamp_min(reb_weight / reb_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Rebalance",
-                      "formula": "rebal"
+                      "formula": "clamp_min(rebal_weight / rebal_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reb",
-                      "query": "avg:dell_powerflex.fwd_rebuild_write_bwc.total_weight_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "name": "reb_weight",
+                      "query": "sum:dell_powerflex.fwd_rebuild_write_bwc.total_weight_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "rebal",
-                      "query": "avg:dell_powerflex.rebalance_write_bwc.total_weight_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name,$scope}"
+                      "name": "reb_window",
+                      "query": "avg:dell_powerflex.fwd_rebuild_write_bwc.num_seconds{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "rebal_weight",
+                      "query": "sum:dell_powerflex.rebalance_write_bwc.total_weight_in_kb{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "rebal_window",
+                      "query": "avg:dell_powerflex.rebalance_write_bwc.num_seconds{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1909,10 +2173,6 @@
                     {
                       "alias": "Fixed read errors",
                       "formula": "fixed_err"
-                    },
-                    {
-                      "alias": "Device errors",
-                      "formula": "dev_err"
                     }
                   ],
                   "queries": [
@@ -1920,11 +2180,6 @@
                       "data_source": "metrics",
                       "name": "fixed_err",
                       "query": "avg:dell_powerflex.fixed_read_error_count{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "dev_err",
-                      "query": "avg:dell_powerflex.num_dev_errors{dell_type:storage_pool,$storage_pool_name,$scope} by {storage_pool_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1999,23 +2254,33 @@
                   "formulas": [
                     {
                       "alias": "Read IOPS",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_ops / reads_window, 0)"
                     },
                     {
                       "alias": "Write IOPS",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_ops / writes_window, 0)"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.num_occured{dell_type:volume,$volume_name,$scope} by {volume_name,$scope}"
+                      "name": "reads_ops",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.num_occured{dell_type:volume,$volume_name,$scope} by {volume_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.num_occured{dell_type:volume,$volume_name,$scope} by {volume_name,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:volume,$volume_name,$scope} by {volume_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_ops",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.num_occured{dell_type:volume,$volume_name,$scope} by {volume_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:volume,$volume_name,$scope} by {volume_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2051,23 +2316,45 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "r"
+                      "formula": "(r_weight / r_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "w"
+                      "formula": "(w_weight / w_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "r",
-                      "query": "avg:dell_powerflex.user_data_sdc_read_latency.num_seconds{dell_type:volume,$volume_name,$scope} by {volume_name,$scope}"
+                      "name": "r_weight",
+                      "query": "sum:dell_powerflex.user_data_sdc_read_latency.total_weight_in_kb{dell_type:volume,$volume_name,$scope} by {volume_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "w",
-                      "query": "avg:dell_powerflex.user_data_sdc_write_latency.num_seconds{dell_type:volume,$volume_name,$scope} by {volume_name,$scope}"
+                      "name": "r_count",
+                      "query": "sum:dell_powerflex.user_data_sdc_read_latency.num_occured{dell_type:volume,$volume_name,$scope} by {volume_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "w_weight",
+                      "query": "sum:dell_powerflex.user_data_sdc_write_latency.total_weight_in_kb{dell_type:volume,$volume_name,$scope} by {volume_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "w_count",
+                      "query": "sum:dell_powerflex.user_data_sdc_write_latency.num_occured{dell_type:volume,$volume_name,$scope} by {volume_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2103,23 +2390,47 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_weight / reads_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_weight / writes_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:volume,$volume_name,$scope} by {volume_name,$scope}"
+                      "name": "reads_weight",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:volume,$volume_name,$scope} by {volume_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:volume,$volume_name,$scope} by {volume_name,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:volume,$volume_name,$scope} by {volume_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_weight",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:volume,$volume_name,$scope} by {volume_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:volume,$volume_name,$scope} by {volume_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2162,7 +2473,7 @@
                     {
                       "data_source": "metrics",
                       "name": "q",
-                      "query": "avg:dell_powerflex.num_of_mapped_sdcs{dell_type:volume,$volume_name,$scope} by {volume_name,$scope}"
+                      "query": "avg:dell_powerflex.num_of_mapped_sdcs{dell_type:volume,$volume_name,$scope} by {volume_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2229,32 +2540,56 @@
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "r_iops",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.num_occured{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip,$scope}"
+                      "name": "r_iops_ops",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.num_occured{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip}"
                     },
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "w_iops",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.num_occured{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip,$scope}"
+                      "name": "r_iops_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip}"
                     },
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "r_bw",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip,$scope}"
+                      "name": "w_iops_ops",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.num_occured{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip}"
                     },
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "w_bw",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip,$scope}"
+                      "name": "w_iops_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "r_bw_weight",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "r_bw_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "w_bw_weight",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "w_bw_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip}"
                     },
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "mapped",
-                      "query": "avg:dell_powerflex.num_of_mapped_volumes{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip,$scope}"
+                      "query": "avg:dell_powerflex.num_of_mapped_volumes{dell_type:sdc,$sdc_id,$scope} by {sdc_id,sdc_ip}"
                     }
                   ],
                   "response_format": "scalar",
@@ -2272,22 +2607,36 @@
                     {
                       "alias": "Read IOPS",
                       "cell_display_mode": "number",
-                      "formula": "r_iops"
+                      "formula": "clamp_min(r_iops_ops / r_iops_window, 0)"
                     },
                     {
                       "alias": "Write IOPS",
                       "cell_display_mode": "number",
-                      "formula": "w_iops"
+                      "formula": "clamp_min(w_iops_ops / w_iops_window, 0)"
                     },
                     {
-                      "alias": "Read Throughput (KB)",
+                      "alias": "Read Throughput (KiB/s)",
                       "cell_display_mode": "number",
-                      "formula": "r_bw"
+                      "formula": "clamp_min(r_bw_weight / r_bw_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
-                      "alias": "Write Throughput (KB)",
+                      "alias": "Write Throughput (KiB/s)",
                       "cell_display_mode": "number",
-                      "formula": "w_bw"
+                      "formula": "clamp_min(w_bw_weight / w_bw_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Mapped Volumes",
@@ -2327,23 +2676,33 @@
                   "formulas": [
                     {
                       "alias": "Read IOPS",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_ops / reads_window, 0)"
                     },
                     {
                       "alias": "Write IOPS",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_ops / writes_window, 0)"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.num_occured{dell_type:sdc,$sdc_id,$scope} by {sdc_id,$scope}"
+                      "name": "reads_ops",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.num_occured{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.num_occured{dell_type:sdc,$sdc_id,$scope} by {sdc_id,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_ops",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.num_occured{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2379,23 +2738,47 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_weight / reads_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_weight / writes_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:sdc,$sdc_id,$scope} by {sdc_id,$scope}"
+                      "name": "reads_weight",
+                      "query": "sum:dell_powerflex.user_data_read_bwc.total_weight_in_kb{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:sdc,$sdc_id,$scope} by {sdc_id,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.user_data_read_bwc.num_seconds{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_weight",
+                      "query": "sum:dell_powerflex.user_data_write_bwc.total_weight_in_kb{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.user_data_write_bwc.num_seconds{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2431,23 +2814,45 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "r"
+                      "formula": "(r_weight / r_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "w"
+                      "formula": "(w_weight / w_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "r",
-                      "query": "avg:dell_powerflex.user_data_sdc_read_latency.num_seconds{dell_type:sdc,$sdc_id,$scope} by {sdc_id,$scope}"
+                      "name": "r_weight",
+                      "query": "sum:dell_powerflex.user_data_sdc_read_latency.total_weight_in_kb{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "w",
-                      "query": "avg:dell_powerflex.user_data_sdc_write_latency.num_seconds{dell_type:sdc,$sdc_id,$scope} by {sdc_id,$scope}"
+                      "name": "r_count",
+                      "query": "sum:dell_powerflex.user_data_sdc_read_latency.num_occured{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "w_weight",
+                      "query": "sum:dell_powerflex.user_data_sdc_write_latency.total_weight_in_kb{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "w_count",
+                      "query": "sum:dell_powerflex.user_data_sdc_write_latency.num_occured{dell_type:sdc,$sdc_id,$scope} by {sdc_id}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2568,23 +2973,47 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_weight / reads_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_weight / writes_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.total_read_bwc.total_weight_in_kb{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "name": "reads_weight",
+                      "query": "sum:dell_powerflex.total_read_bwc.total_weight_in_kb{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.total_write_bwc.total_weight_in_kb{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.total_read_bwc.num_seconds{dell_type:sds,$sds_name,$scope} by {sds_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_weight",
+                      "query": "sum:dell_powerflex.total_write_bwc.total_weight_in_kb{dell_type:sds,$sds_name,$scope} by {sds_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.total_write_bwc.num_seconds{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2620,23 +3049,45 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "r"
+                      "formula": "(r_weight / r_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "w"
+                      "formula": "(w_weight / w_count)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "r",
-                      "query": "avg:dell_powerflex.target_read_latency.num_seconds{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "name": "r_weight",
+                      "query": "sum:dell_powerflex.target_read_latency.total_weight_in_kb{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "w",
-                      "query": "avg:dell_powerflex.target_write_latency.num_seconds{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "name": "r_count",
+                      "query": "sum:dell_powerflex.target_read_latency.num_occured{dell_type:sds,$sds_name,$scope} by {sds_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "w_weight",
+                      "query": "sum:dell_powerflex.target_write_latency.total_weight_in_kb{dell_type:sds,$sds_name,$scope} by {sds_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "w_count",
+                      "query": "sum:dell_powerflex.target_write_latency.num_occured{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2672,23 +3123,33 @@
                   "formulas": [
                     {
                       "alias": "Read IOPS",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_ops / reads_window, 0)"
                     },
                     {
                       "alias": "Write IOPS",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_ops / writes_window, 0)"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.total_read_bwc.num_occured{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "name": "reads_ops",
+                      "query": "sum:dell_powerflex.total_read_bwc.num_occured{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.total_write_bwc.num_occured{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.total_read_bwc.num_seconds{dell_type:sds,$sds_name,$scope} by {sds_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_ops",
+                      "query": "sum:dell_powerflex.total_write_bwc.num_occured{dell_type:sds,$sds_name,$scope} by {sds_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.total_write_bwc.num_seconds{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2731,7 +3192,7 @@
                     {
                       "data_source": "metrics",
                       "name": "q",
-                      "query": "avg:dell_powerflex.capacity.in_use_in_kb{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "query": "avg:dell_powerflex.capacity.in_use_in_kb{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2786,22 +3247,22 @@
                     {
                       "data_source": "metrics",
                       "name": "r_hit",
-                      "query": "avg:dell_powerflex.rfcache.read_hit{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "query": "avg:dell_powerflex.rfcache.read_hit{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "r_miss",
-                      "query": "avg:dell_powerflex.rfcache.read_miss{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "query": "avg:dell_powerflex.rfcache.read_miss{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "w_hit",
-                      "query": "avg:dell_powerflex.rfcache.write_hit{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "query": "avg:dell_powerflex.rfcache.write_hit{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "w_miss",
-                      "query": "avg:dell_powerflex.rfcache.write_miss{dell_type:sds,$sds_name,$scope} by {sds_name,$scope}"
+                      "query": "avg:dell_powerflex.rfcache.write_miss{dell_type:sds,$sds_name,$scope} by {sds_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3055,12 +3516,12 @@
                     {
                       "data_source": "metrics",
                       "name": "r",
-                      "query": "avg:dell_powerflex.avg_read_latency_in_microsec{dell_type:device,$scope} by {device_name,$scope}"
+                      "query": "avg:dell_powerflex.avg_read_latency_in_microsec{dell_type:device,$scope} by {device_name}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "w",
-                      "query": "avg:dell_powerflex.avg_write_latency_in_microsec{dell_type:device,$scope} by {device_name,$scope}"
+                      "query": "avg:dell_powerflex.avg_write_latency_in_microsec{dell_type:device,$scope} by {device_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3096,23 +3557,47 @@
                   "formulas": [
                     {
                       "alias": "Read",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_weight / reads_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     },
                     {
                       "alias": "Write",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_weight / writes_window, 0)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.total_read_bwc.total_weight_in_kb{dell_type:device,$scope} by {device_name,$scope}"
+                      "name": "reads_weight",
+                      "query": "sum:dell_powerflex.total_read_bwc.total_weight_in_kb{dell_type:device,$scope} by {device_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.total_write_bwc.total_weight_in_kb{dell_type:device,$scope} by {device_name,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.total_read_bwc.num_seconds{dell_type:device,$scope} by {device_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_weight",
+                      "query": "sum:dell_powerflex.total_write_bwc.total_weight_in_kb{dell_type:device,$scope} by {device_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.total_write_bwc.num_seconds{dell_type:device,$scope} by {device_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3155,7 +3640,7 @@
                     {
                       "data_source": "metrics",
                       "name": "q",
-                      "query": "avg:dell_powerflex.capacity.in_use_in_kb{dell_type:device,$scope} by {device_name,$scope}"
+                      "query": "avg:dell_powerflex.capacity.in_use_in_kb{dell_type:device,$scope} by {device_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3191,23 +3676,33 @@
                   "formulas": [
                     {
                       "alias": "Read IOPS",
-                      "formula": "reads"
+                      "formula": "clamp_min(reads_ops / reads_window, 0)"
                     },
                     {
                       "alias": "Write IOPS",
-                      "formula": "writes"
+                      "formula": "clamp_min(writes_ops / writes_window, 0)"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "reads",
-                      "query": "avg:dell_powerflex.total_read_bwc.num_occured{dell_type:device,$scope} by {device_name,$scope}"
+                      "name": "reads_ops",
+                      "query": "sum:dell_powerflex.total_read_bwc.num_occured{dell_type:device,$scope} by {device_name}"
                     },
                     {
                       "data_source": "metrics",
-                      "name": "writes",
-                      "query": "avg:dell_powerflex.total_write_bwc.num_occured{dell_type:device,$scope} by {device_name,$scope}"
+                      "name": "reads_window",
+                      "query": "avg:dell_powerflex.total_read_bwc.num_seconds{dell_type:device,$scope} by {device_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_ops",
+                      "query": "sum:dell_powerflex.total_write_bwc.num_occured{dell_type:device,$scope} by {device_name}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "writes_window",
+                      "query": "avg:dell_powerflex.total_write_bwc.num_seconds{dell_type:device,$scope} by {device_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3254,12 +3749,12 @@
                     {
                       "data_source": "metrics",
                       "name": "r",
-                      "query": "avg:dell_powerflex.avg_read_size_in_bytes{dell_type:device,$scope} by {device_name,$scope}"
+                      "query": "avg:dell_powerflex.avg_read_size_in_bytes{dell_type:device,$scope} by {device_name}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "w",
-                      "query": "avg:dell_powerflex.avg_write_size_in_bytes{dell_type:device,$scope} by {device_name,$scope}"
+                      "query": "avg:dell_powerflex.avg_write_size_in_bytes{dell_type:device,$scope} by {device_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3296,22 +3791,13 @@
                     {
                       "alias": "Fixed Read Errors",
                       "formula": "fixed_err"
-                    },
-                    {
-                      "alias": "Device Errors",
-                      "formula": "dev_err"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "fixed_err",
-                      "query": "avg:dell_powerflex.fixed_read_error_count{dell_type:device,$scope} by {device_name,$scope}"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "dev_err",
-                      "query": "avg:dell_powerflex.num_dev_errors{dell_type:device,$scope} by {device_name,$scope}"
+                      "query": "avg:dell_powerflex.fixed_read_error_count{dell_type:device,$scope} by {device_name}"
                     }
                   ],
                   "response_format": "timeseries",

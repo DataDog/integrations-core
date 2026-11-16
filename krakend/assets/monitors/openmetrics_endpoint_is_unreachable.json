@@ -10,8 +10,8 @@
       "integration:krakend"
     ],
     "type": "service check",
-    "query": "\"krakend.api.openmetrics.health\".over(\"*\").by(\"endpoint\").last(6).count_by_status()",
-    "message": "The KrakenD integration cannot reach the OpenMetrics endpoint `{{endpoint.name}}`.\n\nThis can be due to an issue with the KrakenD configuration. For more information about how to configure the KrakenD integration check the [configuration guide](https://docs.datadoghq.com/integrations/kuma/#configuration).",
+    "query": "\"krakend.api.openmetrics.health\".over(\"*\").by(\"host\",\"endpoint\").last(6).count_by_status()",
+    "message": "The KrakenD integration cannot reach the OpenMetrics endpoint `{{endpoint.name}}` on host `{{host.name}}`.\n\nThis can be due to an issue with the KrakenD configuration. For more information about how to configure the KrakenD integration check the [configuration guide](https://docs.datadoghq.com/integrations/krakend/#configuration).",
     "options": {
       "silenced": {},
       "timeout_h": 0,
@@ -32,5 +32,5 @@
   },
   "created_at": "2025-07-31",
   "description": "The KrakenD integration cannot connect with the OpenMetrics endpoint specified in the integration configuration",
-  "last_updated_at": "2025-07-31"
+  "last_updated_at": "2026-11-13"
 }

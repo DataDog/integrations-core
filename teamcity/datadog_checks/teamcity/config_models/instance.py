@@ -123,6 +123,7 @@ class InstanceConfig(BaseModel):
     collect_counters_with_distributions: Optional[bool] = None
     collect_events: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_histograms_as_distributions: Optional[bool] = None
     connect_timeout: Optional[float] = None
     default_build_configs_limit: Optional[int] = None
     default_projects_limit: Optional[int] = None

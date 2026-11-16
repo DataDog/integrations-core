@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "title": "Workflow Duration Exceeds SLO (p95)",
+  "title": "Workflow Average Duration Above Configured Threshold",
   "tags": [
     "integration:n8n"
   ],
   "definition": {
-    "name": "[n8n] Workflow Average Execution Duration Above SLO",
+    "name": "[n8n] Workflow Average Duration Above Configured Threshold",
     "type": "query alert",
     "query": "sum(last_15m):sum:n8n.workflow.execution.duration.seconds.sum{*} by {host,workflow_id}.as_count() / sum:n8n.workflow.execution.duration.seconds.count{*} by {host,workflow_id}.as_count() > 30",
-    "message": "{{#is_alert}}**Workflow `{{workflow.name}}` on `{{host.name}}` is slow.**\nAverage execution duration over the last 15 minutes is **{{value}}s** (SLO: {{threshold}}s).\n**Investigation checklist** (use the n8n Overview dashboard, filtered to this workflow and host):\n1. **One workflow or all?** In *Workflow Performance*, look at the execution duration chart. If only this workflow climbed, the problem is in the workflow itself; if multiple workflows climbed together, suspect runtime or downstream.\n2. **Which node is slow?** In *Node Execution*, find the `node_type` whose `started` rate climbed without a matching `finished` rate — usually an external HTTP node timing out.\n3. **Runtime saturated?** In *Node.js Runtime Health*, check event loop lag p99. Sustained values above 100ms mean the Node.js process is the bottleneck.\n4. **Queue backed up?** In *Queue & Worker Health*, a rising `waiting` gauge with a flat `dequeued` rate means workers can't keep up — scale workers or raise `N8N_CONCURRENCY_PRODUCTION_LIMIT`.\n5. **Logs**: filter the *Logs* group to this workflow to identify the slow node by name.{{/is_alert}}\n\n{{#is_warning}}Workflow `{{workflow_id.name}}` on `{{host.name}}` average duration approaching SLO: **{{value}}s** (warning at {{warn_threshold}}s).{{/is_warning}}\n{{#is_recovery}}Workflow `{{workflow_id.name}}` average duration recovered to **{{value}}s**, below SLO.{{/is_recovery}}",
+    "message": "{{#is_alert}}**Workflow `{{workflow_id.name}}` on `{{host.name}}` has exceeded the configured duration threshold.**\nAverage execution duration over the last 15 minutes is **{{value}}s** (configured threshold: {{threshold}}s).\n**Investigation checklist** (use the n8n Overview dashboard, filtered to this workflow and host):\n1. **One workflow or all?** In *Workflow Performance*, look at the execution duration chart. If only this workflow climbed, the problem is in the workflow itself; if multiple workflows climbed together, suspect runtime or downstream.\n2. **Which node is slow?** In *Node Execution*, find the `node_type` whose `started` rate climbed without a matching `finished` rate — usually an external HTTP node timing out.\n3. **Runtime saturated?** In *Node.js Runtime Health*, check event loop lag p99. Sustained values above 100ms mean the Node.js process is the bottleneck.\n4. **Queue backed up?** In *Queue & Worker Health*, a rising `waiting` gauge with a flat `dequeued` rate means workers can't keep up — scale workers or raise `N8N_CONCURRENCY_PRODUCTION_LIMIT`.\n5. **Logs**: filter the *Logs* group to this workflow to identify the slow node by name.{{/is_alert}}\n\n{{#is_warning}}Workflow `{{workflow_id.name}}` on `{{host.name}}` average duration is **{{value}}s**, above the configured warning threshold of **{{warn_threshold}}s**.{{/is_warning}}\n{{#is_recovery}}Workflow `{{workflow_id.name}}` average duration recovered to **{{value}}s**, below the configured threshold.{{/is_recovery}}",
     "tags": [
       "integration:n8n",
       "service:n8n",
@@ -29,7 +29,7 @@
       "include_tags": true,
       "evaluation_delay": 120,
       "new_group_delay": 300,
-      "escalation_message": "Workflow average duration is still above SLO. Investigate slow nodes, queue backlog, or Node.js runtime saturation.",
+      "escalation_message": "Workflow average duration is still above the configured threshold. Investigate slow nodes, queue backlog, or Node.js runtime saturation.",
       "renotify_statuses": [
         "alert"
       ],
@@ -39,6 +39,6 @@
     "priority": 2
   },
   "created_at": "2026-01-28",
-  "last_updated_at": "2026-05-21",
-  "description": "Alerts when a workflow's avg execution duration over 15m exceeds the SLO threshold. Uses n8n 2.x's execution duration histogram (sum/count). True p95 is unavailable (Prometheus histogram, not DD distribution); avg is the best proxy. Grouped by workflow and host."
+  "last_updated_at": "2026-11-13",
+  "description": "Alerts when a workflow's average execution duration over 15 minutes exceeds the configured threshold. Computed from the execution-duration histogram's sum/count, grouped by workflow and host. Set warning and critical thresholds for your workflows."
 }

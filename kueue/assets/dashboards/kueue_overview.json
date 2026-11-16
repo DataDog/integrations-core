@@ -198,15 +198,15 @@
                   "formulas": [
                     {
                       "alias": "Admitted per hour",
-                      "formula": "per_hour(query1)"
+                      "formula": "query1 * 3600"
                     }
                   ],
                   "queries": [
                     {
-                      "aggregator": "sum",
+                      "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kueue.admitted.workloads.count{$kueue_cluster_queue,$replica_role}.as_count()"
+                      "query": "sum:kueue.admitted.workloads.count{$kueue_cluster_queue,$replica_role}.as_rate()"
                     }
                   ],
                   "response_format": "scalar"
@@ -787,7 +787,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kueue.admission.attempts.count{$kueue_cluster_queue,$replica_role , result:inadmissible} by {result}.as_count()"
+                      "query": "sum:kueue.admission.attempts.count{$replica_role,result:inadmissible} by {result}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -929,7 +929,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kueue.preempted_workloads.count{$kueue_cluster_queue,$replica_role} by {reason}.as_count()"
+                      "query": "sum:kueue.preempted_workloads.count{$preempting_cluster_queue,$replica_role} by {reason}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -994,7 +994,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kueue.preempted_workloads.count{$kueue_cluster_queue,$replica_role} by {preempting_cluster_queue}.as_count()"
+                      "query": "sum:kueue.preempted_workloads.count{$preempting_cluster_queue,$replica_role} by {preempting_cluster_queue}.as_count()"
                     }
                   ],
                   "response_format": "scalar",
@@ -1556,8 +1556,8 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Reconcile time",
-                      "formula": "query1",
+                      "alias": "Average reconcile time",
+                      "formula": "query1 / query2",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -1570,7 +1570,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kueue.controller.runtime.reconcile_time.seconds.sum{*}"
+                      "query": "sum:kueue.controller.runtime.reconcile_time.seconds.sum{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kueue.controller.runtime.reconcile_time.seconds.count{*}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1647,15 +1652,15 @@
                 {
                   "formulas": [
                     {
-                      "alias": "CPU seconds",
-                      "formula": "per_second(query1)"
+                      "alias": "CPU seconds per second",
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:kueue.process.cpu.seconds.count{*}"
+                      "query": "avg:kueue.process.cpu.seconds.count{*}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1874,14 +1879,14 @@
           {
             "id": 9008002,
             "definition": {
-              "title": "Alert and Error Events",
+              "title": "Warning and Error Events",
               "requests": [
                 {
                   "columns": [],
                   "query": {
                     "data_source": "event_stream",
                     "event_size": "s",
-                    "query_string": "source:kueue status:(alert OR error OR critical)"
+                    "query_string": "source:kueue status:(warn OR alert OR error OR critical)"
                   },
                   "response_format": "event_list"
                 }
@@ -1972,6 +1977,12 @@
     {
       "name": "kueue_cluster_queue",
       "prefix": "kueue_cluster_queue",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "preempting_cluster_queue",
+      "prefix": "preempting_cluster_queue",
       "available_values": [],
       "default": "*"
     },

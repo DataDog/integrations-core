@@ -63,6 +63,11 @@ facets:
     source: log
   - groups:
       - Kueue
+    name: Local Queue Namespace
+    path: kueue.local_queue_namespace
+    source: log
+  - groups:
+      - Kueue
     name: Reason
     path: kueue.reason
     source: log
@@ -366,6 +371,16 @@ pipeline:
       preserveSource: false
       overrideOnConflict: true
     - type: attribute-remapper
+      name: Map `localQueue.namespace` to `kueue.local_queue_namespace`
+      enabled: true
+      sources:
+        - localQueue.namespace
+      sourceType: attribute
+      target: kueue.local_queue_namespace
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
       name: Map flat `localQueue` to `kueue.local_queue`
       enabled: true
       sources:
@@ -532,6 +547,16 @@ pipeline:
       target: error.message
       targetType: attribute
       preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map klog `kueue.klog.err` to `error.message`
+      enabled: true
+      sources:
+        - kueue.klog.err
+      sourceType: attribute
+      target: error.message
+      targetType: attribute
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `stacktrace` to `error.stack`
