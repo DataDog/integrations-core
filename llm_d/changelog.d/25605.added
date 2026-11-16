@@ -1,0 +1,1 @@
+Add `max_line_size` as a hidden HTTP option and synchronize configuration metadata with the shared OpenMetrics template.
