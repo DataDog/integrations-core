@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import contextlib
+import threading
 from abc import abstractmethod
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, TypedDict
@@ -202,7 +203,8 @@ class PostgresSchemaCollector(DatabaseSchemaCollector):
 
     _check: PostgreSql
 
-    def __init__(self, check: PostgreSql):
+    def __init__(self, check: PostgreSql, cancel_event: threading.Event | None = None):
+        self._cancel_event = cancel_event
         config = PostgresSchemaCollectorConfig()
         config.collection_interval = check._config.collect_schemas.collection_interval
         config.collect_views = bool(check._config.collect_schemas.collect_views)
@@ -224,9 +226,9 @@ class PostgresSchemaCollector(DatabaseSchemaCollector):
         # Shared with every object collector, so a change here applies to all kinds.
         self._config = config
 
-    @property
-    def kinds(self) -> list[str]:
-        return [object_collector.kind for object_collector in self._object_collectors]
+    def _raise_if_cancelled(self) -> None:
+        if self._cancel_event is not None and self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
 
     def _get_databases(self):
         query = DATABASE_INFORMATION_QUERY
