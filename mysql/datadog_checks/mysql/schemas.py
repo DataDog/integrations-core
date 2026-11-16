@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Iterator
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.schemas import (
     DEFAULT_MAX_VIEWS,
+    DatabaseInfo,
     DatabaseSchemaCollector,
     SchemaCollectorConfig,
     SchemaObjectCollector,
@@ -279,10 +280,6 @@ class MySqlSchemaCollector(MySqlQueryRunner, DatabaseSchemaCollector):
             object_collectors.append(MySqlViewCollector(check, metadata, self._config))
         super().__init__(check, object_collectors)
 
-    @property
-    def kinds(self) -> list[str]:
-        return [object_collector.kind for object_collector in self._object_collectors]
-
     def _raise_if_cancelled(self) -> None:
         self._metadata._raise_if_cancelled()
 
@@ -302,7 +299,7 @@ class MySqlSchemaCollector(MySqlQueryRunner, DatabaseSchemaCollector):
                     self._database_count,
                 )
 
-    def _get_databases(self) -> list[dict]:
+    def _get_databases(self) -> list[DatabaseInfo]:
         with self._metadata.get_db_connection().cursor(CommenterDictCursor) as cursor:
             self._execute(cursor, SQL_DATABASES.format(hint=self._query_hint()))
             databases = [dict(row) for row in cursor.fetchall()]
@@ -353,7 +350,7 @@ class MySqlTableCollector(MySqlObjectCollector):
         return STRATEGY_CHUNKED
 
     @contextlib.contextmanager
-    def _open_rows(self, session: None, database: dict) -> Iterator[Iterator[dict]]:
+    def _open_rows(self, session: None, database: DatabaseInfo) -> Iterator[Iterator[dict]]:
         database_name = database["name"]
         if self._strategy == STRATEGY_CHUNKED:
             yield self._iter_chunked_tables(database_name)
@@ -367,7 +364,7 @@ class MySqlTableCollector(MySqlObjectCollector):
             self._execute(cursor, query, params)
             yield iter(cursor.fetchone, None)
 
-    def _map_row(self, database: dict, cursor_row: dict) -> dict:
+    def _map_row(self, database: DatabaseInfo, cursor_row: dict) -> dict:
         self.tables_found = True
         object = super()._map_row(database, cursor_row)
         if self._strategy == STRATEGY_CHUNKED:
@@ -471,7 +468,7 @@ class MySqlViewCollector(ViewObjectCollector, MySqlObjectCollector):
         return "mysql_views"
 
     @contextlib.contextmanager
-    def _open_rows(self, session: None, database: dict) -> Iterator[Iterator[dict]]:
+    def _open_rows(self, session: None, database: DatabaseInfo) -> Iterator[Iterator[dict]]:
         yield self._iter_views(database["name"])
 
     def _iter_views(self, database_name: str) -> Iterator[dict]:
@@ -492,7 +489,7 @@ class MySqlViewCollector(ViewObjectCollector, MySqlObjectCollector):
             for view in views_chunk:
                 yield {**view, "_columns": columns_by_view.get(view["name"], [])}
 
-    def _map_row(self, database: dict, cursor_row: dict) -> dict:
+    def _map_row(self, database: DatabaseInfo, cursor_row: dict) -> dict:
         view = {
             "name": cursor_row.get("name"),
             # MySQL returns an empty definition when the user lacks the SHOW VIEW privilege.
