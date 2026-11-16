@@ -622,16 +622,14 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: true
-        - type: grok-parser
-          name: Parse `event.entity.entity_payload.reply_to_email` to `ocsf.evidence.email.reply_to`
+        - type: array-processor
+          name: Append `event.entity.entity_payload.reply_to_email` to `ocsf.evidence.email.reply_to_mailboxes`
           enabled: true
-          source: event.entity.entity_payload.reply_to_email
-          samples:
-            - support@openai.com
-          grok:
-            supportRules: ''
-            matchRules: |
-              email %{regex("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"):ocsf.evidence.email.reply_to}
+          operation:
+            source: event.entity.entity_payload.reply_to_email
+            target: ocsf.evidence.email.reply_to_mailboxes
+            preserveSource: true
+            type: append
         - type: attribute-remapper
           name: Map `event.entity.entity_payload.subject` to `ocsf.evidence.email.subject`
           enabled: true

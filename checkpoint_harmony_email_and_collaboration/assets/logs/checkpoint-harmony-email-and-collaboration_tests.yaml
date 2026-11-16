@@ -1786,7 +1786,8 @@ tests:
                 - url_string: "https://help.openai.com/link/2"
               uid: 5004e3491534a38ae96b4f01c9cad8d5
               message_uid: <ec2734857e4fbc57a13639@host-6b9c0f>
-              reply_to: support@openai.com
+              reply_to_mailboxes:
+                - support@openai.com
               subject: Example email subject 10
               from: noreply@sub18.openai.com
               to:
@@ -5675,7 +5676,8 @@ tests:
                 - url_string: "https://s-links.org32.example.com/link/17"
               uid: c17f1339cf56999548a7fb529afc0749
               message_uid: <71764e7aafae4ebf638c29e97c2e062fbdffb859@mailjet.com>
-              reply_to: feedback@org34.example.com
+              reply_to_mailboxes:
+                - feedback@org34.example.com
               subject: Example email subject 11
               from: hello@sub21.org32.example.com
               to:
@@ -6348,7 +6350,8 @@ tests:
                 - url_string: "https://www.org9.example.com/link/28"
               uid: c4ab809b3d3ffc3be7f2928838d1765b
               message_uid: <95764a85c780b4569d0ff62da60a4@sailthru.com>
-              reply_to: newsletter@org7.example.com
+              reply_to_mailboxes:
+                - newsletter@org7.example.com
               size: 135109
               subject: Example email subject 3
               from: newsletter@org7.example.com
@@ -6895,7 +6898,8 @@ tests:
                 - url_string: "https://click.sub24.org35.example.com/link/33"
               uid: 51aead8488309dead667d917ada22ca6
               message_uid: <b59ea30dc068bf25433efe99a10a82c8f6bd@sub25.org37.example.com>
-              reply_to: user46@sub24.org35.example.com
+              reply_to_mailboxes:
+                - user46@sub24.org35.example.com
               subject: Example email subject 12
               from: refreshment@sub24.org35.example.com
               to:
@@ -7560,7 +7564,8 @@ tests:
                 - url_string: "https://sub4.sub5.sub6.click.sub7.sub8.link.org18.example.com/link/35"
               uid: dbdd6db0fdf1e83ae12e5a4ececde773
               message_uid: <39e5d0d5315027f4cca@sub9.knowbe4.com>
-              reply_to: no-reply@org15.example.com
+              reply_to_mailboxes:
+                - no-reply@org15.example.com
               size: 17434
               subject: Example email subject 4
               from: no-reply@org15.example.com
@@ -10717,7 +10722,8 @@ tests:
                   type: "Regular File"
               uid: 1e3c89eee55329b2916f0289e0353e0c
               message_uid: <ee7ba1702b8a7666a38d010e9f92b6d38301@org40.example.com>
-              reply_to: shawn.standin@pm.me
+              reply_to_mailboxes:
+                - shawn.standin@pm.me
               size: 53586
               subject: Example email subject 14
               from: user50@org40.example.com
@@ -12604,7 +12610,8 @@ tests:
               message_uid: <f4fd13f5b06eecf6dc2a92764586e6@host-b2a8bd>
               x_originating_ip:
                 - 203.0.113.107
-              reply_to: webcasts@gitlab.com
+              reply_to_mailboxes:
+                - webcasts@gitlab.com
               subject: Example email subject 8
               from: webcasts@gitlab.com
               to:
@@ -13337,7 +13344,8 @@ tests:
                 - url_string: "https://www.org41.example.com/link/61"
               uid: fd0e35b1ad9808f1b5767dd0667ccff6
               message_uid: <fe04b2b98da530c7ad126472afb7@sub32.sub33.org45.example.com>
-              reply_to: donotreply@org41.example.com
+              reply_to_mailboxes:
+                - donotreply@org41.example.com
               size: 90636
               subject: Example email subject 16
               from: donotreply@org41.example.com
@@ -14086,7 +14094,8 @@ tests:
                 - url_string: "https://www.org25.example.com/link/67"
               uid: 964faa5eac26adcd00261dec6edf0df4
               message_uid: <64b1206349bbdfdb3fabbfbd9f7ddbedb33db048@host-90cd5b>
-              reply_to: user22@org27.example.com
+              reply_to_mailboxes:
+                - user22@org27.example.com
               size: 66348
               subject: Example email subject 9
               from: news@org23.example.com
@@ -15540,7 +15549,8 @@ tests:
               message_uid: <f4fd13f5b06eecf6dc2a92764586e6@host-b2a8bd>
               x_originating_ip:
                 - 203.0.113.107
-              reply_to: webcasts@gitlab.com
+              reply_to_mailboxes:
+                - webcasts@gitlab.com
               subject: Example email subject 8
               from: webcasts@gitlab.com
               to:
