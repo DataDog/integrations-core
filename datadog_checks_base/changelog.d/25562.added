@@ -1,0 +1,1 @@
+Report an Agent Health issue when an OpenMetrics endpoint returns a line longer than `max_line_size`.
