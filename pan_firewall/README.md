@@ -36,29 +36,15 @@ No additional installation is needed on your server.
 
    **Note**: For Panorama discovery, also create an account on Panorama with a role that allows **Operational Requests** in the XML API tab. The Agent uses it only to list the managed firewalls, and polls each firewall with the matching `firewall_credentials` entry.
 
-2. Edit the `pan_firewall.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Palo Alto Networks firewall performance data. See the [sample pan_firewall.d/conf.yaml][4] for all available configuration options.
+2. Edit the `pan_firewall.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample pan_firewall.d/conf.yaml][4] for all available options.
 
-   Choose how the Agent finds the firewalls: list their IP addresses in `firewalls` (hostnames and duplicates are rejected), or set `panorama_host` with `panorama_username` and `panorama_password` (or `panorama_api_key`) to discover every firewall connected to Panorama. Set one or the other, not both.
+   Choose how the Agent finds the firewalls: list their IP addresses in `firewalls`, or set `panorama_host` with `panorama_username` and `panorama_password` (or `panorama_api_key`) to discover every firewall Panorama manages. Set one or the other, not both. With Panorama discovery, set `firewall_ips.include` to the CIDR ranges of your known firewalls so that the check only connects to expected ones.
 
-   In both modes, the Agent logs in to each firewall with an entry of `firewall_credentials`. It uses the first entry whose `cidr` contains the firewall IP, and an entry without `cidr` matches every firewall. Each entry sets either `username` and `password`, or `api_key`.
+   The Agent logs in to each firewall with the first `firewall_credentials` entry whose `cidr` contains the firewall IP. An entry without `cidr` matches every firewall.
 
-   **Note**: The Agent connects to the management interface of each firewall over HTTPS on port 443, and a custom management port is not supported. HTTPS must be enabled in the management profile of that interface, and if you restrict management access, the Agent host must be in the **Permitted IP Addresses** list. With Panorama discovery, the Agent polls each firewall at the IP address that Panorama reports for it.
+   **Note**: HTTPS must be enabled in the management profile of the management interface of each firewall, and if you restrict management access, the Agent host must be in the **Permitted IP Addresses** list.
 
-   PAN-OS management interfaces ship with a self-signed certificate. Either install a certificate signed by a certificate authority (CA) that the Agent trusts, or set `tls_ca_cert` to the path of a PEM file that contains the CA certificate or the self-signed certificate itself. Set `tls_verify` to `false` only as a last resort, because it disables server authentication.
-
-   If you use Panorama discovery, set `firewall_ips.include` to a list of CIDR ranges that match your known firewalls, so that the check only connects to expected firewalls. `firewall_ips.exclude` removes ranges and wins over `include`. Without `firewall_ips`, the Agent polls every connected firewall. Firewalls with no matching `firewall_credentials` entry are skipped with a warning.
-
-   The Agent polls each firewall directly. The `max_concurrency` option (default `5`) sets how many firewalls are polled in parallel, for both a static list and Panorama discovery. In environments with many firewalls, raise `max_concurrency` so that a collection run completes within its interval.
-
-   Security rule hit counts are collected by default, with one `security_rule.hits` series per security rule and virtual system, which can be thousands on a large rulebase. Set `security_rule_filter` to a list of regular expressions to report only the matching rules, or set `collect_rule_hits` to `false` to stop collecting them. A pattern matches anywhere in the rule name, so use `^` and `$` to match an exact name.
-
-   With a `username` and `password`, the Agent generates an API key and keeps it in memory only. A rejected login is retried once per run, so incorrect credentials can trigger a PAN-OS account lockout. A configured `api_key` is never renewed.
-
-   A virtual system (`vsys`) with no interfaces is not detected automatically, so list it in `vsys`. The sample configuration recommends a `min_collection_interval` of 60 seconds. Values above 120 seconds delay the 2-minute and 3-minute metric groups.
-
-   Setting `collect_reports` to `true` submits asynchronous report jobs on the firewall, one at a time, which can add about 45 seconds to each 30-minute run.
-
-   The check sends NDM metadata when `send_ndm_metadata` is `true` (the default), under the `namespace` option (default `default`). Interfaces reach NDM without a description and admin status if the role cannot run the **Operational Requests** that read the running configuration.
+   Security rule hits are collected by default, with one series per security rule and virtual system, which can be thousands on a large rulebase. Set `security_rule_filter` to report only matching rules, or set `collect_rule_hits` to `false` to stop collecting them. A virtual system with no interfaces is not detected automatically, so list it in `vsys`.
 
 3. [Restart the Agent][5].
 
