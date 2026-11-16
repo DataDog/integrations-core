@@ -14,9 +14,9 @@ files:
         openmetrics_endpoint.description: |
           Endpoint exposing Dynamo's Prometheus metrics.
 
-          This integration is part of GPU monitoring and only runs when GPU monitoring is enabled
-          in the Agent configuration (`gpu.enabled: true`, or `DD_GPU_ENABLED=true`). When GPU
-          monitoring is off, every instance configured here is skipped.
+          This integration is part of GPU monitoring. Frontend and router metrics are always collected.
+          Worker metrics are collected only when GPU monitoring is enabled in the Agent configuration
+          (`gpu.enabled: true`, or `DD_GPU_ENABLED=true`).
 
           This is typically the frontend's `/metrics` endpoint (default port 8000).
           Backend workers (`python -m dynamo.vllm`, `python -m dynamo.sglang`, etc.) expose a

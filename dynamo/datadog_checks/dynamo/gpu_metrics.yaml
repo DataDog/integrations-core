@@ -1,0 +1,39 @@
+# Worker metric name mappings for the Dynamo check, loaded only when GPU Monitoring (gpu.enabled) is on.
+#
+# Metrics exposed by Dynamo backend workers (python -m dynamo.vllm/dynamo.sglang/dynamo.trtllm) on the
+# system status server enabled via the DYN_SYSTEM_PORT env var (commonly 8081, or 9090 under the k8s operator).
+# Source: lib/runtime/src/metrics/prometheus_names.rs (work_handler, task_tracker, distributed_runtime, kvstats)
+dynamo_component_requests: component.requests
+dynamo_component_request_bytes: component.request_bytes
+dynamo_component_response_bytes: component.response_bytes
+dynamo_component_inflight_requests: component.inflight_requests
+dynamo_component_model_load_time_seconds: dynamo_component_model_load_time_seconds
+dynamo_component_request_duration_seconds: component.request_duration.seconds
+dynamo_component_errors: component.errors
+dynamo_component_cancellation: component.cancellation
+dynamo_component_network_transit_seconds: component.network_transit.seconds
+dynamo_component_time_to_first_response_seconds: component.time_to_first_response.seconds
+dynamo_component_queue_depth: component.queue_depth
+dynamo_component_queue_capacity: component.queue_capacity
+dynamo_component_enqueue_rejected: component.enqueue_rejected
+dynamo_component_permit_wait_seconds: component.permit_wait.seconds
+dynamo_component_pool_active_tasks: component.pool_active_tasks
+dynamo_component_pool_capacity: component.pool_capacity
+dynamo_component_tasks_issued: component.tasks_issued
+dynamo_component_tasks_started: component.tasks_started
+dynamo_component_tasks_success: component.tasks_success
+dynamo_component_tasks_cancelled: component.tasks_cancelled
+dynamo_component_tasks_failed: component.tasks_failed
+dynamo_component_tasks_rejected: component.tasks_rejected
+# Requests rejected when the worker's engine and overflow queue are both at capacity.
+dynamo_rejection_request: rejection.requests
+# KV cache stats, portable across the vLLM, SGLang, and TensorRT-LLM backends Dynamo can drive.
+dynamo_component_total_blocks: component.kv_cache.total_blocks
+dynamo_component_gpu_cache_usage_percent: component.kv_cache.gpu_cache_usage_percent
+dynamo_component_kv_cache_hit_rate: component.kv_cache.hit_rate
+dynamo_component_kv_publisher_zmq_events: component.kv_publisher.zmq_events
+dynamo_component_kv_publisher_zmq_filtered_events: component.kv_publisher.zmq_filtered_events
+# The TensorRT-LLM engine publishes its own hit-rate gauge under this name instead of Dynamo's
+# portable dynamo_component_kv_cache_hit_rate, which requires the KV event consolidator to be
+# configured (kv_connector_config) and is otherwise never emitted for this backend.
+trtllm_kv_cache_hit_rate: component.kv_cache.hit_rate
