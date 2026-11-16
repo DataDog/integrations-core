@@ -1,0 +1,76 @@
+{
+  "name": "Automox remote session after consent removed",
+  "product": [
+    "security_monitoring"
+  ],
+  "defaultRuleId": "def-000-rsc",
+  "tags": [
+    "source:automox",
+    "security:attack",
+    "tactic:TA0011-command-and-control",
+    "technique:T1219-remote-access-tools",
+    "mitre_platform:windows",
+    "mitre_platform:macos",
+    "mitre_platform:linux"
+  ],
+  "isEnabled": true,
+  "isShadowDeployed": true,
+  "isBeta": true,
+  "options": {
+    "evaluationWindow": 0,
+    "keepAlive": 3600,
+    "maxSignalDuration": 86400,
+    "detectionMethod": "sequence_detection",
+    "sequenceDetectionOptions": {
+      "steps": [
+        {
+          "name": "consent_removed",
+          "condition": "consent_removed1 > 0",
+          "evaluationWindow": 86400
+        },
+        {
+          "name": "remote_session",
+          "condition": "remote_session1 > 0",
+          "evaluationWindow": 86400
+        }
+      ],
+      "stepTransitions": [
+        {
+          "parent": "consent_removed",
+          "child": "remote_session",
+          "evaluationWindow": 86400
+        }
+      ]
+    }
+  },
+  "queries": [
+    {
+      "name": "consent_removed1",
+      "query": "source:automox @ocsf.class_uid:6001 @ocsf.message:\"Splashtop Remote Control Consent Changed\" (@ocsf.unmapped.new_consent_required:false OR @ocsf.unmapped.new_access_type:(unattended OR attended_allow_on_timeout))",
+      "groupByFields": [
+        "@ocsf.web_resources.uid"
+      ],
+      "distinctFields": [],
+      "aggregation": "count",
+      "dataSource": "logs"
+    },
+    {
+      "name": "remote_session1",
+      "query": "source:automox @ocsf.class_uid:6001 @ocsf.message:\"Splashtop Connection Initiated\"",
+      "groupByFields": [
+        "@ocsf.web_resources.uid"
+      ],
+      "distinctFields": [],
+      "aggregation": "count",
+      "dataSource": "logs"
+    }
+  ],
+  "cases": [
+    {
+      "name": "Automox remote-control session opened to a device after its consent was removed",
+      "status": "High",
+      "notifications": [],
+      "condition": "remote_session > 0"
+    }
+  ]
+}

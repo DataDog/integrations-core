@@ -1,0 +1,52 @@
+{
+  "name": "Automox login failures then success",
+  "product": [
+    "security_monitoring"
+  ],
+  "defaultRuleId": "def-000-lfs",
+  "tags": [
+    "source:automox",
+    "security:attack",
+    "tactic:TA0006-credential-access",
+    "technique:T1110-brute-force",
+    "mitre_platform:cloud",
+    "mitre_platform:saas"
+  ],
+  "isEnabled": true,
+  "isShadowDeployed": true,
+  "isBeta": true,
+  "options": {
+    "detectionMethod": "threshold",
+    "evaluationWindow": 900,
+    "keepAlive": 3600,
+    "maxSignalDuration": 86400
+  },
+  "queries": [
+    {
+      "name": "logins_failed",
+      "query": "source:automox @ocsf.class_uid:3002 @ocsf.message:\"User Log In Failure\"",
+      "groupByFields": [
+        "@ocsf.user.email_addr"
+      ],
+      "distinctFields": [],
+      "aggregation": "count"
+    },
+    {
+      "name": "login_success",
+      "query": "source:automox @ocsf.class_uid:3002 @ocsf.message:\"User Log In Success\"",
+      "groupByFields": [
+        "@ocsf.user.email_addr"
+      ],
+      "distinctFields": [],
+      "aggregation": "count"
+    }
+  ],
+  "cases": [
+    {
+      "name": "Automox console sign-in succeeded after repeated failures for the same user",
+      "status": "Medium",
+      "notifications": [],
+      "condition": "logins_failed > 5 THEN login_success > 0"
+    }
+  ]
+}
