@@ -268,25 +268,29 @@ class DatabaseSchemaCollector(ABC):
         # Each run starts from zero, so its telemetry covers only that run.
         for object_collector in self._object_collectors:
             object_collector._reset()
-        status = "success"
         try:
-            databases = self._get_databases()
-            self._log.debug("Collecting schemas for %d databases", len(databases))
-            for database in databases:
-                database_name = database.get('name')
-                if not database_name:
-                    self._log.warning("database has no name: %s", database)
-                    continue
-                self._raise_if_cancelled()
-                self._collect_database(database)
+            self._collect_databases()
         except Exception as e:
-            status = "error"
             self._log.error("Error collecting schema: %s", e)
-            raise e
-        finally:
-            for object_collector in self._object_collectors:
-                object_collector._submit_telemetry(status)
+            self._submit_telemetry("error")
+            raise
+        self._submit_telemetry("success")
         return True
+
+    def _collect_databases(self) -> None:
+        databases = self._get_databases()
+        self._log.debug("Collecting schemas for %d databases", len(databases))
+        for database in databases:
+            database_name = database.get('name')
+            if not database_name:
+                self._log.warning("database has no name: %s", database)
+                continue
+            self._raise_if_cancelled()
+            self._collect_database(database)
+
+    def _submit_telemetry(self, status: str) -> None:
+        for object_collector in self._object_collectors:
+            object_collector._submit_telemetry(status)
 
     def _collect_database(self, database: DatabaseInfo) -> None:
         database_name = database['name']
