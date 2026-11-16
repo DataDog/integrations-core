@@ -18,7 +18,7 @@
     {
       "key": "domain",
       "label": "Freshservice domain",
-      "help": "Your Freshservice host name, such as acme.freshservice.com.",
+      "help": "Your Freshservice host name in lowercase, without https://, such as acme.freshservice.com.",
       "editable": true,
       "required": true,
       "text": {

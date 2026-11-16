@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect Freshservice audit logs and ticket activity history as logs.",
+    "description": "Collect Freshservice audit logs and ticket activity history.",
     "title": "Freshservice",
     "media": [],
     "classifier_tags": [

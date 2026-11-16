@@ -9,7 +9,7 @@ This integration collects the following logs:
 
 Use these logs to investigate administrative changes and to follow how tickets change over time.
 
-**Note**: Audit logs require the Forest plan or the Audit Log add-on in Freshservice. On other plans, the integration still collects ticket activities and the tile shows a message about audit logs.
+**Note**: Audit logs require the Forest plan or the Audit Log add-on in Freshservice. On other plans, the integration collects only ticket activities.
 
 ## Setup
 
@@ -26,9 +26,9 @@ Use these logs to investigate administrative changes and to follow how tickets c
 3. In the right panel, under **Your API Key**, complete the CAPTCHA.
 4. Copy the API key. For more details, see [Where do I find my API key?][6]
 
-If Freshservice says the API key is disabled, an Account Admin can enable API key access for the user in the agent's permissions.
+If Freshservice says the API key is disabled, an Account Admin can enable API key access in the integration user's permissions.
 
-Freshservice doesn't document an expiry for API keys. Resetting the key in Freshservice, or deactivating the integration user, stops collection until you save the new key in Datadog.
+Resetting the API key in Freshservice, or deactivating the integration user, stops collection until you save the new key in Datadog.
 
 ### Configuration
 
@@ -37,7 +37,7 @@ Open the [Freshservice integration tile][3] in Datadog and add your credentials:
 | Parameter | Description |
 | --------- | ----------- |
 | API key | The API key of the integration user. |
-| Freshservice domain | Your Freshservice host name, such as `acme.freshservice.com`. |
+| Freshservice domain | Your Freshservice host name in lowercase, without `https://`, such as `acme.freshservice.com`. |
 
 Click **Save** to save your settings.
 
