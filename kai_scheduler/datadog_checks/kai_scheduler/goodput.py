@@ -453,15 +453,20 @@ class GoodputTracker:
             if category == Category.NONE or not previous.gpus:
                 continue
             seconds = elapsed
+            pod_cutoff = observation.finished_at
+            if pod_cutoff is not None and self.previous_wall is not None and pod_cutoff < self.previous_wall:
+                # A pod that terminated before the previous poll belongs to an earlier attempt, such as a failed pod
+                # kept after its retry was deleted, so it cannot end this interval.
+                pod_cutoff = None
             if previous.state == SchedulingState.RUNNABLE:
                 # Running ends with the last pod, whether the Job then retries or completes: the time the Job
                 # controller takes to mark the Job complete is not GPU time.
-                cutoff = observation.finished_at
+                cutoff = pod_cutoff
                 if cutoff is None:
                     cutoff = observation.owner_finished_at
             elif observation.state == SchedulingState.FINISHED:
                 # A wait, such as for a retry, lasts until the Job gives up, which can be after its last pod.
-                times = [t for t in (observation.finished_at, observation.owner_finished_at) if t is not None]
+                times = [t for t in (pod_cutoff, observation.owner_finished_at) if t is not None]
                 cutoff = max(times) if times else None
             else:
                 cutoff = None

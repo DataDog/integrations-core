@@ -627,6 +627,19 @@ def test_job_failure_time_closes_the_last_retry_wait():
     assert totals(t.update([podgroup()], failed_pod, failed_job)) == {'team-a': (20, 0)}
 
 
+def test_failed_pod_of_an_earlier_attempt_does_not_end_the_running_retry():
+    # The first attempt failed at +5s and its retry was running at +15s; by +30s the retry pod was deleted, leaving
+    # only the old failed pod while the Job is still active.
+    old_failure = pod(phase='Failed', gpus=2, finished_at='2026-11-11T10:00:05Z')
+    t, clock = tracker()
+    t.update([podgroup()], [pod(gpus=2, index=1)], {'pg-uid': ACTIVE_JOB})
+    clock.now = 15
+    t.update([podgroup()], [old_failure, pod(gpus=2, index=1)], {'pg-uid': ACTIVE_JOB})
+    clock.now = 30
+    # The retry termination time is unknown, so the interval it was observed running counts in full.
+    assert totals(t.update([podgroup()], [old_failure], {'pg-uid': ACTIVE_JOB})) == {'team-a': (0, 30)}
+
+
 def test_cpu_pods_left_after_the_gpu_pods_complete_count_no_gpu_time():
     t, clock = tracker()
     t.update([podgroup()], [pod(gpus=2), pod(gpus=0, index=1)])
