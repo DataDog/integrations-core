@@ -214,7 +214,7 @@
                     {
                         "id": 5244504540662117,
                         "definition": {
-                            "title": "Least used engines and auth methods",
+                            "title": "Most active client IPs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -233,10 +233,10 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@request.mount_type",
+                                                    "facet": "@network.client.ip",
                                                     "limit": 10,
                                                     "sort": {
-                                                        "order": "asc",
+                                                        "order": "desc",
                                                         "aggregation": "count"
                                                     }
                                                 }
@@ -252,7 +252,7 @@
                                             "formula": "query1",
                                             "limit": {
                                                 "count": 10,
-                                                "order": "asc"
+                                                "order": "desc"
                                             }
                                         }
                                     ]
