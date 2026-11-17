@@ -10,6 +10,7 @@ from datadog_checks.postgres.schemas import PostgresSchemaCollector
 from datadog_checks.postgres.version_utils import VersionUtils
 
 from .common import POSTGRES_VERSION
+from .utils import _get_superconn, _wait_for_value, requires_over_10
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -238,6 +239,81 @@ def test_tables_include_and_exclude_filter(dbm_instance, integration_check):
         'personsdup13',
     }
     assert set(tables) == expected
+
+
+def _execute(dbm_instance, *statements):
+    with _get_superconn(dbm_instance) as conn:
+        with conn.cursor() as cursor:
+            for statement in statements:
+                cursor.execute(statement)
+
+
+@pytest.fixture
+def activity_schema(dbm_instance):
+    _execute(dbm_instance, "DROP SCHEMA IF EXISTS activity_test CASCADE", "CREATE SCHEMA activity_test")
+    yield
+    _execute(dbm_instance, "DROP SCHEMA IF EXISTS activity_test CASCADE")
+
+
+def _wait_for_stat(dbm_instance, column, table, lower_threshold):
+    _wait_for_value(
+        dbm_instance,
+        lower_threshold=lower_threshold,
+        query=f"SELECT coalesce(sum({column}), 0) FROM pg_stat_user_tables "
+        f"WHERE schemaname = 'activity_test' AND relname LIKE '{table}%'",
+        attempts=150,
+    )
+
+
+def _scan(dbm_instance, table, times):
+    _execute(dbm_instance, *[f"SELECT count(*) FROM activity_test.{table}"] * times)
+    _wait_for_stat(dbm_instance, 'seq_scan', table, times - 1)
+
+
+def _collected_tables(dbm_instance, integration_check, max_tables):
+    dbm_instance['collect_schemas']['include_schemas'] = ['^activity_test$']
+    dbm_instance['collect_schemas']['max_tables'] = max_tables
+    check = integration_check(dbm_instance)
+    check.version = POSTGRES_VERSION
+    collector = PostgresSchemaCollector(check)
+    with collector._get_cursor('datadog_test') as cursor:
+        return {row['table_name'] for row in cursor if row['table_name']}
+
+
+@pytest.mark.usefixtures('activity_schema')
+@pytest.mark.parametrize(
+    'max_tables, expected',
+    [
+        (1, {'z_hot'}),
+        (2, {'z_hot', 'm_large'}),
+    ],
+)
+def test_max_tables_keeps_most_active_tables(dbm_instance, integration_check, max_tables, expected):
+    _execute(
+        dbm_instance,
+        "CREATE TABLE activity_test.a_empty (id int)",
+        "CREATE TABLE activity_test.m_large (id int)",
+        "INSERT INTO activity_test.m_large SELECT generate_series(1, 1000)",
+        "CREATE TABLE activity_test.z_hot (id int)",
+    )
+    _wait_for_stat(dbm_instance, 'n_live_tup', 'm_large', 999)
+    _scan(dbm_instance, 'z_hot', 3)
+
+    assert _collected_tables(dbm_instance, integration_check, max_tables) == expected
+
+
+@requires_over_10
+@pytest.mark.usefixtures('activity_schema')
+def test_max_tables_counts_partition_activity(dbm_instance, integration_check):
+    _execute(
+        dbm_instance,
+        "CREATE TABLE activity_test.a_plain (id int)",
+        "CREATE TABLE activity_test.z_parted (id int) PARTITION BY RANGE (id)",
+        "CREATE TABLE activity_test.z_parted_1 PARTITION OF activity_test.z_parted FOR VALUES FROM (0) TO (10)",
+    )
+    _scan(dbm_instance, 'z_parted', 2)
+
+    assert _collected_tables(dbm_instance, integration_check, 1) == {'z_parted'}
 
 
 # def test_columns(dbm_instance, integration_check):

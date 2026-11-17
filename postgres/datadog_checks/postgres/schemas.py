@@ -130,6 +130,18 @@ SELECT relname,
 FROM   pg_class
 """
 
+TABLE_ACTIVITY_QUERY = """
+SELECT activity_relations.root_id               AS table_id,
+       sum(pg_stat_get_numscans(activity_relations.relid) + COALESCE(index_scans.scans, 0)) AS scans,
+       sum(pg_stat_get_live_tuples(activity_relations.relid)) AS live_tuples
+FROM   activity_relations
+       LEFT JOIN (SELECT indrelid, sum(pg_stat_get_numscans(indexrelid)) AS scans
+                  FROM   pg_index
+                  GROUP BY indrelid) index_scans
+              ON index_scans.indrelid = activity_relations.relid
+GROUP BY activity_relations.root_id
+"""
+
 NUM_PARTITIONS_QUERY = """
 SELECT count(inhrelid :: regclass) AS num_partitions, inhparent as table_id
 FROM   pg_inherits
@@ -315,19 +327,39 @@ class PostgresSchemaCollector(SchemaCollector):
         limit = int(self._config.max_tables or 1_000_000)
 
         query = f"""
-            WITH
+            WITH RECURSIVE
             schemas AS(
                 {schemas_query}
             ),
             tables AS (
                 {tables_query}
             ),
+            partition_descendants AS (
+                SELECT tables.table_id AS root_id, pg_inherits.inhrelid AS relid
+                FROM tables
+                JOIN pg_inherits ON pg_inherits.inhparent = tables.table_id
+                WHERE tables.relkind = 'p'
+                UNION ALL
+                SELECT partition_descendants.root_id, pg_inherits.inhrelid
+                FROM partition_descendants
+                JOIN pg_inherits ON pg_inherits.inhparent = partition_descendants.relid
+            ),
+            activity_relations AS (
+                SELECT tables.table_id AS root_id, tables.table_id AS relid FROM tables
+                UNION ALL
+                SELECT root_id, relid FROM partition_descendants
+            ),
+            table_activity AS (
+                {TABLE_ACTIVITY_QUERY}
+            ),
             schema_tables AS (
                 SELECT schemas.schema_id, schemas.schema_name, schemas.schema_owner,
                 tables.table_id, tables.table_name, tables.table_owner, tables.relkind, tables.toast_table
                 FROM schemas
                 LEFT JOIN tables ON schemas.schema_id = tables.schema_id
-                ORDER BY schemas.schema_name, tables.table_name
+                LEFT JOIN table_activity ON tables.table_id = table_activity.table_id
+                ORDER BY table_activity.scans DESC NULLS LAST, table_activity.live_tuples DESC NULLS LAST,
+                schemas.schema_name, tables.table_name
                 LIMIT {limit}
             ),
             columns AS (
