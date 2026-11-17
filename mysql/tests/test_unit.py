@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import gc
 import inspect
+import logging
 import subprocess
 import weakref
 
@@ -13,10 +14,15 @@ import pytest
 
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
-from datadog_checks.mysql.util import supports_explain_json_format_version
+from datadog_checks.mysql.util import (
+    get_obfuscate_only_options,
+    has_literal_values,
+    supports_explain_json_format_version,
+)
 from datadog_checks.mysql.version_utils import parse_version
 
 from . import common
+from .utils import obfuscate_sql_literals
 
 pytestmark = pytest.mark.unit
 
@@ -953,3 +959,63 @@ def test_check_gc_after_cancel():
             pytest.fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
     finally:
         gc.enable()
+
+
+@pytest.mark.parametrize(
+    'raw_statement, expected',
+    [
+        pytest.param("SELECT * FROM users WHERE name = 'bob'", True, id='string_literal'),
+        pytest.param("SELECT * FROM users WHERE id = 42", True, id='number_literal'),
+        pytest.param("SELECT * FROM users WHERE id = ? AND name IN (?, ?)", False, id='prepared_statement'),
+        pytest.param("SELECT *\n  FROM users\n  WHERE id = ?  ", False, id='prepared_statement_unnormalized'),
+        pytest.param("SELECT * FROM users", False, id='no_values'),
+    ],
+)
+def test_has_literal_values(datadog_agent, raw_statement, expected):
+    """Raw text is only worth collecting when it reveals values that obfuscation hides, whatever its formatting."""
+    options = get_obfuscate_only_options({'dbms': 'mysql', 'obfuscation_mode': 'obfuscate_and_normalize'})
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate_sql_literals):
+        assert has_literal_values(raw_statement, options, logging.getLogger(__name__)) is expected
+
+
+def test_has_literal_values_obfuscation_failure(datadog_agent):
+    """A failing detection keeps the raw statement, since raw statement collection is explicitly enabled."""
+    options = get_obfuscate_only_options({'dbms': 'mysql'})
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=Exception('boom')):
+        assert has_literal_values("SELECT * FROM users WHERE id = ?", options, logging.getLogger(__name__)) is True
+
+
+@pytest.mark.parametrize(
+    'collect_raw_query_statement, expected_tagged',
+    [
+        pytest.param(None, False, id='default'),
+        pytest.param({'enabled': False}, False, id='disabled'),
+        pytest.param({'enabled': True}, True, id='enabled'),
+    ],
+)
+def test_raw_query_statement_tag(collect_raw_query_statement, expected_tagged):
+    """The data of an instance collecting raw query statements is tagged so it can be told apart."""
+    instance = {'server': 'localhost', 'user': 'datadog', 'dbm': True}
+    if collect_raw_query_statement is not None:
+        instance['collect_raw_query_statement'] = collect_raw_query_statement
+
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
+
+    assert ('raw_query_statement:enabled' in check.tag_manager.get_tags()) is expected_tagged
+
+
+def test_raw_query_statement_undocumented_cache_settings():
+    """The undocumented cache settings pass config validation and tune the raw statement rate limiting."""
+    instance = {
+        'server': 'localhost',
+        'user': 'datadog',
+        'dbm': True,
+        'collect_raw_query_statement': {'enabled': True, 'cache_max_size': 5, 'samples_per_hour_per_query': 4},
+    }
+
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
+    check.load_configuration_models()
+
+    raw_statement_text_cache = check.query_activity._raw_statement_text_cache
+    assert raw_statement_text_cache.maxsize == 5
+    assert raw_statement_text_cache.ttl == 60 * 60 / 4

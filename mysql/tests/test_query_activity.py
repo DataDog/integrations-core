@@ -17,12 +17,14 @@ import pymysql
 import pytest
 from packaging.version import parse as parse_version
 
+from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.util import StatementTruncationState
 
 from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, mysql_root_password
+from .utils import obfuscate_sql_literals
 
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
@@ -172,6 +174,47 @@ def test_activity_collection(
                 if row['processlist_user'] == 'bob':
                     captured_idle_blocker = True
         assert captured_idle_blocker, "should have captured the idle blocker"
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_activity_collection_raw_statement(aggregator, dbm_instance, dd_run_check, datadog_agent):
+    """A running statement with literal values is reported obfuscated, linked to an `rqt` event with its raw text."""
+    dbm_instance['collect_raw_query_statement'] = {'enabled': True}
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+    query = "SELECT id, age FROM testdb.users WHERE name = 'Alice' FOR UPDATE"
+
+    bob_conn = _get_conn_for_user('bob')
+    fred_conn = _get_conn_for_user('fred')
+    executor = concurrent.futures.thread.ThreadPoolExecutor(1)
+    try:
+        bob_conn.begin()
+        bob_conn.cursor().execute('SELECT id FROM testdb.users FOR UPDATE')
+        # fred's query gets blocked by bob's transaction, so it stays active while the check runs
+        executor.submit(lambda: fred_conn.cursor().execute(query))
+        time.sleep(0.5)
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate_sql_literals):
+            dd_run_check(check)
+    finally:
+        bob_conn.commit()
+        executor.shutdown()
+        bob_conn.close()
+        fred_conn.close()
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert len(dbm_activity) == 1
+    assert 'Alice' not in json.dumps(dbm_activity[0])
+    fred_rows = [row for row in dbm_activity[0]['mysql_activity'] if row['processlist_user'] == 'fred']
+    assert len(fred_rows) == 1
+    raw_query_signature = fred_rows[0]['raw_query_signature']
+    assert raw_query_signature == compute_sql_signature(query)
+
+    raw_statement_events = [e for e in aggregator.get_event_platform_events("dbm-samples") if e['dbm_type'] == 'rqt']
+    matching = [e for e in raw_statement_events if e['db']['raw_query_signature'] == raw_query_signature]
+    assert len(matching) == 1
+    assert matching[0]['db']['statement'] == query
+    assert matching[0]['db']['query_signature'] == fred_rows[0]['query_signature']
+    assert 'raw_query_statement:enabled' in matching[0]['ddtags'].split(',')
 
 
 @pytest.mark.integration
@@ -443,6 +486,94 @@ def test_normalize_rows_with_null_event_timers(dbm_instance, datadog_agent, rows
         mock_agent.side_effect = "something"
         result_rows = check.query_activity._normalize_rows(rows)
         assert [row['processlist_user'] for row in result_rows] == expected_users
+
+
+def _raw_statement_row(thread_id, sql_text, digest_text):
+    return {
+        "thread_id": thread_id,
+        "current_schema": "testdb",
+        "processlist_command": "Query",
+        "processlist_user": "dog",
+        "sql_text": sql_text,
+        "digest_text": digest_text,
+        "event_timer_start": 353141155758000 + thread_id,
+        "event_timer_end": None,
+    }
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("enabled", [True, False])
+def test_activity_raw_statement_events(aggregator, dbm_instance, datadog_agent, enabled):
+    """
+    Activity rows with literal values link to their raw text, sent in an `rqt` event at most once per
+    query and raw query signature, while the activity payload stays obfuscated.
+    """
+    dbm_instance['collect_raw_query_statement'] = {'enabled': enabled}
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+    # set by the job loop before each run
+    check.query_activity._tags = ['foo:bar']
+    literal_query = "SELECT * FROM users WHERE name = 'alice'"
+    other_literal_query = "SELECT * FROM users WHERE name = 'carol'"
+    # performance_schema truncates long statements and ends them with `...`
+    truncated_query = "SELECT * FROM users WHERE name = 'dave' AND id IN (1, 2..."
+    prepared_query = "SELECT * FROM users WHERE id = ?"
+    rows = [
+        _raw_statement_row(1, literal_query, "SELECT * FROM users WHERE name = ?"),
+        _raw_statement_row(2, literal_query, "SELECT * FROM users WHERE name = ?"),
+        _raw_statement_row(3, other_literal_query, "SELECT * FROM users WHERE name = ?"),
+        _raw_statement_row(4, truncated_query, "SELECT * FROM users WHERE name = ? AND id IN (...)"),
+        _raw_statement_row(5, prepared_query, prepared_query),
+    ]
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate_sql_literals),
+        mock.patch.object(check.query_activity, '_get_db_connection'),
+        mock.patch.object(check.query_activity, '_get_activity', side_effect=lambda cursor: deepcopy(rows)),
+    ):
+        # the second collection finds the same statements within the rate limiting window
+        check.query_activity._collect_activity()
+        check.query_activity._collect_activity()
+
+    activity_payloads = aggregator.get_event_platform_events("dbm-activity")
+    assert len(activity_payloads) == 2
+    signatures = set()
+    for payload in activity_payloads:
+        serialized_payload = json.dumps(payload)
+        for literal in ('alice', 'carol', 'dave'):
+            assert literal not in serialized_payload
+        raw_query_signatures = {row['thread_id']: row.get('raw_query_signature') for row in payload['mysql_activity']}
+        signatures.update(
+            (row['query_signature'], row['raw_query_signature'])
+            for row in payload['mysql_activity']
+            if 'raw_query_signature' in row
+        )
+        if enabled:
+            assert raw_query_signatures == {
+                1: compute_sql_signature(literal_query),
+                2: compute_sql_signature(literal_query),
+                3: compute_sql_signature(other_literal_query),
+                4: compute_sql_signature(truncated_query),
+                5: None,
+            }
+        else:
+            assert set(raw_query_signatures.values()) == {None}
+
+    raw_statement_events = aggregator.get_event_platform_events("dbm-samples")
+    if not enabled:
+        assert raw_statement_events == []
+        return
+    assert len(raw_statement_events) == 3
+    assert {e['db']['statement']: e['db']['query_truncated'] for e in raw_statement_events} == {
+        literal_query: StatementTruncationState.not_truncated.value,
+        other_literal_query: StatementTruncationState.not_truncated.value,
+        truncated_query: StatementTruncationState.truncated.value,
+    }
+    # each event is linked to the activity rows carrying its raw text
+    assert {(e['db']['query_signature'], e['db']['raw_query_signature']) for e in raw_statement_events} == signatures
+    for event in raw_statement_events:
+        assert event['dbm_type'] == 'rqt'
+        assert event['ddsource'] == 'mysql'
+        assert event['db']['raw_query_signature'] == compute_sql_signature(event['db']['statement'])
 
 
 @pytest.mark.integration
