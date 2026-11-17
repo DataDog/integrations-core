@@ -1,0 +1,31 @@
+# Use a disposable Agent with --network host on the x86_64 workspace.
+# Start capture_agent.py on port 19731 before starting the Agent.
+api_key: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+site: capture.invalid
+dd_url: http://127.0.0.1:19731
+hostname: db2-samples-acceptance
+tags: [env:acceptance, service:db2-samples-acceptance]
+remote_configuration: {enabled: false}
+agent_telemetry: {enabled: false}
+agent_data_plane: {enabled: false}
+logs_enabled: false
+apm_config: {enabled: false}
+process_config:
+  process_collection: {enabled: false}
+  container_collection: {enabled: false}
+  process_discovery: {enabled: false}
+  process_dd_url: http://127.0.0.1:19731
+logs_config:
+  logs_dd_url: 127.0.0.1:19731
+  logs_no_ssl: true
+  force_use_http: true
+database_monitoring:
+  metrics: {logs_dd_url: '127.0.0.1:19731', logs_no_ssl: true}
+  samples: {logs_dd_url: '127.0.0.1:19731', logs_no_ssl: true}
+  activity: {logs_dd_url: '127.0.0.1:19731', logs_no_ssl: true}
+network_devices:
+  metadata: {logs_dd_url: '127.0.0.1:19731', logs_no_ssl: true}
+container_lifecycle: {enabled: false}
+container_image: {enabled: false}
+sbom: {enabled: false}
+cloud_provider_metadata: []
