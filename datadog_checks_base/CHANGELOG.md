@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 38.10.0 / 2026-11-16
+
+***Security***:
+
+* Bump `ddtrace` to 4.16.3 and `oauthlib` to 4.0.1 to address CVE-2026-116588, CVE-2026-116589, and CVE-2026-49272. ([#25968](https://github.com/DataDog/integrations-core/pull/25968))
+
+***Added***:
+
+* Add a shared malloc_trim helper in datadog_checks.base.utils.native_memory for integrations that allocate heavily through C libraries. ([#25718](https://github.com/DataDog/integrations-core/pull/25718))
+
 ## 38.9.2 / 2026-11-02
 
 ***Fixed***:
