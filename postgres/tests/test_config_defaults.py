@@ -128,6 +128,8 @@ EXPECTED_DEFAULTS = {
     'collect_schemas': {
         'enabled': True,
         'max_tables': 300,
+        'collect_views': False,
+        'max_views': 1000,
         'max_columns': 50,
         'collection_interval': 600,
         'max_query_duration': 60,

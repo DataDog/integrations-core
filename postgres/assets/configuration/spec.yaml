@@ -1000,6 +1000,25 @@ files:
             type: number
             example: 300
             display_default: 300
+        - name: collect_views
+          fleet_configurable: false
+          description: |
+            Enable collection of views and materialized views, along with their columns, definitions,
+            and materialized view indexes. View definitions are sent as written, without obfuscation.
+            Views are sent in a separate payload from tables and are filtered by the database and schema filters.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: max_views
+          fleet_configurable: true
+          description: |
+            Maximum amount of views and materialized views the Agent collects from each database
+            when `collect_views` is enabled.
+          value:
+            type: number
+            example: 1000
+            display_default: 1000
         - name: max_query_duration
           fleet_configurable: true
           description: |

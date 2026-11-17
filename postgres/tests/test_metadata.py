@@ -557,3 +557,68 @@ def assert_fields(keys: List[str], fields: List[str]):
 def assert_not_fields(keys: List[str], fields: List[str]):
     for field in fields:
         assert field not in keys
+
+
+@pytest.fixture
+def view_schema(dbm_instance):
+    conn = _get_superconn(dbm_instance)
+    with conn.cursor() as cursor:
+        cursor.execute("DROP SCHEMA IF EXISTS view_test CASCADE")
+        cursor.execute("CREATE SCHEMA view_test")
+        cursor.execute("CREATE TABLE view_test.base (id int PRIMARY KEY, name text)")
+        cursor.execute("CREATE VIEW view_test.a_view AS SELECT id, name FROM view_test.base WHERE id > 10")
+        cursor.execute("CREATE MATERIALIZED VIEW view_test.b_matview AS SELECT id FROM view_test.base")
+        cursor.execute("CREATE UNIQUE INDEX b_matview_id ON view_test.b_matview (id)")
+    try:
+        yield
+    finally:
+        with conn.cursor() as cursor:
+            cursor.execute("DROP SCHEMA IF EXISTS view_test CASCADE")
+        conn.close()
+
+
+@pytest.mark.usefixtures('view_schema')
+@pytest.mark.parametrize(
+    'schemas_config, expected_views',
+    [
+        pytest.param({}, None, id='disabled by default'),
+        pytest.param({'collect_views': True}, ['a_view', 'b_matview'], id='enabled'),
+        pytest.param({'collect_views': True, 'max_views': 1}, ['a_view'], id='max_views'),
+    ],
+)
+def test_collect_views(integration_check, dbm_instance, aggregator, schemas_config, expected_views):
+    dbm_instance["collect_schemas"] = {
+        'enabled': True,
+        'include_databases': ['^datadog_test$'],
+        'include_schemas': ['^view_test$'],
+        **schemas_config,
+    }
+    check = integration_check(dbm_instance)
+    run_one_check(check)
+    events = aggregator.get_event_platform_events("dbm-metadata")
+
+    view_events = [e for e in events if e['kind'] == 'pg_views']
+    if expected_views is None:
+        assert view_events == []
+        return
+
+    views = {
+        view['name']: view
+        for event in view_events
+        for database in event['metadata']
+        for schema in database['schemas']
+        for view in schema['views']
+    }
+    assert sorted(views) == expected_views
+
+    view = views['a_view']
+    assert view['relkind'] == 'v'
+    assert 'view_test.base' in view['definition']
+    assert {column['name'] for column in view['columns']} == {'id', 'name'}
+    assert view['indexes'] == []
+
+    if 'b_matview' in views:
+        matview = views['b_matview']
+        assert matview['relkind'] == 'm'
+        assert [index['name'] for index in matview['indexes']] == ['b_matview_id']
+        assert matview['indexes'][0]['is_unique'] is True
