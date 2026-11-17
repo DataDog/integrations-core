@@ -258,7 +258,7 @@ When the query request carries a trace context, every intake request of the run 
 
 ### OBS-03 — Log without data
 
-Every log line about a run carries its crawl, task, and upload IDs. Logs never contain the query text, result values, credentials, or connection strings.
+Every log line about a run carries its crawl, task, and upload IDs. Logs never contain the query text, result values, credentials, or connection strings. Each acknowledged page is logged at debug level with its index, row count, uncompressed and sent byte counts, encoding (`gzip` or `identity`), compression and upload times in milliseconds, and whether gzip was tried but not kept because the page did not get smaller.
 
 ## Configuration
 

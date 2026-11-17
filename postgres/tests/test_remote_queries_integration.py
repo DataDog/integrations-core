@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import socket
 import socketserver
 import ssl
@@ -298,6 +299,34 @@ def test_upload02_08_page_encoding(rq_check: PostgreSql, intake: StubIntake, que
     else:
         assert "Content-Encoding" not in headers
         assert page["wire"] == page["body"] == b"1\n"
+
+
+@pytest.mark.parametrize(
+    "query,fields",
+    [
+        (
+            "SELECT repeat('x', 1000) AS value",
+            r"page=0 rows=1 bytes=1001 sent_bytes=\d+ encoding=gzip compress_ms=\d+\.\d upload_ms=\d+\.\d "
+            r"gzip_not_smaller=False",
+        ),
+        (
+            "SELECT 1 AS value",
+            r"page=0 rows=1 bytes=2 sent_bytes=2 encoding=identity compress_ms=\d+\.\d upload_ms=\d+\.\d "
+            r"gzip_not_smaller=True",
+        ),
+    ],
+    ids=["gzip", "not_smaller"],
+)
+def test_obs03_page_log_reports_size_and_timing(
+    rq_check: PostgreSql, intake: StubIntake, caplog: pytest.LogCaptureFixture, query: str, fields: str
+):
+    payload = request(rq_check, intake.address, query)
+    with caplog.at_level("DEBUG"):
+        assert call(rq_check, payload) == {"status": "SUCCEEDED"}
+    delivery = payload["resultDelivery"]
+    ids = f"crawl_id={delivery['crawlId']} task_id={delivery['taskId']} upload_id={delivery['uploadId']}"
+    (line,) = [r.message for r in caplog.records if r.message.startswith("Remote query page_uploaded ")]
+    assert re.fullmatch(rf"Remote query page_uploaded {re.escape(ids)} {fields}", line)
 
 
 def test_upload08_refused_encoding_falls_back_for_the_run(rq_check: PostgreSql, intake: StubIntake):
