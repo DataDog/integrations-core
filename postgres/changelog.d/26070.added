@@ -1,0 +1,1 @@
+Add `collect_schemas.collect_views` and `collect_schemas.max_views` to collect views and materialized views, with their definitions, columns, and materialized view indexes.
