@@ -335,6 +335,30 @@ def test_max_relations(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
+def test_max_relations_keeps_largest_relations(aggregator, integration_check, pg_instance):
+    pg_instance.update({"relations": [{"relation_regex": ".*"}], "max_relations": 1})
+    conn = _get_superconn(pg_instance)
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("CREATE TABLE largest_relation AS SELECT g AS id FROM generate_series(1, 50000) g")
+            cursor.execute("ANALYZE largest_relation")
+
+        check = integration_check(pg_instance)
+        check.check(pg_instance)
+    finally:
+        with conn.cursor() as cursor:
+            cursor.execute("DROP TABLE IF EXISTS largest_relation")
+        conn.close()
+
+    for name in _iterate_metric_name(QUERY_PG_CLASS_SIZE):
+        if "toast" in name and POSTGRES_LOCALE == "C":
+            continue
+        tables = {tag for m in aggregator._metrics[name] for tag in m.tags if tag.startswith("table:")}
+        assert tables == {"table:largest_relation"}, f"Unexpected relations for {name}: {tables}"
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_index_metrics(aggregator, integration_check, pg_instance):
     pg_instance["relations"] = ["breed"]
     pg_instance["dbname"] = "dogs"

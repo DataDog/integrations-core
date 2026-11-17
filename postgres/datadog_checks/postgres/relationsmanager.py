@@ -170,7 +170,9 @@ FROM
             AND relation = C.oid
       ) AND
       relkind = 'r' AND
-      {relations} {limits}) as s""",
+      {relations}
+    ORDER BY C.relpages DESC, C.oid
+    {limits}) as s""",
     'columns': [
         {'name': 'db', 'type': 'tag'},
         {'name': 'schema', 'type': 'tag'},
