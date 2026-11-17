@@ -13,12 +13,24 @@ import pymysql
 
 from datadog_checks.base import is_affirmative, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    RateLimitingTTLCache,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
 
-from .util import DatabaseConfigurationError, ManagedAuthConnectionMixin, get_truncation_state, warning_with_tags
+from .util import (
+    DatabaseConfigurationError,
+    ManagedAuthConnectionMixin,
+    get_obfuscate_only_options,
+    get_truncation_state,
+    has_literal_values,
+    warning_with_tags,
+)
 
 ACTIVITY_QUERY = """\
 SELECT
@@ -202,6 +214,13 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._obfuscator_options = to_native_string(json.dumps(self._config.obfuscator_options))
         self._activity_query = None
 
+        self._collect_raw_query_statement = self._config.collect_raw_query_statement["enabled"]
+        self._obfuscate_only_options = get_obfuscate_only_options(self._config.obfuscator_options)
+        self._raw_statement_text_cache = RateLimitingTTLCache(
+            maxsize=self._config.collect_raw_query_statement["cache_max_size"],
+            ttl=60 * 60 / self._config.collect_raw_query_statement["samples_per_hour_per_query"],
+        )
+
     def run_job(self):
         # type: () -> None
         # Detect a database misconfiguration by checking if `events-waits-current` is enabled.
@@ -308,16 +327,65 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
                     second_pass[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
             else:
                 seen[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
-            if row["sql_text"] is not None:
-                row["query_truncated"] = get_truncation_state(row["sql_text"]).value
+            raw_sql_text = row["sql_text"]
+            if raw_sql_text is not None:
+                row["query_truncated"] = get_truncation_state(raw_sql_text).value
             row = self._obfuscate_and_sanitize_row(row)
+            if self._collect_raw_query_statement:
+                self._set_raw_query_signature(row, raw_sql_text)
             estimated_size += self._get_estimated_row_size_bytes(row)
             if estimated_size > MySQLActivity.MAX_PAYLOAD_BYTES:
                 return normalized_rows
+            if "raw_query_signature" in row:
+                self._submit_raw_statement_event(row, raw_sql_text)
             normalized_rows.append(row)
         if second_pass:
             normalized_rows = self._eliminate_duplicate_rows(normalized_rows, second_pass)
         return normalized_rows
+
+    def _set_raw_query_signature(self, row: dict[str, Any], raw_sql_text: str | None) -> None:
+        """
+        Set `raw_query_signature` on an obfuscated row when its raw text has literal values,
+        so the raw text can be looked up from the `rqt` event that carries it.
+        """
+        if not raw_sql_text or "query_signature" not in row:
+            return
+        if not has_literal_values(raw_sql_text, self._obfuscate_only_options, self._log):
+            return
+        row["raw_query_signature"] = compute_sql_signature(raw_sql_text)
+
+    def _submit_raw_statement_event(self, row: dict[str, Any], raw_sql_text: str) -> None:
+        """Submit the raw text of a row as an `rqt` event, rate limited per query and raw query signature."""
+        raw_query_signature = row["raw_query_signature"]
+        if not self._raw_statement_text_cache.acquire((row["query_signature"], raw_query_signature)):
+            return
+        raw_query_event = {
+            "timestamp": time.time() * 1000,
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
+            "ddagentversion": self._check.agent_version,
+            "ddsource": "mysql",
+            "dbm_type": "rqt",
+            "ddtags": ",".join(t for t in self._tags if not t.startswith('dd.internal')),
+            'service': self._config.service,
+            "db": {
+                "instance": row.get("current_schema"),
+                "query_signature": row["query_signature"],
+                "raw_query_signature": raw_query_signature,
+                "statement": raw_sql_text,
+                "metadata": {
+                    "tables": row.get("dd_tables"),
+                    "commands": row.get("dd_commands"),
+                    "comments": row.get("dd_comments"),
+                },
+                "query_truncated": row.get("query_truncated"),
+            },
+            "mysql": {
+                "current_schema": row.get("current_schema"),
+                "processlist_user": row.get("processlist_user"),
+            },
+        }
+        self._check.database_monitoring_query_sample(json.dumps(raw_query_event, default=default_json_event_encoding))
 
     @staticmethod
     def _ended_before(row: dict[str, Any], event_timer_start: int | None) -> bool:

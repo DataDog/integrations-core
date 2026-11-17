@@ -2,12 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 import time
 from contextlib import closing
 from enum import Enum
 
 import pymysql
 
+from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql.cursor import CommenterCursor
 
 # First version exposing the `explain_json_format_version` system variable
@@ -50,6 +54,32 @@ def get_truncation_state(statement):
     # a statement is truncated
     truncated = statement[-3:] == '...'
     return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+
+
+def get_obfuscate_only_options(obfuscator_options: dict) -> str:
+    """Serialize the obfuscator options with obfuscation and no normalization, for `has_literal_values`."""
+    return to_native_string(json.dumps({**obfuscator_options, 'obfuscation_mode': 'obfuscate_only'}))
+
+
+def has_literal_values(raw_statement: str, obfuscate_only_options: str, log: logging.Logger) -> bool:
+    """
+    Whether the raw statement reveals values that obfuscation hides, making it worth collecting as raw text.
+
+    Server-side prepared statements only keep `?` placeholders in performance_schema, so their raw text
+    carries no values. Comparing the raw text with its regular obfuscated form is unreliable because
+    normalization also rewrites it (whitespace, comments, grouped placeholders). Obfuscating without
+    normalizing only replaces literal tokens and keeps every other token as is, so the raw text
+    has literal values exactly when that obfuscation changes it.
+
+    Returns True when the obfuscation fails, since raw statement collection is explicitly enabled.
+    """
+    try:
+        obfuscated = obfuscate_sql_with_metadata(raw_statement, obfuscate_only_options)['query']
+    except Exception as e:
+        log.debug("Failed to obfuscate raw statement to detect literal values | err=[%s]", e)
+        return True
+    # obfuscate_sql_with_metadata removes null characters and the obfuscator trims surrounding whitespace
+    return obfuscated != raw_statement.replace('\x00', '').strip()
 
 
 def supports_explain_json_format_version(version):
