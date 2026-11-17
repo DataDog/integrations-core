@@ -126,9 +126,11 @@ What the caller should know:
   - metadata wording (units, descriptions) and README content;
   - endpoints that need auth, custom headers, or a certificate the default TLS verification rejects,
     during the run (the lab must serve them without);
-  - a namespace different from the integration name (to get another namespace, choose another
-    integration name);
   - service checks.
+- The namespace derived from the integration name is the default. The PRD can require another one
+  (for example, to stay compatible with a legacy integration): the code phase can re-prefix the
+  mappings and metadata and set the check's namespace. The naming, metadata, and test phases still
+  start from the derived prefix, so list a different namespace as a risk in the hand-off.
 
 ## Hand-off
 
