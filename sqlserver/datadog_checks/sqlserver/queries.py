@@ -45,10 +45,11 @@ WHERE
 """
 
 # max_length, precision and scale are raw sys.columns values, set only for the
-# types whose declaration uses them and NULL otherwise (FOR JSON PATH leaves
-# NULLs out). max_length is in bytes (twice the declared length for nchar and
-# nvarchar) and -1 for (max) types. data_type stays the bare type name.
-# PRECISION is a reserved keyword, so the aliases are bracketed.
+# types whose declaration uses them and NULL otherwise. FOR JSON PATH leaves
+# NULLs out; the pre-2017 per-table path sends them as null. max_length is in
+# bytes (twice the declared length for nchar and nvarchar) and -1 for (max)
+# types. data_type stays the bare type name. PRECISION is a reserved keyword,
+# so the aliases are bracketed.
 COLUMN_LENGTHS = """
     CASE WHEN t.name IN ('char', 'varchar', 'nchar', 'nvarchar', 'binary', 'varbinary')
         THEN c.max_length END AS max_length,
