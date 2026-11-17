@@ -2,7 +2,7 @@
 
 ## `kong-full` evalya task
 
-The `kong-full` task in `evalya.yaml` stands up an environment in which the kong check emits 31 of the 34 metrics
+The `kong-full` task in `evalya.yaml` sets up an environment in which the Kong check emits 31 of the 34 metrics
 in `metadata.csv`, plus `kong.http.status.count`, with non-zero values (see [Coverage](#coverage)). Run it with:
 
 ```shell
@@ -17,8 +17,8 @@ The check covers three metric families that no single Kong node emits, so the en
 | `upstream` | `nginx` backend that both Kong nodes proxy to. |
 | `kong` | Kong 3.x. Emits the 3.0 Prometheus names (`bandwidth.bytes`, `http.requests`, `kong.latency.ms`, `nginx.connections.total`), plus stream session series through a TCP route on `:9000`. |
 | `kong-legacy` | Kong 2.x. Emits the pre-3.0 names that Kong 3.0 renamed (`bandwidth`, `http.status`, `http.consumer.status`, `latency`, `nginx.http.current_connections`). |
-| `seed` | One-shot. Sends one request per labelled series (authenticated 200, unauthenticated 401, authenticated 404) and one TCP session, so every series exists before the first scrape. |
-| `activity-gen` | Runs `activity-gen.sh`: continuous proxied HTTP and TCP traffic for the request, bandwidth, latency, and session counters, plus per node one idle keep-alive connection (`connections_waiting`) and one slow-header connection (`connections_reading`). |
+| `seed` | One-shot. Sends one request per labeled series (authenticated 200, unauthenticated 401, authenticated 404) and one TCP session, so every series exists before the first scrape. |
+| `activity-gen` | Runs `activity-gen.sh`: continuous proxied HTTP and TCP traffic for the request, bandwidth, latency, and session counters, plus one idle keep-alive connection (`connections_waiting`) and one slow-header connection (`connections_reading`) per node. |
 | `gateway` | Entrypoint. Publishes both nodes on one hostname and serves the recorded `fixtures/prometheus.txt` on `:8200` (see `compose/gateway.conf`). |
 
 Each node routes `/` to `upstream` behind `key-auth`, with one consumer and the Prometheus plugin enabled per
@@ -30,8 +30,10 @@ serve the legacy `/status` endpoint.
 | Label | Value |
 |---|---|
 | `provides.DB_HOST` | Entrypoint hostname. |
-| `provides.KONG_PROXY_PORT` / `provides.KONG_ADMIN_PORT` | `8000` / `8001` (Kong 3.x). |
-| `provides.KONG_LEGACY_PROXY_PORT` / `provides.KONG_LEGACY_ADMIN_PORT` | `8100` / `8101` (Kong 2.x). |
+| `provides.KONG_PROXY_PORT` | `8000` (Kong 3.x). |
+| `provides.KONG_ADMIN_PORT` | `8001` (Kong 3.x). |
+| `provides.KONG_LEGACY_PROXY_PORT` | `8100` (Kong 2.x). |
+| `provides.KONG_LEGACY_ADMIN_PORT` | `8101` (Kong 2.x). |
 | `provides.KONG_FIXTURE_METRICS_PORT` | `8200` (recorded Kong 2.x `/metrics`). |
 | `provides.KONG_CONSUMER_KEY` | The `key-auth` credential of `consumer1`. |
 
@@ -78,8 +80,7 @@ Target: the 34 metrics in `metadata.csv`, plus `kong.http.status.count`, which t
 `kong_http_status`) but `metadata.csv` lists without the `.count` suffix. Measured with
 `agent check kong -t 2 --pause 5000 --json` against the five instances above:
 
-- 31 covered live with non-zero values, including `kong.http.status.count` and all 20 OOTB dashboard metrics. The kong assets define no
-  recommended monitors.
+- 31 covered live with non-zero values, including `kong.http.status.count` and all 20 OOTB dashboard metrics. The Kong assets has no out-of-the-box monitors.
 - 1 fixture-backed: `kong.nginx.stream.current_connections`, from the recorded `fixtures/prometheus.txt`. Its values
   are frozen.
 - 1 at zero: `kong.stream.status.count`. It is emitted only from the recorded fixture, and a frozen counter reports a
