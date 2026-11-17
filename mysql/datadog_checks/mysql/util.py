@@ -65,8 +65,8 @@ def has_literal_values(raw_statement: str, obfuscate_only_options: str, log: log
     """
     Whether the raw statement reveals values that obfuscation hides, making it worth collecting as raw text.
 
-    Server-side prepared statements only keep `?` placeholders in performance_schema, so their raw text
-    carries no values. Comparing the raw text with its regular obfuscated form is unreliable because
+    Statement texts holding only `?` placeholders, such as prepared statement texts, carry no values.
+    Comparing the raw text with its regular obfuscated form is unreliable because
     normalization also rewrites it (whitespace, comments, grouped placeholders). Obfuscating without
     normalizing only replaces literal tokens and keeps every other token as is, so the raw text
     has literal values exactly when that obfuscation changes it.
