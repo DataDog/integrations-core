@@ -488,16 +488,19 @@ def test_normalize_rows_with_null_event_timers(dbm_instance, datadog_agent, rows
         assert [row['processlist_user'] for row in result_rows] == expected_users
 
 
-def _raw_statement_row(thread_id, sql_text, digest_text):
+def _raw_statement_row(
+    thread_id, sql_text, digest_text, event_timer_start=None, event_timer_end=None, sql_text_from_processlist_info=0
+):
     return {
         "thread_id": thread_id,
         "current_schema": "testdb",
         "processlist_command": "Query",
         "processlist_user": "dog",
         "sql_text": sql_text,
+        "sql_text_from_processlist_info": sql_text_from_processlist_info,
         "digest_text": digest_text,
-        "event_timer_start": 353141155758000 + thread_id,
-        "event_timer_end": None,
+        "event_timer_start": event_timer_start or 353141155758000 + thread_id,
+        "event_timer_end": event_timer_end,
     }
 
 
@@ -517,12 +520,22 @@ def test_activity_raw_statement_events(aggregator, dbm_instance, datadog_agent, 
     # performance_schema truncates long statements and ends them with `...`
     truncated_query = "SELECT * FROM users WHERE name = 'dave' AND id IN (1, 2..."
     prepared_query = "SELECT * FROM users WHERE id = ?"
+    # a statement the thread already finished before running the next one
+    stale_query = "SELECT * FROM users WHERE name = 'erin'"
+    current_query = "SELECT * FROM users WHERE name = 'frank'"
+    # PROCESSLIST_INFO, used when there is no sql_text, keeps the first 1024 bytes without marking the cut
+    clipped_processlist_query = ("SELECT * FROM users WHERE name = 'grace' AND id IN (1" + ", 7" * 400)[:1024]
+    processlist_query = "SELECT * FROM users WHERE name = 'heidi'"
     rows = [
         _raw_statement_row(1, literal_query, "SELECT * FROM users WHERE name = ?"),
         _raw_statement_row(2, literal_query, "SELECT * FROM users WHERE name = ?"),
         _raw_statement_row(3, other_literal_query, "SELECT * FROM users WHERE name = ?"),
         _raw_statement_row(4, truncated_query, "SELECT * FROM users WHERE name = ? AND id IN (...)"),
         _raw_statement_row(5, prepared_query, prepared_query),
+        _raw_statement_row(6, stale_query, "SELECT * FROM users WHERE name = ?", 10, 20),
+        _raw_statement_row(6, current_query, "SELECT * FROM users WHERE name = ?", 30, 40),
+        _raw_statement_row(7, clipped_processlist_query, None, sql_text_from_processlist_info=1),
+        _raw_statement_row(8, processlist_query, None, sql_text_from_processlist_info=1),
     ]
 
     with (
@@ -539,7 +552,7 @@ def test_activity_raw_statement_events(aggregator, dbm_instance, datadog_agent, 
     signatures = set()
     for payload in activity_payloads:
         serialized_payload = json.dumps(payload)
-        for literal in ('alice', 'carol', 'dave'):
+        for literal in ('alice', 'carol', 'dave', 'erin', 'frank', 'grace', 'heidi', 'sql_text_from_processlist_info'):
             assert literal not in serialized_payload
         raw_query_signatures = {row['thread_id']: row.get('raw_query_signature') for row in payload['mysql_activity']}
         signatures.update(
@@ -554,6 +567,9 @@ def test_activity_raw_statement_events(aggregator, dbm_instance, datadog_agent, 
                 3: compute_sql_signature(other_literal_query),
                 4: compute_sql_signature(truncated_query),
                 5: None,
+                6: compute_sql_signature(current_query),
+                7: compute_sql_signature(clipped_processlist_query),
+                8: compute_sql_signature(processlist_query),
             }
         else:
             assert set(raw_query_signatures.values()) == {None}
@@ -562,11 +578,14 @@ def test_activity_raw_statement_events(aggregator, dbm_instance, datadog_agent, 
     if not enabled:
         assert raw_statement_events == []
         return
-    assert len(raw_statement_events) == 3
+    assert len(raw_statement_events) == 6
     assert {e['db']['statement']: e['db']['query_truncated'] for e in raw_statement_events} == {
         literal_query: StatementTruncationState.not_truncated.value,
         other_literal_query: StatementTruncationState.not_truncated.value,
         truncated_query: StatementTruncationState.truncated.value,
+        current_query: StatementTruncationState.not_truncated.value,
+        clipped_processlist_query: StatementTruncationState.truncated.value,
+        processlist_query: StatementTruncationState.not_truncated.value,
     }
     # each event is linked to the activity rows carrying its raw text
     assert {(e['db']['query_signature'], e['db']['raw_query_signature']) for e in raw_statement_events} == signatures
@@ -574,6 +593,55 @@ def test_activity_raw_statement_events(aggregator, dbm_instance, datadog_agent, 
         assert event['dbm_type'] == 'rqt'
         assert event['ddsource'] == 'mysql'
         assert event['db']['raw_query_signature'] == compute_sql_signature(event['db']['statement'])
+
+
+@pytest.mark.unit
+def test_activity_raw_statement_cache_full(aggregator, dbm_instance, datadog_agent):
+    """
+    While the rate limiting cache is full, rows whose raw text cannot be sent get no raw query signature,
+    so no raw text is looked up that was never sent. They get it once the cache entries expire.
+    """
+    # the cache settings are undocumented but must pass the config validation
+    dbm_instance['collect_raw_query_statement'] = {
+        'enabled': True,
+        'cache_max_size': 1,
+        'samples_per_hour_per_query': 4,
+    }
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+    check.load_configuration_models()
+    check.query_activity._tags = ['foo:bar']
+    first_query = "SELECT * FROM users WHERE name = 'alice'"
+    second_query = "SELECT * FROM users WHERE name = 'carol'"
+    rows = [
+        _raw_statement_row(1, first_query, "SELECT * FROM users WHERE name = ?"),
+        _raw_statement_row(2, second_query, "SELECT * FROM users WHERE name = ?"),
+    ]
+
+    def collect_activity():
+        aggregator.reset()
+        check.query_activity._collect_activity()
+        (payload,) = aggregator.get_event_platform_events("dbm-activity")
+        return (
+            {row['thread_id']: row.get('raw_query_signature') for row in payload['mysql_activity']},
+            [e['db']['statement'] for e in aggregator.get_event_platform_events("dbm-samples")],
+        )
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate_sql_literals),
+        mock.patch.object(check.query_activity, '_get_db_connection'),
+        mock.patch.object(check.query_activity, '_get_activity', side_effect=lambda cursor: deepcopy(rows)),
+    ):
+        first_collection = collect_activity()
+        # still within the 15 minute window of the sent raw text
+        second_collection = collect_activity()
+        cache = check.query_activity._raw_statement_text_cache
+        cache.expire(cache.timer() + 15 * 60)
+        del rows[0]
+        collection_after_expiry = collect_activity()
+
+    assert first_collection == ({1: compute_sql_signature(first_query), 2: None}, [first_query])
+    assert second_collection == ({1: compute_sql_signature(first_query), 2: None}, [])
+    assert collection_after_expiry == ({2: compute_sql_signature(second_query)}, [second_query])
 
 
 @pytest.mark.integration

@@ -21,11 +21,20 @@ def deep_compare(obj1, obj2):
 def obfuscate_sql_literals(query, options=None):
     """
     Stand-in for the agent SQL obfuscator, whose testing stub leaves literals in place.
-    Replaces string and number literals with `?`, and normalizes whitespace unless the
-    `obfuscation_mode` option is `obfuscate_only`.
+    Like the agent obfuscator, it replaces string and number literals and `EXTRACT` fields with `?`,
+    and identifier digits, NULL and booleans depending on the options. It normalizes whitespace unless
+    the `obfuscation_mode` option is `obfuscate_only`.
     """
+    options = json.loads(options) if options else {}
     obfuscated = re.sub(r"'[^']*'|\b\d+\b", '?', query or '')
-    if not options or json.loads(options).get('obfuscation_mode') != 'obfuscate_only':
+    obfuscated = re.sub(r'(\bEXTRACT\s*\(\s*)(?:YEAR|MONTH|DAY)\b', r'\1?', obfuscated, flags=re.IGNORECASE)
+    if options.get('replace_digits'):
+        obfuscated = re.sub(r'(?<=[A-Za-z_])\d+', '?', obfuscated)
+    if not options.get('keep_null'):
+        obfuscated = re.sub(r'\bNULL\b', '?', obfuscated, flags=re.IGNORECASE)
+    if not options.get('keep_boolean'):
+        obfuscated = re.sub(r'\b(?:TRUE|FALSE)\b', '?', obfuscated, flags=re.IGNORECASE)
+    if options.get('obfuscation_mode') != 'obfuscate_only':
         obfuscated = re.sub(r'\s+', ' ', obfuscated)
     return json.dumps({'query': obfuscated.strip(), 'metadata': {}})
 

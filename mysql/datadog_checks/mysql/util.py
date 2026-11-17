@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+import re
 import time
 from contextlib import closing
 from enum import Enum
@@ -56,20 +57,45 @@ def get_truncation_state(statement):
     return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
 
 
+# The field of `EXTRACT(field FROM ...)` that the obfuscator replaces with a placeholder even though it is no
+# literal value, as listed by go-sqllexer (`extractFieldKeywords`)
+EXTRACT_FIELD_PATTERN = re.compile(
+    r'(\bEXTRACT\s*\(\s*)(?:CENTURY|DAY|DECADE|DOW|DOY|EPOCH|HOUR|ISODOW|ISOYEAR|JULIAN|MICROSECONDS|MILLENNIUM'
+    r'|MILLISECONDS|MINUTE|MONTH|QUARTER|SECOND|TIMEZONE|TIMEZONE_HOUR|TIMEZONE_MINUTE|WEEK|YEAR)\b',
+    re.IGNORECASE,
+)
+
+
 def get_obfuscate_only_options(obfuscator_options: dict) -> str:
-    """Serialize the obfuscator options with obfuscation and no normalization, for `has_literal_values`."""
-    return to_native_string(json.dumps({**obfuscator_options, 'obfuscation_mode': 'obfuscate_only'}))
+    """Serialize the obfuscator options used by `has_literal_values`."""
+    return to_native_string(
+        json.dumps(
+            {
+                **obfuscator_options,
+                'obfuscation_mode': 'obfuscate_only',
+                # Only string and number literals carry values, so turn off the replacements of
+                # identifier digits, NULL, booleans, positional parameters and JSON paths.
+                'replace_digits': False,
+                'keep_null': True,
+                'keep_boolean': True,
+                'keep_positional_parameter': True,
+                'keep_json_path': True,
+            }
+        )
+    )
 
 
 def has_literal_values(raw_statement: str, obfuscate_only_options: str, log: logging.Logger) -> bool:
     """
-    Whether the raw statement reveals values that obfuscation hides, making it worth collecting as raw text.
+    Whether the raw statement has string or number literals that obfuscation hides, making it worth
+    collecting as raw text.
 
     Statement texts holding only `?` placeholders, such as prepared statement texts, carry no values.
-    Comparing the raw text with its regular obfuscated form is unreliable because
-    normalization also rewrites it (whitespace, comments, grouped placeholders). Obfuscating without
-    normalizing only replaces literal tokens and keeps every other token as is, so the raw text
-    has literal values exactly when that obfuscation changes it.
+    Comparing the raw text with its regular obfuscated form is unreliable because normalization also
+    rewrites it (whitespace, comments, grouped placeholders). With the options of `get_obfuscate_only_options`,
+    the obfuscator only replaces literal tokens and the `EXTRACT` fields, keeping every other token as is.
+    So once its `EXTRACT` fields are replaced the same way, the raw text has literal values exactly when
+    that obfuscation changes it.
 
     Returns True when the obfuscation fails, since raw statement collection is explicitly enabled.
     """
@@ -79,7 +105,8 @@ def has_literal_values(raw_statement: str, obfuscate_only_options: str, log: log
         log.debug("Failed to obfuscate raw statement to detect literal values | err=[%s]", e)
         return True
     # obfuscate_sql_with_metadata removes null characters and the obfuscator trims surrounding whitespace
-    return obfuscated != raw_statement.replace('\x00', '').strip()
+    expected_without_literals = EXTRACT_FIELD_PATTERN.sub(r'\1?', raw_statement.replace('\x00', '').strip())
+    return obfuscated != expected_without_literals
 
 
 def supports_explain_json_format_version(version):

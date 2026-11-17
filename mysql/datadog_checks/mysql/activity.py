@@ -26,11 +26,18 @@ from datadog_checks.mysql.cursor import CommenterDictCursor
 from .util import (
     DatabaseConfigurationError,
     ManagedAuthConnectionMixin,
+    StatementTruncationState,
     get_obfuscate_only_options,
     get_truncation_state,
     has_literal_values,
     warning_with_tags,
 )
+
+# `performance_schema.threads.PROCESSLIST_INFO` keeps at most the first 1024 bytes of a statement, cut on a
+# character boundary and without the `...` that marks a truncated `sql_text`.
+PROCESSLIST_INFO_MAX_BYTES = 1024
+# A cut character takes up to 4 bytes in utf8mb4
+PROCESSLIST_INFO_TRUNCATED_MIN_BYTES = PROCESSLIST_INFO_MAX_BYTES - 3
 
 ACTIVITY_QUERY = """\
 SELECT
@@ -42,6 +49,7 @@ SELECT
     thread_a.processlist_command,
     thread_a.processlist_state,
     COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) AS sql_text,
+    statement.sql_text IS NULL AS sql_text_from_processlist_info,
     statement.digest_text as digest_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
@@ -316,6 +324,8 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         seen = {}
         second_pass = {}
         estimated_size = 0
+        # raw texts of the rows with literal values, kept out of the rows so they are never serialized
+        raw_sql_texts = {}
         for row in rows:
             if row["thread_id"] in seen:
                 # A thread appears more than once when `performance_schema.events_statements_current`
@@ -328,37 +338,57 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
             else:
                 seen[row["thread_id"]] = {"event_timer_start": row["event_timer_start"]}
             raw_sql_text = row["sql_text"]
+            sql_text_from_processlist_info = row.pop("sql_text_from_processlist_info", None)
             if raw_sql_text is not None:
-                row["query_truncated"] = get_truncation_state(raw_sql_text).value
+                row["query_truncated"] = self._get_truncation_state(raw_sql_text, sql_text_from_processlist_info).value
             row = self._obfuscate_and_sanitize_row(row)
-            if self._collect_raw_query_statement:
-                self._set_raw_query_signature(row, raw_sql_text)
             estimated_size += self._get_estimated_row_size_bytes(row)
             if estimated_size > MySQLActivity.MAX_PAYLOAD_BYTES:
-                return normalized_rows
-            if "raw_query_signature" in row:
-                self._submit_raw_statement_event(row, raw_sql_text)
+                return self._link_raw_statements(normalized_rows, raw_sql_texts)
+            if self._has_raw_statement(row, raw_sql_text):
+                raw_sql_texts[id(row)] = raw_sql_text
             normalized_rows.append(row)
         if second_pass:
             normalized_rows = self._eliminate_duplicate_rows(normalized_rows, second_pass)
-        return normalized_rows
+        return self._link_raw_statements(normalized_rows, raw_sql_texts)
 
-    def _set_raw_query_signature(self, row: dict[str, Any], raw_sql_text: str | None) -> None:
-        """
-        Set `raw_query_signature` on an obfuscated row when its raw text has literal values,
-        so the raw text can be looked up from the `rqt` event that carries it.
-        """
-        if not raw_sql_text or "query_signature" not in row:
-            return
-        if not has_literal_values(raw_sql_text, self._obfuscate_only_options, self._log):
-            return
-        row["raw_query_signature"] = compute_sql_signature(raw_sql_text)
+    @staticmethod
+    def _get_truncation_state(sql_text: str, from_processlist_info: Any) -> StatementTruncationState:
+        if from_processlist_info:
+            truncated = len(sql_text.encode('utf-8')) >= PROCESSLIST_INFO_TRUNCATED_MIN_BYTES
+            return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+        return get_truncation_state(sql_text)
 
-    def _submit_raw_statement_event(self, row: dict[str, Any], raw_sql_text: str) -> None:
-        """Submit the raw text of a row as an `rqt` event, rate limited per query and raw query signature."""
-        raw_query_signature = row["raw_query_signature"]
-        if not self._raw_statement_text_cache.acquire((row["query_signature"], raw_query_signature)):
-            return
+    def _has_raw_statement(self, row: dict[str, Any], raw_sql_text: str | None) -> bool:
+        """Whether the raw text of an obfuscated row is worth collecting."""
+        return (
+            self._collect_raw_query_statement
+            and bool(raw_sql_text)
+            and "query_signature" in row
+            and has_literal_values(raw_sql_text, self._obfuscate_only_options, self._log)
+        )
+
+    def _link_raw_statements(self, rows: list[dict[str, Any]], raw_sql_texts: dict[int, str]) -> list[dict[str, Any]]:
+        """
+        Set `raw_query_signature` on the rows whose raw text is available in an `rqt` event, submitting
+        that event at most `samples_per_hour_per_query` times per query and raw query signature.
+        Rows whose raw text cannot be sent because the rate limiting cache is full get no signature,
+        since there would be no raw text to look up.
+        """
+        for row in rows:
+            raw_sql_text = raw_sql_texts.get(id(row))
+            if raw_sql_text is None:
+                continue
+            raw_query_signature = compute_sql_signature(raw_sql_text)
+            raw_statement_key = (row["query_signature"], raw_query_signature)
+            if raw_statement_key not in self._raw_statement_text_cache:
+                if not self._raw_statement_text_cache.acquire(raw_statement_key):
+                    continue
+                self._submit_raw_statement_event(row, raw_sql_text, raw_query_signature)
+            row["raw_query_signature"] = raw_query_signature
+        return rows
+
+    def _submit_raw_statement_event(self, row: dict[str, Any], raw_sql_text: str, raw_query_signature: str) -> None:
         raw_query_event = {
             "timestamp": time.time() * 1000,
             "host": self._check.reported_hostname,
