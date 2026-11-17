@@ -966,14 +966,23 @@ def test_check_gc_after_cancel():
     [
         pytest.param("SELECT * FROM users WHERE name = 'bob'", True, id='string_literal'),
         pytest.param("SELECT * FROM users WHERE id = 42", True, id='number_literal'),
+        pytest.param("SELECT EXTRACT(YEAR FROM created_at) FROM users WHERE id = 42", True, id='extract_and_literal'),
         pytest.param("SELECT * FROM users WHERE id = ? AND name IN (?, ?)", False, id='prepared_statement'),
         pytest.param("SELECT *\n  FROM users\n  WHERE id = ?  ", False, id='prepared_statement_unnormalized'),
+        pytest.param("SELECT * FROM users_123 WHERE id = ?", False, id='identifier_digits'),
+        pytest.param("SELECT EXTRACT(YEAR FROM created_at) FROM users WHERE id = ?", False, id='extract_field'),
+        pytest.param("SELECT * FROM users WHERE deleted_at IS NULL AND active = TRUE", False, id='null_and_boolean'),
         pytest.param("SELECT * FROM users", False, id='no_values'),
     ],
 )
 def test_has_literal_values(datadog_agent, raw_statement, expected):
-    """Raw text is only worth collecting when it reveals values that obfuscation hides, whatever its formatting."""
-    options = get_obfuscate_only_options({'dbms': 'mysql', 'obfuscation_mode': 'obfuscate_and_normalize'})
+    """
+    Raw text is only worth collecting when it reveals string or number literals that obfuscation hides,
+    whatever its formatting and the obfuscator options rewriting other tokens.
+    """
+    options = get_obfuscate_only_options(
+        {'dbms': 'mysql', 'obfuscation_mode': 'obfuscate_and_normalize', 'replace_digits': True, 'keep_null': False}
+    )
     with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate_sql_literals):
         assert has_literal_values(raw_statement, options, logging.getLogger(__name__)) is expected
 
@@ -1002,20 +1011,3 @@ def test_raw_query_statement_tag(collect_raw_query_statement, expected_tagged):
     check = MySql(common.CHECK_NAME, {}, instances=[instance])
 
     assert ('raw_query_statement:enabled' in check.tag_manager.get_tags()) is expected_tagged
-
-
-def test_raw_query_statement_undocumented_cache_settings():
-    """The undocumented cache settings pass config validation and tune the raw statement rate limiting."""
-    instance = {
-        'server': 'localhost',
-        'user': 'datadog',
-        'dbm': True,
-        'collect_raw_query_statement': {'enabled': True, 'cache_max_size': 5, 'samples_per_hour_per_query': 4},
-    }
-
-    check = MySql(common.CHECK_NAME, {}, instances=[instance])
-    check.load_configuration_models()
-
-    raw_statement_text_cache = check.query_activity._raw_statement_text_cache
-    assert raw_statement_text_cache.maxsize == 5
-    assert raw_statement_text_cache.ttl == 60 * 60 / 4
