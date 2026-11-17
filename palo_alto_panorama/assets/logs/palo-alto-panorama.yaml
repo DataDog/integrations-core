@@ -333,6 +333,13 @@ facets:
     name: Connection Info Session Unique ID
     path: ocsf.connection_info.session.uid
     source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Count
+    path: ocsf.count
+    source: log
+    type: integer
   - groups:
       - OCSF
     name: Device Name
@@ -342,6 +349,11 @@ facets:
       - OCSF
     name: Device Unique ID
     path: ocsf.device.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Dst Endpoint Hostname
+    path: ocsf.dst_endpoint.hostname
     source: log
   - groups:
       - OCSF
@@ -355,6 +367,45 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Destination Endpoint Geo Location City
+    path: ocsf.dst_endpoint.location.city
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Endpoint Geo Location Continent
+    path: ocsf.dst_endpoint.location.continent
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Endpoint Geo Location Country
+    path: ocsf.dst_endpoint.location.country
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Destination Endpoint Geo Location Latitude
+    path: ocsf.dst_endpoint.location.lat
+    source: log
+    type: double
+  - facetType: range
+    groups:
+      - OCSF
+    name: Destination Endpoint Geo Location Longitude
+    path: ocsf.dst_endpoint.location.long
+    source: log
+    type: double
+  - groups:
+      - OCSF
+    name: Destination Endpoint Geo Location Region
+    path: ocsf.dst_endpoint.location.region
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Endpoint MAC Address
+    path: ocsf.dst_endpoint.mac
+    source: log
+  - groups:
+      - OCSF
     name: Destination Endpoint Owner Name
     path: ocsf.dst_endpoint.owner.name
     source: log
@@ -365,6 +416,11 @@ facets:
     path: ocsf.dst_endpoint.port
     source: log
     type: integer
+  - groups:
+      - OCSF
+    name: Destination Endpoint Unique ID
+    path: ocsf.dst_endpoint.uid
+    source: log
   - groups:
       - OCSF
     name: Destination Endpoint Network Zone
@@ -394,6 +450,16 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Finding Information Analytic Version
+    path: ocsf.finding_info.analytic.version
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Information Description
+    path: ocsf.finding_info.desc
+    source: log
+  - groups:
+      - OCSF
     name: Finding Info Title
     path: ocsf.finding_info.title
     source: log
@@ -414,8 +480,18 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Event Code
+    path: ocsf.metadata.event_code
+    source: log
+  - groups:
+      - OCSF
     name: Metadata Log Name
     path: ocsf.metadata.log_name
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Original Time
+    path: ocsf.metadata.original_time
     source: log
   - groups:
       - OCSF
@@ -434,6 +510,11 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Source Endpoint Hostname
+    path: ocsf.src_endpoint.hostname
+    source: log
+  - groups:
+      - OCSF
     name: Source Endpoint Network Interface Name
     path: ocsf.src_endpoint.interface_name
     source: log
@@ -441,6 +522,45 @@ facets:
       - OCSF
     name: Source IP Address
     path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Geo Location City
+    path: ocsf.src_endpoint.location.city
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Geo Location Continent
+    path: ocsf.src_endpoint.location.continent
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Geo Location Country
+    path: ocsf.src_endpoint.location.country
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Source Endpoint Geo Location Latitude
+    path: ocsf.src_endpoint.location.lat
+    source: log
+    type: double
+  - facetType: range
+    groups:
+      - OCSF
+    name: Source Endpoint Geo Location Longitude
+    path: ocsf.src_endpoint.location.long
+    source: log
+    type: double
+  - groups:
+      - OCSF
+    name: Source Endpoint Geo Location Region
+    path: ocsf.src_endpoint.location.region
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint MAC Address
+    path: ocsf.src_endpoint.mac
     source: log
   - groups:
       - OCSF
@@ -454,6 +574,11 @@ facets:
     path: ocsf.src_endpoint.port
     source: log
     type: integer
+  - groups:
+      - OCSF
+    name: Source Endpoint Unique ID
+    path: ocsf.src_endpoint.uid
+    source: log
   - groups:
       - OCSF
     name: Source Endpoint Network Zone
@@ -521,6 +646,24 @@ facets:
     name: Traffic Bytes Out
     path: ocsf.traffic.bytes_out
     source: log
+  - groups:
+      - OCSF
+    name: Traffic Chunks
+    path: ocsf.traffic.chunks
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Traffic Chunks In
+    path: ocsf.traffic.chunks_in
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Traffic Chunks Out
+    path: ocsf.traffic.chunks_out
+    source: log
+    type: integer
   - groups:
       - OCSF
     name: Traffic Packets
@@ -1518,7 +1661,7 @@ pipeline:
           target: ocsf.evidence.file.type_id
           targetType: attribute
           targetFormat: integer
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: true
         - type: string-builder-processor
           name: Add evidence file type
@@ -1990,6 +2133,10 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
+                    query: "-@severity:*"
+                  name: Unknown
+                  id: 0
+                - filter:
                     query: "@severity:informational"
                   name: Informational
                   id: 1
@@ -2010,10 +2157,6 @@ pipeline:
                   name: Critical
                   id: 5
                 - filter:
-                    query: "-@severity:*"
-                  name: Unknown
-                  id: 0
-                - filter:
                     query: "*"
                   name: Other
                   id: 99
@@ -2030,6 +2173,10 @@ pipeline:
             - type: schema-category-mapper
               name: ocsf.disposition_id
               categories:
+                - filter:
+                    query: "-@palo.alto.panorama.action:*"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@palo.alto.panorama.action:allow"
                   name: Allowed
@@ -2051,10 +2198,6 @@ pipeline:
                   name: Reset
                   id: 21
                 - filter:
-                    query: "-@palo.alto.panorama.action:*"
-                  name: Unknown
-                  id: 0
-                - filter:
                     query: "*"
                   name: Other
                   id: 99
@@ -2072,6 +2215,10 @@ pipeline:
               name: ocsf.action_id
               categories:
                 - filter:
+                    query: "-@palo.alto.panorama.action:*"
+                  name: Unknown
+                  id: 0
+                - filter:
                     query: "@palo.alto.panorama.action:allow"
                   name: Allowed
                   id: 1
@@ -2083,10 +2230,6 @@ pipeline:
                     query: "@palo.alto.panorama.action:alert"
                   name: Observed
                   id: 3
-                - filter:
-                    query: "-@palo.alto.panorama.action:*"
-                  name: Unknown
-                  id: 0
                 - filter:
                     query: "*"
                   name: Other
@@ -2649,6 +2792,10 @@ pipeline:
               name: ocsf.status_id
               categories:
                 - filter:
+                    query: "-@sessionendreason:* OR @sessionendreason:\"n/a\""
+                  name: Unknown
+                  id: 0
+                - filter:
                     query: "@sessionendreason:(tcp-fin OR aged-out OR tcp-rst-from-client OR tcp-rst-from-server)"
                   name: Success
                   id: 1
@@ -2656,10 +2803,6 @@ pipeline:
                     query: "@sessionendreason:(policy-deny OR threat OR resources-unavailable OR decrypt-error OR decrypt-cert-validation OR decrypt-unsupport-param)"
                   name: Failure
                   id: 2
-                - filter:
-                    query: "-@sessionendreason:* OR @sessionendreason:\"n/a\""
-                  name: Unknown
-                  id: 0
                 - filter:
                     query: "*"
                   name: Other
