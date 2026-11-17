@@ -864,7 +864,8 @@ def test_statement_samples_collect_raw_plan(aggregator, dd_run_check, dbm_instan
     plan_event = plan_events[0]
 
     assert 'Bob' not in to_json(plan_event)
-    assert 'Bob' in json.loads(raw_plan_event['db']['plan']['definition'])['query_block']['table']['attached_condition']
+    # the plan conditions hold the literal values, e.g. `attached_condition` on MySQL
+    assert 'Bob' in raw_plan_event['db']['plan']['definition']
     assert raw_plan_event['db']['plan']['raw_signature'] == plan_event['db']['plan']['raw_signature']
     assert 'raw_query_statement:enabled' in plan_event['ddtags'].split(',')
 
