@@ -165,11 +165,11 @@ The integration uploads one run's pages one at a time, in page index order start
 
 ### UPLOAD-02 — Declare each page
 
-Each page upload declares its page index, exact byte length, row count, and record offset, and sends a fixed-length, uncompressed body (intake PAGE-01).
+Each page upload declares its page index, exact uncompressed byte length, row count, and record offset, and sends a fixed-length body (intake PAGE-01).
 
 ### UPLOAD-03 — Send the same page on every attempt
 
-Every attempt of one page sends the same page index, declared values, and bytes. Intake accepts a repeated page without reading it again (intake RETRY-02).
+Every attempt of one page sends the same page index, declared values, and uncompressed bytes. Retries resend the compressed body made for the first attempt. Intake accepts a repeated page without reading it again (intake RETRY-02).
 
 Why: An attempt whose acknowledgement was lost may have been recorded, so its retry must match it exactly to succeed.
 
@@ -202,6 +202,12 @@ Why: Every intake request carries the Agent's API key (UPLOAD-07), which a redir
 ### UPLOAD-07 — Authenticate with the Agent's API key alone
 
 Every intake request carries the Agent's API key and no other credential (intake AUTH-01).
+
+### UPLOAD-08 — Compress page bodies
+
+The integration compresses each page with gzip at the fastest level, and sends it with `Content-Encoding: gzip`. It sends a page uncompressed when compressing does not make it smaller. Compression does not block the run's other work while it runs. When intake answers that it does not accept the encoding, the integration sends that page and the run's later pages uncompressed. This fallback is not counted as a retry attempt (UPLOAD-04).
+
+Why: The public link to intake is slower than intake's processing of unscanned pages, so fewer bytes on the wire shorten each upload. Result CSV usually compresses well.
 
 ## Finishing the run
 
@@ -252,7 +258,7 @@ When the query request carries a trace context, every intake request of the run 
 
 ### OBS-03 — Log without data
 
-Every log line about a run carries its crawl, task, and upload IDs. Logs never contain the query text, result values, credentials, or connection strings.
+Every log line about a run carries its crawl, task, and upload IDs. Logs never contain the query text, result values, credentials, or connection strings. Each acknowledged page is logged at debug level with its index, row count, uncompressed and sent byte counts, encoding (`gzip` or `identity`), compression and upload times in milliseconds, and whether gzip was tried but not kept because the page did not get smaller.
 
 ## Configuration
 
@@ -282,11 +288,11 @@ Runs on one check, or on different checks, never wait on one another.
 
 While a page uploads, the integration reads no COPY output. A run holds in memory at most:
 
-- one page;
+- one page and its compressed body (UPLOAD-08);
 - the record in progress; and
 - one block of COPY output.
 
-The memory a run uses is at most the result file size target plus the row size limit, whatever the result's total size.
+The memory a run uses is at most twice the result file size target plus the row size limit, whatever the result's total size. A compressed body larger than its page is never kept.
 
 ### RES-02 — Use one database connection per run
 
@@ -304,7 +310,7 @@ The integration uses these intake operations:
 | Intake operation | Integration uses it to |
 |---|---|
 | Register descriptor | Register the columns before evaluating the query (DESC-04) |
-| Upload page | Upload each page (UPLOAD-01 to UPLOAD-05) |
+| Upload page | Upload each page (UPLOAD-01 to UPLOAD-05, UPLOAD-08) |
 | Finalize | Finish the upload (FINISH-01) |
 | Abort | Stop the upload of a failed run (ABORT-01) |
 
@@ -332,7 +338,7 @@ Each item is checked at one layer. Performance and resource-use items are checke
 | Layer | Items | Dependencies |
 |---|---|---|
 | Unit | REQ-01, REQ-02, MATCH-01, MATCH-02, MATCH-03, SIZE-01, SIZE-03, SIZE-04, OBS-01, CONFIG-01 | none |
-| Check with Postgres and a stub intake | REQ-03, MATCH-04, MATCH-05, QUERY-01, QUERY-02, QUERY-03, QUERY-04, QUERY-05, QUERY-06, DESC-01, DESC-02, PG-01, DESC-03, DESC-04, SIZE-02, SIZE-05, SIZE-06, UPLOAD-01, UPLOAD-02, UPLOAD-03, UPLOAD-04, UPLOAD-05, UPLOAD-06, UPLOAD-07, FINISH-01, FINISH-02, ABORT-01, TIME-01, CANCEL-01, CANCEL-02, CANCEL-03, OBS-02, OBS-03, SCALE-01, SCALE-02, RES-02 | a local Postgres; a stub intake that can accept, refuse, stall, redirect, or report a page as oversized; an HTTP proxy; a short run time limit |
+| Check with Postgres and a stub intake | REQ-03, MATCH-04, MATCH-05, QUERY-01, QUERY-02, QUERY-03, QUERY-04, QUERY-05, QUERY-06, DESC-01, DESC-02, PG-01, DESC-03, DESC-04, SIZE-02, SIZE-05, SIZE-06, UPLOAD-01, UPLOAD-02, UPLOAD-03, UPLOAD-04, UPLOAD-05, UPLOAD-06, UPLOAD-07, UPLOAD-08, FINISH-01, FINISH-02, ABORT-01, TIME-01, CANCEL-01, CANCEL-02, CANCEL-03, OBS-02, OBS-03, SCALE-01, SCALE-02, RES-02 | a local Postgres; a stub intake that decodes gzip pages and can accept, refuse, stall, redirect, refuse the encoding, or report a page as oversized; an HTTP proxy; a short run time limit |
 | Quality, opt-in | PERF-01, RES-01 | EC2 `m6gd.4xlarge`; a local Postgres; a stub intake |
 | Deployed Agent | PERF-01, RES-01 confirmed end to end | staging Agent with a Postgres database and the staging intake; Agent memory metrics |
 

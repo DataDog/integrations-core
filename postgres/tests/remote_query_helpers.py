@@ -7,6 +7,7 @@ import json
 import select
 import socket
 import threading
+import zlib
 from collections import deque
 from contextlib import closing
 from http.client import HTTPConnection
@@ -55,6 +56,8 @@ class StubIntake:
         self.before_body = None
         self.body_reader = None
         self.retain_bodies = True
+        # Refuse gzip pages with 415 unsupported_encoding, as an intake that lacks the encoding does.
+        self.refuse_encoding = False
         owner = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -82,13 +85,23 @@ class StubIntake:
                         remaining -= len(chunk)
                     body = b""
                 path = self.path.split("/uploads/test-upload", 1)[-1]
-                record = {"method": self.command, "path": path, "headers": dict(self.headers), "body": body}
-                owner.records.append(record if owner.retain_bodies else {**record, "body": b""})
+                encoding = self.headers.get("Content-Encoding")
+                wire, refusal = body, None
+                if "/pages/" in path:
+                    body, refusal = self.decode_page(body, length, encoding)
+                record = {
+                    "method": self.command,
+                    "path": path,
+                    "headers": dict(self.headers),
+                    "body": body,
+                    "wire": wire,
+                }
+                owner.records.append(record if owner.retain_bodies else {**record, "body": b"", "wire": b""})
                 owner.observed.set()
                 if owner.callback:
                     owner.callback(record)
                 replies = owner.responses.get(path)
-                status, code = replies.popleft() if replies else (204, "")
+                status, code = refusal or (replies.popleft() if replies else (204, ""))
                 if status == 0:
                     self.close_connection = True
                     return
@@ -100,12 +113,34 @@ class StubIntake:
                 try:
                     self.send_response(status)
                     self.send_header("Content-Length", str(len(response)))
+                    if status == 415:
+                        self.send_header("Accept-Encoding", "gzip")
                     if status == 302:
                         self.send_header("Location", "http://127.0.0.1:1/credential-leak")
                     self.end_headers()
                     self.wfile.write(response)
                 except (BrokenPipeError, ConnectionResetError):
                     pass
+
+            def decode_page(
+                self, body: bytes, length: int, encoding: str | None
+            ) -> tuple[bytes, tuple[int, str] | None]:
+                """Apply intake's page checks, returning the decoded body and intake's error, if any."""
+                if encoding not in (None, "identity", "gzip") or (encoding == "gzip" and owner.refuse_encoding):
+                    return body, (415, "unsupported_encoding")
+                declared = self.headers.get("X-DD-Source-Page-Bytes", "")
+                if not declared.isdigit():
+                    return body, (400, "invalid_argument")
+                if encoding != "gzip":
+                    return body, None if int(declared) == length else (400, "invalid_argument")
+                if not owner.retain_bodies:
+                    # Streamed measurement runs keep no body to decode; the declaration is all that can be checked.
+                    return body, None
+                try:
+                    decoded = zlib.decompress(body, 31)
+                except zlib.error:
+                    return body, (400, "invalid_argument")
+                return decoded, None if len(decoded) == int(declared) else (400, "invalid_argument")
 
             def log_message(self, format: str, *args: object) -> None:
                 pass

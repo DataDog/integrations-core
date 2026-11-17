@@ -10,6 +10,7 @@ import json
 import re
 import threading
 import time
+import zlib
 from array import array
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
@@ -319,6 +320,8 @@ class Run:
         self.record_offset = 0
         self.result_bytes = 0
         self.sizer: ResultSizer | None = None
+        # Cleared once intake refuses gzip: the rest of the run sends uncompressed pages.
+        self.compress_pages = True
 
     def cancel(self) -> None:
         if self.cancelled.is_set():
@@ -339,6 +342,34 @@ class Run:
             self.delivery["crawlId"],
             self.delivery["taskId"],
             self.delivery["uploadId"],
+        )
+
+    def log_page(
+        self,
+        check: PostgreSql,
+        rows: int,
+        page_bytes: int,
+        sent_bytes: int,
+        encoding: str,
+        compress_ms: float,
+        upload_ms: float,
+        gzip_not_smaller: bool,
+    ) -> None:
+        """Log one acknowledged page: sizes and timings only, never its content."""
+        check.log.debug(
+            "Remote query page_uploaded crawl_id=%s task_id=%s upload_id=%s page=%d rows=%d bytes=%d sent_bytes=%d "
+            "encoding=%s compress_ms=%.1f upload_ms=%.1f gzip_not_smaller=%s",
+            self.delivery["crawlId"],
+            self.delivery["taskId"],
+            self.delivery["uploadId"],
+            self.page_count,
+            rows,
+            page_bytes,
+            sent_bytes,
+            encoding,
+            compress_ms,
+            upload_ms,
+            gzip_not_smaller,
         )
 
     def _guard(self) -> None:
@@ -543,14 +574,14 @@ class Run:
                 self._guard()
                 size = self.sizer.page_bytes(len(page.data) + len(record), page.rows + 1)
                 if page.rows and size > self.limits["maxFileBytes"]:
-                    await self._upload(page, 0, page.rows)
+                    await self._upload(check, page, 0, page.rows)
                     page = Page()
                 page.add(record)
         framer.finish()
         if page.rows or not self.page_count:
-            await self._upload(page, 0, page.rows)
+            await self._upload(check, page, 0, page.rows)
 
-    async def _upload(self, page: Page, first: int, last: int) -> None:
+    async def _upload(self, check: PostgreSql, page: Page, first: int, last: int) -> None:
         self._guard()
         rows = last - first
         body = memoryview(page.data)[page.ends[first] : page.ends[last]]
@@ -558,13 +589,7 @@ class Run:
         if self.page_count >= self.limits["maxPages"] or self.result_bytes + estimate > self.limits["maxResultBytes"]:
             raise RemoteQueryError("result_too_large", "The result exceeds its page or total size limit.")
         try:
-            await self.intake.request(
-                "PUT",
-                f"/pages/{self.page_count}",
-                body,
-                {"X-DD-Source-Page-Rows": str(rows), "X-DD-Record-Offset": str(self.record_offset)},
-                deadline=self.deadline,
-            )
+            await self._put_page(check, body, rows)
         except UploadError as error:
             if error.code != "result_file_too_large":
                 raise
@@ -573,9 +598,57 @@ class Run:
                     "row_too_large", "A one-record page exceeds intake's result file limit."
                 ) from None
             middle = first + rows // 2
-            await self._upload(page, first, middle)
-            await self._upload(page, middle, last)
+            await self._upload(check, page, first, middle)
+            await self._upload(check, page, middle, last)
             return
         self.page_count += 1
         self.record_offset += rows
         self.result_bytes += estimate
+
+    async def _compress(self, body: memoryview) -> bytes | None:
+        """Return the gzip form of a page, or None when it is not smaller than the page."""
+        # Level 1 and zlib's gzip header (no mtime) make the bytes deterministic. The thread keeps the loop
+        # responsive; the run's dedicated loop is closed without waiting, so an abandoned compression cannot
+        # stall the check.
+        compressed = await asyncio.to_thread(zlib.compress, body, 1, 31)
+        return compressed if len(compressed) < len(body) else None
+
+    async def _put_page(self, check: PostgreSql, body: memoryview, rows: int) -> None:
+        """Send one page body, gzip-compressed when that is smaller and intake accepts the encoding."""
+        headers = {
+            "X-DD-Source-Page-Rows": str(rows),
+            "X-DD-Record-Offset": str(self.record_offset),
+            "X-DD-Source-Page-Bytes": str(len(body)),
+        }
+        path = f"/pages/{self.page_count}"
+        compress_ms = 0.0
+        upload_ms = 0.0
+        not_smaller = False
+        compressed = None
+        if self.compress_pages:
+            started = time.perf_counter()
+            compressed = await self._compress(body)
+            compress_ms = (time.perf_counter() - started) * 1000
+            not_smaller = compressed is None
+        if compressed is not None:
+            started = time.perf_counter()
+            try:
+                # Retries inside request() resend these same bytes.
+                await self.intake.request(
+                    "PUT", path, compressed, {**headers, "Content-Encoding": "gzip"}, deadline=self.deadline
+                )
+                upload_ms = (time.perf_counter() - started) * 1000
+                self.log_page(check, rows, len(body), len(compressed), "gzip", compress_ms, upload_ms, False)
+                return
+            except UploadError as error:
+                if error.code != "unsupported_encoding":
+                    raise
+                # Not a retry attempt: resend this page, and send the run's later pages, uncompressed.
+                self.compress_pages = False
+                upload_ms = (time.perf_counter() - started) * 1000
+            finally:
+                compressed = None
+        started = time.perf_counter()
+        await self.intake.request("PUT", path, body, headers, deadline=self.deadline)
+        upload_ms += (time.perf_counter() - started) * 1000
+        self.log_page(check, rows, len(body), len(body), "identity", compress_ms, upload_ms, not_smaller)
