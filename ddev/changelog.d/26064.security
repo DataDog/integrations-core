@@ -1,0 +1,1 @@
+Ignore AI settings in local `.ddev.toml` overrides to keep credentials and authentication settings under user control.
