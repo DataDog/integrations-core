@@ -1,0 +1,1 @@
+Keep the most active tables, by scans and then live tuples, when `collect_schemas.max_tables` limits schema collection.
