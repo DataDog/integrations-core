@@ -10,6 +10,7 @@ import json
 import re
 import threading
 import time
+import zlib
 from array import array
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
@@ -319,6 +320,8 @@ class Run:
         self.record_offset = 0
         self.result_bytes = 0
         self.sizer: ResultSizer | None = None
+        # Cleared once intake refuses gzip: the rest of the run sends uncompressed pages.
+        self.compress_pages = True
 
     def cancel(self) -> None:
         if self.cancelled.is_set():
@@ -558,13 +561,7 @@ class Run:
         if self.page_count >= self.limits["maxPages"] or self.result_bytes + estimate > self.limits["maxResultBytes"]:
             raise RemoteQueryError("result_too_large", "The result exceeds its page or total size limit.")
         try:
-            await self.intake.request(
-                "PUT",
-                f"/pages/{self.page_count}",
-                body,
-                {"X-DD-Source-Page-Rows": str(rows), "X-DD-Record-Offset": str(self.record_offset)},
-                deadline=self.deadline,
-            )
+            await self._put_page(body, rows)
         except UploadError as error:
             if error.code != "result_file_too_large":
                 raise
@@ -579,3 +576,36 @@ class Run:
         self.page_count += 1
         self.record_offset += rows
         self.result_bytes += estimate
+
+    async def _compress(self, body: memoryview) -> bytes | None:
+        """Return the gzip form of a page, or None when it is not smaller than the page."""
+        # Level 1 and zlib's gzip header (no mtime) make the bytes deterministic. The thread keeps the loop
+        # responsive; the run's dedicated loop is closed without waiting, so an abandoned compression cannot
+        # stall the check.
+        compressed = await asyncio.to_thread(zlib.compress, body, 1, 31)
+        return compressed if len(compressed) < len(body) else None
+
+    async def _put_page(self, body: memoryview, rows: int) -> None:
+        """Send one page body, gzip-compressed when that is smaller and intake accepts the encoding."""
+        headers = {
+            "X-DD-Source-Page-Rows": str(rows),
+            "X-DD-Record-Offset": str(self.record_offset),
+            "X-DD-Source-Page-Bytes": str(len(body)),
+        }
+        path = f"/pages/{self.page_count}"
+        compressed = await self._compress(body) if self.compress_pages else None
+        if compressed is not None:
+            try:
+                # Retries inside request() resend these same bytes.
+                await self.intake.request(
+                    "PUT", path, compressed, {**headers, "Content-Encoding": "gzip"}, deadline=self.deadline
+                )
+                return
+            except UploadError as error:
+                if error.code != "unsupported_encoding":
+                    raise
+                # Not a retry attempt: resend this page, and send the run's later pages, uncompressed.
+                self.compress_pages = False
+            finally:
+                compressed = None
+        await self.intake.request("PUT", path, body, headers, deadline=self.deadline)

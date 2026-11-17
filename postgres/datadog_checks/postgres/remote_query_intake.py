@@ -187,6 +187,7 @@ class Intake:
                 "payload_too_large",
                 "result_file_too_large",
                 "scan_failed",
+                "unsupported_encoding",
                 "storage_access_denied",
                 "unavailable",
                 "internal",

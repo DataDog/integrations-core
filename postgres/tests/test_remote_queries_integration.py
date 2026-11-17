@@ -269,9 +269,62 @@ def test_upload01_02_sequential_metadata(rq_check: PostgreSql, intake: StubIntak
         rows = int(headers["X-DD-Source-Page-Rows"])
         offset += rows
         assert rows == page["body"].count(b"\n")
-        assert int(headers["Content-Length"]) == len(page["body"])
-        assert "Content-Encoding" not in headers and "Transfer-Encoding" not in headers
+        assert int(headers["X-DD-Source-Page-Bytes"]) == len(page["body"])
+        assert "Transfer-Encoding" not in headers
     assert offset == 8 and len(intake.pages) > 1
+
+
+PAGES_QUERY = "SELECT i, repeat('x', 100) AS v FROM generate_series(1,8) AS i"
+PAGES_BODY = b"".join(f"{i},{'x' * 100}\n".encode() for i in range(1, 9))
+
+
+@pytest.mark.parametrize(
+    "query,encoded",
+    [("SELECT repeat('x', 1000) AS value", True), ("SELECT 1 AS value", False)],
+    ids=["compressible", "not_smaller_when_compressed"],
+)
+def test_upload02_08_page_encoding(rq_check: PostgreSql, intake: StubIntake, query: str, encoded: bool):
+    assert call(rq_check, request(rq_check, intake.address, query)) == {"status": "SUCCEEDED"}
+    (page,) = intake.pages
+    headers = page["headers"]
+    # The stub has already checked that the declared length is the decoded length.
+    assert headers["X-DD-Source-Page-Bytes"] == str(len(page["body"]))
+    assert headers["Content-Type"] == "text/csv"
+    assert int(headers["Content-Length"]) == len(page["wire"])
+    if encoded:
+        assert headers["Content-Encoding"] == "gzip"
+        assert len(page["wire"]) < len(page["body"])
+        assert page["body"] == b"x" * 1000 + b"\n"
+    else:
+        assert "Content-Encoding" not in headers
+        assert page["wire"] == page["body"] == b"1\n"
+
+
+def test_upload08_refused_encoding_falls_back_for_the_run(rq_check: PostgreSql, intake: StubIntake):
+    intake.refuse_encoding = True
+    payload = request(rq_check, intake.address, PAGES_QUERY, maxFileBytes=700)
+    assert call(rq_check, payload) == {"status": "SUCCEEDED"}
+    pages = intake.pages
+    assert [(r["path"], r["headers"].get("Content-Encoding")) for r in pages[:2]] == [
+        ("/pages/0", "gzip"),
+        ("/pages/0", None),
+    ]
+    # One refusal only, and it is not a retry attempt: later pages are not even tried compressed.
+    assert all("Content-Encoding" not in r["headers"] for r in pages[2:])
+    assert len(pages) > 2
+    assert b"".join(r["body"] for r in pages[1:]) == PAGES_BODY
+
+
+def test_upload08_split_compresses_each_half(rq_check: PostgreSql, intake: StubIntake):
+    intake.reply("/pages/0", (413, "result_file_too_large"))
+    payload = request(rq_check, intake.address, PAGES_QUERY, maxFileBytes=1048576)
+    assert call(rq_check, payload) == {"status": "SUCCEEDED"}
+    pages = intake.pages
+    assert [r["path"] for r in pages] == ["/pages/0", "/pages/0", "/pages/1"]
+    assert all(r["headers"]["Content-Encoding"] == "gzip" for r in pages)
+    assert pages[0]["body"] == PAGES_BODY
+    assert pages[1]["body"] + pages[2]["body"] == PAGES_BODY
+    assert len({r["wire"] for r in pages}) == 3
 
 
 @pytest.mark.parametrize(
@@ -291,10 +344,14 @@ def test_upload03_04_retry_policy(
 ):
     # UPLOAD-03/04: identical retries, five non-capacity failures, capacity retries beyond five, permanent refusal.
     intake.reply(path, *replies)
-    answer = call(rq_check, request(rq_check, intake.address, timeoutMs=15000))
+    answer = call(rq_check, request(rq_check, intake.address, "SELECT repeat('x', 1000) AS value", timeoutMs=15000))
     attempts = [r for r in intake.records if r["path"] == path]
     assert len(attempts) == count
     assert all(attempt == attempts[0] for attempt in attempts)
+    if path == "/pages/0":
+        # The retries resend the compressed bytes of the first attempt.
+        assert attempts[0]["headers"]["Content-Encoding"] == "gzip"
+        assert attempts[0]["wire"] != attempts[0]["body"]
     if outcome == "SUCCEEDED":
         assert answer == {"status": "SUCCEEDED"}
     else:
@@ -649,7 +706,12 @@ def test_upload05_attempt_bounds(rq_check: PostgreSql, intake: StubIntake, monke
         monkeypatch.setattr(f"{transport}.PAGE_TIMEOUT", 4)
         monkeypatch.setattr(f"{transport}.OTHER_TIMEOUT", 2)
         payload = request(
-            rq_check, intake.address, "SELECT repeat('x', 262144) AS value", maxFileBytes=1048576, maxRowBytes=1048576
+            rq_check,
+            intake.address,
+            # Incompressible enough that the page is sent as one slow, 128 KiB body.
+            "SELECT (SELECT string_agg(md5(i::text), '') FROM generate_series(1, 8192) AS i) AS value",
+            maxFileBytes=1048576,
+            maxRowBytes=1048576,
         )
     else:
 
@@ -744,7 +806,7 @@ def test_perf01_res01_median_of_five(
             start = time.perf_counter()
             try:
                 assert call(rq_check, payload) == {"status": "SUCCEEDED"}
-                assert sum(int(page["headers"]["Content-Length"]) for page in intake.pages) >= 1024**3
+                assert sum(int(page["headers"]["X-DD-Source-Page-Bytes"]) for page in intake.pages) >= 1024**3
             finally:
                 stop.set()
                 sampler.join(1)
