@@ -91,6 +91,7 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "15281"
+        count: 1
         device:
           name: "PA-VM"
           type: "Firewall"
@@ -101,6 +102,13 @@ tests:
         dst_endpoint:
           interface_name: "ethernet1/2"
           ip: "185.64.148.0"
+          location:
+            city: "Paris"
+            continent: "Europe"
+            country: "FR"
+            lat: 48.90654
+            long: 2.33339
+            region: "FR-IDF"
           port: 233
           zone: "WAN"
         duration: 0
@@ -108,7 +116,9 @@ tests:
           name: "LAN-WAN"
           uid: "9d526565-xxyy-4e35-9c2e-6f54430132ec"
         metadata:
+          event_code: "TRAFFIC"
           log_name: "TRAFFIC"
+          original_time: "Jan 25 2024 11:02:57 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -122,6 +132,13 @@ tests:
         src_endpoint:
           interface_name: "ethernet1/1"
           ip: "185.64.148.0"
+          location:
+            city: "Paris"
+            continent: "Europe"
+            country: "FR"
+            lat: 48.90654
+            long: 2.33339
+            region: "FR-IDF"
           port: 42071
           zone: "LAN"
         status: "Success"
@@ -132,6 +149,9 @@ tests:
           bytes: 134
           bytes_in: 60
           bytes_out: 74
+          chunks: 0
+          chunks_in: 0
+          chunks_out: 0
           packets: 2
           packets_in: 1
           packets_out: 1
@@ -250,6 +270,7 @@ tests:
         category_uid: 2
         class_name: "Detection Finding"
         class_uid: 2004
+        count: 1
         device:
           name: "PA-VM"
           type: "Firewall"
@@ -260,10 +281,24 @@ tests:
         evidences:
           - dst_endpoint:
               ip: "185.64.148.0"
+              location:
+                city: "Paris"
+                continent: "Europe"
+                country: "FR"
+                lat: 48.90654
+                long: 2.33339
+                region: "FR-IDF"
               port: 443
               zone: "WAN"
             src_endpoint:
               ip: "185.64.148.0"
+              location:
+                city: "Paris"
+                continent: "Europe"
+                country: "FR"
+                lat: 48.90654
+                long: 2.33339
+                region: "FR-IDF"
               port: 49896
               zone: "LAN"
             url:
@@ -275,6 +310,7 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "9999"
+            version: "AppThreat-0-0"
           title: "9999"
           uid: "7312400435275366420"
         firewall_rule:
@@ -282,7 +318,9 @@ tests:
           uid: "b77632fb-xxyy-49f2-b319-e02d91a826fc"
         is_alert: true
         metadata:
+          event_code: "THREAT"
           log_name: "THREAT"
+          original_time: "Jan 25 2024 11:02:57 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -447,6 +485,7 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "1578"
+        count: 1
         device:
           name: "PA-VM"
           type: "Firewall"
@@ -455,17 +494,29 @@ tests:
         disposition: "Blocked"
         disposition_id: 2
         dst_endpoint:
+          hostname: "DE423"
           interface_name: "ethernet1/1"
           ip: "185.64.148.0"
+          location:
+            city: "Paris"
+            continent: "Europe"
+            country: "FR"
+            lat: 48.90654
+            long: 2.33339
+            region: "FR-IDF"
+          mac: "BE:EF:57:33:13:C4"
           owner:
             name: "dstuser1"
           port: 7007
+          uid: "9d526565-ba09-aabb-9c2e-6f54430132dc"
           zone: "WAN"
         firewall_rule:
           name: "DNS"
           uid: "9d526565-ba01-4e35-1234-6f54430032er"
         metadata:
+          event_code: "DECRYPTION"
           log_name: "DECRYPTION"
+          original_time: "Jan 25 2024 11:02:57 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -477,13 +528,24 @@ tests:
         severity: "Informational"
         severity_id: 1
         src_endpoint:
+          hostname: "WIN45"
           interface_name: "ethernet1/2"
           ip: "185.64.148.0"
+          location:
+            city: "Paris"
+            continent: "Europe"
+            country: "FR"
+            lat: 48.90654
+            long: 2.33339
+            region: "FR-IDF"
+          mac: "00:11:22:33:44:55"
           owner:
             name: "sruser1"
           port: 5347
+          uid: "9d526565-ba09-yyxx-9c2e-6f54430132ac"
           zone: "LAN"
         status: "Unknown"
+        status_detail: "failed validation"
         status_id: 0
         time: 1706180577000
         tls:
@@ -681,6 +743,7 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "123459"
+        count: 1
         device:
           name: "fw-01"
           type: "Firewall"
@@ -690,12 +753,21 @@ tests:
         disposition_id: 1
         dst_endpoint:
           ip: "185.64.148.0"
+          location:
+            city: "Paris"
+            continent: "Europe"
+            country: "FR"
+            lat: 48.90654
+            long: 2.33339
+            region: "FR-IDF"
           port: 443
           zone: "untrust"
         firewall_rule:
           name: "rule-04"
         metadata:
+          event_code: "TRAFFIC"
           log_name: "TRAFFIC"
+          original_time: "Oct 05 2026 16:15:07 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -783,6 +855,7 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "123460"
+        count: 1
         device:
           name: "fw-01"
           type: "Firewall"
@@ -797,7 +870,9 @@ tests:
         firewall_rule:
           name: "rule-05"
         metadata:
+          event_code: "TRAFFIC"
           log_name: "TRAFFIC"
+          original_time: "Oct 05 2026 16:15:07 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -924,6 +999,7 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "123456.0"
+        count: 1
         device:
           name: "fw-01"
           type: "Firewall"
@@ -934,6 +1010,13 @@ tests:
         dst_endpoint:
           interface_name: "ethernet1/1"
           ip: "185.64.148.0"
+          location:
+            city: "Paris"
+            continent: "Europe"
+            country: "FR"
+            lat: 48.90654
+            long: 2.33339
+            region: "FR-IDF"
           port: 443
           zone: "untrust"
         duration: 15000
@@ -941,7 +1024,9 @@ tests:
           name: "rule-01"
           uid: "00000000-0000-4000-8000-000000000001"
         metadata:
+          event_code: "TRAFFIC"
           log_name: "TRAFFIC"
+          original_time: "2026/10/05 16:15:07"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -967,6 +1052,9 @@ tests:
           bytes: 5120
           bytes_in: 4096
           bytes_out: 1024
+          chunks: 0
+          chunks_in: 0
+          chunks_out: 0
           packets: 20
           packets_in: 10
           packets_out: 10
@@ -1077,6 +1165,7 @@ tests:
         category_uid: 2
         class_name: "Detection Finding"
         class_uid: 2004
+        count: 1
         device:
           name: "fw-01"
           type: "Firewall"
@@ -1090,8 +1179,17 @@ tests:
                 name: "example\\user2"
             dst_endpoint:
               ip: "185.64.148.0"
+              location:
+                city: "Paris"
+                continent: "Europe"
+                country: "FR"
+                lat: 48.90654
+                long: 2.33339
+                region: "FR-IDF"
               port: 80
               zone: "untrust"
+            http_request:
+              user_agent: "Mozilla/5.0"
             src_endpoint:
               ip: "10.0.0.11"
               port: 51516
@@ -1104,6 +1202,7 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "9999"
+            version: "AppThreat-0-0"
           title: "(9999)"
           uid: "7300000000000000002"
         firewall_rule:
@@ -1111,7 +1210,9 @@ tests:
           uid: "00000000-0000-4000-8000-000000000002"
         is_alert: true
         metadata:
+          event_code: "THREAT"
           log_name: "THREAT"
+          original_time: "2026/10/05 16:15:07"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -1259,6 +1360,7 @@ tests:
           protocol_name: "udp"
           session:
             uid: "123458"
+        count: 1
         device:
           type: "Firewall"
           type_id: 9
@@ -1266,14 +1368,24 @@ tests:
         disposition: "Allowed"
         disposition_id: 1
         dst_endpoint:
+          interface_name: "ethernet1/1"
           ip: "185.64.148.0"
+          location:
+            city: "Paris"
+            continent: "Europe"
+            country: "FR"
+            lat: 48.90654
+            long: 2.33339
+            region: "FR-IDF"
           port: 53
           zone: "untrust"
         duration: 0
         firewall_rule:
           name: "rule-03"
         metadata:
+          event_code: "TRAFFIC"
           log_name: "TRAFFIC"
+          original_time: "2026/10/05 16:15:07"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -1285,6 +1397,7 @@ tests:
         severity: "Informational"
         severity_id: 1
         src_endpoint:
+          interface_name: "ethernet1/2"
           ip: "10.0.0.13"
           port: 53535
           zone: "trust"
@@ -1296,6 +1409,8 @@ tests:
           bytes: 280
           bytes_in: 202
           bytes_out: 78
+          packets_in: 1
+          packets_out: 1
       outbound_if: "ethernet1/1"
       palo:
         alto:
@@ -1383,6 +1498,7 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "2645080"
+        count: 1
         device:
           name: "host-06"
           type: "Firewall"
@@ -1400,7 +1516,9 @@ tests:
           name: "rule-01"
           uid: "123e4567-e89b-12d3-a456-111111111111"
         metadata:
+          event_code: "TRAFFIC"
           log_name: "TRAFFIC"
+          original_time: "Oct 05 2026 21:15:08 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -1424,6 +1542,9 @@ tests:
           bytes: 4329
           bytes_in: 3785
           bytes_out: 544
+          chunks: 0
+          chunks_in: 0
+          chunks_out: 0
           packets: 11
           packets_in: 5
           packets_out: 6
@@ -1526,6 +1647,7 @@ tests:
           protocol_name: "udp"
           session:
             uid: "831129"
+        count: 1
         device:
           name: "host-15"
           type: "Firewall"
@@ -1543,7 +1665,9 @@ tests:
           name: "rule-05"
           uid: "123e4567-e89b-12d3-a456-666666666666"
         metadata:
+          event_code: "TRAFFIC"
           log_name: "TRAFFIC"
+          original_time: "Oct 05 2026 21:15:08 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -1567,6 +1691,9 @@ tests:
           bytes: 198
           bytes_in: 0
           bytes_out: 198
+          chunks: 0
+          chunks_in: 0
+          chunks_out: 0
           packets: 1
           packets_in: 0
           packets_out: 1
@@ -1669,6 +1796,7 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "0"
+        count: 1
         device:
           name: "host-16"
           type: "Firewall"
@@ -1685,7 +1813,9 @@ tests:
           name: "rule-06"
           uid: "123e4567-e89b-12d3-a456-777777777777"
         metadata:
+          event_code: "TRAFFIC"
           log_name: "TRAFFIC"
+          original_time: "Oct 05 2026 21:15:08 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -1709,6 +1839,9 @@ tests:
           bytes: 66
           bytes_in: 0
           bytes_out: 66
+          chunks: 0
+          chunks_in: 0
+          chunks_out: 0
           packets: 1
           packets_in: 0
           packets_out: 1
@@ -1810,6 +1943,7 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "836874"
+        count: 1
         device:
           name: "host-15"
           type: "Firewall"
@@ -1827,7 +1961,9 @@ tests:
           name: "interzone-default"
           uid: "123e4567-e89b-12d3-a456-888888888888"
         metadata:
+          event_code: "TRAFFIC"
           log_name: "TRAFFIC"
+          original_time: "Oct 05 2026 21:15:07 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -1851,6 +1987,9 @@ tests:
           bytes: 434
           bytes_in: 66
           bytes_out: 368
+          chunks: 0
+          chunks_in: 0
+          chunks_out: 0
           packets: 4
           packets_in: 1
           packets_out: 3
@@ -1939,6 +2078,7 @@ tests:
         category_uid: 2
         class_name: "Detection Finding"
         class_uid: 2004
+        count: 1
         device:
           name: "host-09"
           type: "Firewall"
@@ -1962,6 +2102,7 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "109010004"
+            version: "AppThreat-9154-10270"
           title: "Proxy:host-04.example.com"
           uid: "7675920106454133059"
         firewall_rule:
@@ -1969,7 +2110,9 @@ tests:
           uid: "123e4567-e89b-12d3-a456-222222222222"
         is_alert: true
         metadata:
+          event_code: "THREAT"
           log_name: "THREAT"
+          original_time: "Oct 05 2026 21:15:08 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -2073,6 +2216,7 @@ tests:
         category_uid: 2
         class_name: "Detection Finding"
         class_uid: 2004
+        count: 1
         device:
           name: "host-13"
           type: "Firewall"
@@ -2098,6 +2242,7 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "9999"
+            version: "AppThreat-0-0"
           title: "9999"
           uid: "7629135285335571214"
         firewall_rule:
@@ -2105,7 +2250,9 @@ tests:
           uid: "123e4567-e89b-12d3-a456-999999999999"
         is_alert: true
         metadata:
+          event_code: "THREAT"
           log_name: "THREAT"
+          original_time: "Oct 05 2026 20:14:03 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -2208,6 +2355,7 @@ tests:
         category_uid: 2
         class_name: "Detection Finding"
         class_uid: 2004
+        count: 1
         device:
           name: "host-15"
           type: "Firewall"
@@ -2231,6 +2379,7 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "109010004"
+            version: "AppThreat-9154-10270"
           title: "Proxy:host-04.example.com"
           uid: "7692458174297510569"
         firewall_rule:
@@ -2238,7 +2387,9 @@ tests:
           uid: "123e4567-e89b-12d3-a456-123456789010"
         is_alert: true
         metadata:
+          event_code: "THREAT"
           log_name: "THREAT"
+          original_time: "Oct 05 2026 21:15:02 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -2341,6 +2492,7 @@ tests:
         category_uid: 2
         class_name: "Detection Finding"
         class_uid: 2004
+        count: 1
         device:
           name: "host-16"
           type: "Firewall"
@@ -2364,6 +2516,7 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "99950"
+            version: "AppThreat-9154-10270"
           title: "Inline Cloud Analyzed SQL Injection Traffic Detection"
           uid: "7692468671212893711"
         firewall_rule:
@@ -2371,7 +2524,9 @@ tests:
           uid: "123e4567-e89b-12d3-a456-123456789011"
         is_alert: true
         metadata:
+          event_code: "THREAT"
           log_name: "THREAT"
+          original_time: "Oct 05 2026 21:09:12 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -2490,6 +2645,7 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "5188146"
+        count: 1
         device:
           name: "host-10"
           type: "Firewall"
@@ -2506,7 +2662,9 @@ tests:
           name: "rule-03"
           uid: "123e4567-e89b-12d3-a456-333333333333"
         metadata:
+          event_code: "DECRYPTION"
           log_name: "DECRYPTION"
+          original_time: "Oct 05 2026 21:15:08 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -2618,11 +2776,14 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "6005"
+          desc: "Example evidence"
           title: "object-01"
           uid: "012345678905-6005-1791167544000"
         is_alert: true
         metadata:
+          event_code: "CORRELATION"
           log_name: "CORRELATION"
+          original_time: "Oct 05 2026 02:32:24 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -2707,6 +2868,7 @@ tests:
           protocol_name: "tcp"
           session:
             uid: "36137871"
+        count: 1
         device:
           name: "pan-01"
           type: "Firewall"
@@ -2724,7 +2886,9 @@ tests:
           name: "Allow Engineers to have git-over-ssh access to code-host"
           uid: "3f7b1c2e-9a4d-4e6b-8c15-2d0a7e9b4f61"
         metadata:
+          event_code: "TRAFFIC"
           log_name: "TRAFFIC"
+          original_time: "Nov 16 2026 16:07:00 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -2748,6 +2912,9 @@ tests:
           bytes: 310
           bytes_in: 78
           bytes_out: 232
+          chunks: 0
+          chunks_in: 0
+          chunks_out: 0
           packets: 4
           packets_in: 1
           packets_out: 3
@@ -2842,6 +3009,7 @@ tests:
         category_uid: 2
         class_name: "Detection Finding"
         class_uid: 2004
+        count: 2
         device:
           name: "fw-02"
           type: "Firewall"
@@ -2872,6 +3040,7 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "52209"
+            version: "AppThreat-9172-10351"
           title: "DER Encoded X509 Certificate"
           uid: "7705462235869186469"
         firewall_rule:
@@ -2879,7 +3048,9 @@ tests:
           uid: "b21e6d94-5c3a-4f78-a0d2-91c8e47f3a05"
         is_alert: true
         metadata:
+          event_code: "THREAT"
           log_name: "THREAT"
+          original_time: "2026/11/16 10:06:59"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -2982,6 +3153,7 @@ tests:
         category_uid: 2
         class_name: "Detection Finding"
         class_uid: 2004
+        count: 6
         device:
           name: "fw-03"
           type: "Firewall"
@@ -3005,11 +3177,14 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "8723"
+            version: "AppThreat-0-0"
           title: "TCP SYN with data"
           uid: "7675920106542801317"
         is_alert: true
         metadata:
+          event_code: "THREAT"
           log_name: "THREAT"
+          original_time: "Nov 16 2026 06:31:51 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"
@@ -3105,6 +3280,7 @@ tests:
         category_uid: 2
         class_name: "Detection Finding"
         class_uid: 2004
+        count: 1
         device:
           name: "fw-03"
           type: "Firewall"
@@ -3128,11 +3304,14 @@ tests:
             type: "Rule"
             type_id: 1
             uid: "8002"
+            version: "AppThreat-0-0"
           title: "SCAN: Host Sweep"
           uid: "7675920106543412254"
         is_alert: true
         metadata:
+          event_code: "THREAT"
           log_name: "THREAT"
+          original_time: "Nov 16 2026 16:07:02 GMT"
           product:
             name: "Panorama"
             vendor_name: "Palo Alto Networks"

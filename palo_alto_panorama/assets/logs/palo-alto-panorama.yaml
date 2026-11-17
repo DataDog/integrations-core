@@ -1642,6 +1642,136 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `useragent` to `ocsf.evidence.http_request.user_agent`
+          enabled: true
+          sources:
+            - useragent
+          sourceType: attribute
+          target: ocsf.evidence.http_request.user_agent
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.country.iso_code` to `ocsf.evidence.src_endpoint.location.country`
+          enabled: true
+          sources:
+            - network.client.geoip.country.iso_code
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.country
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.subdivision.iso_code` to `ocsf.evidence.src_endpoint.location.region`
+          enabled: true
+          sources:
+            - network.client.geoip.subdivision.iso_code
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.region
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.city.name` to `ocsf.evidence.src_endpoint.location.city`
+          enabled: true
+          sources:
+            - network.client.geoip.city.name
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.city
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.continent.name` to `ocsf.evidence.src_endpoint.location.continent`
+          enabled: true
+          sources:
+            - network.client.geoip.continent.name
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.continent
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.location.latitude` to `ocsf.evidence.src_endpoint.location.lat`
+          enabled: true
+          sources:
+            - network.client.geoip.location.latitude
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.lat
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.location.longitude` to `ocsf.evidence.src_endpoint.location.long`
+          enabled: true
+          sources:
+            - network.client.geoip.location.longitude
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.long
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.country.iso_code` to `ocsf.evidence.dst_endpoint.location.country`
+          enabled: true
+          sources:
+            - network.destination.geoip.country.iso_code
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.country
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.subdivision.iso_code` to `ocsf.evidence.dst_endpoint.location.region`
+          enabled: true
+          sources:
+            - network.destination.geoip.subdivision.iso_code
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.region
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.city.name` to `ocsf.evidence.dst_endpoint.location.city`
+          enabled: true
+          sources:
+            - network.destination.geoip.city.name
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.city
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.continent.name` to `ocsf.evidence.dst_endpoint.location.continent`
+          enabled: true
+          sources:
+            - network.destination.geoip.continent.name
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.continent
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.location.latitude` to `ocsf.evidence.dst_endpoint.location.lat`
+          enabled: true
+          sources:
+            - network.destination.geoip.location.latitude
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.lat
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.location.longitude` to `ocsf.evidence.dst_endpoint.location.long`
+          enabled: true
+          sources:
+            - network.destination.geoip.location.longitude
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.long
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
         - type: array-processor
           name: Move `ocsf.evidence` into the `ocsf.evidences` array
           enabled: true
@@ -1774,6 +1904,42 @@ pipeline:
               sources:
                 - ruleuuid
               target: ocsf.firewall_rule.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `type` to `ocsf.metadata.event_code`
+              sources:
+                - type
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `repeatcnt` to `ocsf.count`
+              sources:
+                - repeatcnt
+              target: ocsf.count
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `time_generated` to `ocsf.metadata.original_time`
+              sources:
+                - time_generated
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `contentver` to `ocsf.finding_info.analytic.version`
+              sources:
+                - contentver
+              target: ocsf.finding_info.analytic.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `evidence` to `ocsf.finding_info.desc`
+              sources:
+                - evidence
+              target: ocsf.finding_info.desc
               preserveSource: true
               overrideOnConflict: true
             - type: schema-category-mapper
@@ -2027,9 +2193,10 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `inboundif` to `ocsf.src_endpoint.interface_name`
+              name: Map `inboundif`, `inbound_if` to `ocsf.src_endpoint.interface_name`
               sources:
                 - inboundif
+                - inbound_if
               target: ocsf.src_endpoint.interface_name
               preserveSource: true
               overrideOnConflict: true
@@ -2064,9 +2231,10 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `outboundif` to `ocsf.dst_endpoint.interface_name`
+              name: Map `outboundif`, `outbound_if` to `ocsf.dst_endpoint.interface_name`
               sources:
                 - outboundif
+                - outbound_if
               target: ocsf.dst_endpoint.interface_name
               preserveSource: true
               overrideOnConflict: true
@@ -2128,23 +2296,26 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `palo.alto.panorama.pktsent` to `ocsf.traffic.packets_out`
+              name: Map `palo.alto.panorama.pktsent`, `pkts_sent` to `ocsf.traffic.packets_out`
               sources:
                 - palo.alto.panorama.pktsent
+                - pkts_sent
               target: ocsf.traffic.packets_out
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `palo.alto.panorama.pktrcvd` to `ocsf.traffic.packets_in`
+              name: Map `palo.alto.panorama.pktrcvd`, `pkts_received` to `ocsf.traffic.packets_in`
               sources:
                 - palo.alto.panorama.pktrcvd
+                - pkts_received
               target: ocsf.traffic.packets_in
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `sessionendreason` to `ocsf.status_detail`
+              name: Map `sessionendreason`, `err` to `ocsf.status_detail`
               sources:
                 - sessionendreason
+                - err
               target: ocsf.status_detail
               preserveSource: true
               overrideOnConflict: true
@@ -2226,6 +2397,175 @@ pipeline:
               sources:
                 - certver
               target: ocsf.tls.certificate.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `type` to `ocsf.metadata.event_code`
+              sources:
+                - type
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `repeatcnt` to `ocsf.count`
+              sources:
+                - repeatcnt
+              target: ocsf.count
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `time_generated` to `ocsf.metadata.original_time`
+              sources:
+                - time_generated
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `chunk` to `ocsf.traffic.chunks`
+              sources:
+                - chunk
+              target: ocsf.traffic.chunks
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `chunksent` to `ocsf.traffic.chunks_out`
+              sources:
+                - chunksent
+              target: ocsf.traffic.chunks_out
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `chunkrcvd` to `ocsf.traffic.chunks_in`
+              sources:
+                - chunkrcvd
+              target: ocsf.traffic.chunks_in
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `smac` to `ocsf.src_endpoint.mac`
+              sources:
+                - smac
+              target: ocsf.src_endpoint.mac
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `shost` to `ocsf.src_endpoint.hostname`
+              sources:
+                - shost
+              target: ocsf.src_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `suuid` to `ocsf.src_endpoint.uid`
+              sources:
+                - suuid
+              target: ocsf.src_endpoint.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `palo.alto.panorama.dmac` to `ocsf.dst_endpoint.mac`
+              sources:
+                - palo.alto.panorama.dmac
+              target: ocsf.dst_endpoint.mac
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `dhost` to `ocsf.dst_endpoint.hostname`
+              sources:
+                - dhost
+              target: ocsf.dst_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `duuid` to `ocsf.dst_endpoint.uid`
+              sources:
+                - duuid
+              target: ocsf.dst_endpoint.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.country.iso_code` to `ocsf.src_endpoint.location.country`
+              sources:
+                - network.client.geoip.country.iso_code
+              target: ocsf.src_endpoint.location.country
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.subdivision.iso_code` to `ocsf.src_endpoint.location.region`
+              sources:
+                - network.client.geoip.subdivision.iso_code
+              target: ocsf.src_endpoint.location.region
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.city.name` to `ocsf.src_endpoint.location.city`
+              sources:
+                - network.client.geoip.city.name
+              target: ocsf.src_endpoint.location.city
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.continent.name` to `ocsf.src_endpoint.location.continent`
+              sources:
+                - network.client.geoip.continent.name
+              target: ocsf.src_endpoint.location.continent
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.location.latitude` to `ocsf.src_endpoint.location.lat`
+              sources:
+                - network.client.geoip.location.latitude
+              target: ocsf.src_endpoint.location.lat
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.location.longitude` to `ocsf.src_endpoint.location.long`
+              sources:
+                - network.client.geoip.location.longitude
+              target: ocsf.src_endpoint.location.long
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.destination.geoip.country.iso_code` to `ocsf.dst_endpoint.location.country`
+              sources:
+                - network.destination.geoip.country.iso_code
+              target: ocsf.dst_endpoint.location.country
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.destination.geoip.subdivision.iso_code` to `ocsf.dst_endpoint.location.region`
+              sources:
+                - network.destination.geoip.subdivision.iso_code
+              target: ocsf.dst_endpoint.location.region
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.destination.geoip.city.name` to `ocsf.dst_endpoint.location.city`
+              sources:
+                - network.destination.geoip.city.name
+              target: ocsf.dst_endpoint.location.city
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.destination.geoip.continent.name` to `ocsf.dst_endpoint.location.continent`
+              sources:
+                - network.destination.geoip.continent.name
+              target: ocsf.dst_endpoint.location.continent
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.destination.geoip.location.latitude` to `ocsf.dst_endpoint.location.lat`
+              sources:
+                - network.destination.geoip.location.latitude
+              target: ocsf.dst_endpoint.location.lat
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.destination.geoip.location.longitude` to `ocsf.dst_endpoint.location.long`
+              sources:
+                - network.destination.geoip.location.longitude
+              target: ocsf.dst_endpoint.location.long
               preserveSource: true
               overrideOnConflict: true
             - type: schema-category-mapper
