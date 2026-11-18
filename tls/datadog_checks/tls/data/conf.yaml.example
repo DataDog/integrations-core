@@ -90,6 +90,9 @@ instances:
     ## @param intermediate_cert_refresh_interval - number - optional - default: 60
     ## When `fetch_intermediate_certs` is set to `true`, this indicates how often to
     ## refresh the intermediate certificate cache in minutes.
+    ## Expired entries are removed from the trust store. If an intermediate is still
+    ## required and its AIA endpoint cannot serve a valid replacement, `tls.cert_validation`
+    ## reports CRITICAL until trust can be renewed.
     #
     # intermediate_cert_refresh_interval: 60
 

@@ -9,18 +9,23 @@ environment provider, so neither Git nor Hatch is ever invoked.
 
 from __future__ import annotations
 
-import logging
+from functools import partial
 from typing import TYPE_CHECKING
 
 import pytest
 
 from ddev.cli.ci.tests.batching.build import (
-    build_test_batches,
-    build_test_units,
+    build_test_batches as _build_test_batches,
+)
+from ddev.cli.ci.tests.batching.build import (
+    build_test_units as _build_test_units,
+)
+from ddev.cli.ci.tests.batching.build import (
     create_test_batches,
     supports_minimum_base_package,
 )
-from ddev.cli.ci.tests.batching.exceptions import BatchValidationError
+from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, PlanningError
+from ddev.cli.ci.tests.batching.targets import ExplicitTargetsRule, all_target_rules
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
 from ddev.utils.platform import PlatformName
 
@@ -30,6 +35,10 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.batching.units import ResolvedEnvironment
     from ddev.cli.ci.tests.messages import BatchJob
 from tests.cli.ci.tests.helpers import FakeIntegration, FakeRegistry, env, jobs, modified
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
+
+build_test_units = partial(_build_test_units, monitor=make_monitor('planner'))
+build_test_batches = partial(_build_test_batches, monitor=make_monitor('planner'))
 
 
 class FakeConfig:
@@ -96,33 +105,43 @@ def test_build_end_to_end_direct_and_broad_overlap():
     ]
 
 
-def test_build_warns_about_a_target_with_no_testable_environment(caplog: pytest.LogCaptureFixture):
+def test_build_warns_about_a_target_with_no_testable_environment():
     repo = FakeRepo([FakeIntegration("ddev")])
     provider = FakeEnvironmentProvider({})
     changed = [modified("ddev/src/ddev/foo.py")]
+    handler = RecordingJsonHandler()
 
-    with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.build"):
-        units = build_test_units(repo, changed, environment_provider=provider)
+    units = build_test_units(
+        repo,
+        changed,
+        environment_provider=provider,
+        monitor=make_monitor('planner', handler=handler),
+    )
 
     # The target is dropped rather than planned with an invented environment.
     assert units == []
-    assert "ddev has a hatch.toml but no testable environment" in caplog.text
+    [event] = handler.events
+    assert event['event'] == "ddev has a hatch.toml but no testable environment"
 
 
-def test_build_plans_nothing_for_a_platform_whose_environments_are_constrained_elsewhere(
-    caplog: pytest.LogCaptureFixture,
-):
+def test_build_plans_nothing_for_a_platform_whose_environments_are_constrained_elsewhere():
     # A target declaring a platform that every environment is constrained away from is a weaker
     # version of the same contradiction: odd configuration, worth surfacing, not worth failing.
     repo = FakeRepo([FakeIntegration("disk")], ci={"disk": {"platforms": ["linux", "windows"]}})
     provider = FakeEnvironmentProvider({"disk": [env("py3.13", platform=PlatformName.LINUX)]})
     changed = [modified("disk/tests/test_a.py")]
+    handler = RecordingJsonHandler()
 
-    with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.units"):
-        units = build_test_units(repo, changed, environment_provider=provider)
+    units = build_test_units(
+        repo,
+        changed,
+        environment_provider=provider,
+        monitor=make_monitor('planner', handler=handler),
+    )
 
     assert [unit.platform for unit in units] == [PlatformName.LINUX]
-    assert "disk runs on windows but no environment tests it" in caplog.text
+    [event] = handler.events
+    assert event['event'] == "disk runs on windows but no environment tests it"
 
 
 def test_build_excludes_target_via_ci_override():
@@ -177,6 +196,21 @@ def test_build_batches_end_to_end_split_defaults():
         ("postgres (py3.11)", "py3.11", True, True),
     ]
     assert batch.jobs_count == 1
+
+
+def test_build_batches_tests_the_configured_infrastructure_targets():
+    repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("mysql")])
+    provider = FakeEnvironmentProvider({"postgres": [env("py3.11")], "mysql": [env("py3.11")]})
+    changed = [modified(".github/actions/setup-ddev/action.yml")]
+
+    batches = build_test_batches(
+        repo,
+        changed,
+        environment_provider=provider,
+        config=BatchingConfig(test_infrastructure_targets=("mysql",)),
+    )
+
+    assert [job.target for batch in batches for job in batch.job_list] == ["mysql"]
 
 
 @pytest.mark.parametrize(
@@ -299,3 +333,114 @@ def test_build_only_expands_the_whole_repository_for_the_core_repo():
 
     assert targets(FakeRepo(integrations)) == {"postgres", "datadog_checks_base"}
     assert targets(FakeRepo(integrations, name="extras")) == {"datadog_checks_base"}
+
+
+@pytest.mark.parametrize(
+    ("rules", "changed", "expected"),
+    [
+        pytest.param(
+            None,
+            [modified("postgres/tests/test_a.py"), modified("redis/tests/test_b.py")],
+            {"postgres"},
+            id="change-based",
+        ),
+        pytest.param(all_target_rules(), [], {"postgres", "ntp"}, id="all"),
+    ],
+)
+def test_build_drops_excluded_targets_from_whatever_was_selected(rules, changed, expected):
+    """`--exclude-targets` filters the selection; it neither widens nor replaces it."""
+    repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("redis"), FakeIntegration("ntp")])
+    provider = FakeEnvironmentProvider({name: [env("py3.11")] for name in ("postgres", "redis", "ntp")})
+
+    units = build_test_units(repo, changed, environment_provider=provider, rules=rules, exclude_targets=("redis",))
+
+    assert {unit.target for unit in units} == expected
+
+
+def test_build_rejects_an_exclusion_that_names_no_target():
+    """A typo would silently exclude nothing, so the run would test a target it was told to skip."""
+    repo = FakeRepo([FakeIntegration("ddev")])
+    provider = FakeEnvironmentProvider({"ddev": [env("py3.11")]})
+
+    with pytest.raises(PlanningError, match="Excluded targets are not testable targets: ddevv"):
+        build_test_units(repo, [], environment_provider=provider, exclude_targets=("ddevv",))
+
+
+@pytest.mark.parametrize(
+    ("ci", "environments", "message"),
+    [
+        pytest.param(
+            {"hyperv": {"exclude": True}},
+            {"hyperv": [env("py3.11")]},
+            "`overrides.ci.hyperv.exclude` removes it from CI",
+            id="ci-excluded",
+        ),
+        pytest.param(
+            {},
+            {"hyperv": []},
+            "hatch.toml with no testable environment",
+            id="no-testable-environment",
+        ),
+    ],
+)
+def test_build_refuses_to_silently_drop_a_requested_target(ci, environments, message):
+    """A no-op that reports success would look like the target was tested and found clean."""
+    repo = FakeRepo([FakeIntegration("hyperv")], ci=ci)
+    provider = FakeEnvironmentProvider(environments)
+
+    with pytest.raises(PlanningError, match=message):
+        build_test_units(
+            repo,
+            [],
+            environment_provider=provider,
+            rules=(ExplicitTargetsRule(("hyperv",)),),
+            requested_targets=("hyperv",),
+        )
+
+
+def test_build_still_skips_an_inferred_target_the_same_reasons_would_drop():
+    """Only a named target fails; one the change set merely implicated keeps being skipped."""
+    repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("hyperv")], ci={"hyperv": {"exclude": True}})
+    provider = FakeEnvironmentProvider({"postgres": [env("py3.11")], "hyperv": [env("py3.11")]})
+    changed = [modified("postgres/tests/test_a.py"), modified("hyperv/tests/test_b.py")]
+
+    units = build_test_units(repo, changed, environment_provider=provider, requested_targets=("postgres",))
+
+    assert {unit.target for unit in units} == {"postgres"}
+
+
+def test_build_plans_every_environment_of_an_explicit_target():
+    """A named target runs all its environments, so no environment's failure goes unseen."""
+    repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("redis")])
+    provider = FakeEnvironmentProvider(
+        {
+            "postgres": [env("py3.11-16"), env("py3.11-17")],
+            "redis": [env("py3.11")],
+        }
+    )
+
+    units = build_test_units(repo, [], environment_provider=provider, rules=(ExplicitTargetsRule(("postgres",)),))
+
+    assert [(unit.target, unit.environment.name, unit.platform) for unit in units] == [
+        ("postgres", "py3.11-16", PlatformName.LINUX),
+        ("postgres", "py3.11-17", PlatformName.LINUX),
+    ]
+
+
+def test_build_batches_resolves_every_e2e_image_with_the_given_resolver():
+    """Catches an override that `build_test_batches` accepts but never hands to the job expansion."""
+    repo = FakeRepo([FakeIntegration("postgres")])
+    provider = FakeEnvironmentProvider({"postgres": [env("py3.11", e2e=True), env("py3.12", e2e=False)]})
+
+    [batch] = build_test_batches(
+        repo,
+        [modified("postgres/tests/test_a.py")],
+        environment_provider=provider,
+        config=BatchingConfig(),
+        agent_image_resolver=lambda python_version, platform: f"custom:{platform}",
+    )
+
+    assert [(job.environment, job.agent_image) for job in batch.job_list] == [
+        ("py3.11", "custom:linux"),
+        ("py3.12", None),
+    ]

@@ -321,7 +321,7 @@ def test_isolated_parent_does_not_invoke_metric_limit_state(datadog_agent: Any) 
     check.instance['process_isolation'] = True
     check._on_metric_limit_state = mock.Mock()
 
-    with mock.patch('datadog_checks.base.utils.replay.execute.run_with_isolation'):
+    with mock.patch('datadog_checks.base.utils.replay.execute.run_with_isolation', return_value=''):
         assert check.run() == ''
 
     check._on_metric_limit_state.assert_not_called()

@@ -29,35 +29,47 @@ instances:
     #   - ib1
 
     ## @param additional_counters - list of strings - optional
-    ## A list of additional counters to collect. The counter names are the files in which the counter 
+    ## A list of additional counters to collect. The counter names are the files in which the counter
     ## values are stored. These are located inside /sys/class/infiniband/devices/<device>/ports/<port>/counters.
+    ## These names come from the kernel's standard performance counter table and are the same across
+    ## drivers, so they are stable.
     #
     # additional_counters:
-    #   - additional_counter
-    #   - rx_mpwqe_frag
+    #   - symbol_error
+    #   - port_xmit_wait
 
     ## @param additional_hw_counters - list of strings - optional
-    ## A list of additional hardware counters to collect. The counter names are the files in which the 
-    ## counter values are stored. These are located inside 
+    ## A list of additional hardware counters to collect. The counter names are the files in which the
+    ## counter values are stored. These are located inside
     ## /sys/class/infiniband/devices/<device>/ports/<port>/hw_counters.
+    ##
+    ## Unlike the standard counters, the contents of hw_counters are driver-specific and can also
+    ## change with the device's mode, so there is no name that is valid everywhere. List the
+    ## directory on the host to see what it actually exposes, and use the names from there:
+    ##
+    ##   ls /sys/class/infiniband/<device>/ports/<port>/hw_counters/
+    ##
+    ## Counter names that do not match a file are ignored. Run the check with debug logging to see
+    ## which configured names were not found.
     #
     # additional_hw_counters:
     #   - additional_hw_counter
-    #   - rx_mpwqe_frag
 
     ## @param exclude_counters - list of strings - optional
-    ## A list of counters to exclude from the check.
+    ## A list of counters to exclude from the check. These are the standard counters found in
+    ## /sys/class/infiniband/devices/<device>/ports/<port>/counters.
     #
     # exclude_counters:
-    #   - duplicate_request
-    #   - lifespan
-
-    ## @param exclude_hw_counters - list of strings - optional
-    ## A list of hardware counters to exclude from the check.
-    #
-    # exclude_hw_counters:
     #   - VL15_dropped
     #   - link_downed
+
+    ## @param exclude_hw_counters - list of strings - optional
+    ## A list of hardware counters to exclude from the check. These are the driver-specific
+    ## counters found in /sys/class/infiniband/devices/<device>/ports/<port>/hw_counters.
+    #
+    # exclude_hw_counters:
+    #   - duplicate_request
+    #   - out_of_sequence
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

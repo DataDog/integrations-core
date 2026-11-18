@@ -16,12 +16,23 @@ class MetricStub(MetricStubBase):
 ServiceCheckStub = namedtuple('ServiceCheckStub', 'check_id name status tags hostname message')
 HistogramBucketStubBase = namedtuple(
     'HistogramBucketStub',
-    'name value lower_bound upper_bound monotonic hostname tags flush_first_value',
+    'name value lower_bound upper_bound monotonic hostname tags flush_first_value multiple_buckets',
 )
 
 
 class HistogramBucketStub(HistogramBucketStubBase):
-    def __new__(cls, name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value=None):
+    def __new__(
+        cls,
+        name,
+        value,
+        lower_bound,
+        upper_bound,
+        monotonic,
+        hostname,
+        tags,
+        flush_first_value=None,
+        multiple_buckets=False,
+    ):
         return HistogramBucketStubBase.__new__(
-            cls, name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value
+            cls, name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value, multiple_buckets
         )

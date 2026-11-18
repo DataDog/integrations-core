@@ -7,28 +7,46 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Mapping
 from typing import Any
 
 import structlog
 
+from ddev.monitoring import ComponentMonitor, MonitoringRuntime
+from ddev.monitoring.diagnostics import DiagnosticSink
 from ddev.monitoring.metrics import MetricRecord
 
 
+def make_monitor(name: str, *, handler: logging.Handler | None = None) -> ComponentMonitor:
+    return MonitoringRuntime(console_handler=handler).component(name)
+
+
+def projector_for(*names: str):
+    """A tag projector promoting the named context fields, to observe enrichment in tests."""
+    selected = frozenset(names)
+
+    def project(fields: Mapping[str, Any]) -> dict[str, str]:
+        return {name: str(value) for name, value in fields.items() if name in selected and value is not None}
+
+    return project
+
+
 class RecordingSink:
-    """A ``MetricsSink`` collecting every record it is handed."""
+    """A `MetricsSink` collecting every record it is handed."""
 
     def __init__(self) -> None:
         self.records: list[MetricRecord] = []
+        self.close_count = 0
+        self.diagnostics: DiagnosticSink | None = None
 
     def record(self, record: MetricRecord) -> None:
         self.records.append(record)
 
+    def close(self) -> None:
+        self.close_count += 1
+
     def records_named(self, name: str) -> list[MetricRecord]:
         return [record for record in self.records if record.name == name]
-
-    def field_values(self, name: str, key: str) -> list[Any]:
-        """The values one field took on the records named *name*, in emission order."""
-        return [record.fields.get(key) for record in self.records_named(name)]
 
 
 class RecordingJsonHandler(logging.Handler):

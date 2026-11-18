@@ -1,6 +1,36 @@
 provides:
-  - id: iboss-metrics
-    always_on: true
-    granular: false
+  - id: iboss-gateway-performance-metrics
+    always_on: false
+    granular: true
+    data_type: metrics
+    direction: inbound
+  - id: iboss-bandwidth-metrics
+    always_on: false
+    granular: true
+    data_type: metrics
+    direction: inbound
+  - id: iboss-digital-experience-metrics
+    always_on: false
+    granular: true
+    data_type: metrics
+    direction: inbound
+  - id: iboss-web-metrics
+    always_on: false
+    granular: true
+    data_type: metrics
+    direction: inbound
+  - id: iboss-casb-metrics
+    always_on: false
+    granular: true
+    data_type: metrics
+    direction: inbound
+  - id: iboss-threat-metrics
+    always_on: false
+    granular: true
+    data_type: metrics
+    direction: inbound
+  - id: iboss-zero-trust-metrics
+    always_on: false
+    granular: true
     data_type: metrics
     direction: inbound

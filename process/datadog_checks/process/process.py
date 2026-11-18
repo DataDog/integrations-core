@@ -15,6 +15,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.platform import Platform
 
 from .cache import DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION, ProcessListCache
+from .config_models.validators import INF_SENTINEL
 
 try:
     import datadog_agent
@@ -77,6 +78,9 @@ class ProcessCheck(AgentCheck):
         self.user = self.instance.get('user', False)
         self.try_sudo = self.instance.get('try_sudo', False)
         self.use_oneshot = is_affirmative(self.instance.get('use_oneshot', True))
+
+        # Platform capability, computed once rather than per check run.
+        self._has_native_ppid_map = hasattr(psutil._psplatform, 'ppid_map')
 
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``
@@ -387,16 +391,35 @@ class ProcessCheck(AgentCheck):
         return (int(i) for i in data.split()[9:13])
 
     def _get_child_processes(self, pids):
+        if self._has_native_ppid_map:
+            # Single fast call, same as Process.children(recursive=True) uses internally.
+            ppid_map = psutil._psplatform.ppid_map()
+        else:
+            # No native bulk lookup (eg. AIX). Build it per-pid instead, skipping pids we
+            # can't read rather than aborting the whole batch like psutil's own fallback does.
+            ppid_map = {}
+            for p in psutil.pids():
+                try:
+                    ppid_map[p] = psutil.Process(p).ppid()
+                except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                    self.log.debug('Could not read ppid for pid %s, excluded from child collection: %s', p, e)
+                    continue
+
+        reverse_ppid_map = defaultdict(list)
+        for pid, ppid in ppid_map.items():
+            reverse_ppid_map[ppid].append(pid)
+
         children_pids = set()
         for pid in pids:
-            try:
-                children = psutil.Process(pid).children(recursive=True)
-                self.log.debug('%s children were collected for process %s', len(children), pid)
-                for child in children:
-                    children_pids.add(child.pid)
-            except psutil.NoSuchProcess:
-                self.log.debug("Unable to get children for process because process %s does not exist", pid)
+            stack = [pid]
+            while stack:
+                current = stack.pop()
+                for child_pid in reverse_ppid_map.get(current, ()):
+                    if child_pid not in children_pids:
+                        children_pids.add(child_pid)
+                        stack.append(child_pid)
 
+        self.log.debug('%s children were collected for %s pids', len(children_pids), len(pids))
         return children_pids
 
     def check(self, _):
@@ -498,6 +521,16 @@ class ProcessCheck(AgentCheck):
             self.log.debug("Unable to get pid set, process %s does not exist", pid)
             return set()
 
+    @staticmethod
+    def _coerce_threshold_bound(value):
+        # Remote Config transmits `thresholds` as JSON, which can't represent a
+        # raw float infinity, so its payloads use the string '.inf' instead
+        # (matching the YAML `.inf` literal documented in spec.yaml). Coerce it
+        # back to a real float here so the comparisons below work either way.
+        # `config_models.validators.instance_thresholds` guarantees it's the only
+        # string that can reach this point.
+        return float('inf') if value == INF_SENTINEL else value
+
     def _process_service_check(self, name, nb_procs, bounds, tags):
         """
         Report a service check, for each process in search_string.
@@ -513,8 +546,8 @@ class ProcessCheck(AgentCheck):
         if not bounds and nb_procs < 1:
             status = AgentCheck.CRITICAL
         elif bounds:
-            warning = bounds.get('warning', [1, float('inf')])
-            critical = bounds.get('critical', [1, float('inf')])
+            warning = [self._coerce_threshold_bound(v) for v in bounds.get('warning') or [1, float('inf')]]
+            critical = [self._coerce_threshold_bound(v) for v in bounds.get('critical') or [1, float('inf')]]
 
             if warning[1] < nb_procs or nb_procs < warning[0]:
                 status = AgentCheck.WARNING

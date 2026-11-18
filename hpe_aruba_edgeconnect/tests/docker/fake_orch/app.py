@@ -16,6 +16,14 @@ KEY_FILE = "/app/certs/key.pem"
 
 ORCH_USERNAME = os.environ.get("ORCH_USERNAME", "admin")
 ORCH_PASSWORD = os.environ.get("ORCH_PASSWORD", "")
+# When set, the account is only accepted for this authentication backend, mirroring an
+# Orchestrator whose users live on a remote RADIUS or TACACS+ server. Parsed here so a bad
+# value fails at container start rather than on the first login request.
+_raw_login_type = os.environ.get("ORCH_LOGIN_TYPE")
+ORCH_LOGIN_TYPE = int(_raw_login_type) if _raw_login_type else None
+# When set, data endpoints accept only this key in `X-Auth-Token`, as an Orchestrator does for
+# API-key clients. Login and health stay open so the password-mode environment is unaffected.
+ORCH_API_KEY = os.environ.get("ORCH_API_KEY") or None
 
 PEER_NEWYORK_IP = "10.0.0.2"
 PEER_SANFRAN_IP = "10.0.0.3"
@@ -64,11 +72,22 @@ def _appliance(ip, ne_pk, host_name, site, startup_time=None):
     }
 
 
+@app.before_request
+def require_api_key():
+    if ORCH_API_KEY is None or request.path in ("/health", "/gms/rest/authentication/login"):
+        return None
+    if request.headers.get("X-Auth-Token") != ORCH_API_KEY:
+        return jsonify({"status": "unauthorized"}), 401
+    return None
+
+
 @app.route("/gms/rest/authentication/login", methods=["POST"])
 def login():
     data = request.get_json(silent=True) or {}
     if data.get("user") != ORCH_USERNAME or data.get("password") != ORCH_PASSWORD:
         return jsonify({"status": "unauthorized"}), 401
+    if ORCH_LOGIN_TYPE is not None and data.get("loginType") != ORCH_LOGIN_TYPE:
+        return jsonify({"status": "wrong credentials"}), 401
     return jsonify({"status": "ok"})
 
 

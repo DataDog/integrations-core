@@ -177,7 +177,7 @@ def start(
     if not hide_help:
         app.output()
         app.display_pair('Stop environment', app.style_info(f'ddev env stop {intg_name} {environment}'))
-        app.display_pair('Execute tests', app.style_info(f'ddev env test {intg_name} {environment}'))
+        app.display_pair('Execute tests', app.style_info(f'ddev env test {intg_name} --envs {environment}'))
         app.display_pair('Check status', app.style_info(f'ddev env agent {intg_name} {environment} status'))
         app.display_pair('Trigger run', app.style_info(f'ddev env agent {intg_name} {environment} check'))
         app.display_pair('Reload config', app.style_info(f'ddev env reload {intg_name} {environment}'))
@@ -213,7 +213,7 @@ def _get_agent_env_vars(org_config, metadata, extra_env_vars, dogstatsd):
         env_vars[AgentEnvVars.DOGSTATSD_METRICS_STATS] = 'true'
 
     # Enable logs Agent by default if the environment is mounting logs
-    if any(ev.startswith(E2EEnvVars.LOGS_DIR_PREFIX) for ev in metadata.get(E2EMetadata.ENV_VARS, {})):
+    if any(ev.upper().startswith(E2EEnvVars.LOGS_DIR_PREFIX) for ev in metadata.get(E2EMetadata.ENV_VARS, {})):
         env_vars.setdefault(AgentEnvVars.LOGS_ENABLED, 'true')
 
     env_vars.update(ev.split('=', maxsplit=1) for ev in extra_env_vars)

@@ -2,7 +2,35 @@
 
 <!-- towncrier release notes start -->
 
-## 23.5.0 / 2026-09-02
+## 23.7.0 / 2026-10-29
+
+***Added***:
+
+* Add opt-in collection of view definitions and column metadata during schema collection with `collect_schemas.collect_views`. ([#24928](https://github.com/DataDog/integrations-core/pull/24928))
+* Report SQL Server index key columns and included columns separately. ([#25484](https://github.com/DataDog/integrations-core/pull/25484))
+* Report the `WHERE` condition of SQL Server filtered indexes as `filter_definition`. ([#25563](https://github.com/DataDog/integrations-core/pull/25563))
+* Add opt-in collection of column statistics through a customer-installed `datadog.column_statistics` procedure, for the query benchmarker. ([#25769](https://github.com/DataDog/integrations-core/pull/25769))
+
+***Fixed***:
+
+* Prefer the ODBC driver registration owned by the Agent install over the bundled odbcinst.ini, which hardcodes the Agent install path. The bundled file is still used on Agents that do not ship one. ([#25413](https://github.com/DataDog/integrations-core/pull/25413))
+* Declare the accepted values of `azure.deployment_type` in the configuration spec. ([#25603](https://github.com/DataDog/integrations-core/pull/25603))
+* Exclude internal resource tags from the `database_instance` and settings metadata payloads. ([#25692](https://github.com/DataDog/integrations-core/pull/25692))
+* Collect schemas at `collect_schemas.collection_interval` when it is shorter than the settings collection interval, instead of at most once per settings interval. ([#25769](https://github.com/DataDog/integrations-core/pull/25769))
+
+## 23.6.0 / 2026-10-01 / Agent 7.85.0
+
+***Security***:
+
+* Encode database names in SQL Server ODBC and ADO connection strings so names with special characters are not parsed as separate connection attributes. ([#25270](https://github.com/DataDog/integrations-core/pull/25270))
+
+***Fixed***:
+
+* Isolate execution plan lookup failures so query metrics collection can continue. ([#25091](https://github.com/DataDog/integrations-core/pull/25091))
+* Fix SQL Server Agent history collection scaling. ([#25214](https://github.com/DataDog/integrations-core/pull/25214))
+* Log plan obfuscation failures with repr so an embedded null cannot crash the job. ([#25344](https://github.com/DataDog/integrations-core/pull/25344))
+
+## 23.5.0 / 2026-09-02 / Agent 7.84.0
 
 ***Deprecated***:
 
@@ -28,7 +56,7 @@
 * Fix Data Observability scheduling so queries with the same monitor ID execute independently. ([#24998](https://github.com/DataDog/integrations-core/pull/24998))
 * Cache the Agent version instead of resolving it for every payload. ([#25023](https://github.com/DataDog/integrations-core/pull/25023))
 
-## 23.4.0 / 2026-08-05
+## 23.4.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:
 

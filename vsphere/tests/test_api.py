@@ -5,8 +5,10 @@ import datetime as dt
 import ssl
 
 import pytest
-from mock import ANY, MagicMock, patch
+import vsanapiutils
+from mock import ANY, MagicMock, PropertyMock, patch
 from pyVmomi import vim, vmodl
+from pyVmomi.SoapAdapter import SoapResponseDeserializer
 
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
@@ -464,3 +466,235 @@ def test_vsan_empty_health_metrics(aggregator, realtime_instance, dd_run_check, 
                 cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time
             )
             assert len(health_metrics) == 0
+
+
+def make_health_result():
+    return [
+        MagicMock(
+            groupId='group-1',
+            groupHealth='green',
+            groupTests=[MagicMock(testId='test.1', testHealth='green')],
+        )
+    ]
+
+
+def make_perf_result():
+    return [
+        MagicMock(
+            entityRefId="cluster-domclient:nested-id-1",
+            value=[MagicMock(metricId=MagicMock(dynamicProperty=[]))],
+        )
+    ]
+
+
+def logged_warnings(log):
+    return [call.args[0] % call.args[1:] for call in log.warning.call_args_list]
+
+
+@pytest.fixture
+def vsan_api(realtime_instance):
+    """A VSphereAPI with a mocked vSAN performance manager and a real-enough logger to assert on."""
+    realtime_instance['collect_vsan_data'] = True
+    with (
+        patch('datadog_checks.vsphere.api.connect'),
+        patch('pyVmomi.vim.cluster.VsanPerformanceManager') as MockVsanPerformanceManager,
+    ):
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
+        log = MagicMock()
+        yield VSphereAPI(config, log), MockVsanPerformanceManager.return_value, log
+
+
+ENTITY_REF_IDS = {
+    'cluster': ['cluster-domclient:', 'vsan-cluster-capacity:'],
+    'host': ['host-domclient:', 'host-cpu:'],
+}
+ID_TO_TAGS = {'nested-id-1': ['cluster'], 'nested-id-2': ['host']}
+
+
+@pytest.mark.parametrize(
+    'failing_call',
+    ['QueryClusterHealth', 'QueryVsanPerf'],
+)
+def test_vsan_metrics_failure_on_one_cluster_keeps_the_others(vsan_api, failing_call):
+    """A single unhealthy cluster must not wipe out vSAN collection for the whole vCenter."""
+    api, perf_manager, log = vsan_api
+    bad_cluster = MagicMock(spec=vim.ClusterComputeResource)
+    bad_cluster.name = 'IADC01'
+    good_cluster = MagicMock(spec=vim.ClusterComputeResource)
+    good_cluster.name = 'NHDC01'
+    error = vim.fault.NotFound(msg='Stats primary cannot be found in the cluster.')
+
+    def only_bad_cluster_fails(*args):
+        if bad_cluster in args:
+            raise error
+        return make_health_result() if failing_call == 'QueryClusterHealth' else make_perf_result()
+
+    getattr(perf_manager, failing_call).side_effect = only_bad_cluster_fails
+    other_call = 'QueryVsanPerf' if failing_call == 'QueryClusterHealth' else 'QueryClusterHealth'
+    getattr(perf_manager, other_call).return_value = (
+        make_perf_result() if other_call == 'QueryVsanPerf' else make_health_result()
+    )
+
+    health_metrics, performance_metrics = api.get_vsan_metrics(
+        {bad_cluster: ['nested-id-1'], good_cluster: ['nested-id-1']},
+        ENTITY_REF_IDS,
+        ID_TO_TAGS,
+        dt.datetime(2024, 1, 1),
+    )
+
+    assert len(health_metrics) == 1
+    assert health_metrics[0]['vsphere.vsan.cluster.health.count']['vsphere_cluster'] == 'NHDC01'
+    assert len(performance_metrics) == 1
+    warnings = logged_warnings(log)
+    assert len(warnings) == 1
+    assert 'IADC01' in warnings[0]
+    assert 'Stats primary cannot be found in the cluster.' in warnings[0]
+
+
+def test_vsan_metrics_unexpected_health_payload_skips_only_that_cluster(vsan_api):
+    """A health group the bindings cannot type has no `groupId`; that must not drop the other clusters."""
+    api, perf_manager, log = vsan_api
+    bad_cluster = MagicMock(spec=vim.ClusterComputeResource)
+    bad_cluster.name = 'MADC06'
+    good_cluster = MagicMock(spec=vim.ClusterComputeResource)
+    good_cluster.name = 'NHDC01'
+
+    def health_without_group_id(*args):
+        if bad_cluster in args:
+            return [MagicMock(spec=[])]
+        return make_health_result()
+
+    perf_manager.QueryClusterHealth.side_effect = health_without_group_id
+    perf_manager.QueryVsanPerf.return_value = make_perf_result()
+
+    health_metrics, _ = api.get_vsan_metrics(
+        {bad_cluster: ['nested-id-1'], good_cluster: ['nested-id-1']},
+        ENTITY_REF_IDS,
+        ID_TO_TAGS,
+        dt.datetime(2024, 1, 1),
+    )
+
+    assert len(health_metrics) == 1
+    assert health_metrics[0]['vsphere.vsan.cluster.health.count']['vsphere_cluster'] == 'NHDC01'
+    warnings = logged_warnings(log)
+    assert len(warnings) == 1
+    assert 'MADC06' in warnings[0]
+    assert 'groupId' in warnings[0]
+
+
+def test_vsan_metrics_reports_cluster_by_id_when_its_name_is_unreachable(vsan_api):
+    """Looking up `name` hits vCenter, so it can fail too. Fall back to the managed object id."""
+    api, perf_manager, log = vsan_api
+    bad_cluster = MagicMock()
+    bad_cluster._moId = 'domain-c3489'
+    type(bad_cluster).name = PropertyMock(side_effect=vim.fault.NotAuthenticated(msg='Session is not authenticated.'))
+    perf_manager.QueryClusterHealth.return_value = make_health_result()
+    perf_manager.QueryVsanPerf.return_value = make_perf_result()
+
+    health_metrics, _ = api.get_vsan_metrics(
+        {bad_cluster: ['nested-id-1']},
+        ENTITY_REF_IDS,
+        ID_TO_TAGS,
+        dt.datetime(2024, 1, 1),
+    )
+
+    assert len(health_metrics) == 0
+    warnings = logged_warnings(log)
+    assert len(warnings) == 1
+    assert 'domain-c3489' in warnings[0]
+
+
+def test_vsan_metrics_reports_every_failed_cluster_in_a_single_warning(vsan_api):
+    """A dead session fails every cluster; that must stay one warning per run, not one per cluster."""
+    api, perf_manager, log = vsan_api
+    clusters = {}
+    for cluster_name in ('NHDC01', 'PRDC01', 'MADC01'):
+        cluster = MagicMock(spec=vim.ClusterComputeResource)
+        cluster.name = cluster_name
+        clusters[cluster] = ['nested-id-1']
+    perf_manager.QueryClusterHealth.side_effect = vim.fault.NotAuthenticated(msg='Session is not authenticated.')
+
+    health_metrics, _ = api.get_vsan_metrics(clusters, ENTITY_REF_IDS, ID_TO_TAGS, dt.datetime(2024, 1, 1))
+
+    assert len(health_metrics) == 0
+    warnings = logged_warnings(log)
+    assert len(warnings) == 1
+    for cluster_name in ('NHDC01', 'PRDC01', 'MADC01'):
+        assert cluster_name in warnings[0]
+    assert 'Session is not authenticated.' in warnings[0]
+
+
+# A VsanPerfQueryClusterHealthResponse as vCenter returns it. vCenter 9.0.x omits `xsi:type` on the
+# `returnval` items; 8.0.x includes it. pyvmomi 8.0.3.0.1 declared this method's result type as the
+# abstract `vmodl.DynamicData[]`, so without `xsi:type` it had no concrete type to bind the items to
+# and raised `AttributeError: groupId` while deserializing, inside `QueryClusterHealth()`, losing all
+# vSAN metrics for the vCenter. See AGENT-17358.
+def vsan_health_response(xsi_type=''):
+    returnval = '<returnval xsi:type="{}">'.format(xsi_type) if xsi_type else '<returnval>'
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"'
+        ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Body>'
+        '<VsanPerfQueryClusterHealthResponse xmlns="urn:vsan">'
+        + returnval
+        + '<groupId>com.vmware.vsan.health.test.perfsvc</groupId>'
+        '<groupName>Performance service</groupName>'
+        '<groupHealth>green</groupHealth>'
+        '<groupTests>'
+        '<testId>com.vmware.vsan.health.test.statsdb</testId>'
+        '<testHealth>green</testHealth>'
+        '</groupTests>'
+        '</returnval></VsanPerfQueryClusterHealthResponse>'
+        '</soapenv:Body></soapenv:Envelope>'
+    )
+
+
+class VsanStubAdapter:
+    """A vSAN stub that answers `QueryClusterHealth` by deserializing a real vCenter response.
+
+    The mocked `VsanPerformanceManager` used elsewhere in this file returns ready-made objects and so
+    cannot exercise deserialization, which is where AGENT-17358 failed.
+    """
+
+    def __init__(self, response):
+        self.version = vsanapiutils.VSAN_VMODL_VERSION
+        self.response = response
+
+    def SupportServerGUIDs(self):
+        return False
+
+    def InvokeAccessor(self, managed_object, info):
+        return 'CLUSTER01'
+
+    def InvokeMethod(self, managed_object, info, args):
+        if info.wsdlName != 'VsanPerfQueryClusterHealth':
+            return []
+        result_type = info.result[1] if isinstance(info.result, tuple) else info.result
+        return SoapResponseDeserializer(self).Deserialize(self.response, result_type)
+
+
+@pytest.mark.parametrize(
+    'xsi_type, vcenter',
+    [('', 'vCenter 9.0.x, which omits xsi:type'), ('VsanClusterHealthGroup', 'vCenter 8.0.x, which sends it')],
+    ids=['without_xsi_type', 'with_xsi_type'],
+)
+def test_vsan_health_metrics_are_collected_from_a_real_response(realtime_instance, xsi_type, vcenter):
+    """vSAN health metrics must be collected from the health response as vCenter actually sends it."""
+    realtime_instance['collect_vsan_data'] = True
+    with patch('datadog_checks.vsphere.api.connect'):
+        api = VSphereAPI(VSphereConfig(realtime_instance, {}, MagicMock()), MagicMock())
+    stub = VsanStubAdapter(vsan_health_response(xsi_type))
+    api._vsan_stub = stub
+    cluster = vim.ClusterComputeResource('domain-c99', stub)
+
+    health_metrics, _ = api.get_vsan_metrics(
+        {cluster: ['nested-id-1']}, ENTITY_REF_IDS, ID_TO_TAGS, dt.datetime(2024, 1, 1)
+    )
+
+    assert len(health_metrics) == 1
+    assert health_metrics[0]['vsphere.vsan.cluster.health.count'] == {
+        'group_id': 'com.vmware.vsan.health.test.perfsvc',
+        'status': 'green',
+        'vsphere_cluster': 'CLUSTER01',
+    }
+    assert 'vsphere.vsan.cluster.health.statsdb.count' in health_metrics[0]

@@ -7,7 +7,7 @@ instances:
   - kafka_connect_str: localhost:9092
     consumer_groups:
       my-consumer-group: {}
-    enable_cluster_monitoring: true
+    enable_kafka_console: true
     schema_registry_url: http://localhost:8081
 
 # Example 2: Basic Authentication (Most Common)
@@ -16,7 +16,7 @@ instances:
   - kafka_connect_str: kafka-broker:9092
     consumer_groups:
       my-consumer-group: {}
-    enable_cluster_monitoring: true
+    enable_kafka_console: true
     schema_registry_url: https://schema-registry:8081
     schema_registry_username: registry-user
     schema_registry_password: registry-password
@@ -28,7 +28,7 @@ instances:
   - kafka_connect_str: kafka-broker:9092
     consumer_groups:
       my-consumer-group: {}
-    enable_cluster_monitoring: true
+    enable_kafka_console: true
     schema_registry_url: https://schema-registry:8081
     schema_registry_username: registry-user
     schema_registry_password: registry-password
@@ -41,7 +41,7 @@ instances:
   - kafka_connect_str: kafka-broker:9092
     consumer_groups:
       my-consumer-group: {}
-    enable_cluster_monitoring: true
+    enable_kafka_console: true
     schema_registry_url: https://schema-registry:8081
     schema_registry_tls_verify: true
     schema_registry_tls_ca_cert: /etc/ssl/certs/ca.pem
@@ -54,7 +54,7 @@ instances:
   - kafka_connect_str: kafka-broker:9092
     consumer_groups:
       my-consumer-group: {}
-    enable_cluster_monitoring: true
+    enable_kafka_console: true
     schema_registry_url: https://schema-registry:8081
     schema_registry_username: registry-user
     schema_registry_password: registry-password
@@ -69,7 +69,7 @@ instances:
   - kafka_connect_str: kafka-broker:9092
     consumer_groups:
       my-consumer-group: {}
-    enable_cluster_monitoring: true
+    enable_kafka_console: true
     schema_registry_url: https://schema-registry:8081
     schema_registry_username: registry-user
     schema_registry_password: registry-password

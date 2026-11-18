@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 STATUS_METRICS = {
     "ready": "gauge",
     "health": "gauge",
@@ -18,6 +21,12 @@ WORK_QUEUE_METRICS = {
     "work_queue.backlog.size": "gauge",
     "work_queue.backlog.age": "gauge",
     "work_queue.concurrency.in_use": "gauge",
+}
+
+CONCURRENCY_LIMIT_METRICS = {
+    "concurrency_limit.limit": "gauge",
+    "concurrency_limit.active_slots": "gauge",
+    "concurrency_limit.is_active": "gauge",
 }
 
 DEPLOYMENT_METRICS = {
@@ -58,6 +67,7 @@ METRICS_SPEC = {
     **STATUS_METRICS,
     **WORK_POOL_METRICS,
     **WORK_QUEUE_METRICS,
+    **CONCURRENCY_LIMIT_METRICS,
     **DEPLOYMENT_METRICS,
     **FLOW_RUN_METRICS,
     **TASK_RUN_METRICS,

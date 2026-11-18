@@ -49,7 +49,7 @@ tests:
           version: "1.5.0"
         query:
           class: "IN"
-          hostname: "trace-k8s.agent.datadoghq.com.apm1.cluster.local."
+          hostname: "trace-k8s.agent.datadoghq.com.apm1.cluster.local"
           type: "AAAA"
         rcode: "NXDomain"
         rcode_id: 3
@@ -59,6 +59,7 @@ tests:
         src_endpoint:
           ip: "10.145.105.176"
           port: 36008
+          uid: "10.145.105.176"
         status: "Failure"
         status_code: "NXDOMAIN"
         status_id: 2
@@ -117,7 +118,7 @@ tests:
           version: "1.5.0"
         query:
           class: "IN"
-          hostname: "example.org."
+          hostname: "example.org"
           type: "A"
         rcode: "NoError"
         rcode_id: 0
@@ -127,6 +128,7 @@ tests:
         src_endpoint:
           ip: "127.0.0.1"
           port: 50759
+          uid: "127.0.0.1"
         status: "Success"
         status_code: "NOERROR"
         status_id: 1

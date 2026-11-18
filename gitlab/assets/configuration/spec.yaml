@@ -44,6 +44,28 @@ files:
         display_default: null
         example: http://<GITALY-URL>:9236/metrics
         type: string
+    - name: workhorse_endpoint
+      description: |
+        Endpoint exposing the GitLab Workhorse Prometheus metrics (only available when `openmetrics_endpoint` is
+        used). Workhorse serves these on its own listener, configured by
+        `gitlab_workhorse['prometheus_listen_addr']`, not on the Rails metrics endpoint.
+      fleet_configurable: true
+      display_priority: 3
+      value:
+        display_default: null
+        example: http://<WORKHORSE-URL>:9229/metrics
+        type: string
+    - name: sidekiq_endpoint
+      description: |
+        Endpoint exposing the Sidekiq exporter's Prometheus metrics (only available when `openmetrics_endpoint` is
+        used). Requires `sidekiq['metrics_enabled']` and is served on its own port, not on the Rails metrics
+        endpoint.
+      fleet_configurable: true
+      display_priority: 2
+      value:
+        display_default: null
+        example: http://<SIDEKIQ-URL>:8082/metrics
+        type: string
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false

@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 2.5.1 / 2026-08-05
+## 2.5.3 / 2026-10-26
+
+***Fixed***:
+
+* Fix version metadata collection failing when `collect_sinfo_stats` is disabled. ([#25685](https://github.com/DataDog/integrations-core/pull/25685))
+
+## 2.5.2 / 2026-09-25 / Agent 7.85.0
+
+***Fixed***:
+
+* Make logging when encountering binary calls issues less noisy ([#25154](https://github.com/DataDog/integrations-core/pull/25154))
+
+## 2.5.1 / 2026-08-05 / Agent 7.83.0
 
 ***Fixed***:
 

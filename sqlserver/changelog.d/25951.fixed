@@ -1,0 +1,1 @@
+Obfuscate `ParameterRuntimeValue` in XML plans and compute `db.plan.raw_signature` from the raw plan instead of `query_plan_hash`.

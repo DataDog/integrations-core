@@ -373,7 +373,8 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                 statement = obfuscate_sql_with_metadata(row['digest_text'], self._obfuscate_options)
                 obfuscated_statement = statement['query'] if row['digest_text'] is not None else None
             except Exception as e:
-                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['digest_text'], e)
+                # repr so a query containing a null cannot make this handler raise inside the agent log binding.
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['digest_text']), e)
                 continue
 
             normalized_row['digest_text'] = obfuscated_statement
@@ -401,7 +402,24 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             digest_rows[_row_state_key(row)] = row
             self._statement_rows[key] = digest_rows
 
+        self._drop_deallocated_prepared_statements(rows)
+
         return [row for statement_row in self._statement_rows.values() for row in statement_row.values()]
+
+    def _drop_deallocated_prepared_statements(self, rows: list[Row]) -> None:
+        """
+        `prepared_statements_instances` is read in full on each run, so an instance missing from `rows` has normally
+        been deallocated and will not report again. Writing to a signature refreshes the cache TTL, so without this the
+        rows of an active signature would accumulate forever. An allocated instance dropped by the query LIMIT loses
+        only its baseline: if it returns, it is baselined again rather than reported as a large delta.
+        """
+        current_keys = {_row_state_key(row) for row in rows}
+        for key, digest_rows in list(self._statement_rows.items()):
+            for state_key in list(digest_rows):
+                if state_key[0] == PREPARED_STATEMENT_SOURCE and state_key not in current_keys:
+                    del digest_rows[state_key]
+            if not digest_rows:
+                del self._statement_rows[key]
 
     def _rows_to_fqt_events(self, rows, tags):
         for row in rows:

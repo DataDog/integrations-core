@@ -12,6 +12,7 @@ import psycopg
 from psycopg.rows import dict_row
 
 from .column_statistics import PostgresColumnStatisticsCollector
+from .role_collector import PostgresRoleCollector
 from .schemas import PostgresSchemaCollector
 from .util import collection_interval_gcd
 
@@ -53,20 +54,25 @@ case when source = 'session' then reset_val else setting end as setting,
 source,
 sourcefile,
 pending_restart
-FROM pg_settings
+FROM pg_catalog.pg_settings
 """
 
 PG_EXTENSIONS_QUERY = """
 SELECT extname, nspname schemaname
-FROM pg_extension left join pg_namespace on extnamespace = pg_namespace.oid;
+FROM pg_catalog.pg_extension left join pg_catalog.pg_namespace on extnamespace = pg_namespace.oid;
 """
 
+# Every function and type is qualified with the extension's schema and arguments are cast to the exact
+# signature. Otherwise a user able to create objects in a schema on the monitoring role's search_path could
+# shadow them with an overload (e.g. armor(text) beats armor(bytea) for an untyped literal) and run arbitrary
+# SQL as the monitoring role
 PG_EXTENSION_LOADER_QUERY = {
-    'pg_trgm': "SELECT word_similarity('foo', 'bar');",
+    'pg_trgm': "SELECT {schema}.word_similarity('foo'::pg_catalog.text, 'bar'::pg_catalog.text);",
     'plpgsql': "DO $$ BEGIN PERFORM 1; END$$;",
-    'pgcrypto': "SELECT armor('foo');",
-    'hstore': "SELECT 'a=>1'::hstore;",
+    'pgcrypto': "SELECT {schema}.armor('foo'::pg_catalog.bytea);",
+    'hstore': "SELECT 'a=>1'::{schema}.hstore;",
 }
+PG_EXTENSION_LOADER_SCHEMAS = ('pg_catalog', 'public')
 
 
 def agent_check_getter(self):
@@ -80,6 +86,7 @@ class PostgresMetadata(DBMAsyncJob):
         2. collection of pg_settings
         3. schema collection
         4. column statistics collection
+        5. role and privilege collection
     """
 
     def __init__(self, check: PostgreSql, config: InstanceConfig):
@@ -89,12 +96,14 @@ class PostgresMetadata(DBMAsyncJob):
         self.pg_extensions_collection_interval = self.pg_settings_collection_interval
         self.schemas_collection_interval = config.collect_schemas.collection_interval
         self.column_statistics_collection_interval = config.collect_column_statistics.collection_interval
+        self.roles_collection_interval = config.collect_roles.collection_interval
 
         self.collection_interval = collection_interval_gcd(
             self.pg_extensions_collection_interval,
             self.pg_settings_collection_interval,
             self.schemas_collection_interval,
             self.column_statistics_collection_interval,
+            self.roles_collection_interval,
         )
 
         super(PostgresMetadata, self).__init__(
@@ -103,7 +112,8 @@ class PostgresMetadata(DBMAsyncJob):
             run_sync=config.collect_settings.run_sync,
             enabled=config.collect_settings.enabled
             or config.collect_schemas.enabled
-            or config.collect_column_statistics.enabled,
+            or config.collect_column_statistics.enabled
+            or config.collect_roles.enabled,
             dbms=check.dbms,
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
@@ -121,11 +131,14 @@ class PostgresMetadata(DBMAsyncJob):
             if self._collect_column_statistics_enabled
             else None
         )
+        self._collect_roles_enabled = config.collect_roles.enabled and config.dbm
+        self._role_collector = PostgresRoleCollector(check, self._cancel_event) if self._collect_roles_enabled else None
         self._compiled_patterns_cache = {}
         self._time_since_last_extension_query = 0
         self._time_since_last_settings_query = 0
         self._last_schemas_query_time = 0
         self._last_column_statistics_query_time = 0
+        self._last_roles_query_time = 0
         self.column_buffer_size = 100_000
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
@@ -135,6 +148,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._check = None
         self._schema_collector = None
         self._column_statistics_collector = None
+        self._role_collector = None
         self._compiled_patterns_cache = None
 
     def _dbtags(self, db, *extra_tags):
@@ -233,6 +247,12 @@ class PostgresMetadata(DBMAsyncJob):
         ):
             self._collect_column_statistics()
 
+        if (
+            self._collect_roles_enabled
+            and self._rate_limiter.last_event - self._last_roles_query_time >= self.roles_collection_interval
+        ):
+            self._collect_postgres_roles()
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_schemas(self):
         self._last_schemas_query_time = time.time()
@@ -251,8 +271,10 @@ class PostgresMetadata(DBMAsyncJob):
                 for row in rows:
                     extension = row['extname']
                     if extension in PG_EXTENSION_LOADER_QUERY:
-                        if row['schemaname'] in ['pg_catalog', 'public']:
-                            query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
+                        # The schema is interpolated into SQL, so it must stay restricted to this fixed allowlist.
+                        if row['schemaname'] in PG_EXTENSION_LOADER_SCHEMAS:
+                            loader = PG_EXTENSION_LOADER_QUERY[extension].format(schema=row['schemaname'])
+                            query = loader + "\n" + query
                         else:
                             self._log.debug(
                                 "unable to collect settings for extension %s in schema %s",
@@ -290,3 +312,11 @@ class PostgresMetadata(DBMAsyncJob):
             self._column_statistics_collector.collect_column_statistics(self._tags_no_db)
         finally:
             self._last_column_statistics_query_time = time.time()
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_postgres_roles(self):
+        # Record the tick that started this job run rather than the current time. Ticks are at least one period
+        # apart, so neither this collection's duration nor the collectors that ran before it in this run can push
+        # the next collection back by a whole tick.
+        self._last_roles_query_time = self._rate_limiter.last_event
+        self._role_collector.collect_roles(self._tags_no_db)

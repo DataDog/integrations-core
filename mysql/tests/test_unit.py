@@ -3,9 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import gc
 import inspect
-import json
 import subprocess
-import time
 import weakref
 
 import mock
@@ -15,12 +13,10 @@ import pytest
 
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
-from datadog_checks.mysql.databases_data import DatabasesData, SubmitData
 from datadog_checks.mysql.util import supports_explain_json_format_version
 from datadog_checks.mysql.version_utils import parse_version
 
 from . import common
-from .utils import deep_compare
 
 pytestmark = pytest.mark.unit
 
@@ -337,147 +333,6 @@ def test_service_check(disable_generic_tags, expected_tags, hostname):
     check = MySql(common.CHECK_NAME, {}, instances=[config])
 
     assert set(check._service_check_tags(hostname)) == expected_tags
-
-
-class DummyLogger:
-    def debug(*args):
-        pass
-
-    def error(*args):
-        pass
-
-
-def set_up_submitter_unit_test():
-    submitted_data = []
-    base_event = {
-        "host": "some",
-        "agent_version": 0,
-        "dbms": "sqlserver",
-        "kind": "sqlserver_databases",
-        "collection_interval": 1200,
-        "dbms_version": "some",
-        "tags": "some",
-        "cloud_metadata": "some",
-    }
-
-    def submitData(data):
-        submitted_data.append(data)
-
-    dataSubmitter = SubmitData(submitData, base_event, DummyLogger())
-    return dataSubmitter, submitted_data
-
-
-def test_submit_data():
-    dataSubmitter, submitted_data = set_up_submitter_unit_test()
-
-    dataSubmitter.store_db_infos(
-        [
-            {"name": "test_db1", "default_character_set_name": "latin1"},
-            {"name": "test_db2", "default_character_set_name": "latin1"},
-        ]
-    )
-
-    dataSubmitter.store("test_db1", [1, 2], 5)
-    dataSubmitter.store("test_db2", [1, 2], 5)
-    assert dataSubmitter.columns_since_last_submit() == 10
-    dataSubmitter.store("test_db1", [1, 2], 10)
-
-    dataSubmitter.submit()
-
-    assert dataSubmitter.columns_since_last_submit() == 0
-
-    expected_data = {
-        "host": "some",
-        "agent_version": 0,
-        "dbms": "sqlserver",
-        "kind": "sqlserver_databases",
-        "collection_interval": 1200,
-        "dbms_version": "some",
-        "tags": "some",
-        "cloud_metadata": "some",
-        "metadata": [
-            {"name": "test_db1", "default_character_set_name": "latin1", "tables": [1, 2, 1, 2]},
-            {"name": "test_db2", "default_character_set_name": "latin1", "tables": [1, 2]},
-        ],
-    }
-
-    data = json.loads(submitted_data[0])
-    data.pop("timestamp")
-    assert deep_compare(data, expected_data)
-
-
-def test_fetch_throws():
-    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
-    databases_data = DatabasesData({}, check, check._config)
-    with (
-        mock.patch('time.time', side_effect=[0, 9999999]),
-        mock.patch(
-            'datadog_checks.mysql.databases_data.DatabasesData._get_tables',
-            return_value=[{"name": "mytable1"}, {"name": "mytable2"}],
-        ),
-        mock.patch('datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]),
-    ):
-        with pytest.raises(StopIteration):
-            databases_data._fetch_database_data("dummy_cursor", time.time(), "my_db")
-
-
-def test_submit_is_called_if_too_many_columns():
-    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
-    databases_data = DatabasesData({}, check, check._config)
-    with (
-        mock.patch('time.time', side_effect=[0, 0]),
-        mock.patch('datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]),
-        mock.patch('datadog_checks.mysql.databases_data.SubmitData.submit') as mocked_submit,
-        mock.patch(
-            'datadog_checks.mysql.databases_data.DatabasesData._get_tables_data',
-            return_value=(1000_000, {"name": "my_table"}),
-        ),
-    ):
-        databases_data._fetch_database_data("dummy_cursor", time.time(), "my_db")
-        assert mocked_submit.call_count == 2
-
-
-def test_get_tables_data_uses_parameterized_queries():
-    """Table names must be passed as query parameters, not interpolated into SQL strings."""
-    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
-    databases_data = DatabasesData({}, check, check._config)
-
-    table_list = [{"name": 'normal_table'}, {"name": 'bad"table'}, {"name": "x\") UNION SELECT user()#"}]
-    execute_calls = []
-
-    class MockCursor:
-        def execute(self, query, params=None):
-            execute_calls.append((query, params))
-
-        def fetchall(self):
-            return []
-
-    def fake_index_query(v, m, p):
-        return "SELECT 1 WHERE s = %s AND n IN ({})".format(p)
-
-    with mock.patch('datadog_checks.mysql.databases_data.get_indexes_query', side_effect=fake_index_query):
-        databases_data._get_tables_data(table_list, "mydb", MockCursor())
-
-    table_name_list = [str(t["name"]) for t in table_list]
-
-    assert execute_calls, "Expected at least one query to be executed"
-    for query, params in execute_calls:
-        assert isinstance(params, list)
-        assert params[0] == "mydb"
-        assert params[1:] == table_name_list
-        assert query.count('%s') == len(table_list) + 1
-
-
-def test_fetch_for_databases_continues_after_database_error():
-    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
-    databases_data = DatabasesData({}, check, check._config)
-    with mock.patch(
-        'datadog_checks.mysql.databases_data.DatabasesData._fetch_database_data',
-        side_effect=[pymysql.DatabaseError("Can't connect to DB"), None],
-    ) as fetch_database_data:
-        databases_data._fetch_for_databases([{"name": "first_db"}, {"name": "second_db"}], "dummy_cursor")
-
-    assert [call.args[2] for call in fetch_database_data.call_args_list] == ['first_db', 'second_db']
 
 
 def test_update_aurora_replication_role():
@@ -1076,6 +931,7 @@ def test_check_gc_after_cancel():
         'query_activity': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
         'collect_settings': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
         'data_observability': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
+        'collect_schemas': {'enabled': True, 'run_sync': True, 'collection_interval': 1},
     }
 
     check = MySql(common.CHECK_NAME, {}, instances=[instance])

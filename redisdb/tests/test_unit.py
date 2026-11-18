@@ -2,13 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from collections.abc import Callable, Iterator
 
 import mock
 import pytest
 import redis
 from redis.exceptions import ResponseError
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.redisdb import Redis
 
 pytestmark = pytest.mark.unit
 
@@ -136,6 +139,106 @@ def test_check_all_available_config_options(check, aggregator, redis_instance, d
         dd_run_check(redis_check)
         # RESP2 is pinned by the check rather than taken from the client default
         assert redis_conn.call_args.kwargs == connection_args | {'protocol': 2}
+
+
+@pytest.fixture
+def config_connection(redis_instance: dict) -> Iterator[mock.Mock]:
+    redis_instance.pop('keys')
+    with mock.patch('redis.Redis') as redis_client:
+        conn = redis_client.return_value
+        conn.info.return_value = {'role': 'master', 'connected_clients': 2}
+        conn.slowlog_get.side_effect = [
+            [{'start_time': timestamp, 'duration': 42, 'command': b'GET key'}] for timestamp in range(1, 4)
+        ]
+        yield conn
+
+
+@pytest.mark.parametrize('slowlog_limit', [None, 256])
+def test_disable_config_get(
+    check: Callable[[dict], Redis],
+    redis_instance: dict,
+    config_connection: mock.Mock,
+    aggregator: AggregatorStub,
+    slowlog_limit: int | None,
+):
+    redis_instance['disable_config_get'] = True
+    if slowlog_limit is not None:
+        redis_instance['slowlog-max-len'] = slowlog_limit
+    redis_check = check(redis_instance)
+
+    for _ in range(2):
+        redis_check.check(redis_instance)
+
+    config_connection.config_get.assert_not_called()
+    assert config_connection.slowlog_get.call_args_list == [mock.call(slowlog_limit or 128)] * 2
+    aggregator.assert_metric('redis.net.maxclients', count=0)
+    aggregator.assert_metric('redis.net.clients', value=2, count=2)
+    aggregator.assert_metric('redis.slowlog.micros', value=42, count=2)
+
+
+@pytest.mark.parametrize('rejected_parameter', ['maxclients', 'slowlog-max-len'])
+def test_config_get_response_error(
+    check: Callable[[dict], Redis],
+    redis_instance: dict,
+    config_connection: mock.Mock,
+    aggregator: AggregatorStub,
+    caplog: pytest.LogCaptureFixture,
+    rejected_parameter: str,
+):
+    # Regression: https://datadoghq.atlassian.net/browse/AI-7311
+    error = ResponseError('ERR CONFIG is restricted')
+    responses = [error] if rejected_parameter == 'maxclients' else [{'maxclients': '1000'}, error]
+    config_connection.config_get.side_effect = responses
+    redis_instance['disable_connection_cache'] = True
+    redis_check = check(redis_instance)
+
+    with caplog.at_level(logging.WARNING):
+        for _ in range(3):
+            redis_check.check(redis_instance)
+
+    expected_calls = [mock.call('maxclients')]
+    if rejected_parameter == 'slowlog-max-len':
+        expected_calls.append(mock.call('slowlog-max-len'))
+    assert config_connection.config_get.call_args_list == expected_calls
+    assert config_connection.slowlog_get.call_args_list == [mock.call(128)] * 3
+    aggregator.assert_metric('redis.net.maxclients', count=int(rejected_parameter == 'slowlog-max-len'))
+    aggregator.assert_metric('redis.net.clients', value=2, count=3)
+    aggregator.assert_metric('redis.slowlog.micros', value=42, count=3)
+    assert len(caplog.records) == 1
+    assert 'disable_config_get' in caplog.messages[0]
+    assert 'ERR CONFIG is restricted' in caplog.messages[0]
+
+
+@pytest.mark.parametrize(
+    'server_limit, configured_limit, expected_limit',
+    [(64, None, 64), (256, None, 128), (64, 256, 256)],
+)
+def test_config_get_metrics(
+    check: Callable[[dict], Redis],
+    redis_instance: dict,
+    config_connection: mock.Mock,
+    aggregator: AggregatorStub,
+    server_limit: int,
+    configured_limit: int | None,
+    expected_limit: int,
+):
+    if configured_limit is not None:
+        redis_instance['slowlog-max-len'] = configured_limit
+    responses = [{'maxclients': '1000'}]
+    expected_calls = [mock.call('maxclients')]
+    if configured_limit is None:
+        responses.append({'slowlog-max-len': str(server_limit)})
+        expected_calls.append(mock.call('slowlog-max-len'))
+    config_connection.config_get.side_effect = responses * 2
+    redis_check = check(redis_instance)
+
+    for _ in range(2):
+        redis_check.check(redis_instance)
+
+    assert config_connection.config_get.call_args_list == expected_calls * 2
+    assert config_connection.slowlog_get.call_args_list == [mock.call(expected_limit)] * 2
+    aggregator.assert_metric('redis.net.maxclients', value=1000, count=2)
+    aggregator.assert_metric('redis.slowlog.micros', value=42, count=2)
 
 
 def test_slowlog_quiet_failure(check, aggregator, redis_instance):

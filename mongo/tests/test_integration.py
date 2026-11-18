@@ -1208,6 +1208,9 @@ def test_integration_localhost_process_stats(instance_integration, aggregator, c
             with mock.patch('psutil.Process') as mock_process:
                 mock_process.return_value.name.return_value = 'mongos'
                 mock_process.return_value.cpu_percent.return_value = 20.0
+                # psutil's first cpu_percent() sample on a process is meaningless and is skipped,
+                # so process CPU is only reported from the run after the process is resolved.
+                dd_run_check(mongo_check)
                 dd_run_check(mongo_check)
 
     metrics_categories = [

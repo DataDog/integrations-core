@@ -1,0 +1,5210 @@
+[
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "AP has a coverage hole",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "This AP $apName$ is currently experiencing coverage hole on the $band$ GHz band. $clientCount$ client(s) have had RSSI lower than threshold -80 dBm over the last 3 minutes. These client(s) are considered to be in a coverage hole because they are unable to roam to neighboring AP(s) with improved coverage because the AP(s) are not available.",
+      "Assurance Issue Name": "AP $apName$ have a coverage hole",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-3-100",
+    "name": "AP Coverage Hole",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "ap_coverage_hole"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "5 GHz radio on AP(s) are experiencing high utilization",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The 5GHz radio on the AP $apname$ has exceeded the $threshold$% threshold and is currently experiencing $utilization$% utilization. This is impacting $clientCount$ client(s).",
+      "Assurance Issue Name": "The 5GHz radio on AP $apname$ is experiencing high utilization",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-3-102",
+    "name": "Radio High Utilization (5GHz)",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "radio_5_util_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "AP is experiencing high memory utilization",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Memory utilization for the AP $apName$ has exceeded the $threshold$% threshold. This issue is potentially impacting $clientCount$ client(s)",
+      "Assurance Issue Name": "AP $apName$ is experiencing high memory utilization",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-104",
+    "name": "AP Memory High Utilization",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "ap_memory_threshold_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "AP has rebooted due to a hardware or software crash",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "AP $apName$ has rebooted due to a hardware or software crash",
+      "Assurance Issue Name": "AP $apName$ has rebooted due to a hardware or software crash",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-105",
+    "name": "AP Reboot Crash",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "ap_reboot_crash_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Device is unreachable",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "This network device $nwDeviceName$ is unreachable from Cisco DNA Center. The device role is $fabricOrDeviceRole$.",
+      "Assurance Issue Name": "Network Device $managementIpAddr$ Is Unreachable From Controller",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-NON-FABRIC_WIRELESS-1-150",
+    "name": "WLC Unreachable",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "Non-Fabric Wireless",
+    "tags": [
+      "ASSURANCE",
+      "wlc_unreachable"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Power supply has failed on this WLC",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The $powerIndex$ power supply has failed on the WLC $wlcName$. This WLC is now operating with a single power supply",
+      "Assurance Issue Name": "$powerIndex$ power supply has failed on this WLC $wlcName$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-153",
+    "name": "WLC Power Supply Failure",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "wlc_power_supply_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "WLC is experiencing high memory utilization",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Memory utilization in the WLC $wlcName$ memory has exceeded the $threshold$% threshold for the past 15 minutes.",
+      "Assurance Issue Name": "This WLC $wlcName$ is experiencing high memory utilization",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-154",
+    "name": "WLC Memory High Utilization",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "wlc_memory_high"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "WLC currently has no free AP licenses",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "This WLC $wlcName$ is currently licensed to support $maxCount$ AP(s) and is now operating at its full licensed capacity. No additional AP can join this WLC.",
+      "Assurance Issue Name": "WLC $wlcName$ currently has no free AP licenses.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-155",
+    "name": "AP License Exhausted on WLC",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "wlc_ap_license_exhausted"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Network controller is not receiving data from WLC",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "This WLC $wlcName$ is not exporting WSA $o_entity$ data. ",
+      "Assurance Issue Name": "Network controller is not receiving $o_entity$ data from $wlcName$ WLC.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-NON-FABRIC_WIRELESS-3-156",
+    "name": "WLC Monitor",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Non-Fabric Wireless",
+    "tags": [
+      "ASSURANCE",
+      "wlc_monitor"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Device is unreachable",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "This network device $nwDeviceName$ is unreachable from controller. The device role is $fabricOrDeviceRole$",
+      "Assurance Issue Name": "Network Device $managementIpAddr$ Is Unreachable From Controller",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-NON-FABRIC_WIRED-1-200",
+    "name": "Switch Unreachable",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "Non-Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "switch_unreachable"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Power supply failure on switch",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "There is a power supply failure in network device $nwDeviceName$.",
+      "Assurance Issue Name": "Power supply failure on device",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-201",
+    "name": "Switch Power Failure",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_issue_power"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Device has rebooted due to a hardware or software crash",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Network Device $nwDeviceName$ is rebooting.",
+      "Assurance Issue Name": "Device has rebooted due to a hardware or software crash",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-202",
+    "name": "Device Reboot Crash",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_issue_reboot"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Map cache entries have exceeded limit on map server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Map cache entries $mapCacheSize$ have exceeded limit $mapCacheLimit$ on the fabric $nwDeviceName$",
+      "Assurance Issue Name": "Map cache entries $mapCacheSize$ have exceeded limit $mapCacheLimit$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-2-203",
+    "name": "Map Cache Limit Reached",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "snmp_map_cache_limit_reached"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Stack member is running an incompatible image",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Stackmember $nwDeviceName$ running an incompatible image",
+      "Assurance Issue Name": "Stackmember running an incompatible image",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-204",
+    "name": "Stack Member Running Incompatible Image",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "stack_switch_version_mismatch_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Fan failure on switch",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "There is a fan failure in network device $nwDeviceName$",
+      "Assurance Issue Name": "Fan failure on device",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-205",
+    "name": "Switch Fan Failure",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_issue_fan"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Device experiencing high CPU utilization",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Network Device $nwDeviceName$ is experiencing high CPU utilization $cpu$%",
+      "Assurance Issue Name": "Network Device $managementIpAddr$ Is Experiencing High CPU Utilization",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-206",
+    "name": "Switch Experiencing High CPU utilization",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_cpu_high"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Device experiencing high memory utilization",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Network Device $nwDeviceName$ is experiencing high memory utilization $memory$%",
+      "Assurance Issue Name": "Device experiencing high memory utilization",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-207",
+    "name": "Switch Experiencing High Memory Utilization",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_memory_high"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output utilization on interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output utilization Rx $avgInputUtilization$% Tx $avgOutputUtilization$% on interface $interfaceName$ (Interface description: $interfaceDescription$), Device $nwDeviceName$",
+      "Assurance Issue Name": "High input/output utilization on interface $interfaceName$ (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-208",
+    "name": "High input/output Utilization on Switch Interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_interface_excess_rx_tx_util"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output error on interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output error Rx $rxErrorPercent$% Tx $txErrorPercent$% on interface $interfaceName$ (Interface description: $interfaceDescription$), Device $nwDeviceName$",
+      "Assurance Issue Name": "High input/output error on interface $interfaceName$ (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-209",
+    "name": "High input/output Error on Switch Interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_interface_input_output_errors"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "A port interface is flapping on a switch",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Switch $deviceName$ Interface $interfaceName$ (Interface description: $interfaceDescription$) is flapping",
+      "Assurance Issue Name": "Interface $interfaceName$ (Interface description: $interfaceDescription$) is Flapping on Network Device $managementIpAddr$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-210",
+    "name": "Interface Flapping On Network Device",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_port_flaps"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Stack member was removed",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Stack member $eventValue$ removed from stack $nwDeviceName$",
+      "Assurance Issue Name": "Stack member $eventValue$ removed from stack.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-211",
+    "name": "Stack Member Removal",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "default_trap_event_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Device is unreachable",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "This network device $nwDeviceName$ is unreachable from controller. The device role is $fabricOrDeviceRole$",
+      "Assurance Issue Name": "Network Device $managementIpAddr$ Is Unreachable From Controller",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-NON-FABRIC_WIRED-1-250",
+    "name": "Router unreachable",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "Non-Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "router_unreachable"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Interface Connecting Network Devices is Down",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Interface $interfaceName$ (Interface description: $interfaceDescription$) connecting the following two network devices is down: Local Node: $deviceName$, Peer Node: $peerDeviceName$",
+      "Assurance Issue Name": "Interface $interfaceName$ (Interface description: $interfaceDescription$) is Down on Network Device $managementIpAddr$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-NON-FABRIC_WIRED-1-251",
+    "name": "Interface Connecting Network Devices is Down",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "Non-Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "infra_link_down"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Device experiencing high CPU utilization",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Device $nwDeviceName$ CPU usage has exceeded $threshold$% utilization for 30 minutes.",
+      "Assurance Issue Name": "Network Device $managementIpAddr$ Is Experiencing High CPU Utilization",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-252",
+    "name": "Router Experiencing High CPU Utilization",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "router_cpu_high"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output utilization on interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output utilization Rx $avgInputUtilization$% Tx $avgOutputUtilization$% on interface $interfaceName$ (Interface description: $interfaceDescription$) on device $nwDeviceName$",
+      "Assurance Issue Name": "High input/output utilization on interface $interfaceName$ (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-253",
+    "name": "High input/output Utilization on Router Interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "router_interface_excess_rx_tx_util"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output error on interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output error Rx $rxErrorPercent$% Tx $txErrorPercent$% on interface $interfaceName$ (Interface description: $interfaceDescription$) on device $nwDeviceName$",
+      "Assurance Issue Name": "High input/output error on interface $interfaceName$ (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-254",
+    "name": "High input/output Error on Router Interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "router_interface_input_output_errors"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Device experiencing high memory utilization",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Device $nwDeviceName$ memory usage has exceeded $threshold$% utilization for 30 minutes.",
+      "Assurance Issue Name": "Device $managementIpAddr$ experiencing high memory utilization",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-255",
+    "name": "Router Experiencing High Memory Utilization",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "router_memory_high"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "BGP Connectivity Failure with Peer due to Wrong AS",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Device name: $nwDeviceName$ - BGP peering with neighbor $remoteIP$ failed due to Autonomous System (AS) Number mismatch. The configured AS number does not match with peer",
+      "Assurance Issue Name": "Device $nwDeviceName$ Received Error Message From Neighbor $remoteIP$ (Peer in Wrong AS)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-2-303",
+    "name": "BGP Tunnel Connectivity",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "network_connectivity_trigger_BGP"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "BGP Connectivity is Flapping with Neighbor",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Device:$nwDeviceName$- BGP is flapping with neighbor $remoteIP$",
+      "Assurance Issue Name": "BGP is Flapping on Device $nwDeviceName$ with Neighbor $remoteIP$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-2-256",
+    "name": "Network Device Interface Connectivity - BGP Flap",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "BGP_Flap"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "OSPF Adjacency Failed with Neighbor",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "OSPF adjacency failed on device:$nwDeviceName$, interface:$intfName$ with neighbor $remoteIP$",
+      "Assurance Issue Name": "OSPF Adjacency Failed on Device $nwDeviceName$ Interface $intfName$ with Neighbor $remoteIP$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-2-257",
+    "name": "Network Device Interface Connectivity - OSPF Adjacency Failure",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "OSPF_Down"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "ISIS Adjacency Failed on Device.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "ISIS adjacency failed on device:$nwDeviceName$, interface:$intfName$",
+      "Assurance Issue Name": "ISIS Adjacency Failed on Device $nwDeviceName$ Interface $intfName$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-2-258",
+    "name": "Network Device Interface Connectivity - ISIS Adjacency Failure",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "isis_adjacency_failure"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "EIGRP Adjacency Failed with Neighbor.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "EIGRP adjacency failed on device:$nwDeviceName$, interface:$intfName$ with neighbor $remoteIP$",
+      "Assurance Issue Name": "EIGRP Adjacency Failed on Device $nwDeviceName$ Interface $intfName$ with Neighbor $remoteIP$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-2-259",
+    "name": "Network Device Interface Connectivity - EIGRP Adjacency Failure",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "EIGRP_Peering"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "The network device went through an HA switchover.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Device $nwDeviceName$ went through an HA switchover event with reason code $cRFStatusLastSwactReasonCode$.",
+      "Assurance Issue Name": "Network device $managementIpAddr$ underwent an HA switchover",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-300",
+    "name": "Network Device HA Switchover",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "snmp_trap_ha_switchover"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Host MAC Address Flapping seen on Network Device",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Host MAC Address flaps are detected along with other events that are indicative of a Layer2 loop. Go to Root Cause Analysis for detailed troubleshooting and see the exact impacted devices involved in the loop",
+      "Assurance Issue Name": "Host flaps observed in $vlanCount$ VLAN(s)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-2-318",
+    "name": "Layer 2 loop symptoms",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "mac_flap_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Issues created by single occurrence of syslog event related to power",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$messageText$",
+      "Assurance Issue Name": "POE power issues on device $managementIpAddr$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-304",
+    "name": "Issues based on Syslog events - POE",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "network_device_poe_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric WLC Lost Connectivity to the Fabric Control Plane Node",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The Fabric $sourceRole$ $managementIpAddr$ has connectivity failure to the Fabric Control Plane Node $destIp$. This can prevent Fabric services and new wireless clients from functioning correctly",
+      "Assurance Issue Name": "Fabric $sourceRole$ $managementIpAddr$ Lost Connectivity to the Fabric Control Plane Node $destIp$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRELESS-1-307",
+    "name": "Fabric WLC to MapServer Connectivity",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "Fabric Wireless",
+    "tags": [
+      "ASSURANCE",
+      "fabric_wlc_reachability"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Edge Lost Connectivity to the Fabric Border in the Physical Network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "There is a connectivity failure between the Fabric Edge $managementIpAddr$ and the Fabric Border $destMgmtIp$ in the Physical Network, which is impacting many services from functioning properly",
+      "Assurance Issue Name": "Fabric Edge $managementIpAddr$ Lost Connectivity to the Fabric Border $destMgmtIp$ in the Physical Network",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-308",
+    "name": "Fabric Devices Connectivity - Border Underlay",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "fabric_reachability_border_underlay_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Fabric Edge Lost Connectivity to the Fabric Border in the Virtual Network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "There is a connectivity failure between the Fabric Edge $managementIpAddr$ and the Fabric Border $destMgmtIp$ in the Virtual Network VRF $vrf$, which is impacting many services from functioning properly",
+      "Assurance Issue Name": "Fabric Edge $managementIpAddr$ Lost Connectivity to the Fabric Border $destMgmtIp$ in the Virtual Network $vrf$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-2-309",
+    "name": "Fabric Devices Connectivity - Border Overlay",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "fabric_reachability_border_overlay_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Node Lost Connectivity to the Fabric Control Plane Device in the Physical Network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The $sourceRole$ $managementIpAddr$ has connectivity failure to the Fabric Control Plane $dstDeviceName$ in the physical network. This can prevent many of the services from functioning correctly.",
+      "Assurance Issue Name": "$sourceRole$ $managementIpAddr$ Lost Connectivity to the Fabric Control Plane Device $destMgmtIp$ in the Physical Network",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-310",
+    "name": "Fabric Devices Connectivity - Control Underlay",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "fabric_reachability_control_underlay_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Node Lost Connectivity to the Co-located Fabric Border and Control Plane in the Physical Network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "There is a connectivity failure between the $sourceRole$ $managementIpAddr$ to Co-located Fabric Border and Control Plane $destMgmtIp$ in the physical network. This can prevent many of the services from functioning correctly.",
+      "Assurance Issue Name": "$sourceRole$ $managementIpAddr$ Lost Connectivity to the Co-located Fabric Border and Control Plane $destMgmtIp$ in the Physical Network",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-311",
+    "name": "Fabric Devices Connectivity - Control Border Underlay",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "fabric_reachability_control_border_underlay_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Edge Lost Connectivity to the ISE Server in the Physical Network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The Fabric Edge $managementIpAddr$ cannot reach the ISE server $destIp$ in the Physical Network",
+      "Assurance Issue Name": "Fabric Edge $managementIpAddr$ Lost Connectivity to the ISE Server $destIp$ in the Physical Network",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-312",
+    "name": "Fabric Devices Connectivity - ISE Server",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "fabric_reachability_ise_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Fabric Node Lost Connectivity to the DHCP Server in the Virtual Network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$sourceRole$ $managementIpAddr$ cannot reach the DHCP server $destIp$ in the Virtual Network VRF $vrf$'",
+      "Assurance Issue Name": "$sourceRole$ $managementIpAddr$ Lost Connectivity to the DHCP Server $destIp$ in the Virtual Network $vrf$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-2-313",
+    "name": "Fabric Devices Connectivity - DHCP Overlay",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "fabric_reachability_dhcp_overlay_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Node Lost Connectivity to the DHCP Server in the Physical Network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$sourceRole$ $managementIpAddr$ cannot reach the DHCP server $destIp$ in the physical network.",
+      "Assurance Issue Name": "$sourceRole$ $managementIpAddr$ Lost Connectivity to the DHCP Server $destIp$ in the Physical Network",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-317",
+    "name": "Fabric Devices Connectivity - DHCP Underlay",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "fabric_reachability_dhcp_underlay_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Fabric Node Lost Connectivity to the DNS Server in the Virtual Network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$sourceRole$ $managementIpAddr$ cannot reach the DNS server $destIp$ in the Virtual Network VRF $vrf$'",
+      "Assurance Issue Name": "$sourceRole$ $managementIpAddr$ Lost Connectivity to the DNS Server $destIp$ in the Virtual Network $vrf$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-2-314",
+    "name": "Fabric Devices Connectivity - DNS Overlay",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "fabric_reachability_dns_overlay_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Node Lost Connectivity to the DNS Server in the Physical Network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$sourceRole$ $managementIpAddr$ cannot reach the DNS server $destIp$ in the Physical Network.",
+      "Assurance Issue Name": "$sourceRole$ $managementIpAddr$ Lost Connectivity to the DNS Server $destIp$ in the Physical Network",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-315",
+    "name": "Fabric Devices Connectivity - DNS Underlay",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "fabric_reachability_dns_underlay_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "The Fabric Border cannot reach user-provisioned external URL",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The Fabric Border device $managementIpAddr$ lost connectivity to external URL IP $destIp$",
+      "Assurance Issue Name": "The Fabric Border $managementIpAddr$ cannot reach user-provisioned external URL IP $destIp$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-2-316",
+    "name": "Fabric Devices Connectivity - External Url",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "fabric_reachability_external_url_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless Clients failed to connect - DHCP Server timeout",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients have failed to get an IP address during onboarding. They are not able to get an IP address because the clients are not responding to DHCP messages from the DHCP server",
+      "Assurance Issue Name": "Wireless clients failed to connect ($groupType$: $entityId$) - DHCP Server Timeout",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-3-350",
+    "name": "Wireless Clients failed to connect - DHCP Server timeout",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_dhcp_fail_server_timeout_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to connect - AAA Server Timeout",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients failed to complete the authentication process during the onboarding process because the WLC did not receive a response from the AAA server during the authentication message exchanges. This can be due to the AAA server not responding or a network issue.",
+      "Assurance Issue Name": "Wireless clients failed to connect ($groupType$: $entityId$) - AAA Server Timeout",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-3-351",
+    "name": "Wireless clients failed to connect - AAA Server Timeout",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_auth_fail_aaa_timeout_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to connect - WLC configuration error",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients failed to authenticate during onboarding because of issues in the $entityId$ WLC configuration",
+      "Assurance Issue Name": "Wireless clients failed to connect (WLC: $entityId$) - WLC configuration error",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-3-352",
+    "name": "Wireless clients failed to connect - WLC configuration error",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_auth_fail_wlc_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Stackwise Virtual Link Failure",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Stack Interface $interfaceName$ (Interface description: $interfaceDescription$) and Peer Interface $connectedInterface$ on Network Device $nwDeviceName$ have failed",
+      "Assurance Issue Name": "Stackwise Virtual Link has failed on Network Device $nwDeviceName$ Interface $interfaceName$ (Interface description: $interfaceDescription$).",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-NON-FABRIC_WIRED-1-212",
+    "name": "Stackwise Virtual Link Failure",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "Non-Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "switch_svl_down"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Dual-Active Detection Link Failure",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Stack Interface $interfaceName$ (Interface description: $interfaceDescription$) on Network Device $nwDeviceName$ has failed",
+      "Assurance Issue Name": "Dual-Active Detection Link has failed on Network Device $nwDeviceName$ Interface $interfaceName$ (Interface description: $interfaceDescription$).",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-NON-FABRIC_WIRED-1-213",
+    "name": "Dual-Active Detection Link Failure",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "Non-Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "switch_dad_link_down"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Authentication failures exceed\u00a0the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The network is experiencing excessive authentication failures compared to usual. Clients are experiencing more authentication failures than usual from $serverIp$.",
+      "Assurance Issue Name": "Excessive failures to get Authenticated - At least $pctDeviation$% increase in failures from $serverIp$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-WIRELESS-3-401",
+    "name": "Excessive Authentication failures\u00a0- High deviation from baseline",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_excessive_aaa_failure_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Authentication times exceed\u00a0the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The network is experiencing excessive authentication time compared to usual. Clients are taking longer than the usual time to authenticate to SSID $ssid$.",
+      "Assurance Issue Name": "Excessive time to get Authenticated - At least $pctDeviation$% increase in time on $ssid$ in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-WIRELESS-3-402",
+    "name": "Excessive Authentication times\u00a0- High deviation from baseline",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_excessive_aaa_time_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Association times exceed the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The network is experiencing excessive association time compared to usual. Clients are taking longer than the usual time to associate to SSID $ssid$.",
+      "Assurance Issue Name": "Excessive time to get Associated - At least $pctDeviation$% increase in time on $ssid$ in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-WIRELESS-3-403",
+    "name": "Excessive Association times - High deviation from baseline",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_excessive_assoc_time_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "IP Assignment Failures exceed the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The network is experiencing excessive addressing failures compared to usual. Clients are experiencing more addressing failures than usual from $serverIp$.",
+      "Assurance Issue Name": "Excessive failures to get IP address - At least $pctDeviation$% increase in failures from $serverIp$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-WIRELESS-3-404",
+    "name": "Excessive IP Address Assignment failures\u00a0- High deviation from baseline",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_excessive_dhcp_failure_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Time to be assigned an IP address exceeds the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The network is experiencing excessive authentication time compared to usual. Clients are taking longer than the usual time to authenticate to SSID $ssid$.",
+      "Assurance Issue Name": "Excessive time to get IP Address - At least $pctDeviation$% increase in time on $ssid$ in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-WIRELESS-3-405",
+    "name": "Excessive IP Address Assignment times\u00a0- High deviation from baseline",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_excessive_dhcp_time_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Connection failures exceed the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The network is experiencing a high percentage of onboarding failures compared to usual. Clients are experiencing multiple onboarding failures while connecting to SSID $ssid$.",
+      "Assurance Issue Name": "Excessive failures to connect - At least $pctDeviation$% increase in failures on $ssid$ in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-WIRELESS-3-406",
+    "name": "Excessive Connection failures\u00a0- High deviation from baseline",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_excessive_onboarding_failure_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Connection times exceed the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The network is experiencing excessive onboarding time compared to usual. Clients are taking longer than the usual time to connect to SSID $ssid$.",
+      "Assurance Issue Name": "Excessive time to connect - At least $pctDeviation$% increase in time on $ssid$ in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-WIRELESS-3-407",
+    "name": "Excessive Connection times\u00a0- High deviation from baseline",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_excessive_onboarding_time_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Association failures exceed the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The network is experiencing excessive association failures compared to usual. Clients are experiencing more association failures than usual on SSID $ssid$.",
+      "Assurance Issue Name": "Excessive failures to Associate - At least $pctDeviation$% increase in failures on $ssid$ in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-WIRELESS-3-408",
+    "name": "Excessive Association failures\u00a0- High deviation from baseline",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_excessive_assoc_failure_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "A drop in application group throughput is observed from the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "APs in network are experiencing a drop in Cloud Applications throughput. These radios are in the $band$ band. These radios are located in $siteHierarchy$",
+      "Assurance Issue Name": "At least $pctDeviation$% drop in radio throughput for Cloud Applications from baseline for AP(s) in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-APPLICATIONS-3-409",
+    "name": "Drop in radio throughput for Cloud Applications",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_radio_cloud_app_throughput_drop_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "A drop in application group throughput is observed from the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "APs in network are experiencing a drop in Media Applications throughput. These radios are in the $band$ band. These radios are located in $siteHierarchy$",
+      "Assurance Issue Name": "At least $pctDeviation$% drop in radio throughput for Media Applications from baseline for AP(s) in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-APPLICATIONS-3-410",
+    "name": "Drop in radio throughput for Media Applications",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_radio_media_app_throughput_drop_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "A drop in application group throughput is observed from the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "APs in network are experiencing a drop in Social Applications throughput. These radios are in the $band$ band. These radios are located in $siteHierarchy$",
+      "Assurance Issue Name": "At least $pctDeviation$% drop in radio throughput for Social Applications from baseline for AP(s) in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-APPLICATIONS-3-411",
+    "name": "Drop in radio throughput for Social Applications",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_radio_social_app_throughput_drop_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "A drop in net radio throughput is observed from the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "APs in network are experiencing a drop in total throughput. These radios are in the $band$ band. These radios are located in $siteHierarchy$",
+      "Assurance Issue Name": "At least $pctDeviation$% drop in radio throughput from baseline for AP(s) in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-APPLICATIONS-3-412",
+    "name": "Drop in total radio throuhgput",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_radio_throughput_drop_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output discard on interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output discard Rx $rxDiscardPercent$% Tx $txDiscardPercent$% on interface $interfaceName$ (Interface description: $interfaceDescription$) on device $nwDeviceName$",
+      "Assurance Issue Name": "High input/output discard on interface $interfaceName$ (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-256",
+    "name": "High input/output Discard on Router Interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "router_interface_input_output_discards"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output discard on interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output discard Rx $rxDiscardPercent$% Tx $txDiscardPercent$% on interface $interfaceName$ (Interface description: $interfaceDescription$), Device $nwDeviceName$",
+      "Assurance Issue Name": "High input/output discard on interface $interfaceName$ (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-215",
+    "name": "High input/output Discard on Switch Interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_interface_input_output_discards"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Stack Port Link has failed on Network Device",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Stack Interface $interfaceName$ (Interface description: $interfaceDescription$) and Peer Interface $connectedInterface$ on Network Device $nwDeviceName$ have failed",
+      "Assurance Issue Name": "Stack Port Link has failed on Network Device $nwDeviceName$ Interface $interfaceName$ (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-NON-FABRIC_WIRED-1-214",
+    "name": "Stack Port Link has failed",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "Non-Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "switch_backstack_link_down"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Issues created by single occurrence of syslog event related to power denied for PoE powered device",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "PoE power denied to device connected on $nwDeviceName$ $param1$ (Interface description: $interfaceDescription$) due to $param2$",
+      "Assurance Issue Name": "PoE powered device connected on $nwDeviceName$ $param1$ (Interface description: $interfaceDescription$) got power denied",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-319",
+    "name": "Power denied for PoE powered device",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "network_device_poe_power_deny_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Issues created by multiple occurrences of syslog event related to PoE powered device",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "PoE powered device connected on $nwDeviceName$ $param1$ (Interface description: $interfaceDescription$) is flagged faulty due to $param2$",
+      "Assurance Issue Name": "PoE powered device connected on $nwDeviceName$ $param1$ (Interface description: $interfaceDescription$) is flagged faulty due to $param2$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-320",
+    "name": "PoE powered device flagged faulty",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "network_device_controller_poe_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Issues created by single occurrence of syslog event related to power",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "PoE port on $nwDeviceName$ $param2$ (Interface description: $interfaceDescription$) is in error disabled state. Reason: $param1$ error detected",
+      "Assurance Issue Name": "PoE port on $nwDeviceName$ $param2$ (Interface description: $interfaceDescription$) is in error disabled state",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-321",
+    "name": "PoE port in error state",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "network_device_poe_err_disabled_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "WAN Interface Down",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "WAN Interface $interfaceName$ (Interface description: $interfaceDescription$) connecting service provider is down.",
+      "Assurance Issue Name": "WAN Interface \"$interfaceName$\" (Interface description: $interfaceDescription$) is down on network device \"$nwDeviceName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-1-271",
+    "name": "WAN Interface Down",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "wan_link_down"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output utilization on WAN interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Input/Output utilization Rx $avgInputUtilization$% Tx $avgOutputUtilization$% on WAN interface '$interfaceName$' (Interface description: $interfaceDescription$) exceeded one or more thresholds Rx $rxThreshold$%, Tx $txThreshold$%.",
+      "Assurance Issue Name": "High input/output utilization on Router WAN interface '$interfaceName$' (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-269",
+    "name": "High input/output utilization on Router WAN interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "router_wan_interface_excess_rx_tx_util"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output utilization on WAN interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Input/Output utilization Rx $avgInputUtilization$% Tx $avgOutputUtilization$% on WAN interface '$interfaceName$' (Interface description: $interfaceDescription$) exceeded one or more thresholds Rx $rxThreshold$%, Tx $txThreshold$%.",
+      "Assurance Issue Name": "High input/output utilization on Switch WAN interface '$interfaceName$' (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-217",
+    "name": "High input/output utilization on Switch WAN interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_wan_interface_excess_rx_tx_util"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output discard on WAN interface",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output discards Rx $rxDiscardPercen$% Tx $txDiscardPercent$% on WAN interface '$interfaceName$' (Interface description: $interfaceDescription$). Input/Output discards exceed one or more thresholds Rx $rxThreshold$%, Tx $txThreshold$%.",
+      "Assurance Issue Name": "High input/output discard on Router WAN interface '$interfaceName$' (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-270",
+    "name": "High input/output discard on Router WAN interface",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "router_wan_interface_input_output_discards"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output discard on WAN interface",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output discards Rx $rxDiscardPercent$% Tx $txDiscardPercent$% on WAN interface '$interfaceName$' (Interface description: $interfaceDescription$). Input/Output discards exceed one or more thresholds Rx $rxThreshold$%, Tx $txThreshold$%.",
+      "Assurance Issue Name": "High input/output discard on Switch WAN interface '$interfaceName$' (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-218",
+    "name": "High input/output discard on Switch WAN interface",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "switch_wan_interface_input_output_discards"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "AP has flapped",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "AP $apName$ has flapped",
+      "Assurance Issue Name": "AP $apName$ has flapped",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-107",
+    "name": "AP Flap",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "ap_flap"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "A drop in application group throughput is observed from the computed baseline.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "APs in network are experiencing a drop in Collaboration Applications throughput. These radios are in the $band$ band. These radios are located in $siteHierarchy$",
+      "Assurance Issue Name": "At least $pctDeviation$% drop in radio throughput for Collaboration Applications from baseline for AP(s) in $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-APPLICATIONS-3-413",
+    "name": "Drop in radio throughput for Collaboration Applications",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Applications",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_radio_collaboration_app_throughput_drop_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "INFO",
+    "clientId": "devnetuser",
+    "description": "Sensors failed to connect to the wireless network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" have failed to connect to the wireless network.",
+      "Assurance Issue Name": "Sensors failed to connect to the wireless network from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-4-500",
+    "name": "Sensors - Onboarding Failures",
+    "namespace": "ASSURANCE",
+    "severity": 4,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_onboarding_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors failed to associate during onboarding",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "'$failure_count$' sensors in '$locationName$' failed to associate with the WLAN.",
+      "Assurance Issue Name": "Sensors failed to associate during onboarding in '$locationName$'.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-501",
+    "name": "Sensors - Failed Association during Onboarding",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_onboarding_assoc_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors failed to authenticate during onboarding",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "'$failure_count$' sensors in '$locationName$' failed to authenticate with the WLAN.",
+      "Assurance Issue Name": "Sensors failed to authenticate during onboarding in '$locationName$'.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-502",
+    "name": "Sensors - Failed Authentication during Onboarding",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_onboarding_auth_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors failed to get an IPv4 address",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" have failed to get an IPv4 address from DHCP server.",
+      "Assurance Issue Name": "Failed to get an IPv4 address from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-2-503",
+    "name": "Sensors - DHCP Failures",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_onboarding_ipv4_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors failed to resolve domain name with DNS Server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from location \"$locationName$\" are unable to resolve the given test domain name with the DNS server. This will impact users connectivity.",
+      "Assurance Issue Name": "Failed to resolve domain name with DNS Server from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-504",
+    "name": "Sensors - DNS Resolution Failed",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_dns_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting ping failure to the host. Unreachable Host.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are not able to reach test host. Pings are failing.",
+      "Assurance Issue Name": "Unreachable Host from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-505",
+    "name": "Sensors - Unreachable Host",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_host_ping_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting unreachable Radius server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are reporting slow authentication time from  Radius servers. Clients should be able to authenticate in 3 seconds or less. This slow authentication will lead to poor onboarding experience for users.",
+      "Assurance Issue Name": "Unreachable Radius server from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-2-506",
+    "name": "Sensors - Unreachable Radius",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_radius_server_unreach_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting failed to authenticate with Radius Server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are unable to authenticate with Radius servers.",
+      "Assurance Issue Name": "Failed to authenticate with Radius Server from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-507",
+    "name": "Sensors - Radius Authentication Fail",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_radius_auth_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting unreachable Outlook Web Access host",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are not able to reach the Outlook Web Access host. Pings to the Outlook Web Access hosts are failing.",
+      "Assurance Issue Name": "Unreachable Outlook Web Access host from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-508",
+    "name": "Sensors - Outlook Server Unreachable",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_outlook_server_unreach_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting failed to connect to Outlook Web Access",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are unable to connect to Outlook Web Access.",
+      "Assurance Issue Name": "Failed to connect to Outlook Web Access from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-509",
+    "name": "Sensors - Outlook Server Test Fail",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_outlook_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting unreachable Web server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are not able to reach the Web server host. Pings are failing.",
+      "Assurance Issue Name": "Unreachable Web server from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-510",
+    "name": "Sensors - Web Server Unreachable",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_web_server_unreach_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting failed to load page from Web Server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from  \"$locationName$\" are unable to load a page from Web servers.",
+      "Assurance Issue Name": "Failed to load page from Web Servers from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-511",
+    "name": "Sensors - Web Server Test Failed",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_web_server_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting unreachable Mail server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are not able to reach the Mail server host. Pings are failing.",
+      "Assurance Issue Name": "Unreachable Mail server from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-512",
+    "name": "Sensors - Mail Server Unreachable",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_mailserver_unreach_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting failed to connect to Mail Server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are unable to connect to Mail servers. Users may not be able to use mail services.",
+      "Assurance Issue Name": "Failed to connect to Mail Server from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-513",
+    "name": "Sensors - Mail Server Test Fail",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_mailserver_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting unreachable FTP server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are not able to reach the FTP server host. Pings are failing.",
+      "Assurance Issue Name": "Unreachable FTP server from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-514",
+    "name": "Sensors - FTP Unreachable",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_ftp_unreach_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting failed to transfer file with FTP server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are unable to transfer file with FTP servers. Users may not be able to use ftp services on this server.",
+      "Assurance Issue Name": "Failed to transfer file with FTP server from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-515",
+    "name": "Sensors - FTP Transfer Fail",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_ftp_transfer_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting unable to connect to FTP server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are unable to connect to ftp server.",
+      "Assurance Issue Name": "Unable to connect to FTP server from \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-516",
+    "name": "Sensors - FTP Test Fail",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_ftp_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting clients are failing web authentication test",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" are failing the web authentication test, because of an invalid sensor configuration. Users may also experience web failures if their configuration is similar.",
+      "Assurance Issue Name": "Clients are failing web authentication test from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-517",
+    "name": "Sensors - Web Authentication Fail",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_webauth_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting speed test failed",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported Speed Test Failure.",
+      "Assurance Issue Name": "Speed Test failed from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-518",
+    "name": "Sensors - Speed Test Fail",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_speed_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting speed test generic failure",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported Speed Test failure.",
+      "Assurance Issue Name": "Speed Test generic failure from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-519",
+    "name": "Sensors - Speed Test Generic Error",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_speed_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting speed test HTTP error while accessing query server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" received http error on Speed test server discovery.",
+      "Assurance Issue Name": "Speed Test HTTP error while accessing query server from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-520",
+    "name": "Sensors  - Speed Test HTTP Error",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_speed_http_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting speed test URL error while accessing query server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported url error.",
+      "Assurance Issue Name": "Speed Test URL error while accessing query server from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-521",
+    "name": "Sensors - Speed Test URL Error",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_speed_url_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting speed test query server timeout",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported time out for query server.",
+      "Assurance Issue Name": "Speed Test Query server timeout from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-522",
+    "name": "Sensors - Query Server Timeout",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_speed_timeout_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting speed test NDT server does not exist",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\". reported unavailability of Speed Test server.",
+      "Assurance Issue Name": "Speed Test NDT server does not exist from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-523",
+    "name": "Sensors - No NDT Server",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_speed_ndt_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting speed test websocket error during the test",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported websocket error.",
+      "Assurance Issue Name": "Speed Test Websocket error during the test from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-524",
+    "name": "Sensors - Web Socket Error",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_speed_socket_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting IPSLA test failed",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported IPSLA failure.",
+      "Assurance Issue Name": "IPSLA test failed from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-525",
+    "name": "Sensors - IPSLA Test Fail",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_ipsla_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting IPSLA test  unsupported probe type",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported unsupported probe type.",
+      "Assurance Issue Name": "IPSLA Test - unsupported probe type from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-526",
+    "name": "Sensors - IPSLA Unsupported Probe Type",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_ipsla_unsupported_probe_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting IPSLA test socket error",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" failed to connect to IPSLA responder.",
+      "Assurance Issue Name": "IPSLA Test Socket Error from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-527",
+    "name": "Sensors - IPSLA Socket Error",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_ipsla_socket_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting IPSLA test IP address not received from Cisco DNA Center",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" failed to get IPSLA responder IP.",
+      "Assurance Issue Name": "IPSLA test IP Address Not Received from Cisco DNA Center from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-528",
+    "name": "Sensors - IPSLA No IP Address",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_ipsla_noip_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting IPSLA Test - no response from IPSLA responder",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported no response from responder AP.",
+      "Assurance Issue Name": "IPSLA Test - No Response from IPSLA Responder from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-529",
+    "name": "Sensors - IPSLA No Response",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_ipsla_noresponse_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting speed test uplink test timeout",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported timeout on uplink test.",
+      "Assurance Issue Name": "Speed Test Uplink test timeout from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-530",
+    "name": "Sensors - Speed Test Uplink Timeout",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_uplink_timeout_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting speed test uplink test proxy error",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported uplink proxy error.",
+      "Assurance Issue Name": "Speed Test Uplink test proxy error from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-531",
+    "name": "Sensors- Speed Test Uplink Proxy Error",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_uplink_proxy_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting IPerf failure with unknown reason",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported IPerf failures with unknown reason.",
+      "Assurance Issue Name": "IPerf Test - Internal error caused by unknown reason from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-532",
+    "name": "Sensors - IPerf Undefined Error",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_iperf_undefined_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting IPerf failure due to invalid config",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported IPerf failures due to invalid configuration.",
+      "Assurance Issue Name": "IPerf Test - Failure caused by invalid config from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-533",
+    "name": "Sensors - IPerf Invalid Config Error",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_iperf_invalid_config_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting IPerf test failures due to network error",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported IPerf failures due to network error.",
+      "Assurance Issue Name": "IPerf Test - Failure caused by network error from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$deviceType$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-534",
+    "name": "Sensors - IPerf Test Network Error",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_iperf_network_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Multiple sensors are reporting IPerf test failures due to busy server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$failure_count$ sensors from \"$locationName$\" reported IPerf servers are busy.",
+      "Assurance Issue Name": "IPerf Test - Failure caused by busy server from location \"$locationName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Location": "$locationName$",
+      "Type": "$deviceType$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SENSORS-3-535",
+    "name": "Sensors - IPerf Server busy",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Sensors",
+    "tags": [
+      "ASSURANCE",
+      "global_sensor_iperf_server_busy_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "2.4 GHz radio on AP(s) are experiencing high utilization.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The 2.4 GHz radio on the AP \"$apname$\" has exceeded the $threshold$% threshold and is currently experiencing $utilization$% utilization. This is impacting $clientCount$ client(s).",
+      "Assurance Issue Name": "The 2.4 GHz radio $radioSlot$ on AP $apname$ is experiencing high utilization.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-108",
+    "name": "Radio High Utilization (2.4GHz)",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "radio_24_util_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Failure to install Access Contract (SGACL) access policy on the device",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Failure to install an access policy for SGT '$sgName$' ('$sgtValue$').  Policy rule error found in SGACL '$sgaclName$', ACE rule '$aceName$'.",
+      "Assurance Issue Name": "Failed to install IP SGACL '$sgaclName$' for SGT '$sgName$' due to ACE '$aceName$' error",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-264",
+    "name": "Access Contract (SGACL) access policy installation failed on the device",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "sgacl_install_error_ace"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Excessive time lag between Cisco DNA Center and Device",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The time on Cisco DNA Center and Device \"$nwDeviceName$\" has drifted too far apart. Cisco DNA Center cannot process the device data accurately if the time difference is more than 3 minutes.",
+      "Assurance Issue Name": "Excessive time lag between Cisco DNA Center and device \"$nwDeviceName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-260",
+    "name": "Device time has drifted from Cisco DNA Center",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "device_time_drift"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Failure to install an access policy for SGT",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Failure to install an SGACL access policy for SGT name:'$sgName$', ID:('$sgtValue$').",
+      "Assurance Issue Name": "Failure to install an SGACL access policy for SGT.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-263",
+    "name": "Failure to install an access policy for SGT",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "sgacl_install_error"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "SGT access policy download failed on the device",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Failed to download SGACL ACEs for SGT '$sgName$' ('$sgtValue$').",
+      "Assurance Issue Name": "Failed to download SGACL ACEs for SGT",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-262",
+    "name": "SGT access policy download failed on the device",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "download_sgacl_aces"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Issues for TCAM exhaustion in layer 2, layer 3, QoS and SGACL",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The Device \"$nwDeviceName$\" is Experiencing TCAM Exhaustion $max_tcam_util$%. $rootCause$ TCAM Usage is $tcam_actual$",
+      "Assurance Issue Name": "This Device is Experiencing TCAM Exhaustion $max_tcam_util$%. $rootCause$ TCAM Usage is $tcam_actual$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-1-216",
+    "name": "TCAM Utilization High Issues",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "tcam_util_high"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Unable to download SGT access policy from the Policy Server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Failure to download the source list for access policy for SGT '$sgName$' ('$sgtValue$').",
+      "Assurance Issue Name": "Failure to download the source list for access policy for SGT.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-266",
+    "name": "Unable to download SGT access policy from the Policy Server",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "sgacl_download_source_list_error"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Uninstall of SGT access policy failed on the device",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Failure to uninstall an SGACL access policy for SGT '$sgName$' ('$sgtValue$').",
+      "Assurance Issue Name": "Failure to uninstall an SGACL access policy for SGT",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-265",
+    "name": "Uninstall of SGT access policy failed on the device",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "sgacl_uninstall_error"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "SGACL for policy could not be saved as the SGACL table is full",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Policy with source SGT $sourceSgt$ and destination SGT $destinationSgt$ could not be saved on device $nwDeviceName$ as the SGACL table is full.",
+      "Assurance Issue Name": "SGACL for policy sgt $sourceSgt$, dgt $destinationSgt$ could not be saved as the SGACL table is full.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-261",
+    "name": "SGACL TCAM table is full.",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "sgacl_hash_full_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Issues created by single occurrence of syslog event related to high temperature",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The following syslog $rootCause$ is received indicating high temperature conditions on device $managementIpAddr$",
+      "Assurance Issue Name": "Syslog received indicating high temperature on device $managementIpAddr$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-267",
+    "name": "Issues based on Syslog events - High Temperature",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "network_device_high_temp_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "INFO",
+    "clientId": "devnetuser",
+    "description": "Wireless clients took a long time to connect - Excessive time due to authentication timeouts",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients were taking longer than expected to connect to WLC '$entityId$' due to excessive authentication time caused by the $groupType$ '$entityId$'.<ul><li>Onboarding took an average of $avgTotalTime$ (expected time should be less than $recentTotalThresholdTime$ seconds).</li><li>Authentication and Key Exchange took an average of $avgAuthTime$ (expected time should be less than $recentAuthThresholdTime$ seconds).</li></ul><br>",
+      "Assurance Issue Name": "Wireless clients took a long time to connect ($groupType$: $entityId$) - Excessive time due to Authentication timeouts",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-4-365",
+    "name": "Excessive time for onboarding - Excessive time due to auth timeouts",
+    "namespace": "ASSURANCE",
+    "severity": 4,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_excess_auth_network_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients excluded - IP Theft Issue",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients were rejected and excluded by \"$entityId$\" WLC for reusing the IP address of other active clients.",
+      "Assurance Issue Name": "Wireless clients excluded (WLC: $entityId$) - IP Theft Issue",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-362",
+    "name": "Wireless clients excluded - IP Theft Issue",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_exclude_ip_theft_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to connect - AAA Server Rejected Clients",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients failed to complete authentication during onboarding. This happened because the AAA Server rejected the clients during the authentication process. The $groupType$ is $groupBy$.",
+      "Assurance Issue Name": "Wireless clients failed to connect ($groupType$: $entityId$) - AAA Server Rejected Clients",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-357",
+    "name": "Wireless clients failed to connect - AAA Server Rejected Clients",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_auth_fail_aaa_rej_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to connect - Client PMK Not Found",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients failed to connect to SSID through \"$entityId$\" WLC because the Pairwise Master Keys (PMKs) of the clients was not found on the AP and WLC.",
+      "Assurance Issue Name": "Wireless clients failed to connect (WLC: $entityId$) - Client PMK Not Found",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-359",
+    "name": "Wireless clients failed to connect - Client PMK Not Found",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_auth_fail_pmk_notfound_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to connect - Failed to authenticate due to Client Timeouts",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients failed to complete authentication during onboarding because the WLC did not receive a response from the client during the authentication message exchanges. This can happen if the wireless client itself doesn't respond or there is an RF issue. The AAA server is responding so it's not a server side issue.",
+      "Assurance Issue Name": "Wireless clients failed to connect - Failed to authenticate due to Client Timeout",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-356",
+    "name": "Wireless clients failed to connect - Failed to authenticate due to Client Timeouts",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_auth_fail_client_timeout_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to connect - Failed to get an IP Address due to Client Timeouts",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients have failed to get an IP address during onboarding. They are not able to get an IP address because the clients are not responding to DHCP messages from the DHCP server.<br>The clients were trying to connect to APs in $groupType$: $entityId$ or $siteHierarchy$",
+      "Assurance Issue Name": "Wireless clients failed to connect - Failed to get an IP Address due to Client Timeout",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-354",
+    "name": "Wireless clients failed to connect - Failed to get an IP Address due to Client Timeouts",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_dhcp_fail_client_timeout_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to connect - Failed to get an IP Address due to DHCP Server or Client Timeouts",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients have failed to get an IP address during onboarding. They are not able to get an IP address because the clients or the DHCP server are not responding to DHCP messages.<br>The clients were trying to connect to APs in $groupType$ : $entityId$ or $siteHierarchy$",
+      "Assurance Issue Name": "Wireless clients failed to connect - DHCP Timeout",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-355",
+    "name": "Wireless clients failed to connect - Failed to get an IP Address due to DHCP Server or Client Timeout",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_dhcp_fail_dhcp_timeout_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to connect and were excluded - The clients' PSK did not match the configured WLAN PSK",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients failed to complete authentication during onboarding and were excluded. This happened because the PSK provided by the clients did not match the configured PSK. The clients were connected to SSID '$groupBy$'.",
+      "Assurance Issue Name": "Wireless client failed to connect (SSID : $entityId$) - Incorrect PSK",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-369",
+    "name": "Wireless clients failed to connect - Incorrect PSK",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_exclude_wrong_psk_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to connect - Security Parameter mismatch during authentication",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients failed to authenticate and complete authentication because the security parameters have a mismatch issue.",
+      "Assurance Issue Name": "Wireless clients failed to connect (SSID: $entityId$) - Security Parameter Mismatch",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-358",
+    "name": "Wireless clients failed to connect - Security Parameter Mismatch",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_auth_fail_sec_param_mismatch_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to roam - Clients were excluded due to Client Exclusion Policies on the WLC",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients failed to roam in the last \"$timeWindowInMin$\" minutes. The new \"$entityId$\" WLC failed to obtain a configuration parameter from an external server for these clients.",
+      "Assurance Issue Name": "Wireless clients failed to roam (WLC: $entityId$) - External Errors",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-360",
+    "name": "Wireless clients failed to roam - Client Exclusion Policies on the WLC",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_roam_fail_gen_error_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to roam - Clients were Excluded before roaming",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients unable to roam. Clients have been excluded by \"$entityId$\" WLC.",
+      "Assurance Issue Name": "Wireless clients failed to roam (WLC: {entityId}) - Clients were Excluded before roaming",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-363",
+    "name": "Wireless clients failed to roam - Clients were Excluded before roaming",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_exclude_roam_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Wireless clients failed to roam between APs - WLC configuration mismatch",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Wireless clients failed to roam in the last $timeWindowInMin$ minutes to \"$entityId$\" WLC. WLAN configuration mismatches between WLCs prevented the roam completing successfully.",
+      "Assurance Issue Name": "Wireless clients failed to roam between APs (WLC: $entityId$) - WLC configuration mismatch",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-361",
+    "name": "Wireless clients failed to roam - WLC configuration mismatch",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_roam_fail_wlc_config_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "INFO",
+    "clientId": "devnetuser",
+    "description": "Wireless clients took a long time to connect - Excessive time due to DHCP server failures",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients were taking longer than expected to onboard due to excessive time in getting an IP address due to issues on the DHCP Server. ($groupType$: $entityId$) <ul><li>Onboarding took an average of $avgTotalTime$ (expected time should be less than $recentTotalThresholdTime$ seconds).</li><li>IP Addressing took an average of $avgDhcpTime$ (expected time should be less than $recentDhcpThresholdTime$ seconds).</li></ul>",
+      "Assurance Issue Name": "Wireless clients took a long time to connect ($groupType$: $entityId$) - Excessive time due to DHCP server failures",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-4-368",
+    "name": "Wireless clients took a long time to connect - Excessive time due to DHCP server failures",
+    "namespace": "ASSURANCE",
+    "severity": 4,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_excess_dhcp_server_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "INFO",
+    "clientId": "devnetuser",
+    "description": "Wireless clients took a long time to connect - Excessive time due to failed credentials",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients were taking longer than expected time to connect to SSID due to excessive authentication time with AAA Server.($groupType$: $entityId$) <ul><li>These clients took $avgTotalTime$ to connect, longer than expected onboarding time of $recentTotalThresholdTime$ seconds.</li><li>These clients took $avgAuthTime$ to authenticate, longer than expected authentication and 4-way handshake time of $recentAuthThresholdTime$ seconds.</li></ul><br>The AAA server '$entityId$' is taking longer than usual time to respond. There may be an issue with the AAA server or the network causing the delays.",
+      "Assurance Issue Name": "Wireless clients took a long time to connect ($groupType$: $entityId$) - Excessive time due to failed credential",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-4-364",
+    "name": "Wireless clients took a long time to connect - Failed credentials",
+    "namespace": "ASSURANCE",
+    "severity": 4,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_excess_auth_aaa_fail_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "INFO",
+    "clientId": "devnetuser",
+    "description": "Wireless clients took a long time to connect - Excessive time due to WLC failures",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Clients were taking longer than expected time to connect to SSID due to excessive authentication time with '$entityId$' WLC.<ul><li>These clients took $avgTotalTime$ to connect, longer than expected onboarding time of 10.0 seconds.</li><li>These clients took $avgAuthTime$ to authenticate, longer than expected authentication and 4-way handshake time of 3.0 seconds.</li></ul><br>There may be an issue with the AAA server or the network causing the delays.",
+      "Assurance Issue Name": "Wireless clients took a long time to connect (WLC: $entityId$) - Excessive time due to WLC failures",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-4-366",
+    "name": "Wireless clients took a long time to connect - WLC failures",
+    "namespace": "ASSURANCE",
+    "severity": 4,
+    "source": null,
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_client_excess_auth_wlc_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "APs (2.4 GHz) on a floor are experiencing high interference or noise",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$numAps$ AP(s) on 2.4 GHz radio at $siteHierarchy$ are experiencing high interference or noise. This may result in poor wireless experience for the clients connected to the APs",
+      "Assurance Issue Name": "$numAps$ AP(s) (2.4 GHz) at $siteHierarchy$ had high interference or noise",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-109",
+    "name": "Poor RF (2.4 GHz) on a floor",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "global_radio_24_poor_rf_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "APs (5 GHz) on a floor are experiencing high interference or noise",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "$numAps$ AP(s) on 5 GHz radio at $siteHierarchy$ are experiencing high interference or noise. This may result in poor wireless experience for the clients connected to the APs",
+      "Assurance Issue Name": "$numAps$ AP(s) (5 GHz) at $siteHierarchy$ had high interference or noise",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-110",
+    "name": "Poor RF (5 GHz) on a floor",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "global_radio_5_poor_rf_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "The 2.4GHz radio on the AP has no transmit/receive for a period of time",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "2.4 GHz radio on AP $apname$ has not seen any receive activity for the past $threshold$ minutes. There has been no data or management traffic on this radio.",
+      "Assurance Issue Name": "No activity on 2.4 GHz radio $radioSlot$ on $apname$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-111",
+    "name": "Radio No Activity (2.4 GHz)",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "radio_24_hung_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "The 5GHz radio on the AP has no transmit/receive for a period of time",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "5 GHz radio on AP $apname$ has not seen any receive activity for the past $threshold$ minutes. There has been no data or management traffic on this radio.",
+      "Assurance Issue Name": "No activity on 5 GHz radio $radioSlot$ on $apname$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-112",
+    "name": "Radio No Activity (5 GHz)",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "radio_5_hung_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "INFO",
+    "clientId": "devnetuser",
+    "description": "Client Proximity report notification. This event will be triggered only when the execution for the Client Proximity API will complete.",
+    "details": {
+      "client_proximity": [
+        {
+          "client_info": [
+            {
+              "ap_name": "string",
+              "end_time": "string",
+              "location": "string",
+              "location_id": "string",
+              "start_time": "string",
+              "users_info": [
+                {
+                  "client_mac": "string",
+                  "client_type": "string",
+                  "client_user": "string"
+                }
+              ]
+            }
+          ],
+          "mac_address": "string"
+        }
+      ],
+      "end_time": "string",
+      "error_code": "string",
+      "error_desc": "string",
+      "number_days": "string",
+      "start_time": "string",
+      "time_resolution": "string",
+      "user_name": "string"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-3-506",
+    "name": "Client Proximity Report",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Clients",
+    "tags": [
+      "Network",
+      "clients",
+      "ASSURANCE"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Node Port Channel Interface Down",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Interface '$interfaceName$' (Interface description: $interfaceDescription$) on fabric '$fabricDeviceOrRole$' node '$nwDeviceName$' is down",
+      "Assurance Issue Name": "Status down on '$fabricOrDeviceRole$' node fabric-facing port channel '$interfaceName$' (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SDA-1-329",
+    "name": "Fabric Devices Connectivity - Port Channel Down",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "fabric_poch_link_down",
+      "ASSURANCE"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Node Lost Connectivity to the AAA Server",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Fabric '$fabricOrDeviceRole$' node Lost Connectivity to AAA Server '$serverName$'",
+      "Assurance Issue Name": "Fabric '$fabricOrDeviceRole$' node Lost Connectivity to AAA Server '$serverName$'",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-SDA-1-330",
+    "name": "Fabric Devices Connectivity - AAA Server",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "fabric_aaa_server_down_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "Fabric Border Lost Connectivity to the Internet in the Virtual Network",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "There is a connectivity failure between the Fabric Border $managementIpAddr$ and the Internet URL $internetUrl$ in the Virtual Network $l3VN$, which is impacting many services from functioning properly",
+      "Assurance Issue Name": "Fabric Border $managementIpAddr$ in Fabric $fabricName$ Lost Internet Connectivity in the Virtual Network $l3VN$ to $internetUrl$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-SDA-1-321",
+    "name": "Fabric Devices Connectivity - Internet",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_internet_connectivity_ipsla_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "AP disconnected from WLC",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The AP $apName$ is CAPWAP disconnected from WLC $connectedWlcName$ and is no longer joined to it. The WLC has missed the AP\u2019s CAPWAP heartbeat message. At the time, AP was connected to switch $switchName$ - port $portId$",
+      "Assurance Issue Name": "AP $apName$ disconnected from WLC",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-106",
+    "name": "AP disconnected from WLC",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "ap_down"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "6 GHz radio on AP(s) are experiencing high utilization",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The 6GHz radio on the AP $apname$ has exceeded the $threshold$% threshold and is currently experiencing $utilization$% utilization. This is impacting $clientCount$ client(s).",
+      "Assurance Issue Name": "The 6GHz radio on AP $apname$ is experiencing high utilization",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-113",
+    "name": "Radio High Utilization (6GHz)",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Topology",
+    "tags": [
+      "ASSURANCE",
+      "radio_6_util_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "The 6GHz radio on the AP has no transmit/receive for a period of time",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "6 GHz radio on AP $apname$ has not seen any receive activity for the past $threshold$ minutes. There has been no data or management traffic on this radio.",
+      "Assurance Issue Name": "No activity on 6 GHz radio $radioSlot$ on $apname$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-114",
+    "name": "Radio No Activity (6 GHz)",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "radio_6_hung_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "APs (6 GHz) on a floor are experiencing high interference or noise",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "AP(s) on 6 GHz radio at $siteHierarchy$ are experiencing high interference or noise. This may result in poor wireless experience for the clients connected to the APs",
+      "Assurance Issue Name": "AP(s) (6 GHz) at $siteHierarchy$ had high interference or noise",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-115",
+    "name": "Poor RF (6 GHz) on a floor",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "global_radio_6_poor_rf_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Border lost connectivity to the Control Plane in the Network.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "LISP Pub-sub session on Fabric $fabricOrDeviceRole$ $nwDeviceName$ in fabric site $fabricName$ to $role$ Control Plane $deviceName$ for Virtual Network $vrf$ is down.",
+      "Assurance Issue Name": "LISP Pub-sub session on Fabric $fabricOrDeviceRole$ $nwDeviceName$ in fabric site $fabricName$ to $role$ Control Plane $deviceName$ for Virtual Network $vrf$ is down",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$nwDeviceName$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-324",
+    "name": "Fabric Control Plane - LISP Pubsub Session Status",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_pubsub_session_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Device lost connectivity to Control Plane network.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "LISP session on Fabric $fabricOrDeviceRole$ $nwDeviceName$ in fabric site $fabricName$ to Control Plane $deviceName$ is down.",
+      "Assurance Issue Name": "LISP session on Fabric $fabricOrDeviceRole$ $nwDeviceName$ in fabric site $fabricName$ to $role$ Control Plane $deviceName$ is down",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$nwDeviceName$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-323",
+    "name": "Fabric Control Plane - LISP Session Status",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_lisp_session_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "INFO",
+    "clientId": "devnetuser",
+    "description": "Wireless or Wired Clients have been detected connecting to the network the first time or every time depending on configuration chosen",
+    "details": {
+      "Assurance Issue Details": "Client $mac$ has connected to Device $name$ at time $timestamp$ in location $location$",
+      "Assurance Issue Name": "Client $mac$ has connected to Device $name$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-CLIENTS-4-370",
+    "name": "Clients detected connecting on network",
+    "namespace": "ASSURANCE",
+    "severity": 4,
+    "source": "",
+    "subDomain": "Clients",
+    "tags": [
+      "ASSURANCE",
+      "client_tracking"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "2.4 GHz radio on AP is down.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The 2.4 GHz radio on the AP \"$apname$\" is down.",
+      "Assurance Issue Name": "The 2.4 GHz radio $radioSlot$ on AP $apname$ is down.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-107",
+    "name": "Radio Down (2.4 GHz)",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "radio_24_down_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "5 GHz radio on AP is down.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The 5 GHz radio on the AP \"$apname$\" is down.",
+      "Assurance Issue Name": "The 5 GHz radio $radioSlot$ on AP $apname$ is down.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-108",
+    "name": "Radio Down (5 GHz)",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "radio_5_down_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "6 GHz radio on AP is down.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The 6 GHz radio on the AP \"$apname$\" is down.",
+      "Assurance Issue Name": "The 6 GHz radio $radioSlot$ on AP $apname$ is down.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-109",
+    "name": "Radio Down (6 GHz)",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "radio_6_down_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "BGP Connectivity is Down with Neighbor",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Device:$nwDeviceName$ - BGP is down with neighbor $remoteIP$",
+      "Assurance Issue Name": "BGP is Down on Device $nwDeviceName$ with Neighbor $remoteIP$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-2-272",
+    "name": "Network Device Interface Connectivity - BGP Down",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Issues",
+    "tags": [
+      "ASSURANCE",
+      "BGP_Down"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "The RADIUS server is not responding to requests being made from the network device, or the responses are not being received by the network device.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The RADIUS server $aaaServerIp$:$destPort$ is not responding to requests being made from the network device $deviceIp$",
+      "Assurance Issue Name": "Radius server is not responding.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-2-273",
+    "name": "Radius server is not responding",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": "",
+    "subDomain": "Issues",
+    "tags": [
+      "radius_error_trigger",
+      "ASSURANCE"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Default route on control plane is lost.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Default route on Fabric Border $deviceName$ in Fabric Site $fabricName$ for Virtual Network $vrf$ is unavailable on Control Plane $nwDeviceName$",
+      "Assurance Issue Name": "Default route on Fabric Border $deviceName$ in Fabric Site $fabricName$ for Virtual Network $vrf$ is unavailable on Control Plane $nwDeviceName$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$nwDeviceName$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-325",
+    "name": "Fabric Devices Connectivity - Default Route",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "fabric_default_route_reg_trigger",
+      "ASSURANCE"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Remote internet route on control plane is lost.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Remote internet service across SD-Access Transit $fabricName$ on Fabric Border $deviceName$ for Virtual Network $vrf$ is unavailable on the Control Plane $nwDeviceName$.",
+      "Assurance Issue Name": "Remote internet service across SD-Access Transit $fabricName$ on Fabric Border $deviceName$ for Virtual Network $vrf$ is unavailable on the Control Plane $nwDeviceName$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$nwDeviceName$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-326",
+    "name": "Fabric Devices Connectivity - Remote Internet Route",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "fabric_remote_route_reg_trigger",
+      "ASSURANCE"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Cisco TrustSec Environment data is not complete.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Cisco TrustSec environment data is not complete on Fabric '$fabricOrDeviceRole$' node '$nwDeviceName$' in Fabric site '$fabricName$'",
+      "Assurance Issue Name": "Cisco TrustSec environment data is not complete on Fabric '$fabricOrDeviceRole$' node '$nwDeviceName$' in Fabric site '$fabricName$'",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$nwDeviceName$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-SDA-1-331",
+    "name": "Cisco TrustSec environment data download status",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "SDA",
+    "tags": [
+      "fabric_cts_env_data_download_incomplete_trigger",
+      "ASSURANCE"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "This issue is raised when the amount of failures to roam is higher than the baseline. The baseline is generated using Machine Learning models built for this network.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "The network is experiencing a high percentage of roaming failures compared to usual. Clients are experiencing multiple roaming failures while roaming on SSID $ssid$ to destination site $siteHierarchy$.",
+      "Assurance Issue Name": "Excessive failures to roam - At least $pctDeviation$% increase in failures on $ssid$ to destination $siteHierarchy$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-WIRELESS-2-414",
+    "name": "Excessive failures to roam - High deviation from baseline",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Wireless",
+    "tags": [
+      "ASSURANCE",
+      "global_wireless_kairos_excessive_roaming_failure_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "A user defined issue has been triggered",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "User defined issue has been triggered for \"$nwDeviceName$\"",
+      "Assurance Issue Name": "User defined issue has been triggered for \"$nwDeviceName$\"",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-NETWORKS-2-219",
+    "name": "User Defined Issue Notification",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "user_defined_issue"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "BGP session down on border with Control Plane in Fabric Site.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "BGP neighborship on Fabric Border $nwDeviceName$ in $fabricOrTransitType$ Fabric Site $fabricName$ with Control Plane $deviceName$ is down.",
+      "Assurance Issue Name": "BGP neighborship on Fabric Border $nwDeviceName$ in $fabricOrTransitType$ Fabric Site $fabricName$ with Control Plane $deviceName$ is down.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$nwDeviceName$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-327",
+    "name": "BGP session Status to Fabric Control Plane",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "fabric_bgp_session_state_fcp_down_trigger",
+      "ASSURANCE"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "BGP session down on border connected to SD-Access Transit.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "BGP neighborship on Fabric Border $nwDeviceName$ in SD-Access Transit with Transit Control Plane $deviceName$ is down.",
+      "Assurance Issue Name": "BGP neighborship on Fabric Border $nwDeviceName$ in SD-Access Transit with Transit Control Plane $deviceName$ is down.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$nwDeviceName$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-328",
+    "name": "BGP session Status to Transit Control Plane",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "fabric_bgp_session_state_tcp_down_trigger",
+      "ASSURANCE"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "BGP session down on border for IP Transit peer in site.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "BGP neighborship on Fabric Border $nwDeviceName$ in Fabric Site $fabricName$ with $destIp$ is down.",
+      "Assurance Issue Name": "BGP neighborship on Fabric Border $nwDeviceName$ in Fabric Site $fabricName$ with $destIp$ is down.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$nwDeviceName$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-329",
+    "name": "BGP session Status to Peer Device",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "fabric_bgp_session_state_peer_down_trigger",
+      "ASSURANCE"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Extranet policy status is down",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Extranet Policy $enetPolicy$ is down on Fabric $role$ Control Plane $nwDeviceName$",
+      "Assurance Issue Name": "Fabric Extranet policy status",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-330",
+    "name": "Fabric Extranet policy status",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_enet_policy_status_failed_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "The Third Party Device is unreachable from the Cisco DNA Center via ICMP or SNMP",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Third Party Device $managementIpAddr$ Is Unreachable From Controller",
+      "Assurance Issue Name": "This Third Party Device $nwDeviceName$ is unreachable from controller. The device role is $fabricOrDeviceRole$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-NON-FABRIC_WIRED-1-273",
+    "name": "Third Party Device unreachable",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "Non-Fabric Wired",
+    "tags": [
+      "ASSURANCE",
+      "thirdparty_unreachable"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output error on interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output error Rx $rxErrorPercent$% Tx $txErrorPercent$% on interface $interfaceName$ (Interface description: $interfaceDescription$), Device $nwDeviceName$",
+      "Assurance Issue Name": "High input/output error on interface $interfaceName$ (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-274",
+    "name": "High input/output error on Third Party Device interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "thirdparty_interface_input_output_errors"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output discard on interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output discard Rx $rxDiscardPercent$% Tx $txDiscardPercent$% on interface $interfaceName$ (Interface description: $interfaceDescription$), Device $nwDeviceName$",
+      "Assurance Issue Name": "High input/output discard on interface $interfaceName$ (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-275",
+    "name": "High input/output discard on Third Party Device interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "thirdparty_interface_input_output_discards"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output utilization on interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output utilization Rx $avgInputUtilization$% Tx $avgOutputUtilization$% on interface $interfaceName$ (Interface description: $interfaceDescription$), Device $nwDeviceName$",
+      "Assurance Issue Name": "High input/output utilization on interface $interfaceName$ (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-276",
+    "name": "High input/output utilization on Third Party Device interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "thirdparty_interface_excess_rx_tx_util"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output discard on WAN interface",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "High Input/Output discards Rx $rxDiscardPercent$% Tx $txDiscardPercent$% on WAN interface '$interfaceName$' (Interface description: $interfaceDescription$). Input/Output discards exceed one or more thresholds Rx $rxThreshold$%, Tx $txThreshold$%.",
+      "Assurance Issue Name": "High input/output discard on Third Party Device WAN interface '$interfaceName$' (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-277",
+    "name": "High input/output discard on Third Party Device WAN interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "thirdparty_wan_interface_input_output_discards"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "High input/output utilization on WAN interfaces",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Input/Output utilization Rx $avgInputUtilization$% Tx $avgOutputUtilization$% on WAN interface '$interfaceName$' (Interface description: $interfaceDescription$) exceeded one or more thresholds Rx $rxThreshold$%, Tx $txThreshold$%.",
+      "Assurance Issue Name": "High input/output utilization on Third Party Device WAN interface '$interfaceName$' (Interface description: $interfaceDescription$)",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-278",
+    "name": "High input/output utilization on Third Party Device WAN interfaces",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "thirdparty_wan_interface_excess_rx_tx_util"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "LISP session status from Control Plane to fabric node is down",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "LISP session on $role$ Control Plane $nwDeviceName$ is down",
+      "Assurance Issue Name": "LISP session status from $role$ Control Plane to fabric node is down",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-332",
+    "name": "Fabric LISP session status on Control Plane node",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_lisp_session_down_global_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "LISP PubSub session status between border node and control/transit control plane node.One issue is generated for each pair of border and control plane.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "LISP PubSub session on Fabric Border $nwDeviceName$ in Fabric site $fabricName$ to $role$ Control Plane $deviceName$ is down",
+      "Assurance Issue Name": "Fabric LISP PubSub session status is down",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-333",
+    "name": "Fabric LISP PubSub session status is down",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_pubsub_session_global_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Internet Availability monitors default route on external borders and registers that with the control plane node within a LISP/PUBSUB site. One issue is generated for each pair of border and control plane.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Internet service on Fabric Border $deviceName$ in Fabric Site $fabricName$ is unavailable on $role$ Control Plane $nwDeviceName$",
+      "Assurance Issue Name": "Fabric Border node internet is unavailable",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-334",
+    "name": "Fabric Border node internet is unavailable",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_default_route_down_global_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Remote Internet Availability monitors whether remote fabric sites are able to provide backup internet through SDA-Transit connected Borders within a LISP/PUBSUB site.One issue is generated for each pair of border and control plane.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Remote internet service across SD-Access Transit $fabricName$ on Fabric Border $deviceName$ is unavailable on the Control Plane $nwDeviceName$",
+      "Assurance Issue Name": "Fabric Border node remote internet is unavailable",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-335",
+    "name": "Fabric Border node remote internet is unavailable",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_remote_route_reg_global_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "BGP session is down on border node with IP Transit peer. One issue is generated for each pair of border and control plane.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "BGP neighborship on Fabric Border $nwDeviceName$ in Fabric Site $fabricName$ with $destIp$ is down",
+      "Assurance Issue Name": "Fabric BGP session status is down with Peer Device",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-336",
+    "name": "Fabric BGP session status is down with Peer Device",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": null,
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_bgp_session_state_peer_down_global_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "VNI(s) Down on Fabric Node",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "VNI(s) are down on $fabricOrDeviceRole$ $nwDeviceName$ in $fabricOrTransitType$ Fabric Site $fabricName$",
+      "Assurance Issue Name": "VNI(s) Down on Fabric Node",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-343",
+    "name": "VNI(s) Down on Fabric Node",
+    "namespace": "DNACENTER",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_vni_down_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "NVE Peer is missing from a fabric node device in an EVPN protocol network.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "NVE Peer(s) are not present on $fabricOrDeviceRole$ $nwDeviceName$ in $fabricOrTransitType$ Fabric Site $fabricName$",
+      "Assurance Issue Name": "Expected Peer not present on Fabric Node",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-342",
+    "name": "Expected Peer not present on Fabric Node",
+    "namespace": "DNACENTER",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_nve_peer_missing_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "BGP session is down between fabric node and Spine role fabric node in Fabric Site.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "BGP neighborship on Fabric device $nwDeviceName$ in Fabric Site $fabricName$ with Spine $deviceName$ is down",
+      "Assurance Issue Name": "BGP Session to Spine Node Down",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-FABRIC_WIRED-1-340",
+    "name": "BGP Session to Spine Node Down",
+    "namespace": "DNACENTER",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_bgp_session_state_spine_down_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "AP is experiencing high CPU utilization",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "CPU utilization for the AP $apName$ has exceeded the $threshold$% threshold. This issue is potentially impacting $clientCount$ client(s)",
+      "Assurance Issue Name": "AP $apName$ is experiencing high CPU utilization",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-3-103",
+    "name": "AP CPU High Utilization",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": null,
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "ap_cpu_threshold_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "WARN",
+    "clientId": "devnetuser",
+    "description": "Business Relevant applications are experiencing network latencies higher than normal",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "Application '$applicationName$' is experiencing high network latency on interface '$nwInterfaceName$'.",
+      "Assurance Issue Name": "Network Latency for application '$applicationName$' is above the threshold value of $threshold$ ms on network device $exporterIpAddress$.",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-APPLICATIONS-3-600",
+    "name": "Application Latency Issues",
+    "namespace": "ASSURANCE",
+    "severity": 3,
+    "source": "",
+    "subDomain": "Applications",
+    "tags": [
+      "ASSURANCE",
+      "Application_Experience_Issues_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Border Lost Connectivity to the  Multicast RP in the Virtual Network. One issue is generated for each pair of Border and RP.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "There is a connectivity failure between the Fabric Border $managementIpAddr$ and the Multicast RP $destIp$, which is impacting many services from functioning properly",
+      "Assurance Issue Name": "Fabric Border $managementIpAddr$ Lost Connectivity to the Multicast RP $destIp$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-SDA-1-345",
+    "name": "Fabric Devices Connectivity - Multicast RP",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_connectivity_multicast_overlay_global_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ALERT",
+    "clientId": "devnetuser",
+    "description": "Fabric Border Lost Connectivity to the  Multicast RP in the Virtual Network. Unique issues are generated for each VN.",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "There is a connectivity failure between the Fabric Border $managementIpAddr$ and the Multicast RP $destIp$ in the Virtual Network $l3VN$, which is impacting many services from functioning properly",
+      "Assurance Issue Name": "Fabric Border $managementIpAddr$ Lost Connectivity to the Multicast RP $destIp$ in the Virtual Network $l3VN$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Connectivity",
+    "eventId": "NETWORK-SDA-1-322",
+    "name": "Fabric Devices Connectivity - Multicast RP (per VN)",
+    "namespace": "ASSURANCE",
+    "severity": 1,
+    "source": "",
+    "subDomain": "SDA",
+    "tags": [
+      "ASSURANCE",
+      "fabric_connectivity_multicast_overlay_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "WLC has rebooted due to a hardware or software crash",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "This WLC $wlcName$ has rebooted due to a hardware or software crash.",
+      "Assurance Issue Name": "WLC $wlcName$ has rebooted due to a hardware or software crash",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-152",
+    "name": "WLC Reboot Unexpectedly",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "wlc_reboot_crash_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  },
+  {
+    "category": "ERROR",
+    "clientId": "devnetuser",
+    "description": "AP(s) disconnected from WLC on Switch",
+    "details": {
+      "Assurance Issue Category": "$category$",
+      "Assurance Issue Details": "AP(s) are disconnected from Wireless Controller that are physically connected to Switch - $switchName$.",
+      "Assurance Issue Name": "AP(s) disconnected from WLC on Switch $switchName$",
+      "Assurance Issue Priority": "$priority$",
+      "Assurance Issue Status": "$status$",
+      "Device": "$eventUniqueId$",
+      "Type": "$eventSource$"
+    },
+    "domain": "Know Your Network",
+    "eventId": "NETWORK-DEVICES-2-119",
+    "name": "AP(s) disconnected from WLC on Switch",
+    "namespace": "ASSURANCE",
+    "severity": 2,
+    "source": "",
+    "subDomain": "Devices",
+    "tags": [
+      "ASSURANCE",
+      "global_ap_disconnect_trigger"
+    ],
+    "tenantId": "SYS0",
+    "type": "NETWORK",
+    "version": null
+  }
+]

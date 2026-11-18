@@ -22,6 +22,20 @@ class TestObfuscateStatement:
         ):
             assert obfuscate_statement('SELECT 1', '{}') is None
 
+    def test_null_query_is_logged_without_an_embedded_null(self):
+        with (
+            mock.patch(
+                'datadog_checks.base.utils.db.query_metrics.obfuscation.obfuscate_sql_with_metadata',
+                side_effect=ValueError('embedded null character'),
+            ),
+            mock.patch('datadog_checks.base.utils.db.query_metrics.obfuscation.logger.warning') as warning,
+        ):
+            assert obfuscate_statement("SELECT 'abc\x00def'", '{}', log_unobfuscated_queries=True) is None
+
+        for arg in warning.call_args[0]:
+            if isinstance(arg, str):
+                assert '\x00' not in arg
+
     def test_identical_text_yields_identical_signature(self):
         """Callers that cannot cache still get signatures consistent with the cached path."""
         first = obfuscate_statement('SELECT 1', '{}')

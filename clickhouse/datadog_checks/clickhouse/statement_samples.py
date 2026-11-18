@@ -333,7 +333,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
             return self._obfuscate_query(normalized_row)
         except Exception as e:
-            self._log.warning("Failed to normalize row: %s, row: %s", str(e), row)
+            self._log.warning("Failed to normalize row: %s, row: %s", str(e), repr(row))
             return None
 
     def _obfuscate_query(self, row):
@@ -352,7 +352,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             row['dd_comments'] = metadata.get('comments', None)
 
         except Exception as e:
-            self._log.warning("Failed to obfuscate query: %s, query: %s", str(e), row.get('query', '')[:100])
+            self._log.warning("Failed to obfuscate query: %s, query: %s", str(e), repr(row.get('query', '')[:100]))
             # On obfuscation error, still include the row but without statement
             row['statement'] = None
             row['query_signature'] = compute_sql_signature(row['query'])

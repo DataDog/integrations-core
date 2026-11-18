@@ -71,8 +71,14 @@ def _build_table(
 
     lines = ["| Validation | Description | Status |", "|---|---|---|"]
     for name in sorted(rows):
-        status = "✅" if rows[name].success else "❌"
-        description = configs.get(name, _VC()).description
+        result = rows[name]
+        config = configs.get(name, _VC())
+        status = "✅" if result.success else "❌"
+        description = config.description
+        if not result.success and config.failure_guidance:
+            # Newlines break the table row, so guidance uses <br> separators inside the cell.
+            guidance = config.failure_guidance.replace("\n", "<br>")
+            description = f"{description}<br><br>{guidance}"
         lines.append(f"| `{name}` | {description} | {status} |")
     return lines
 

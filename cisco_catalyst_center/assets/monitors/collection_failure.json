@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "created_at": "2026-09-25",
+  "last_updated_at": "2026-09-25",
+  "title": "Collection failure",
+  "description": "Alerts when every Cisco Catalyst Center collection cycle in the last 15 minutes had a failing collector, or when the check stops reporting, since either leaves gaps in the data that other dashboards and monitors rely on.",
+  "tags": [
+    "integration:cisco-catalyst-center"
+  ],
+  "definition": {
+    "name": "[Cisco Catalyst Center] Collection is failing for {{catalyst_center_host.name}}",
+    "type": "query alert",
+    "query": "max(last_15m):min:cisco_catalyst_center.collection.success{*} by {catalyst_center_host} < 1",
+    "message": "{{#is_alert}}Every cycle in the last 15 minutes had at least one enabled collector fail (value {{value}}); opt-in ones such as SD-Access fabric or security count too.{{/is_alert}}\n{{#is_no_data}}No data means the check is not running or not completing.{{/is_no_data}}\n{{^is_recovery}}\nLook first in the Agent log for `Catalyst Center ... collection failed` or `Unexpected failure collecting Catalyst Center ...`, or run `datadog-agent check cisco_catalyst_center`. The first may include the `x-correlation-id` for Cisco TAC.\n\nIf [`cisco_catalyst_center.device.count`](/metric/explorer?exp_metric=cisco_catalyst_center.device.count&exp_scope=catalyst_center_host:{{catalyst_center_host.name}}) is still arriving, the appliance and login are fine and a later collector is failing.{{/is_recovery}}",
+    "tags": [
+      "integration:cisco-catalyst-center"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 1
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "renotify_interval": 0,
+      "include_tags": true,
+      "new_group_delay": 900,
+      "on_missing_data": "show_and_notify_no_data",
+      "avalanche_window": 10,
+      "silenced": {}
+    },
+    "priority": null,
+    "restricted_roles": null
+  }
+}

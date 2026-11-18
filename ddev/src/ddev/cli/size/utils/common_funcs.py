@@ -12,6 +12,7 @@ import subprocess
 import tempfile
 import zipfile
 import zlib
+from collections.abc import Callable
 from datetime import date
 from types import TracebackType
 from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict, get_args
@@ -323,6 +324,13 @@ def wheel_url_candidates(url: str, wheels_storage: WheelsStorageTier) -> list[st
     return [resolve_wheel_url(url, tier) for tier in tiers]
 
 
+WHEEL_REQUEST_ATTEMPTS = 4
+WHEEL_REQUEST_RETRY_BACKOFF_SECONDS = 1.0
+WHEEL_REQUEST_TIMEOUT_SECONDS = 30
+
+WHEEL_REQUEST_RETRY_STATUSES = (502, 503, 504)
+
+
 def request_wheel(
     app: Application, url: str, wheels_storage: WheelsStorageTier, head: bool = False
 ) -> requests.Response:
@@ -331,14 +339,19 @@ def request_wheel(
 
     Both 404 and 403 are treated as "not found" and trigger a fallback to the next tier, since the
     dev/stable S3 buckets return 403 instead of 404 for a missing key when the caller can't list the
-    bucket. Any other error status aborts immediately instead of retrying. If every tier fails, the
-    raised error lists all tried tiers, since the URL alone wouldn't reveal that a fallback was
-    attempted.
+    bucket. Any other error status aborts immediately instead of falling back. If every tier fails,
+    the raised error lists all tried tiers, since the URL alone wouldn't reveal that a fallback was
+    attempted. This function makes a single pass over the tiers and never retries; wrap it in
+    `retry_wheel_request` to retry transient failures.
     """
     candidates = wheel_url_candidates(url, wheels_storage)
     tried: list[str] = []
     for index, candidate in enumerate(candidates):
-        response = requests.head(candidate) if head else requests.get(candidate, stream=True)
+        response = (
+            requests.head(candidate, timeout=WHEEL_REQUEST_TIMEOUT_SECONDS)
+            if head
+            else requests.get(candidate, stream=True, timeout=WHEEL_REQUEST_TIMEOUT_SECONDS)
+        )
         try:
             response.raise_for_status()
         except requests.HTTPError as e:
@@ -353,6 +366,50 @@ def request_wheel(
         return response
 
     raise RuntimeError(f"No wheels storage tier served {url}")
+
+
+def is_transient_wheel_error(error: Exception) -> bool:
+    """
+    Whether a failed wheel request or download is worth retrying: a dropped or timed-out connection,
+    a body cut short mid-download, or a gateway error. Every other error status aborts.
+    """
+    if isinstance(error, requests.HTTPError):
+        return error.response is not None and error.response.status_code in WHEEL_REQUEST_RETRY_STATUSES
+    return isinstance(error, (requests.ConnectionError, requests.Timeout, requests.exceptions.ChunkedEncodingError))
+
+
+def retry_wheel_request[T](operation: Callable[[], T], url: str) -> T:
+    """
+    Runs a wheel request or download, retrying it on transient errors with exponential backoff.
+
+    A single attempt budget covers the whole operation, so a failure while connecting, a gateway
+    error and a body cut short all count against the same `WHEEL_REQUEST_ATTEMPTS`.
+    """
+    # Imported here because this module loads on every `ddev` run and `stamina` is only needed for wheels.
+    import stamina
+
+    retrying = stamina.retry(
+        on=is_transient_wheel_error,
+        attempts=WHEEL_REQUEST_ATTEMPTS,
+        timeout=None,
+        wait_initial=WHEEL_REQUEST_RETRY_BACKOFF_SECONDS,
+    )
+    try:
+        return retrying(operation)()
+    except Exception as e:
+        if is_transient_wheel_error(e):
+            e.add_note(f"Wheel request for {url} failed after {WHEEL_REQUEST_ATTEMPTS} attempts")
+        raise
+
+
+def download_wheel(app: Application, url: str, wheels_storage: WheelsStorageTier) -> bytes:
+    """Downloads a wheel's content, retrying the request or the body read on transient errors."""
+
+    def fetch() -> bytes:
+        with request_wheel(app, url, wheels_storage) as response:
+            return response.content
+
+    return retry_wheel_request(fetch, url)
 
 
 def get_dependencies(
@@ -429,8 +486,7 @@ def get_dependencies_sizes(
     """
     file_data: list[FileDataEntry] = []
     for dep, url, version in zip(deps, download_urls, versions, strict=False):
-        with request_wheel(app, url, wheels_storage) as response:
-            wheel_data = response.content
+        wheel_data = download_wheel(app, url, wheels_storage)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             wheel_path = Path(tmpdir) / "package"

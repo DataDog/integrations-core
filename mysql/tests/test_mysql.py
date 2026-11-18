@@ -942,7 +942,6 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     expected_tags = tags.METRIC_TAGS + (
         "database_hostname:{}".format(expected_database_hostname),
         "database_instance:{}".format(expected_database_instance),
-        'dd.internal.resource:database_instance:{}'.format(expected_database_instance),
         "dbms_flavor:{}".format(MYSQL_FLAVOR.lower()),
     )
 

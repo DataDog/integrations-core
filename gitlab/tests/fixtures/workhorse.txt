@@ -1,0 +1,15 @@
+# HELP gitlab_workhorse_http_requests_total A counter for requests to the http server.
+# TYPE gitlab_workhorse_http_requests_total counter
+gitlab_workhorse_http_requests_total{backend_id="rails",code="200",method="get",route="^/-/",route_id="dash"} 3
+gitlab_workhorse_http_requests_total{backend_id="rails",code="404",method="get",route="^/api/",route_id="api"} 1
+gitlab_workhorse_http_requests_total{backend_id="self",code="200",method="get",route="^/-/health$",route_id="health"} 13
+gitlab_workhorse_http_requests_total{backend_id="self",code="502",method="get",route="^/-/health$",route_id="health"} 1
+# HELP gitlab_workhorse_http_request_duration_seconds A histogram of latencies for requests to the http server.
+# TYPE gitlab_workhorse_http_request_duration_seconds histogram
+gitlab_workhorse_http_request_duration_seconds_bucket{backend_id="rails",code="200",method="get",route="^/-/",route_id="dash",le="0.005"} 0
+gitlab_workhorse_http_request_duration_seconds_bucket{backend_id="rails",code="200",method="get",route="^/-/",route_id="dash",le="0.025"} 0
+gitlab_workhorse_http_request_duration_seconds_bucket{backend_id="rails",code="200",method="get",route="^/-/",route_id="dash",le="0.1"} 0
+gitlab_workhorse_http_request_duration_seconds_bucket{backend_id="rails",code="200",method="get",route="^/-/",route_id="dash",le="0.5"} 1
+gitlab_workhorse_http_request_duration_seconds_bucket{backend_id="rails",code="200",method="get",route="^/-/",route_id="dash",le="1"} 1
+gitlab_workhorse_http_request_duration_seconds_sum{backend_id="rails",code="200",method="get",route="^/-/",route_id="dash"} 6.05373292
+gitlab_workhorse_http_request_duration_seconds_count{backend_id="rails",code="200",method="get",route="^/-/",route_id="dash"} 3

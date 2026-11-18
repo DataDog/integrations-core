@@ -3,15 +3,29 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
 from ddev.utils.github_async.models import (
+    ContentType,
+    FileCommit,
+    FileContent,
     GitHubUser,
+    GitReference,
     Label,
     PullRequest,
     PullRequestRef,
     PullRequestState,
+    WorkflowJob,
+    WorkflowRun,
 )
-from tests.utils.github_async.payloads import full_pull_request_payload
+from tests.utils.github_async.payloads import (
+    file_commit_payload,
+    file_content_payload,
+    full_pull_request_payload,
+    git_ref_payload,
+    workflow_job,
+    workflow_run_payload,
+)
 
 
 def test_pull_request_parses_full_response() -> None:
@@ -45,6 +59,82 @@ def test_pull_request_ignores_extra_fields() -> None:
     payload = full_pull_request_payload(mergeable_state="clean", additions=42, unknown_future_field={"nested": True})
     pr = PullRequest.model_validate(payload)
     assert pr.number == 42
+
+
+def test_git_reference_exposes_the_object_sha() -> None:
+    """Callers read `object.sha` to branch from a ref, so the nested object must parse."""
+    ref = GitReference.model_validate(git_ref_payload(ref="refs/heads/7.56.x", sha="d" * 40))
+    assert ref.ref == "refs/heads/7.56.x"
+    assert ref.object.sha == "d" * 40
+
+
+def test_file_content_rejects_a_non_file_type() -> None:
+    """`get_content` is only used for files; a directory/symlink response must not parse as a file."""
+    assert FileContent.model_validate(file_content_payload()).type is ContentType.FILE
+    with pytest.raises(ValidationError):
+        FileContent.model_validate(file_content_payload(type="dir"))
+
+
+def test_file_commit_parses_with_null_content() -> None:
+    """`file-commit.content` is nullable; the commit is what callers need and must still parse."""
+    commit = FileCommit.model_validate(file_commit_payload(commit_sha="e" * 40))
+    assert commit.commit.sha == "e" * 40
+
+
+def test_workflow_run_parses_null_status():
+    """The `workflow-run` schema declares `status` nullable, so a null value must parse."""
+    run = WorkflowRun.model_validate(workflow_run_payload(status=None))
+
+    assert run.status is None
+    assert run.is_completed is False
+
+
+@pytest.mark.parametrize(
+    ("status", "expected"),
+    [
+        pytest.param("completed", 90.0, id="completed"),
+        pytest.param("in_progress", None, id="unfinished"),
+    ],
+)
+def test_workflow_run_duration_reads_updated_at_only_once_completed(status: str, expected: float | None):
+    """gh treats `updated_at` as the end time, which only holds once the run completed."""
+    run = WorkflowRun.model_validate(
+        workflow_run_payload(
+            status=status,
+            run_started_at="2026-01-01T10:00:00Z",
+            updated_at="2026-01-01T10:01:30Z",
+        )
+    )
+
+    assert run.duration_seconds == expected
+
+
+@pytest.mark.parametrize(
+    ("started_at", "completed_at", "expected"),
+    [
+        pytest.param("2026-09-24T15:39:24Z", "2026-09-24T15:44:30Z", 306.0, id="valid"),
+        pytest.param("2026-09-24T15:39:24Z", "2026-09-24T15:39:24Z", 0.0, id="genuine-zero"),
+        pytest.param("2026-09-24T15:39:24", "2026-09-24T15:44:30", 306.0, id="naive-but-consistent"),
+        pytest.param("2026-09-24T15:39:24Z", "2026-09-24T15:44:30", None, id="mixed-zones"),
+        pytest.param("2026-09-24T15:44:30Z", "2026-09-24T15:39:24Z", None, id="reversed"),
+        pytest.param("not-a-timestamp", "2026-09-24T15:44:30Z", None, id="invalid-start"),
+        pytest.param("2026-09-24T15:39:24Z", None, None, id="missing-end"),
+    ],
+)
+def test_workflow_job_duration_comes_only_from_valid_ordered_timestamps(
+    started_at: str, completed_at: str | None, expected: float | None
+):
+    """A job's duration is its own execution window, never an invented zero for unusable timing."""
+    job = WorkflowJob.model_validate(workflow_job(started_at=started_at, completed_at=completed_at))
+
+    assert job.duration_seconds == expected
+
+
+def test_workflow_job_queue_duration_comes_only_from_created_at_to_started_at():
+    """A job's runner wait is `started_at - created_at`. The shared edge cases are the duration matrix."""
+    job = WorkflowJob.model_validate(workflow_job(created_at="2026-01-01T09:59:55Z", started_at="2026-01-01T10:00:00Z"))
+
+    assert job.queue_duration_seconds == 5.0
 
 
 def test_models_subpackage_unknown_attribute_raises_attribute_error() -> None:

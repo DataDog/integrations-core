@@ -10,6 +10,7 @@ from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.kind import kind_run
 
 HERE = get_here()
+CHECK_ROOT = os.path.dirname(HERE)
 
 TEKTON_STARTUP_TIMEOUT = 600
 
@@ -102,7 +103,7 @@ def setup_tekton():
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_tekton]) as kubeconfig:
         instances = {
             'pipelines_controller_endpoint': (
@@ -113,10 +114,23 @@ def dd_environment():
             ),
         }
 
+        dd_save_state('tekton_kubeconfig', kubeconfig)
+
         yield (
             {'instances': [instances]},
-            {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}},
+            {
+                'agent_type': 'kubernetes',
+                'kubernetes': {
+                    'kubeconfig': kubeconfig,
+                    'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'tekton', 'data', 'auto_conf.yaml'),
+                },
+            },
         )
+
+
+@pytest.fixture(scope='session')
+def tekton_kubeconfig(dd_get_state):
+    return dd_get_state('tekton_kubeconfig')
 
 
 @pytest.fixture

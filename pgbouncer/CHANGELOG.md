@@ -2,13 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 8.12.0 / 2026-09-02
+## 8.12.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:
 
 * Add prepared statement statistics from PgBouncer 1.21+ (SHOW CLIENTS/SERVERS) and 1.24+ (SHOW STATS). ([#24607](https://github.com/DataDog/integrations-core/pull/24607))
 
-## 8.11.0 / 2026-08-05
+## 8.11.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:
 

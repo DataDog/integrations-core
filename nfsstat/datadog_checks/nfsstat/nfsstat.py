@@ -8,6 +8,31 @@ from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
 
+BUNDLED_NFSIOSTAT_PATHS = (
+    '/opt/datadog-agent/embedded/sbin/nfsiostat',
+    '/opt/datadog-packages/datadog-agent/stable/embedded/sbin/nfsiostat',
+)
+SOURCE_NFSIOSTAT_PATH = '/usr/local/sbin/nfsiostat'
+
+
+def _get_bundled_nfsiostat_command(nfsiostat_path: str) -> list[str] | None:
+    """Return a command when the bundled script and its interpreter are available."""
+    embedded_path = os.path.dirname(os.path.dirname(nfsiostat_path))
+    python_path = os.path.join(embedded_path, 'bin', 'python')
+    if os.path.exists(nfsiostat_path) and os.path.exists(python_path):
+        return [python_path, nfsiostat_path, '1', '2']
+
+    return None
+
+
+def _get_device_key(device_data: list[list[str]]) -> tuple[str, str] | None:
+    """Return the source and mount from an nfsiostat sample header."""
+    if not device_data or len(device_data[0]) < 4:
+        return None
+
+    device_header = device_data[0]
+    return device_header[0], device_header[-1][:-1]
+
 
 class NfsStatCheck(AgentCheck):
     metric_prefix = 'system.nfs.'
@@ -18,17 +43,19 @@ class NfsStatCheck(AgentCheck):
         if init_config.get('nfsiostat_path'):
             self.nfs_cmd = init_config['nfsiostat_path'].split() + ['1', '2']
         else:
-            # if not, check if it's installed in the opt dir, if so use that
-            if os.path.exists('/opt/datadog-agent/embedded/sbin/nfsiostat'):
-                self.nfs_cmd = ['/opt/datadog-agent/embedded/sbin/nfsiostat', '1', '2']
-            # if not, then check if it is in the default place
-            elif os.path.exists('/usr/local/sbin/nfsiostat'):
-                self.nfs_cmd = ['/usr/local/sbin/nfsiostat', '1', '2']
+            for nfsiostat_path in BUNDLED_NFSIOSTAT_PATHS:
+                nfs_cmd = _get_bundled_nfsiostat_command(nfsiostat_path)
+                if nfs_cmd:
+                    self.nfs_cmd = nfs_cmd
+                    break
             else:
-                raise Exception(
-                    'nfsstat check requires nfsiostat be installed, please install it '
-                    '(through nfs-utils) or set the path to the installed version'
-                )
+                if os.path.exists(SOURCE_NFSIOSTAT_PATH):
+                    self.nfs_cmd = [SOURCE_NFSIOSTAT_PATH, '1', '2']
+                else:
+                    raise Exception(
+                        'nfsstat check requires nfsiostat be installed, please install it '
+                        '(through nfs-utils) or set the path to the installed version'
+                    )
         self.autofs_enabled = is_affirmative(init_config.get('autofs_enabled', False))
         self.disable_missing_mountpoints_warning = is_affirmative(
             self.instance.get('disable_missing_mountpoints_warning', False)
@@ -36,10 +63,30 @@ class NfsStatCheck(AgentCheck):
 
     def check(self, instance):
         stat_out, err, _ = get_subprocess_output(self.nfs_cmd, self.log)
-        all_devices = []
+        latest_devices = {}
         this_device = []
         custom_tags = instance.get("tags", [])
         stats = stat_out.splitlines()
+
+        def add_device(device_data: list[list[str]]) -> None:
+            if len(device_data) < 7:
+                device_key = _get_device_key(device_data)
+                if device_key:
+                    # Do not submit the previous report when the current sample is incomplete.
+                    latest_devices.pop(device_key, None)
+                    self.log.warning(
+                        'Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d. (%s mounted on %s)',
+                        len(device_data),
+                        *device_key,
+                    )
+                else:
+                    self.log.warning(
+                        'Skipping incomplete nfsiostat sample: expected at least 7 rows, got %d.', len(device_data)
+                    )
+                return
+
+            device = Device(device_data, self.log)
+            latest_devices[(device.device_name, device.mount)] = device
 
         if 'No NFS mount point' in stats[0]:
             if not self.autofs_enabled:
@@ -54,20 +101,14 @@ class NfsStatCheck(AgentCheck):
                 continue
             elif l.find('mounted on') >= 0 and len(this_device) > 0:
                 # if it's a new device, create the device and add it to the array
-                device = Device(this_device, self.log)
-                all_devices.append(device)
+                add_device(this_device)
                 this_device = []
             this_device.append(l.strip().split())
 
         # Add the last device into the array
-        device = Device(this_device, self.log)
-        all_devices.append(device)
+        add_device(this_device)
 
-        # Disregard the first half of device stats (report 1 of 2)
-        # as that is the moving average
-        all_devices = all_devices[len(all_devices) // 2 :]
-
-        for device in all_devices:
+        for device in latest_devices.values():
             device.send_metrics(self.gauge, custom_tags)
 
 
@@ -88,8 +129,9 @@ class Device(object):
         self.log.info(self._device_header)
         self.device_name = self._device_header[0]
         self.mount = self._device_header[-1][:-1]
-        self.nfs_server = self.device_name.split(':')[0]
-        self.nfs_export = self.device_name.split(':')[1]
+        self.nfs_server, _, self.nfs_export = self.device_name.partition(':')
+        if not self.nfs_export:
+            self.nfs_export = self.device_name
 
     def _parse_ops(self):
         ops = self._device_data[2]

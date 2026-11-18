@@ -13,12 +13,14 @@ import logging
 import posixpath
 import re
 import tempfile
-import urllib.request
 from collections.abc import Mapping
 from pathlib import Path
 
-from tuf.ngclient import Updater
+import requests
+from requests.adapters import HTTPAdapter
+from tuf.ngclient import RequestsFetcher, Updater
 from tuf.ngclient.config import UpdaterConfig
+from urllib3.util.retry import Retry
 
 from .exceptions import (
     DigestMismatch,
@@ -32,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 V2_REPOSITORY_URL = "https://agent-integration-wheels.datadoghq.com"
 
-# tuf.ngclient sets its own fetcher timeout; this applies only to the raw wheel urlopen().
+# tuf.ngclient sets its own fetcher timeout; this applies only to the raw wheel session.get().
 WHEEL_FETCH_TIMEOUT_SECONDS = 60
 
 REQUIRED_POINTER_KEYS = ('digest', 'length', 'wheel_path')
@@ -40,6 +42,31 @@ V2_POINTER_TARGET_DELEGATION = 'wheelsmith'
 V2_POINTER_TARGET_SCHEMA_VERSION = 'v1'
 V2_POINTER_TARGET_PREFIX = f'{V2_POINTER_TARGET_DELEGATION}/{V2_POINTER_TARGET_SCHEMA_VERSION}'
 SHA256_HEX_RE = re.compile(r'^[0-9a-f]{64}$')
+
+
+def _mount_retry_adapter(session: requests.Session) -> None:
+    """Mount the shared retry policy on *session*."""
+    retry = Retry(
+        backoff_factor=1,
+        raise_on_status=False,  # exhaustion still raises DownloadHTTPError with its status, not a bare urllib3 error
+        respect_retry_after_header=False,  # a caller-controlled --repository could stall retries for hours otherwise
+        status_forcelist=frozenset({429, *range(500, 600)}),  # respect_retry_after_header=False discards default 429
+        total=3,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+
+
+class RetryingRequestsFetcher(RequestsFetcher):
+    """RequestsFetcher that retries transient 5xx/network errors on TUF metadata GETs."""
+
+    def _get_session(self, url: str) -> requests.Session:
+        seen = len(self._sessions)
+        session = super()._get_session(url)
+        if len(self._sessions) > seen:
+            _mount_retry_adapter(session)
+        return session
 
 
 class TUFPointerDownloader:
@@ -64,6 +91,7 @@ class TUFPointerDownloader:
             target_base_url=f'{self._repository_url}/targets/',
             target_dir=str(target_dir),
             config=UpdaterConfig(prefix_targets_with_hash=True),
+            fetcher=RetryingRequestsFetcher(),
         )
 
     @staticmethod
@@ -152,8 +180,11 @@ class TUFPointerDownloader:
         dest = (dest_dir or Path(tempfile.mkdtemp())) / wheel_filename
 
         logger.info('Downloading wheel from %s', wheel_url)
-        with urllib.request.urlopen(wheel_url, timeout=WHEEL_FETCH_TIMEOUT_SECONDS) as resp:
-            content = resp.read()
+        with requests.Session() as session:
+            _mount_retry_adapter(session)
+            response = session.get(wheel_url, timeout=WHEEL_FETCH_TIMEOUT_SECONDS)
+            response.raise_for_status()
+            content = response.content
 
         if pointer is not None:
             self._verify_content(project, content, pointer)

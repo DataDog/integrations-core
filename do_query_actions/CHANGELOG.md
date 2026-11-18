@@ -2,13 +2,31 @@
 
 <!-- towncrier release notes start -->
 
-## 1.3.0 / 2026-09-02
+## 1.6.0 / 2026-10-29
+
+***Added***:
+
+* Update dependencies ([#25599](https://github.com/DataDog/integrations-core/pull/25599))
+
+## 1.5.0 / 2026-10-27 / Agent 7.85.0
+
+***Security***:
+
+* Update boto3 to 1.43.119, which drops the Sectigo root that anchors the compromised eMudhra intermediates. ([#25797](https://github.com/DataDog/integrations-core/pull/25797))
+
+## 1.4.0 / 2026-10-01
+
+***Added***:
+
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+## 1.3.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:
 
 * Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
 
-## 1.2.0 / 2026-08-05
+## 1.2.0 / 2026-08-05 / Agent 7.83.0
 
 ***Security***:
 

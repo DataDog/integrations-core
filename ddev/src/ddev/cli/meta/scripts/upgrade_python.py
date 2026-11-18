@@ -21,6 +21,12 @@ PYTHON_FTP_URL = "https://www.python.org/ftp/python/"
 PYTHON_SBOM_LINUX_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz.spdx.json"
 PYTHON_SBOM_WINDOWS_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/python-{version}-amd64.exe.spdx.json"
 
+# Patch versions the automated upgrade must never select, mapped to the reason.
+# Keep in sync with EXCLUDED_PYTHON_VERSIONS in datadog-agent's tasks/python_version.py.
+EXCLUDED_PYTHON_VERSIONS = {
+    "3.13.16": "the python/cpython#130094 backport makes concurrent imports raise _DeadlockError in the Agent",
+}
+
 # Python Build Standalone (PBS) - used for macOS
 # https://github.com/astral-sh/python-build-standalone
 PBS_LATEST_RELEASE_URL = "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest"
@@ -346,6 +352,9 @@ def get_latest_python_version(app: Application, major_minor: str) -> str | None:
         match = re.search(pattern, line)
         if match:
             version_str = match.group(1)
+            if version_str in EXCLUDED_PYTHON_VERSIONS:
+                app.display_warning(f"Skipping Python {version_str}: {EXCLUDED_PYTHON_VERSIONS[version_str]}")
+                continue
             try:
                 versions.append(Version(version_str))
             except Exception:

@@ -1,6 +1,12 @@
 services:
   teleport-service:
-    image: public.ecr.aws/gravitational/teleport-distroless:17.2
+    build:
+      context: .
+      args:
+        TELEPORT_VERSION: ${TELEPORT_VERSION}
+    # Autodiscovery matches the image short name against the ad_identifiers in auto_conf.yaml.
+    image: teleport-distroless:${TELEPORT_VERSION}
+    pull_policy: build
     ports:
       - 3000:3000
     volumes:

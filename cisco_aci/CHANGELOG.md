@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 6.0.0 / 2026-09-02
+## 6.1.1 / 2026-10-29
+
+***Fixed***:
+
+* Fix a `TypeError` in APIC controller interface collection that stopped fabric, capacity, and fault collection when `send_ndm_metadata` is enabled. ([#25744](https://github.com/DataDog/integrations-core/pull/25744))
+
+## 6.1.0 / 2026-10-01 / Agent 7.85.0
+
+***Added***:
+
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+## 6.0.0 / 2026-09-02 / Agent 7.84.0
 
 ***Changed***:
 
@@ -12,7 +24,7 @@
 
 * [Cisco ACI] Add new endpoint to process APIC interfaces to enable topology ([#24193](https://github.com/DataDog/integrations-core/pull/24193))
 
-## 5.1.0 / 2026-08-24
+## 5.1.0 / 2026-08-24 / Agent 7.83.0
 
 ***Security***:
 

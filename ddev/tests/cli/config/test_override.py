@@ -103,6 +103,17 @@ def test_update_existing_local_config(
     assert config_file.overrides_model.raw_data["orgs"]["default"]["api_key"] == "test_key"
 
 
+def test_warns_once_for_ai_overrides(ddev: CliRunner, overrides_config: Path):
+    overrides_config.write_text("[ai]\n")
+
+    result = ddev("config", "override", input="core\n")
+
+    assert result.exit_code == 0, result.output
+    warning = "Ignoring [ai] in .ddev.toml; AI settings must be set in the global config.\n"
+    assert result.output.count(warning) == 1
+    assert load_toml_file(overrides_config)["ai"] == {}
+
+
 def assert_valid_local_config(
     config_file: ConfigFileWithOverrides, repo_path: Path, result: Result, expected_output: str
 ):

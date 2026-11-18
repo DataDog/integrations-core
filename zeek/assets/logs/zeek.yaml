@@ -3506,6 +3506,14 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `ocsf.src_endpoint.ip` to `ocsf.src_endpoint.uid`
+              sources:
+                - ocsf.src_endpoint.ip
+              target: ocsf.src_endpoint.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
               name: Map `id.orig_p` to `ocsf.src_endpoint.port`
               sources:
                 - id.orig_p

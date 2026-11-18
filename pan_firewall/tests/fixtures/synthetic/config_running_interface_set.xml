@@ -1,0 +1,29 @@
+<!-- Derived from fw-a-probe/config_running_interface.xml, with the settings the lab lacks: comments on every interface kind and link-state down on ethernet1/2. Element names from the PAN-OS schema (pan-os-codegen ethernet.yaml link-state, comment on every interface spec); not yet seen in a real reply. -->
+<response status="success"><result><interface>
+  <ethernet>
+    <entry name="ethernet1/1">
+      <layer3>
+        <units>
+          <entry name="ethernet1/1.10"><tag>10</tag><comment>Guest VLAN</comment></entry>
+        </units>
+        <ip><entry name="10.60.1.10/24"/></ip>
+      </layer3>
+      <link-state>up</link-state>
+      <comment>Uplink &amp; &lt;ISP&gt; — São Paulo</comment>
+    </entry>
+    <entry name="ethernet1/2">
+      <layer3>
+        <units>
+          <entry name="ethernet1/2.20"><tag>20</tag></entry>
+        </units>
+      </layer3>
+      <link-state>down</link-state>
+      <comment>   </comment>
+    </entry>
+  </ethernet>
+  <aggregate-ethernet>
+    <entry name="ae1"><comment>LACP to core</comment></entry>
+  </aggregate-ethernet>
+  <loopback><units><entry name="loopback.1"><comment>router-id</comment></entry></units></loopback>
+  <tunnel><units><entry name="tunnel.3"><comment>to DC2</comment></entry></units></tunnel>
+</interface></result></response>
