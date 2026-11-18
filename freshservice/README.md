@@ -17,7 +17,7 @@ Use these logs to investigate administrative changes and to follow how tickets c
 
 - A Freshservice account on the Forest plan or with the Audit Log add-on, to collect audit logs.
 - A dedicated Freshservice integration user with the **Account Admin** role. The role is required to read audit logs, and the user needs permission to view tickets in all workspaces. A dedicated user keeps the API key working when people leave your organization.
-- If your Freshservice account restricts API access by IP address, allow Datadog's IP ranges. Find them in the [IP ranges][2] list.
+- If your Freshservice account restricts API access by IP address, allow the IP ranges in the **webhooks** section of Datadog's [IP ranges][2] list.
 
 ### Create an API key in Freshservice
 
