@@ -28,7 +28,7 @@ The integration serves two operations: resolve and execute (annex). A request fo
 
 ### REQ-02 — Validate a request before using it
 
-A match check carries only the operation and the target. A query request carries the operation, the target, a non-empty query, the schema choice, the delivery instructions, and optionally the trace context. The target and the delivery instructions follow the Agent's rules (Agent INPUT-03, INPUT-04). A request with an unknown field or a missing or invalid value fails as an invalid request, without contacting the database or intake.
+A match check carries only the operation and the target. A query request carries the operation, the target, a non-empty query, the schema choice, the delivery instructions, and optionally the trace context. The target and the delivery instructions follow the Agent's rules (Agent INPUT-03, INPUT-04), except for the crawl ID. The delivery instructions always carry a valid task ID and upload ID. The crawl ID is optional here: when present it must be a valid UUID, and when absent the integration neither invents one nor substitutes the upload ID. The Agent's rule that the crawl ID is required applies only to its AP ingress. A request with an unknown field or a missing or invalid value fails as an invalid request, without contacting the database or intake.
 
 ### REQ-03 — Require the Agent's API key
 
@@ -260,7 +260,7 @@ When the query request carries a trace context, every intake request of the run 
 
 ### OBS-03 — Log without data
 
-Every log line about a run carries its crawl, task, and upload IDs. Logs never contain the query text, result values, credentials, or connection strings. Each acknowledged page is logged at debug level with its index, row count, uncompressed and sent byte counts, encoding (`gzip` or `identity`), compression and upload times in milliseconds, and whether gzip was tried but not kept because the page did not get smaller.
+Every log line about a run carries its task and upload IDs, and its crawl ID when the request carried one. A run without a crawl ID logs none, and never logs its upload ID as one. Logs never contain the query text, result values, credentials, or connection strings. Each acknowledged page is logged at debug level with its index, row count, uncompressed and sent byte counts, encoding (`gzip` or `identity`), compression and upload times in milliseconds, and whether gzip was tried but not kept because the page did not get smaller.
 
 ## Configuration
 
