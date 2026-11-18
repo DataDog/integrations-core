@@ -1,0 +1,1 @@
+Rename `dynamo.dynamo_component_model_load_time_seconds` to `dynamo.component.model_load_time.seconds`.
