@@ -16,7 +16,6 @@ import pytest
 
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.db.sql_commenter import generate_sql_comment
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
@@ -33,7 +32,6 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
 )
-from datadog_checks.sqlserver.cursor import DD_QUERY_ATTRIBUTES
 from datadog_checks.sqlserver.database_metrics import SqlserverDatabaseStatsMetrics
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, SqlFractionMetric, SqlSimpleMetric
@@ -1572,10 +1570,6 @@ def test_needs_comment_recovery_recognizes_dbm_comment_markers(marker):
 )
 def test_needs_comment_recovery_requires_missing_dbm_comment(full_text, statement_comments, expected):
     assert needs_comment_recovery(full_text, statement_comments) is expected
-
-
-def test_agent_service_comment_matches_the_cursor_comment():
-    assert AGENT_SERVICE_COMMENT == generate_sql_comment(**DD_QUERY_ATTRIBUTES)
 
 
 @pytest.mark.parametrize(

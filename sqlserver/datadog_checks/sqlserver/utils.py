@@ -165,8 +165,10 @@ def needs_comment_recovery(full_text: Optional[str], statement_comments: Optiona
     )
 
 
-# CommenterCursorWrapper prepends this comment onto every Agent query.
-AGENT_SERVICE_COMMENT = generate_sql_comment(service='datadog-agent')
+DD_QUERY_ATTRIBUTES = {
+    'service': 'datadog-agent',
+}
+AGENT_SERVICE_COMMENT = generate_sql_comment(**DD_QUERY_ATTRIBUTES)
 
 
 def append_agent_service_comment(comments: Sequence[str] | None, full_text: Optional[str]) -> list[str]:
