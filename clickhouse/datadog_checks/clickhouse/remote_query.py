@@ -829,11 +829,14 @@ class ClickhouseRemoteQueryHandler:
                 # every boundary.
                 tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'clickhouse')
                 tracing.open_root(parsed.result_delivery)
+                creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, started_at, parsed.trace_context)
+                upload_client = (
+                    http_client if http_client is not None else rq_upload.RequestsUploadClient(tracing=tracing)
+                )
                 if not self._check_matches_target(parsed.target):
                     raise rq_contract.RemoteQueryFailure(
                         'target_not_found', 'No loaded ClickHouse integration instance matched target selector.'
                     )
-                creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, started_at, parsed.trace_context)
                 if not creds.api_key:
                     raise rq_contract.RemoteQueryFailure(
                         'credentials_unavailable',
@@ -843,9 +846,6 @@ class ClickhouseRemoteQueryHandler:
                     raise rq_contract.RemoteQueryFailure(
                         'target_unavailable', 'Matched ClickHouse check HTTP connection pool is unavailable.'
                     )
-                upload_client = (
-                    http_client if http_client is not None else rq_upload.RequestsUploadClient(tracing=tracing)
-                )
                 stats = rq_contract.RemoteQueryRunStats()
                 yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
                 self._produce_remote_query(

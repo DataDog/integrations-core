@@ -482,6 +482,8 @@ class PostgresRemoteQueryHandler:
                 # every boundary.
                 tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'postgres')
                 tracing.open_root(parsed.result_delivery)
+                creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, started_at, parsed.trace_context)
+                client = http_client if http_client is not None else rq_upload.RequestsUploadClient(tracing=tracing)
                 if self._match_check_for_target(parsed.target) is None:
                     raise rq_contract.RemoteQueryFailure(
                         'target_not_found', 'No loaded Postgres integration instance matched target selector.'
@@ -491,7 +493,6 @@ class PostgresRemoteQueryHandler:
                     raise rq_contract.RemoteQueryFailure(
                         'target_unavailable', 'Matched Postgres check does not expose a configured database name.'
                     )
-                creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, started_at, parsed.trace_context)
                 if not creds.api_key:
                     raise rq_contract.RemoteQueryFailure(
                         'credentials_unavailable',
@@ -506,7 +507,6 @@ class PostgresRemoteQueryHandler:
                     raise rq_contract.RemoteQueryFailure(
                         'target_unavailable', 'Matched Postgres check connection pool is closed.'
                     )
-                client = http_client if http_client is not None else rq_upload.RequestsUploadClient(tracing=tracing)
                 stats = rq_contract.RemoteQueryRunStats()
                 yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
                 try:
