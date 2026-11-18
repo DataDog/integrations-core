@@ -491,138 +491,31 @@ pipeline:
     query: source:pan.firewall
   processors:
     - type: grok-parser
-      name: Extract the PAN-OS log `type`
+      name: Parsing Palo Alto Network Firewall logs
       enabled: true
       source: message
       samples:
-        - "<14>Nov 18 10:20:05 fw-a timestamp=2026/11/18 10:20:05, serial=007955000930601, type=THREAT, subtype=spyware"
-        - "timestamp=2026/11/18 10:20:05, serial=007955000930601, type=GLOBALPROTECT, subtype=0, tunnel_type=IPSec"
+        - "<14>Nov 18 10:20:05 fw-a timestamp=2026/11/18 10:20:05, serial=007955000930601, type=THREAT, subtype=spyware, time_generated=2026/11/18 10:20:05, network.client.ip=10.60.2.100, network.destination.ip=8.8.8.8, rule=trust-out, usr.id=, dstuser=,\tapp=dns-base,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\t evt.name=drop,\tmisc=test-malware.testpanw.com,\tthreatid=generic:test-malware.testpanw.com,\tcategory=any,\tseverity=medium,\turl_idx=0,\thttp.useragent=,\tfiletype=,\txff=\treferer=,\ttunnel=N/A,\tthr_category=dns-malware"
+        - "<14>Nov 18 10:15:48 fw-b timestamp=2026/11/18 10:15:48, serial=007955000930602, type=SYSTEM, subtype=general,\tvsys=,\tevt.name=general,\tobject=,\tmodule=general,\tseverity=informational,\topaque=WildFire job enqueued. Enqueue time=2026/11/18 10:15:48. JobId=13752.  . Type: Full,\tseqno=7701028248951498075, actionflags=0x0, vsys_name=, device_name=fw-b"
+        - "<14>Oct 26 16:59:23 fw-b timestamp=2026/10/26 16:59:23,\tserial=007955000930602,\ttype=CONFIG,\tsubtype=0,\t network.client.ip=38.32.8.169,\tvsys=,\tevt.name=set,\tusr.id=admin,\tclient=CLI,\tevt.outcome=Succeeded,\tpath= network interface ethernet  ethernet1/1 layer3 ip, before_change_detail=,\tafter_change_detail=,\tseqno=7701021535917572103,\tactionflags=0x0, vsys_name=, device_name=fw-b"
+        - "<14>Nov 18 10:19:48 fw-a timestamp=2026/11/18 10:19:48, serial=007955000930601, type=TRAFFIC, subtype=end, time_generated=2026/11/18 10:19:48, network.client.ip=10.60.3.100, network.destination.ip=10.60.2.100, rule=vpn-to-trust, usr.id=, dstuser=,\tapp=incomplete,\tinbound_if=tunnel.1,\toutbound_if=ethernet1/2,\tnetwork.client.port=54096,\tnetwork.destination.port=8080, natsport=0\tnatdport=0,\tproto=tcp,\t evt.name=allow, start=2026/11/18 10:19:34, tunnel=N/A"
       grok:
-        # Read `type` first so that each log type only runs the parsing rules written for it.
+        # Free-text fields (misc, threatid, http.useragent, path, before/after_change_detail,
+        # error, opaque) can contain commas, `=` and `key=value` text, so they are captured
+        # whole up to the next documented key and kept out of the keyvalue filter. Values may
+        # be wrapped in double quotes. The last rule is the generic keyvalue fallback.
         matchRules: |
-          log_type %{data}(?<![\w.])type=%{regex("[A-Za-z_]+"):type}%{data}
-        supportRules: ''
-    - type: pipeline
-      name: Parsing Palo Alto Network Firewall Threat, URL and Data Filtering logs
-      enabled: true
-      filter:
-        query: "@type:THREAT"
-      processors:
-        - type: grok-parser
-          name: Parsing Palo Alto Network Firewall Threat, URL and Data Filtering logs
-          enabled: true
-          source: message
-          samples:
-            - "<14>Nov 18 10:20:05 fw-a timestamp=2026/11/18 10:20:05, serial=007955000930601, type=THREAT, subtype=spyware, time_generated=2026/11/18 10:20:05, network.client.ip=10.60.2.100, network.destination.ip=8.8.8.8, rule=trust-out, usr.id=, dstuser=,\tapp=dns-base,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\t evt.name=drop,\tmisc=test-malware.testpanw.com,\tthreatid=generic:test-malware.testpanw.com,\tcategory=any,\tseverity=medium,\turl_idx=0,\thttp.useragent=,\tfiletype=,\txff=\treferer=,\ttunnel=N/A,\tthr_category=dns-malware"
-          grok:
-            # Free-text fields can contain commas, `=` and `key=value` text, so they are captured
-            # whole up to the next documented key and kept out of the keyvalue filter. Values may
-            # be wrapped in double quotes. The last rule is the generic keyvalue fallback, used when
-            # the format differs from the README.
-            matchRules: |
-              threat_with_useragent %{_header}%{_kv}misc=%{_q}%{data:misc}%{_sep}threatid=%{_q}%{data:threatid}%{_sep}(?=category=)%{_kv}http.useragent=%{_q}%{data:http.useragent}%{_sep}(?=filetype=)%{_kv}
-              threat %{_header}%{_kv}misc=%{_q}%{data:misc}%{_sep}threatid=%{_q}%{data:threatid}%{_sep}(?=category=)%{_kv}
-              rule_panos %{_header}%{_kv}
-            supportRules: |
-              _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^")}
-              _header (?:[^=]*\s)?
-              _q \s*"*
-              _sep \s*"*,\s*
-    - type: pipeline
-      name: Parsing Palo Alto Network Firewall Config logs
-      enabled: true
-      filter:
-        query: "@type:CONFIG"
-      processors:
-        - type: grok-parser
-          name: Parsing Palo Alto Network Firewall Config logs
-          enabled: true
-          source: message
-          samples:
-            - "<14>Oct 26 16:59:23 fw-b timestamp=2026/10/26 16:59:23,\tserial=007955000930602,\ttype=CONFIG,\tsubtype=0,\t network.client.ip=38.32.8.169,\tvsys=,\tevt.name=set,\tusr.id=admin,\tclient=CLI,\tevt.outcome=Succeeded,\tpath= network interface ethernet  ethernet1/1 layer3 ip, before_change_detail=,\tafter_change_detail=,\tseqno=7701021535917572103,\tactionflags=0x0, vsys_name=, device_name=fw-b"
-          grok:
-            # Free-text fields can contain commas, `=` and `key=value` text, so they are captured
-            # whole up to the next documented key and kept out of the keyvalue filter. Values may
-            # be wrapped in double quotes. The last rule is the generic keyvalue fallback, used when
-            # the format differs from the README.
-            matchRules: |
-              config %{_header}%{_kv}path=%{_q}%{data:path}%{_sep}before_change_detail=%{_q}%{data:before_change_detail}%{_sep}after_change_detail=%{_q}%{data:after_change_detail}%{_sep}(?=seqno=)%{_kv}
-              rule_panos %{_header}%{_kv}
-            supportRules: |
-              _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^")}
-              _header (?:[^=]*\s)?
-              _q \s*"*
-              _sep \s*"*,\s*
-    - type: pipeline
-      name: Parsing Palo Alto Network Firewall GlobalProtect logs
-      enabled: true
-      filter:
-        query: "@type:GLOBALPROTECT"
-      processors:
-        - type: grok-parser
-          name: Parsing Palo Alto Network Firewall GlobalProtect logs
-          enabled: true
-          source: message
-          samples:
-            - "timestamp=2026/11/18 10:21:17, serial=016201026426, type=GLOBALPROTECT, subtype=0, error=\"Authentication failed, retry\", opaque=\"Client version=6.2.1, tunnel=IPSec\", gp_status=success, seqno=1"
-          grok:
-            # Free-text fields can contain commas, `=` and `key=value` text, so they are captured
-            # whole up to the next documented key and kept out of the keyvalue filter. Values may
-            # be wrapped in double quotes. The last rule is the generic keyvalue fallback, used when
-            # the format differs from the README.
-            matchRules: |
-              globalprotect %{_header}%{_kv}error=%{_q}%{data:error}%{_sep}opaque=%{_q}%{data:opaque}%{_sep}(?=(?:gp_)?status=)%{_kv}
-              rule_panos %{_header}%{_kv}
-            supportRules: |
-              _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^")}
-              _header (?:[^=]*\s)?
-              _q \s*"*
-              _sep \s*"*,\s*
-    - type: pipeline
-      name: Parsing Palo Alto Network Firewall System and Correlated Events logs
-      enabled: true
-      filter:
-        query: "@type:(SYSTEM OR CORRELATION)"
-      processors:
-        - type: grok-parser
-          name: Parsing Palo Alto Network Firewall System and Correlated Events logs
-          enabled: true
-          source: message
-          samples:
-            - "<14>Nov 18 10:15:48 fw-b timestamp=2026/11/18 10:15:48, serial=007955000930602, type=SYSTEM, subtype=general,\tvsys=,\tevt.name=general,\tobject=,\tmodule=general,\tseverity=informational,\topaque=WildFire job enqueued. Enqueue time=2026/11/18 10:15:48. JobId=13752.  . Type: Full,\tseqno=7701028248951498075, actionflags=0x0, vsys_name=, device_name=fw-b"
-          grok:
-            # Free-text fields can contain commas, `=` and `key=value` text, so they are captured
-            # whole up to the next documented key and kept out of the keyvalue filter. Values may
-            # be wrapped in double quotes. The last rule is the generic keyvalue fallback, used when
-            # the format differs from the README.
-            matchRules: |
-              system %{_header}%{_kv}opaque=%{_q}%{data:opaque}%{_sep}(?=seqno=)%{_kv}
-              rule_panos %{_header}%{_kv}
-            supportRules: |
-              _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^")}
-              _header (?:[^=]*\s)?
-              _q \s*"*
-              _sep \s*"*,\s*
-    - type: pipeline
-      name: Parsing Palo Alto Network Firewall logs
-      enabled: true
-      filter:
-        query: "-@type:(THREAT OR CONFIG OR GLOBALPROTECT OR SYSTEM OR CORRELATION)"
-      processors:
-        - type: grok-parser
-          name: Parsing Palo Alto Network Firewall logs
-          enabled: true
-          source: message
-          samples:
-            - "<14>Nov 18 10:19:48 fw-a timestamp=2026/11/18 10:19:48, serial=007955000930601, type=TRAFFIC, subtype=end, time_generated=2026/11/18 10:19:48, network.client.ip=10.60.3.100, network.destination.ip=10.60.2.100, rule=vpn-to-trust, usr.id=, dstuser=,\tapp=incomplete,\tinbound_if=tunnel.1,\toutbound_if=ethernet1/2,\tnetwork.client.port=54096,\tnetwork.destination.port=8080, natsport=0\tnatdport=0,\tproto=tcp,\t evt.name=allow, start=2026/11/18 10:19:34, tunnel=N/A"
-          grok:
-            matchRules: |
-              rule_panos %{_header}%{_kv}
-            supportRules: |
-              _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^")}
-              _header (?:[^=]*\s)?
-              _q \s*"*
-              _sep \s*"*,\s*
+          threat_with_useragent %{_header}%{_kv}misc=%{_q}%{data:misc}%{_sep}threatid=%{_q}%{data:threatid}%{_sep}(?=category=)%{_kv}http.useragent=%{_q}%{data:http.useragent}%{_sep}(?=filetype=)%{_kv}
+          threat %{_header}%{_kv}misc=%{_q}%{data:misc}%{_sep}threatid=%{_q}%{data:threatid}%{_sep}(?=category=)%{_kv}
+          config %{_header}%{_kv}path=%{_q}%{data:path}%{_sep}before_change_detail=%{_q}%{data:before_change_detail}%{_sep}after_change_detail=%{_q}%{data:after_change_detail}%{_sep}(?=seqno=)%{_kv}
+          globalprotect %{_header}%{_kv}error=%{_q}%{data:error}%{_sep}opaque=%{_q}%{data:opaque}%{_sep}(?=(?:gp_)?status=)%{_kv}
+          system %{_header}%{_kv}opaque=%{_q}%{data:opaque}%{_sep}(?=seqno=)%{_kv}
+          rule_panos %{_header}%{_kv}
+        supportRules: |
+          _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^")}
+          _header (?:[^=]*\s)?
+          _q \s*"*
+          _sep \s*"*,\s*
     - type: grok-parser
       name: Keep `serial` as a string
       enabled: true
