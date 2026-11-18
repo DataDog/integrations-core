@@ -401,93 +401,106 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         for row in rows:
             if not self._should_include_query_metrics_row(row):
                 continue
-            # Attempt to obfuscate SQL statement with metadata
-            try:
-                statement = obfuscate_sql_with_metadata(
-                    row['statement_text'], self._config.obfuscator_options, replace_null_character=True
-                )
-                metadata = statement['metadata']
-                comments = metadata.get('comments', [])
-
-            except Exception as e:
-                if self._config.log_unobfuscated_queries:
-                    self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['statement_text']), e)
-                else:
-                    self.log.debug("Failed to obfuscate query | err=[%s]", e)
-                self._check.count(
-                    "dd.sqlserver.statements.error",
-                    1,
-                    **self._check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))]),
-                )
-                # If we can't obfuscate the query, give up.
+            text_fields = self._normalize_query_text(row)
+            if text_fields is None:
                 continue
-
-            # Extract obfuscated statement and update row fields
-            obfuscated_statement = statement['query']
-            query_signature = compute_sql_signature(obfuscated_statement)
-
-            procedure_signature = None
-            procedure_content = None
-            row['is_proc'] = bool(row.get('procedure_name'))
-            has_sproc_context = row['is_proc'] or bool(row.get('sproc_object_id'))
-            needs_procedure_metadata = has_sproc_context or self.disable_secondary_tags
-            should_recover_comments = needs_comment_recovery(row.get('text'), comments)
-            if row.get('text') and (needs_procedure_metadata or should_recover_comments):
-                try:
-                    full_text_statement = obfuscate_sql_with_metadata(
-                        row['text'], self._config.obfuscator_options, replace_null_character=True
-                    )
-                    full_text_comments = full_text_statement['metadata'].get('comments', [])
-                    if full_text_comments:
-                        comments = list(dict.fromkeys(comments + full_text_comments))
-                    if needs_procedure_metadata:
-                        procedure_content = full_text_statement['query']
-                        procedure_signature = compute_sql_signature(full_text_statement['query'])
-                        if not row.get('procedure_name'):
-                            procedures = full_text_statement['metadata'].get('procedures')
-                            if procedures:
-                                row['procedure_name'] = procedures[0].lower()
-                                row['is_proc'] = True
-                except Exception as e:
-                    if needs_procedure_metadata:
-                        procedure_signature = '__procedure_obfuscation_error__'
-                        procedure_content = '__procedure_obfuscation_error__'
-                    if self._config.log_unobfuscated_queries:
-                        self.log.warning("Failed to obfuscate query text=[%s] | err=[%s]", repr(row['text']), e)
-                    else:
-                        self.log.debug(
-                            "Failed to obfuscate query text for query_signature=[%s] | err=[%s]", query_signature, e
-                        )
-                    if needs_procedure_metadata:
-                        self._check.count(
-                            "dd.sqlserver.statements.error",
-                            1,
-                            **self._check.debug_stats_kwargs(tags=["error:obfuscate-sproc-{}".format(type(e))]),
-                        )
-                    # If we can't obfuscate the full text, keep the row using the obfuscated statement text.
-
-            if procedure_content:
-                row['procedure_text'] = procedure_content
-
-            if procedure_signature:
-                row['procedure_signature'] = procedure_signature
-
-            if row.get('procedure_name') and row.get('schema_name'):
-                # convert to lowercase for backward compatibility
-                row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}".lower()
-
-            row['dd_comments'] = comments
-            row['text'] = obfuscated_statement
-            row['query_signature'] = query_signature
+            row.update(text_fields)
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
             row['plan_handle'] = _hash_to_hex(row['plan_handle'])
-
-            row['dd_tables'] = metadata.get('tables', None)
-            row['dd_commands'] = metadata.get('commands', None)
-
             normalized_rows.append(row)
         return normalized_rows
+
+    def _normalize_query_text(self, row):
+        """Derive the text-dependent fields of a query stats row, or None if its statement cannot be obfuscated.
+
+        Reads `statement_text`, `text` and the procedure context from *row* without modifying it, and returns the
+        obfuscated statement in `text`, its signature and metadata, and the procedure fields where they apply.
+        """
+        # Attempt to obfuscate SQL statement with metadata
+        try:
+            statement = obfuscate_sql_with_metadata(
+                row['statement_text'], self._config.obfuscator_options, replace_null_character=True
+            )
+            metadata = statement['metadata']
+            comments = metadata.get('comments', [])
+
+        except Exception as e:
+            if self._config.log_unobfuscated_queries:
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['statement_text']), e)
+            else:
+                self.log.debug("Failed to obfuscate query | err=[%s]", e)
+            self._check.count(
+                "dd.sqlserver.statements.error",
+                1,
+                **self._check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))]),
+            )
+            # If we can't obfuscate the query, give up.
+            return None
+
+        # Extract obfuscated statement and update row fields
+        obfuscated_statement = statement['query']
+        query_signature = compute_sql_signature(obfuscated_statement)
+
+        fields = {}
+        procedure_name = row.get('procedure_name')
+        procedure_signature = None
+        procedure_content = None
+        fields['is_proc'] = bool(procedure_name)
+        has_sproc_context = fields['is_proc'] or bool(row.get('sproc_object_id'))
+        needs_procedure_metadata = has_sproc_context or self.disable_secondary_tags
+        should_recover_comments = needs_comment_recovery(row.get('text'), comments)
+        if row.get('text') and (needs_procedure_metadata or should_recover_comments):
+            try:
+                full_text_statement = obfuscate_sql_with_metadata(
+                    row['text'], self._config.obfuscator_options, replace_null_character=True
+                )
+                full_text_comments = full_text_statement['metadata'].get('comments', [])
+                if full_text_comments:
+                    comments = list(dict.fromkeys(comments + full_text_comments))
+                if needs_procedure_metadata:
+                    procedure_content = full_text_statement['query']
+                    procedure_signature = compute_sql_signature(full_text_statement['query'])
+                    if not procedure_name:
+                        procedures = full_text_statement['metadata'].get('procedures')
+                        if procedures:
+                            procedure_name = procedures[0].lower()
+                            fields['procedure_name'] = procedure_name
+                            fields['is_proc'] = True
+            except Exception as e:
+                if needs_procedure_metadata:
+                    procedure_signature = '__procedure_obfuscation_error__'
+                    procedure_content = '__procedure_obfuscation_error__'
+                if self._config.log_unobfuscated_queries:
+                    self.log.warning("Failed to obfuscate query text=[%s] | err=[%s]", repr(row['text']), e)
+                else:
+                    self.log.debug(
+                        "Failed to obfuscate query text for query_signature=[%s] | err=[%s]", query_signature, e
+                    )
+                if needs_procedure_metadata:
+                    self._check.count(
+                        "dd.sqlserver.statements.error",
+                        1,
+                        **self._check.debug_stats_kwargs(tags=["error:obfuscate-sproc-{}".format(type(e))]),
+                    )
+                # If we can't obfuscate the full text, keep the row using the obfuscated statement text.
+
+        if procedure_content:
+            fields['procedure_text'] = procedure_content
+
+        if procedure_signature:
+            fields['procedure_signature'] = procedure_signature
+
+        if procedure_name and row.get('schema_name'):
+            # convert to lowercase for backward compatibility
+            fields['procedure_name'] = f"{row['schema_name']}.{procedure_name}".lower()
+
+        fields['dd_comments'] = comments
+        fields['text'] = obfuscated_statement
+        fields['query_signature'] = query_signature
+        fields['dd_tables'] = metadata.get('tables', None)
+        fields['dd_commands'] = metadata.get('commands', None)
+        return fields
 
     def _collect_metrics_rows(self, cursor):
         rows = self._load_raw_query_metrics_rows(cursor)
