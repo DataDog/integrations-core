@@ -57,7 +57,7 @@ class QuerySamplesCollector(DBMAsyncJob):
             'ibm_db2_version': self._check.dbms_version,
             'timestamp': time() * 1000,
             'collection_interval': self._config.query_samples.collection_interval,
-            'tags': self._check.tag_manager.get_tags(include_internal=False),
+            'ddtags': self._check.tag_manager.get_tags(include_internal=False),
             'service': self._config.service,
             'ibm_db2_activity': observations,
         }

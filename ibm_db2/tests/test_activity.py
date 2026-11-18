@@ -213,11 +213,12 @@ def test_query_samples_registration(
     dbm: bool,
     enabled: bool,
 ):
-    """Only explicit DBM sampling starts the registered collector; its output carries the configured envelope."""
+    """Only explicit DBM sampling submits activity with configured tags in the common envelope."""
     from datadog_checks.ibm_db2 import IbmDb2Check, query_samples
 
     monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
     instance.update(dbm=dbm, query_metrics={'enabled': False}, query_samples={'enabled': enabled}, service='orders')
+    instance['tags'] = ['custom_tag:query-samples']
     check = IbmDb2Check('ibm_db2', {}, [instance])
     source = Mock(return_value=([activity_row], {'row_limit': 0, 'text_limit': 0, 'text_budget': 0}))
     monkeypatch.setattr(query_samples, 'read_activity', source)
@@ -231,6 +232,7 @@ def test_query_samples_registration(
         assert event['ddsource'] == 'ibm_db2'
         assert event['dbm_type'] == 'activity'
         assert event['service'] == 'orders'
+        assert 'custom_tag:query-samples' in event['ddtags']
         assert event['host'] == check.reported_hostname
         assert event['database_instance'] == check.database_identifier
         assert event['collection_interval'] == 1
