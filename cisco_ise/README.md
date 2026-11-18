@@ -116,13 +116,20 @@ The Cisco ISE integration collects ISE's syslog messages and parses them with th
 - Profiler messages (`80002`): the endpoint vendor (`cisco_ise.attributes.EndpointOUI`) and ISE's list of endpoint properties as one string (`cisco_ise.endpoint.properties`).
 - Standard attributes: `usr.name`, `network.client.ip`, and `evt.name` (ISE's message class, for example `Passed-Authentication` or `Failed-Attempt`).
 
-ISE logs unknown users as `INVALID`, so failed logins by non-existing users are grouped under `usr.name:INVALID`.
+ISE logs unknown users as `INVALID`, so failed logins by non-existing users are grouped under `usr.name:INVALID`. For downloadable ACL requests (`5232`), ISE puts the ACL name (`#ACSACL#-...`) in `UserName`; it is not mapped to `usr.name`.
+
+ISE escapes commas inside some values with a backslash, and the backslash stays in the attribute: for example `cisco_ise.attributes.EndpointOUI` is `Cisco Systems\, Inc`. Search these values with a wildcard, such as `@cisco_ise.attributes.EndpointOUI:Cisco*`.
 
 #### Finding failed logins
 
 <!-- RFC Q5 (proposed answer): no evt.outcome; the pipeline keeps ISE code, category, and class as sent. -->
 
-ISE has no single success or failure field, so the pipeline keeps the values ISE sends and doesn't classify them. To find failures, use the Logging Category (`@cisco_ise.category:Failed_Attempts`), the message class (`@evt.name:Failed-Attempt`), or the message code. Common codes:
+ISE has no single success or failure field, so the pipeline keeps the values ISE sends and doesn't classify them. To find failures, use the message class or the Logging Category; they differ:
+
+- `@evt.name:Failed-Attempt`: the individual failed authentications and authorizations (for example `5400`, `5401`, `5402`, `5411`). Use it to count failed logins.
+- `@cisco_ise.category:Failed_Attempts`: everything in ISE's *Failed Attempts* category, which also includes summaries of repeated failures (`5434`, `5449`), failed CoA requests (`5417`), and failed guest logins (`5418`).
+
+The message code (`@cisco_ise.message_code`) selects one message type. Common codes:
 
 | Code | Message |
 |---|---|
