@@ -516,13 +516,16 @@ class PostgreSql(DatabaseCheck):
         try:
             parsed = parse_request(request)
             with self._remote_query_condition:
-                if self._remote_query_unscheduled:
-                    return failed("cancelled", "The check was unscheduled.")
                 if parsed["operation"] == "resolve":
+                    if self._remote_query_unscheduled:
+                        return failed("cancelled", "The check was unscheduled.")
                     match(self, parsed["target"])
                     return '{"status":"MATCHED"}'
                 run = Run(parsed, received)
                 self._remote_query_runs.add(run)
+                if self._remote_query_unscheduled:
+                    # The run fails as cancelled and aborts its upload session.
+                    run.cancel()
         except RemoteQueryError as error:
             return failed(error.code, error.message)
         except Exception:

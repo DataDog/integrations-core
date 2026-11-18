@@ -327,12 +327,17 @@ class Run:
         if self.cancelled.is_set():
             return
         self.cancelled.set()
-        loop, task = self.loop, self.task
-        if loop is not None and task is not None:
+        loop = self.loop
+        if loop is not None:
             try:
-                loop.call_soon_threadsafe(task.cancel)
+                loop.call_soon_threadsafe(self._cancel_task)
             except RuntimeError:
                 pass  # The run has already ended.
+
+    def _cancel_task(self) -> None:
+        # Cleanup clears the task first, so it is never cancelled.
+        if self.task is not None:
+            self.task.cancel()
 
     def log(self, check: PostgreSql, event: str, code: str) -> None:
         check.log.debug(
