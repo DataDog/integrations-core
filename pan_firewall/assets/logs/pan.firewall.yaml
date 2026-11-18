@@ -1,5 +1,4 @@
 # bypass-global-facets-path-checks
-# bypass-global-grok-parser-rules-checks
 id: pan.firewall
 metric_id: pan-firewall
 backend_only: false
@@ -500,21 +499,11 @@ pipeline:
         - "<14>Oct 26 16:59:23 fw-b timestamp=2026/10/26 16:59:23,\tserial=007955000930602,\ttype=CONFIG,\tsubtype=0,\t network.client.ip=38.32.8.169,\tvsys=,\tevt.name=set,\tusr.id=admin,\tclient=CLI,\tevt.outcome=Succeeded,\tpath= network interface ethernet  ethernet1/1 layer3 ip, before_change_detail=,\tafter_change_detail=,\tseqno=7701021535917572103,\tactionflags=0x0, vsys_name=, device_name=fw-b"
         - "<14>Nov 18 10:19:48 fw-a timestamp=2026/11/18 10:19:48, serial=007955000930601, type=TRAFFIC, subtype=end, time_generated=2026/11/18 10:19:48, network.client.ip=10.60.3.100, network.destination.ip=10.60.2.100, rule=vpn-to-trust, usr.id=, dstuser=,\tapp=incomplete,\tinbound_if=tunnel.1,\toutbound_if=ethernet1/2,\tnetwork.client.port=54096,\tnetwork.destination.port=8080, natsport=0\tnatdport=0,\tproto=tcp,\t evt.name=allow, start=2026/11/18 10:19:34, tunnel=N/A"
       grok:
-        # Free-text fields (misc, threatid, http.useragent, path, before/after_change_detail,
-        # error, opaque) can contain commas, `=` and `key=value` text, so they are captured
-        # whole up to the next documented key and kept out of the keyvalue filter. Values may
-        # be wrapped in double quotes. The last rule is the generic keyvalue fallback.
         matchRules: |
-          threat_with_useragent %{_header}%{_kv}misc=%{_q}%{data:misc}%{_sep}threatid=%{_q}%{data:threatid}%{_sep}(?=category=)%{_kv}http.useragent=%{_q}%{data:http.useragent}%{_sep}(?=filetype=)%{_kv}
-          threat %{_header}%{_kv}misc=%{_q}%{data:misc}%{_sep}threatid=%{_q}%{data:threatid}%{_sep}(?=category=)%{_kv}
-          config %{_header}%{_kv}path=%{_q}%{data:path}%{_sep}before_change_detail=%{_q}%{data:before_change_detail}%{_sep}after_change_detail=%{_q}%{data:after_change_detail}%{_sep}(?=seqno=)%{_kv}
-          system %{_header}%{_kv}severity=%{_q}%{word:severity}%{_sep}opaque=%{_q}%{data:opaque}%{_sep}(?=seqno=)%{_kv}
           rule_panos %{_header}%{_kv}
         supportRules: |
           _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^")}
           _header (?:[^=]*\s)?
-          _q \s*"*
-          _sep \s*"*,\s*
     - type: grok-parser
       name: Keep `serial` as a string
       enabled: true
@@ -671,16 +660,17 @@ pipeline:
       filter:
         query: "@type:THREAT @subtype:url"
       processors:
-        - type: attribute-remapper
-          name: Map `misc` to `ocsf.evidence.url.url_string`
+        - type: grok-parser
+          name: Parse `misc` to `ocsf.evidence.url.url_string`
           enabled: true
-          sources:
-            - misc
-          sourceType: attribute
-          target: ocsf.evidence.url.url_string
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: true
+          source: message
+          samples:
+            - "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, type=THREAT, subtype=url, evt.name=block-url, misc=http://malware.example.com/payload.bin?id=42&ref=mail, threatid=Suspicious URL"
+            - "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, type=THREAT, subtype=url, evt.name=block-url, misc=\"http://malware.example.com/payload.bin\", threatid=\"Suspicious URL\""
+          grok:
+            supportRules: ""
+            matchRules: |-
+              misc_url %{data}misc="*%{regex("[^,\"]*"):ocsf.evidence.url.url_string}%{data}
     - type: pipeline
       name: misc field filename extraction
       enabled: true

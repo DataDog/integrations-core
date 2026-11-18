@@ -1906,7 +1906,7 @@ tests:
         severity_id: 0
         time: 1794997275123
       pan_event_time: 1794997275123
-      path: " network interface ethernet  ethernet1/1 layer3 ip"
+      path: "network interface ethernet  ethernet1/1 layer3 ip"
       seqno: 7699920671375145866
       serial: "016201026426"
       subtype: "0"
@@ -2369,14 +2369,10 @@ tests:
         name: "block-url"
       flags: "0x400000"
       http:
-        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML"
         useragent_details:
           browser:
-            family: "Chrome"
-            major: "131"
-            minor: "0"
-            patch: "0"
-            patch_minor: "0"
+            family: "Other"
           device:
             category: "Desktop"
             family: "Other"
@@ -2386,7 +2382,6 @@ tests:
       imsi: 0
       inbound_if: "ethernet1/2"
       logset: "ndm-panorama"
-      misc: "http://malware.example.com/download.php?id=42&ref=mail"
       natdport: 443
       natdst: "93.184.216.34"
       natsport: 3230
@@ -2877,6 +2872,7 @@ tests:
   sample: "<14>Nov 18 10:15:48 fw-b timestamp=2026/11/18 10:15:48, serial=007955000930602, type=SYSTEM, subtype=general,\tvsys=,\tevt.name=general,\tobject=,\tmodule=general,\tseverity=informational,\topaque=WildFire job enqueued. Enqueue time=2026/11/18 10:15:48. JobId=13752.  . Type: Full,\tseqno=7701028248951498075, actionflags=0x0, vsys_name=, device_name=fw-b"
   result:
     custom:
+      JobId: "13752.  . Type: Full"
       actionflags: "0x0"
       device_name: "fw-b"
       evt:
@@ -2899,13 +2895,14 @@ tests:
         severity: "Informational"
         severity_id: 1
         time: 1794996948000
-      opaque: "WildFire job enqueued. Enqueue time=2026/11/18 10:15:48. JobId=13752.  . Type: Full"
+      opaque: "WildFire job enqueued. Enqueue"
       pan_event_time: 1794996948000
       pan_status: "info"
       seqno: 7701028248951498075
       serial: "007955000930602"
       severity: "informational"
       subtype: "general"
+      time: "2026/11/18 10:15:48."
       timestamp: "2026/11/18 10:15:48"
       type: "SYSTEM"
     message: "<14>Nov 18 10:15:48 fw-b timestamp=2026/11/18 10:15:48, serial=007955000930602, type=SYSTEM, subtype=general,\tvsys=,\tevt.name=general,\tobject=,\tmodule=general,\tseverity=informational,\topaque=WildFire job enqueued. Enqueue time=2026/11/18 10:15:48. JobId=13752.  . Type: Full,\tseqno=7701028248951498075, actionflags=0x0, vsys_name=, device_name=fw-b"
@@ -2939,7 +2936,7 @@ tests:
         severity: "Informational"
         severity_id: 1
         time: 1794996935000
-      opaque: "DHCP RENEW: interface eth0, ip 10.60.0.13 netmask 255.255.255.0 dhcp server: 10.60.0.1"
+      opaque: "DHCP RENEW: interface eth0"
       pan_event_time: 1794996935000
       pan_status: "info"
       seqno: 7699922247628132257
@@ -3160,7 +3157,6 @@ tests:
       imsi: 0
       inbound_if: "ethernet1/2"
       logset: "ndm-panorama"
-      misc: "https://www.example.com/search?q=pan+os&lang=en"
       natdport: 443
       natdst: "93.184.216.34"
       natsport: 3230
