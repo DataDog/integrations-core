@@ -772,7 +772,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              endpoint_oui %{data}, EndpointOUI=%{regex("[^,\\\\]*(\\\\.[^,\\\\]*)*"):cisco_ise.attributes.EndpointOUI},%{data}
+              endpoint_oui %{data}, EndpointOUI=%{data:cisco_ise.attributes.EndpointOUI}, %{regex("[A-Za-z-]+")}=%{data}
         - type: grok-parser
           name: Extract EndpointProperty
           enabled: true
@@ -782,4 +782,4 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              endpoint_property %{data}, EndpointProperty=%{regex("[^,\\\\]*(\\\\.[^,\\\\]*)*"):cisco_ise.endpoint.properties},%{data}
+              endpoint_property %{data}, EndpointProperty=%{data:cisco_ise.endpoint.properties}, %{regex("[A-Za-z-]+")}=%{data}
