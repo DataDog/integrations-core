@@ -3157,7 +3157,7 @@ tests:
           severity: "warning"
         timestamp: 1794476976653
       message: "2026-11-12 09:49:36.653 +00:00 0000055278 11213 WARN  Dynamic-Authorization: No response received from Network Access Device after sending a Dynamic Authorization request, ConfigVersionId=436, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, RadiusPacketType=CoARequest, NAS-IP-Address=192.168.254.11, Calling-Station-ID=AA-BB-CC-10-81-01, cisco-av-pair=subscriber:command=reauthenticate, cisco-av-pair=audit-session-id=luisx108101, AcsSessionID=fc4da863-594f-46fe-8215-86a13d769776, CPMSessionID=luisx108101,"
-      status: "warning"
+      status: "warn"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1794476976653
