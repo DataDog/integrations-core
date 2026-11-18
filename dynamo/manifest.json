@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a9a1c533-9a78-48d9-9b66-9a91d51e550a",
   "app_id": "dynamo",
-  "owner": "new-workloads",
+  "owner": "gpu-monitoring-agent",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -40,7 +40,13 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "dynamo.frontend",
+        "dynamo.vllm",
+        "dynamo.sglang",
+        "dynamo.trtllm"
+      ]
     },
     "monitors": {},
     "saved_views": {}
