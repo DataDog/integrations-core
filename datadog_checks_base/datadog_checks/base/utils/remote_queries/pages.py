@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import io
+import logging
 from array import array
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -27,9 +28,13 @@ from .contract import (
 from .tracing import NULL_PRODUCER_TRACING, RemoteQueryProducerTracing
 from .upload import (
     REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE,
+    SourcePageUploadReport,
     UploadClient,
     UploadCredentials,
 )
+
+LOGGER = logging.getLogger(__name__)
+
 
 PAGE_SUFFIX = b']}'
 
@@ -207,7 +212,7 @@ class PageUploader:
             page = SourcePageUploadMetadata(stats.pages_emitted, stats.rows_emitted, end, count)
             try:
                 self.guard()
-                self.client.put_source_page(self.creds, page, _SourcePageBody(buffer, end))
+                report = self.client.put_source_page(self.creds, page, _SourcePageBody(buffer, end))
             except RemoteQueryFailure as error:
                 if error.code != REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE:
                     raise
@@ -217,12 +222,32 @@ class PageUploader:
                     ) from None
                 count //= 2
                 continue
+            if report is not None:
+                self._log_page(page.batch_index, count, end, report)
             stats.pages_emitted += 1
             stats.rows_emitted += count
             stats.bytes_emitted += bound
             # The root span's time_to_first_page_ms counts the first recorded page.
             self.tracing.note_page_acknowledged()
             return count, end
+
+    def _log_page(self, index: int, rows: int, page_bytes: int, report: SourcePageUploadReport) -> None:
+        """Log one acknowledged page: identifiers, sizes, and timings, never its content."""
+        LOGGER.debug(
+            'Remote query page_uploaded crawl_id=%s task_id=%s upload_id=%s page=%d rows=%d bytes=%d sent_bytes=%d '
+            'encoding=%s compress_ms=%.1f upload_ms=%.1f gzip_not_smaller=%s',
+            self.delivery.run_id,
+            self.delivery.task_id,
+            self.delivery.upload_id,
+            index,
+            rows,
+            page_bytes,
+            report.sent_bytes,
+            report.encoding,
+            report.compress_ms,
+            report.upload_ms,
+            report.gzip_not_smaller,
+        )
 
     def finalize(self) -> None:
         # The finalize span is also the injection parent of the finalize requests.

@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import gzip
 import io
 import json
 import logging
+import random
 import socket
 import socketserver
 import threading
@@ -22,6 +24,7 @@ from datadog_checks.base.utils.remote_queries import upload as rq_upload
 from .helpers import (
     PARENT_ID,
     TRACE_ID,
+    PageIntake,
     RefusingPropagator,
     as_session_request,
     descriptor,
@@ -143,11 +146,12 @@ def test_http_descriptor_registration_replays_the_identical_body(monkeypatch, cr
 
 
 @pytest.mark.parametrize('trigger', ['lost_response', 'unavailable'])
-def test_http_source_page_retry_replays_exact_body_and_headers(monkeypatch, creds, trigger):
+@pytest.mark.parametrize('compressible', [False, True], ids=['identity', 'gzip'])
+def test_http_source_page_retry_replays_exact_body_and_headers(monkeypatch, creds, trigger, compressible):
     import requests
 
     calls = []
-    payload = b'null,"""x"""\n'
+    payload = b'"row"\n' * 200 if compressible else b'null,"""x"""\n'
     page = source_page(payload, batch_index=2)
 
     def request(method, url, headers, data, timeout):
@@ -165,14 +169,48 @@ def test_http_source_page_retry_replays_exact_body_and_headers(monkeypatch, cred
         client.put_source_page(creds, page, body)
     assert calls[0] == calls[1]
     method, url, headers, sent = calls[0]
-    assert (method, url, sent) == ('PUT', 'https://intake.example/uploads/upload-1/pages/2', payload)
-    assert headers == {
+    assert (method, url) == ('PUT', 'https://intake.example/uploads/upload-1/pages/2')
+    expected = {
         'dd-api-key': 'test-api-key',
         'Content-Type': 'text/csv',
         'Content-Length': str(len(payload)),
+        'X-DD-Source-Page-Bytes': str(len(payload)),
         'X-DD-Source-Page-Rows': '1',
         'X-DD-Record-Offset': '7',
     }
+    if compressible:
+        assert gzip.decompress(sent) == payload
+        assert len(sent) < len(payload)
+        expected.update({'Content-Length': str(len(sent)), 'Content-Encoding': 'gzip'})
+    else:
+        assert sent == payload
+    assert headers == expected
+
+
+def test_unsupported_encoding_resends_uncompressed_now_and_for_the_rest_of_the_run(monkeypatch, creds):
+    import requests
+
+    intake = PageIntake(refuse_gzip=True)
+    sleeps = []
+    monkeypatch.setattr(requests.Session, 'request', as_session_request(intake))
+    monkeypatch.setattr(rq_upload.time, 'sleep', sleeps.append)
+    payload = b'"row"\n' * 200
+    client = rq_upload.RequestsUploadClient()
+    reports = []
+    for index in range(2):
+        with io.BytesIO(payload) as body:
+            reports.append(client.put_source_page(creds, source_page(payload, batch_index=index), body))
+
+    # Page 0 is tried as gzip once, then resent as is; page 1 never tries gzip.
+    assert [('Content-Encoding' in headers, accepted) for headers, _, _, accepted in intake.attempts] == [
+        (True, False),
+        (False, True),
+        (False, True),
+    ]
+    assert [wire for _, wire, _, accepted in intake.attempts if accepted] == [payload, payload]
+    assert sleeps == []  # the fallback is not a retry attempt
+    assert [report.encoding for report in reports] == ['identity', 'identity']
+    assert [report.gzip_not_smaller for report in reports] == [False, False]
 
 
 def test_http_result_file_too_large_surfaces_as_its_own_code(monkeypatch, creds):
@@ -318,7 +356,7 @@ def test_http_page_attempt_bound_kills_slow_attempts(monkeypatch, creds):
     monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: clock['now'])
     wall_creds = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, None, wall_deadline=1000.0)
     with io.BytesIO(payload) as body:
-        assert rq_upload.RequestsUploadClient().put_source_page(wall_creds, page, body) is None
+        rq_upload.RequestsUploadClient().put_source_page(wall_creds, page, body)
     assert len(attempts) == 2
     # The killed attempt fails its deadline check before any byte leaves; only the rewound
     # second attempt streams the page.
@@ -723,7 +761,8 @@ class StallingIntake:
         self.server.server_close()
 
 
-PAGE_PAYLOAD = b'x' * (8 * 1024 * 1024)
+# Incompressible, so the page really crosses the wire in full instead of shrinking under gzip.
+PAGE_PAYLOAD = random.Random(0).randbytes(8 * 1024 * 1024)
 
 
 def put_page_to(intake, client, wall_deadline=None):
@@ -740,7 +779,7 @@ def test_a_reader_that_stalls_longer_than_the_connect_timeout_does_not_fail_the_
     with StallingIntake(stall_seconds=1.0) as intake:
         # The stall is 3x the connect timeout and well inside the write timeout.
         client = rq_upload.RequestsUploadClient(timeout=(0.3, 5), write_timeout=5)
-        assert put_page_to(intake, client) is None
+        put_page_to(intake, client)
     assert intake.connections == 1
 
 
