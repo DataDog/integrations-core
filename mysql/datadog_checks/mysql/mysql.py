@@ -526,6 +526,7 @@ class MySql(DatabaseCheck):
             'connect_timeout': self._config.connect_timeout,
             'read_timeout': self._config.read_timeout,
             'autocommit': True,
+            'cursorclass': CommenterCursor,
         }
         if self._config.charset:
             connection_args['charset'] = self._config.charset

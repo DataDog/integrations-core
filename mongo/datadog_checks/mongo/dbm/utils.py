@@ -4,7 +4,7 @@
 
 
 import re
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from bson import json_util, regex
 from pymongo.errors import ExecutionTimeout, NetworkTimeout
@@ -13,6 +13,7 @@ from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache
+from datadog_checks.mongo.api import DD_APP_NAME
 from datadog_checks.mongo.common import MONGODB_SYSTEM_DATABASES
 
 try:
@@ -94,6 +95,14 @@ EXPLAIN_PLAN_KEYS_TO_REMOVE = frozenset(
 )
 
 log = get_check_logger()
+
+
+def get_operation_comment(command: dict, application: str | None) -> Any:
+    # Ingestion parses operation comments into trace.tags, giving Agent samples the
+    # same service identity as SQL samples even when their commands carry no comment.
+    if application == DD_APP_NAME:
+        return "service='datadog-agent'"
+    return command.get('comment')
 
 
 def format_key_name(formatter, metric_dict: dict) -> dict:

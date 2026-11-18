@@ -840,3 +840,15 @@ def test_obfuscate_error_msg(
 ):
     obfuscated_error_message = obfuscate_error_msg(error_message, password)
     assert obfuscated_error_message == expected_error_message
+
+
+@pytest.mark.unit
+def test_connection_setup_preserves_agent_service_comment():
+    raw_connection = mock.MagicMock()
+    raw_cursor = raw_connection.cursor.return_value
+    connection = Connection({}, {'host': 'localhost'}, mock.MagicMock())
+    connection._setup_new_connection(raw_connection)
+    raw_cursor.execute.assert_called_once_with(
+        "/* service='datadog-agent' */ SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED"
+    )
+    raw_cursor.close.assert_called_once_with()

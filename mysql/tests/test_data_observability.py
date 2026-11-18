@@ -14,6 +14,7 @@ import pymysql
 import pytest
 
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.cursor import CommenterSSCursor
 from datadog_checks.mysql.data_observability import EVENT_TRACK_TYPE, MAX_RESULT_ROWS
 from datadog_checks.mysql.version_utils import MySQLVersion
 
@@ -81,7 +82,7 @@ def _make_mock_conn(rows=None, description=None, open=True):
     result_rows = rows if rows is not None else [(42,)]
     query_cursor.fetchmany.side_effect = lambda size: result_rows[:size]
     mock_conn.cursor.side_effect = lambda cursor_class=None: (
-        query_cursor if cursor_class is pymysql.cursors.SSCursor else timeout_cursor
+        query_cursor if cursor_class is CommenterSSCursor else timeout_cursor
     )
     mock_conn.query_cursor = query_cursor
     mock_conn.timeout_cursor = timeout_cursor
@@ -351,7 +352,7 @@ def test_streaming_result_is_capped_in_emitted_event(instance_basic):
     assert payload['row_count'] == MAX_RESULT_ROWS
     assert len(payload['rows']) == MAX_RESULT_ROWS
     assert payload['rows'][-1] == [MAX_RESULT_ROWS - 1]
-    conn.cursor.assert_any_call(pymysql.cursors.SSCursor)
+    conn.cursor.assert_any_call(CommenterSSCursor)
 
 
 def test_event_payload_structure(instance_basic):

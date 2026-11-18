@@ -16,6 +16,7 @@ from datadog_checks.base.utils.cron import CronScheduler
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
+from .cursor import CommenterSSCursor
 from .util import ManagedAuthConnectionMixin
 
 if TYPE_CHECKING:
@@ -217,7 +218,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             # SSCursor reads rows as fetchmany() requests them instead of buffering the
             # full result in execute(). Closing it drains unread rows before the shared
             # connection is reused for another query.
-            with closing(conn.cursor(pymysql.cursors.SSCursor)) as cursor:
+            with closing(conn.cursor(CommenterSSCursor)) as cursor:
                 if dbname != self._current_dbname:
                     cursor.execute(f"USE `{dbname}`")
                     self._current_dbname = dbname

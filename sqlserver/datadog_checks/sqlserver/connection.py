@@ -361,7 +361,7 @@ class Connection(object):
                 self.log.debug(check_err_message)
 
     def _setup_new_connection(self, rawconn):
-        with rawconn.cursor() as cursor:
+        with closing(CommenterCursorWrapper(rawconn.cursor())) as cursor:
             # ensure that by default, the agent's reads can never block updates to any tables it's reading from
             cursor.execute("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")
 

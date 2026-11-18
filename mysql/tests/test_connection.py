@@ -6,6 +6,7 @@ import copy
 import pytest
 
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.cursor import CommenterCursor
 
 from . import common
 
@@ -23,6 +24,7 @@ def test_connection_with_defaults_file():
     connection_args = check._get_connection_args()
     assert connection_args == {
         'autocommit': True,
+        'cursorclass': CommenterCursor,
         'ssl': None,
         'connect_timeout': 10,
         'read_timeout': None,
@@ -43,6 +45,7 @@ def test_connection_with_sock():
     connection_args = check._get_connection_args()
     assert connection_args == {
         'autocommit': True,
+        'cursorclass': CommenterCursor,
         'ssl': None,
         'connect_timeout': 10,
         'read_timeout': None,
@@ -63,6 +66,7 @@ def test_connection_with_host():
     connection_args = check._get_connection_args()
     assert connection_args == {
         'autocommit': True,
+        'cursorclass': CommenterCursor,
         'ssl': None,
         'connect_timeout': 10,
         'read_timeout': None,
@@ -78,6 +82,7 @@ def test_connection_with_host_and_port():
     connection_args = check._get_connection_args()
     assert connection_args == {
         'autocommit': True,
+        'cursorclass': CommenterCursor,
         'ssl': None,
         'connect_timeout': 10,
         'read_timeout': None,
@@ -96,6 +101,7 @@ def test_connection_with_charset(instance_basic):
     connection_args = check._get_connection_args()
     assert connection_args == {
         'autocommit': True,
+        'cursorclass': CommenterCursor,
         'host': common.HOST,
         'user': common.USER,
         'passwd': common.PASS,

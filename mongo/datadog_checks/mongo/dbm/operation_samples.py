@@ -16,6 +16,7 @@ from datadog_checks.mongo.dbm.utils import (
     get_command_truncation_state,
     get_db_from_namespace,
     get_explain_plan,
+    get_operation_comment,
     obfuscate_command,
     should_explain_operation,
 )
@@ -229,7 +230,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "dbname": command.get("$db", db),
             "application": operation.get("appName"),
             "collection": get_command_collection(command, namespace),
-            "comment": command.get("comment"),
+            "comment": get_operation_comment(command, operation.get("appName")),
             "truncated": get_command_truncation_state(command),
             "client": self._get_operation_client(operation),
             "user": self._get_operation_user(operation),

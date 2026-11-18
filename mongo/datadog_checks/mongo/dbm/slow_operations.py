@@ -19,6 +19,7 @@ from datadog_checks.mongo.dbm.utils import (
     get_command_truncation_state,
     get_db_from_namespace,
     get_explain_plan,
+    get_operation_comment,
     obfuscate_command,
     should_explain_operation,
 )
@@ -284,7 +285,7 @@ class MongoSlowOperations(DBMAsyncJob):
             "query_hash": slow_operation.get("queryHash") or slow_operation.get("planCacheShapeHash"),
             "plan_cache_key": slow_operation.get("planCacheKey"),  # only available with profiling
             "query_framework": slow_operation.get("queryFramework"),
-            "comment": slow_operation["command"].get("comment"),
+            "comment": get_operation_comment(slow_operation["command"], slow_operation.get("appName")),
             # metrics
             # mills from profiler, durationMillis from logs
             "mills": slow_operation.get("millis", slow_operation.get("durationMillis", 0)),
@@ -350,7 +351,7 @@ class MongoSlowOperations(DBMAsyncJob):
                     "op": slow_operation.get("op") or slow_operation.get("type"),
                     "ns": slow_operation.get("ns"),
                     "collection": get_command_collection(slow_operation["command"], slow_operation.get("ns")),
-                    "comment": slow_operation["command"].get("comment"),
+                    "comment": get_operation_comment(slow_operation["command"], slow_operation.get("appName")),
                 },
                 "truncated": get_command_truncation_state(slow_operation["command"]),
                 "source": "slow_query",
