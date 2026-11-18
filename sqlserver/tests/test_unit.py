@@ -16,6 +16,7 @@ import pytest
 
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db.sql_commenter import generate_sql_comment
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
@@ -32,6 +33,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_SERVERNAME,
     STATIC_INFO_VERSION,
 )
+from datadog_checks.sqlserver.cursor import DD_QUERY_ATTRIBUTES
 from datadog_checks.sqlserver.database_metrics import SqlserverDatabaseStatsMetrics
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, SqlFractionMetric, SqlSimpleMetric
@@ -43,8 +45,10 @@ from datadog_checks.sqlserver.schemas import (
 )
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
+    AGENT_SERVICE_COMMENT,
     DRIVER_CONFIG_DIR,
     Database,
+    append_agent_service_comment,
     construct_use_statement,
     extract_sql_comments_and_procedure_name,
     extract_trailing_dbm_comments,
@@ -1568,6 +1572,41 @@ def test_needs_comment_recovery_recognizes_dbm_comment_markers(marker):
 )
 def test_needs_comment_recovery_requires_missing_dbm_comment(full_text, statement_comments, expected):
     assert needs_comment_recovery(full_text, statement_comments) is expected
+
+
+def test_agent_service_comment_matches_the_cursor_comment():
+    assert AGENT_SERVICE_COMMENT == generate_sql_comment(**DD_QUERY_ATTRIBUTES)
+
+
+@pytest.mark.parametrize(
+    'full_text,statement_comments,expected',
+    [
+        pytest.param(None, [], [], id='no_batch'),
+        pytest.param(
+            f"(@P1 int){AGENT_SERVICE_COMMENT} SELECT 1",
+            [],
+            [AGENT_SERVICE_COMMENT],
+            id='offsets_omit_the_comment',
+        ),
+        pytest.param(
+            f"{AGENT_SERVICE_COMMENT} SELECT 1",
+            [AGENT_SERVICE_COMMENT],
+            [AGENT_SERVICE_COMMENT],
+            id='already_in_statement_metadata',
+        ),
+        pytest.param("SELECT * FROM t WHERE service=@id", [], [], id='column_equals_parameter'),
+        pytest.param("SET @service='api'", [], [], id='variable_assignment'),
+        pytest.param("SELECT * FROM t WHERE microservice='api'", [], [], id='substring_of_identifier'),
+        pytest.param(
+            "(@P1 int)/* environment='prod' */ SELECT * FROM t WHERE service=@P1",
+            [],
+            [],
+            id='unrelated_comment_with_sql_equality',
+        ),
+    ],
+)
+def test_append_agent_service_comment(full_text, statement_comments, expected):
+    assert append_agent_service_comment(statement_comments, full_text) == expected
 
 
 @pytest.mark.parametrize(

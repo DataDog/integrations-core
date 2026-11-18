@@ -8,6 +8,7 @@ import sys
 from typing import Dict, Optional, Sequence
 from xml.etree import ElementTree
 
+from datadog_checks.base.utils.db.sql_commenter import generate_sql_comment
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 
@@ -162,6 +163,25 @@ def needs_comment_recovery(full_text: Optional[str], statement_comments: Optiona
     return has_dbm_comment_marker(full_text) and not any(
         has_dbm_comment_marker(comment) for comment in statement_comments or ()
     )
+
+
+# CommenterCursorWrapper prepends this comment onto every Agent query.
+AGENT_SERVICE_COMMENT = generate_sql_comment(service='datadog-agent')
+
+
+def append_agent_service_comment(comments: Sequence[str] | None, full_text: Optional[str]) -> list[str]:
+    """Return statement comments, plus the Agent service comment when offsets omit it.
+
+    The comment is matched in full. `service=` also appears in SQL (`WHERE service=@id`), so it cannot
+    be a substring marker for the batch-wide recovery path.
+    """
+    merged = list(comments or [])
+    if not full_text or AGENT_SERVICE_COMMENT not in full_text:
+        return merged
+    if any(AGENT_SERVICE_COMMENT in comment for comment in merged if comment):
+        return merged
+    merged.append(AGENT_SERVICE_COMMENT)
+    return merged
 
 
 _SQLCOMMENTER_COMMENT = re.compile(r"/\*\s*[\w.-]+='[^']*'(?:\s*,\s*[\w.-]+='[^']*')*\s*\*/")
