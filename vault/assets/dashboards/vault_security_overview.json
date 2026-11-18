@@ -1,7 +1,7 @@
 {
     "author_name": "Datadog",
     "title": "Vault - Security Overview",
-    "description": "Security overview of HashiCorp Vault audit logs: secret access, root token use and privilege and configuration changes, authentication and access denials, and Cloud SIEM signals.\n\n- [Vault Integration Documentation](https://docs.datadoghq.com/integrations/vault/)\n- [Vault Audit Devices](https://developer.hashicorp.com/vault/docs/audit)",
+    "description": "Security overview of HashiCorp Vault audit logs: secret access, root token use, privilege and configuration changes, authentication and access denials, and Cloud SIEM signals.\n\n- [Vault integration documentation](https://docs.datadoghq.com/integrations/vault/)\n- [Vault audit devices](https://developer.hashicorp.com/vault/docs/audit)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -48,7 +48,7 @@
                         "id": 6806324622707781,
                         "definition": {
                             "type": "note",
-                            "content": "Use this dashboard to monitor HashiCorp Vault audit logs: who reads, deletes and exports secrets, root token use and changes to policies, identity groups and configuration, and how identities authenticate and get denied.\n\nAudit logs come from a Vault [audit device](https://developer.hashicorp.com/vault/docs/audit) collected with `source:vault`. Vault writes a request and a response entry for every call; this dashboard counts responses.\n\nFor further reading, see:\n\n- [Vault Integration Documentation](https://docs.datadoghq.com/integrations/vault/)\n\n- [Vault Audit Devices](https://developer.hashicorp.com/vault/docs/audit)\n\n- [Datadog Cloud SIEM](https://docs.datadoghq.com/security/cloud_siem/)",
+                            "content": "Use this dashboard to monitor HashiCorp Vault audit logs, including:\n\n- Who reads, deletes, and exports secrets\n- Root token use\n- Changes to policies, identity groups, and configuration\n- How identities authenticate and when they are denied access\n\nAudit logs come from a Vault [audit device](https://developer.hashicorp.com/vault/docs/audit) and are collected with `source:vault`. Vault writes a request entry and a response entry for every call. This dashboard counts only responses.\n\nFor further reading, see:\n\n- [Vault integration documentation](https://docs.datadoghq.com/integrations/vault/)\n\n- [Vault audit devices](https://developer.hashicorp.com/vault/docs/audit)\n\n- [Datadog Cloud SIEM](https://docs.datadoghq.com/security/cloud_siem/)",
                             "background_color": "transparent",
                             "font_size": "14",
                             "text_align": "left",
@@ -78,7 +78,7 @@
         {
             "id": 5342134344663769,
             "definition": {
-                "title": "Vault Audit Log Overview",
+                "title": "Vault audit log overview",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -495,7 +495,7 @@
                     {
                         "id": 8257714028344607,
                         "definition": {
-                            "title": "Security Signals by User",
+                            "title": "Security signals by user",
                             "type": "toplist",
                             "style": {},
                             "requests": [
@@ -742,7 +742,7 @@
         {
             "id": 7443757409087164,
             "definition": {
-                "title": "Vault Secret Access",
+                "title": "Vault secret access",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1134,7 +1134,7 @@
         {
             "id": 9493563053372004,
             "definition": {
-                "title": "Vault Root Tokens, Privilege & Configuration Changes",
+                "title": "Vault root tokens, privilege, and configuration changes",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1142,7 +1142,7 @@
                     {
                         "id": 7166123763532491,
                         "definition": {
-                            "title": "Root token use and policy, group and configuration changes",
+                            "title": "Root token use and policy, group, and configuration changes",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "list_stream",
@@ -1336,7 +1336,7 @@
         {
             "id": 4489935553975915,
             "definition": {
-                "title": "Vault Authentication & Access Denials",
+                "title": "Vault authentication and access denials",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
