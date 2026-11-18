@@ -514,8 +514,8 @@ pipeline:
         supportRules: |
           _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^")}
           _header (?:[^=]*\s)?
-          _q \s*"?
-          _sep "?,\s*
+          _q \s*"*
+          _sep \s*"*,\s*
     - type: grok-parser
       name: Keep `serial` as a string
       enabled: true
