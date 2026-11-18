@@ -438,7 +438,7 @@ def test_time01_run_deadline(rq_check: PostgreSql, intake: StubIntake, monkeypat
         release.set()
 
 
-@pytest.mark.parametrize("mode", ["run", "unschedule", "duplicate", "stalled_cancel"])
+@pytest.mark.parametrize("mode", ["unschedule", "duplicate", "stalled_cancel"])
 def test_cancel01_02_03_blocked_first_record(
     rq_check: PostgreSql,
     intake: StubIntake,
@@ -485,9 +485,7 @@ def test_cancel01_02_03_blocked_first_record(
                 release.set()
                 cancellation.result(5)
             else:
-                rq_check.cancel_remote_query(payload["resultDelivery"]["crawlId"])
-                assert time.monotonic() - start < 0.5
-                rq_check.cancel_remote_query("unknown")
+                rq_check.cancel()
             answers = [future.result(8) for future in futures]
             assert time.monotonic() - start < 6.5
             if mode == "stalled_cancel":
@@ -523,7 +521,8 @@ def test_abort01_cancel_signalled_before_failure_does_not_interrupt_abort(
     payload = request(rq_check, intake.address)
 
     def cancel_then_fail(check: PostgreSql, target: dict) -> str:
-        check.cancel_remote_query(payload["resultDelivery"]["crawlId"])
+        for run in list(check._remote_query_runs):
+            run.cancel()
         raise RemoteQueryError("target_not_found", "No Postgres instance matches the target.")
 
     monkeypatch.setattr("datadog_checks.postgres.remote_queries.match", cancel_then_fail)

@@ -552,13 +552,6 @@ class PostgreSql(DatabaseCheck):
                 self._remote_query_runs.discard(run)
                 self._remote_query_condition.notify_all()
 
-    def cancel_remote_query(self, crawl_id: str) -> None:
-        """Signal every active call for this crawl ID without waiting for its abort."""
-        with self._remote_query_condition:
-            for run in self._remote_query_runs:
-                if run.delivery["crawlId"] == crawl_id:
-                    run.cancel()
-
     def cancel(self) -> None:
         with self._remote_query_condition:
             self._remote_query_unscheduled = True

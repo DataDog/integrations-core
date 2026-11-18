@@ -346,7 +346,7 @@ Each item is checked at one layer. Performance and resource-use items are checke
 
 ## Open questions
 
-1. QUERY-01: should a check bound its concurrent runs, to protect the customer database? If so, what limit, and do extra runs wait or fail? Runs are no longer limited by the Agent runner's task concurrency (Agent RUN-04).
+1. QUERY-01: should a check bound its concurrent runs, to protect the customer database? If so, what limit, and do extra runs wait or fail? The Agent runner's task concurrency does not limit runs (Agent RUN-04).
 2. QUERY-06: is the SQLSTATE enough for users, or may messages of some error classes, such as syntax errors, be included?
 3. OBS-02: besides passing the trace context, should the integration emit its own spans for its phases, and to which trace intake?
 
