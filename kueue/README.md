@@ -148,6 +148,10 @@ available. Instance tags, including the tags you set in `tags` and the tags Auto
 apply to metrics only, not to events. Eviction events also include the eviction reason, and preemption events include
 the Kueue preemption reason when available. Pending events include the reason reported by Kueue.
 
+Events also carry the scheduler tags that the Agent adds to the pods of every batch scheduler, so that the same
+queries work for Kueue and other schedulers: `job_scheduler:kueue`, `job_scheduler_workload` (the Workload name), and
+`job_scheduler_queue` (the ClusterQueue, when the Workload has been admitted).
+
 Each event also carries `kueue_workload_event_index`, a per-Workload integer that increases for every event the check
 emits for that Workload. Kueue often stamps several transitions with the same second-resolution timestamp; sort by
 `timestamp`, then by `kueue_workload_event_index` as an integer, to order those events. The index is kept in the Agent
@@ -157,10 +161,17 @@ not preserved across container recreation.
 
 The first collection run seeds the Workload state and does not emit events for already existing transitions.
 
-## Troubleshooting
+### Service Checks
+
+See [service_checks.json][15] for a list of service checks provided by this integration.
+
+## Uninstallation
+
+To disable the integration, remove the `kueue.yaml` entry from the Cluster Agent `confd` configuration, or remove the Autodiscovery annotations from the Kueue metrics Service.
+
+## Support
 
 Need help? Contact [Datadog support][8].
-
 
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
@@ -173,3 +184,4 @@ Need help? Contact [Datadog support][8].
 [12]: https://docs.datadoghq.com/containers/kubernetes/log/
 [13]: https://docs.datadoghq.com/gpu_monitoring/
 [14]: https://docs.datadoghq.com/containers/cluster_agent/endpointschecks/
+[15]: https://github.com/DataDog/integrations-core/blob/master/kueue/assets/service_checks.json

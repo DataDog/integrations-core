@@ -44,6 +44,10 @@ def instance_collect_histogram_buckets():
     return True
 
 
+def instance_collect_histograms_as_distributions():
+    return False
+
+
 def instance_default_build_configs_limit():
     return 5
 

@@ -400,7 +400,7 @@
           {
             "id": 7820000000000010,
             "definition": {
-              "title": "Workflow execution duration (p50, p90, p99)",
+              "title": "Workflow execution duration (average)",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": [
@@ -415,28 +415,8 @@
                 {
                   "formulas": [
                     {
-                      "alias": "p50",
-                      "formula": "query1",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      }
-                    },
-                    {
-                      "alias": "p90",
-                      "formula": "query2",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      }
-                    },
-                    {
-                      "alias": "p99",
-                      "formula": "query3",
+                      "alias": "Average duration",
+                      "formula": "query1 / query2",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -449,17 +429,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:n8n.workflow.execution.duration.seconds.bucket{upper_bound:0.5,$host,$workflow}"
+                      "query": "sum:n8n.workflow.execution.duration.seconds.sum{$host,$workflow}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:n8n.workflow.execution.duration.seconds.bucket{upper_bound:5.0,$host,$workflow}"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "avg:n8n.workflow.execution.duration.seconds.bucket{upper_bound:10.0,$host,$workflow}"
+                      "query": "sum:n8n.workflow.execution.duration.seconds.count{$host,$workflow}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -561,7 +536,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:n8n (@n8n.event_name:n8n.workflow.failed OR @n8n.success:false) @n8n.workflow_id_lower:$workflow.value"
+                        "query": "source:n8n host:$host.value (@n8n.event_name:n8n.workflow.failed OR @n8n.success:false) @n8n.workflow_id_lower:$workflow.value"
                       },
                       "indexes": [
                         "*"
@@ -858,22 +833,22 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:n8n.workflow.started.count{$host}.as_rate()"
+                      "query": "sum:n8n.workflow.started.count{$host,$workflow}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:n8n.workflow.success.count{$host}.as_rate()"
+                      "query": "sum:n8n.workflow.success.count{$host,$workflow}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:n8n.workflow.failed.count{$host}.as_rate()"
+                      "query": "sum:n8n.workflow.failed.count{$host,$workflow}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:n8n.workflow.cancelled.count{$host}.as_rate()"
+                      "query": "sum:n8n.workflow.cancelled.count{$host,$workflow}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -931,12 +906,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:n8n.workflow.success.count{$host, $workflow}.as_rate()"
+                      "query": "sum:n8n.workflow.success.count{$host, $workflow}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:n8n.workflow.failed.count{$host, $workflow}.as_rate()"
+                      "query": "sum:n8n.workflow.failed.count{$host, $workflow}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -975,7 +950,7 @@
           {
             "id": 2007,
             "definition": {
-              "title": "Workflow execution duration (p50, p90, p99)",
+              "title": "Workflow execution duration (average)",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": [
@@ -990,28 +965,8 @@
                 {
                   "formulas": [
                     {
-                      "alias": "p50",
-                      "formula": "query1",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      }
-                    },
-                    {
-                      "alias": "p90",
-                      "formula": "query2",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      }
-                    },
-                    {
-                      "alias": "p99",
-                      "formula": "query3",
+                      "alias": "Average duration",
+                      "formula": "query1 / query2",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -1024,17 +979,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:n8n.workflow.execution.duration.seconds.bucket{upper_bound:0.5,$host,$workflow}"
+                      "query": "sum:n8n.workflow.execution.duration.seconds.sum{$host,$workflow}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:n8n.workflow.execution.duration.seconds.bucket{upper_bound:5.0,$host,$workflow}"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "avg:n8n.workflow.execution.duration.seconds.bucket{upper_bound:10.0,$host,$workflow}"
+                      "query": "sum:n8n.workflow.execution.duration.seconds.count{$host,$workflow}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1069,7 +1019,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:n8n @n8n.workflow_id_lower:$workflow.value",
+                    "query_string": "source:n8n host:$host.value @n8n.workflow_id_lower:$workflow.value",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -1125,7 +1075,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:n8n @n8n.workflow_id_lower:$workflow.value @n8n.event_name:n8n.node.started OR @n8n.event_name:n8n.node.finished",
+                    "query_string": "source:n8n host:$host.value @n8n.workflow_id_lower:$workflow.value @n8n.event_name:(n8n.node.started OR n8n.node.finished)",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -1231,7 +1181,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:n8n.node.started.count{$host}.as_rate()"
+                      "query": "sum:n8n.node.started.count{$host,$workflow}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1275,7 +1225,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:n8n.node.finished.count{$host}.as_rate()"
+                      "query": "sum:n8n.node.finished.count{$host,$workflow}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1320,12 +1270,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:n8n.node.started.count{$host}.as_rate()"
+                      "query": "sum:n8n.node.started.count{$host,$workflow}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:n8n.node.finished.count{$host}.as_rate()"
+                      "query": "sum:n8n.node.finished.count{$host,$workflow}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2170,7 +2120,7 @@
           {
             "id": 5006000000000001,
             "definition": {
-              "title": "HTTP request duration (p50, p90, p99 bucket approximations)",
+              "title": "HTTP request duration (average)",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": [
@@ -2183,28 +2133,8 @@
                 {
                   "formulas": [
                     {
-                      "alias": "p50 (~0.1s)",
-                      "formula": "query1",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      }
-                    },
-                    {
-                      "alias": "p90 (~0.5s)",
-                      "formula": "query2",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      }
-                    },
-                    {
-                      "alias": "p99 (~1s)",
-                      "formula": "query3",
+                      "alias": "Average duration",
+                      "formula": "query1 / query2",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -2217,17 +2147,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:n8n.http.request.duration.seconds.bucket{upper_bound:0.1,$host}"
+                      "query": "sum:n8n.http.request.duration.seconds.sum{$host}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:n8n.http.request.duration.seconds.bucket{upper_bound:0.5,$host}"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "avg:n8n.http.request.duration.seconds.bucket{upper_bound:1.0,$host}"
+                      "query": "sum:n8n.http.request.duration.seconds.count{$host}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3346,7 +3271,7 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "sum:n8n.workflows.total{*}",
-                      "aggregator": "sum"
+                      "aggregator": "last"
                     }
                   ],
                   "response_format": "scalar",
@@ -3606,7 +3531,7 @@
           {
             "id": 9300000000000004,
             "definition": {
-              "title": "Expression evaluation duration (p50, p99 bucket approximations)",
+              "title": "Expression evaluation duration (average)",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": [
@@ -3619,18 +3544,8 @@
                 {
                   "formulas": [
                     {
-                      "alias": "p50 (~5ms)",
-                      "formula": "query1",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      }
-                    },
-                    {
-                      "alias": "p99 (~50ms)",
-                      "formula": "query2",
+                      "alias": "Average duration",
+                      "formula": "query1 / query2",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -3643,12 +3558,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:n8n.expression.evaluation.duration.seconds.bucket{upper_bound:0.005,$host}"
+                      "query": "sum:n8n.expression.evaluation.duration.seconds.sum{$host}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:n8n.expression.evaluation.duration.seconds.bucket{upper_bound:0.05,$host}"
+                      "query": "sum:n8n.expression.evaluation.duration.seconds.count{$host}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -4324,7 +4239,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:n8n"
+                        "query": "source:n8n host:$host.value"
                       },
                       "indexes": [
                         "*"
@@ -4383,7 +4298,7 @@
                       "name": "query1",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:n8n @n8n.workflow_id_lower:$workflow.value"
+                        "query": "source:n8n host:$host.value @n8n.workflow_id_lower:$workflow.value"
                       },
                       "indexes": [
                         "*"
@@ -4395,11 +4310,12 @@
                         "limit": 10,
                         "sort": {
                           "order": "desc",
-                          "aggregation": "count"
+                          "aggregation": "cardinality",
+                          "metric": "@n8n.execution_id"
                         }
                       },
                       "compute": {
-                        "aggregation": "count",
+                        "aggregation": "cardinality",
                         "metric": "@n8n.execution_id"
                       },
                       "storage": "hot"
@@ -4437,7 +4353,7 @@
           {
             "id": 1378509991732987,
             "definition": {
-              "title": "Error and critical logs",
+              "title": "Errors & Critical (includes application errors)",
               "title_size": "16",
               "title_align": "left",
               "requests": [
@@ -4445,7 +4361,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:n8n status:(error OR critical) @n8n.workflow_id_lower:$workflow.value",
+                    "query_string": "source:n8n host:$host.value status:(error OR critical) (@n8n.workflow_id_lower:$workflow.value OR -@n8n.workflow_id_lower:*)",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {

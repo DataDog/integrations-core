@@ -120,7 +120,7 @@ def assert_podgroup_event(dd_run_check, check, aggregator, podgroup: str, transi
         events = [
             event
             for event in aggregator.events
-            if event['event_type'] == f'kai.podgroup.{transition}' and f'kai_workload:{podgroup}' in event['tags']
+            if event['event_type'] == f'kai.podgroup.{transition}' and f'kai_pod_group:{podgroup}' in event['tags']
         ]
         if events:
             assert len(events) == 1, events

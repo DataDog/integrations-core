@@ -829,6 +829,10 @@ integration/litellm:
 - changed-files:
   - any-glob-to-any-file:
     - litellm/**/*
+integration/llm_d:
+- changed-files:
+  - any-glob-to-any-file:
+    - llm_d/**/*
 integration/lparstats:
 - changed-files:
   - any-glob-to-any-file:
@@ -1029,10 +1033,6 @@ integration/podman:
 - changed-files:
   - any-glob-to-any-file:
     - podman/**/*
-integration/powershell:
-- changed-files:
-  - any-glob-to-any-file:
-    - powershell/**/*
 integration/postfix:
 - changed-files:
   - any-glob-to-any-file:
@@ -1049,6 +1049,10 @@ integration/powerdns_recursor:
 - changed-files:
   - any-glob-to-any-file:
     - powerdns_recursor/**/*
+integration/powershell:
+- changed-files:
+  - any-glob-to-any-file:
+    - powershell/**/*
 integration/prefect:
 - changed-files:
   - any-glob-to-any-file:

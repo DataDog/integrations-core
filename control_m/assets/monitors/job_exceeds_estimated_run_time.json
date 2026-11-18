@@ -19,7 +19,7 @@
       },
       "notify_audit": false,
       "notify_no_data": false,
-      "on_missing_data": "default",
+      "on_missing_data": "resolve",
       "renotify_interval": 0,
       "require_full_window": false,
       "include_tags": true,
@@ -29,6 +29,6 @@
     "priority": 2
   },
   "created_at": "2026-03-23",
-  "last_updated_at": "2026-03-23",
+  "last_updated_at": "2026-11-13",
   "description": "Alerts when a running Control-M job exceeds its estimated end time."
 }

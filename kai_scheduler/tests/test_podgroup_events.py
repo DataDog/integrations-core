@@ -24,10 +24,13 @@ RESTARTED_AT = '2026-11-03T10:06:00Z'
 
 BASE_TAGS = [
     'kube_namespace:team-a',
-    'kai_workload:pg-train',
-    'kai_workload_uid:pg-uid',
+    'job_scheduler:kai',
+    'job_scheduler_workload:pg-train',
+    'job_scheduler_queue:research',
+    'kai_pod_group:pg-train',
+    'kai_pod_group_uid:pg-uid',
     'kai_queue:research',
-    'kai_workload_priority_class:train',
+    'kai_pod_group_priority_class:train',
 ]
 PENDING = {
     'type': 'UnschedulableOnNodePool',
@@ -187,7 +190,7 @@ def test_lifecycle_events(aggregator, instance):
         assert event['timestamp'] == epoch(timestamp)
         assert event['aggregation_key'] == 'pg-uid'
         assert sorted(event['tags']) == sorted(
-            [*BASE_TAGS, *extra_tags, f'kai_transition:{transition}', f'kai_workload_event_index:{index}']
+            [*BASE_TAGS, *extra_tags, f'kai_transition:{transition}', f'kai_pod_group_event_index:{index}']
         )
 
 
@@ -265,7 +268,7 @@ def test_evicted_without_evict_event(aggregator, instance, evict_events):
     aggregator.assert_event(
         'PodGroup team-a/pg-train evicted.',
         count=1,
-        tags=[*BASE_TAGS, 'kai_nodepool:gpu-pool', 'kai_transition:evicted', 'kai_workload_event_index:0'],
+        tags=[*BASE_TAGS, 'kai_nodepool:gpu-pool', 'kai_transition:evicted', 'kai_pod_group_event_index:0'],
     )
 
 
@@ -297,7 +300,7 @@ def test_eviction_details_match_transition(aggregator, instance, evict_events):
             'kai_transition:evicted',
             'kai_eviction_action:preempt',
             'kai_evicted_by:team-b/pg-serve',
-            'kai_workload_event_index:0',
+            'kai_pod_group_event_index:0',
         ],
     )
 
@@ -409,7 +412,7 @@ def test_event_index_persists_across_restart(aggregator, instance):
     collect(make_collector(instance, [podgroup(pending=PENDING)], [podgroup(last_start=STARTED_AT)]), 2)
 
     assert [event['event_type'] for event in aggregator.events] == ['kai.podgroup.admitted']
-    assert 'kai_workload_event_index:2' in aggregator.events[0]['tags']
+    assert 'kai_pod_group_event_index:2' in aggregator.events[0]['tags']
 
 
 @pytest.mark.parametrize(
@@ -427,8 +430,8 @@ def test_corrupt_event_index_cache(aggregator, instance, cache):
     collect(collector, 2)
 
     assert [tag for event in aggregator.events for tag in event['tags'] if 'event_index' in tag] == [
-        'kai_workload_event_index:0',
-        'kai_workload_event_index:1',
+        'kai_pod_group_event_index:0',
+        'kai_pod_group_event_index:1',
     ]
 
 

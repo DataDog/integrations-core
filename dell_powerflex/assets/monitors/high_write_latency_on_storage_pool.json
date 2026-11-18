@@ -7,7 +7,7 @@
   "definition": {
     "name": "[Dell PowerFlex] High write latency on storage pool {{storage_pool_name.name}}",
     "type": "query alert",
-    "query": "avg(last_10m):max:dell_powerflex.avg_write_latency_in_microsec{*} by {storage_pool_id,storage_pool_name} > 5000",
+    "query": "avg(last_10m):sum:dell_powerflex.user_data_sdc_write_latency.total_weight_in_kb{dell_type:storage_pool} by {storage_pool_id,storage_pool_name} / sum:dell_powerflex.user_data_sdc_write_latency.num_occured{dell_type:storage_pool} by {storage_pool_id,storage_pool_name} > 5000",
     "message": "{{#is_warning}}\nDell PowerFlex storage pool {{storage_pool_name.name}} (ID: {{storage_pool_id.name}}) is experiencing elevated write latency.\n\nCurrent value: {{value}} microseconds.\n{{/is_warning}}\n\n{{#is_alert}}\nDell PowerFlex storage pool {{storage_pool_name.name}} (ID: {{storage_pool_id.name}}) is experiencing high write latency.\n\nCurrent value: {{value}} microseconds.\n\nInvestigate whether the pool is overloaded, if a rebuild or rebalance is in progress, or if there are degraded devices.\n{{/is_alert}}\n\n{{#is_recovery}}\nWrite latency on Dell PowerFlex storage pool {{storage_pool_name.name}} has returned to normal.\n{{/is_recovery}}",
     "tags": [
       "integration:dell-powerflex"
@@ -26,6 +26,6 @@
     "priority": 3
   },
   "created_at": "2026-05-19",
-  "last_updated_at": "2026-05-19",
+  "last_updated_at": "2026-11-13",
   "description": "Write latency measures the average time in microseconds for write operations to complete on a Dell PowerFlex storage pool. This monitor tracks when write latency exceeds expected thresholds to identify performance degradation caused by overloaded pools, ongoing rebuilds, or failing devices."
 }
