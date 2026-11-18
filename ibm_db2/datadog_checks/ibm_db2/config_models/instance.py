@@ -62,6 +62,15 @@ class QueryMetrics(BaseModel):
     query_timeout: Optional[int] = Field(None, gt=0)
 
 
+class QuerySamples(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, gt=0.0)
+    enabled: Optional[bool] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -83,6 +92,7 @@ class InstanceConfig(BaseModel):
     password: str
     port: Optional[int] = None
     query_metrics: Optional[QueryMetrics] = None
+    query_samples: Optional[QuerySamples] = None
     security: Optional[Literal['none', 'ssl']] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

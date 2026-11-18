@@ -39,6 +39,16 @@ def build_config(check: IbmDb2Check) -> InstanceConfig:
             **query_metrics,
         }
 
+    query_samples = instance.get('query_samples')
+    if query_samples is None:
+        query_samples = {}
+    if isinstance(query_samples, Mapping):
+        args['query_samples'] = {
+            'enabled': False,
+            'collection_interval': 1,
+            **{key: value for key, value in query_samples.items() if value is not None},
+        }
+
     custom_queries = list(instance.get('custom_queries', []))
     use_global_custom_queries = instance.get('use_global_custom_queries', True)
     if use_global_custom_queries == 'extend':

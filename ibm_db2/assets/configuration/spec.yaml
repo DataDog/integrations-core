@@ -135,6 +135,26 @@ files:
               exclusiveMinimum: 0
               example: 10
 
+      - name: query_samples
+        description: Configure opt-in DBM in-flight query sampling.
+        fleet_configurable: true
+        options:
+          - name: enabled
+            description: |
+              Enable query samples. Disabled by default. Requires `dbm: true`.
+            fleet_configurable: true
+            value:
+              type: boolean
+              example: false
+          - name: collection_interval
+            description: |
+              The interval between activity snapshots in seconds. Defaults to 1 and must be greater than zero.
+            fleet_configurable: true
+            value:
+              type: number
+              exclusiveMinimum: 0
+              example: 1
+
       - template: instances/db
         overrides:
           custom_queries.description: |
