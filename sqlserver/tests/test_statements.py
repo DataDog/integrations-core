@@ -596,7 +596,8 @@ def test_statement_metrics_limit(
         ),
         (
             {'tables_csv': '', 'commands': None, 'comments': []},
-            {'tables': None, 'commands': None, 'comments': []},
+            # The batch text contains the Agent comment, so recovery adds it when the obfuscator omits it.
+            {'tables': None, 'commands': None, 'comments': ["/* service='datadog-agent' */"]},
         ),
     ],
 )
