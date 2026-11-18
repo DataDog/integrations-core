@@ -227,6 +227,37 @@ not already have an authority that grants access, run this in each monitored dat
 GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_PKG_CACHE_STMT TO USER <DATADOG_USER>;
 ```
 
+#### Query samples
+
+Query sampling is opt-in during preview. It observes in-flight statements independently
+of Query Metrics' package-cache counters and uses the same normalized query signatures.
+Snapshots include elapsed time, native execution identity, and available session context.
+Sampling can miss short statements; repeated observations describe the same running
+execution, and elapsed time is not completed-query duration.
+
+```yaml
+dbm: true
+query_samples:
+  enabled: true
+  collection_interval: 1
+```
+
+In addition to the existing monitoring permissions, the connection needs `CONNECT` and
+permission to execute these routines in each monitored database:
+
+```sql
+GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_ACTIVITY TO USER <DATADOG_USER>;
+GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_CONNECTION TO USER <DATADOG_USER>;
+GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_APPLICATION_HANDLE TO USER <DATADOG_USER>;
+```
+
+The reader selects the oldest local activities first, with limits of 1,000 rows, 16 KiB
+per SQL statement, 4 MiB aggregate SQL, and a 5-second statement timeout. Final activity
+payloads are limited to 4 MiB. Oversized statements are skipped without hashing fragments.
+These output limits do not bound the monitoring function's internal scan. Successful idle
+polls emit empty snapshots; collection failures report feature health instead. Internal
+`dd.ibm_db2.query_samples.*` telemetry exposes cap hits and normalization drops.
+
 #### Disable automatic client reroute
 
 A direct address alone does not prevent the IBM driver from using an alternate server.
