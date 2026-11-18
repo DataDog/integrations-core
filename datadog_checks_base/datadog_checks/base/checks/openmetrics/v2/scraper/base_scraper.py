@@ -14,7 +14,7 @@ from binary import KIBIBYTE
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.checks.openmetrics import parser_optimizations
@@ -25,7 +25,12 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import OPENMETRICS_MAX_LINE_SIZE, RequestsWrapper, limit_line_size
+from datadog_checks.base.utils.http import OPENMETRICS_MAX_LINE_SIZE, limit_line_size
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+)
 
 
 class OpenMetricsScraper:
@@ -219,7 +224,7 @@ class OpenMetricsScraper:
 
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
-        self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
+        self.http = self.check.create_http_client(config)
         self.http.max_line_size = OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE
 
         self._content_type = ''
@@ -413,17 +418,29 @@ class OpenMetricsScraper:
         """
         Yield the connection line.
         """
+        # Checks with AGNOSTIC_HTTP_CLIENT raise the agnostic types. Checks without it raise requests exceptions.
+        connection_errors = (RequestsConnectionError, HTTPClientConnectionError, HTTPClientConnectTimeoutError)
+        # A read timeout before the response arrives means the endpoint is running but not answering, so it fails
+        # the run. Once the body is streaming, requests reports a read timeout as a connection error, so it is
+        # ignored like one.
         try:
-            with self.get_connection() as connection:
-                # Media type will be used to select parser dynamically
-                self._content_type = connection.headers.get('Content-Type', '')
+            connection = self.get_connection()
+        except connection_errors:
+            if not self.ignore_connection_errors:
+                raise
+            self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
+            return
+
+        with connection:
+            # Media type will be used to select parser dynamically
+            self._content_type = connection.headers.get('Content-Type', '')
+            try:
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
-        except ConnectionError as e:
-            if self.ignore_connection_errors:
+            except (*connection_errors, HTTPClientReadTimeoutError):
+                if not self.ignore_connection_errors:
+                    raise
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
-            else:
-                raise e
 
     def filter_connection_lines(self, line_streamer):
         """
