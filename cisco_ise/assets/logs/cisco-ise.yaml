@@ -93,6 +93,30 @@ facets:
     facetType: list
     groups:
       - Cisco ISE
+    name: Site Level 3
+    path: cisco_ise.site.level3
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Cisco ISE
+    name: Site Level 4
+    path: cisco_ise.site.level4
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Cisco ISE
+    name: Site Level 5
+    path: cisco_ise.site.level5
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Cisco ISE
     name: TACACS+ Command
     path: cisco_ise.tacacs.command
     source: log
@@ -468,8 +492,11 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              site_3 Location\#All
-              Locations\#%{regex("[^#]+"):cisco_ise.site.level1}\#%{regex("[^#]+"):cisco_ise.site.level2}\#%{regex("[^#]+"):cisco_ise.site.level3}%{data}
+              site_5 Location\#All Locations\#%{regex("[^#]+"):cisco_ise.site.level1}\#%{regex("[^#]+"):cisco_ise.site.level2}\#%{regex("[^#]+"):cisco_ise.site.level3}\#%{regex("[^#]+"):cisco_ise.site.level4}\#%{regex("[^#]+"):cisco_ise.site.level5}%{data}
+
+              site_4 Location\#All Locations\#%{regex("[^#]+"):cisco_ise.site.level1}\#%{regex("[^#]+"):cisco_ise.site.level2}\#%{regex("[^#]+"):cisco_ise.site.level3}\#%{regex("[^#]+"):cisco_ise.site.level4}
+
+              site_3 Location\#All Locations\#%{regex("[^#]+"):cisco_ise.site.level1}\#%{regex("[^#]+"):cisco_ise.site.level2}\#%{regex("[^#]+"):cisco_ise.site.level3}
 
               site_2 Location\#All Locations\#%{regex("[^#]+"):cisco_ise.site.level1}\#%{regex("[^#]+"):cisco_ise.site.level2}
 
