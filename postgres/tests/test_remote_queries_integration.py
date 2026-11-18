@@ -28,7 +28,7 @@ from datadog_checks.postgres.config_models.instance import DatabaseAutodiscovery
 from datadog_checks.postgres.remote_queries import RemoteQueryError, parse_request
 
 from .common import PASSWORD_ADMIN, USER_ADMIN
-from .remote_query_helpers import StubIntake, StubProxy, call, request
+from .remote_query_helpers import StubIntake, StubProxy, call, request, tunnel_request
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
@@ -328,6 +328,34 @@ def test_obs03_page_log_reports_size_and_timing(
     ids = f"crawl_id={delivery['crawlId']} task_id={delivery['taskId']} upload_id={delivery['uploadId']}"
     (line,) = [r.message for r in caplog.records if r.message.startswith("Remote query page_uploaded ")]
     assert re.fullmatch(rf"Remote query page_uploaded {re.escape(ids)} {fields}", line)
+
+
+def test_tunnel01_upload_session_without_crawl_id(
+    rq_check: PostgreSql, intake: StubIntake, caplog: pytest.LogCaptureFixture
+):
+    payload = tunnel_request(rq_check, intake.address, PAGES_QUERY, maxFileBytes=700)
+    delivery = payload["resultDelivery"]
+    with caplog.at_level("DEBUG"):
+        assert call(rq_check, payload) == {"status": "SUCCEEDED"}
+    assert intake.records[-1]["path"] == "/finalize"
+    assert {r["upload_id"] for r in intake.records} == {delivery["uploadId"]}
+    # No file body, descriptor or log line invents a crawl ID, and the upload ID is not one.
+    assert all(b"crawl" not in r["body"] for r in intake.records)
+    lines = [r.message for r in caplog.records if r.message.startswith("Remote query ")]
+    assert lines
+    assert all("crawl" not in line and delivery["uploadId"] in line and delivery["taskId"] in line for line in lines)
+
+
+def test_tunnel02_failure_aborts_the_upload_session(
+    rq_check: PostgreSql, intake: StubIntake, caplog: pytest.LogCaptureFixture
+):
+    payload = tunnel_request(rq_check, intake.address, "SELECT 'result-secret'::integer AS secret")
+    delivery = payload["resultDelivery"]
+    with caplog.at_level("DEBUG"):
+        assert call(rq_check, payload)["error"]["code"] == "query_failed"
+    assert [(r["path"], r["upload_id"]) for r in intake.records] == [("/abort", delivery["uploadId"])]
+    lines = [r.message for r in caplog.records if r.message.startswith("Remote query ")]
+    assert lines and all("crawl" not in line and delivery["uploadId"] in line for line in lines)
 
 
 def test_upload08_refused_encoding_falls_back_for_the_run(rq_check: PostgreSql, intake: StubIntake):

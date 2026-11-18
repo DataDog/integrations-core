@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 import select
 import socket
 import threading
@@ -41,6 +42,14 @@ def request(check: PostgreSql, address: str, query: str = "SELECT 1 AS value", *
             },
         },
     }
+
+
+def tunnel_request(check: PostgreSql, address: str, query: str = "SELECT 1 AS value", **limits: int) -> dict:
+    """A request as the Agent tunnel path sends it: no crawlId, and an upload ID that is a UUID but not a crawl."""
+    payload = request(check, address, query, **limits)
+    del payload["resultDelivery"]["crawlId"]
+    payload["resultDelivery"]["uploadId"] = str(uuid4())
+    return payload
 
 
 def call(check: PostgreSql, value: dict) -> dict:
@@ -84,7 +93,8 @@ class StubIntake:
                             break
                         remaining -= len(chunk)
                     body = b""
-                path = self.path.split("/uploads/test-upload", 1)[-1]
+                upload = re.search(r"/uploads/([^/]+)(/.*)?$", self.path)
+                upload_id, path = (upload[1], upload[2] or "") if upload else ("", self.path)
                 encoding = self.headers.get("Content-Encoding")
                 wire, refusal = body, None
                 if "/pages/" in path:
@@ -92,6 +102,7 @@ class StubIntake:
                 record = {
                     "method": self.command,
                     "path": path,
+                    "upload_id": upload_id,
                     "headers": dict(self.headers),
                     "body": body,
                     "wire": wire,
