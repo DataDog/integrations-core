@@ -136,7 +136,7 @@ metadata:
     ad.datadoghq.com/tags: '{"inference_pool": "<INFERENCE_POOL_NAME>"}'
 ```
 
-EPP request metrics (`llm_d.epp.request.*`) don't include a pool label. The integration collects the pool name
+EPP request metrics (`llm_d_inference.epp.request.*`) don't include a pool label. The integration collects the pool name
 that the EPP reports on its pool and Flow Control metrics as the `llm_d_pool` tag. In standalone mode
 (`--endpoint-selector`, without an InferencePool), pool metrics report the EPP Deployment name.
 

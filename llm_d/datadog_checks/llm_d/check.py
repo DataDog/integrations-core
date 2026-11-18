@@ -14,7 +14,7 @@ from datadog_checks.base.errors import SkipInstanceError
 
 class LlmDCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
-    __NAMESPACE__ = 'llm_d'
+    __NAMESPACE__ = 'llm_d_inference'
 
     def __init__(self, name: str, init_config: dict[str, Any], instances: list[dict[str, Any]]) -> None:
         # llm-d ships as part of the GPU monitoring SKU; only run it when GPU monitoring is on.

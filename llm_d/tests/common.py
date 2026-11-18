@@ -164,12 +164,12 @@ COORDINATOR_HISTOGRAMS = [
 def with_histogram_counters(metrics, histograms):
     # Histograms are submitted as distributions under the base metric name, plus `.count` and `.sum`.
     expanded = metrics + [f'{metric}.{suffix}' for metric in histograms for suffix in ('count', 'sum')]
-    return [f'llm_d.{metric}' for metric in expanded]
+    return [f'llm_d_inference.{metric}' for metric in expanded]
 
 
 ROUTER_METRICS = with_histogram_counters(ROUTER_METRICS, ROUTER_HISTOGRAMS)
 SIDECAR_METRICS = with_histogram_counters(SIDECAR_METRICS, SIDECAR_HISTOGRAMS)
 COORDINATOR_METRICS = with_histogram_counters(COORDINATOR_METRICS, COORDINATOR_HISTOGRAMS)
-ROUTER_HISTOGRAMS = [f'llm_d.{metric}' for metric in ROUTER_HISTOGRAMS]
-SIDECAR_HISTOGRAMS = [f'llm_d.{metric}' for metric in SIDECAR_HISTOGRAMS]
-COORDINATOR_HISTOGRAMS = [f'llm_d.{metric}' for metric in COORDINATOR_HISTOGRAMS]
+ROUTER_HISTOGRAMS = [f'llm_d_inference.{metric}' for metric in ROUTER_HISTOGRAMS]
+SIDECAR_HISTOGRAMS = [f'llm_d_inference.{metric}' for metric in SIDECAR_HISTOGRAMS]
+COORDINATOR_HISTOGRAMS = [f'llm_d_inference.{metric}' for metric in COORDINATOR_HISTOGRAMS]
