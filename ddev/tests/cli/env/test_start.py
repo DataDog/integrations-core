@@ -3,14 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
+from collections.abc import Callable
 
 import pytest
 from datadog_checks.dev.env import serialize_data
+from pytest_mock import MockerFixture
 
+from ddev.config.file import ConfigFileWithOverrides
 from ddev.e2e.config import EnvDataStorage
 from ddev.e2e.constants import DEFAULT_DOGSTATSD_PORT, E2EEnvVars, E2EMetadata
 from ddev.utils.fs import Path
 from ddev.utils.structures import EnvVars
+from tests.helpers.runner import CliRunner
 
 
 @pytest.fixture(autouse=True)
@@ -155,6 +159,37 @@ def test_basic(ddev, helpers, data_dir, write_result_file, mocker):
         agent_build='registry.datadoghq.com/agent-dev:master-py3',
         local_packages={},
         env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com'},
+    )
+
+
+@pytest.mark.parametrize('option', ['-o', '--org'])
+def test_org_override(
+    ddev: CliRunner,
+    config_file: ConfigFileWithOverrides,
+    write_result_file: Callable[[dict[str, object]], Callable[..., object]],
+    mocker: MockerFixture,
+    option: str,
+):
+    config_file.model.orgs['other'] = {
+        'api_key': 'other-api-key',
+        'site': 'datadoghq.eu',
+        'dd_url': 'https://app.datadoghq.eu',
+    }
+    config_file.save()
+    mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': {}, 'config': {}}))
+    start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
+
+    result = ddev(option, 'other', 'env', 'start', 'postgres', 'py3.12')
+
+    assert result.exit_code == 0, result.output
+    start.assert_called_once_with(
+        agent_build='registry.datadoghq.com/agent-dev:master-py3',
+        local_packages={},
+        env_vars={
+            'DD_API_KEY': 'other-api-key',
+            'DD_SITE': 'datadoghq.eu',
+            'DD_DD_URL': 'https://app.datadoghq.eu',
+        },
     )
 
 
