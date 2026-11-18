@@ -8,6 +8,7 @@ import marshal
 from collections import defaultdict
 from concurrent.futures import Future
 from contextlib import nullcontext as does_not_raise
+from typing import Any
 
 import mock
 import pytest
@@ -1533,3 +1534,95 @@ def test_list_consumer_group_offsets_given_coordinator_error_returns_offsets_on_
         offsets = client.list_consumer_group_offsets(groups)
 
     assert offsets == [('consumer_group1', [('topic1', 0, 5)])]
+
+
+SHARDED_GROUPS = ["group-a", "group-b", "group-c", "group-d", "group-e", "group-f"]
+# zlib.crc32(group) % 3, pinned so that a change to the shard hash is caught: every
+# shard of a deployment has to agree on the assignment, across processes and restarts.
+GROUPS_BY_SHARD = {0: ["group-c", "group-d", "group-e"], 1: ["group-b", "group-f"], 2: ["group-a"]}
+
+
+def sharded_instance(
+    kafka_instance: dict[str, Any], shard_index: int, shard_count: int = 3, **options: Any
+) -> dict[str, Any]:
+    kafka_instance.pop("consumer_groups", None)
+    kafka_instance.update(
+        {'consumer_groups_shard_count': shard_count, 'consumer_groups_shard_index': shard_index, **options}
+    )
+    return kafka_instance
+
+
+@pytest.mark.parametrize('shard_index', [0, 1, 2])
+def test_monitor_unlisted_consumer_groups_are_split_across_shards(kafka_instance, shard_index):
+    instance = sharded_instance(kafka_instance, shard_index, monitor_unlisted_consumer_groups=True)
+    with mock.patch(
+        "datadog_checks.kafka_consumer.kafka_consumer.KafkaClient.list_consumer_groups",
+        return_value=SHARDED_GROUPS,
+    ):
+        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+        assert kafka_consumer_check._get_consumer_groups() == GROUPS_BY_SHARD[shard_index]
+
+
+def test_regex_consumer_groups_are_split_across_shards(kafka_instance):
+    instance = sharded_instance(kafka_instance, 1, consumer_groups_regex={'group-.*': {}})
+    with mock.patch(
+        "datadog_checks.kafka_consumer.kafka_consumer.KafkaClient.list_consumer_groups",
+        # "unmatched-b" hashes to shard 1, so it must still be dropped by the regex.
+        return_value=SHARDED_GROUPS + ["unmatched-b"],
+    ):
+        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+        assert kafka_consumer_check._get_consumer_groups() == GROUPS_BY_SHARD[1]
+
+
+def test_configured_consumer_groups_are_split_across_shards(kafka_instance):
+    instance = sharded_instance(kafka_instance, 0, consumer_groups={group: {'topic1': [0]} for group in SHARDED_GROUPS})
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+
+    assert kafka_consumer_check._get_consumer_groups() == {group: {'topic1': [0]} for group in GROUPS_BY_SHARD[0]}
+
+
+def test_offsets_are_only_fetched_for_consumer_groups_in_shard(check, kafka_instance, dd_run_check):
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = SHARDED_GROUPS
+    kafka_consumer_check = check(sharded_instance(kafka_instance, 2, monitor_unlisted_consumer_groups=True))
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    mock_client.list_consumer_group_offsets.assert_called_once_with([(group, None) for group in GROUPS_BY_SHARD[2]])
+
+
+@pytest.mark.parametrize(
+    'shard_count, shard_index',
+    [
+        pytest.param(0, 0, id='count zero'),
+        pytest.param(-1, 0, id='count negative'),
+        pytest.param(3, 3, id='index equal to count'),
+        pytest.param(3, -1, id='index negative'),
+        pytest.param(1, 1, id='index without count'),
+    ],
+)
+def test_invalid_consumer_groups_shard_settings_raise(check, kafka_instance, shard_count, shard_index):
+    instance = sharded_instance(kafka_instance, shard_index, shard_count, monitor_unlisted_consumer_groups=True)
+
+    with pytest.raises(ConfigurationError, match='consumer_groups_shard'):
+        check(instance)
+
+
+def test_shard_count_without_shard_index_raises(check, kafka_instance):
+    # Defaulting the index to 0 would silently collect only one shard of the groups.
+    kafka_instance.pop("consumer_groups", None)
+    kafka_instance.update({'monitor_unlisted_consumer_groups': True, 'consumer_groups_shard_count': 3})
+
+    with pytest.raises(ConfigurationError, match='`consumer_groups_shard_index` is required'):
+        check(kafka_instance)
+
+
+@pytest.mark.parametrize('kafka_console_option', ['enable_kafka_console', 'enable_cluster_monitoring'])
+def test_sharding_with_kafka_console_raises(check, kafka_instance, kafka_console_option):
+    # Kafka Console collects group metadata cluster-wide, so every shard would emit it.
+    instance = sharded_instance(kafka_instance, 0, monitor_unlisted_consumer_groups=True)
+    instance[kafka_console_option] = True
+
+    with pytest.raises(ConfigurationError, match='`consumer_groups_shard_count` cannot be used with Kafka Console'):
+        check(instance)
