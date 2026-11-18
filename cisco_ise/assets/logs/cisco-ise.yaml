@@ -459,7 +459,8 @@ pipeline:
           name: Extract Device IP Address
           enabled: true
           source: message
-          samples: []
+          samples:
+            - '2026-11-03 13:23:43.766 +00:00 0000001423 3000 NOTICE Radius-Accounting: RADIUS Accounting start request, ConfigVersionId=124, Device IP Address=192.168.254.11, UserName=luis_test, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, Acct-Status-Type=Start, Acct-Delay-Time=1, Acct-Input-Octets=2, Acct-Output-Octets=3, Acct-Session-Id=luise6001, Acct-Authentic=RADIUS, Acct-Session-Time=4, Acct-Input-Packets=5, Acct-Output-Packets=6, Acct-Multi-Session-Id=321, Acct-Link-Count=1, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, AcsSessionID=ise-1/583071475/51, SelectedAccessService=Default Network Access, RequestLatency=2, Step=11004, Step=11017, Step=15049, Step=15008, Step=22001, Step=22083, Step=11005, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, CPMSessionID=luise6001, TotalAuthenLatency=2, ClientLatency=0, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No,'
           grok:
             supportRules: ""
             matchRules: cisco_ise_device_ip %{data}, Device IP
@@ -468,7 +469,8 @@ pipeline:
           name: Extract CmdSet
           enabled: true
           source: message
-          samples: []
+          samples:
+            - '2026-11-03 14:18:15.596 +00:00 0000001782 3300 NOTICE Tacacs-Accounting: TACACS+ Accounting with Command, ConfigVersionId=138, Device IP Address=192.168.254.11, CmdSet=[ CmdAV=show running-config <cr> ], NetworkDeviceName=luis_mac_radius_sim, Type=Accounting, Privilege-Level=15, Service=Login, User=luis_test, Port=tty2, Remote-Address=10.99.0.200, Authen-Method=TacacsPlus, AVPair=task_id=156541, AVPair=priv-lvl=15, AVPair=stop_time=1793715656, AVPair=timezone=UTC, AcctRequest-Flags=Stop, Service-Argument=shell, AcsSessionID=ise-1/583071475/66, SelectedAccessService=Default Device Admin, RequestLatency=1, Step=13006, Step=15049, Step=15008, Step=13035, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, CPMSessionID=1874867130192.168.254.1152215Accounting1874867130, TotalAuthenLatency=2714133164, ClientLatency=2714133163, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Response={AcctReply-Status=Success; },'
           grok:
             supportRules: ""
             matchRules: cisco_ise_cmdset %{data}, CmdSet=\[
@@ -477,12 +479,19 @@ pipeline:
           name: Extract ConfigChangeData
           enabled: true
           source: message
-          samples: []
+          samples:
+            - '2026-11-03 13:27:36.437 +00:00 0000001600 52000 NOTICE Configuration-Changes: Added configuration, ConfigVersionId=124, AdminInterface=CLI, ConfigChangeData=object created: Value=Docker ise-prometheus-container MemUsagePerLimitPercentage limit is exceeded( Limit: 1.56% \, Actual: 9.31% ), ObjectType=DockerMetrics, ObjectName=DockerMetrics, Component=System Configuration, ObjectInternalID=unknown,'
           grok:
             supportRules: ""
             matchRules: cisco_ise_config_change %{data},
               ConfigChangeData=%{data:cisco_ise.attributes.ConfigChangeData},
               %{regex("[A-Za-z-]+")}=%{data}
+    - type: pipeline
+      name: ISE derived fields
+      enabled: true
+      filter:
+        query: "@cisco_ise.segment.number:0"
+      processors:
         - type: grok-parser
           name: Parse site levels
           enabled: true
@@ -540,7 +549,8 @@ pipeline:
           name: Parse TACACS+ command name
           enabled: true
           source: cisco_ise.tacacs.command
-          samples: []
+          samples:
+            - 'show running-config'
           grok:
             supportRules: ""
             matchRules: command_name %{notSpace:cisco_ise.tacacs.command_name}%{data}
