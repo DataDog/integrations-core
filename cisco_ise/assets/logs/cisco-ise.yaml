@@ -444,6 +444,11 @@ pipeline:
               cisco_ise_body_kv %{date("yyyy-MM-dd HH:mm:ss.SSS ZZ"):timestamp} %{notSpace:cisco_ise.sequence} %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity}\s+%{regex("[A-Za-z-]+"):cisco_ise.message_class}: %{regex("[^,]*"):cisco_ise.message_text}%{data:cisco_ise.attributes:keyvalue("="," :/#{};=<>()+%*'!?&|$~\\[\\]","",",")}
 
               cisco_ise_body %{date("yyyy-MM-dd HH:mm:ss.SSS ZZ"):timestamp} %{notSpace:cisco_ise.sequence} %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity}\s+%{regex("[A-Za-z-]+"):cisco_ise.message_class}: %{regex("[^,]*"):cisco_ise.message_text}%{data}
+        - type: date-remapper
+          name: Define timestamp
+          enabled: true
+          sources:
+            - timestamp
         - type: status-remapper
           name: Define status
           enabled: true
@@ -480,17 +485,17 @@ pipeline:
             matchRules: cisco_ise_config_change %{data},
               ConfigChangeData=%{data:cisco_ise.attributes.ConfigChangeData},
               %{regex("[A-Za-z-]+")}=%{data}
-    - type: date-remapper
-      name: Define timestamp
-      enabled: true
-      sources:
-        - timestamp
     - type: pipeline
       name: ISE derived fields
       enabled: true
       filter:
         query: "@cisco_ise.segment.number:0"
       processors:
+        - type: date-remapper
+          name: Define timestamp
+          enabled: true
+          sources:
+            - timestamp
         - type: grok-parser
           name: Parse site levels
           enabled: true
