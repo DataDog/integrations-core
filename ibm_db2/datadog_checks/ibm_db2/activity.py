@@ -1,9 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 from datetime import datetime, timedelta
-from hashlib import sha256
 from typing import Any
 
 from datadog_checks.base.utils.db.query_metrics import obfuscate_statement
@@ -22,7 +20,7 @@ CONTEXT_COLUMNS = (
 CONTEXT_MAX_CHARS = 512
 
 
-def normalize_activity(row: dict[str, Any], database: str, database_instance: str) -> dict[str, Any] | None:
+def normalize_activity(row: dict[str, Any], database: str) -> dict[str, Any] | None:
     """Build an allowlisted observation; both timestamps must come from the database's local clock.
 
     Connection context is optional and never contributes to execution identity: the monitoring
@@ -44,15 +42,12 @@ def normalize_activity(row: dict[str, Any], database: str, database_instance: st
     if statement is None or not statement.obfuscated_query:
         return None
 
-    identity = [database_instance, database, *(row[column] for column in IDENTITY_COLUMNS), start.isoformat()]
-    encoded_identity = json.dumps(identity, separators=(',', ':'), ensure_ascii=False).encode('utf-8')
     result = {
         'statement': statement.obfuscated_query,
         'query_signature': statement.query_signature,
         'dd_tables': statement.tables,
         'dd_commands': statement.commands,
         'database_name': database,
-        'db_execution_id': sha256(encoded_identity).hexdigest(),
         'elapsed_ns': (elapsed.days * 86_400 + elapsed.seconds) * 1_000_000_000 + elapsed.microseconds * 1_000,
         'local_start_time': start.isoformat(),
         **{column: row[column] for column in IDENTITY_COLUMNS},
