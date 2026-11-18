@@ -171,17 +171,17 @@ DD_QUERY_ATTRIBUTES = {
 AGENT_SERVICE_COMMENT = generate_sql_comment(**DD_QUERY_ATTRIBUTES)
 
 
-def append_agent_service_comment(comments: Sequence[str] | None, full_text: Optional[str]) -> list[str]:
-    """Return statement comments, plus the Agent service comment when offsets omit it.
-
-    The comment is matched in full. `service=` also appears in SQL (`WHERE service=@id`), so it cannot
-    be a substring marker for the batch-wide recovery path.
-    """
-    merged = list(comments or [])
-    if not full_text or AGENT_SERVICE_COMMENT not in full_text:
-        return merged
-    if any(AGENT_SERVICE_COMMENT in comment for comment in merged if comment):
-        return merged
+def append_agent_service_comment(comments: Sequence[str] | None, full_text: Optional[str]) -> Sequence[str]:
+    """Append the Agent service comment when the batch text has it and the statement comments do not."""
+    if comments is None:
+        comments = []
+    if (
+        not full_text
+        or AGENT_SERVICE_COMMENT not in full_text
+        or any(comment and AGENT_SERVICE_COMMENT in comment for comment in comments)
+    ):
+        return comments
+    merged = list(comments)
     merged.append(AGENT_SERVICE_COMMENT)
     return merged
 

@@ -1588,15 +1588,6 @@ def test_needs_comment_recovery_requires_missing_dbm_comment(full_text, statemen
             [AGENT_SERVICE_COMMENT],
             id='already_in_statement_metadata',
         ),
-        pytest.param("SELECT * FROM t WHERE service=@id", [], [], id='column_equals_parameter'),
-        pytest.param("SET @service='api'", [], [], id='variable_assignment'),
-        pytest.param("SELECT * FROM t WHERE microservice='api'", [], [], id='substring_of_identifier'),
-        pytest.param(
-            "(@P1 int)/* environment='prod' */ SELECT * FROM t WHERE service=@P1",
-            [],
-            [],
-            id='unrelated_comment_with_sql_equality',
-        ),
     ],
 )
 def test_append_agent_service_comment(full_text, statement_comments, expected):

@@ -1282,7 +1282,7 @@ def test_normalize_queries_recovers_leading_comment_for_non_proc_statement(insta
 
 
 @pytest.mark.unit
-def test_normalize_queries_recovers_agent_service_comment_without_second_obfuscation(instance_docker, datadog_agent):
+def test_normalize_queries_recovers_agent_service_comment(instance_docker, datadog_agent):
     instance_docker['dbm'] = True
     instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
     check = SQLServer(CHECK_NAME, {}, [instance_docker])

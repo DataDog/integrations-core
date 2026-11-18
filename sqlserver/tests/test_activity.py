@@ -1080,7 +1080,7 @@ def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(d
         pytest.param(False, [], id='collect_comments_disabled'),
     ],
 )
-def test_sanitize_activity_row_recovers_agent_service_comment_without_second_obfuscation(
+def test_sanitize_activity_row_recovers_agent_service_comment(
     dbm_instance, datadog_agent, collect_comments, expected_comments
 ):
     comment = "/* service='datadog-agent' */"
