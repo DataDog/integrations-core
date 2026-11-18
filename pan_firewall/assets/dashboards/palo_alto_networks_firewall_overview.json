@@ -178,7 +178,7 @@
             "log_query": {
               "index": "*",
               "search": {
-                "query": "source:pan.firewall $evt.name $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+                "query": "source:pan.firewall $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
               },
               "group_by": [
                 {
@@ -216,7 +216,7 @@
             "log_query": {
               "index": "*",
               "search": {
-                "query": "source:pan.firewall $network.client.ip $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+                "query": "source:pan.firewall $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
               },
               "group_by": [
                 {
@@ -352,7 +352,7 @@
             "log_query": {
               "index": "*",
               "search": {
-                "query": "source:pan.firewall @type:AUTHENTICATION $authpolicy $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+                "query": "source:pan.firewall @type:AUTHENTICATION $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
               },
               "group_by": [
                 {
@@ -398,7 +398,7 @@
             "log_query": {
               "index": "*",
               "search": {
-                "query": "source:pan.firewall @type:AUTHENTICATION $clienttype $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+                "query": "source:pan.firewall @type:AUTHENTICATION $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
               },
               "group_by": [
                 {
@@ -786,7 +786,7 @@
             "log_query": {
               "index": "*",
               "search": {
-                "query": "source:pan.firewall @type:AUTHENTICATION $authpolicy $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
+                "query": "source:pan.firewall @type:AUTHENTICATION $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
               },
               "group_by": [
                 {
