@@ -27,7 +27,7 @@ facets:
     groups:
       - Cisco ISE
     name: Endpoint MAC
-    path: cisco.ise.endpoint.mac
+    path: cisco_ise.endpoint.mac
     source: log
     type: string
   - description: ""
@@ -35,7 +35,7 @@ facets:
     groups:
       - Cisco ISE
     name: Failure Reason
-    path: cisco.ise.attributes.FailureReason
+    path: cisco_ise.attributes.FailureReason
     source: log
     type: string
   - description: ""
@@ -43,7 +43,7 @@ facets:
     groups:
       - Cisco ISE
     name: ISE Node
-    path: syslog.hostname
+    path: cisco_ise.node
     source: log
     type: string
   - description: ""
@@ -51,7 +51,7 @@ facets:
     groups:
       - Cisco ISE
     name: Logging Category
-    path: cisco.ise.category
+    path: cisco_ise.category
     source: log
     type: string
   - description: ""
@@ -59,7 +59,7 @@ facets:
     groups:
       - Cisco ISE
     name: Message Code
-    path: cisco.ise.message_code
+    path: cisco_ise.message_code
     source: log
     type: string
   - description: ""
@@ -67,7 +67,7 @@ facets:
     groups:
       - Cisco ISE
     name: Network Device
-    path: cisco.ise.attributes.NetworkDeviceName
+    path: cisco_ise.attributes.NetworkDeviceName
     source: log
     type: string
   - description: ""
@@ -75,7 +75,7 @@ facets:
     groups:
       - Cisco ISE
     name: Privilege Level
-    path: cisco.ise.attributes.Privilege-Level
+    path: cisco_ise.attributes.Privilege-Level
     source: log
     type: integer
   - description: ""
@@ -83,7 +83,7 @@ facets:
     groups:
       - Cisco ISE
     name: Site Level 1
-    path: cisco.ise.site.level1
+    path: cisco_ise.site.level1
     source: log
     type: string
   - description: ""
@@ -91,7 +91,7 @@ facets:
     groups:
       - Cisco ISE
     name: Site Level 2
-    path: cisco.ise.site.level2
+    path: cisco_ise.site.level2
     source: log
     type: string
   - description: ""
@@ -99,7 +99,7 @@ facets:
     groups:
       - Cisco ISE
     name: TACACS+ Command
-    path: cisco.ise.tacacs.command
+    path: cisco_ise.tacacs.command
     source: log
     type: string
   - description: ""
@@ -107,7 +107,7 @@ facets:
     groups:
       - Cisco ISE
     name: TACACS+ Command Name
-    path: cisco.ise.tacacs.command_name
+    path: cisco_ise.tacacs.command_name
     source: log
     type: string
 pipeline:
@@ -226,19 +226,29 @@ pipeline:
         supportRules: ""
         matchRules: cisco_ise_message <%{integer:syslog.priority}>(%{date("MMM  d
           HH:mm:ss")}|%{date("MMM d HH:mm:ss")}) %{notSpace:syslog.hostname}
-          CISE_%{notSpace:cisco.ise.category} %{notSpace:cisco.ise.message_id}
-          %{integer:cisco.ise.segment.total} %{integer:cisco.ise.segment.number}
+          CISE_%{notSpace:cisco_ise.category} %{notSpace:cisco_ise.message_id}
+          %{integer:cisco_ise.segment.total} %{integer:cisco_ise.segment.number}
           %{data:message}
     - type: message-remapper
       name: Define message
       enabled: true
       sources:
         - message
+    - type: attribute-remapper
+      name: Map ISE node to cisco_ise.node
+      enabled: true
+      sources:
+        - syslog.hostname
+      sourceType: attribute
+      target: cisco_ise.node
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
     - type: pipeline
       name: ISE message
       enabled: true
       filter:
-        query: "@cisco.ise.segment.number:0"
+        query: "@cisco_ise.segment.number:0"
       processors:
         - type: grok-parser
           name: Parse body header
@@ -405,17 +415,17 @@ pipeline:
             supportRules: ""
             matchRules: >-
               cisco_ise_body_kv_response %{date("yyyy-MM-dd HH:mm:ss.SSS
-              ZZ"):timestamp} %{notSpace:cisco.ise.sequence}
-              %{notSpace:cisco.ise.message_code} %{word:cisco.ise.severity}
-              %{regex("[A-Za-z-]+"):cisco.ise.message_class}:
-              %{regex("[^,]*"):cisco.ise.message_text}%{data:cisco.ise.attributes:keyvalue("=","
+              ZZ"):timestamp} %{notSpace:cisco_ise.sequence}
+              %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity}
+              %{regex("[A-Za-z-]+"):cisco_ise.message_class}:
+              %{regex("[^,]*"):cisco_ise.message_text}%{data:cisco_ise.attributes:keyvalue("=","
               :/#{};=<>()+%*'!?&|$~\\[\\]","",",")},
-              Response=\{%{data:cisco.ise.response:keyvalue("=","
+              Response=\{%{data:cisco_ise.response:keyvalue("=","
               :/#","",";")}\},%{data}
 
-              cisco_ise_body_kv %{date("yyyy-MM-dd HH:mm:ss.SSS ZZ"):timestamp} %{notSpace:cisco.ise.sequence} %{notSpace:cisco.ise.message_code} %{word:cisco.ise.severity} %{regex("[A-Za-z-]+"):cisco.ise.message_class}: %{regex("[^,]*"):cisco.ise.message_text}%{data:cisco.ise.attributes:keyvalue("="," :/#{};=<>()+%*'!?&|$~\\[\\]","",",")}
+              cisco_ise_body_kv %{date("yyyy-MM-dd HH:mm:ss.SSS ZZ"):timestamp} %{notSpace:cisco_ise.sequence} %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity} %{regex("[A-Za-z-]+"):cisco_ise.message_class}: %{regex("[^,]*"):cisco_ise.message_text}%{data:cisco_ise.attributes:keyvalue("="," :/#{};=<>()+%*'!?&|$~\\[\\]","",",")}
 
-              cisco_ise_body %{date("yyyy-MM-dd HH:mm:ss.SSS ZZ"):timestamp} %{notSpace:cisco.ise.sequence} %{notSpace:cisco.ise.message_code} %{word:cisco.ise.severity} %{regex("[A-Za-z-]+"):cisco.ise.message_class}: %{regex("[^,]*"):cisco.ise.message_text}%{data}
+              cisco_ise_body %{date("yyyy-MM-dd HH:mm:ss.SSS ZZ"):timestamp} %{notSpace:cisco_ise.sequence} %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity} %{regex("[A-Za-z-]+"):cisco_ise.message_class}: %{regex("[^,]*"):cisco_ise.message_text}%{data}
         - type: date-remapper
           name: Define timestamp
           enabled: true
@@ -425,7 +435,7 @@ pipeline:
           name: Define status
           enabled: true
           sources:
-            - cisco.ise.severity
+            - cisco_ise.severity
         - type: grok-parser
           name: Extract Device IP Address
           enabled: true
@@ -434,7 +444,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: cisco_ise_device_ip %{data}, Device IP
-              Address=%{regex("[^,]*"):cisco.ise.attributes.DeviceIPAddress},%{data}
+              Address=%{regex("[^,]*"):cisco_ise.attributes.DeviceIPAddress},%{data}
         - type: grok-parser
           name: Extract CmdSet
           enabled: true
@@ -443,7 +453,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: cisco_ise_cmdset %{data}, CmdSet=\[
-              %{data:cisco.ise.attributes.CmdSet} \],%{data}
+              %{data:cisco_ise.attributes.CmdSet} \],%{data}
         - type: grok-parser
           name: Extract ConfigChangeData
           enabled: true
@@ -452,85 +462,85 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: cisco_ise_config_change %{data},
-              ConfigChangeData=%{data:cisco.ise.attributes.ConfigChangeData},
+              ConfigChangeData=%{data:cisco_ise.attributes.ConfigChangeData},
               %{regex("[A-Za-z-]+")}=%{data}
         - type: category-processor
           name: Define outcome
           enabled: true
           categories:
             - filter:
-                query: "@cisco.ise.message_code:(5200 OR 5201 OR 5202 OR 5203 OR 51001 OR 60080
+                query: "@cisco_ise.message_code:(5200 OR 5201 OR 5202 OR 5203 OR 51001 OR 60080
                   OR 60115)"
               name: success
             - filter:
-                query: "@cisco.ise.message_code:(5400 OR 5401 OR 5402 OR 5434 OR 5449 OR 51021)"
+                query: "@cisco_ise.message_code:(5400 OR 5401 OR 5402 OR 5434 OR 5449 OR 51021)"
               name: failure
           target: evt.outcome
         - type: grok-parser
           name: Parse site levels
           enabled: true
-          source: cisco.ise.attributes.Location
+          source: cisco_ise.attributes.Location
           samples:
             - Location#All Locations#Spain#Madrid
           grok:
             supportRules: ""
             matchRules: >-
               site_3 Location\#All
-              Locations\#%{regex("[^#]+"):cisco.ise.site.level1}\#%{regex("[^#]+"):cisco.ise.site.level2}\#%{regex("[^#]+"):cisco.ise.site.level3}%{data}
+              Locations\#%{regex("[^#]+"):cisco_ise.site.level1}\#%{regex("[^#]+"):cisco_ise.site.level2}\#%{regex("[^#]+"):cisco_ise.site.level3}%{data}
 
-              site_2 Location\#All Locations\#%{regex("[^#]+"):cisco.ise.site.level1}\#%{regex("[^#]+"):cisco.ise.site.level2}
+              site_2 Location\#All Locations\#%{regex("[^#]+"):cisco_ise.site.level1}\#%{regex("[^#]+"):cisco_ise.site.level2}
 
-              site_1 Location\#All Locations\#%{regex("[^#]+"):cisco.ise.site.level1}
+              site_1 Location\#All Locations\#%{regex("[^#]+"):cisco_ise.site.level1}
         - type: grok-parser
           name: Parse MAC
           enabled: true
-          source: cisco.ise.attributes.Calling-Station-ID
+          source: cisco_ise.attributes.Calling-Station-ID
           samples:
             - AA:BB:CC:04:60:01
           grok:
             supportRules: ""
             matchRules: >-
               mac_separated
-              %{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o1:lowercase}(:|-)%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o2:lowercase}(:|-)%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o3:lowercase}(:|-)%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o4:lowercase}(:|-)%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o5:lowercase}(:|-)%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o6:lowercase}
+              %{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o1:lowercase}(:|-)%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o2:lowercase}(:|-)%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o3:lowercase}(:|-)%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o4:lowercase}(:|-)%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o5:lowercase}(:|-)%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o6:lowercase}
 
-              mac_dotted %{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o1:lowercase}%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o2:lowercase}\.%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o3:lowercase}%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o4:lowercase}\.%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o5:lowercase}%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco.ise.endpoint.mac_octets.o6:lowercase}
+              mac_dotted %{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o1:lowercase}%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o2:lowercase}\.%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o3:lowercase}%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o4:lowercase}\.%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o5:lowercase}%{regex("[0-9A-Fa-f][0-9A-Fa-f]"):cisco_ise.endpoint.mac_octets.o6:lowercase}
         - type: string-builder-processor
           name: Build MAC
           enabled: true
-          template: "%{cisco.ise.endpoint.mac_octets.o1}:%{cisco.ise.endpoint.mac_octets.\
-            o2}:%{cisco.ise.endpoint.mac_octets.o3}:%{cisco.ise.endpoint.mac_oc\
-            tets.o4}:%{cisco.ise.endpoint.mac_octets.o5}:%{cisco.ise.endpoint.m\
+          template: "%{cisco_ise.endpoint.mac_octets.o1}:%{cisco_ise.endpoint.mac_octets.\
+            o2}:%{cisco_ise.endpoint.mac_octets.o3}:%{cisco_ise.endpoint.mac_oc\
+            tets.o4}:%{cisco_ise.endpoint.mac_octets.o5}:%{cisco_ise.endpoint.m\
             ac_octets.o6}"
-          target: cisco.ise.endpoint.mac
+          target: cisco_ise.endpoint.mac
           replaceMissing: false
         - type: grok-parser
           name: Parse TACACS+ command
           enabled: true
-          source: cisco.ise.attributes.CmdSet
+          source: cisco_ise.attributes.CmdSet
           samples:
             - CmdAV=show running-config <cr>
             - CmdAV=show CmdArgAV=running-config CmdArgAV=<cr>
           grok:
             supportRules: ""
             matchRules: >-
-              tacacs_accounting CmdAV=%{data:cisco.ise.tacacs.command} <cr>
+              tacacs_accounting CmdAV=%{data:cisco_ise.tacacs.command} <cr>
 
-              tacacs_authorization CmdAV=%{notSpace:cisco.ise.tacacs.command_name}%{data}
+              tacacs_authorization CmdAV=%{notSpace:cisco_ise.tacacs.command_name}%{data}
         - type: grok-parser
           name: Parse TACACS+ command name
           enabled: true
-          source: cisco.ise.tacacs.command
+          source: cisco_ise.tacacs.command
           samples: []
           grok:
             supportRules: ""
-            matchRules: command_name %{notSpace:cisco.ise.tacacs.command_name}%{data}
+            matchRules: command_name %{notSpace:cisco_ise.tacacs.command_name}%{data}
         - type: attribute-remapper
           name: Map user to usr.name
           enabled: true
           sources:
-            - cisco.ise.attributes.UserName
-            - cisco.ise.attributes.AdminName
-            - cisco.ise.attributes.User
+            - cisco_ise.attributes.UserName
+            - cisco_ise.attributes.AdminName
+            - cisco_ise.attributes.User
           sourceType: attribute
           target: usr.name
           targetType: attribute
@@ -540,9 +550,9 @@ pipeline:
           name: Map client IP to network.client.ip
           enabled: true
           sources:
-            - cisco.ise.attributes.Remote-Address
-            - cisco.ise.attributes.AdminIPAddress
-            - cisco.ise.attributes.Framed-IP-Address
+            - cisco_ise.attributes.Remote-Address
+            - cisco_ise.attributes.AdminIPAddress
+            - cisco_ise.attributes.Framed-IP-Address
           sourceType: attribute
           target: network.client.ip
           targetType: attribute
@@ -552,7 +562,7 @@ pipeline:
           name: Map message class to evt.name
           enabled: true
           sources:
-            - cisco.ise.message_class
+            - cisco_ise.message_class
           sourceType: attribute
           target: evt.name
           targetType: attribute

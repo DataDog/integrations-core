@@ -3,118 +3,118 @@ tests:
   - sample: "<181>Nov  3 13:23:40 ise-1 CISE_Passed_Authentications 0000000128 1 0 2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
     result:
       custom:
-        cisco:
-          ise:
-            attributes:
-              AcsSessionID: "ise-1/583071475/50"
-              AuthenticationIdentityStore: "Internal Users"
-              AuthenticationMethod: "PAP_ASCII"
-              AuthenticationStatus: "AuthenticationPassed"
-              AuthorizationPolicyMatchedRule: "Basic_Authenticated_Access"
-              CPMSessionID: "luise6001"
-              Calling-Station-ID: "AA:BB:CC:04:60:01"
-              ClientLatency: 0
-              ConfigVersionId: 124
-              DTLSSupport: "Unknown"
-              DestinationIPAddress: "10.10.20.77"
-              DestinationPort: 1812
-              DeviceIPAddress: "192.168.254.11"
-              EnableFlag: "Enabled"
-              EndPointMACAddress: "AA-BB-CC-04-60-01"
-              Framed-IP-Address: "10.99.0.61"
-              Framed-IP-Netmask: "255.255.255.0"
-              IPSEC: "IPSEC#Is IPSEC Device#No"
-              ISEPolicySetName: "Default"
-              IdentityGroup: "User Identity Groups:Employee"
-              IdentityPolicyMatchedRule: "Default"
-              IdentitySelectionMatchedRule: "Default"
-              IsThirdPartyDeviceFlow: false
-              Location: "Location#All Locations#Spain#Madrid"
-              NAS-IP-Address: "10.0.0.1"
-              NAS-Port: 50161
-              NAS-Port-Id: "GigabitEthernet1/0/61"
-              NAS-Port-Type: "Ethernet"
-              Name: "User Identity Groups:Employee"
-              NetworkDeviceGroups:
-                - "IPSEC#Is IPSEC Device#No"
-                - "Location#All Locations#Spain#Madrid"
-                - "Device Type#All Device Types#RadiusSimulator"
-              NetworkDeviceName: "luis_mac_radius_sim"
-              NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
-              NetworkDeviceProfileName: "Cisco"
-              OriginalUserName: "luis_test"
-              PostureAssessmentStatus: "NotApplicable"
-              Protocol: "Radius"
-              RequestLatency: 15
-              SelectedAccessService: "Default Network Access"
-              SelectedAuthenticationIdentityStores:
-                - "Internal Users"
-                - "All_AD_Join_Points"
-                - "Guest Users"
-              SelectedAuthorizationProfiles: "PermitAccess"
-              Step:
-                - 11001
-                - 11017
-                - 15049
-                - 15008
-                - 15041
-                - 15048
-                - 22072
-                - 15013
-                - 24210
-                - 24212
-                - 22037
-                - 24715
-                - 15036
-                - 24209
-                - 24217
-                - 15048
-                - 15048
-                - 15048
-                - 15016
-                - 22081
-                - 22080
-                - 11002
-              StepData=15: "Radius.NAS-Port-Type"
-              StepData=16: "EndPoints.LogicalProfile"
-              StepData=17: "Network Access.AuthenticationStatus"
-              StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
-              StepData=6: "All_User_ID_Stores"
-              StepData=7: "Internal Users"
-              TotalAuthenLatency: 15
-              User-Name: "luis_test"
-              UserName: "luis_test"
-              UserType: "User"
-              allowEasyWiredSession: false
-              cisco-av-pair=AuthenticationIdentityStore: "Internal Users"
-              cisco-av-pair=FQSubjectName: "9273fe30-8c01-11e6-996c-525400b48521#luis_test"
-              cisco-av-pair=UniqueSubjectID: "237198dd9352df10277534c78aacf3ef916b3dc4"
-              cisco-av-pair=audit-session-id: "luise6001"
-            category: "Passed_Authentications"
-            endpoint:
-              mac: "aa:bb:cc:04:60:01"
-              mac_octets:
-                o1: "aa"
-                o2: "bb"
-                o3: "cc"
-                o4: "04"
-                o5: "60"
-                o6: "01"
-            message_class: "Passed-Authentication"
-            message_code: "5200"
-            message_id: "0000000128"
-            message_text: "Authentication succeeded"
-            response:
-              Class: "CACS:luise6001:ise-1/583071475/50"
-              LicenseTypes: 1
-            segment:
-              number: 0
-              total: 1
-            sequence: "0000001415"
-            severity: "NOTICE"
-            site:
-              level1: "Spain"
-              level2: "Madrid"
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/50"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "PAP_ASCII"
+            AuthenticationStatus: "AuthenticationPassed"
+            AuthorizationPolicyMatchedRule: "Basic_Authenticated_Access"
+            CPMSessionID: "luise6001"
+            Calling-Station-ID: "AA:BB:CC:04:60:01"
+            ClientLatency: 0
+            ConfigVersionId: 124
+            DTLSSupport: "Unknown"
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 1812
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            EndPointMACAddress: "AA-BB-CC-04-60-01"
+            Framed-IP-Address: "10.99.0.61"
+            Framed-IP-Netmask: "255.255.255.0"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentityPolicyMatchedRule: "Default"
+            IdentitySelectionMatchedRule: "Default"
+            IsThirdPartyDeviceFlow: false
+            Location: "Location#All Locations#Spain#Madrid"
+            NAS-IP-Address: "10.0.0.1"
+            NAS-Port: 50161
+            NAS-Port-Id: "GigabitEthernet1/0/61"
+            NAS-Port-Type: "Ethernet"
+            Name: "User Identity Groups:Employee"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            NetworkDeviceProfileName: "Cisco"
+            OriginalUserName: "luis_test"
+            PostureAssessmentStatus: "NotApplicable"
+            Protocol: "Radius"
+            RequestLatency: 15
+            SelectedAccessService: "Default Network Access"
+            SelectedAuthenticationIdentityStores:
+              - "Internal Users"
+              - "All_AD_Join_Points"
+              - "Guest Users"
+            SelectedAuthorizationProfiles: "PermitAccess"
+            Step:
+              - 11001
+              - 11017
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 22072
+              - 15013
+              - 24210
+              - 24212
+              - 22037
+              - 24715
+              - 15036
+              - 24209
+              - 24217
+              - 15048
+              - 15048
+              - 15048
+              - 15016
+              - 22081
+              - 22080
+              - 11002
+            StepData=15: "Radius.NAS-Port-Type"
+            StepData=16: "EndPoints.LogicalProfile"
+            StepData=17: "Network Access.AuthenticationStatus"
+            StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
+            StepData=6: "All_User_ID_Stores"
+            StepData=7: "Internal Users"
+            TotalAuthenLatency: 15
+            User-Name: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+            allowEasyWiredSession: false
+            cisco-av-pair=AuthenticationIdentityStore: "Internal Users"
+            cisco-av-pair=FQSubjectName: "9273fe30-8c01-11e6-996c-525400b48521#luis_test"
+            cisco-av-pair=UniqueSubjectID: "237198dd9352df10277534c78aacf3ef916b3dc4"
+            cisco-av-pair=audit-session-id: "luise6001"
+          category: "Passed_Authentications"
+          endpoint:
+            mac: "aa:bb:cc:04:60:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "04"
+              o5: "60"
+              o6: "01"
+          message_class: "Passed-Authentication"
+          message_code: "5200"
+          message_id: "0000000128"
+          message_text: "Authentication succeeded"
+          node: "ise-1"
+          response:
+            Class: "CACS:luise6001:ise-1/583071475/50"
+            LicenseTypes: 1
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001415"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
         evt:
           name: "Passed-Authentication"
           outcome: "success"
@@ -135,112 +135,112 @@ tests:
   - sample: "<181>Nov  3 13:24:04 ise-1 CISE_Failed_Attempts 0000000131 1 0 2026-11-03 13:24:04.327 +00:00 0000001467 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=124, Device IP Address=192.168.254.11, Device Port=55433, DestinationIPAddress=10.10.20.77, DestinationPort=1812, RadiusPacketType=AccessRequest, UserName=INVALID, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=INVALID, NAS-IP-Address=10.0.0.1, Calling-Station-ID=AA:BB:CC:04:20:01, cisco-av-pair=audit-session-id=luise2001, OriginalUserName=INVALID, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/53, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, RequestLatency=10, FailureReason=22056 Subject not found in the applicable identity store(s), Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24216, Step=15013, Step=24430, Step=24325, Step=24313, Step=24366, Step=24322, Step=24352, Step=24412, Step=15013, Step=24631, Step=24633, Step=22016, Step=22056, Step=22058, Step=22061, Step=11003, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, CPMSessionID=luise2001, EndPointMACAddress=AA-BB-CC-04-20-01, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=10=All_AD_Join_Points, StepData=11=All_AD_Join_Points, StepData=12=INVALID, StepData=13=lab.devnetsandbox.local, StepData=14=lab.devnetsandbox.local, StepData=16=ERROR_NO_SUCH_USER, StepData=17=All_AD_Join_Points, StepData=18=Guest Users, TotalAuthenLatency=10, ClientLatency=0, IsMachineIdentity=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Response={RadiusPacketType=AccessReject; AuthenticationResult=UnknownUser; },"
     result:
       custom:
-        cisco:
-          ise:
-            attributes:
-              AcsSessionID: "ise-1/583071475/53"
-              AuthenticationMethod: "PAP_ASCII"
-              CPMSessionID: "luise2001"
-              Calling-Station-ID: "AA:BB:CC:04:20:01"
-              ClientLatency: 0
-              ConfigVersionId: 124
-              DTLSSupport: "Unknown"
-              DestinationIPAddress: "10.10.20.77"
-              DestinationPort: 1812
-              DeviceIPAddress: "192.168.254.11"
-              EndPointMACAddress: "AA-BB-CC-04-20-01"
-              FailureReason: "22056 Subject not found in the applicable identity store(s)"
-              IPSEC: "IPSEC#Is IPSEC Device#No"
-              ISEPolicySetName: "Default"
-              IdentityPolicyMatchedRule: "Default"
-              IdentitySelectionMatchedRule: "Default"
-              IsMachineIdentity: false
-              IsThirdPartyDeviceFlow: false
-              Location: "Location#All Locations#Spain#Madrid"
-              NAS-IP-Address: "10.0.0.1"
-              NetworkDeviceGroups:
-                - "IPSEC#Is IPSEC Device#No"
-                - "Location#All Locations#Spain#Madrid"
-                - "Device Type#All Device Types#RadiusSimulator"
-              NetworkDeviceName: "luis_mac_radius_sim"
-              NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
-              NetworkDeviceProfileName: "Cisco"
-              OriginalUserName: "INVALID"
-              Protocol: "Radius"
-              RadiusPacketType: "AccessRequest"
-              RequestLatency: 10
-              SelectedAccessService: "Default Network Access"
-              SelectedAuthenticationIdentityStores:
-                - "Internal Users"
-                - "All_AD_Join_Points"
-                - "Guest Users"
-              Step:
-                - 11001
-                - 11017
-                - 15049
-                - 15008
-                - 15041
-                - 15048
-                - 22072
-                - 15013
-                - 24210
-                - 24216
-                - 15013
-                - 24430
-                - 24325
-                - 24313
-                - 24366
-                - 24322
-                - 24352
-                - 24412
-                - 15013
-                - 24631
-                - 24633
-                - 22016
-                - 22056
-                - 22058
-                - 22061
-                - 11003
-              StepData=10: "All_AD_Join_Points"
-              StepData=11: "All_AD_Join_Points"
-              StepData=12: "INVALID"
-              StepData=13: "lab.devnetsandbox.local"
-              StepData=14: "lab.devnetsandbox.local"
-              StepData=16: "ERROR_NO_SUCH_USER"
-              StepData=17: "All_AD_Join_Points"
-              StepData=18: "Guest Users"
-              StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
-              StepData=6: "All_User_ID_Stores"
-              StepData=7: "Internal Users"
-              TotalAuthenLatency: 10
-              User-Name: "INVALID"
-              UserName: "INVALID"
-              cisco-av-pair=audit-session-id: "luise2001"
-            category: "Failed_Attempts"
-            endpoint:
-              mac: "aa:bb:cc:04:20:01"
-              mac_octets:
-                o1: "aa"
-                o2: "bb"
-                o3: "cc"
-                o4: "04"
-                o5: "20"
-                o6: "01"
-            message_class: "Failed-Attempt"
-            message_code: "5400"
-            message_id: "0000000131"
-            message_text: "Authentication failed"
-            response:
-              AuthenticationResult: "UnknownUser"
-              RadiusPacketType: "AccessReject"
-            segment:
-              number: 0
-              total: 1
-            sequence: "0000001467"
-            severity: "NOTICE"
-            site:
-              level1: "Spain"
-              level2: "Madrid"
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/53"
+            AuthenticationMethod: "PAP_ASCII"
+            CPMSessionID: "luise2001"
+            Calling-Station-ID: "AA:BB:CC:04:20:01"
+            ClientLatency: 0
+            ConfigVersionId: 124
+            DTLSSupport: "Unknown"
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 1812
+            DeviceIPAddress: "192.168.254.11"
+            EndPointMACAddress: "AA-BB-CC-04-20-01"
+            FailureReason: "22056 Subject not found in the applicable identity store(s)"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityPolicyMatchedRule: "Default"
+            IdentitySelectionMatchedRule: "Default"
+            IsMachineIdentity: false
+            IsThirdPartyDeviceFlow: false
+            Location: "Location#All Locations#Spain#Madrid"
+            NAS-IP-Address: "10.0.0.1"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            NetworkDeviceProfileName: "Cisco"
+            OriginalUserName: "INVALID"
+            Protocol: "Radius"
+            RadiusPacketType: "AccessRequest"
+            RequestLatency: 10
+            SelectedAccessService: "Default Network Access"
+            SelectedAuthenticationIdentityStores:
+              - "Internal Users"
+              - "All_AD_Join_Points"
+              - "Guest Users"
+            Step:
+              - 11001
+              - 11017
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 22072
+              - 15013
+              - 24210
+              - 24216
+              - 15013
+              - 24430
+              - 24325
+              - 24313
+              - 24366
+              - 24322
+              - 24352
+              - 24412
+              - 15013
+              - 24631
+              - 24633
+              - 22016
+              - 22056
+              - 22058
+              - 22061
+              - 11003
+            StepData=10: "All_AD_Join_Points"
+            StepData=11: "All_AD_Join_Points"
+            StepData=12: "INVALID"
+            StepData=13: "lab.devnetsandbox.local"
+            StepData=14: "lab.devnetsandbox.local"
+            StepData=16: "ERROR_NO_SUCH_USER"
+            StepData=17: "All_AD_Join_Points"
+            StepData=18: "Guest Users"
+            StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
+            StepData=6: "All_User_ID_Stores"
+            StepData=7: "Internal Users"
+            TotalAuthenLatency: 10
+            User-Name: "INVALID"
+            UserName: "INVALID"
+            cisco-av-pair=audit-session-id: "luise2001"
+          category: "Failed_Attempts"
+          endpoint:
+            mac: "aa:bb:cc:04:20:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "04"
+              o5: "20"
+              o6: "01"
+          message_class: "Failed-Attempt"
+          message_code: "5400"
+          message_id: "0000000131"
+          message_text: "Authentication failed"
+          node: "ise-1"
+          response:
+            AuthenticationResult: "UnknownUser"
+            RadiusPacketType: "AccessReject"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001467"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
         evt:
           name: "Failed-Attempt"
           outcome: "failure"
@@ -258,96 +258,96 @@ tests:
   - sample: "<181>Nov  3 13:24:06 ise-1 CISE_Failed_Attempts 0000000135 1 0 2026-11-03 13:24:06.383 +00:00 0000001538 5434 NOTICE RADIUS: Endpoint conducted several failed authentications of the same scenario, ConfigVersionId=124, Device IP Address=192.168.254.11, Device Port=59725, DestinationIPAddress=10.10.20.77, DestinationPort=1812, RadiusPacketType=AccessRequest, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, Calling-Station-ID=AA:BB:CC:04:30:01, cisco-av-pair=audit-session-id=luise3002, OriginalUserName=luis_test, IsEndpointInRejectMode=false, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/57, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, IdentityGroup=User Identity Groups:Employee, FailureReason=22040 Wrong password or invalid shared secret, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22040, Step=22057, Step=22061, Step=11003, Step=5434, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, UserType=User, CPMSessionID=luise3002, EndPointMACAddress=AA-BB-CC-04-30-01, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, TotalFailedAttempts=2, TotalFailedTime=1, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, EnableFlag=Enabled, Response={RadiusPacketType=AccessReject; AuthenticationResult=Failed; },"
     result:
       custom:
-        cisco:
-          ise:
-            attributes:
-              AcsSessionID: "ise-1/583071475/57"
-              AuthenticationIdentityStore: "Internal Users"
-              AuthenticationMethod: "PAP_ASCII"
-              CPMSessionID: "luise3002"
-              Calling-Station-ID: "AA:BB:CC:04:30:01"
-              ConfigVersionId: 124
-              DTLSSupport: "Unknown"
-              DestinationIPAddress: "10.10.20.77"
-              DestinationPort: 1812
-              DeviceIPAddress: "192.168.254.11"
-              EnableFlag: "Enabled"
-              EndPointMACAddress: "AA-BB-CC-04-30-01"
-              FailureReason: "22040 Wrong password or invalid shared secret"
-              IPSEC: "IPSEC#Is IPSEC Device#No"
-              ISEPolicySetName: "Default"
-              IdentityGroup: "User Identity Groups:Employee"
-              IdentityPolicyMatchedRule: "Default"
-              IdentitySelectionMatchedRule: "Default"
-              IsEndpointInRejectMode: false
-              IsThirdPartyDeviceFlow: false
-              Location: "Location#All Locations#Spain#Madrid"
-              NAS-IP-Address: "10.0.0.1"
-              NetworkDeviceGroups:
-                - "IPSEC#Is IPSEC Device#No"
-                - "Location#All Locations#Spain#Madrid"
-                - "Device Type#All Device Types#RadiusSimulator"
-              NetworkDeviceName: "luis_mac_radius_sim"
-              NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
-              NetworkDeviceProfileName: "Cisco"
-              OriginalUserName: "luis_test"
-              Protocol: "Radius"
-              RadiusPacketType: "AccessRequest"
-              SelectedAccessService: "Default Network Access"
-              SelectedAuthenticationIdentityStores:
-                - "Internal Users"
-                - "All_AD_Join_Points"
-                - "Guest Users"
-              Step:
-                - 11001
-                - 11017
-                - 15049
-                - 15008
-                - 15041
-                - 15048
-                - 22072
-                - 15013
-                - 24210
-                - 24212
-                - 22040
-                - 22057
-                - 22061
-                - 11003
-                - 5434
-              StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
-              StepData=6: "All_User_ID_Stores"
-              StepData=7: "Internal Users"
-              TotalFailedAttempts: 2
-              TotalFailedTime: 1
-              User-Name: "luis_test"
-              UserName: "luis_test"
-              UserType: "User"
-              cisco-av-pair=audit-session-id: "luise3002"
-            category: "Failed_Attempts"
-            endpoint:
-              mac: "aa:bb:cc:04:30:01"
-              mac_octets:
-                o1: "aa"
-                o2: "bb"
-                o3: "cc"
-                o4: "04"
-                o5: "30"
-                o6: "01"
-            message_class: "RADIUS"
-            message_code: "5434"
-            message_id: "0000000135"
-            message_text: "Endpoint conducted several failed authentications of the same scenario"
-            response:
-              AuthenticationResult: "Failed"
-              RadiusPacketType: "AccessReject"
-            segment:
-              number: 0
-              total: 1
-            sequence: "0000001538"
-            severity: "NOTICE"
-            site:
-              level1: "Spain"
-              level2: "Madrid"
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/57"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "PAP_ASCII"
+            CPMSessionID: "luise3002"
+            Calling-Station-ID: "AA:BB:CC:04:30:01"
+            ConfigVersionId: 124
+            DTLSSupport: "Unknown"
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 1812
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            EndPointMACAddress: "AA-BB-CC-04-30-01"
+            FailureReason: "22040 Wrong password or invalid shared secret"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentityPolicyMatchedRule: "Default"
+            IdentitySelectionMatchedRule: "Default"
+            IsEndpointInRejectMode: false
+            IsThirdPartyDeviceFlow: false
+            Location: "Location#All Locations#Spain#Madrid"
+            NAS-IP-Address: "10.0.0.1"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            NetworkDeviceProfileName: "Cisco"
+            OriginalUserName: "luis_test"
+            Protocol: "Radius"
+            RadiusPacketType: "AccessRequest"
+            SelectedAccessService: "Default Network Access"
+            SelectedAuthenticationIdentityStores:
+              - "Internal Users"
+              - "All_AD_Join_Points"
+              - "Guest Users"
+            Step:
+              - 11001
+              - 11017
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 22072
+              - 15013
+              - 24210
+              - 24212
+              - 22040
+              - 22057
+              - 22061
+              - 11003
+              - 5434
+            StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
+            StepData=6: "All_User_ID_Stores"
+            StepData=7: "Internal Users"
+            TotalFailedAttempts: 2
+            TotalFailedTime: 1
+            User-Name: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+            cisco-av-pair=audit-session-id: "luise3002"
+          category: "Failed_Attempts"
+          endpoint:
+            mac: "aa:bb:cc:04:30:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "04"
+              o5: "30"
+              o6: "01"
+          message_class: "RADIUS"
+          message_code: "5434"
+          message_id: "0000000135"
+          message_text: "Endpoint conducted several failed authentications of the same scenario"
+          node: "ise-1"
+          response:
+            AuthenticationResult: "Failed"
+            RadiusPacketType: "AccessReject"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001538"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
         evt:
           name: "RADIUS"
           outcome: "failure"
@@ -365,75 +365,75 @@ tests:
   - sample: "<181>Nov  3 13:23:43 ise-1 CISE_RADIUS_Accounting 0000000129 1 0 2026-11-03 13:23:43.766 +00:00 0000001423 3000 NOTICE Radius-Accounting: RADIUS Accounting start request, ConfigVersionId=124, Device IP Address=192.168.254.11, UserName=luis_test, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, Acct-Status-Type=Start, Acct-Delay-Time=1, Acct-Input-Octets=2, Acct-Output-Octets=3, Acct-Session-Id=luise6001, Acct-Authentic=RADIUS, Acct-Session-Time=4, Acct-Input-Packets=5, Acct-Output-Packets=6, Acct-Multi-Session-Id=321, Acct-Link-Count=1, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, AcsSessionID=ise-1/583071475/51, SelectedAccessService=Default Network Access, RequestLatency=2, Step=11004, Step=11017, Step=15049, Step=15008, Step=22001, Step=22083, Step=11005, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, CPMSessionID=luise6001, TotalAuthenLatency=2, ClientLatency=0, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No,"
     result:
       custom:
-        cisco:
-          ise:
-            attributes:
-              Acct-Authentic: "RADIUS"
-              Acct-Delay-Time: 1
-              Acct-Input-Octets: 2
-              Acct-Input-Packets: 5
-              Acct-Link-Count: 1
-              Acct-Multi-Session-Id: 321
-              Acct-Output-Octets: 3
-              Acct-Output-Packets: 6
-              Acct-Session-Id: "luise6001"
-              Acct-Session-Time: 4
-              Acct-Status-Type: "Start"
-              AcsSessionID: "ise-1/583071475/51"
-              CPMSessionID: "luise6001"
-              Calling-Station-ID: "AA:BB:CC:04:60:01"
-              ClientLatency: 0
-              ConfigVersionId: 124
-              DeviceIPAddress: "192.168.254.11"
-              Framed-IP-Address: "10.99.0.61"
-              Framed-IP-Netmask: "255.255.255.0"
-              IPSEC: "IPSEC#Is IPSEC Device#No"
-              Location: "Location#All Locations#Spain#Madrid"
-              NAS-IP-Address: "10.0.0.1"
-              NAS-Port: 50161
-              NAS-Port-Id: "GigabitEthernet1/0/61"
-              NAS-Port-Type: "Ethernet"
-              NetworkDeviceGroups:
-                - "IPSEC#Is IPSEC Device#No"
-                - "Location#All Locations#Spain#Madrid"
-                - "Device Type#All Device Types#RadiusSimulator"
-              NetworkDeviceName: "luis_mac_radius_sim"
-              RequestLatency: 2
-              SelectedAccessService: "Default Network Access"
-              Step:
-                - 11004
-                - 11017
-                - 15049
-                - 15008
-                - 22001
-                - 22083
-                - 11005
-              TotalAuthenLatency: 2
-              User-Name: "luis_test"
-              UserName: "luis_test"
-              cisco-av-pair=audit-session-id: "luise6001"
-            category: "RADIUS_Accounting"
-            endpoint:
-              mac: "aa:bb:cc:04:60:01"
-              mac_octets:
-                o1: "aa"
-                o2: "bb"
-                o3: "cc"
-                o4: "04"
-                o5: "60"
-                o6: "01"
-            message_class: "Radius-Accounting"
-            message_code: "3000"
-            message_id: "0000000129"
-            message_text: "RADIUS Accounting start request"
-            segment:
-              number: 0
-              total: 1
-            sequence: "0000001423"
-            severity: "NOTICE"
-            site:
-              level1: "Spain"
-              level2: "Madrid"
+        cisco_ise:
+          attributes:
+            Acct-Authentic: "RADIUS"
+            Acct-Delay-Time: 1
+            Acct-Input-Octets: 2
+            Acct-Input-Packets: 5
+            Acct-Link-Count: 1
+            Acct-Multi-Session-Id: 321
+            Acct-Output-Octets: 3
+            Acct-Output-Packets: 6
+            Acct-Session-Id: "luise6001"
+            Acct-Session-Time: 4
+            Acct-Status-Type: "Start"
+            AcsSessionID: "ise-1/583071475/51"
+            CPMSessionID: "luise6001"
+            Calling-Station-ID: "AA:BB:CC:04:60:01"
+            ClientLatency: 0
+            ConfigVersionId: 124
+            DeviceIPAddress: "192.168.254.11"
+            Framed-IP-Address: "10.99.0.61"
+            Framed-IP-Netmask: "255.255.255.0"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            Location: "Location#All Locations#Spain#Madrid"
+            NAS-IP-Address: "10.0.0.1"
+            NAS-Port: 50161
+            NAS-Port-Id: "GigabitEthernet1/0/61"
+            NAS-Port-Type: "Ethernet"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            RequestLatency: 2
+            SelectedAccessService: "Default Network Access"
+            Step:
+              - 11004
+              - 11017
+              - 15049
+              - 15008
+              - 22001
+              - 22083
+              - 11005
+            TotalAuthenLatency: 2
+            User-Name: "luis_test"
+            UserName: "luis_test"
+            cisco-av-pair=audit-session-id: "luise6001"
+          category: "RADIUS_Accounting"
+          endpoint:
+            mac: "aa:bb:cc:04:60:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "04"
+              o5: "60"
+              o6: "01"
+          message_class: "Radius-Accounting"
+          message_code: "3000"
+          message_id: "0000000129"
+          message_text: "RADIUS Accounting start request"
+          node: "ise-1"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001423"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
         evt:
           name: "Radius-Accounting"
         network:
@@ -453,85 +453,85 @@ tests:
   - sample: "<181>Nov  3 14:18:14 ise-1 CISE_Passed_Authentications 0000000220 1 0 2026-11-03 14:18:14.276 +00:00 0000001741 5201 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=138, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=49, UserName=luis_test, Protocol=Tacacs, NetworkDeviceName=luis_mac_radius_sim, Type=Authentication, Action=Login, Privilege-Level=0, Authen-Type=ASCII, Service=Login, User=luis_test, Port=tty2, Remote-Address=10.99.0.200, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, AcsSessionID=ise-1/583071475/62, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Device Admin, SelectedShellProfile=Default Shell Profile, RequestLatency=12, IdentityGroup=User Identity Groups:Employee, Step=13013, Step=15049, Step=15008, Step=15041, Step=15048, Step=15013, Step=24210, Step=24212, Step=13045, Step=13015, Step=13014, Step=15041, Step=15013, Step=24210, Step=24212, Step=22037, Step=15036, Step=13015, SelectedAuthenticationIdentityStores=Internal Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, AuthorizationPolicyMatchedRule=luis_tacacs_authz, UserType=User, CPMSessionID=4015896421192.168.254.1152209Authentication4015896421, ISEPolicySetName=Default, IdentitySelectionMatchedRule=luis_tacacs_admin, StepData=4= Network Access.UserName, StepData=5=Internal Users, StepData=12=Internal Users, TotalAuthenLatency=2714131845, ClientLatency=2714131833, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, EnableFlag=Enabled, Response={Authen-Reply-Status=Pass; },"
     result:
       custom:
-        cisco:
-          ise:
-            attributes:
-              AcsSessionID: "ise-1/583071475/62"
-              Action: "Login"
-              Authen-Type: "ASCII"
-              AuthenticationIdentityStore: "Internal Users"
-              AuthenticationMethod: "PAP_ASCII"
-              AuthenticationStatus: "AuthenticationPassed"
-              AuthorizationPolicyMatchedRule: "luis_tacacs_authz"
-              CPMSessionID: "4015896421192.168.254.1152209Authentication4015896421"
-              ClientLatency: 2714131833
-              ConfigVersionId: 138
-              DestinationIPAddress: "10.10.20.77"
-              DestinationPort: 49
-              DeviceIPAddress: "192.168.254.11"
-              EnableFlag: "Enabled"
-              IPSEC: "IPSEC#Is IPSEC Device#No"
-              ISEPolicySetName: "Default"
-              IdentityGroup: "User Identity Groups:Employee"
-              IdentitySelectionMatchedRule: "luis_tacacs_admin"
-              Location: "Location#All Locations#Spain#Madrid"
-              NetworkDeviceGroups:
-                - "IPSEC#Is IPSEC Device#No"
-                - "Location#All Locations#Spain#Madrid"
-                - "Device Type#All Device Types#RadiusSimulator"
-              NetworkDeviceName: "luis_mac_radius_sim"
-              NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
-              Port: "tty2"
-              Privilege-Level: 0
-              Protocol: "Tacacs"
-              Remote-Address: "10.99.0.200"
-              RequestLatency: 12
-              SelectedAccessService: "Default Device Admin"
-              SelectedAuthenticationIdentityStores: "Internal Users"
-              SelectedShellProfile: "Default Shell Profile"
-              Service: "Login"
-              Step:
-                - 13013
-                - 15049
-                - 15008
-                - 15041
-                - 15048
-                - 15013
-                - 24210
-                - 24212
-                - 13045
-                - 13015
-                - 13014
-                - 15041
-                - 15013
-                - 24210
-                - 24212
-                - 22037
-                - 15036
-                - 13015
-              StepData=12: "Internal Users"
-              StepData=4: "Network Access.UserName"
-              StepData=5: "Internal Users"
-              TotalAuthenLatency: 2714131845
-              Type: "Authentication"
-              User: "luis_test"
-              UserName: "luis_test"
-              UserType: "User"
-            category: "Passed_Authentications"
-            message_class: "Passed-Authentication"
-            message_code: "5201"
-            message_id: "0000000220"
-            message_text: "Authentication succeeded"
-            response:
-              Authen-Reply-Status: "Pass"
-            segment:
-              number: 0
-              total: 1
-            sequence: "0000001741"
-            severity: "NOTICE"
-            site:
-              level1: "Spain"
-              level2: "Madrid"
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/62"
+            Action: "Login"
+            Authen-Type: "ASCII"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "PAP_ASCII"
+            AuthenticationStatus: "AuthenticationPassed"
+            AuthorizationPolicyMatchedRule: "luis_tacacs_authz"
+            CPMSessionID: "4015896421192.168.254.1152209Authentication4015896421"
+            ClientLatency: 2714131833
+            ConfigVersionId: 138
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 49
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentitySelectionMatchedRule: "luis_tacacs_admin"
+            Location: "Location#All Locations#Spain#Madrid"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            Port: "tty2"
+            Privilege-Level: 0
+            Protocol: "Tacacs"
+            Remote-Address: "10.99.0.200"
+            RequestLatency: 12
+            SelectedAccessService: "Default Device Admin"
+            SelectedAuthenticationIdentityStores: "Internal Users"
+            SelectedShellProfile: "Default Shell Profile"
+            Service: "Login"
+            Step:
+              - 13013
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 15013
+              - 24210
+              - 24212
+              - 13045
+              - 13015
+              - 13014
+              - 15041
+              - 15013
+              - 24210
+              - 24212
+              - 22037
+              - 15036
+              - 13015
+            StepData=12: "Internal Users"
+            StepData=4: "Network Access.UserName"
+            StepData=5: "Internal Users"
+            TotalAuthenLatency: 2714131845
+            Type: "Authentication"
+            User: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+          category: "Passed_Authentications"
+          message_class: "Passed-Authentication"
+          message_code: "5201"
+          message_id: "0000000220"
+          message_text: "Authentication succeeded"
+          node: "ise-1"
+          response:
+            Authen-Reply-Status: "Pass"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001741"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
         evt:
           name: "Passed-Authentication"
           outcome: "success"
@@ -552,85 +552,85 @@ tests:
   - sample: "<181>Nov  3 14:18:21 ise-1 CISE_Failed_Attempts 0000000230 1 0 2026-11-03 14:18:21.202 +00:00 0000001846 5401 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=138, Device IP Address=192.168.254.11, Device Port=52226, DestinationIPAddress=10.10.20.77, DestinationPort=49, UserName=luis_test, Protocol=Tacacs, NetworkDeviceName=luis_mac_radius_sim, Type=Authentication, Action=Login, Privilege-Level=0, Authen-Type=ASCII, Service=Login, User=luis_test, Port=tty2, Remote-Address=10.99.0.200, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, AcsSessionID=ise-1/583071475/72, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Device Admin, RequestLatency=5, IdentityGroup=User Identity Groups:Employee, FailureReason=22040 Wrong password or invalid shared secret, Step=13013, Step=15049, Step=15008, Step=15041, Step=15048, Step=15013, Step=24210, Step=24212, Step=13045, Step=13015, Step=13014, Step=15041, Step=15013, Step=24210, Step=24212, Step=22040, Step=22057, Step=22061, Step=13015, SelectedAuthenticationIdentityStores=Internal Users, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, UserType=User, CPMSessionID=3312682675192.168.254.1152226Authentication3312682675, ISEPolicySetName=Default, IdentitySelectionMatchedRule=luis_tacacs_admin, StepData=4= Network Access.UserName, StepData=5=Internal Users, StepData=12=Internal Users, TotalAuthenLatency=2714138770, ClientLatency=2714138765, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, EnableFlag=Enabled, Response={AuthenticationResult=Failed; Authen-Reply-Status=Fail; },"
     result:
       custom:
-        cisco:
-          ise:
-            attributes:
-              AcsSessionID: "ise-1/583071475/72"
-              Action: "Login"
-              Authen-Type: "ASCII"
-              AuthenticationIdentityStore: "Internal Users"
-              AuthenticationMethod: "PAP_ASCII"
-              CPMSessionID: "3312682675192.168.254.1152226Authentication3312682675"
-              ClientLatency: 2714138765
-              ConfigVersionId: 138
-              DestinationIPAddress: "10.10.20.77"
-              DestinationPort: 49
-              DeviceIPAddress: "192.168.254.11"
-              EnableFlag: "Enabled"
-              FailureReason: "22040 Wrong password or invalid shared secret"
-              IPSEC: "IPSEC#Is IPSEC Device#No"
-              ISEPolicySetName: "Default"
-              IdentityGroup: "User Identity Groups:Employee"
-              IdentitySelectionMatchedRule: "luis_tacacs_admin"
-              Location: "Location#All Locations#Spain#Madrid"
-              NetworkDeviceGroups:
-                - "IPSEC#Is IPSEC Device#No"
-                - "Location#All Locations#Spain#Madrid"
-                - "Device Type#All Device Types#RadiusSimulator"
-              NetworkDeviceName: "luis_mac_radius_sim"
-              NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
-              Port: "tty2"
-              Privilege-Level: 0
-              Protocol: "Tacacs"
-              Remote-Address: "10.99.0.200"
-              RequestLatency: 5
-              SelectedAccessService: "Default Device Admin"
-              SelectedAuthenticationIdentityStores: "Internal Users"
-              Service: "Login"
-              Step:
-                - 13013
-                - 15049
-                - 15008
-                - 15041
-                - 15048
-                - 15013
-                - 24210
-                - 24212
-                - 13045
-                - 13015
-                - 13014
-                - 15041
-                - 15013
-                - 24210
-                - 24212
-                - 22040
-                - 22057
-                - 22061
-                - 13015
-              StepData=12: "Internal Users"
-              StepData=4: "Network Access.UserName"
-              StepData=5: "Internal Users"
-              TotalAuthenLatency: 2714138770
-              Type: "Authentication"
-              User: "luis_test"
-              UserName: "luis_test"
-              UserType: "User"
-            category: "Failed_Attempts"
-            message_class: "Failed-Attempt"
-            message_code: "5401"
-            message_id: "0000000230"
-            message_text: "Authentication failed"
-            response:
-              Authen-Reply-Status: "Fail"
-              AuthenticationResult: "Failed"
-            segment:
-              number: 0
-              total: 1
-            sequence: "0000001846"
-            severity: "NOTICE"
-            site:
-              level1: "Spain"
-              level2: "Madrid"
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/72"
+            Action: "Login"
+            Authen-Type: "ASCII"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "PAP_ASCII"
+            CPMSessionID: "3312682675192.168.254.1152226Authentication3312682675"
+            ClientLatency: 2714138765
+            ConfigVersionId: 138
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 49
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            FailureReason: "22040 Wrong password or invalid shared secret"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentitySelectionMatchedRule: "luis_tacacs_admin"
+            Location: "Location#All Locations#Spain#Madrid"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            Port: "tty2"
+            Privilege-Level: 0
+            Protocol: "Tacacs"
+            Remote-Address: "10.99.0.200"
+            RequestLatency: 5
+            SelectedAccessService: "Default Device Admin"
+            SelectedAuthenticationIdentityStores: "Internal Users"
+            Service: "Login"
+            Step:
+              - 13013
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 15013
+              - 24210
+              - 24212
+              - 13045
+              - 13015
+              - 13014
+              - 15041
+              - 15013
+              - 24210
+              - 24212
+              - 22040
+              - 22057
+              - 22061
+              - 13015
+            StepData=12: "Internal Users"
+            StepData=4: "Network Access.UserName"
+            StepData=5: "Internal Users"
+            TotalAuthenLatency: 2714138770
+            Type: "Authentication"
+            User: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+          category: "Failed_Attempts"
+          message_class: "Failed-Attempt"
+          message_code: "5401"
+          message_id: "0000000230"
+          message_text: "Authentication failed"
+          node: "ise-1"
+          response:
+            Authen-Reply-Status: "Fail"
+            AuthenticationResult: "Failed"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001846"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
         evt:
           name: "Failed-Attempt"
           outcome: "failure"
@@ -651,61 +651,61 @@ tests:
   - sample: "<181>Nov  3 14:18:15 ise-1 CISE_TACACS_Accounting 0000000224 1 0 2026-11-03 14:18:15.596 +00:00 0000001782 3300 NOTICE Tacacs-Accounting: TACACS+ Accounting with Command, ConfigVersionId=138, Device IP Address=192.168.254.11, CmdSet=[ CmdAV=show running-config <cr> ], NetworkDeviceName=luis_mac_radius_sim, Type=Accounting, Privilege-Level=15, Service=Login, User=luis_test, Port=tty2, Remote-Address=10.99.0.200, Authen-Method=TacacsPlus, AVPair=task_id=156541, AVPair=priv-lvl=15, AVPair=stop_time=1793715656, AVPair=timezone=UTC, AcctRequest-Flags=Stop, Service-Argument=shell, AcsSessionID=ise-1/583071475/66, SelectedAccessService=Default Device Admin, RequestLatency=1, Step=13006, Step=15049, Step=15008, Step=13035, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, CPMSessionID=1874867130192.168.254.1152215Accounting1874867130, TotalAuthenLatency=2714133164, ClientLatency=2714133163, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Response={AcctReply-Status=Success; },"
     result:
       custom:
-        cisco:
-          ise:
-            attributes:
-              AVPair=priv-lvl: 15
-              AVPair=stop_time: 1793715656
-              AVPair=task_id: 156541
-              AVPair=timezone: "UTC"
-              AcctRequest-Flags: "Stop"
-              AcsSessionID: "ise-1/583071475/66"
-              Authen-Method: "TacacsPlus"
-              CPMSessionID: "1874867130192.168.254.1152215Accounting1874867130"
-              ClientLatency: 2714133163
-              CmdSet: "CmdAV=show running-config <cr>"
-              ConfigVersionId: 138
-              DeviceIPAddress: "192.168.254.11"
-              IPSEC: "IPSEC#Is IPSEC Device#No"
-              Location: "Location#All Locations#Spain#Madrid"
-              NetworkDeviceGroups:
-                - "IPSEC#Is IPSEC Device#No"
-                - "Location#All Locations#Spain#Madrid"
-                - "Device Type#All Device Types#RadiusSimulator"
-              NetworkDeviceName: "luis_mac_radius_sim"
-              Port: "tty2"
-              Privilege-Level: 15
-              Remote-Address: "10.99.0.200"
-              RequestLatency: 1
-              SelectedAccessService: "Default Device Admin"
-              Service: "Login"
-              Service-Argument: "shell"
-              Step:
-                - 13006
-                - 15049
-                - 15008
-                - 13035
-              TotalAuthenLatency: 2714133164
-              Type: "Accounting"
-              User: "luis_test"
-            category: "TACACS_Accounting"
-            message_class: "Tacacs-Accounting"
-            message_code: "3300"
-            message_id: "0000000224"
-            message_text: "TACACS+ Accounting with Command"
-            response:
-              AcctReply-Status: "Success"
-            segment:
-              number: 0
-              total: 1
-            sequence: "0000001782"
-            severity: "NOTICE"
-            site:
-              level1: "Spain"
-              level2: "Madrid"
-            tacacs:
-              command: "show running-config"
-              command_name: "show"
+        cisco_ise:
+          attributes:
+            AVPair=priv-lvl: 15
+            AVPair=stop_time: 1793715656
+            AVPair=task_id: 156541
+            AVPair=timezone: "UTC"
+            AcctRequest-Flags: "Stop"
+            AcsSessionID: "ise-1/583071475/66"
+            Authen-Method: "TacacsPlus"
+            CPMSessionID: "1874867130192.168.254.1152215Accounting1874867130"
+            ClientLatency: 2714133163
+            CmdSet: "CmdAV=show running-config <cr>"
+            ConfigVersionId: 138
+            DeviceIPAddress: "192.168.254.11"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            Location: "Location#All Locations#Spain#Madrid"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            Port: "tty2"
+            Privilege-Level: 15
+            Remote-Address: "10.99.0.200"
+            RequestLatency: 1
+            SelectedAccessService: "Default Device Admin"
+            Service: "Login"
+            Service-Argument: "shell"
+            Step:
+              - 13006
+              - 15049
+              - 15008
+              - 13035
+            TotalAuthenLatency: 2714133164
+            Type: "Accounting"
+            User: "luis_test"
+          category: "TACACS_Accounting"
+          message_class: "Tacacs-Accounting"
+          message_code: "3300"
+          message_id: "0000000224"
+          message_text: "TACACS+ Accounting with Command"
+          node: "ise-1"
+          response:
+            AcctReply-Status: "Success"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001782"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
+          tacacs:
+            command: "show running-config"
+            command_name: "show"
         evt:
           name: "Tacacs-Accounting"
         network:
@@ -725,85 +725,85 @@ tests:
   - sample: "<181>Nov  3 14:18:18 ise-1 CISE_Failed_Attempts 0000000227 1 0 2026-11-03 14:18:18.950 +00:00 0000001815 5402 NOTICE Failed-Attempt: Command Authorization failed, ConfigVersionId=138, Device IP Address=192.168.254.11, Device Port=52220, DestinationIPAddress=10.10.20.77, DestinationPort=49, UserName=luis_test, CmdSet=[ CmdAV=username CmdArgAV=backdoor CmdArgAV=privilege CmdArgAV=15 CmdArgAV=secret CmdArgAV=0 CmdArgAV=x CmdArgAV=<cr> ], Protocol=Tacacs, NetworkDeviceName=luis_mac_radius_sim, Type=Authorization, Privilege-Level=15, Authen-Type=ASCII, Service=Login, User=luis_test, Port=tty2, Remote-Address=10.99.0.200, Authen-Method=TacacsPlus, Service-Argument=shell, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, AcsSessionID=ise-1/583071475/69, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=Lookup, SelectedAccessService=Default Device Admin, SelectedCommandSet=luis_permit_but_username, RequestLatency=8, IdentityGroup=User Identity Groups:Employee, FailureReason=13025 Command failed to match a Permit rule, Step=13005, Step=15049, Step=15008, Step=15041, Step=15048, Step=15013, Step=24210, Step=24212, Step=22037, Step=15036, Step=15018, Step=13025, Step=13034, SelectedAuthenticationIdentityStores=Internal Users, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, AuthorizationPolicyMatchedRule=luis_tacacs_authz, UserType=User, CPMSessionID=3802611232192.168.254.1152220Authorization3802611232, ISEPolicySetName=Default, IdentitySelectionMatchedRule=luis_tacacs_admin, StepData=4= Network Access.UserName, StepData=5=Internal Users, TotalAuthenLatency=2714136518, ClientLatency=2714136510, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, EnableFlag=Enabled, Response={AuthenticationResult=Passed; AuthorizationFailureReason=CmdDidNotMatchPermitRule; Author-Reply-Status=Fail; },"
     result:
       custom:
-        cisco:
-          ise:
-            attributes:
-              AcsSessionID: "ise-1/583071475/69"
-              Authen-Method: "TacacsPlus"
-              Authen-Type: "ASCII"
-              AuthenticationIdentityStore: "Internal Users"
-              AuthenticationMethod: "Lookup"
-              AuthorizationPolicyMatchedRule: "luis_tacacs_authz"
-              CPMSessionID: "3802611232192.168.254.1152220Authorization3802611232"
-              ClientLatency: 2714136510
-              CmdSet: "CmdAV=username CmdArgAV=backdoor CmdArgAV=privilege CmdArgAV=15 CmdArgAV=secret CmdArgAV=0 CmdArgAV=x CmdArgAV=<cr>"
-              ConfigVersionId: 138
-              DestinationIPAddress: "10.10.20.77"
-              DestinationPort: 49
-              DeviceIPAddress: "192.168.254.11"
-              EnableFlag: "Enabled"
-              FailureReason: "13025 Command failed to match a Permit rule"
-              IPSEC: "IPSEC#Is IPSEC Device#No"
-              ISEPolicySetName: "Default"
-              IdentityGroup: "User Identity Groups:Employee"
-              IdentitySelectionMatchedRule: "luis_tacacs_admin"
-              Location: "Location#All Locations#Spain#Madrid"
-              NetworkDeviceGroups:
-                - "IPSEC#Is IPSEC Device#No"
-                - "Location#All Locations#Spain#Madrid"
-                - "Device Type#All Device Types#RadiusSimulator"
-              NetworkDeviceName: "luis_mac_radius_sim"
-              NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
-              Port: "tty2"
-              Privilege-Level: 15
-              Protocol: "Tacacs"
-              Remote-Address: "10.99.0.200"
-              RequestLatency: 8
-              SelectedAccessService: "Default Device Admin"
-              SelectedAuthenticationIdentityStores: "Internal Users"
-              SelectedCommandSet: "luis_permit_but_username"
-              Service: "Login"
-              Service-Argument: "shell"
-              Step:
-                - 13005
-                - 15049
-                - 15008
-                - 15041
-                - 15048
-                - 15013
-                - 24210
-                - 24212
-                - 22037
-                - 15036
-                - 15018
-                - 13025
-                - 13034
-              StepData=4: "Network Access.UserName"
-              StepData=5: "Internal Users"
-              TotalAuthenLatency: 2714136518
-              Type: "Authorization"
-              User: "luis_test"
-              UserName: "luis_test"
-              UserType: "User"
-            category: "Failed_Attempts"
-            message_class: "Failed-Attempt"
-            message_code: "5402"
-            message_id: "0000000227"
-            message_text: "Command Authorization failed"
-            response:
-              AuthenticationResult: "Passed"
-              Author-Reply-Status: "Fail"
-              AuthorizationFailureReason: "CmdDidNotMatchPermitRule"
-            segment:
-              number: 0
-              total: 1
-            sequence: "0000001815"
-            severity: "NOTICE"
-            site:
-              level1: "Spain"
-              level2: "Madrid"
-            tacacs:
-              command_name: "username"
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/69"
+            Authen-Method: "TacacsPlus"
+            Authen-Type: "ASCII"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "Lookup"
+            AuthorizationPolicyMatchedRule: "luis_tacacs_authz"
+            CPMSessionID: "3802611232192.168.254.1152220Authorization3802611232"
+            ClientLatency: 2714136510
+            CmdSet: "CmdAV=username CmdArgAV=backdoor CmdArgAV=privilege CmdArgAV=15 CmdArgAV=secret CmdArgAV=0 CmdArgAV=x CmdArgAV=<cr>"
+            ConfigVersionId: 138
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 49
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            FailureReason: "13025 Command failed to match a Permit rule"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentitySelectionMatchedRule: "luis_tacacs_admin"
+            Location: "Location#All Locations#Spain#Madrid"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            Port: "tty2"
+            Privilege-Level: 15
+            Protocol: "Tacacs"
+            Remote-Address: "10.99.0.200"
+            RequestLatency: 8
+            SelectedAccessService: "Default Device Admin"
+            SelectedAuthenticationIdentityStores: "Internal Users"
+            SelectedCommandSet: "luis_permit_but_username"
+            Service: "Login"
+            Service-Argument: "shell"
+            Step:
+              - 13005
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 15013
+              - 24210
+              - 24212
+              - 22037
+              - 15036
+              - 15018
+              - 13025
+              - 13034
+            StepData=4: "Network Access.UserName"
+            StepData=5: "Internal Users"
+            TotalAuthenLatency: 2714136518
+            Type: "Authorization"
+            User: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+          category: "Failed_Attempts"
+          message_class: "Failed-Attempt"
+          message_code: "5402"
+          message_id: "0000000227"
+          message_text: "Command Authorization failed"
+          node: "ise-1"
+          response:
+            AuthenticationResult: "Passed"
+            Author-Reply-Status: "Fail"
+            AuthorizationFailureReason: "CmdDidNotMatchPermitRule"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001815"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
+          tacacs:
+            command_name: "username"
         evt:
           name: "Failed-Attempt"
           outcome: "failure"
@@ -824,25 +824,25 @@ tests:
   - sample: "<181>Nov  3 14:18:38 ise-1 CISE_Administrative_and_Operational_Audit 0000000233 1 0 2026-11-03 14:18:38.339 +00:00 0000001899 60115 NOTICE Administrator-Login: A CLI user has logged in from SSH, ConfigVersionId=138, AdminInterface=CLI, AdminIPAddress=192.168.254.11, AdminName=admin, OperationMessageText=User 'admin' logged in to CLI SSH session from SSH client IP: 192.168.254.11, AcsInstance=ise-1,"
     result:
       custom:
-        cisco:
-          ise:
-            attributes:
-              AcsInstance: "ise-1"
-              AdminIPAddress: "192.168.254.11"
-              AdminInterface: "CLI"
-              AdminName: "admin"
-              ConfigVersionId: 138
-              OperationMessageText: "User 'admin' logged in to CLI SSH session from SSH client IP: 192.168.254.11"
-            category: "Administrative_and_Operational_Audit"
-            message_class: "Administrator-Login"
-            message_code: "60115"
-            message_id: "0000000233"
-            message_text: "A CLI user has logged in from SSH"
-            segment:
-              number: 0
-              total: 1
-            sequence: "0000001899"
-            severity: "NOTICE"
+        cisco_ise:
+          attributes:
+            AcsInstance: "ise-1"
+            AdminIPAddress: "192.168.254.11"
+            AdminInterface: "CLI"
+            AdminName: "admin"
+            ConfigVersionId: 138
+            OperationMessageText: "User 'admin' logged in to CLI SSH session from SSH client IP: 192.168.254.11"
+          category: "Administrative_and_Operational_Audit"
+          message_class: "Administrator-Login"
+          message_code: "60115"
+          message_id: "0000000233"
+          message_text: "A CLI user has logged in from SSH"
+          node: "ise-1"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001899"
+          severity: "NOTICE"
         evt:
           name: "Administrator-Login"
           outcome: "success"
@@ -863,26 +863,26 @@ tests:
   - sample: "<181>Nov  3 13:27:36 ise-1 CISE_Administrative_and_Operational_Audit 0000000141 1 0 2026-11-03 13:27:36.437 +00:00 0000001600 52000 NOTICE Configuration-Changes: Added configuration, ConfigVersionId=124, AdminInterface=CLI, ConfigChangeData=object created: Value=Docker ise-prometheus-container MemUsagePerLimitPercentage limit is exceeded( Limit: 1.56% \\, Actual: 9.31% ), ObjectType=DockerMetrics, ObjectName=DockerMetrics, Component=System Configuration, ObjectInternalID=unknown,"
     result:
       custom:
-        cisco:
-          ise:
-            attributes:
-              AdminInterface: "CLI"
-              Component: "System Configuration"
-              ConfigChangeData: "object created: Value=Docker ise-prometheus-container MemUsagePerLimitPercentage limit is exceeded( Limit: 1.56% \\, Actual: 9.31% )"
-              ConfigVersionId: 124
-              ObjectInternalID: "unknown"
-              ObjectName: "DockerMetrics"
-              ObjectType: "DockerMetrics"
-            category: "Administrative_and_Operational_Audit"
-            message_class: "Configuration-Changes"
-            message_code: "52000"
-            message_id: "0000000141"
-            message_text: "Added configuration"
-            segment:
-              number: 0
-              total: 1
-            sequence: "0000001600"
-            severity: "NOTICE"
+        cisco_ise:
+          attributes:
+            AdminInterface: "CLI"
+            Component: "System Configuration"
+            ConfigChangeData: "object created: Value=Docker ise-prometheus-container MemUsagePerLimitPercentage limit is exceeded( Limit: 1.56% \\, Actual: 9.31% )"
+            ConfigVersionId: 124
+            ObjectInternalID: "unknown"
+            ObjectName: "DockerMetrics"
+            ObjectType: "DockerMetrics"
+          category: "Administrative_and_Operational_Audit"
+          message_class: "Configuration-Changes"
+          message_code: "52000"
+          message_id: "0000000141"
+          message_text: "Added configuration"
+          node: "ise-1"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001600"
+          severity: "NOTICE"
         evt:
           name: "Configuration-Changes"
         syslog:
@@ -897,17 +897,16 @@ tests:
   - sample: "<181>Nov  3 11:57:33 ise-1 CISE_Passed_Authentications 0000000001 3 1  IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test,"
     result:
       custom:
-        cisco:
-          ise:
-            category: "Passed_Authentications"
-            message_id: "0000000001"
-            segment:
-              number: 1
-              total: 3
+        cisco_ise:
+          category: "Passed_Authentications"
+          message_id: "0000000001"
+          node: "ise-1"
+          segment:
+            number: 1
+            total: 3
         syslog:
           hostname: "ise-1"
           priority: 181
       message: " IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test,"
-      status: "info"
       tags:
         - "source:LOGS_SOURCE"

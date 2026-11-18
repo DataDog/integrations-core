@@ -2,7 +2,7 @@
 
 [Cisco Identity Services Engine (ISE)][4] is a network access control platform. It decides whether users and devices may join the wired, wireless, or VPN network and with which access (VLAN, downloadable ACL, Security Group Tag), and it authenticates network administrators on switches and routers through TACACS+.
 
-Integrate Cisco ISE with Datadog to search and analyze ISE's syslog messages: RADIUS authentications and failures with the user, endpoint MAC address, network device, port, SSID, and site; RADIUS accounting, which links endpoint IP addresses to users and MAC addresses; TACACS+ logins and commands; ISE administrator logins and configuration changes; profiling; guest and My Devices portal activity. Datadog uses its built-in log pipeline to parse and enrich these logs into Datadog standard attributes and `cisco.ise.*` attributes. The logs can also be used by Cloud SIEM detection rules.
+Integrate Cisco ISE with Datadog to search and analyze ISE's syslog messages: RADIUS authentications and failures with the user, endpoint MAC address, network device, port, SSID, and site; RADIUS accounting, which links endpoint IP addresses to users and MAC addresses; TACACS+ logins and commands; ISE administrator logins and configuration changes; profiling; guest and My Devices portal activity. Datadog uses its built-in log pipeline to parse and enrich these logs into Datadog standard attributes and `cisco_ise.*` attributes. The logs can also be used by Cloud SIEM detection rules.
 
 **Disclaimer**: Your use of this integration, which may collect data that includes personal information, is subject to your agreements with Datadog. Cisco is not responsible for the privacy, security or integrity of any end-user information, including personal data, transmitted through your use of the integration.
 
@@ -82,7 +82,7 @@ ISE only sends the categories attached to a target. Go to **Administration** > *
 #### Recommended network device and ISE settings
 
 - **RADIUS accounting, including interim updates, on the switches and wireless controllers.** The endpoint IP address is only reported after DHCP, in accounting messages, so the IP address to user and MAC address mapping depends on it.
-- **Network device Location groups** (**Administration** > **Network Resources** > **Network Device Groups**). The device's location path, such as `All Locations#Spain#Madrid`, is the site in the logs, split into `cisco.ise.site.level1` to `level5` (without the `All Locations` root).
+- **Network device Location groups** (**Administration** > **Network Resources** > **Network Device Groups**). The device's location path, such as `All Locations#Spain#Madrid`, is the site in the logs, split into `cisco_ise.site.level1` to `level5` (without the `All Locations` root).
 - Leave ISE's suppression of repeated events on (the default) to avoid most repeated re-authentications.
 
 #### Optional: drop noisy messages in the Agent
@@ -106,11 +106,11 @@ ISE logs some messages that rarely matter, such as `52000` configuration changes
 
 The Cisco ISE integration collects ISE's syslog messages and parses them with the `cisco-ise` log pipeline:
 
-- The syslog header gives the ISE node (`syslog.hostname`), the Logging Category (`cisco.ise.category`), and the message ID and segment numbers.
-- The message body gives the event time with milliseconds, the message code (`cisco.ise.message_code`, for example `5200` for a passed authentication), the severity (the log status), and ISE's own fields.
-<!-- RFC Q2 (proposed answer): ISE's key names kept under cisco.ise.attributes.*, site split into cisco.ise.site.level1..5 (RFC v11). -->
-- ISE's fields keep their names under `cisco.ise.attributes.*` (for example `cisco.ise.attributes.NetworkDeviceName`, `cisco.ise.attributes.FailureReason`), and the authorization result `Response={...}` is parsed under `cisco.ise.response.*`.
-- Derived fields: `evt.outcome` (`success` or `failure`, from the message code), the site levels, the normalized endpoint MAC address (`cisco.ise.endpoint.mac`), and the TACACS+ command (`cisco.ise.tacacs.command`, `cisco.ise.tacacs.command_name`).
+- The syslog header gives the ISE node (`syslog.hostname`, also copied to `cisco_ise.node`), the Logging Category (`cisco_ise.category`), and the message ID and segment numbers.
+- The message body gives the event time with milliseconds, the message code (`cisco_ise.message_code`, for example `5200` for a passed authentication), the severity (the log status), and ISE's own fields.
+<!-- RFC Q2 (proposed answer): ISE key names kept under cisco_ise.attributes.*, site split into cisco_ise.site.level1..5 (RFC v11). -->
+- ISE's fields keep their names under `cisco_ise.attributes.*` (for example `cisco_ise.attributes.NetworkDeviceName`, `cisco_ise.attributes.FailureReason`), and the authorization result `Response={...}` is parsed under `cisco_ise.response.*`.
+- Derived fields: `evt.outcome` (`success` or `failure`, from the message code), the site levels, the normalized endpoint MAC address (`cisco_ise.endpoint.mac`), and the TACACS+ command (`cisco_ise.tacacs.command`, `cisco_ise.tacacs.command_name`).
 - Standard attributes: `usr.name`, `network.client.ip`, `evt.name`, and `evt.outcome`.
 
 ISE logs unknown users as `INVALID`, so failed logins by non-existing users are grouped under `usr.name:INVALID`.
@@ -134,7 +134,7 @@ The Cisco ISE integration does not include any events.
 
 **Fields are missing, or many logs have only the header parsed:**
 
-The Remote Logging Target's **Maximum Length** is lower than 8192. ISE splits longer events into several syslog messages (`@cisco.ise.segment.number:>0`), and only the first one is parsed. Set **Maximum Length** to 8192.
+The Remote Logging Target's **Maximum Length** is lower than 8192. ISE splits longer events into several syslog messages (`@cisco_ise.segment.number:>0`), and only the first one is parsed. Set **Maximum Length** to 8192.
 
 **Permission denied while port binding:**
 
