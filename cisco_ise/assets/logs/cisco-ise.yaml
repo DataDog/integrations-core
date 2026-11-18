@@ -665,18 +665,6 @@ pipeline:
             supportRules: ""
             matchRules: command_name %{notSpace:cisco_ise.tacacs.command_name}%{data}
         - type: attribute-remapper
-          name: Map user to usr.name
-          enabled: true
-          sources:
-            - cisco_ise.attributes.UserName
-            - cisco_ise.attributes.AdminName
-            - cisco_ise.attributes.User
-          sourceType: attribute
-          target: usr.name
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: false
-        - type: attribute-remapper
           name: Map client IP to network.client.ip
           enabled: true
           sources:
@@ -783,3 +771,26 @@ pipeline:
             supportRules: ""
             matchRules: >-
               endpoint_property %{data}, EndpointProperty=%{data:cisco_ise.endpoint.properties}, %{regex("[A-Za-z-]+")}=%{data}
+    - type: pipeline
+      name: ISE user
+      enabled: true
+      filter:
+        query: "@cisco_ise.segment.number:0 -@cisco_ise.attributes.UserName:#ACSACL#*"
+      processors:
+        - type: date-remapper
+          name: Define timestamp
+          enabled: true
+          sources:
+            - timestamp
+        - type: attribute-remapper
+          name: Map user to usr.name
+          enabled: true
+          sources:
+            - cisco_ise.attributes.UserName
+            - cisco_ise.attributes.AdminName
+            - cisco_ise.attributes.User
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false

@@ -2102,8 +2102,6 @@ tests:
           priority: 181
           severity: "notice"
         timestamp: 1794475814113
-        usr:
-          name: "#ACSACL#-IP-LUIS_DACL-6af5820f"
       message: "2026-11-12 09:30:14.113 +00:00 0000054922 5232 NOTICE Passed-Authentication: DACL Download Succeeded, ConfigVersionId=430, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=#ACSACL#-IP-LUIS_DACL-6af5820f, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=#ACSACL#-IP-LUIS_DACL-6af5820f, NAS-Identifier=luis-eap-nad, cisco-av-pair=aaa:service=ip_download, cisco-av-pair=aaa:event=acl-download, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583701566/18, RequestLatency=1, Step=11001, Step=11017, Step=11117, Step=11002, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, CPMSessionID=0a0a144dVfbrdB_wX5WHh4TSdkqrbkhCpyYoXeYIugbCMEkoVp8, TotalAuthenLatency=1, ClientLatency=0, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Response={Class=CACS:0a0a144dVfbrdB_wX5WHh4TSdkqrbkhCpyYoXeYIugbCMEkoVp8:ise-1/583701566/18; cisco-av-pair=ip:inacl#1=permit udp any any eq 53; cisco-av-pair=ip:inacl#2=permit tcp any any eq 443; cisco-av-pair=ip:inacl#3=deny ip any any; },"
       status: "notice"
       tags:
