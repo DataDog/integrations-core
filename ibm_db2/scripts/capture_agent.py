@@ -39,6 +39,8 @@ def decode_events(body: bytes, encoding: str) -> list[dict]:
     if len(body) > MAX_BODY_BYTES:
         raise ValueError('Decoded body exceeds the capture limit')
     events = json.loads(body)
+    if events == {}:  # The Agent sends an empty object to check HTTP connectivity.
+        return []
     if not isinstance(events, list) or not all(isinstance(event, dict) for event in events):
         raise ValueError('Expected an Agent DBM batch of JSON objects')
     return events
@@ -72,8 +74,9 @@ def capture_server(output: Path, port: int = 19731) -> ThreadingHTTPServer:
                 if path in STREAM_PATHS.values():
                     events = decode_events(body, self.headers.get('Content-Encoding', '').strip().lower())
                     record = {'received_at': time.time(), 'path': path, 'events': events}
-                    with lock, output.open('a', encoding='utf-8') as capture:
-                        capture.write(json.dumps(record) + '\n')
+                    if events:
+                        with lock, output.open('a', encoding='utf-8') as capture:
+                            capture.write(json.dumps(record) + '\n')
             except (ValueError, OSError, subprocess.SubprocessError, EOFError, zlib.error):
                 self._respond(400)
                 return

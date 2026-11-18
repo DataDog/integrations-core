@@ -87,7 +87,8 @@ def test_readback_separates_streams(recorder: tuple[ThreadingHTTPServer, Path]):
 
 
 @pytest.mark.parametrize(
-    'body, encoding', [(b'invalid', ''), (b'{}', ''), (b'[1]', ''), (b'invalid', 'gzip'), (b'[]', 'unknown')]
+    'body, encoding',
+    [(b'invalid', ''), (b'{"unexpected":true}', ''), (b'[1]', ''), (b'invalid', 'gzip'), (b'[]', 'unknown')],
 )
 def test_invalid_request_is_not_acknowledged(recorder: tuple[ThreadingHTTPServer, Path], body: bytes, encoding: str):
     """Bad compression or batch shape must fail visibly instead of producing a misleading accepted capture."""
@@ -102,6 +103,8 @@ def test_agent_auxiliary_requests(recorder: tuple[ThreadingHTTPServer, Path]):
     status, body = request(server, 'GET', '/api/v1/validate?api_key=QUERY_SECRET')
     assert status == 200
     assert json.loads(body) == {'valid': True}
+    assert request(server, 'POST', '/api/v2/dbmactivity', b'{}')[0] == 202
+    assert request(server, 'POST', '/api/v2/dbmactivity', b'[]')[0] == 202
     assert request(server, 'POST', '/api/v2/series', b'protobuf', 'zstd')[0] == 202
     assert not output.exists()
 
