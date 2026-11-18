@@ -23,7 +23,7 @@ them from git, and `../changes.py` decides which two commits a CI run compares.
 | --- | --- |
 | `build.py` | Composes the stages and adapts concrete `Repository`/`Integration` objects to them. The package's public entry point. |
 | `hatch_environments.py` | Reads and validates static Hatch environment settings and expands candidate environments. |
-| `targets.py` | Maps changed files to affected target names through ordered, independent rules. `AllTargetsRule` is the exception: it ignores the change set, for a run that tests everything. |
+| `targets.py` | Maps changed files to affected target names through ordered, independent rules. `AllTargetsRule` and `ExplicitTargetsRule` are the exceptions: they ignore the change set, for a run that tests everything or the targets it was given. |
 | `units.py` | Expands targets into `TestUnit` values: one target, one platform, one environment. |
 | `jobs.py` | Turns each unit into the concrete `BatchJob` the workflow runs. |
 | `strategy/` | Packs jobs into capacity-bounded groups. `types.py` is the contract, `default.py` the implementation. |
@@ -32,15 +32,7 @@ them from git, and `../changes.py` decides which two commits a CI run compares.
 
 The `BatchJob` type itself lives in `../messages.py`, alongside the other Dispatcher messages.
 
-## Relationship to `ci_matrix.py`
-
-The implementation this package shadows is `ddev/src/ddev/utils/scripts/ci_matrix.py`, and that is
-still the one CI uses. The two will run side by side until the Dispatcher takes over, so a
-behavioural change here that CI does not make is a divergence, not an improvement.
-
-Some values are duplicated between them on purpose: `ci_matrix.py` must run standalone with no
-dependencies, so it cannot import from this package. `PLATFORMS` and the path patterns are the
-copies that matter. Change one and change the other.
+## Environment discovery
 
 Environment discovery uses an injected `EnvironmentProvider` defined in `units.py`.
 The `HatchEnvironmentProvider` in `hatch_environments.py` reads `hatch.toml` without invoking Hatch
@@ -73,6 +65,11 @@ callable produced it. Do not move a check into a strategy.
 of guessing at what it probably meant: a Python version that is not `major.minor`, an unknown or
 repeated platform name in a CI override, or a target reaching expansion with no environments all
 raise `PlanningError`. The alternative is a plan that looks fine and tests the wrong thing.
+
+**What the caller named is never dropped quietly.** A target the change set merely implicated may be
+skipped with a warning, but one the caller asked for by name must be planned or raise
+`PlanningError` — a CI exclusion and an empty environment set both qualify. The same goes for an
+exclusion matching no target. Silently planning nothing reports success for tests that never ran.
 
 Generated or advertised data is different. `manifest.json` lists platforms ddev has no runner for,
 such as AIX, so the supported OS list is filtered rather than parsed. Failing on it would turn

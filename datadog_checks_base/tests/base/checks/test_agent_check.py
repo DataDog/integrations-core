@@ -703,6 +703,33 @@ class TestMetrics:
             check.gauge(metric_name, '85k')
         aggregator.assert_metric(metric_name, count=0)
 
+    def test_histogram_bucket_multiple_buckets(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+
+        check.submit_histogram_bucket('histogram', 3, 0, 1, True, 'host', ['foo:bar'])
+        check.submit_histogram_bucket('histogram', 4, 1, 2, True, 'host', ['foo:bar'], multiple_buckets=True)
+
+        aggregator.assert_histogram_bucket(
+            'test.histogram', 3, 0, 1, True, 'host', ['foo:bar'], count=1, multiple_buckets=False
+        )
+        aggregator.assert_histogram_bucket(
+            'test.histogram', 4, 1, 2, True, 'host', ['foo:bar'], count=1, multiple_buckets=True
+        )
+
+    def test_multiple_buckets_support_ignores_discovery_proxy(self, monkeypatch):
+        from datadog_checks.base.stubs.aggregator import AggregatorStub
+        from datadog_checks.base.utils.discovery.probe import _suppress_discovery_side_effects
+
+        monkeypatch.delattr(AggregatorStub, 'submit_histogram_bucket_multi')
+        check = AgentCheck()
+
+        with _suppress_discovery_side_effects(check):
+            assert hasattr(check._aggregator(), 'submit_histogram_bucket_multi')
+            assert check.multiple_histogram_buckets_unsupported_reason() == (
+                'is not supported by this Agent version, upgrade the Agent to use it'
+            )
+
 
 class TestEvents:
     def test_valid_event(self, aggregator):

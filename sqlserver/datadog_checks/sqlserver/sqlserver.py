@@ -254,6 +254,9 @@ class SQLServer(DatabaseCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
+    def database_monitoring_column_statistics(self, raw_event: str):
+        self.event_platform_event(raw_event, "dbm-column-statistics")
+
     def _submit_initialization_health_event(self):
         try:
             # Handle the config validation result after we've set tags so those tags are included in the health event
@@ -1206,7 +1209,7 @@ class SQLServer(DatabaseCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 "dbms_version": self.dbms_version,
                 "integration_version": __version__,
-                "tags": self.tag_manager.get_tags(),
+                "tags": self.tag_manager.get_tags(include_internal=False, include_db=False),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {

@@ -40,8 +40,16 @@ def instance_collect_counters_with_distributions():
     return False
 
 
+def instance_collect_follower_metrics():
+    return False
+
+
 def instance_collect_histogram_buckets():
     return True
+
+
+def instance_collect_histograms_as_distributions():
+    return False
 
 
 def instance_collect_workload_events():

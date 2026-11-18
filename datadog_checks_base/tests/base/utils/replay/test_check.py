@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import logging
 
 import pytest
@@ -107,3 +108,19 @@ def test_replay_timeout(caplog, dd_run_check):
         dd_run_check(check)
 
     assert 'Check timed out' in caplog.text
+
+
+class FailingReplayCheck(AgentCheck):
+    __NAMESPACE__ = 'failing_replay'
+
+    def check(self, _):
+        raise Exception('Failure in the isolated process')
+
+
+def test_replay_reports_child_error():
+    check = FailingReplayCheck('failing_replay', {}, [{'process_isolation': True}])
+
+    error = json.loads(check.run())[0]
+
+    assert error['message'] == 'Failure in the isolated process'
+    assert 'in check' in error['traceback']

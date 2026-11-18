@@ -73,6 +73,9 @@ class _DiscoveryAggregatorProxy:
     def submit_histogram_bucket(self, *args: Any, **kwargs: Any) -> None:
         self._stats.metric_count += 1
 
+    def submit_histogram_bucket_multi(self, *args: Any, **kwargs: Any) -> None:
+        self._stats.metric_count += 1
+
     def submit_event(self, *args: Any, **kwargs: Any) -> None:
         pass
 

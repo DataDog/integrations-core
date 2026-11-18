@@ -44,6 +44,10 @@ def instance_collect_histogram_buckets():
     return True
 
 
+def instance_collect_histograms_as_distributions():
+    return False
+
+
 def instance_collect_openmetrics():
     return True
 
@@ -85,7 +89,7 @@ def instance_genresources_repository_scrape_interval_seconds():
 
 
 def instance_genresources_stream_applications_enabled():
-    return True
+    return False
 
 
 def instance_genresources_stream_backoff_max_seconds():

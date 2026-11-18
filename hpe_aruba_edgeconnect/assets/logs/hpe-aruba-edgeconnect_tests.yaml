@@ -1,0 +1,188 @@
+id: "hpe-aruba-edgeconnect"
+tests:
+ -
+  sample: "May 21 08:17:24 2026 SanFranSP02 tunneld[26132]: CPU 1 TID 1140410927240640: [tunneld.INFO]: cpkt_dpc_get_average_tunnel_stats: tunnel_25(tid=26)i:4 Remote_wrx_pkt(168), remote_postfec_loss(0)"
+  result:
+    custom:
+      cpu: 1
+      function:
+        name: "cpkt_dpc_get_average_tunnel_stats"
+      host_name: "SanFranSP02"
+      level: "INFO"
+      process:
+        component: "tunneld"
+        pid: 26132
+      thread:
+        tid: 1140410927240640
+      timestamp: 1779351444000
+    message: "cpkt_dpc_get_average_tunnel_stats: tunnel_25(tid=26)i:4 Remote_wrx_pkt(168), remote_postfec_loss(0)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1779351444000
+ -
+  sample: "May 21 08:24:18 2026 SanFranSP02 mgmtd[25974]: CPU 0 TID 139724457364416: [mgmtd.INFO]: Handling ACTION request"
+  result:
+    custom:
+      cpu: 0
+      host_name: "SanFranSP02"
+      level: "INFO"
+      process:
+        component: "mgmtd"
+        pid: 25974
+      thread:
+        tid: 139724457364416
+      timestamp: 1779351858000
+    message: "Handling ACTION request"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1779351858000
+ -
+  sample: "May 21 09:45:48 2026 SanFranSP02 mgmtd[25974]: nodejs@system action /cn/st2/action/orchestratorliveness succeeded params:orchestrator_state="
+  result:
+    custom:
+      host_name: "SanFranSP02"
+      process:
+        component: "mgmtd"
+        pid: 25974
+      timestamp: 1779356748000
+    message: "nodejs@system action /cn/st2/action/orchestratorliveness succeeded params:orchestrator_state="
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1779356748000
+ -
+  sample: "May 21 10:03:01 2026 SanFranSP02 syslogd 1.5.1: restart."
+  result:
+    custom:
+      host_name: "SanFranSP02"
+      timestamp: 1779357781000
+    message: "syslogd 1.5.1: restart."
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1779357781000
+ -
+  sample: "Jun  2 10:11:47 2026 SanFranSP02 pm[25282]: CPU 1 TID 140014226732928: [pm.INFO]: Couldn't get PID in /var/run/routerd.pid"
+  result:
+    custom:
+      cpu: 1
+      host_name: "SanFranSP02"
+      level: "INFO"
+      process:
+        component: "pm"
+        pid: 25282
+      thread:
+        tid: 140014226732928
+      timestamp: 1780395107000
+    message: "Couldn't get PID in /var/run/routerd.pid"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1780395107000
+ -
+  sample: "May 21 08:17:24 2026 edge-01 tunneld[26132]: CPU 1 TID 1140410927240640: [tunneld.INFO]: cpkt_dpc_get_average_tunnel_stats: tunnel_25(tid=26)i:4 Remote_wrx_pkt(168), remote_postfec_loss(0)"
+  result:
+    custom:
+      cpu: 1
+      function:
+        name: "cpkt_dpc_get_average_tunnel_stats"
+      host_name: "edge-01"
+      level: "INFO"
+      process:
+        component: "tunneld"
+        pid: 26132
+      thread:
+        tid: 1140410927240640
+      timestamp: 1779351444000
+    message: "cpkt_dpc_get_average_tunnel_stats: tunnel_25(tid=26)i:4 Remote_wrx_pkt(168), remote_postfec_loss(0)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1779351444000
+ -
+  sample: "Jun  2 10:11:47 2026 sp02.corp pm[25282]: CPU 1 TID 140014226732928: [pm.INFO]: Couldn't get PID in /var/run/routerd.pid"
+  result:
+    custom:
+      cpu: 1
+      host_name: "sp02.corp"
+      level: "INFO"
+      process:
+        component: "pm"
+        pid: 25282
+      thread:
+        tid: 140014226732928
+      timestamp: 1780395107000
+    message: "Couldn't get PID in /var/run/routerd.pid"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1780395107000
+ -
+  sample: "May 21 09:38:23 2026 sp02.corp mdreq[7767]: [mdreq.DEBUG]: session 1: finished sending frame 2000003 on fd 7 of 90 bytes"
+  result:
+    custom:
+      function:
+        name: "session 1"
+      host_name: "sp02.corp"
+      level: "DEBUG"
+      process:
+        component: "mdreq"
+        pid: 7767
+      timestamp: 1779356303000
+    message: "session 1: finished sending frame 2000003 on fd 7 of 90 bytes"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1779356303000
+ -
+  sample: "Jun  2 09:38:23 2026 edge-01 mdreq[7767]: [mdreq.DEBUG]: session 1: finished sending frame 2000003 on fd 7 of 90 bytes"
+  result:
+    custom:
+      function:
+        name: "session 1"
+      host_name: "edge-01"
+      level: "DEBUG"
+      process:
+        component: "mdreq"
+        pid: 7767
+      timestamp: 1780393103000
+    message: "session 1: finished sending frame 2000003 on fd 7 of 90 bytes"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1780393103000
+ -
+  sample: "May 21 09:45:48 2026 edge-01 mgmtd[25974]: nodejs@system action /cn/st2/action/orchestratorliveness succeeded params:orchestrator_state="
+  result:
+    custom:
+      host_name: "edge-01"
+      process:
+        component: "mgmtd"
+        pid: 25974
+      timestamp: 1779356748000
+    message: "nodejs@system action /cn/st2/action/orchestratorliveness succeeded params:orchestrator_state="
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1779356748000
+ -
+  sample: "May 21 10:03:01 2026 sp02.corp syslogd 1.5.1: restart."
+  result:
+    custom:
+      host_name: "sp02.corp"
+      timestamp: 1779357781000
+    message: "syslogd 1.5.1: restart."
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1779357781000
+ -
+  sample: "Jun  2 10:03:01 2026 edge-01 syslogd 1.5.1: restart."
+  result:
+    custom:
+      host_name: "edge-01"
+      timestamp: 1780394581000
+    message: "syslogd 1.5.1: restart."
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1780394581000
+
+

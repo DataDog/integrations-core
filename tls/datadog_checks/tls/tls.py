@@ -101,11 +101,11 @@ class TLSCheck(AgentCheck):
         # Assign lazily since these aren't used by both collection methods
         self._validation_data = None
 
-        # Only fetch intermediate certs from the indicated URIs occasionally
+        # Map each URI to its fetch timestamp and certificate ID for expiry of downloaded trust.
         self._intermediate_cert_uri_cache = {}
 
-        # Only load intermediate certs once
-        self._intermediate_cert_id_cache = set()
+        # Retain downloaded intermediates so refreshed TLS contexts keep the same CA trust.
+        self._intermediate_cert_cache = {}
 
         local_cert_path = instances[0].get('local_cert_path', '')
 

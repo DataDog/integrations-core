@@ -1,0 +1,364 @@
+# HELP close_session_latency_milliseconds Close session latency in milliseconds, including all plugins, as a gauge
+# TYPE close_session_latency_milliseconds gauge
+close_session_latency_milliseconds 0
+# HELP e2e_scheduling_latency_milliseconds E2e scheduling latency in milliseconds (scheduling algorithm + binding), as a gauge
+# TYPE e2e_scheduling_latency_milliseconds gauge
+e2e_scheduling_latency_milliseconds 0
+# HELP go_gc_duration_seconds A summary of the wall-time pause (stop-the-world) duration in garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 0.000534058
+go_gc_duration_seconds{quantile="0.25"} 0.00086289
+go_gc_duration_seconds{quantile="0.5"} 0.001129439
+go_gc_duration_seconds{quantile="0.75"} 0.001342837
+go_gc_duration_seconds{quantile="1"} 0.001664833
+go_gc_duration_seconds_sum 0.009870806
+go_gc_duration_seconds_count 9
+# HELP go_gc_gogc_percent Heap size target percentage configured by the user, otherwise 100. This value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent function. Sourced from /gc/gogc:percent.
+# TYPE go_gc_gogc_percent gauge
+go_gc_gogc_percent 400
+# HELP go_gc_gomemlimit_bytes Go runtime memory limit configured by the user, otherwise math.MaxInt64. This value is set by the GOMEMLIMIT environment variable, and the runtime/debug.SetMemoryLimit function. Sourced from /gc/gomemlimit:bytes.
+# TYPE go_gc_gomemlimit_bytes gauge
+go_gc_gomemlimit_bytes 4.8318382e+08
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 173
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.26.8"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated in heap and currently in use. Equals to /memory/classes/heap/objects:bytes.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 1.8128664e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated in heap until now, even if released already. Equals to /gc/heap/allocs:bytes.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 2.82574136e+08
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table. Equals to /memory/classes/profiling/buckets:bytes.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.544491e+06
+# HELP go_memstats_frees_total Total number of heap objects frees. Equals to /gc/heap/frees:objects + /gc/heap/tiny/allocs:objects.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 2.774956e+06
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata. Equals to /memory/classes/metadata/other:bytes.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 4.581632e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and currently in use, same as go_memstats_alloc_bytes. Equals to /memory/classes/heap/objects:bytes.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 1.8128664e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used. Equals to /memory/classes/heap/released:bytes + /memory/classes/heap/free:bytes.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 2.9024256e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use. Equals to /memory/classes/heap/objects:bytes + /memory/classes/heap/unused:bytes
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 2.4027136e+07
+# HELP go_memstats_heap_objects Number of currently allocated objects. Equals to /gc/heap/objects:objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 143297
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS. Equals to /memory/classes/heap/released:bytes.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 3.751936e+06
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system. Equals to /memory/classes/heap/objects:bytes + /memory/classes/heap/unused:bytes + /memory/classes/heap/released:bytes + /memory/classes/heap/free:bytes.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 5.3051392e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.7925807787050095e+09
+# HELP go_memstats_mallocs_total Total number of heap objects allocated, both live and gc-ed. Semantically a counter version for go_memstats_heap_objects gauge. Equals to /gc/heap/allocs:objects + /gc/heap/tiny/allocs:objects.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 2.918253e+06
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures. Equals to /memory/classes/metadata/mcache/inuse:bytes.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 4592
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system. Equals to /memory/classes/metadata/mcache/inuse:bytes + /memory/classes/metadata/mcache/free:bytes.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 16072
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures. Equals to /memory/classes/metadata/mspan/inuse:bytes.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 392000
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system. Equals to /memory/classes/metadata/mspan/inuse:bytes + /memory/classes/metadata/mspan/free:bytes.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 864960
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place. Equals to /gc/heap/goal:bytes.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 4.3760448e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations. Equals to /memory/classes/other:bytes.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 638309
+# HELP go_memstats_stack_inuse_bytes Number of bytes obtained from system for stack allocator in non-CGO environments. Equals to /memory/classes/heap/stacks:bytes.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.47456e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator. Equals to /memory/classes/heap/stacks:bytes + /memory/classes/os-stacks:bytes.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.47456e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system. Equals to /memory/classes/total:byte.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 6.2171416e+07
+# HELP go_sched_gomaxprocs_threads The current runtime.GOMAXPROCS setting, or the number of operating system threads that can execute user-level Go code simultaneously. Sourced from /sched/gomaxprocs:threads.
+# TYPE go_sched_gomaxprocs_threads gauge
+go_sched_gomaxprocs_threads 2
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 8
+# HELP kai_action_scheduling_latency_milliseconds Action scheduling latency in milliseconds, as a gauge
+# TYPE kai_action_scheduling_latency_milliseconds gauge
+kai_action_scheduling_latency_milliseconds{action="allocate"} 0
+kai_action_scheduling_latency_milliseconds{action="consolidation"} 0
+kai_action_scheduling_latency_milliseconds{action="preempt"} 0
+kai_action_scheduling_latency_milliseconds{action="reclaim"} 0
+kai_action_scheduling_latency_milliseconds{action="stalegangeviction"} 0
+# HELP kai_close_session_latency_milliseconds Close session latency in milliseconds, including all plugins, as a gauge
+# TYPE kai_close_session_latency_milliseconds gauge
+kai_close_session_latency_milliseconds 0
+# HELP kai_e2e_scheduling_latency_milliseconds E2e scheduling latency in milliseconds (scheduling algorithm + binding), as a gauge
+# TYPE kai_e2e_scheduling_latency_milliseconds gauge
+kai_e2e_scheduling_latency_milliseconds 2
+# HELP kai_open_session_latency_milliseconds Open session latency in milliseconds, including all plugins, as a gauge
+# TYPE kai_open_session_latency_milliseconds gauge
+kai_open_session_latency_milliseconds 1
+# HELP kai_plugin_scheduling_latency_milliseconds Plugin scheduling latency in milliseconds, as a gauge
+# TYPE kai_plugin_scheduling_latency_milliseconds gauge
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="backgroundpods"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="dynamicresources"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="elastic"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="gpupack"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="gpusharingorder"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="kubeflow"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="minruntime"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="nodeavailability"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="nodeplacement"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="nominatednode"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="podaffinity"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="predicates"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="priority"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="proportion"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="ray"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="resourcetype"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="sg-multinodegang"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="sg-nodelocalgreedy"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="snapshot"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="subgrouporder"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="taskorder"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionClose",plugin="topology"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="backgroundpods"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="dynamicresources"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="elastic"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="gpupack"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="gpusharingorder"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="kubeflow"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="minruntime"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="nodeavailability"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="nodeplacement"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="nominatednode"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="podaffinity"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="predicates"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="priority"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="proportion"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="ray"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="resourcetype"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="sg-multinodegang"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="sg-nodelocalgreedy"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="snapshot"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="subgrouporder"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="taskorder"} 0
+kai_plugin_scheduling_latency_milliseconds{OnSession="OnSessionOpen",plugin="topology"} 0
+# HELP kai_pod_group_evicted_pods_total Total number of pods evicted per pod group
+# TYPE kai_pod_group_evicted_pods_total counter
+kai_pod_group_evicted_pods_total{action="preempt",namespace="default",nodepool="default",podgroup="pg-preempt-low-pod-c27373b7-bc16-4ab4-8da6-53715a1f5400",uid="e60b1ef4-dd32-4ca1-a904-7e509fe61a82"} 1
+# HELP kai_podgroups_acted_on_by_action Count of podgroups tried per action
+# TYPE kai_podgroups_acted_on_by_action counter
+kai_podgroups_acted_on_by_action{action="preempt"} 1
+# HELP kai_podgroups_scheduled_by_action Count of podgroups scheduled per action
+# TYPE kai_podgroups_scheduled_by_action counter
+kai_podgroups_scheduled_by_action{action="allocate"} 3
+kai_podgroups_scheduled_by_action{action="preempt"} 1
+# HELP kai_queue_cpu_usage CPU usage of queue, as a gauge. Units depend on UsageDB configuration
+# TYPE kai_queue_cpu_usage gauge
+kai_queue_cpu_usage{queue_display_name="",queue_metadata_name="default-parent-queue",queue_name="default-parent-queue"} 0
+kai_queue_cpu_usage{queue_display_name="",queue_metadata_name="default-queue",queue_name="default-queue"} 0
+kai_queue_cpu_usage{queue_display_name="",queue_metadata_name="e2e-parent",queue_name="e2e-parent"} 0
+kai_queue_cpu_usage{queue_display_name="",queue_metadata_name="team-b",queue_name="team-b"} 0
+kai_queue_cpu_usage{queue_display_name="Team A",queue_metadata_name="team-a",queue_name="Team A"} 0
+# HELP kai_queue_fair_share_cpu_cores CPU Fair share of queue, as a gauge. Value is in Cores
+# TYPE kai_queue_fair_share_cpu_cores gauge
+kai_queue_fair_share_cpu_cores{queue_display_name="",queue_metadata_name="default-parent-queue",queue_name="default-parent-queue"} 0
+kai_queue_fair_share_cpu_cores{queue_display_name="",queue_metadata_name="default-queue",queue_name="default-queue"} 0
+kai_queue_fair_share_cpu_cores{queue_display_name="",queue_metadata_name="e2e-parent",queue_name="e2e-parent"} 2.45
+kai_queue_fair_share_cpu_cores{queue_display_name="",queue_metadata_name="team-b",queue_name="team-b"} 1.65
+kai_queue_fair_share_cpu_cores{queue_display_name="Team A",queue_metadata_name="team-a",queue_name="Team A"} 0.8
+# HELP kai_queue_fair_share_gpu GPU Fair share of queue, as a gauge. Values in GPU devices
+# TYPE kai_queue_fair_share_gpu gauge
+kai_queue_fair_share_gpu{queue_display_name="",queue_metadata_name="default-parent-queue",queue_name="default-parent-queue"} 0
+kai_queue_fair_share_gpu{queue_display_name="",queue_metadata_name="default-queue",queue_name="default-queue"} 0
+kai_queue_fair_share_gpu{queue_display_name="",queue_metadata_name="e2e-parent",queue_name="e2e-parent"} 0
+kai_queue_fair_share_gpu{queue_display_name="",queue_metadata_name="team-b",queue_name="team-b"} 0
+kai_queue_fair_share_gpu{queue_display_name="Team A",queue_metadata_name="team-a",queue_name="Team A"} 0
+# HELP kai_queue_fair_share_memory_gb Memory Fair share of queue, as a gauge. Value is in GB
+# TYPE kai_queue_fair_share_memory_gb gauge
+kai_queue_fair_share_memory_gb{queue_display_name="",queue_metadata_name="default-parent-queue",queue_name="default-parent-queue"} 0
+kai_queue_fair_share_memory_gb{queue_display_name="",queue_metadata_name="default-queue",queue_name="default-queue"} 0
+kai_queue_fair_share_memory_gb{queue_display_name="",queue_metadata_name="e2e-parent",queue_name="e2e-parent"} 0.201326592
+kai_queue_fair_share_memory_gb{queue_display_name="",queue_metadata_name="team-b",queue_name="team-b"} 0.134217728
+kai_queue_fair_share_memory_gb{queue_display_name="Team A",queue_metadata_name="team-a",queue_name="Team A"} 0.067108864
+# HELP kai_queue_gpu_usage GPU usage of queue, as a gauge. Units depend on UsageDB configuration
+# TYPE kai_queue_gpu_usage gauge
+kai_queue_gpu_usage{queue_display_name="",queue_metadata_name="default-parent-queue",queue_name="default-parent-queue"} 0
+kai_queue_gpu_usage{queue_display_name="",queue_metadata_name="default-queue",queue_name="default-queue"} 0
+kai_queue_gpu_usage{queue_display_name="",queue_metadata_name="e2e-parent",queue_name="e2e-parent"} 0
+kai_queue_gpu_usage{queue_display_name="",queue_metadata_name="team-b",queue_name="team-b"} 0
+kai_queue_gpu_usage{queue_display_name="Team A",queue_metadata_name="team-a",queue_name="Team A"} 0
+# HELP kai_queue_memory_usage Memory usage of queue, as a gauge. Units depend on UsageDB configuration
+# TYPE kai_queue_memory_usage gauge
+kai_queue_memory_usage{queue_display_name="",queue_metadata_name="default-parent-queue",queue_name="default-parent-queue"} 0
+kai_queue_memory_usage{queue_display_name="",queue_metadata_name="default-queue",queue_name="default-queue"} 0
+kai_queue_memory_usage{queue_display_name="",queue_metadata_name="e2e-parent",queue_name="e2e-parent"} 0
+kai_queue_memory_usage{queue_display_name="",queue_metadata_name="team-b",queue_name="team-b"} 0
+kai_queue_memory_usage{queue_display_name="Team A",queue_metadata_name="team-a",queue_name="Team A"} 0
+# HELP kai_scenario_search_action_budget_configured_seconds Configured action scenario search budget in seconds.
+# TYPE kai_scenario_search_action_budget_configured_seconds gauge
+kai_scenario_search_action_budget_configured_seconds{action="consolidation"} 300
+kai_scenario_search_action_budget_configured_seconds{action="preempt"} 300
+kai_scenario_search_action_budget_configured_seconds{action="reclaim"} 300
+# HELP kai_scenario_search_duration_seconds Elapsed generator-search duration in seconds.
+# TYPE kai_scenario_search_duration_seconds histogram
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="0.001"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="0.002"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="0.004"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="0.008"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="0.016"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="0.032"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="0.064"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="0.128"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="0.256"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="0.512"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="1.024"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="2.048"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="4.096"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="8.192"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="16.384"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="32.768"} 2
+kai_scenario_search_duration_seconds_bucket{action="preempt",generator="NodeLocalGreedy",result="solved",le="+Inf"} 2
+kai_scenario_search_duration_seconds_sum{action="preempt",generator="NodeLocalGreedy",result="solved"} 0.000856679
+kai_scenario_search_duration_seconds_count{action="preempt",generator="NodeLocalGreedy",result="solved"} 2
+# HELP kai_scenario_search_generator_budget_configured_seconds Configured generator scenario search budget in seconds.
+# TYPE kai_scenario_search_generator_budget_configured_seconds gauge
+kai_scenario_search_generator_budget_configured_seconds{generator="MultiNodeGang"} 120
+kai_scenario_search_generator_budget_configured_seconds{generator="NodeLocalGreedy"} 30
+kai_scenario_search_generator_budget_configured_seconds{generator="default"} 120
+# HELP kai_scenario_search_job_budget_configured_seconds Configured per-job scenario search budget in seconds.
+# TYPE kai_scenario_search_job_budget_configured_seconds gauge
+kai_scenario_search_job_budget_configured_seconds 240
+# HELP kai_scenario_search_jobs_total Count of jobs considered by bounded scenario search.
+# TYPE kai_scenario_search_jobs_total counter
+kai_scenario_search_jobs_total{action="preempt",reduced_budget="false",result="solved"} 1
+# HELP kai_scenario_search_scenarios_total Count of bounded-search scenarios by state.
+# TYPE kai_scenario_search_scenarios_total counter
+kai_scenario_search_scenarios_total{action="preempt",generator="NodeLocalGreedy",state="emitted"} 2
+kai_scenario_search_scenarios_total{action="preempt",generator="NodeLocalGreedy",state="simulated"} 2
+# HELP kai_scenarios_simulation_by_action Count of scenarios simulated per action
+# TYPE kai_scenarios_simulation_by_action counter
+kai_scenarios_simulation_by_action{action="preempt"} 2
+# HELP kai_task_bind_latency_milliseconds Task bind latency histogram in milliseconds
+# TYPE kai_task_bind_latency_milliseconds histogram
+kai_task_bind_latency_milliseconds_bucket{le="5"} 0
+kai_task_bind_latency_milliseconds_bucket{le="10"} 2
+kai_task_bind_latency_milliseconds_bucket{le="20"} 3
+kai_task_bind_latency_milliseconds_bucket{le="40"} 3
+kai_task_bind_latency_milliseconds_bucket{le="80"} 3
+kai_task_bind_latency_milliseconds_bucket{le="160"} 3
+kai_task_bind_latency_milliseconds_bucket{le="320"} 3
+kai_task_bind_latency_milliseconds_bucket{le="640"} 3
+kai_task_bind_latency_milliseconds_bucket{le="1280"} 3
+kai_task_bind_latency_milliseconds_bucket{le="2560"} 3
+kai_task_bind_latency_milliseconds_bucket{le="+Inf"} 3
+kai_task_bind_latency_milliseconds_sum 29
+kai_task_bind_latency_milliseconds_count 3
+# HELP kai_task_scheduling_latency_milliseconds Task scheduling latency in milliseconds
+# TYPE kai_task_scheduling_latency_milliseconds histogram
+kai_task_scheduling_latency_milliseconds_bucket{le="5"} 0
+kai_task_scheduling_latency_milliseconds_bucket{le="10"} 0
+kai_task_scheduling_latency_milliseconds_bucket{le="20"} 0
+kai_task_scheduling_latency_milliseconds_bucket{le="40"} 0
+kai_task_scheduling_latency_milliseconds_bucket{le="80"} 0
+kai_task_scheduling_latency_milliseconds_bucket{le="160"} 0
+kai_task_scheduling_latency_milliseconds_bucket{le="320"} 0
+kai_task_scheduling_latency_milliseconds_bucket{le="640"} 0
+kai_task_scheduling_latency_milliseconds_bucket{le="1280"} 2
+kai_task_scheduling_latency_milliseconds_bucket{le="2560"} 3
+kai_task_scheduling_latency_milliseconds_bucket{le="+Inf"} 3
+kai_task_scheduling_latency_milliseconds_sum 4652
+kai_task_scheduling_latency_milliseconds_count 3
+# HELP kai_total_preemption_attempts Total preemption attempts in the cluster till now
+# TYPE kai_total_preemption_attempts counter
+kai_total_preemption_attempts 1
+# HELP open_session_latency_milliseconds Open session latency in milliseconds, including all plugins, as a gauge
+# TYPE open_session_latency_milliseconds gauge
+open_session_latency_milliseconds 0
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 7.23
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.073741816e+09
+# HELP process_network_receive_bytes_total Number of bytes received by the process over the network.
+# TYPE process_network_receive_bytes_total counter
+process_network_receive_bytes_total 1.325926e+06
+# HELP process_network_transmit_bytes_total Number of bytes sent by the process over the network.
+# TYPE process_network_transmit_bytes_total counter
+process_network_transmit_bytes_total 292332
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 10
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 1.1022336e+08
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.79258004402e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 1.439883264e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 21
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0
+# HELP scenario_search_job_budget_configured_seconds Configured per-job scenario search budget in seconds.
+# TYPE scenario_search_job_budget_configured_seconds gauge
+scenario_search_job_budget_configured_seconds 0
+# HELP task_bind_latency_milliseconds Task bind latency histogram in milliseconds
+# TYPE task_bind_latency_milliseconds histogram
+task_bind_latency_milliseconds_bucket{le="5"} 0
+task_bind_latency_milliseconds_bucket{le="10"} 0
+task_bind_latency_milliseconds_bucket{le="20"} 0
+task_bind_latency_milliseconds_bucket{le="40"} 0
+task_bind_latency_milliseconds_bucket{le="80"} 0
+task_bind_latency_milliseconds_bucket{le="160"} 0
+task_bind_latency_milliseconds_bucket{le="320"} 0
+task_bind_latency_milliseconds_bucket{le="640"} 0
+task_bind_latency_milliseconds_bucket{le="1280"} 0
+task_bind_latency_milliseconds_bucket{le="2560"} 0
+task_bind_latency_milliseconds_bucket{le="+Inf"} 0
+task_bind_latency_milliseconds_sum 0
+task_bind_latency_milliseconds_count 0
+# HELP task_scheduling_latency_milliseconds Task scheduling latency in milliseconds
+# TYPE task_scheduling_latency_milliseconds histogram
+task_scheduling_latency_milliseconds_bucket{le="5"} 0
+task_scheduling_latency_milliseconds_bucket{le="10"} 0
+task_scheduling_latency_milliseconds_bucket{le="20"} 0
+task_scheduling_latency_milliseconds_bucket{le="40"} 0
+task_scheduling_latency_milliseconds_bucket{le="80"} 0
+task_scheduling_latency_milliseconds_bucket{le="160"} 0
+task_scheduling_latency_milliseconds_bucket{le="320"} 0
+task_scheduling_latency_milliseconds_bucket{le="640"} 0
+task_scheduling_latency_milliseconds_bucket{le="1280"} 0
+task_scheduling_latency_milliseconds_bucket{le="2560"} 0
+task_scheduling_latency_milliseconds_bucket{le="+Inf"} 0
+task_scheduling_latency_milliseconds_sum 0
+task_scheduling_latency_milliseconds_count 0
+# HELP total_preemption_attempts Total preemption attempts in the cluster till now
+# TYPE total_preemption_attempts counter
+total_preemption_attempts 0

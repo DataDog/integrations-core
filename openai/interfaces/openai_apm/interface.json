@@ -1,0 +1,9 @@
+{
+  "interface_type": "tracing-library",
+  "source_type_id": 92087905,
+  "source_type_name": "OpenAI APM",
+  "interface_title": "APM",
+  "is_primary": false,
+  "auto_install": false,
+  "creates_events": false
+}

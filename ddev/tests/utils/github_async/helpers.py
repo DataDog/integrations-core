@@ -16,6 +16,7 @@ import httpx
 from aiolimiter import AsyncLimiter
 
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
+from ddev.utils.github_async.observer import RequestAttempt, RequestFailure
 from ddev.utils.rate_limiting import RATE_LIMIT_TIME_PERIOD, BudgetGovernor, InstrumentedAsyncLimiter
 from tests.helpers.clock import FakeClock
 from tests.utils.github_async.payloads import (
@@ -25,6 +26,7 @@ from tests.utils.github_async.payloads import (
     file_content_payload,
     full_pull_request_payload,
     git_ref_payload,
+    git_tag_payload,
     issue_comment_payload,
     pr_review_comment_payload,
     pull_request_file_payload,
@@ -87,6 +89,8 @@ def governed_client(
     transport: httpx.MockTransport,
     on_event: Any = None,
     max_rate_limit_retries: int = 2,
+    observer: RecordingObserver | None = None,
+    token_provider: Callable[[], Awaitable[str]] | None = None,
 ) -> AsyncGitHubClient:
     """Client whose governor runs on *clock*, so retry waits are deterministic under a fake sleep."""
     governor = BudgetGovernor(now=clock, on_event=on_event)
@@ -97,8 +101,25 @@ def governed_client(
         name="github",
     )
     return AsyncGitHubClient(
-        token=TOKEN, rate_limiter=limiter, transport=transport, max_rate_limit_retries=max_rate_limit_retries
+        token=TOKEN,
+        rate_limiter=limiter,
+        transport=transport,
+        max_rate_limit_retries=max_rate_limit_retries,
+        observer=observer,
+        token_provider=token_provider,
     )
+
+
+@dataclasses.dataclass
+class RecordingObserver:
+    attempts: list[RequestAttempt] = dataclasses.field(default_factory=list)
+    failures: list[RequestFailure] = dataclasses.field(default_factory=list)
+
+    def attempt_finished(self, attempt: RequestAttempt) -> None:
+        self.attempts.append(attempt)
+
+    def request_failed(self, failure: RequestFailure) -> None:
+        self.failures.append(failure)
 
 
 async def first_page(pages: AsyncIterator[GitHubResponse[Any]]) -> GitHubResponse[Any]:
@@ -222,6 +243,12 @@ ENDPOINT_CALLS = [
         "get_ref",
         lambda c: c.get_ref("o", "r", "heads/main"),
         lambda: json_response(git_ref_payload()),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "get_tag",
+        lambda c: c.get_tag("o", "r", "t" * 40),
+        lambda: json_response(git_tag_payload()),
         default_retry="safe",
     ),
     EndpointCase(

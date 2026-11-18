@@ -203,6 +203,19 @@ def test_validate_config(instance):
         check.validate_config()
 
 
+def test_empty_compression_disables_compression(instance):
+    instance['compression'] = ''
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.check_id = 'test-empty-compression'
+    check.validate_config()
+
+    with mock.patch('clickhouse_connect.get_client') as m:
+        m.return_value = mock_clickhouse_client()
+        check.connect()
+        _, kwargs = m.call_args
+        assert kwargs['compress'] is False
+
+
 def test_deprecated_user_option():
     """Test that the deprecated 'user' option is migrated to 'username' with a warning."""
     instance = {
@@ -859,6 +872,21 @@ def test_database_instance_payload_reports_the_connection_mode_when_unset(aggreg
     check._send_database_instance_metadata()
 
     assert emitted_metadata(aggregator)['single_endpoint_mode'] is False
+
+
+def test_metadata_is_emitted_when_metric_queries_fail(aggregator, datadog_agent, instance):
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.check_id = 'test:123'
+    failing_query_manager = mock.MagicMock()
+    failing_query_manager.execute.side_effect = Exception('Not enough privileges')
+    with mock.patch.object(ClickhouseCheck, '_build_query_manager', return_value=failing_query_manager):
+        with mock.patch('clickhouse_connect.get_client', return_value=mock_clickhouse_client()):
+            with pytest.raises(Exception, match='Not enough privileges'):
+                check.check({})
+
+    events = aggregator.get_event_platform_events('dbm-metadata')
+    assert [e['kind'] for e in events] == ['database_instance']
+    datadog_agent.assert_metadata('test:123', {'version.scheme': 'calver', 'version.raw': MOCK_CLICKHOUSE_VERSION})
 
 
 def test_check_tags_with_cluster(instance):

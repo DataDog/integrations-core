@@ -1,0 +1,81 @@
+{
+  "response": {
+    "attributes": null,
+    "aggregateAttributes": null,
+    "groups": [
+      {
+        "id": "ssid__band_0.0",
+        "attributes": [
+          {
+            "name": "ssid",
+            "value": ""
+          },
+          {
+            "name": "band",
+            "value": null
+          }
+        ],
+        "aggregateAttributes": [
+          {
+            "name": "rssi",
+            "function": "avg",
+            "value": 0
+          },
+          {
+            "name": "snr",
+            "function": "avg",
+            "value": 0
+          },
+          {
+            "name": "dataRate",
+            "function": "avg",
+            "value": 0
+          },
+          {
+            "name": "usage",
+            "function": "sum",
+            "value": 0
+          },
+          {
+            "name": "avgRunDuration",
+            "function": "avg",
+            "value": 0
+          },
+          {
+            "name": "maxRunDuration",
+            "function": "max",
+            "value": 0
+          },
+          {
+            "name": "avgAssocDuration",
+            "function": "avg",
+            "value": 0
+          },
+          {
+            "name": "avgAuthDuration",
+            "function": "avg",
+            "value": 0
+          },
+          {
+            "name": "avgDhcpDuration",
+            "function": "avg",
+            "value": 0
+          },
+          {
+            "name": "macAddress",
+            "function": "count",
+            "value": 7
+          }
+        ]
+      }
+    ]
+  },
+  "page": {
+    "limit": 100,
+    "offset": null,
+    "cursor": "eyJzc2lkX3Rlcm1zIjoiIiwiZnJlcXVlbmN5X3Rlcm1zIjowLjB9",
+    "count": 1,
+    "sortBy": null
+  },
+  "version": "1.0"
+}

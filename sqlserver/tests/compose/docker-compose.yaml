@@ -3,8 +3,9 @@ services:
     # https://hub.docker.com/_/microsoft-mssql-server
     # https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-linux-2017
     build:
-      context: .
-      dockerfile: Dockerfile
+      # The tests directory, so the image can include the shared column statistics procedure.
+      context: ..
+      dockerfile: compose/Dockerfile
       args:
         - SQLSERVER_IMAGE_TAG=${SQLSERVER_IMAGE_TAG}
     platform: linux/amd64

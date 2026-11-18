@@ -66,7 +66,7 @@ from .metrics import (
     VOLTAGE_GAUGES,
 )
 
-pytestmark = common.snmp_integration_only
+pytestmark = common.python_suite_only
 
 
 def test_load_profiles(caplog):
@@ -2256,6 +2256,9 @@ def test_checkpoint(aggregator):
     for metric in fw_gauge_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
 
+    aggregator.assert_metric('snmp.haStatCode', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.haClusterXLFailover', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -2330,6 +2333,9 @@ def test_checkpoint_firewall(aggregator):
     fw_gauge_metrics = ['fwNumConn', 'fwPeakNumConn']
     for metric in fw_gauge_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+
+    aggregator.assert_metric('snmp.haStatCode', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.haClusterXLFailover', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -2743,6 +2749,11 @@ def test_fortinet_fortigate(aggregator):
     ]
     vd_tags = common_tags + ['virtualdomain_index:4', 'virtualdomain_name:their oxen quaintly']
 
+    hw_sensors = [
+        ('1', 'CPU Temperature'),
+        ('2', 'System Fan Speed'),
+    ]
+
     common.assert_common_metrics(aggregator, common_tags)
 
     aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -2762,6 +2773,11 @@ def test_fortinet_fortigate(aggregator):
 
     for metric in vd_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=vd_tags, count=1)
+
+    for sensor_index, sensor_name in hw_sensors:
+        sensor_tags = common_tags + ['sensor_index:{}'.format(sensor_index), 'sensor_name:{}'.format(sensor_name)]
+        aggregator.assert_metric('snmp.fgHwSensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
+        aggregator.assert_metric('snmp.fgHwSensorAlarmStatus', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
     # Interface
     aggregator.assert_metric('snmp.fgIntfEntVdom', metric_type=aggregator.GAUGE, count=1)

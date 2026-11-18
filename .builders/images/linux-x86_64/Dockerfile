@@ -19,8 +19,8 @@ ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
  cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.6.4" \
- SHA256="9bffaa1ad1e07b354c21bd3324ec02fa15579f45a7d0494b3e74bc449b7333ef" \
+ VERSION="3.6.5" \
+ SHA256="a2157c2830efdec3788939b00c9b0638306d3f0bbb76dc4832ee503bb397df98" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -35,11 +35,11 @@ RUN yum install -y perl-IPC-Cmd perl-CPANPLUS perl-core && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.13.15
+ENV PYTHON3_VERSION=3.13.17
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="c28d9d213c09b5b5ab2c29812950e12f746999e099b82894231be954b26baed9" \
+ SHA256="9cb057caa588f122577a5054a22531cd9c23ab6706f1a19bc95a55380a895177" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh --prefix=/opt/python/${PYTHON3_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON3_VERSION}/bin:${PATH}"
@@ -111,8 +111,8 @@ RUN \
 # libpq and pg_config as needed by psycopg
 RUN yum install -y flex && \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
- VERSION="18.3" \
- SHA256="d95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f" \
+ VERSION="18.6" \
+ SHA256="555610c24d53e4316da5b7d3fc25c279d96856d5e0e23ee308c328c5fa881d9f" \
  RELATIVE_PATH="postgresql-{{version}}" \
  bash install-from-source.sh --without-readline --with-openssl --without-icu --with-gssapi
 # Add paths to pg_config and to the library
@@ -161,8 +161,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.21.0" \
- SHA256="d9b327997999045a24cda50f3983e69e51c516bd8be6ef9842fc7f99135e33bb" \
+ VERSION="8.23.0" \
+ SHA256="e3de77cfa6367083c776a26647fc9f633b538c06c3baa73d931a252ac8f72b49" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \

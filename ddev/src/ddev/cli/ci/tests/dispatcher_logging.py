@@ -14,7 +14,7 @@ from urllib.parse import quote, urlencode
 import structlog
 from structlog.typing import EventDict
 
-from ddev.cli.ci.tests.dispatcher_attributes import ATTRIBUTE_SPECS, log_tag_mapping, stringify
+from ddev.cli.ci.tests.dispatcher_attributes import ATTRIBUTE_SPECS, log_tag_mapping, native_value, stringify
 from ddev.monitoring.logger import REDACTED, is_secret_field, redact_value
 
 SERVICE = 'ddev'
@@ -47,9 +47,14 @@ def _stringify(value: Any) -> str:
     return stringify(redact_value(value))
 
 
+def ci_pipeline_id() -> str | None:
+    """The ID of the GitHub Actions workflow running the Dispatcher, which a rerun keeps."""
+    return os.getenv('GITHUB_RUN_ID') or None
+
+
 def ci_attributes() -> dict[str, str]:
     """Describe the GitHub Actions workflow running the Dispatcher."""
-    run_id = os.getenv('GITHUB_RUN_ID')
+    run_id = ci_pipeline_id()
     if not run_id:
         return {}
 
@@ -73,7 +78,7 @@ def ci_attributes() -> dict[str, str]:
 
 def get_dispatcher_logs_url(*, terminal: bool = False, now: datetime | None = None) -> str | None:
     """Link to this run's logs, freezing the time window for terminal reports."""
-    run_id = os.getenv('GITHUB_RUN_ID')
+    run_id = ci_pipeline_id()
     if not run_id:
         return None
     from_ts: int | str
@@ -94,7 +99,7 @@ def get_dispatcher_logs_url(*, terminal: bool = False, now: datetime | None = No
     return f'{LOGS_URL}?{urlencode(params, quote_via=quote)}'
 
 
-def project_event(event: Mapping[str, Any], ci: Mapping[str, str] | None = None) -> dict[str, str]:
+def project_event(event: Mapping[str, Any], ci: Mapping[str, str] | None = None) -> dict[str, Any]:
     """Project a canonical Dispatcher event onto Datadog log attributes."""
     attributes = {
         'message': _stringify(event.get('event', '')),
@@ -113,7 +118,7 @@ def project_event(event: Mapping[str, Any], ci: Mapping[str, str] | None = None)
     for key, value in fields.items():
         if key not in ATTRIBUTE_SPECS:
             target = f'dispatcher.{key}'
-            attributes[target] = REDACTED if is_secret_field(target) else stringify(value)
+            attributes[target] = REDACTED if is_secret_field(target) else native_value(value)
     attributes.update(ci or {})
     return attributes
 

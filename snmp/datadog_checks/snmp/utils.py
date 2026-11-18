@@ -8,6 +8,11 @@ from typing import Any, Dict, Iterator, List, Mapping, Optional, Pattern, Sequen
 
 import yaml
 
+try:
+    from yaml import CSafeLoader as YamlLoader
+except ImportError:
+    from yaml import SafeLoader as YamlLoader
+
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_types import (
@@ -90,7 +95,7 @@ def _read_profile_definition(definition_file):
     definition_file = _resolve_definition_file(definition_file)
 
     with open(definition_file) as f:
-        return yaml.safe_load(f)
+        return yaml.load(f, Loader=YamlLoader)
 
 
 def recursively_expand_base_profiles(definition):

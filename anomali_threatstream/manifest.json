@@ -3,7 +3,7 @@
     "app_uuid": "6525b01a-cddd-4f60-84ff-d6739812b4c6",
     "app_id": "anomali-threatstream",
     "owner": "saas-integrations",
-    "display_on_public_website": false,
+    "display_on_public_website": true,
     "tile": {
         "overview": "README.md#Overview",
         "configuration": "README.md#Setup",

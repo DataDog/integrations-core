@@ -1,0 +1,1 @@
+Replace the misleading example in the generated `validators.py` documentation with guidance on spec constraints and the `check_instance` hook.

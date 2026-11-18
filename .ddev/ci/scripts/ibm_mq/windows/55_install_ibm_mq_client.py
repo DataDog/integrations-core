@@ -7,7 +7,7 @@ import requests
 
 CLIENT_VERSION = '9.2.5.0'
 CLIENT_ARCHIVE_NAME = f'{CLIENT_VERSION}-IBM-MQC-Redist-Win64.zip'
-CLIENT_URL = f'https://ddintegrations.blob.core.windows.net/ibm-mq/{CLIENT_ARCHIVE_NAME}'
+CLIENT_URL = f'https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/ibm-mq/{CLIENT_ARCHIVE_NAME}'
 CLIENT_TARGET_DIR = 'C:\\ibm_mq'
 
 

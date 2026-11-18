@@ -215,9 +215,8 @@ def test_a_failing_owned_client_close_is_diagnosed_without_escaping_the_worker(m
     [
         ['not', 'an', 'object'],
         {'status': 'info'},
-        {'message': 'Numeric attribute', 'attempt': 1},
     ],
-    ids=['not-an-object', 'missing-message', 'non-string-attribute'],
+    ids=['not-an-object', 'missing-message'],
 )
 def test_invalid_formatter_output_is_dropped_with_a_diagnostic(invalid_payload: object):
     submitter = FakeLogSubmitter()
@@ -229,6 +228,28 @@ def test_invalid_formatter_output_is_dropped_with_a_diagnostic(invalid_payload: 
 
     submitter.assert_no_logs()
     assert any('could not be formatted' in notice for notice in diagnostics)
+
+
+def test_native_json_attribute_values_are_delivered_with_their_types():
+    submitter = FakeLogSubmitter()
+    diagnostics: list[str] = []
+    handler = make_handler(submitter, diagnostics)
+
+    handler.emit(
+        log_record(payload('Batch dispatched', attempt=3, done=False, integrations=['ntp', 'redis'], nested={'k': 1}))
+    )
+    handler.close()
+
+    submitter.assert_log_matches(
+        {
+            'message': 'Batch dispatched',
+            'attempt': 3,
+            'done': False,
+            'integrations': ['ntp', 'redis'],
+            'nested': {'k': 1},
+        }
+    )
+    assert not diagnostics
 
 
 def test_formatter_failures_do_not_escape_the_logging_handler():

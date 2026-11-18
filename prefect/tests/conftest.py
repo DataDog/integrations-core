@@ -80,6 +80,7 @@ def check(instance: Callable[..., dict[str, str | dict[str, list[str]] | None | 
                 work_pool_names={"exclude": ["^not_included_"]},
                 work_queue_names={"exclude": ["^not_included_"]},
                 deployment_names={"exclude": ["^not_included_"]},
+                flow_names={"exclude": ["^not_included_"]},
                 event_names={
                     "include": [
                         r"^prefect\.task-run\..*$",
@@ -101,6 +102,7 @@ def instance() -> Callable[[str], dict[str, str | dict[str, list[str]] | None | 
         work_pool_names: dict[str, list[str]] | None = None,
         work_queue_names: dict[str, list[str]] | None = None,
         deployment_names: dict[str, list[str]] | None = None,
+        flow_names: dict[str, list[str]] | None = None,
         event_names: dict[str, list[str]] | None = None,
         collect_events: bool = True,
         min_collection_interval: int = 600,
@@ -110,6 +112,7 @@ def instance() -> Callable[[str], dict[str, str | dict[str, list[str]] | None | 
             "work_pool_names": work_pool_names,
             "work_queue_names": work_queue_names,
             "deployment_names": deployment_names,
+            "flow_names": flow_names,
             "event_names": event_names,
             "collect_events": collect_events,
             "min_collection_interval": min_collection_interval,

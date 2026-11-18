@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 6.6.0 / 2026-09-02
+## 6.7.0 / 2026-10-29
+
+***Added***:
+
+* Collect the `datadog.cluster_agent.metadata_streaming.history_resyncs` metric. ([#25819](https://github.com/DataDog/integrations-core/pull/25819))
+
+## 6.6.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:
 

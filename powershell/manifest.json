@@ -1,0 +1,40 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "542fce74-d7a6-49e7-9172-2e5bc680cdfa",
+  "app_id": "powershell",
+  "owner": "windows-products",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect custom metrics from allowlisted read-only PowerShell cmdlets.",
+    "title": "PowerShell",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::OS & System",
+      "Category::Windows",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 89049507,
+      "source_type_name": "PowerShell",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

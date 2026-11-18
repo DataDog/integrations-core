@@ -214,6 +214,7 @@ XML_PLAN_OBFUSCATION_ATTRS = frozenset(
         "ConstValue",
         "ScalarString",
         "ParameterCompiledValue",
+        "ParameterRuntimeValue",
     }
 )
 
@@ -668,7 +669,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         "query_signature=[{0}] query_hash=[{1}] query_plan_hash=[{2}] plan_handle=[{3}] err=[{4}]"
                     ).format(row['query_signature'], row['query_hash'], row['query_plan_hash'], row['plan_handle'], e)
                     if self._config.log_unobfuscated_plans:
-                        self.log.warning("Failed to obfuscate plan=[%s] | %s", raw_plan, context)
+                        self.log.warning("Failed to obfuscate plan=[%s] | %s", repr(raw_plan), context)
                     else:
                         self.log.debug("Failed to obfuscate plan | %s", context)
                     collection_errors.append({'code': "obfuscate_xml_plan_error", 'message': str(e)})
@@ -743,8 +744,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     raw_plan_event = copy.deepcopy(obfuscated_plan_event)
                     raw_plan_event["dbm_type"] = "rqp"  # raw query plan
                     raw_plan_event["db"]["plan"]["definition"] = raw_plan
-                    # add the raw signature to the event so we can use it to look up the raw plan
-                    raw_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
-                    obfuscated_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
+                    if raw_plan:
+                        # add the raw signature to the event so we can use it to look up the raw plan.
+                        # query_plan_hash only identifies the plan shape, so hash the raw plan content instead.
+                        raw_plan_signature = compute_sql_signature(raw_plan)
+                        raw_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
+                        obfuscated_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
                     yield raw_plan_event
                 yield obfuscated_plan_event

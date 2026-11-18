@@ -67,6 +67,19 @@ files:
         type: boolean
         example: false
       fleet_configurable: true
+    - name: disable_config_get
+      display_priority: 0
+      description: |
+        Skip all CONFIG GET commands. Enable this for managed backends such as Amazon ElastiCache
+        that forbid CONFIG commands to avoid rejected requests.
+        When enabled, redis.net.maxclients is not collected. Slowlog collection uses slowlog-max-len
+        if configured, otherwise 128.
+        By default, the first CONFIG GET response error disables all CONFIG GET commands for the
+        lifetime of the check instance and logs a warning.
+      value:
+        type: boolean
+        example: false
+      fleet_configurable: true
     - name: socket_timeout
       display_priority: 0
       description: Custom timeout for the check request.
@@ -164,6 +177,7 @@ files:
       description: |
         Set the maximum number of entries to fetch from the slow query log.
         By default, the check reads this value from the redis config, but is limited to 128.
+        If CONFIG GET is disabled or rejected, the check uses 128 unless a value is configured here.
 
         Set a custom value here if you need to get more than 128 slowlog entries every 15 seconds.
         Warning: Higher values may impact the performance of your Redis instance.

@@ -272,6 +272,9 @@ jsonstream__total_items 40
 # HELP leader_election_is_leader The label is_leader is true if the reporting pod is leader, equals false otherwise.
 # TYPE leader_election_is_leader gauge
 leader_election_is_leader{is_leader="true",join_leader="true"} 1
+# HELP metadata_streaming_history_resyncs Number of full metadata states successfully sent because an agent fell behind the retained version history
+# TYPE metadata_streaming_history_resyncs counter
+metadata_streaming_history_resyncs 3
 # HELP orchestrator__cache_hits Number of cache hits
 # TYPE orchestrator__cache_hits counter
 orchestrator__cache_hits{orchestrator="k8s",resource="cluster"} 6

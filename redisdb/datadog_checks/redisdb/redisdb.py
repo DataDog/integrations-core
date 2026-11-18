@@ -40,6 +40,7 @@ class Redis(AgentCheck):
         custom_tags = self.instance.get('tags', [])
         self.tags = self._get_tags(custom_tags)
         self.collect_client_metrics = is_affirmative(self.instance.get('collect_client_metrics', False))
+        self._config_get_disabled = is_affirmative(self.instance.get('disable_config_get', False))
         if ("host" not in self.instance or "port" not in self.instance) and "unix_socket_path" not in self.instance:
             raise ConfigurationError("You must specify a host/port couple or a unix_socket_path")
 
@@ -118,6 +119,22 @@ class Redis(AgentCheck):
         tags = sorted(tags_to_add.union(custom_tags))
         return tags
 
+    def _get_config(self, conn: redis.Redis, parameter: str) -> dict[str, str]:
+        if self._config_get_disabled:
+            return {}
+
+        try:
+            return conn.config_get(parameter)
+        except redis.ResponseError as e:
+            self._config_get_disabled = True
+            self.log.warning(
+                "CONFIG GET %s failed: %s. Disabling CONFIG GET for the lifetime of this check instance. "
+                "Set disable_config_get to true to skip CONFIG GET entirely on restricted backends.",
+                parameter,
+                e,
+            )
+            return {}
+
     def _check_db(self):
         tags = list(self.tags)
         conn = self._get_conn(self.instance)
@@ -156,12 +173,7 @@ class Redis(AgentCheck):
         self.gauge('redis.info.latency_ms', info_latency_ms, tags=tags)
         self.gauge('redis.ping.latency_ms', ping_latency_ms, tags=tags)
 
-        try:
-            config = conn.config_get("maxclients")
-        except redis.ResponseError:
-            # config_get is disabled on some environments
-            self.log.debug("Unable to collect max clients: CONFIG GET disabled in managed Redis instances.")
-            config = {}
+        config = self._get_config(conn, "maxclients")
 
         # Save the database statistics.
         for key in info.keys():
@@ -428,19 +440,15 @@ class Redis(AgentCheck):
         conn.set_response_callback("SLOWLOG GET", upstream_parse_slowlog_get)
 
         if not self.instance.get(MAX_SLOW_ENTRIES_KEY):
-            try:
-                max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
-                if max_slow_entries > DEFAULT_MAX_SLOW_ENTRIES:
-                    self.log.debug(
-                        "Redis {0} is higher than {1}. Defaulting to {1}. "  # noqa: G001
-                        "If you need a higher value, please set {0} in your check config".format(
-                            MAX_SLOW_ENTRIES_KEY, DEFAULT_MAX_SLOW_ENTRIES
-                        )
+            config = self._get_config(conn, MAX_SLOW_ENTRIES_KEY)
+            max_slow_entries = int(config.get(MAX_SLOW_ENTRIES_KEY, DEFAULT_MAX_SLOW_ENTRIES))
+            if max_slow_entries > DEFAULT_MAX_SLOW_ENTRIES:
+                self.log.debug(
+                    "Redis {0} is higher than {1}. Defaulting to {1}. "  # noqa: G001
+                    "If you need a higher value, please set {0} in your check config".format(
+                        MAX_SLOW_ENTRIES_KEY, DEFAULT_MAX_SLOW_ENTRIES
                     )
-                    max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
-            # No config on AWS Elasticache
-            except redis.ResponseError:
-                self.log.debug("Unable to collect length of slow log: CONFIG GET disabled in some managed Redis.")
+                )
                 max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
         else:
             max_slow_entries = int(self.instance.get(MAX_SLOW_ENTRIES_KEY))

@@ -1,0 +1,1 @@
+Use `hpe-aruba-edgeconnect` as the log source in the example configuration so logs match the integration log pipeline.

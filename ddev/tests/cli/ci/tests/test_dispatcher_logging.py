@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from datetime import datetime, timezone
 from urllib.parse import parse_qs, urlsplit
@@ -66,7 +65,7 @@ def test_projection_maps_event_fields_to_datadog_attributes():
     assert attributes['ddsource'] == 'dispatcher'
     assert attributes['ddtags'] == 'team:agent-integrations'
     assert attributes['git.repository.id_v2'] == 'github.com/datadog/integrations-core'
-    assert attributes['dispatcher.run.dry_run'] == 'false'
+    assert attributes['dispatcher.run.dry_run'] is False
     assert attributes['dispatcher.unlisted_field'] == 'value'
     assert 'dispatcher.pr_number_missing' not in attributes
 
@@ -87,9 +86,10 @@ def test_projection_redacts_secret_fields_and_strips_signed_urls_recursively():
     assert attributes['message'] == 'Downloaded https://example.com/artifact done'
     assert attributes['dispatcher.download_token'] == '[REDACTED]'
     assert attributes['dispatcher.batch.workflow.url'] == 'https://example.com/run/123'
-    metadata = json.loads(attributes['dispatcher.metadata'])
-    assert metadata['headers']['Authorization'] == '[REDACTED]'
-    assert metadata['artifacts'] == [{'api_key': '[REDACTED]', 'url': 'https://example.com/archive'}]
+    assert attributes['dispatcher.metadata'] == {
+        'headers': {'Authorization': '[REDACTED]'},
+        'artifacts': [{'url': 'https://example.com/archive', 'api_key': '[REDACTED]'}],
+    }
 
 
 def test_ci_attributes_follow_the_github_actions_environment(monkeypatch: pytest.MonkeyPatch):
@@ -147,8 +147,8 @@ def test_runtime_context_is_delivered_without_changing_the_console_event():
             'git.commit.sha': 'head-sha',
             'dispatcher.component': 'test-runner',
             'dispatcher.batch.id': 'batch-01',
-            'dispatcher.batch.workflow.id': '123',
-            'dispatcher.batch.artifact.id': '456',
+            'dispatcher.batch.workflow.id': 123,
+            'dispatcher.batch.artifact.id': 456,
             'dispatcher.api_key': '[REDACTED]',
         }
     )
@@ -170,4 +170,33 @@ def test_console_and_datadog_thresholds_are_independent():
     [item] = datadog.events
     assert item['message'] == 'Artifact download failed'
     assert item['status'] == 'warning'
-    assert item['dispatcher.batch.workflow.id'] == '123'
+    assert item['dispatcher.batch.workflow.id'] == 123
+
+
+def test_batch_integrations_arrive_at_intake_as_a_native_array():
+    """The integration list must survive delivery as `list[str]`, so a log query can match array
+    membership instead of searching inside a serialized string."""
+    console = RecordingJsonHandler()
+    submitter = FakeLogSubmitter()
+    datadog = DatadogLogHandler(api_key='test-api-key', submitter=submitter)
+    datadog.setFormatter(dispatcher_datadog_formatter(ci={}))
+    runtime = MonitoringRuntime(console_handler=console)
+    runtime.add_log_handler(datadog)
+
+    with runtime.component('test-runner').scope(
+        batch_id='batch-01', batch_integrations=['ntp', 'redis'], dry_run=False, batch_job_count=2
+    ):
+        runtime.component('test-runner').logger.info('Dispatching batch')
+
+    runtime.close()
+    datadog.close()
+
+    submitter.assert_log_matches(
+        {
+            'message': 'Dispatching batch',
+            'dispatcher.batch.id': 'batch-01',
+            'dispatcher.batch.integrations': ['ntp', 'redis'],
+            'dispatcher.run.dry_run': False,
+            'dispatcher.batch.job_count': 2,
+        }
+    )

@@ -100,10 +100,17 @@ class RateLimiterFactory:
         self,
         config: RateLimiterFactoryConfig | None = None,
         logger: logging.Logger | None = None,
+        on_event: Callable[[RateLimitEvent], None] | None = None,
     ) -> None:
         cfg = config or RateLimiterFactoryConfig()
         self.slow_integrations = cfg.slow_integrations
-        on_event = event_logger(logger) if logger else None
+        handlers = [handler for handler in (event_logger(logger) if logger else None, on_event) if handler is not None]
+
+        def handle(event: RateLimitEvent) -> None:
+            for handler in handlers:
+                handler(event)
+
+        on_event = handle if handlers else None
         budget_governor = BudgetGovernor(
             reserve_fraction=cfg.reserve_fraction,
             buffer_seconds=cfg.budget_buffer_seconds,

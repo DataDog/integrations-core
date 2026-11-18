@@ -16,7 +16,7 @@ from .utils import (
     get_device_ip_from_config,
 )
 
-pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
+pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.core_suite_only]
 
 
 def test_e2e_profile_ruckus_unleashed(dd_agent_check):

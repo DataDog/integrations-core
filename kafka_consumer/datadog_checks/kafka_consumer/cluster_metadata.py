@@ -460,10 +460,14 @@ class ClusterMetadataCollector:
             if cached_offsets.keys() == requested:
                 return cached_offsets
 
-            result = self._fetch_earliest_offsets_from_broker(topic_partitions)
+            missing = {}
+            for topic, partition in requested - cached_offsets.keys():
+                missing.setdefault(topic, []).append(partition)
+            result = self._fetch_earliest_offsets_from_broker(missing)
             if result:
-                self._save_earliest_offsets_cache(result, expire_at=cached['expire_at'])
-            return result
+                cached_offsets.update(result)
+                self._save_earliest_offsets_cache(cached_offsets, expire_at=cached['expire_at'])
+            return cached_offsets
 
         result = self._fetch_earliest_offsets_from_broker(topic_partitions)
         if result:
