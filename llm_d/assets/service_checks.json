@@ -2,7 +2,7 @@
     {
         "agent_version": "7.87.0",
         "integration": "llm-d",
-        "check": "llm_d.openmetrics.health",
+        "check": "llm_d_inference.openmetrics.health",
         "statuses": [
             "ok",
             "critical"
