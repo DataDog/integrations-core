@@ -5,6 +5,8 @@
 
 import csv
 import json
+import logging
+import re
 from types import SimpleNamespace
 
 import pytest
@@ -14,6 +16,7 @@ from datadog_checks.base.utils.remote_queries import pages as rq_pages
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 
 from .helpers import (
+    PageIntake,
     Uploads,
     as_session_request,
     bounded_delivery,
@@ -468,3 +471,43 @@ def test_finalize_abort_and_test_drive_routing(monkeypatch, creds):
     assert calls[0][3] == b'{"expected_page_count":3}'
     assert calls[1][3] == b'{}'
     assert all(method == 'POST' and headers['test-drive-test-intake'] == '1' for method, _, headers, _ in calls)
+
+
+def test_split_pages_are_each_compressed_on_their_own(monkeypatch, delivery, creds):
+    import requests
+
+    intake = PageIntake(max_rows=2)
+    monkeypatch.setattr(requests.Session, 'request', as_session_request(intake))
+    writer = make_writer(delivery, creds, rq_upload.RequestsUploadClient())
+    for _ in range(4):
+        writer.add_row([string_cell('a' * 50)])
+    writer.finish()
+
+    # The four-row page is refused as too large; its two halves go out as pages 0 and 1.
+    assert [headers['X-DD-Source-Page-Rows'] for headers, *_ in intake.attempts] == ['4', '2', '2']
+    assert [headers['X-DD-Record-Offset'] for headers, *_ in intake.accepted] == ['0', '2']
+    record = csv_record([string_cell('a' * 50).token])
+    assert [decoded for _, _, decoded, _ in intake.accepted] == [record * 2, record * 2]
+    for headers, wire, decoded, _ in intake.accepted:
+        assert headers['Content-Encoding'] == 'gzip'
+        assert len(wire) < len(decoded)
+
+
+def test_acknowledged_pages_log_one_debug_line_without_content(monkeypatch, caplog, delivery, creds):
+    import requests
+
+    monkeypatch.setattr(requests.Session, 'request', as_session_request(PageIntake()))
+    writer = make_writer(delivery, creds, rq_upload.RequestsUploadClient())
+    for _ in range(3):
+        writer.add_row([string_cell('secret-value-' + 'a' * 30)])
+    with caplog.at_level(logging.DEBUG, logger=rq_pages.LOGGER.name):
+        writer.finish()
+
+    lines = [record.getMessage() for record in caplog.records if 'page_uploaded' in record.getMessage()]
+    assert len(lines) == 1
+    assert re.fullmatch(
+        r'Remote query page_uploaded crawl_id=run-1 task_id=task-1 upload_id=upload-1 page=0 rows=3 bytes=\d+ '
+        r'sent_bytes=\d+ encoding=gzip compress_ms=\d+\.\d upload_ms=\d+\.\d gzip_not_smaller=False',
+        lines[0],
+    )
+    assert 'secret-value' not in lines[0]

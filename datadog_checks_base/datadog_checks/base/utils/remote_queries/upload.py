@@ -7,12 +7,14 @@
 
 from __future__ import annotations
 
+import io
 import json
 import logging
 import random
 import re
 import socket
 import time
+import zlib
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, BinaryIO, Protocol
@@ -36,6 +38,17 @@ REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE = 'text/csv'
 
 
 REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE = 'result_file_too_large'
+
+
+REMOTE_QUERY_UNSUPPORTED_ENCODING_ERROR_CODE = 'unsupported_encoding'
+
+
+# gzip level 1 trades ratio for producer throughput; wbits 31 selects the gzip container, whose
+# zlib-written header carries no mtime, so the same page always compresses to the same bytes.
+REMOTE_QUERY_PAGE_GZIP_LEVEL = 1
+
+
+REMOTE_QUERY_PAGE_GZIP_WBITS = 31
 
 
 REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY = 'remote_queries.execute.intake_test_drive'
@@ -123,10 +136,25 @@ class UploadCredentials:
     trace_context: RemoteQueryTraceContext | None = None
 
 
+@dataclass(frozen=True)
+class SourcePageUploadReport:
+    """How one acknowledged page went over the wire; sizes and timings only, never content."""
+
+    sent_bytes: int
+    encoding: str
+    compress_ms: float
+    upload_ms: float
+    gzip_not_smaller: bool
+
+
 class UploadClient(Protocol):
     def register_descriptor(self, creds: UploadCredentials, body: bytes) -> None: ...
 
-    def put_source_page(self, creds: UploadCredentials, page: SourcePageUploadMetadata, body: BinaryIO) -> None: ...
+    def put_source_page(
+        self, creds: UploadCredentials, page: SourcePageUploadMetadata, body: BinaryIO
+    ) -> SourcePageUploadReport | None:
+        """Upload one page; a client may return a report of the transfer, or None."""
+        ...
 
     def finalize_run(self, creds: UploadCredentials, expected_page_count: int) -> None: ...
 
@@ -248,6 +276,8 @@ class RequestsUploadClient:
         self._timeout = timeout
         self._write_timeout = write_timeout
         self._tracing = tracing if tracing is not None else NULL_PRODUCER_TRACING
+        # One client serves one run: once intake refuses gzip, the run's later pages skip it.
+        self._compress_pages = True
 
     def _headers(self, creds: UploadCredentials, content_type: str | None = None) -> dict[str, str]:
         headers = {
@@ -274,25 +304,63 @@ class RequestsUploadClient:
         )
         verify_no_content_response(status, 'descriptor registration')
 
-    def put_source_page(self, creds: UploadCredentials, page: SourcePageUploadMetadata, buffer: BinaryIO) -> None:
+    def put_source_page(
+        self, creds: UploadCredentials, page: SourcePageUploadMetadata, buffer: BinaryIO
+    ) -> SourcePageUploadReport:
         """Upload a complete page, acknowledged only after intake records it.
 
-        Retries rewind the same fixed-length, uncompressed body. An oversized result file
-        is surfaced separately so the writer can split records and retry the same index.
+        The page is gzip-compressed once unless intake already refused the encoding or the
+        result is not smaller; retries resend the same bytes. When intake refuses gzip, the
+        page is resent uncompressed at once (not as a retry attempt) and so are the run's later
+        pages. An oversized result file is surfaced separately so the writer can split records
+        and retry the same index, compressing each new page on its own.
         """
+        compress_ms = 0.0
+        gzip_not_smaller = False
+        compressed = None
+        if self._compress_pages:
+            started = time.perf_counter()
+            compressed = compress_page(buffer.read())
+            compress_ms = _elapsed_ms(started)
+            gzip_not_smaller = compressed is None
+        started = time.perf_counter()
+        if compressed is not None:
+            try:
+                self._send_page(creds, page, io.BytesIO(compressed), len(compressed), 'gzip')
+                return SourcePageUploadReport(
+                    len(compressed), 'gzip', compress_ms, _elapsed_ms(started), gzip_not_smaller
+                )
+            except RemoteQueryFailure as error:
+                if error.code != REMOTE_QUERY_UNSUPPORTED_ENCODING_ERROR_CODE:
+                    raise
+                self._compress_pages = False
+            # Release the compressed copy; the fallback sends the buffer itself.
+            compressed = None
+        self._send_page(creds, page, buffer, page.source_bytes, 'identity')
+        return SourcePageUploadReport(
+            page.source_bytes, 'identity', compress_ms, _elapsed_ms(started), gzip_not_smaller
+        )
+
+    def _send_page(
+        self, creds: UploadCredentials, page: SourcePageUploadMetadata, body: BinaryIO, length: int, encoding: str
+    ) -> None:
         headers = self._headers(creds, REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE)
         headers['X-DD-Source-Page-Rows'] = str(page.rows)
         headers['X-DD-Record-Offset'] = str(page.record_offset)
-        headers['Content-Length'] = str(page.source_bytes)
+        headers['X-DD-Source-Page-Bytes'] = str(page.source_bytes)
+        headers['Content-Length'] = str(length)
+        if encoding != 'identity':
+            headers['Content-Encoding'] = encoding
         url = '{}/uploads/{}/pages/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, page.batch_index)
         status, _ = upload_with_retry(
             'PUT',
             url,
             headers,
-            buffer,
+            body,
             self._timeout,
             mapped_error_codes={
-                REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE: REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE
+                REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE: REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE,
+                REMOTE_QUERY_UNSUPPORTED_ENCODING_ERROR_CODE: REMOTE_QUERY_UNSUPPORTED_ENCODING_ERROR_CODE,
             },
             deadline=creds.wall_deadline,
             tracing=self._tracing,
@@ -329,6 +397,16 @@ class RequestsUploadClient:
             )
         except RemoteQueryFailure:
             LOGGER.debug('Remote query upload abort failed (best-effort)')
+
+
+def compress_page(data: bytes) -> bytes | None:
+    """Return the gzip form of a page body, or None when it is not smaller than the page."""
+    compressed = zlib.compress(data, REMOTE_QUERY_PAGE_GZIP_LEVEL, REMOTE_QUERY_PAGE_GZIP_WBITS)
+    return compressed if len(compressed) < len(data) else None
+
+
+def _elapsed_ms(started: float) -> float:
+    return (time.perf_counter() - started) * 1000
 
 
 def verify_no_content_response(status: int, operation: str) -> None:

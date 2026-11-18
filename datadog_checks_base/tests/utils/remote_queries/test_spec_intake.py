@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import gzip
 import io
 import json
 import threading
@@ -23,6 +24,7 @@ class SpecIntake:
         self.requests = []
         self.registered = False
         self.page_count = 0
+        self.pages = []
         intake = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -52,7 +54,9 @@ class SpecIntake:
                 elif '/pages/' in self.path:
                     if not intake.registered:
                         code = 'failed_precondition'
-                    elif length < 0 or self.headers.get('Content-Encoding', 'identity') != 'identity':
+                    elif self.headers.get('Content-Encoding', 'identity') not in ('identity', 'gzip'):
+                        code = 'unsupported_encoding'
+                    elif length < 0 or self.headers.get('X-DD-Source-Page-Bytes') is None:
                         code = 'invalid_argument'
                     elif (
                         self.headers.get('X-DD-Source-Page-Rows') is None
@@ -60,7 +64,13 @@ class SpecIntake:
                     ):
                         code = 'invalid_argument'
                     else:
-                        intake.page_count += 1
+                        if self.headers.get('Content-Encoding') == 'gzip':
+                            body = gzip.decompress(body)
+                        if len(body) != int(self.headers['X-DD-Source-Page-Bytes']):
+                            code = 'invalid_argument'
+                        else:
+                            intake.pages.append(body)
+                            intake.page_count += 1
                 elif self.path.endswith('/finalize'):
                     value = json.loads(body)
                     if set(value) != {'expected_page_count'}:
@@ -69,7 +79,7 @@ class SpecIntake:
                         code = 'failed_precondition'
                 if code:
                     payload = json.dumps({'error': {'code': code, 'message': 'request rejected'}}).encode()
-                    self.send_response(400 if code == 'invalid_argument' else 409)
+                    self.send_response({'invalid_argument': 400, 'unsupported_encoding': 415}.get(code, 409))
                     self.send_header('Content-Type', 'application/json')
                     self.send_header('Content-Length', str(len(payload)))
                     self.end_headers()
@@ -111,6 +121,7 @@ def test_upload_client_completes_the_spec_intake_protocol():
     columns = json.loads(intake.requests[0][3])['columns']
     assert all(set(column) == {'column_name', 'vendor_data_type', 'logical_type'} for column in columns)
     _, _, headers, uploaded = intake.requests[1]
+    # Too small for gzip to help: the page goes as is, declaring its own length.
     assert uploaded == payload
     assert headers['Content-Length'] == str(len(payload))
     assert headers['X-DD-Source-Page-Rows'] == '1'
@@ -118,8 +129,23 @@ def test_upload_client_completes_the_spec_intake_protocol():
     assert headers['Content-Type'] == 'text/csv'
     assert 'Transfer-Encoding' not in headers
     assert 'Content-Encoding' not in headers
-    assert 'X-DD-Source-Page-Bytes' not in headers
+    assert headers['X-DD-Source-Page-Bytes'] == str(len(payload))
     assert all(headers['dd-api-key'] == 'test-api-key' for _, _, headers, _ in intake.requests)
+
+
+def test_compressible_page_is_gzipped_over_real_http():
+    payload = b'"row"\n' * 500
+    with SpecIntake() as intake:
+        creds = rq_upload.UploadCredentials(intake.base_url, 'upload-1', 'test-api-key', None)
+        rq_upload.RequestsUploadClient().register_descriptor(creds, rq_contract.descriptor_request_bytes(descriptor()))
+        with io.BytesIO(payload) as page_body:
+            rq_upload.RequestsUploadClient().put_source_page(creds, source_page(payload, record_offset=0), page_body)
+
+    _, _, headers, wire = intake.requests[1]
+    assert headers['Content-Encoding'] == 'gzip'
+    assert headers['Content-Length'] == str(len(wire)) and len(wire) < len(payload)
+    assert headers['X-DD-Source-Page-Bytes'] == str(len(payload))
+    assert intake.pages == [payload]
 
 
 @pytest.mark.parametrize('unknown_field', ['extra', 'array_element_delimiter'])

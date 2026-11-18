@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import gzip
 import json
+from types import SimpleNamespace
 
 from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import pages as rq_pages
@@ -249,3 +251,39 @@ def make_tracing(integration='postgres', propagator=None, **tracer_kwargs):
         ),
         tracer,
     )
+
+
+class PageIntake:
+    """A `requests.Session.request` double for page PUTs that decodes gzip like the spec intake.
+
+    Every page attempt is recorded as `(headers, wire_body, decoded_body)`, rejected ones too.
+    `refuse_gzip` answers 415 `unsupported_encoding` to any gzip page; `max_rows` answers
+    413 `result_file_too_large` to a page that declares more rows.
+    """
+
+    def __init__(self, refuse_gzip=False, max_rows=None):
+        self.refuse_gzip = refuse_gzip
+        self.max_rows = max_rows
+        self.attempts = []
+
+    @property
+    def accepted(self):
+        return [attempt for attempt in self.attempts if attempt[3]]
+
+    def __call__(self, method, url, headers, data, timeout):
+        if method != 'PUT':
+            return SimpleNamespace(status_code=204, content=b'')
+        wire = data.read()
+        gzipped = headers.get('Content-Encoding') == 'gzip'
+        decoded = gzip.decompress(wire) if gzipped else wire
+        assert len(wire) == int(headers['Content-Length'])
+        assert len(decoded) == int(headers['X-DD-Source-Page-Bytes'])
+        if gzipped and self.refuse_gzip:
+            status, code = 415, 'unsupported_encoding'
+        elif self.max_rows is not None and int(headers['X-DD-Source-Page-Rows']) > self.max_rows:
+            status, code = 413, 'result_file_too_large'
+        else:
+            status, code = 204, None
+        self.attempts.append((dict(headers), wire, decoded, status == 204))
+        content = json.dumps({'error': {'code': code}}).encode() if code else b''
+        return SimpleNamespace(status_code=status, content=content)
