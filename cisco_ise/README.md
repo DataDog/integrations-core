@@ -117,7 +117,7 @@ ISE logs unknown users as `INVALID`, so failed logins by non-existing users are 
 
 #### Finding failed logins
 
-<!-- RFC Q5 (decided): no evt.outcome; the pipeline keeps ISE's own code, category, and class. -->
+<!-- RFC Q5 (proposed answer): no evt.outcome; the pipeline keeps ISE code, category, and class as sent. -->
 
 ISE has no single success or failure field, so the pipeline keeps the values ISE sends and doesn't classify them. To find failures, use the Logging Category (`@cisco_ise.category:Failed_Attempts`), the message class (`@evt.name:Failed-Attempt`), or the message code. Common codes:
 
