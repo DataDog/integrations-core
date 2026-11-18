@@ -153,12 +153,36 @@ def test_stream_binary_proof_query_preserves_nul_payload_exactly(monkeypatch):
     assert page == csv_record([b'"\\u0000ab"'])
 
 
-def test_stream_requires_dbname_match_even_when_host_and_port_match():
+def test_stream_requires_dbname_match_even_when_host_and_port_match(monkeypatch):
+    patch_upload_credentials(monkeypatch)
     check = make_check(server='localhost', port=8123, db='default')
 
     events = collect_events(valid_request(dbname='analytics'), check)
 
     assert_failed_event(events, 'target_not_found')
+
+
+def missing_target_case():
+    return make_check(), valid_request(dbname='analytics'), 'target_not_found'
+
+
+def missing_pool_manager_case():
+    check = make_check()
+    check._pool_manager = None
+    return check, valid_request(), 'target_unavailable'
+
+
+@pytest.mark.parametrize('case', [missing_target_case, missing_pool_manager_case])
+def test_stream_aborts_upload_session_on_admission_failure(monkeypatch, case):
+    """The worker waits on the upload session until its deadline unless the executor aborts it."""
+    patch_upload_credentials(monkeypatch)
+    check, request, code = case()
+    fake = FakeUploadClient()
+
+    events = collect_events(request, check, upload_client=fake)
+
+    assert_failed_event(events, code)
+    assert fake.abort_calls == 1
 
 
 def test_stream_credentials_unavailable_without_agent_api_key(monkeypatch):
@@ -167,10 +191,14 @@ def test_stream_credentials_unavailable_without_agent_api_key(monkeypatch):
 
     monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
 
-    events = collect_events(valid_request(), make_check())
+    fake = FakeUploadClient()
+
+    events = collect_events(valid_request(), make_check(), upload_client=fake)
 
     assert_failed_event(events, 'credentials_unavailable')
     assert events[0].event_type == 'error'
+    # Without an API key the abort cannot authenticate, so none is sent.
+    assert fake.abort_calls == 0
 
 
 class HeaderRecordingUploadClient(FakeUploadClient):
@@ -963,6 +991,7 @@ def test_producer_brackets_the_abort_and_fails_the_root_on_a_produce_failure(mon
 
 
 def test_producer_fails_the_root_for_an_admission_failure(monkeypatch):
+    patch_upload_credentials(monkeypatch)
     tracing = RecordingTracing()
     monkeypatch.setattr(rq_tracing, 'open_remote_query_producer_tracing', recording_tracing_factory(tracing))
     request = valid_request()
@@ -972,11 +1001,13 @@ def test_producer_fails_the_root_for_an_admission_failure(monkeypatch):
     events = collect_events(request, check, clickhouse_client=make_client(rows=[[1]]))
 
     assert_failed_event(events, 'target_not_found')
-    # The admission failure still closes the root with the failure code and zero
-    # counters; no page, abort, or produce boundary was ever reached.
+    # The admission failure aborts the session and still closes the root with the failure
+    # code and zero counters; no page or produce boundary was ever reached.
     assert tracing.calls == [
         ('factory', None, 'clickhouse'),
         ('open_root', RUN_ID, UPLOAD_ID),
+        'abort_span:open',
+        'abort_span:close',
         ('fail', 'target_not_found', 0),
         'close',
     ]

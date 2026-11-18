@@ -657,7 +657,8 @@ def resolve_upload_credentials(
 
 
 def safe_abort(client: UploadClient, creds: UploadCredentials) -> None:
-    if not creds.base_url or not creds.upload_id:
+    """Abort the upload session best-effort; an Agent without an API key cannot authenticate the abort."""
+    if not creds.base_url or not creds.upload_id or not creds.api_key:
         return
     try:
         client.abort(creds)

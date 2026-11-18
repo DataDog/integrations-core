@@ -146,12 +146,15 @@ def test_stream_credentials_unavailable_without_agent_api_key(monkeypatch):
 
     monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
     pool = FakePool(rows=[(1,)])
+    fake = FakeUploadClient()
 
-    events = collect_events(valid_request(), make_check(pool=pool), client=FakeUploadClient())
+    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
 
     assert_failed_event(events, 'credentials_unavailable')
     assert events[0].event_type == 'error'
     assert pool.requested_dbnames == []
+    # Without an API key the abort cannot authenticate, so none is sent.
+    assert fake.abort_calls == 0
 
 
 class HeaderRecordingUploadClient(FakeUploadClient):
@@ -205,6 +208,39 @@ def test_stream_missing_pool_returns_credentials_unavailable(monkeypatch):
     events = collect_events(valid_request(), check, client=FakeUploadClient())
 
     assert_failed_event(events, 'credentials_unavailable')
+
+
+def missing_target_case():
+    return make_check(), valid_request(dbname='other_database'), 'target_not_found'
+
+
+def unnamed_database_case():
+    request = valid_request()
+    request['target'] = {'database_instance': 'Postgres/Primary-A'}
+    return make_check(dbname=None, check_database_identifier='Postgres/Primary-A'), request, 'target_unavailable'
+
+
+def missing_pool_case():
+    check = make_check()
+    check.db_pool = None
+    return check, valid_request(), 'credentials_unavailable'
+
+
+def closed_pool_case():
+    return make_check(pool=FakePool(closed=True)), valid_request(), 'target_unavailable'
+
+
+@pytest.mark.parametrize('case', [missing_target_case, unnamed_database_case, missing_pool_case, closed_pool_case])
+def test_stream_aborts_upload_session_on_admission_failure(monkeypatch, case):
+    """The worker waits on the upload session until its deadline unless the executor aborts it."""
+    patch_upload_credentials(monkeypatch)
+    check, request, code = case()
+    fake = FakeUploadClient()
+
+    events = collect_events(request, check, client=fake)
+
+    assert_failed_event(events, code)
+    assert fake.abort_calls == 1
 
 
 def test_entry_dispatches_resolve_target_by_operation(runtime_check):
@@ -1008,11 +1044,13 @@ def test_producer_fails_the_root_for_an_admission_failure(monkeypatch):
     events = collect_events(valid_request(dbname='other_database'), make_check(), client=FakeUploadClient())
 
     assert_failed_event(events, 'target_not_found')
-    # The admission failure still closes the root with the failure code and zero
-    # counters; no page, abort, or produce boundary was ever reached.
+    # The admission failure aborts the session and still closes the root with the failure
+    # code and zero counters; no page or produce boundary was ever reached.
     assert tracing.calls == [
         ('factory', None, 'postgres'),
         ('open_root', RUN_ID, UPLOAD_ID),
+        'abort_span:open',
+        'abort_span:close',
         ('fail', 'target_not_found', 0),
         'close',
     ]
