@@ -123,6 +123,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1793712220472
         usr:
           name: "luis_test"
@@ -245,6 +246,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1793712244327
         usr:
           name: "INVALID"
@@ -351,6 +353,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1793712246383
         usr:
           name: "luis_test"
@@ -439,6 +442,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1793712223766
         usr:
           name: "luis_test"
@@ -537,6 +541,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1793715494276
         usr:
           name: "luis_test"
@@ -635,6 +640,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1793715501202
         usr:
           name: "luis_test"
@@ -709,6 +715,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1793715495596
         usr:
           name: "luis_test"
@@ -807,6 +814,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1793715498950
         usr:
           name: "luis_test"
@@ -845,6 +853,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1793715518339
         usr:
           name: "admin"
@@ -881,6 +890,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1793712456437
       message: "2026-11-03 13:27:36.437 +00:00 0000001600 52000 NOTICE Configuration-Changes: Added configuration, ConfigVersionId=124, AdminInterface=CLI, ConfigChangeData=object created: Value=Docker ise-prometheus-container MemUsagePerLimitPercentage limit is exceeded( Limit: 1.56% \\, Actual: 9.31% ), ObjectType=DockerMetrics, ObjectName=DockerMetrics, Component=System Configuration, ObjectInternalID=unknown,"
       status: "notice"
@@ -900,7 +910,9 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
       message: " IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test,"
+      status: "notice"
       tags:
         - "source:LOGS_SOURCE"
   - sample: "<181>Nov 10 16:42:33 ise-1 CISE_Passed_Authentications 0000000025 1 0 2026-11-10 16:42:33.861 +00:00 0000000290 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=99, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=00-1B-54-10-13-01, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=001b54101301, Service-Type=Call Check, Called-Station-ID=00-11-22-BB-00-01, Calling-Station-ID=00-1B-54-10-13-01, NAS-Identifier=luis-eap-nad, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/13, cisco-av-pair=service-type=Call Check, cisco-av-pair=method=mab, cisco-av-pair=audit-session-id=luisx101301, OriginalUserName=001b54101301, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, RadiusFlowType=WiredMAB, SSID=00-11-22-BB-00-01, AcsSessionID=ise-1/583701566/5, AuthenticationIdentityStore=Internal Endpoints, AuthenticationMethod=Lookup, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=Cisco_IP_Phones, UseCase=Host Lookup, RequestLatency=21, IdentityGroup=Endpoint Identity Groups:Profiled:Cisco-IP-Phone, Step=11001, Step=11017, Step=11027, Step=15049, Step=15008, Step=15041, Step=15048, Step=15013, Step=24209, Step=24211, Step=22037, Step=15036, Step=15048, Step=15016, Step=11022, Step=24209, Step=24211, Step=11002, SelectedAuthenticationIdentityStores=Internal Endpoints, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=MAB, AuthorizationPolicyMatchedRule=Profiled Cisco IP Phones, cisco-av-pair=AuthenticationIdentityStore=Internal Endpoints, UserType=Host, CPMSessionID=luisx101301, EndPointMACAddress=00-1B-54-10-13-01, PostureAssessmentStatus=NotApplicable, EndPointMatchedProfile=Cisco-Device, DeviceRegistrationStatus=notRegistered, ISEPolicySetName=Default, IdentitySelectionMatchedRule=MAB, StepData=6= Normalised Radius.RadiusFlowType, StepData=7=Internal Endpoints, StepData=12= Radius.NAS-Port-Type, TotalAuthenLatency=21, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, HostIdentityGroup=Endpoint Identity Groups:Profiled:Cisco-IP-Phone, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=Endpoint Identity Groups:Profiled:Cisco-IP-Phone, Response={UserName=00:1B:54:10:13:01; User-Name=00-1B-54-10-13-01; Class=CACS:luisx101301:ise-1/583701566/5; cisco-av-pair=device-traffic-class=voice; cisco-av-pair=ACS:CiscoSecure-Defined-ACL=#ACSACL#-IP-PERMIT_ALL_IPV4_TRAFFIC-57f6b0d3; cisco-av-pair=profile-name=Cisco-Device; LicenseTypes=515; },"
@@ -986,6 +998,8 @@ tests:
             cisco-av-pair=audit-session-id: "luisx101301"
             cisco-av-pair=method: "mab"
             cisco-av-pair=service-type: "Call Check"
+          authorization:
+            dacl: "#ACSACL#-IP-PERMIT_ALL_IPV4_TRAFFIC-57f6b0d3"
           category: "Passed_Authentications"
           endpoint:
             mac: "00:1b:54:10:13:01"
@@ -1019,6 +1033,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794328953861
         usr:
           name: "00-1B-54-10-13-01"
@@ -1136,11 +1151,13 @@ tests:
           site:
             level1: "Spain"
             level2: "Madrid"
+          ssid: "luis-corp"
         evt:
           name: "Passed-Authentication"
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794328954161
         usr:
           name: "AA-BB-CC-10-14-01"
@@ -1356,6 +1373,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794328956116
         usr:
           name: "luis_test"
@@ -1526,11 +1544,13 @@ tests:
           site:
             level1: "Spain"
             level2: "Madrid"
+          ssid: "luis-corp"
         evt:
           name: "Passed-Authentication"
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794328975383
         usr:
           name: "luis_tls_01"
@@ -1665,6 +1685,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794328976473
         usr:
           name: "USERNAME"
@@ -1835,6 +1856,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794329079632
         usr:
           name: "luis_test"
@@ -1875,6 +1897,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794328974242
         usr:
           name: "USERNAME"
@@ -1976,6 +1999,10 @@ tests:
             cisco-av-pair=FQSubjectName: "9273fe30-8c01-11e6-996c-525400b48521#luis_test"
             cisco-av-pair=UniqueSubjectID: "237198dd9352df10277534c78aacf3ef916b3dc4"
             cisco-av-pair=audit-session-id: "luisx105101"
+          authorization:
+            dacl: "#ACSACL#-IP-LUIS_DACL-6af5820f"
+            sgt: "0004-00"
+            vlan: "100"
           category: "Passed_Authentications"
           endpoint:
             mac: "aa:bb:cc:10:51:01"
@@ -2007,6 +2034,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794475804211
         usr:
           name: "luis_test"
@@ -2072,6 +2100,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794475814113
         usr:
           name: "#ACSACL#-IP-LUIS_DACL-6af5820f"
@@ -2149,6 +2178,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794475826046
         usr:
           name: "luis_test"
@@ -2174,6 +2204,8 @@ tests:
             Location: "Location#All Locations#Spain#Madrid"
             ProfilerServer: "ise-1.lab.devnetsandbox.local"
           category: "Profiler"
+          endpoint:
+            properties: "PolicyVersion=0\\,IPSEC=IPSEC#Is IPSEC Device#No\\,EndPointPolicyID=2ac6a950-8c00-11e6-996c-525400b48521\\,LogicalProfile=\\,EndPointVersion=1\\,FirstCollection=1794475835441\\,CacheUpdateTime=1794475835457\\,StaticAssignment=false\\,User-Name=luis_test\\,NmapScanCount=0\\,NetworkDeviceName=luis_mac_radius_sim\\,AAA-Server=ise-1\\,MessageCode=3002\\,epid=epid:707524704360329216\\,Device Type=Device Type#All Device Types#RadiusSimulator\\,Device IP Address=192.168.254.11\\,PortalUser=\\,NetworkDeviceGroups=IPSEC#Is IPSEC Device#No\\, Location#All Locations#Spain#Madrid\\, Device Type#All Device Types#RadiusSimulator\\,BYODRegistration=Unknown\\,Calling-Station-ID=3C-A9-F4-10-61-01\\,Total Certainty Factor=5\\,Network Device Profile=Cisco\\,IdentityGroupID=aa10ae00-8bff-11e6-996c-525400b48521\\,PostureApplicable=Yes\\,NAS-Identifier=luis-eap-nad\\,NmapSubnetScanID=0\\,NAS-Port-Type=Ethernet\\,TimeToProfile=4\\,DeviceRegistrationStatus=NotRegistered\\,TotalAuthenLatency=4\\,MatchedPolicyID=2ac6a950-8c00-11e6-996c-525400b48521\\,Service-Type=Framed\\,FeedService=false\\,StaticGroupAssignment=false\\,NAS-Port-Id=GigabitEthernet1/0/61\\,LastActivity=1794475835441\\,LastNmapScanTime=0\\,ClientLatency=0\\,UpdateTime=0\\,Framed-IP-Address=10.99.1.61\\,Location=Location#All Locations#Spain#Madrid"
           message_class: "Profiler"
           message_code: "80002"
           message_id: "0000052528"
@@ -2192,6 +2224,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 182
+          severity: "info"
         timestamp: 1794475835459
       message: "2026-11-12 09:30:35.459 +00:00 0000055005 80002 INFO  Profiler: Profiler EndPoint profiling event occurred, ConfigVersionId=430, EndpointCertainityMetric=5, EndpointIPAddress=10.99.1.61, EndpointMacAddress=3C:A9:F4:10:61:01, EndpointMatchedPolicy=Intel-Device, EndpointOUI=Intel Corporate, EndpointPolicy=Intel-Device, EndpointProperty=PolicyVersion=0\\,IPSEC=IPSEC#Is IPSEC Device#No\\,EndPointPolicyID=2ac6a950-8c00-11e6-996c-525400b48521\\,LogicalProfile=\\,EndPointVersion=1\\,FirstCollection=1794475835441\\,CacheUpdateTime=1794475835457\\,StaticAssignment=false\\,User-Name=luis_test\\,NmapScanCount=0\\,NetworkDeviceName=luis_mac_radius_sim\\,AAA-Server=ise-1\\,MessageCode=3002\\,epid=epid:707524704360329216\\,Device Type=Device Type#All Device Types#RadiusSimulator\\,Device IP Address=192.168.254.11\\,PortalUser=\\,NetworkDeviceGroups=IPSEC#Is IPSEC Device#No\\, Location#All Locations#Spain#Madrid\\, Device Type#All Device Types#RadiusSimulator\\,BYODRegistration=Unknown\\,Calling-Station-ID=3C-A9-F4-10-61-01\\,Total Certainty Factor=5\\,Network Device Profile=Cisco\\,IdentityGroupID=aa10ae00-8bff-11e6-996c-525400b48521\\,PostureApplicable=Yes\\,NAS-Identifier=luis-eap-nad\\,NmapSubnetScanID=0\\,NAS-Port-Type=Ethernet\\,TimeToProfile=4\\,DeviceRegistrationStatus=NotRegistered\\,TotalAuthenLatency=4\\,MatchedPolicyID=2ac6a950-8c00-11e6-996c-525400b48521\\,Service-Type=Framed\\,FeedService=false\\,StaticGroupAssignment=false\\,NAS-Port-Id=GigabitEthernet1/0/61\\,LastActivity=1794475835441\\,LastNmapScanTime=0\\,ClientLatency=0\\,UpdateTime=0\\,Framed-IP-Address=10.99.1.61\\,Location=Location#All Locations#Spain#Madrid, EndpointSourceEvent=RADIUS Probe, EndpointIdentityGroup=Profiled, ProfilerServer=ise-1.lab.devnetsandbox.local,"
       status: "info"
@@ -2245,6 +2278,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794478308393
         usr:
           name: "INVALID"
@@ -2297,6 +2331,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 182
+          severity: "info"
         timestamp: 1794478400785
         usr:
           name: "SelfRegistration"
@@ -2361,6 +2396,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794478517514
         usr:
           name: "luistest"
@@ -2387,6 +2423,8 @@ tests:
             OperatingSystem: "OS X"
             ProfilerServer: "ise-1.lab.devnetsandbox.local"
           category: "Profiler"
+          endpoint:
+            properties: "PortalUser.GuestType=Daily (default)\\,AuthenticationMethod=Lookup\\,DestinationPort=1812\\,PortalUser.GuestStatus=Active\\,allowEasyWiredSession=false\\,PostureExpiry=\\,SelectedAccessService=Default Network Access\\,NetworkDeviceName=luis_mac_radius_sim\\,DestinationIPAddress=10.10.20.77\\,PortalUser.EmailAddress=luis@test.com\\,SelectedAuthenticationIdentityStores=Internal Endpoints\\,MessageCode=5418\\,PortalUser.PhoneNumber=+6881111\\,epid=epid:707534784984117248\\,Device Type=Device Type#All Device Types#RadiusSimulator\\,MacAddress=AA:BB:CC:11:12:01\\,AuthenticationStatus=UnknownUser\\,NetworkDeviceGroups=IPSEC#Is IPSEC Device#No\\, Location#All Locations#Spain#Madrid\\, Device Type#All Device Types#RadiusSimulator\\,IdentitySelectionMatchedRule=MAB\\,BYODRegistration=No\\,OriginalUserName=aabbcc111201\\,PreviousDeviceRegistrationStatus=NotRegistered\\,Total Certainty Factor=110\\,UserType=NON_GUEST\\,IdentityGroupID=aa178bd0-8bff-11e6-996c-525400b48521\\,NAS-Identifier=luis-eap-nad\\,NAS-Port-Type=Wireless - IEEE 802.11\\,StepData=6= Normalised Radius.RadiusFlowType\\, 7=Internal Endpoints\\, 16= Radius.NAS-Port-Type\\, 17= Network Access.UserName\\, 18= IdentityGroup.Name (2 times)\\, 19= EndPoints.LogicalProfile\\,RegistrationTimeStamp=1794478760660\\,PhoneID=\\,TimeToProfile=521072\\,DeviceRegistrationStatus=Pending\\,RadiusFlowType=WirelessMAB\\,ResponseTime=134\\,SSID=00-11-22-AA-00-01:luis-guest\\,CreateTime=1794478239647\\,UseCase=Host Lookup\\,StaticGroupAssignment=true\\,DTLSSupport=Unknown\\,LastActivity=1794478760670\\,LastNmapScanTime=1794478321924\\,ClientLatency=0\\,UpdateTime=0\\,NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c\\,NetworkDeviceProfileName=Cisco\\,IpAddress=192.168.254.11\\,PostureAssessmentStatus=Pending\\,PolicyVersion=0\\,IPSEC=IPSEC#Is IPSEC Device#No\\,AuditSessionId=luisx111201\\,EndPointPolicyID=af55d860-4fbf-11ed-a871-0050568f5811\\,LogicalProfile=\\,EndPointVersion=16\\,FirstCollection=1794478239606\\,CacheUpdateTime=1794478760679\\,IdentityStoreGUID=9eee92b0-8c01-11e6-996c-525400b48521\\,IdentityPolicyMatchedRule=MAB\\,StaticAssignment=false\\,User-Name=aabbcc111201\\,NmapScanCount=2\\,AAA-Server=ise-1\\,LastAUPAccepted=1794478526155\\,IsThirdPartyDeviceFlow=false\\,162-udp=snmptrap\\,IsRegistered=true\\,Device IP Address=192.168.254.11\\,PortalUser.LastName=Test\\,PortalUser=luistest\\,AllowedProtocolMatchedRule=MAB\\,PortalUser.FirstName=Luis\\,Calling-Station-ID=AA-BB-CC-11-12-01\\,FailureReason=22056 Subject not found in the applicable identity store(s)\\,Network Device Profile=Cisco\\,MDMServerID=\\,Called-Station-ID=00-11-22-AA-00-01:luis-guest\\,OperatingSystem=OS X\\,PostureApplicable=Yes\\,PortalUser.Location=San Jose\\,NmapSubnetScanID=0\\,PreviousMACAddress=AA:BB:CC:11:12:01\\,Portal.Name=Self-Registered Guest Portal (default)\\,Device Identifier=\\,TotalAuthenLatency=23\\,MatchedPolicyID=af55d860-4fbf-11ed-a871-0050568f5811\\,PortalUser.CreationType=Self Registration Guest\\,AUPAccepted=true\\,161-udp=snmp\\,Service-Type=Call Check\\,PortalName=Self-Registered Guest Portal (default)\\,UserName=INVALID\\,FeedService=false\\,SelectedAuthorizationProfiles=Cisco_WebAuth\\,host-name=\\,Response=\\{User-Name=AA-BB-CC-11-12-01\\; Class=CACS:luisx111201:ise-1/583701566/43\\; cisco-av-pair=url-redirect-acl=ACL_WEBAUTH_REDIRECT\\; cisco-av-pair=url-redirect=https://ise-1.lab.devnetsandbox.local:8443/portal/gateway?sessionId=luisx111201&portal=f09aaac2-f101-45ed-832f-fda201ab7639&action=cwa&token=07d2941ce8888f58087b1309f8298374\\; LicenseTypes=1\\; \\}\\,EPMacAddress=AA:BB:CC:11:12:01\\,EndPointMACAddress=AA-BB-CC-11-12-01\\,Framed-IP-Address=192.168.254.11\\,AuthorizationPolicyMatchedRule=Wi-Fi_Redirect_to_Guest_Login\\,Device Name=AA:BB:CC:11:12:01\\,UniqueSubjectID=8123e0641375fcf055590d4af10c079db5bdf74d\\,Location=Location#All Locations#Spain#Madrid"
           message_class: "Profiler"
           message_code: "80002"
           message_id: "0000052639"
@@ -2405,6 +2443,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 182
+          severity: "info"
         timestamp: 1794478760682
       message: "2026-11-12 10:19:20.682 +00:00 0000055574 80002 INFO  Profiler: Profiler EndPoint profiling event occurred, ConfigVersionId=441, OperatingSystem=OS X, EndpointCertainityMetric=110, EndpointIPAddress=192.168.254.11, EndpointMacAddress=AA:BB:CC:11:12:01, EndpointMatchedPolicy=OS_X_Catalina-Workstation, EndpointOUI=UNKNOWN, EndpointPolicy=OS_X_Catalina-Workstation, EndpointProperty=PortalUser.GuestType=Daily (default)\\,AuthenticationMethod=Lookup\\,DestinationPort=1812\\,PortalUser.GuestStatus=Active\\,allowEasyWiredSession=false\\,PostureExpiry=\\,SelectedAccessService=Default Network Access\\,NetworkDeviceName=luis_mac_radius_sim\\,DestinationIPAddress=10.10.20.77\\,PortalUser.EmailAddress=luis@test.com\\,SelectedAuthenticationIdentityStores=Internal Endpoints\\,MessageCode=5418\\,PortalUser.PhoneNumber=+6881111\\,epid=epid:707534784984117248\\,Device Type=Device Type#All Device Types#RadiusSimulator\\,MacAddress=AA:BB:CC:11:12:01\\,AuthenticationStatus=UnknownUser\\,NetworkDeviceGroups=IPSEC#Is IPSEC Device#No\\, Location#All Locations#Spain#Madrid\\, Device Type#All Device Types#RadiusSimulator\\,IdentitySelectionMatchedRule=MAB\\,BYODRegistration=No\\,OriginalUserName=aabbcc111201\\,PreviousDeviceRegistrationStatus=NotRegistered\\,Total Certainty Factor=110\\,UserType=NON_GUEST\\,IdentityGroupID=aa178bd0-8bff-11e6-996c-525400b48521\\,NAS-Identifier=luis-eap-nad\\,NAS-Port-Type=Wireless - IEEE 802.11\\,StepData=6= Normalised Radius.RadiusFlowType\\, 7=Internal Endpoints\\, 16= Radius.NAS-Port-Type\\, 17= Network Access.UserName\\, 18= IdentityGroup.Name (2 times)\\, 19= EndPoints.LogicalProfile\\,RegistrationTimeStamp=1794478760660\\,PhoneID=\\,TimeToProfile=521072\\,DeviceRegistrationStatus=Pending\\,RadiusFlowType=WirelessMAB\\,ResponseTime=134\\,SSID=00-11-22-AA-00-01:luis-guest\\,CreateTime=1794478239647\\,UseCase=Host Lookup\\,StaticGroupAssignment=true\\,DTLSSupport=Unknown\\,LastActivity=1794478760670\\,LastNmapScanTime=1794478321924\\,ClientLatency=0\\,UpdateTime=0\\,NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c\\,NetworkDeviceProfileName=Cisco\\,IpAddress=192.168.254.11\\,PostureAssessmentStatus=Pending\\,PolicyVersion=0\\,IPSEC=IPSEC#Is IPSEC Device#No\\,AuditSessionId=luisx111201\\,EndPointPolicyID=af55d860-4fbf-11ed-a871-0050568f5811\\,LogicalProfile=\\,EndPointVersion=16\\,FirstCollection=1794478239606\\,CacheUpdateTime=1794478760679\\,IdentityStoreGUID=9eee92b0-8c01-11e6-996c-525400b48521\\,IdentityPolicyMatchedRule=MAB\\,StaticAssignment=false\\,User-Name=aabbcc111201\\,NmapScanCount=2\\,AAA-Server=ise-1\\,LastAUPAccepted=1794478526155\\,IsThirdPartyDeviceFlow=false\\,162-udp=snmptrap\\,IsRegistered=true\\,Device IP Address=192.168.254.11\\,PortalUser.LastName=Test\\,PortalUser=luistest\\,AllowedProtocolMatchedRule=MAB\\,PortalUser.FirstName=Luis\\,Calling-Station-ID=AA-BB-CC-11-12-01\\,FailureReason=22056 Subject not found in the applicable identity store(s)\\,Network Device Profile=Cisco\\,MDMServerID=\\,Called-Station-ID=00-11-22-AA-00-01:luis-guest\\,OperatingSystem=OS X\\,PostureApplicable=Yes\\,PortalUser.Location=San Jose\\,NmapSubnetScanID=0\\,PreviousMACAddress=AA:BB:CC:11:12:01\\,Portal.Name=Self-Registered Guest Portal (default)\\,Device Identifier=\\,TotalAuthenLatency=23\\,MatchedPolicyID=af55d860-4fbf-11ed-a871-0050568f5811\\,PortalUser.CreationType=Self Registration Guest\\,AUPAccepted=true\\,161-udp=snmp\\,Service-Type=Call Check\\,PortalName=Self-Registered Guest Portal (default)\\,UserName=INVALID\\,FeedService=false\\,SelectedAuthorizationProfiles=Cisco_WebAuth\\,host-name=\\,Response=\\{User-Name=AA-BB-CC-11-12-01\\; Class=CACS:luisx111201:ise-1/583701566/43\\; cisco-av-pair=url-redirect-acl=ACL_WEBAUTH_REDIRECT\\; cisco-av-pair=url-redirect=https://ise-1.lab.devnetsandbox.local:8443/portal/gateway?sessionId=luisx111201&portal=f09aaac2-f101-45ed-832f-fda201ab7639&action=cwa&token=07d2941ce8888f58087b1309f8298374\\; LicenseTypes=1\\; \\}\\,EPMacAddress=AA:BB:CC:11:12:01\\,EndPointMACAddress=AA-BB-CC-11-12-01\\,Framed-IP-Address=192.168.254.11\\,AuthorizationPolicyMatchedRule=Wi-Fi_Redirect_to_Guest_Login\\,Device Name=AA:BB:CC:11:12:01\\,UniqueSubjectID=8123e0641375fcf055590d4af10c079db5bdf74d\\,Location=Location#All Locations#Spain#Madrid, EndpointSourceEvent=GUEST Portal, EndpointUserAgent=Mozilla/5.0 (Macintosh\\; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML\\, like Gecko) Chrome/157.0.0.0 Safari/537.36, EndpointIdentityGroup=GuestEndpoints, ProfilerServer=ise-1.lab.devnetsandbox.local,"
       status: "info"
@@ -2481,6 +2520,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794478775540
       message: "2026-11-12 10:19:35.540 +00:00 0000055580 5417 NOTICE Dynamic-Authorization: Dynamic Authorization failed, ConfigVersionId=441, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, RadiusPacketType=CoARequest, NetworkDeviceName=luis_mac_radius_sim, NAS-IP-Address=192.168.254.11, Calling-Station-ID=AA-BB-CC-11-12-01, Event-Timestamp=1794478765, cisco-av-pair=subscriber:reauthenticate-type=last, cisco-av-pair=subscriber:command=reauthenticate, cisco-av-pair=audit-session-id=luisx111201, NetworkDeviceProfileName=Cisco, Device CoA type=Cisco CoA, Device CoA port=1700, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=1e590d4e-040d-4725-8939-7e84c79ccee6, RequestLatency=10009, FailureReason=11213 No response received from Network Access Device after sending a Dynamic Authorization request, Step=11204, Step=11220, Step=11100, Step=11104, Step=11213, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, CPMSessionID=luisx111201, StepLatency=3=10008, StepData=2=( port = 1700 \\, type = Cisco CoA ), TotalAuthenLatency=3477413109, ClientLatency=3477403100, CoASourceComponent=GUEST, CoAReason=Guest authenticated for network access, CoAType=Reauthentication - last, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No,"
       status: "notice"
@@ -2513,6 +2553,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 179
+          severity: "error"
         timestamp: 1794478775541
       message: "2026-11-12 10:19:35.541 +00:00 0000055583 88015 ERROR MyDevices: Failed to perform a CoA re-authentication, ConfigVersionId=441, EPMacAddress=AA-BB-CC-11-12-01, NADAddress=192.168.254.11, EndpointCoA=Reauth, CPMSessionID=luisx111201,"
       status: "error"
@@ -2592,6 +2633,8 @@ tests:
             cisco-av-pair=audit-session-id: "luisx111201"
             cisco-av-pair=method: "mab"
             cisco-av-pair=service-type: "Call Check"
+          authorization:
+            sgt: "0006-00"
           category: "Passed_Authentications"
           endpoint:
             mac: "aa:bb:cc:11:12:01"
@@ -2621,11 +2664,13 @@ tests:
           site:
             level1: "Spain"
             level2: "Madrid"
+          ssid: "luis-guest"
         evt:
           name: "Passed-Authentication"
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794478796610
         usr:
           name: "luistest"
@@ -2661,6 +2706,7 @@ tests:
         syslog:
           hostname: "ise-1"
           priority: 181
+          severity: "notice"
         timestamp: 1794479204746
         usr:
           name: "INVALID"
