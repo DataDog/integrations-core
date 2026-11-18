@@ -1458,7 +1458,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1794997201000
  -
-  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=data, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\jdoe, dstuser=, app=web-browsing, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465, repeatcnt=1, network.client.port=51022, network.destination.port=443, natsport=3230, natdport=443, flags=0x400000, proto=tcp, evt.name=alert, misc=\"payroll, Q3.xlsx\", threatid=\"Credit Card Numbers(52000)\", category=any, severity=high, direction=client-to-server, seqno=7699920671375145866, actionflags=0x0, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=United States, contenttype=, pcap_id=0, filedigest=, cloud=, url_idx=0, http.useragent=\"\", filetype=, xff=, referer=, sender=, subject=, recipient=, reportid=0, vsys_name=, device_name=fw-a, src_uuid=, dst_uuid=, http_method=, tunnel_id=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, thr_category=data-filtering, contentver=AppThreat-9173-10354, assoc_id=0, ppid=4294967295, http_headers=, url_category_list=, rule_uuid=d6e5f4a3-3333-4444-5555-666677778888, http2_connection=0, dynusergroup_name=, xff_ip=, src_osfamily=, src_osversion=, src_host=, src_mac=, dst_osfamily=, dst_osversion=, dst_host=, dst_mac=, container_id=, pod_namespace=, pod_name=, src_edl=, dst_edl=, hostid=, serialnumber=, domain_edl=, src_dag=, dst_dag=, partial_hash=, high_res_timestamp=2026-11-18T10:21:15.123+00:00, reason=, justification="
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=data, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\jdoe, dstuser=, app=web-browsing, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465, repeatcnt=1, network.client.port=51022, network.destination.port=443, natsport=3230, natdport=443, flags=0x400000, proto=tcp, evt.name=alert, misc=\"payroll, Q3.xlsx\", threatid=\"Credit Card Numbers\", category=any, severity=high, direction=client-to-server, seqno=7699920671375145866, actionflags=0x0, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=United States, contenttype=, pcap_id=0, filedigest=, cloud=, url_idx=0, http.useragent=\"\", filetype=, xff=, referer=, sender=, subject=, recipient=, reportid=0, vsys_name=, device_name=fw-a, src_uuid=, dst_uuid=, http_method=, tunnel_id=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, thr_category=data-filtering, contentver=AppThreat-9173-10354, assoc_id=0, ppid=4294967295, http_headers=, url_category_list=, rule_uuid=d6e5f4a3-3333-4444-5555-666677778888, http2_connection=0, dynusergroup_name=, xff_ip=, src_osfamily=, src_osversion=, src_host=, src_mac=, dst_osfamily=, dst_osversion=, dst_host=, dst_mac=, container_id=, pod_namespace=, pod_name=, src_edl=, dst_edl=, hostid=, serialnumber=, domain_edl=, src_dag=, dst_dag=, partial_hash=, high_res_timestamp=2026-11-18T10:21:15.123+00:00, reason=, justification="
   result:
     custom:
       actionflags: "0x0"
@@ -1542,7 +1542,7 @@ tests:
           product:
             name: "Palo Alto Networks Firewall"
             vendor_name: "Palo Alto Networks"
-          title: "Credit Card Numbers(52000)"
+          title: "Credit Card Numbers"
           uid: "016201026426-7699920671375145866"
         firewall_rule:
           name: "trust-out"
@@ -1582,7 +1582,7 @@ tests:
       source_zone: "trust"
       subtype: "data"
       thr_category: "data-filtering"
-      threatid: "Credit Card Numbers(52000)"
+      threatid: "Credit Card Numbers"
       time_generated: "2026/11/18 10:21:15"
       timestamp: "2026/11/18 10:21:17"
       tunnel: "N/A"
@@ -1592,7 +1592,7 @@ tests:
       usr:
         id: "CORP\\jdoe"
       vsys: "vsys1"
-    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=data, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\jdoe, dstuser=, app=web-browsing, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465, repeatcnt=1, network.client.port=51022, network.destination.port=443, natsport=3230, natdport=443, flags=0x400000, proto=tcp, evt.name=alert, misc=\"payroll, Q3.xlsx\", threatid=\"Credit Card Numbers(52000)\", category=any, severity=high, direction=client-to-server, seqno=7699920671375145866, actionflags=0x0, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=United States, contenttype=, pcap_id=0, filedigest=, cloud=, url_idx=0, http.useragent=\"\", filetype=, xff=, referer=, sender=, subject=, recipient=, reportid=0, vsys_name=, device_name=fw-a, src_uuid=, dst_uuid=, http_method=, tunnel_id=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, thr_category=data-filtering, contentver=AppThreat-9173-10354, assoc_id=0, ppid=4294967295, http_headers=, url_category_list=, rule_uuid=d6e5f4a3-3333-4444-5555-666677778888, http2_connection=0, dynusergroup_name=, xff_ip=, src_osfamily=, src_osversion=, src_host=, src_mac=, dst_osfamily=, dst_osversion=, dst_host=, dst_mac=, container_id=, pod_namespace=, pod_name=, src_edl=, dst_edl=, hostid=, serialnumber=, domain_edl=, src_dag=, dst_dag=, partial_hash=, high_res_timestamp=2026-11-18T10:21:15.123+00:00, reason=, justification="
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=data, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\jdoe, dstuser=, app=web-browsing, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465, repeatcnt=1, network.client.port=51022, network.destination.port=443, natsport=3230, natdport=443, flags=0x400000, proto=tcp, evt.name=alert, misc=\"payroll, Q3.xlsx\", threatid=\"Credit Card Numbers\", category=any, severity=high, direction=client-to-server, seqno=7699920671375145866, actionflags=0x0, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=United States, contenttype=, pcap_id=0, filedigest=, cloud=, url_idx=0, http.useragent=\"\", filetype=, xff=, referer=, sender=, subject=, recipient=, reportid=0, vsys_name=, device_name=fw-a, src_uuid=, dst_uuid=, http_method=, tunnel_id=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, thr_category=data-filtering, contentver=AppThreat-9173-10354, assoc_id=0, ppid=4294967295, http_headers=, url_category_list=, rule_uuid=d6e5f4a3-3333-4444-5555-666677778888, http2_connection=0, dynusergroup_name=, xff_ip=, src_osfamily=, src_osversion=, src_host=, src_mac=, dst_osfamily=, dst_osversion=, dst_host=, dst_mac=, container_id=, pod_namespace=, pod_name=, src_edl=, dst_edl=, hostid=, serialnumber=, domain_edl=, src_dag=, dst_dag=, partial_hash=, high_res_timestamp=2026-11-18T10:21:15.123+00:00, reason=, justification="
     status: "error"
     tags:
      - "source:LOGS_SOURCE"
@@ -1872,12 +1872,12 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
  -
-  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15,\tserial=016201026426,\ttype=CONFIG,\tsubtype=0,\t network.client.ip=10.60.0.5,\tvsys=vsys1,\tevt.name=set,\tusr.id=admin,\tclient=Web,\tevt.outcome=Succeeded,\tpath=\" network interface ethernet  ethernet1/1 layer3 ip\", before_change_detail=\"ip: 10.0.0.1/24, mtu=1500\",\tafter_change_detail=\"ip: 10.0.0.2/24, mtu=1500\",\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=, device_name=fw-a, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15,\tserial=016201026426,\ttype=CONFIG,\tsubtype=0,\t network.client.ip=10.60.0.5,\tvsys=vsys1,\tevt.name=set,\tusr.id=admin,\tclient=Web,\tevt.outcome=Succeeded,\tpath=\" network interface ethernet  ethernet1/1 layer3 ip\", before_change_detail=\"/config/devices/entry[@name='localhost.localdomain']/network/interface/ethernet/entry[@name='ethernet1/1']/layer3/ip/entry[@name='10.0.0.1/24']\",\tafter_change_detail=\"/config/devices/entry[@name='localhost.localdomain']/network/interface/ethernet/entry[@name='ethernet1/1']/layer3/ip/entry[@name='10.0.0.2/24']\",\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=, device_name=fw-a, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
   result:
     custom:
       actionflags: "0x0"
-      after_change_detail: "ip: 10.0.0.2/24, mtu=1500"
-      before_change_detail: "ip: 10.0.0.1/24, mtu=1500"
+      after_change_detail: "/config/devices/entry[@name='localhost.localdomain']/network/interface/ethernet/entry[@name='ethernet1/1']/layer3/ip/entry[@name='10.0.0.2/24']"
+      before_change_detail: "/config/devices/entry[@name='localhost.localdomain']/network/interface/ethernet/entry[@name='ethernet1/1']/layer3/ip/entry[@name='10.0.0.1/24']"
       client: "Web"
       device_name: "fw-a"
       evt:
@@ -1915,7 +1915,7 @@ tests:
       usr:
         id: "admin"
       vsys: "vsys1"
-    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15,\tserial=016201026426,\ttype=CONFIG,\tsubtype=0,\t network.client.ip=10.60.0.5,\tvsys=vsys1,\tevt.name=set,\tusr.id=admin,\tclient=Web,\tevt.outcome=Succeeded,\tpath=\" network interface ethernet  ethernet1/1 layer3 ip\", before_change_detail=\"ip: 10.0.0.1/24, mtu=1500\",\tafter_change_detail=\"ip: 10.0.0.2/24, mtu=1500\",\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=, device_name=fw-a, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15,\tserial=016201026426,\ttype=CONFIG,\tsubtype=0,\t network.client.ip=10.60.0.5,\tvsys=vsys1,\tevt.name=set,\tusr.id=admin,\tclient=Web,\tevt.outcome=Succeeded,\tpath=\" network interface ethernet  ethernet1/1 layer3 ip\", before_change_detail=\"/config/devices/entry[@name='localhost.localdomain']/network/interface/ethernet/entry[@name='ethernet1/1']/layer3/ip/entry[@name='10.0.0.1/24']\",\tafter_change_detail=\"/config/devices/entry[@name='localhost.localdomain']/network/interface/ethernet/entry[@name='ethernet1/1']/layer3/ip/entry[@name='10.0.0.2/24']\",\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=, device_name=fw-a, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
@@ -1962,7 +1962,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
  -
-  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=vulnerability, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\jdoe, dstuser=,\tapp=web-browsing,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tnatsport=3230,\tnatdport=443,\tflags=0x400000,\tproto=tcp,\t evt.name=reset-both,\tmisc=\"passwd\",\tthreatid=\"HTTP /etc/passwd Access Attempt(30852)\",\tcategory=any,\tseverity=medium,\tdirection=client-to-server,\tseqno=7699920671375145866,\tactionflags=0x0,\tnetwork.client.geoip.country.name=10.0.0.0-10.255.255.255,\tdstloc=United States,\tcontenttype=,\tpcap_id=0,\tfiledigest=,\tcloud=,\turl_idx=0,\thttp.useragent=\"\",\tfiletype=,\txff=\treferer=,\tsender=,\tsubject=,\trecipient=,\treportid=0,\tvsys_name=,\tdevice_name=fw-a,\tsrc_uuid=,\tdst_uuid=,\thttp_method=,\ttunnel_id=0, imsi=0, monitortag=, imei=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tthr_category=info-leak,\tcontentver=AppThreat-9173-10354,\tassoc_id=0,\tppid=4294967295,\thttp_headers=, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=vulnerability, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\jdoe, dstuser=,\tapp=web-browsing,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tnatsport=3230,\tnatdport=443,\tflags=0x400000,\tproto=tcp,\t evt.name=reset-both,\tmisc=\"passwd\",\tthreatid=\"HTTP /etc/passwd Access Attempt\",\tcategory=any,\tseverity=medium,\tdirection=client-to-server,\tseqno=7699920671375145866,\tactionflags=0x0,\tnetwork.client.geoip.country.name=10.0.0.0-10.255.255.255,\tdstloc=United States,\tcontenttype=,\tpcap_id=0,\tfiledigest=,\tcloud=,\turl_idx=0,\thttp.useragent=\"\",\tfiletype=,\txff=\treferer=,\tsender=,\tsubject=,\trecipient=,\treportid=0,\tvsys_name=,\tdevice_name=fw-a,\tsrc_uuid=,\tdst_uuid=,\thttp_method=,\ttunnel_id=0, imsi=0, monitortag=, imei=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tthr_category=info-leak,\tcontentver=AppThreat-9173-10354,\tassoc_id=0,\tppid=4294967295,\thttp_headers=, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
   result:
     custom:
       actionflags: "0x0"
@@ -2040,7 +2040,7 @@ tests:
           product:
             name: "Palo Alto Networks Firewall"
             vendor_name: "Palo Alto Networks"
-          title: "HTTP /etc/passwd Access Attempt(30852)"
+          title: "HTTP /etc/passwd Access Attempt"
           uid: "016201026426-7699920671375145866"
         firewall_rule:
           name: "trust-out"
@@ -2078,7 +2078,7 @@ tests:
       source_zone: "trust"
       subtype: "vulnerability"
       thr_category: "info-leak"
-      threatid: "HTTP /etc/passwd Access Attempt(30852)"
+      threatid: "HTTP /etc/passwd Access Attempt"
       time_generated: "2026/11/18 10:21:15"
       timestamp: "2026/11/18 10:21:17"
       tunnel: "N/A"
@@ -2088,7 +2088,7 @@ tests:
       usr:
         id: "CORP\\jdoe"
       vsys: "vsys1"
-    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=vulnerability, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\jdoe, dstuser=,\tapp=web-browsing,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tnatsport=3230,\tnatdport=443,\tflags=0x400000,\tproto=tcp,\t evt.name=reset-both,\tmisc=\"passwd\",\tthreatid=\"HTTP /etc/passwd Access Attempt(30852)\",\tcategory=any,\tseverity=medium,\tdirection=client-to-server,\tseqno=7699920671375145866,\tactionflags=0x0,\tnetwork.client.geoip.country.name=10.0.0.0-10.255.255.255,\tdstloc=United States,\tcontenttype=,\tpcap_id=0,\tfiledigest=,\tcloud=,\turl_idx=0,\thttp.useragent=\"\",\tfiletype=,\txff=\treferer=,\tsender=,\tsubject=,\trecipient=,\treportid=0,\tvsys_name=,\tdevice_name=fw-a,\tsrc_uuid=,\tdst_uuid=,\thttp_method=,\ttunnel_id=0, imsi=0, monitortag=, imei=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tthr_category=info-leak,\tcontentver=AppThreat-9173-10354,\tassoc_id=0,\tppid=4294967295,\thttp_headers=, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=vulnerability, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\jdoe, dstuser=,\tapp=web-browsing,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tnatsport=3230,\tnatdport=443,\tflags=0x400000,\tproto=tcp,\t evt.name=reset-both,\tmisc=\"passwd\",\tthreatid=\"HTTP /etc/passwd Access Attempt\",\tcategory=any,\tseverity=medium,\tdirection=client-to-server,\tseqno=7699920671375145866,\tactionflags=0x0,\tnetwork.client.geoip.country.name=10.0.0.0-10.255.255.255,\tdstloc=United States,\tcontenttype=,\tpcap_id=0,\tfiledigest=,\tcloud=,\turl_idx=0,\thttp.useragent=\"\",\tfiletype=,\txff=\treferer=,\tsender=,\tsubject=,\trecipient=,\treportid=0,\tvsys_name=,\tdevice_name=fw-a,\tsrc_uuid=,\tdst_uuid=,\thttp_method=,\ttunnel_id=0, imsi=0, monitortag=, imei=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tthr_category=info-leak,\tcontentver=AppThreat-9173-10354,\tassoc_id=0,\tppid=4294967295,\thttp_headers=, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
     status: "warn"
     tags:
      - "source:LOGS_SOURCE"
@@ -2997,6 +2997,132 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1793033963000
+ -
+  sample: "<14>Nov 18 10:25:08 fw-a timestamp=2026/11/18 10:25:08, serial=007955000930601, type=THREAT, subtype=spyware, time_generated=2026/11/18 10:25:08, network.client.ip=10.60.2.100, network.destination.ip=8.8.8.8, natsrc=10.60.1.10, natdst=8.8.8.8, rule=trust-out, usr.id=, dstuser=,\tapp=dns-base,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957744,\trepeatcnt=1,\tnetwork.client.port=45020,\tnetwork.destination.port=53,\tnatsport=42739,\tnatdport=53,\tflags=0x403000,\tproto=udp,\t evt.name=drop-packet,\tmisc=test-malware.testpanw.com,\tthreatid=generic:test-malware.testpanw.com,\tcategory=any,\tseverity=medium,\tdirection=client-to-server,\tseqno=7699920658490546770,\tactionflags=0x0,\tnetwork.client.geoip.country.name=10.0.0.0-10.255.255.255,\tdstloc=United States,\tcontenttype=,\tpcap_id=0,\tfiledigest=,\tcloud=,\turl_idx=0,\thttp.useragent=,\tfiletype=,\txff=\treferer=,\tsender=,\tsubject=,\trecipient=,\treportid=0,\tvsys_name=,\tdevice_name=fw-a,\tsrc_uuid=,\tdst_uuid=,\thttp_method=,\ttunnel_id=, imsi=, monitortag=0, imei=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tthr_category=dns-malware,\tcontentver=AppThreat-9173-10354,\tassoc_id=0,\tppid=4294967295,\thttp_headers="
+  result:
+    custom:
+      actionflags: "0x0"
+      app: "dns-base"
+      assoc_id: 0
+      category: "any"
+      contentver: "AppThreat-9173-10354"
+      destination_zone: "untrust"
+      device_name: "fw-a"
+      direction: "client-to-server"
+      dstloc: "United States"
+      evt:
+        name: "drop-packet"
+      flags: "0x403000"
+      inbound_if: "ethernet1/2"
+      logset: "ndm-panorama"
+      misc: "test-malware.testpanw.com"
+      monitortag: 0
+      natdport: 53
+      natdst: "8.8.8.8"
+      natsport: 42739
+      natsrc: "10.60.1.10"
+      network:
+        client:
+          geoip: {}
+          ip: "10.60.2.100"
+          port: 45020
+        destination:
+          ip: "8.8.8.8"
+          port: 53
+      ocsf:
+        action: "Denied"
+        action_id: 2
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        confidence: "Unknown"
+        confidence_id: 0
+        disposition: "Dropped"
+        disposition_id: 6
+        evidences:
+         -
+          actor:
+            app_name: "dns-base"
+            session:
+              uid: "957744"
+          connection_info:
+            direction: "Unknown"
+            direction_id: 0
+            protocol_name: "udp"
+          device:
+            name: "fw-a"
+            type: "Firewall"
+            type_id: 9
+          dst_endpoint:
+            ip: "8.8.8.8"
+            port: 53
+            zone: "untrust"
+          src_endpoint:
+            ip: "10.60.2.100"
+            port: 45020
+            zone: "trust"
+        finding_info:
+          analytic:
+            category: "spyware"
+            name: "trust-out"
+            type: "Rule"
+            type_id: 1
+          product:
+            name: "Palo Alto Networks Firewall"
+            vendor_name: "Palo Alto Networks"
+          title: "generic:test-malware.testpanw.com"
+          uid: "007955000930601-7699920658490546770"
+        firewall_rule:
+          name: "trust-out"
+        is_alert: true
+        metadata:
+          event_code: "THREAT"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "007955000930601"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
+          sequence: 7699920658490546770
+          version: "1.5.0"
+        severity: "Medium"
+        severity_id: 3
+        status: "New"
+        status_detail: "drop-packet"
+        status_id: 1
+        time: 1794997508000
+      outbound_if: "ethernet1/1"
+      pan_event_time: 1794997508000
+      pan_status: "warning"
+      parent_session_id: 0
+      pcap_id: 0
+      ppid: 4294967295
+      proto: "udp"
+      repeatcnt: 1
+      reportid: 0
+      rule: "trust-out"
+      seqno: 7699920658490546770
+      serial: "007955000930601"
+      sessionid: 957744
+      severity: "medium"
+      source_zone: "trust"
+      subtype: "spyware"
+      thr_category: "dns-malware"
+      threatid: "generic:test-malware.testpanw.com"
+      time_generated: "2026/11/18 10:25:08"
+      timestamp: "2026/11/18 10:25:08"
+      tunnel: "N/A"
+      type: "THREAT"
+      url_idx: 0
+      vsys: "vsys1"
+    message: "<14>Nov 18 10:25:08 fw-a timestamp=2026/11/18 10:25:08, serial=007955000930601, type=THREAT, subtype=spyware, time_generated=2026/11/18 10:25:08, network.client.ip=10.60.2.100, network.destination.ip=8.8.8.8, natsrc=10.60.1.10, natdst=8.8.8.8, rule=trust-out, usr.id=, dstuser=,\tapp=dns-base,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957744,\trepeatcnt=1,\tnetwork.client.port=45020,\tnetwork.destination.port=53,\tnatsport=42739,\tnatdport=53,\tflags=0x403000,\tproto=udp,\t evt.name=drop-packet,\tmisc=test-malware.testpanw.com,\tthreatid=generic:test-malware.testpanw.com,\tcategory=any,\tseverity=medium,\tdirection=client-to-server,\tseqno=7699920658490546770,\tactionflags=0x0,\tnetwork.client.geoip.country.name=10.0.0.0-10.255.255.255,\tdstloc=United States,\tcontenttype=,\tpcap_id=0,\tfiledigest=,\tcloud=,\turl_idx=0,\thttp.useragent=,\tfiletype=,\txff=\treferer=,\tsender=,\tsubject=,\trecipient=,\treportid=0,\tvsys_name=,\tdevice_name=fw-a,\tsrc_uuid=,\tdst_uuid=,\thttp_method=,\ttunnel_id=, imsi=, monitortag=0, imei=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tthr_category=dns-malware,\tcontentver=AppThreat-9173-10354,\tassoc_id=0,\tppid=4294967295,\thttp_headers="
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1794997508000
  -
   sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=url, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\jdoe, dstuser=, app=web-browsing, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465, repeatcnt=1, network.client.port=51022, network.destination.port=443, natsport=3230, natdport=443, flags=0x400000, proto=tcp, evt.name=alert, misc=\"\"https://www.example.com/search?q=pan+os&lang=en\"\", threatid=\"(9999)\", category=search-engines, severity=informational, direction=client-to-server, seqno=7699920671375145866, actionflags=0x0, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=United States, contenttype=, pcap_id=0, filedigest=, cloud=, url_idx=0, http.useragent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36\", filetype=, xff=, referer=, sender=, subject=, recipient=, reportid=0, vsys_name=, device_name=fw-a, src_uuid=, dst_uuid=, http_method=get, tunnel_id=0, imsi=0, monitortag=, imei=, parent_session_id=0, parent_start_time=, tunnel=N/A, thr_category=, contentver=AppThreat-9173-10354, assoc_id=0, ppid=4294967295, http_headers=, url_category_list=, rule_uuid=d6e5f4a3-3333-4444-5555-666677778888, http2_connection=0, dynusergroup_name=, xff_ip=, src_osfamily=, src_osversion=, src_host=, src_mac=, dst_osfamily=, dst_osversion=, dst_host=, dst_mac=, container_id=, pod_namespace=, pod_name=, src_edl=, dst_edl=, hostid=, serialnumber=, domain_edl=, src_dag=, dst_dag=, partial_hash=, high_res_timestamp=2026-11-18T02:21:15.123-08:00, reason=, justification="
   result:
