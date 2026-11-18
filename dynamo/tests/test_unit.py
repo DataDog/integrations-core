@@ -6,7 +6,6 @@ from unittest import mock
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -83,7 +82,27 @@ def test_emits_critical_openmetrics_service_check_when_service_is_down(
     aggregator.assert_service_check("dynamo.openmetrics.health", ServiceCheck.CRITICAL)
 
 
-def test_check_skipped_when_gpu_monitoring_disabled(frontend_instance):
+@pytest.mark.parametrize(
+    ('instance_fixture', 'fixture_file', 'metrics'),
+    [
+        # Frontend and router metrics come from CPU nodes, so they don't need GPU monitoring.
+        pytest.param('frontend_instance', 'dynamo_frontend_metrics.txt', FRONTEND_METRICS_MOCK, id='frontend'),
+        # Worker metrics ship with the GPU monitoring SKU; only the runtime uptime every process exposes remains.
+        pytest.param('worker_instance', 'dynamo_worker_metrics.txt', ['dynamo.component.uptime_seconds'], id='worker'),
+    ],
+)
+def test_worker_metrics_require_gpu_monitoring(
+    dd_run_check, aggregator, request, instance_fixture, fixture_file, metrics
+):
+    check = DynamoCheck("dynamo", {}, [request.getfixturevalue(instance_fixture)])
+    mock_response = MockResponse(file_path=get_fixture_path(fixture_file))
+
     with mock.patch.dict(datadog_agent._config, {'gpu.enabled': False}):
-        with pytest.raises(SkipInstanceError):
-            DynamoCheck("dynamo", {}, [frontend_instance])
+        with mock.patch('requests.Session.get', return_value=mock_response):
+            dd_run_check(check)
+
+    for metric in metrics:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_service_check("dynamo.openmetrics.health", ServiceCheck.OK)

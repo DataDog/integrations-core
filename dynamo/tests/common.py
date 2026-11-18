@@ -71,6 +71,10 @@ FRONTEND_METRICS_MOCK = [
     'frontend.lora.churn_loads.count',
     'frontend.lora.churn_unloads.count',
     'frontend.lora.overflow_count',
+    'component.router.requests.count',
+    'component.router.requests_started.count',
+    'component.router.non_max_overlap_selections.count',
+    'component.kv_cache.events_applied.count',
 ]
 
 WORKER_METRICS_MOCK = [
@@ -96,12 +100,8 @@ WORKER_METRICS_MOCK = [
     'component.kv_cache.total_blocks',
     'component.kv_cache.gpu_cache_usage_percent',
     'component.kv_cache.hit_rate',
-    'component.kv_cache.events_applied.count',
     'component.kv_publisher.zmq_events.count',
     'component.kv_publisher.zmq_filtered_events.count',
-    'component.router.requests.count',
-    'component.router.requests_started.count',
-    'component.router.non_max_overlap_selections.count',
     'rejection.requests.count',
 ]
 
@@ -131,13 +131,6 @@ FRONTEND_HISTOGRAM_BUCKETS_MOCK = [
     'request_plane.queue.seconds',
     'request_plane.roundtrip_ttft.seconds',
     'request_plane.send.seconds',
-]
-
-WORKER_HISTOGRAM_BUCKETS_MOCK = [
-    'component.request_duration.seconds',
-    'component.network_transit.seconds',
-    'component.time_to_first_response.seconds',
-    'component.permit_wait.seconds',
     'component.router.time_to_first_token.seconds',
     'component.router.inter_token_latency.seconds',
     'component.router.input_sequence_tokens',
@@ -147,6 +140,13 @@ WORKER_HISTOGRAM_BUCKETS_MOCK = [
     'component.router.kv_transfer_estimated_latency.seconds',
     'component.router.shared_cache_hit_rate',
     'component.router.shared_cache_beyond_blocks',
+]
+
+WORKER_HISTOGRAM_BUCKETS_MOCK = [
+    'component.request_duration.seconds',
+    'component.network_transit.seconds',
+    'component.time_to_first_response.seconds',
+    'component.permit_wait.seconds',
 ]
 
 FRONTEND_METRICS_MOCK.extend(

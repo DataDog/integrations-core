@@ -20,16 +20,16 @@ applying these instructions.
 
 ### Prerequisites
 
-This integration is part of [GPU monitoring][10] and only runs when GPU monitoring is enabled in the
-Datadog Agent configuration:
+This integration is part of [GPU monitoring][10]. Frontend and router metrics are collected without
+GPU monitoring. Backend worker metrics are collected only when GPU monitoring is enabled in the
+Datadog Agent configuration on the worker's node:
 
 ```yaml
 gpu:
   enabled: true
 ```
 
-The equivalent environment variable is `DD_GPU_ENABLED=true`. When GPU monitoring is off, the check
-skips every configured instance and reports no metrics.
+The equivalent environment variable is `DD_GPU_ENABLED=true`.
 
 ### Installation
 

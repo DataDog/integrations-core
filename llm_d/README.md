@@ -16,8 +16,6 @@ Model server metrics are collected by the [vLLM][2] or [SGLang][3] integrations.
 Histogram buckets are submitted as Datadog distributions by default, so percentile aggregations are
 available for latency and token-count metrics.
 
-This integration is part of [GPU Monitoring][4] and runs only when GPU Monitoring is enabled.
-
 **Minimum Agent version:** 7.87.0
 
 **Supported llm-d versions:** v1.0.0 and later
@@ -26,18 +24,6 @@ This integration is part of [GPU Monitoring][4] and runs only when GPU Monitorin
 
 Use the following instructions to configure this check for an Agent running on Kubernetes. See the
 [Autodiscovery integration templates][5] for more guidance.
-
-### Prerequisites
-
-Enable GPU Monitoring in the Datadog Agent configuration:
-
-```yaml
-gpu:
-  enabled: true
-```
-
-The equivalent environment variable is `DD_GPU_ENABLED=true`. When GPU Monitoring is disabled, the
-Agent skips every configured llm-d instance.
 
 ### Installation
 
@@ -180,7 +166,6 @@ Need help? Contact [Datadog support][11].
 [1]: https://llm-d.ai/
 [2]: https://docs.datadoghq.com/integrations/vllm/
 [3]: https://docs.datadoghq.com/integrations/sglang/
-[4]: https://docs.datadoghq.com/gpu_monitoring/
 [5]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [6]: https://app.datadoghq.com/account/settings/agent/latest
 [7]: https://github.com/DataDog/integrations-core/blob/master/llm_d/datadog_checks/llm_d/data/conf.yaml.example

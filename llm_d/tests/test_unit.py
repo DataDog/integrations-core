@@ -6,7 +6,6 @@ from unittest import mock
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -83,7 +82,9 @@ def test_emits_critical_openmetrics_service_check_when_service_is_down(
     aggregator.assert_service_check('llm_d.openmetrics.health', ServiceCheck.CRITICAL)
 
 
-def test_check_skipped_when_gpu_monitoring_disabled(router_instance):
+def test_check_runs_when_gpu_monitoring_disabled(dd_run_check, aggregator, router_instance):
+    # llm-d components are routing-layer services that run on CPU nodes.
     with mock.patch.dict(datadog_agent._config, {'gpu.enabled': False}):
-        with pytest.raises(SkipInstanceError):
-            LlmDCheck('llm_d', {}, [router_instance])
+        run_check(dd_run_check, router_instance, 'llm_d_router_metrics.txt')
+
+    aggregator.assert_metric('llm_d.epp.pool.ready_endpoints')
