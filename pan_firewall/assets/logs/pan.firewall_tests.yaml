@@ -1130,16 +1130,14 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
  -
-  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=USERID, subtype=login, vsys=vsys1,\tnetwork.client.ip=10.60.2.100,\tusr.id=CORP\\jdoe, datasourcename=dc01.corp.example.com,\tevt.name=login,\trepeatcnt=1, timeout=2700,\tbeginport=0,\tendport=0,\tdatasource=syslog,\tdatasourcetype=ldap,\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=,\tdevice_name=fw-a,\tvsys_id=1,\tfactortype=,\tfactorcompletiontime=1970/01/01 00:00:00,,\tfactorno=1,\tugflags=0x0,\tuserbysource=jdoe, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=USERID, subtype=login, vsys=vsys1,\tnetwork.client.ip=10.60.2.100,\tusr.id=CORP\\jdoe, datasourcename=dc01.corp.example.com,\tevt.name=login,\trepeatcnt=1, timeout=2700,\tnetwork.client.port=0,\tnetwork.destination.port=0,\tdatasource=syslog,\tdatasourcetype=ldap,\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=,\tdevice_name=fw-a,\tvsys_id=1,\tfactortype=,\tfactorcompletiontime=1970/01/01 00:00:00,,\tfactorno=1,\tugflags=0x0,\tuserbysource=jdoe, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
   result:
     custom:
       actionflags: "0x0"
-      beginport: 0
       datasource: "syslog"
       datasourcename: "dc01.corp.example.com"
       datasourcetype: "ldap"
       device_name: "fw-a"
-      endport: 0
       evt:
         name: "login"
       factorcompletiontime: "1970/01/01 00:00:00"
@@ -1149,6 +1147,9 @@ tests:
         client:
           geoip: {}
           ip: "10.60.2.100"
+          port: 0
+        destination:
+          port: 0
       ocsf:
         activity_id: 99
         activity_name: "USERID"
@@ -1180,15 +1181,14 @@ tests:
         id: "CORP\\jdoe"
       vsys: "vsys1"
       vsys_id: 1
-    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=USERID, subtype=login, vsys=vsys1,\tnetwork.client.ip=10.60.2.100,\tusr.id=CORP\\jdoe, datasourcename=dc01.corp.example.com,\tevt.name=login,\trepeatcnt=1, timeout=2700,\tbeginport=0,\tendport=0,\tdatasource=syslog,\tdatasourcetype=ldap,\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=,\tdevice_name=fw-a,\tvsys_id=1,\tfactortype=,\tfactorcompletiontime=1970/01/01 00:00:00,,\tfactorno=1,\tugflags=0x0,\tuserbysource=jdoe, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=USERID, subtype=login, vsys=vsys1,\tnetwork.client.ip=10.60.2.100,\tusr.id=CORP\\jdoe, datasourcename=dc01.corp.example.com,\tevt.name=login,\trepeatcnt=1, timeout=2700,\tnetwork.client.port=0,\tnetwork.destination.port=0,\tdatasource=syslog,\tdatasourcetype=ldap,\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=,\tdevice_name=fw-a,\tvsys_id=1,\tfactortype=,\tfactorcompletiontime=1970/01/01 00:00:00,,\tfactorno=1,\tugflags=0x0,\tuserbysource=jdoe, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
  -
-  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15,\tserial=016201026426,\ttype=END,\tsubtype=end,\t network.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34,\tnatsrc=72.138.81.50,\tnatdst=93.184.216.34,\trule=trust-out,\tusr.id=CORP\\jdoe,\tdstuser=,\tapp=web-browsing,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tnatsport=3230,\tnatdport=443,\tflags=0x400000,\tproto=tcp,\tevt.name=allow,\tseverity=informational,\tseqno=7699920671375145866,\tactionflags=0x0,\tsrcloc=10.0.0.0-10.255.255.255,\tdstloc=United States,\tvsys_name=,\tdevice_name=fw-a,\ttunnelid=0,\tmonitortag=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tbytes=2048,\tnetwork.bytes_read=1024,\tnetwork.bytes_written=1024,\tpackets=12,\tpkts_sent=6,\tpkts_received=6,\tmax_encap=0,\tunknown_proto=0,\tstrict_check=0,\ttunnel_fragment=0,\tsessions_created=1,\tsessions_closed=0,\tsession_end_reason=aged-out,\taction_source=from-policy,\tstart=2026/11/18 10:20:01,\telapsed=3,\ttunnel_insp_rule=inspect-gre, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15,\tserial=016201026426,\ttype=END,\tsubtype=end,\t network.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34,\tnatsrc=72.138.81.50,\tnatdst=93.184.216.34,\trule=trust-out,\tusr.id=CORP\\jdoe,\tdstuser=,\tapp=web-browsing,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tnatsport=3230,\tnatdport=443,\tflags=0x400000,\tproto=tcp,\tevt.outcome=allow,\tseverity=informational,\tseqno=7699920671375145866,\tactionflags=0x0,\tsrcloc=10.0.0.0-10.255.255.255,\tdstloc=United States,\tvsys_name=,\tdevice_name=fw-a,\ttunnelid=0,\tmonitortag=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tbytes=2048,\tnetwork.bytes_read=1024,\tnetwork.bytes_written=1024,\tpackets=12,\tpkts_sent=6,\tpkts_received=6,\tmax_encap=0,\tunknown_proto=0,\tstrict_check=0,\ttunnel_fragment=0,\tsessions_created=1,\tsessions_closed=0,\tsession_end_reason=aged-out,\tevt.name=from-policy,\tstart=2026/11/18 10:20:01,\telapsed=3,\ttunnel_insp_rule=inspect-gre, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
   result:
     custom:
-      action_source: "from-policy"
       actionflags: "0x0"
       app: "web-browsing"
       bytes: 2048
@@ -1197,7 +1197,8 @@ tests:
       dstloc: "United States"
       elapsed: 3
       evt:
-        name: "allow"
+        name: "from-policy"
+        outcome: "allow"
       flags: "0x400000"
       high_res_timestamp: "2026-11-18T10:21:15.123+00:00"
       inbound_if: "ethernet1/2"
@@ -1266,15 +1267,16 @@ tests:
       usr:
         id: "CORP\\jdoe"
       vsys: "vsys1"
-    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15,\tserial=016201026426,\ttype=END,\tsubtype=end,\t network.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34,\tnatsrc=72.138.81.50,\tnatdst=93.184.216.34,\trule=trust-out,\tusr.id=CORP\\jdoe,\tdstuser=,\tapp=web-browsing,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tnatsport=3230,\tnatdport=443,\tflags=0x400000,\tproto=tcp,\tevt.name=allow,\tseverity=informational,\tseqno=7699920671375145866,\tactionflags=0x0,\tsrcloc=10.0.0.0-10.255.255.255,\tdstloc=United States,\tvsys_name=,\tdevice_name=fw-a,\ttunnelid=0,\tmonitortag=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tbytes=2048,\tnetwork.bytes_read=1024,\tnetwork.bytes_written=1024,\tpackets=12,\tpkts_sent=6,\tpkts_received=6,\tmax_encap=0,\tunknown_proto=0,\tstrict_check=0,\ttunnel_fragment=0,\tsessions_created=1,\tsessions_closed=0,\tsession_end_reason=aged-out,\taction_source=from-policy,\tstart=2026/11/18 10:20:01,\telapsed=3,\ttunnel_insp_rule=inspect-gre, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15,\tserial=016201026426,\ttype=END,\tsubtype=end,\t network.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34,\tnatsrc=72.138.81.50,\tnatdst=93.184.216.34,\trule=trust-out,\tusr.id=CORP\\jdoe,\tdstuser=,\tapp=web-browsing,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tnatsport=3230,\tnatdport=443,\tflags=0x400000,\tproto=tcp,\tevt.outcome=allow,\tseverity=informational,\tseqno=7699920671375145866,\tactionflags=0x0,\tsrcloc=10.0.0.0-10.255.255.255,\tdstloc=United States,\tvsys_name=,\tdevice_name=fw-a,\ttunnelid=0,\tmonitortag=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tbytes=2048,\tnetwork.bytes_read=1024,\tnetwork.bytes_written=1024,\tpackets=12,\tpkts_sent=6,\tpkts_received=6,\tmax_encap=0,\tunknown_proto=0,\tstrict_check=0,\ttunnel_fragment=0,\tsessions_created=1,\tsessions_closed=0,\tsession_end_reason=aged-out,\tevt.name=from-policy,\tstart=2026/11/18 10:20:01,\telapsed=3,\ttunnel_insp_rule=inspect-gre, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
  -
-  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=SCTP, network.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34, rule=trust-out, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tproto=sctp,\tevt.name=allow, vsys_name=,\tdevice_name=fw-a,\tseqno=7699920671375145866,\tassoc_id=0,\tppid=4294967295,\tseverity=low,\tsctp_chunk_type=DATA,\tsctp_event_type=association-established,\tverif_tag_1=0x1a2b3c4d,\tverif_tag_2=0x5e6f7a8b,\tsctp_cause_code=0,\tdiam_app_id=0,\tdiam_cmd_code=0,\tdiam_avp_code=0,\tstream_id=0,\tassoc_end_reason=,\top_code=0,\tsccp_calling_ssn=0,\tsccp_calling_gt=,\tsctp_filter=,\tchunks=0,\tchunks_sent=0,\tchunks_received=0,\tpackets=12,\tpkts_sent=6,\tpkts_received=6, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=SCTP, network.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34, rule=trust-out, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tproto=sctp,\taction=allow, vsys_name=,\tdevice_name=fw-a,\tseqno=7699920671375145866,\tassoc_id=0,\tppid=4294967295,\tseverity=low,\tsctp_chunk_type=DATA,\tsctp_event_type=association-established,\tverif_tag_1=0x1a2b3c4d,\tverif_tag_2=0x5e6f7a8b,\tsctp_cause_code=0,\tdiam_app_id=0,\tdiam_cmd_code=0,\tdiam_avp_code=0,\tstream_id=0,\tassoc_end_reason=,\top_code=0,\tsccp_calling_ssn=0,\tsccp_calling_gt=,\tsctp_filter=,\tchunks=0,\tchunks_sent=0,\tchunks_received=0,\tpackets=12,\tpkts_sent=6,\tpkts_received=6, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
   result:
     custom:
+      action: "allow"
       assoc_id: 0
       chunks: 0
       chunks_received: 0
@@ -1284,8 +1286,6 @@ tests:
       diam_app_id: 0
       diam_avp_code: 0
       diam_cmd_code: 0
-      evt:
-        name: "allow"
       high_res_timestamp: "2026-11-18T10:21:15.123+00:00"
       inbound_if: "ethernet1/2"
       logset: "ndm-panorama"
@@ -1340,7 +1340,7 @@ tests:
       verif_tag_1: "0x1a2b3c4d"
       verif_tag_2: "0x5e6f7a8b"
       vsys: "vsys1"
-    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=SCTP, network.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34, rule=trust-out, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tproto=sctp,\tevt.name=allow, vsys_name=,\tdevice_name=fw-a,\tseqno=7699920671375145866,\tassoc_id=0,\tppid=4294967295,\tseverity=low,\tsctp_chunk_type=DATA,\tsctp_event_type=association-established,\tverif_tag_1=0x1a2b3c4d,\tverif_tag_2=0x5e6f7a8b,\tsctp_cause_code=0,\tdiam_app_id=0,\tdiam_cmd_code=0,\tdiam_avp_code=0,\tstream_id=0,\tassoc_end_reason=,\top_code=0,\tsccp_calling_ssn=0,\tsccp_calling_gt=,\tsctp_filter=,\tchunks=0,\tchunks_sent=0,\tchunks_received=0,\tpackets=12,\tpkts_sent=6,\tpkts_received=6, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=SCTP, network.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34, rule=trust-out, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tproto=sctp,\taction=allow, vsys_name=,\tdevice_name=fw-a,\tseqno=7699920671375145866,\tassoc_id=0,\tppid=4294967295,\tseverity=low,\tsctp_chunk_type=DATA,\tsctp_event_type=association-established,\tverif_tag_1=0x1a2b3c4d,\tverif_tag_2=0x5e6f7a8b,\tsctp_cause_code=0,\tdiam_app_id=0,\tdiam_cmd_code=0,\tdiam_avp_code=0,\tstream_id=0,\tassoc_end_reason=,\top_code=0,\tsccp_calling_ssn=0,\tsccp_calling_gt=,\tsctp_filter=,\tchunks=0,\tchunks_sent=0,\tchunks_received=0,\tpackets=12,\tpkts_sent=6,\tpkts_received=6, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
     status: "notice"
     tags:
      - "source:LOGS_SOURCE"
@@ -1753,7 +1753,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
  -
-  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=GLOBALPROTECT, subtype=0, time_generated=2026/11/18 10:21:15, vsys=vsys1, evt.name=gateway-connected, stage=login, auth_method=LDAP, tunnel_type=IPSec, usr.id=CORP\\jdoe, srcregion=US, machinename=LAPTOP-JDOE, public_ip=203.0.113.10, public_ipv6=2001:db8:1::10, private_ip=10.200.1.20, private_ipv6=, hostid=, serialnumber=, client_ver=6.2.1, client_os=Microsoft Windows, client_os_ver=\"Microsoft Windows 11 Pro , 64-bit\", repeatcnt=1, reason=, error=\"Authentication failed, retry\", opaque=\"Client version=6.2.1, tunnel=IPSec\", gp_status=success, location=, login_duration=0, connect_method=user-logon, error_code=0, portal=corp-portal, seqno=7699920671375145866, actionflags=0x0, selection_type=, response_time=0, priority=0, attempted_gateways=, gateway=corp-gw, dg_hier_level_1=0, dg_hier_level_2=0, dg_hier_level_3=0, dg_hier_level_4=0, vsys_name=, device_name=fw-a, vsys_id=1"
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=GLOBALPROTECT, subtype=0, time_generated=2026/11/18 10:21:15, vsys=vsys1, evt.name=gateway-connected, stage=login, auth_method=LDAP, tunnel_type=IPSec, usr.id=CORP\\jdoe, srcregion=US, machinename=LAPTOP-JDOE, public_ip=203.0.113.10, public_ipv6=2001:db8:1::10, private_ip=10.200.1.20, private_ipv6=, hostid=, serialnumber=, client_ver=6.2.1, client_os=Microsoft Windows, client_os_ver=\"Microsoft Windows 11 Pro , 64-bit\", repeatcnt=1, reason=, error=\"Authentication failed, retry\", opaque=\"Client version=6.2.1, tunnel=IPSec\", status=success, location=, login_duration=0, connect_method=user-logon, error_code=0, portal=corp-portal, seqno=7699920671375145866, actionflags=0x0, selection_type=, response_time=0, priority=0, attempted_gateways=, gateway=corp-gw, dg_hier_level_1=0, dg_hier_level_2=0, dg_hier_level_3=0, dg_hier_level_4=0, vsys_name=, device_name=fw-a, vsys_id=1"
   result:
     custom:
       actionflags: "0x0"
@@ -1772,7 +1772,6 @@ tests:
       evt:
         name: "gateway-connected"
       gateway: "corp-gw"
-      gp_status: "success"
       login_duration: 0
       machinename: "LAPTOP-JDOE"
       ocsf:
@@ -1805,6 +1804,7 @@ tests:
       serial: "016201026426"
       srcregion: "US"
       stage: "login"
+      status: "success"
       subtype: "0"
       time_generated: "2026/11/18 10:21:15"
       timestamp: "2026/11/18 10:21:17"
@@ -1814,16 +1814,15 @@ tests:
         id: "CORP\\jdoe"
       vsys: "vsys1"
       vsys_id: 1
-    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=GLOBALPROTECT, subtype=0, time_generated=2026/11/18 10:21:15, vsys=vsys1, evt.name=gateway-connected, stage=login, auth_method=LDAP, tunnel_type=IPSec, usr.id=CORP\\jdoe, srcregion=US, machinename=LAPTOP-JDOE, public_ip=203.0.113.10, public_ipv6=2001:db8:1::10, private_ip=10.200.1.20, private_ipv6=, hostid=, serialnumber=, client_ver=6.2.1, client_os=Microsoft Windows, client_os_ver=\"Microsoft Windows 11 Pro , 64-bit\", repeatcnt=1, reason=, error=\"Authentication failed, retry\", opaque=\"Client version=6.2.1, tunnel=IPSec\", gp_status=success, location=, login_duration=0, connect_method=user-logon, error_code=0, portal=corp-portal, seqno=7699920671375145866, actionflags=0x0, selection_type=, response_time=0, priority=0, attempted_gateways=, gateway=corp-gw, dg_hier_level_1=0, dg_hier_level_2=0, dg_hier_level_3=0, dg_hier_level_4=0, vsys_name=, device_name=fw-a, vsys_id=1"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=GLOBALPROTECT, subtype=0, time_generated=2026/11/18 10:21:15, vsys=vsys1, evt.name=gateway-connected, stage=login, auth_method=LDAP, tunnel_type=IPSec, usr.id=CORP\\jdoe, srcregion=US, machinename=LAPTOP-JDOE, public_ip=203.0.113.10, public_ipv6=2001:db8:1::10, private_ip=10.200.1.20, private_ipv6=, hostid=, serialnumber=, client_ver=6.2.1, client_os=Microsoft Windows, client_os_ver=\"Microsoft Windows 11 Pro , 64-bit\", repeatcnt=1, reason=, error=\"Authentication failed, retry\", opaque=\"Client version=6.2.1, tunnel=IPSec\", status=success, location=, login_duration=0, connect_method=user-logon, error_code=0, portal=corp-portal, seqno=7699920671375145866, actionflags=0x0, selection_type=, response_time=0, priority=0, attempted_gateways=, gateway=corp-gw, dg_hier_level_1=0, dg_hier_level_2=0, dg_hier_level_3=0, dg_hier_level_4=0, vsys_name=, device_name=fw-a, vsys_id=1"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275000
  -
-  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426,\ttype=AUTHENTICATION,\tsubtype=0,\tvsys=vsys1,\tnetwork.client.ip=10.60.2.100,\tusr.id=CORP\\jdoe,\tnormalize_user=corp\\jdoe,\tobject=,\tauthpolicy=gp-auth,\trepeatcnt=1,\tauthid=68376,\tvendor=Okta\t, logset=ndm-panorama, serverprofile=okta-saml,\tauth_message=\"Authenticated user: jdoe, method=saml\"\t,clienttype=Web UI,\tevt.outcome=auth-success,\tfactorno=1,\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=,\tdevice_name=fw-a,\tvsys_id=1,\tevt.name=SAML, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426,\ttype=AUTHENTICATION,\tsubtype=0,\tvsys=vsys1,\tnetwork.client.ip=10.60.2.100,\tusr.id=CORP\\jdoe,\tnormalize_user=corp\\jdoe,\tobject=,\tauthpolicy=gp-auth,\trepeatcnt=1,\tauthid=68376,\tvendor=Okta\t, logset=ndm-panorama, serverprofile=okta-saml,\tmessage=\"Authenticated user: jdoe, method=saml\"\t,clienttype=Web UI,\tevt.outcome=auth-success,\tfactorno=1,\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=,\tdevice_name=fw-a,\tvsys_id=1,\tevt.name=SAML, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
   result:
     custom:
       actionflags: "0x0"
-      auth_message: "Authenticated user: jdoe, method=saml"
       authid: 68376
       authpolicy: "gp-auth"
       clienttype: "Web UI"
@@ -1834,6 +1833,7 @@ tests:
       factorno: 1
       high_res_timestamp: "2026-11-18T10:21:15.123+00:00"
       logset: "ndm-panorama"
+      message: "Authenticated user: jdoe, method=saml"
       network:
         client:
           geoip: {}
@@ -1869,7 +1869,7 @@ tests:
       vendor: "Okta"
       vsys: "vsys1"
       vsys_id: 1
-    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426,\ttype=AUTHENTICATION,\tsubtype=0,\tvsys=vsys1,\tnetwork.client.ip=10.60.2.100,\tusr.id=CORP\\jdoe,\tnormalize_user=corp\\jdoe,\tobject=,\tauthpolicy=gp-auth,\trepeatcnt=1,\tauthid=68376,\tvendor=Okta\t, logset=ndm-panorama, serverprofile=okta-saml,\tauth_message=\"Authenticated user: jdoe, method=saml\"\t,clienttype=Web UI,\tevt.outcome=auth-success,\tfactorno=1,\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=,\tdevice_name=fw-a,\tvsys_id=1,\tevt.name=SAML, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426,\ttype=AUTHENTICATION,\tsubtype=0,\tvsys=vsys1,\tnetwork.client.ip=10.60.2.100,\tusr.id=CORP\\jdoe,\tnormalize_user=corp\\jdoe,\tobject=,\tauthpolicy=gp-auth,\trepeatcnt=1,\tauthid=68376,\tvendor=Okta\t, logset=ndm-panorama, serverprofile=okta-saml,\tmessage=\"Authenticated user: jdoe, method=saml\"\t,clienttype=Web UI,\tevt.outcome=auth-success,\tfactorno=1,\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=,\tdevice_name=fw-a,\tvsys_id=1,\tevt.name=SAML, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
