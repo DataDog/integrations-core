@@ -435,16 +435,15 @@ pipeline:
             matchRules: >-
               cisco_ise_body_kv_response %{date("yyyy-MM-dd HH:mm:ss.SSS
               ZZ"):timestamp} %{notSpace:cisco_ise.sequence}
-              %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity}
-              %{regex("[A-Za-z-]+"):cisco_ise.message_class}:
+              %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity}\s+%{regex("[A-Za-z-]+"):cisco_ise.message_class}:
               %{regex("[^,]*"):cisco_ise.message_text}%{data:cisco_ise.attributes:keyvalue("=","
               :/#{};=<>()+%*'!?&|$~\\[\\]","",",")},
               Response=\{%{data:cisco_ise.response:keyvalue("=","
               :/#","",";")}\},%{data}
 
-              cisco_ise_body_kv %{date("yyyy-MM-dd HH:mm:ss.SSS ZZ"):timestamp} %{notSpace:cisco_ise.sequence} %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity} %{regex("[A-Za-z-]+"):cisco_ise.message_class}: %{regex("[^,]*"):cisco_ise.message_text}%{data:cisco_ise.attributes:keyvalue("="," :/#{};=<>()+%*'!?&|$~\\[\\]","",",")}
+              cisco_ise_body_kv %{date("yyyy-MM-dd HH:mm:ss.SSS ZZ"):timestamp} %{notSpace:cisco_ise.sequence} %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity}\s+%{regex("[A-Za-z-]+"):cisco_ise.message_class}: %{regex("[^,]*"):cisco_ise.message_text}%{data:cisco_ise.attributes:keyvalue("="," :/#{};=<>()+%*'!?&|$~\\[\\]","",",")}
 
-              cisco_ise_body %{date("yyyy-MM-dd HH:mm:ss.SSS ZZ"):timestamp} %{notSpace:cisco_ise.sequence} %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity} %{regex("[A-Za-z-]+"):cisco_ise.message_class}: %{regex("[^,]*"):cisco_ise.message_text}%{data}
+              cisco_ise_body %{date("yyyy-MM-dd HH:mm:ss.SSS ZZ"):timestamp} %{notSpace:cisco_ise.sequence} %{notSpace:cisco_ise.message_code} %{word:cisco_ise.severity}\s+%{regex("[A-Za-z-]+"):cisco_ise.message_class}: %{regex("[^,]*"):cisco_ise.message_text}%{data}
         - type: status-remapper
           name: Define status
           enabled: true
