@@ -4,21 +4,21 @@
 
 This check monitors [Palo Alto Networks firewalls][1] through the Datadog Agent.
 
-
-Palo Alto Networks next-generation firewalls run PAN-OS and enforce security policy, threat prevention, and VPN connectivity at the network edge and in the data center. This integration polls the PAN-OS XML API of each firewall to collect health and performance metrics, and reports the firewalls and their interfaces to Network Device Monitoring (NDM). The Agent finds the firewalls from a static list or from the firewalls that a Panorama server manages. It also parses the threat, traffic, authentication, and other logs that PAN-OS forwards through syslog.
+Palo Alto Networks next-generation firewalls run PAN-OS and enforce security policy, threat prevention, and VPN connectivity at the network edge and in the data center. This check polls the PAN-OS XML API of each firewall to collect health and performance metrics, and reports the firewalls and their interfaces to Network Device Monitoring (NDM). The Agent finds the firewalls from a static list or from the firewalls that a Panorama server manages. It also parses the threat, traffic, authentication, and other logs that PAN-OS forwards through syslog.
 
 ### What this integration monitors
 
-The integration collects the following data:
+The check collects the following data:
 
-- **Firewall inventory**: Discovers firewalls from a static list or from Panorama, and reports them to NDM with their serial number, model, software version, and high availability (HA) state. Also reports traffic counters for the HA1 and HA2 links, and receive error and drop counters.
+- **Firewall inventory**: Discovers firewalls from a static list or from Panorama, and reports them to NDM with their serial number, model, and software version.
+- **High availability**: On firewalls with high availability (HA) enabled, reports the HA state and traffic, receive error, and receive drop counters for the HA1 and HA2 links.
 - **System resources**: Reports management-plane CPU, memory, swap, and disk usage, and data-plane CPU utilization, so you can detect overloaded firewalls. Hardware firewalls also report power and temperature sensor readings.
 - **Network interfaces**: Reports traffic, error, drop, and attack counters per interface. Reports each interface to NDM with its description and admin status.
 - **IPsec tunnels**: Reports tunnel state and traffic, and the number of active, inactive, and initializing tunnels.
 - **Routing**: Reports BGP peer state and prefix counts, and optionally OSPF neighbor state (set `collect_ospf` to `true`), so you can detect a routing peer going down. Works with both the legacy routing engine and the Advanced Routing Engine. On the Advanced Routing Engine, it also reports established and dropped BGP connections and OSPF neighbor state changes. See [metadata.csv][7] for the metrics each engine sends.
 - **Licenses**: Reports expiration status and days left for each subscription.
 - **Security rules**: Reports hit counts per security rule.
-- **Global counters and reports** (optional): Set `collect_global_counters` or `collect_reports` to `true` to collect PAN-OS global counters, dropped packets by aspect, and top-N reports for applications, sources, destinations, zones, and rules.
+- **Global counters and reports** (optional): Set `collect_global_counters` or `collect_reports` to `true` to collect PAN-OS global counters, dropped packets by aspect, and top-N reports for applications, application and technology categories, sources, destinations, countries, zones, and rules.
 
 **Minimum Agent version:** 7.86.0
 
@@ -35,13 +35,12 @@ No additional installation is needed on your server.
 
 #### Metric collection
 
-1. Create an account for the Agent on each firewall:
+1. Prepare each firewall:
 
-   1. In PAN-OS, go to **Device > Admin Roles** and add a role profile.
-   2. In the **XML API** tab, enable **Operational Requests**. If you set `collect_reports` to `true`, also enable **Report**. The role does not need **Configuration** permission.
-   3. Go to **Device > Administrators**, add an account that uses this role, and commit the changes.
-
-   **Note**: On each firewall, enable HTTPS in the management profile of the management interface. If you restrict management access, add the Agent host to the **Permitted IP Addresses** list.
+   1. Enable HTTPS in the management profile of the management interface. If you restrict management access, add the Agent host to the **Permitted IP Addresses** list.
+   2. In PAN-OS, go to **Device > Admin Roles** and add a role profile.
+   3. In the **XML API** tab, enable **Operational Requests**. If you set `collect_reports` to `true`, also enable **Report**. The role does not need **Configuration** permission. To report interface descriptions and admin status to NDM, the role must also be able to run `show config running`.
+   4. Go to **Device > Administrators**, add an account that uses this role, and commit the changes.
 
    **Note**: For Panorama discovery, also create an account on Panorama with a role that allows **Operational Requests** in the XML API tab. The Agent uses this account only to list the managed firewalls. It polls each firewall with the firewall credentials you configure in step 2.
 
@@ -57,7 +56,7 @@ No additional installation is needed on your server.
 
 #### Log collection
 
-The Agent must run on a host that the firewall can reach on the syslog port and that can send data to Datadog.
+The Agent must run on a host that the firewall can reach on the syslog port and that can send data to Datadog. Allow inbound TCP traffic on the syslog port you choose (10518 in the example) on the Agent host.
 
 1. Enable log collection in your `datadog.yaml` file:
 
@@ -106,7 +105,7 @@ The Agent must run on a host that the firewall can reach on the syslog port and 
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `pan_firewall` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `pan_firewall` under the Checks section. Confirm that it reports no errors.
 
 ## Data Collected
 
@@ -122,7 +121,9 @@ The check collects metrics on different schedules and submits each gauge only wh
 - Every 30 minutes: disk usage, interface speed, and top-N report metrics
 - Every 24 hours: license days left and expiration
 
-The check sends `pan_firewall.panorama.can_connect` on every run. If a collection fails, the check retries it within 5 minutes. Collection pauses for up to 10 minutes while the firewall runs a commit or a content, antivirus, or WildFire update, so short gaps are expected.
+With Panorama discovery, the check sends `pan_firewall.panorama.can_connect` on every run.
+
+If a collection fails, the check retries it within 5 minutes. Collection pauses for up to 10 minutes while the firewall runs a commit or a content, antivirus, or WildFire update, so expect gaps of that length.
 
 ### Logs
 
@@ -138,7 +139,11 @@ The Palo Alto Networks Firewall integration does not include any service checks.
 
 ## Troubleshooting
 
-If the check cannot log in to a firewall, `pan_firewall.api.authentication.status` is `1`. Confirm that the account's role allows **Operational Requests** and that a `firewall_credentials` entry matches the firewall.
+If `pan_firewall.api.authentication.status` is `1`, the firewall rejected the username and password or the API key in the matching `firewall_credentials` entry. Check them, and check that the firewall has not locked the account.
+
+If the status is `0` but metrics are missing, the role probably lacks a permission. Check the Agent logs for `not authorized for user role`, and enable **Operational Requests**, and **Report** if `collect_reports` is `true`.
+
+If `pan_firewall.can_connect` is `0`, the Agent cannot reach the firewall or the firewall rejected the connection.
 
 Need help? Contact [Datadog support][10].
 
