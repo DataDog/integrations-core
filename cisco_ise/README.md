@@ -110,10 +110,28 @@ The Cisco ISE integration collects ISE's syslog messages and parses them with th
 - The message body gives the event time with milliseconds, the message code (`cisco_ise.message_code`, for example `5200` for a passed authentication), the severity (the log status), and ISE's own fields.
 <!-- RFC Q2 (proposed answer): ISE key names kept under cisco_ise.attributes.*, site split into cisco_ise.site.level1..5 (RFC v11). -->
 - ISE's fields keep their names under `cisco_ise.attributes.*` (for example `cisco_ise.attributes.NetworkDeviceName`, `cisco_ise.attributes.FailureReason`), and the authorization result `Response={...}` is parsed under `cisco_ise.response.*`.
-- Derived fields: `evt.outcome` (`success` or `failure`, from the message code), the site levels, the normalized endpoint MAC address (`cisco_ise.endpoint.mac`), and the TACACS+ command (`cisco_ise.tacacs.command`, `cisco_ise.tacacs.command_name`).
-- Standard attributes: `usr.name`, `network.client.ip`, `evt.name`, and `evt.outcome`.
+- Derived fields: the site levels, the normalized endpoint MAC address (`cisco_ise.endpoint.mac`), and the TACACS+ command (`cisco_ise.tacacs.command`, `cisco_ise.tacacs.command_name`).
+- Standard attributes: `usr.name`, `network.client.ip`, and `evt.name` (ISE's message class, for example `Passed-Authentication` or `Failed-Attempt`).
 
 ISE logs unknown users as `INVALID`, so failed logins by non-existing users are grouped under `usr.name:INVALID`.
+
+#### Finding failed logins
+
+<!-- RFC Q5 (decided): no evt.outcome; the pipeline keeps ISE's own code, category, and class. -->
+
+ISE has no single success or failure field, so the pipeline keeps the values ISE sends and doesn't classify them. To find failures, use the Logging Category (`@cisco_ise.category:Failed_Attempts`), the message class (`@evt.name:Failed-Attempt`), or the message code. Common codes:
+
+| Code | Message |
+|---|---|
+| `5200` / `5400` | RADIUS authentication succeeded / failed |
+| `5411` | Supplicant stopped responding to ISE (for example, a wrong PEAP password) |
+| `5434` / `5449` | Repeated failures of the same endpoint (`cisco_ise.attributes.TotalFailedAttempts`) / endpoint rejected |
+| `5201` / `5401` | TACACS+ authentication succeeded / failed |
+| `5202` / `5402` | TACACS+ command authorization succeeded / failed |
+| `3300` | TACACS+ command accounting (the command typed) |
+| `3000` / `3002` / `3001` | RADIUS accounting start / interim update / stop |
+
+The full list is in Cisco's [Cisco ISE Syslogs][8] guide.
 
 #### Sensitive data
 
@@ -163,3 +181,4 @@ Need help? Contact [Datadog support][1].
 [5]: https://github.com/DataDog/integrations-core/blob/master/cisco_ise/datadog_checks/cisco_ise/data/conf.yaml.example
 [6]: https://app.datadoghq.com/logs?query=source%3Acisco-ise
 [7]: https://docs.datadoghq.com/security/sensitive_data_scanner/
+[8]: https://www.cisco.com/c/en/us/td/docs/security/ise/syslog/Cisco_ISE_Syslogs/m_SyslogsList.html

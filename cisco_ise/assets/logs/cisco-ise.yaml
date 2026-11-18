@@ -3,11 +3,6 @@ metric_id: cisco-ise
 backend_only: false
 facets:
   - groups:
-      - Event
-    name: Event Outcome
-    path: evt.outcome
-    source: log
-  - groups:
       - User
     name: User Name
     path: usr.name
@@ -464,18 +459,6 @@ pipeline:
             matchRules: cisco_ise_config_change %{data},
               ConfigChangeData=%{data:cisco_ise.attributes.ConfigChangeData},
               %{regex("[A-Za-z-]+")}=%{data}
-        - type: category-processor
-          name: Define outcome
-          enabled: true
-          categories:
-            - filter:
-                query: "@cisco_ise.message_code:(5200 OR 5201 OR 5202 OR 5203 OR 51001 OR 60080
-                  OR 60115)"
-              name: success
-            - filter:
-                query: "@cisco_ise.message_code:(5400 OR 5401 OR 5402 OR 5434 OR 5449 OR 51021)"
-              name: failure
-          target: evt.outcome
         - type: grok-parser
           name: Parse site levels
           enabled: true

@@ -117,7 +117,6 @@ tests:
             level2: "Madrid"
         evt:
           name: "Passed-Authentication"
-          outcome: "success"
         network:
           client:
             ip: "10.99.0.61"
@@ -243,7 +242,6 @@ tests:
             level2: "Madrid"
         evt:
           name: "Failed-Attempt"
-          outcome: "failure"
         syslog:
           hostname: "ise-1"
           priority: 181
@@ -350,7 +348,6 @@ tests:
             level2: "Madrid"
         evt:
           name: "RADIUS"
-          outcome: "failure"
         syslog:
           hostname: "ise-1"
           priority: 181
@@ -534,7 +531,6 @@ tests:
             level2: "Madrid"
         evt:
           name: "Passed-Authentication"
-          outcome: "success"
         network:
           client:
             ip: "10.99.0.200"
@@ -633,7 +629,6 @@ tests:
             level2: "Madrid"
         evt:
           name: "Failed-Attempt"
-          outcome: "failure"
         network:
           client:
             ip: "10.99.0.200"
@@ -806,7 +801,6 @@ tests:
             command_name: "username"
         evt:
           name: "Failed-Attempt"
-          outcome: "failure"
         network:
           client:
             ip: "10.99.0.200"
@@ -845,7 +839,6 @@ tests:
           severity: "NOTICE"
         evt:
           name: "Administrator-Login"
-          outcome: "success"
         network:
           client:
             ip: "192.168.254.11"
