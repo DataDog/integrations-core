@@ -285,109 +285,11 @@ SDK_EXCLUDING_DEV_SERVERS = {
     },
 }
 
-SDK_DEMO_SERVERS_COLLECT_FALSE = {
-    'openstack_cloud_name': 'test_cloud',
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
-    'use_legacy_check_version': False,
-    "projects": {
-        "include": [
-            {
-                "name": "^admin.*",
-            },
-            {
-                "name": "^demo.*",
-                "compute": {
-                    "servers": False,
-                },
-            },
-        ],
-    },
-}
-
-SDK_DEMO_SERVERS_DIAGNOSTICS_FALSE = {
-    'openstack_cloud_name': 'test_cloud',
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
-    'use_legacy_check_version': False,
-    "projects": {
-        "include": [
-            {
-                "name": "^admin.*",
-            },
-            {
-                "name": "^demo.*",
-                "compute": {
-                    "servers": {
-                        "include": [
-                            {
-                                "name": ".*",
-                                "diagnostics": False,
-                            },
-                        ],
-                    },
-                },
-            },
-        ],
-    },
-}
-
-SDK_DEMO_SERVERS_FLAVORS_FALSE = {
-    'openstack_cloud_name': 'test_cloud',
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
-    'use_legacy_check_version': False,
-    "projects": {
-        "include": [
-            {
-                "name": "^admin.*",
-            },
-            {
-                "name": "^demo.*",
-                "compute": {
-                    "servers": {
-                        "include": [
-                            {
-                                "name": ".*",
-                                "flavors": False,
-                            },
-                        ],
-                    },
-                },
-            },
-        ],
-    },
-}
-
 SDK_NOVA_MICROVERSION_2_93 = {
     'openstack_cloud_name': 'test_cloud',
     'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
     'nova_microversion': '2.93',
     'use_legacy_check_version': False,
-}
-
-SDK_NOVA_MICROVERSION_2_93_DEMO_SERVERS_DIAGNOSTICS_FALSE = {
-    'openstack_cloud_name': 'test_cloud',
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
-    'nova_microversion': '2.93',
-    'use_legacy_check_version': False,
-    "projects": {
-        "include": [
-            {
-                "name": "^admin.*",
-            },
-            {
-                "name": "^demo.*",
-                "compute": {
-                    "servers": {
-                        "include": [
-                            {
-                                "name": ".*",
-                                "diagnostics": False,
-                            },
-                        ],
-                    },
-                },
-            },
-        ],
-    },
 }
 
 SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT = {
@@ -422,33 +324,6 @@ SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEV_SERVERS = {
                 },
             },
             "^demo.*",
-        ],
-    },
-}
-
-SDK_NOVA_MICROVERSION_2_93_DEMO_SERVERS_FLAVORS_FALSE = {
-    'openstack_cloud_name': 'test_cloud',
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
-    'nova_microversion': '2.93',
-    'use_legacy_check_version': False,
-    "projects": {
-        "include": [
-            {
-                "name": "^admin.*",
-            },
-            {
-                "name": "^demo.*",
-                "compute": {
-                    "servers": {
-                        "include": [
-                            {
-                                "name": ".*",
-                                "flavors": False,
-                            },
-                        ],
-                    },
-                },
-            },
         ],
     },
 }

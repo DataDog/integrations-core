@@ -6,13 +6,11 @@ import copy
 import logging
 import os
 
-import mock
 import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
     CONTAINERS_METRICS_SWIFT,
@@ -33,11 +31,11 @@ pytestmark = [
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_swift_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -51,27 +49,18 @@ def test_disable_swift_metrics(aggregator, dd_run_check, instance, openstack_con
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'openstack_v3_password', 'instance', 'api_type'),
+    ('mock_http_post', 'instance'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['object-store'])}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'catalog': []},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_post', 'openstack_v3_password'],
+    indirect=['mock_http_post'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -89,14 +78,11 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         args, kwargs = call
         args_list += list(args)
     assert args_list.count('http://127.0.0.1:6002/v1') == 0
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_post.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
-    if api_type == ApiType.SDK:
-        assert openstack_connection.call_count == 4
+    args_list = []
+    for call in mock_http_post.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     assert '`swift` component not found in catalog' in caplog.text
 
 
@@ -121,12 +107,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
                 }
             },
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -156,12 +142,12 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         pytest.param(
             {'elapsed_total_seconds': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': 0.30706}},
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_service_check(
@@ -192,7 +178,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_swift', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {
@@ -201,30 +187,14 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
                     '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
                 },
             },
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {
-                'http_error': {
-                    'containers': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
-                    }
-                }
-            },
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_swift'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_containers_exception(aggregator, check, dd_run_check, mock_http_get, connection_swift, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_containers_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.swift.container.count',
@@ -234,25 +204,12 @@ def test_containers_exception(aggregator, check, dd_run_check, mock_http_get, co
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += [(list(args), kwargs.get('params', None))]
-    if api_type == ApiType.REST:
-        assert (
-            args_list.count((['http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304'], {'format': 'json'}))
-            == 1
-        )
-        assert (
-            args_list.count((['http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15'], {'format': 'json'}))
-            == 1
-        )
-    else:
-        assert connection_swift.containers.call_count == 2
-        assert (
-            connection_swift.containers.call_args_list.count(mock.call(account_id='1e6e233e637d4d55a50a62b63398ad15'))
-            == 1
-        )
-        assert (
-            connection_swift.containers.call_args_list.count(mock.call(account_id='6e39099cccde4f809b003d9e0dd09304'))
-            == 1
-        )
+    assert (
+        args_list.count((['http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304'], {'format': 'json'})) == 1
+    )
+    assert (
+        args_list.count((['http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15'], {'format': 'json'})) == 1
+    )
 
 
 @pytest.mark.parametrize(
@@ -266,11 +223,11 @@ def test_containers_exception(aggregator, check, dd_run_check, mock_http_get, co
         pytest.param(
             configs.SDK,
             CONTAINERS_METRICS_SWIFT,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_containers_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
     for metric in metrics:
@@ -284,60 +241,36 @@ def test_containers_metrics(aggregator, check, dd_run_check, metrics):
 
 
 @pytest.mark.parametrize(
-    ('instance', 'api_type', 'metrics'),
+    ('instance', 'metrics'),
     [
         pytest.param(
             configs.REST,
-            ApiType.REST,
             CONTAINERS_METRICS_SWIFT,
             id='api rest limit 1',
         ),
-        pytest.param(
-            configs.SDK,
-            ApiType.SDK,
-            CONTAINERS_METRICS_SWIFT,
-            id='api sdk limit 1',
-        ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'connection_swift', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_containers_pagination_limit_1(
     aggregator,
     instance,
     openstack_controller_check,
-    api_type,
     dd_run_check,
     mock_http_get,
-    connection_swift,
     metrics,
 ):
     paginated_instance = copy.deepcopy(instance)
     paginated_instance['paginated_limit'] = 1
     dd_run_check(openstack_controller_check(paginated_instance))
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
-            limit = params.get('limit')
-            args_list += [(args[0], limit)]
-        assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304', 1)) == 2
-        assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', 1)) == 3
-    else:
-        assert connection_swift.containers.call_count == 2
-        assert (
-            connection_swift.containers.call_args_list.count(
-                mock.call(account_id='1e6e233e637d4d55a50a62b63398ad15', limit=1)
-            )
-            == 1
-        )
-        assert (
-            connection_swift.containers.call_args_list.count(
-                mock.call(account_id='6e39099cccde4f809b003d9e0dd09304', limit=1)
-            )
-            == 1
-        )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+        params = kwargs.get('params', {})
+        limit = params.get('limit')
+        args_list += [(args[0], limit)]
+    assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304', 1)) == 2
+    assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', 1)) == 3
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],
@@ -349,60 +282,36 @@ def test_containers_pagination_limit_1(
 
 
 @pytest.mark.parametrize(
-    ('instance', 'api_type', 'metrics'),
+    ('instance', 'metrics'),
     [
         pytest.param(
             configs.REST,
-            ApiType.REST,
             CONTAINERS_METRICS_SWIFT,
             id='api rest limit 1000',
         ),
-        pytest.param(
-            configs.SDK,
-            ApiType.SDK,
-            CONTAINERS_METRICS_SWIFT,
-            id='api sdk limit 1000',
-        ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'connection_swift', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_containers_pagination_limit_1000(
     aggregator,
     instance,
     openstack_controller_check,
-    api_type,
     dd_run_check,
     mock_http_get,
-    connection_swift,
     metrics,
 ):
     paginated_instance = copy.deepcopy(instance)
     paginated_instance['paginated_limit'] = 1000
     dd_run_check(openstack_controller_check(paginated_instance))
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
-            limit = params.get('limit')
-            args_list += [(args[0], limit)]
-        assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304', 1000)) == 2
-        assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', 1000)) == 2
-    else:
-        assert connection_swift.containers.call_count == 2
-        assert (
-            connection_swift.containers.call_args_list.count(
-                mock.call(account_id='1e6e233e637d4d55a50a62b63398ad15', limit=1000)
-            )
-            == 1
-        )
-        assert (
-            connection_swift.containers.call_args_list.count(
-                mock.call(account_id='6e39099cccde4f809b003d9e0dd09304', limit=1000)
-            )
-            == 1
-        )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+        params = kwargs.get('params', {})
+        limit = params.get('limit')
+        args_list += [(args[0], limit)]
+    assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304', 1000)) == 2
+    assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', 1000)) == 2
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],

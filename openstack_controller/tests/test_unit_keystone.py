@@ -6,13 +6,11 @@
 import logging
 import os
 
-import mock
 import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
 pytestmark = [
@@ -34,15 +32,15 @@ pytestmark = [
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_keystone_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -68,15 +66,15 @@ def test_disable_keystone_metrics(aggregator, dd_run_check, instance, openstack_
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_keystone_region_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -104,15 +102,15 @@ def test_disable_keystone_region_metrics(aggregator, dd_run_check, instance, ope
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_keystone_domain_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -140,15 +138,15 @@ def test_disable_keystone_domain_metrics(aggregator, dd_run_check, instance, ope
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_keystone_project_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -176,15 +174,15 @@ def test_disable_keystone_project_metrics(aggregator, dd_run_check, instance, op
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_keystone_user_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -212,15 +210,15 @@ def test_disable_keystone_user_metrics(aggregator, dd_run_check, instance, opens
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_keystone_group_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -248,15 +246,15 @@ def test_disable_keystone_group_metrics(aggregator, dd_run_check, instance, open
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_keystone_service_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -284,15 +282,15 @@ def test_disable_keystone_service_metrics(aggregator, dd_run_check, instance, op
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_keystone_limit_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -308,27 +306,18 @@ def test_disable_keystone_limit_metrics(aggregator, dd_run_check, instance, open
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'openstack_v3_password', 'instance', 'api_type'),
+    ('mock_http_post', 'instance'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['identity'])}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'catalog': []},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_post', 'openstack_v3_password'],
+    indirect=['mock_http_post'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -356,14 +345,11 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         args, kwargs = call
         args_list += list(args)
     assert args_list.count('http://127.0.0.1:8080/identity') == 0
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_post.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
-    if api_type == ApiType.SDK:
-        assert openstack_connection.call_count == 4
+    args_list = []
+    for call in mock_http_post.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     assert '`identity` component not found in catalog' in caplog.text
 
 
@@ -376,11 +362,11 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_region_id_in_tags(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "endpoint_region_id": "RegionOne",
@@ -416,12 +402,12 @@ def test_region_id_in_tags(aggregator, dd_run_check, instance, openstack_control
         pytest.param(
             {'http_error': {'/identity': MockResponse(status_code=500)}},
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -461,12 +447,12 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         pytest.param(
             {'elapsed_total_seconds': {'/identity': 0.30706}},
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_service_check(
@@ -497,27 +483,18 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {'http_error': {'/identity/v3/regions': MockResponse(status_code=500)}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'http_error': {'regions': MockResponse(status_code=500)}},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_identity'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_regions_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_regions_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.region.count',
@@ -527,14 +504,11 @@ def test_regions_exception(aggregator, check, dd_run_check, mock_http_get, conne
         'openstack.keystone.region.enabled',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/regions') == 3
-    if api_type == ApiType.SDK:
-        assert connection_identity.regions.call_count == 3
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/regions') == 3
 
 
 @pytest.mark.parametrize(
@@ -546,11 +520,11 @@ def test_regions_exception(aggregator, check, dd_run_check, mock_http_get, conne
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_regions_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -572,27 +546,18 @@ def test_regions_metrics(aggregator, check, dd_run_check):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {'http_error': {'/identity/v3/domains': MockResponse(status_code=500)}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'http_error': {'domains': MockResponse(status_code=500)}},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_identity'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_domains_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_domains_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.domain.count',
@@ -602,14 +567,11 @@ def test_domains_exception(aggregator, check, dd_run_check, mock_http_get, conne
         'openstack.keystone.domain.enabled',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/domains') == 3
-    if api_type == ApiType.SDK:
-        assert connection_identity.domains.call_count == 3
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/domains') == 3
 
 
 @pytest.mark.parametrize(
@@ -621,11 +583,11 @@ def test_domains_exception(aggregator, check, dd_run_check, mock_http_get, conne
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_domains_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -667,27 +629,18 @@ def test_domains_metrics(aggregator, check, dd_run_check):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {'http_error': {'/identity/v3/projects': MockResponse(status_code=500)}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'http_error': {'projects': MockResponse(status_code=500)}},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_identity'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_projects_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_projects_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.project.count',
@@ -697,14 +650,11 @@ def test_projects_exception(aggregator, check, dd_run_check, mock_http_get, conn
         'openstack.keystone.project.enabled',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/projects') == 3
-    if api_type == ApiType.SDK:
-        assert connection_identity.projects.call_count == 3
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/projects') == 3
 
 
 @pytest.mark.parametrize(
@@ -716,11 +666,11 @@ def test_projects_exception(aggregator, check, dd_run_check, mock_http_get, conn
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_projects_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -826,40 +776,28 @@ def test_projects_metrics(aggregator, check, dd_run_check):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {'http_error': {'/identity/v3/users': MockResponse(status_code=500)}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'http_error': {'users': MockResponse(status_code=500)}},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_identity'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_users_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_users_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.user.count',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/users') == 3
-    if api_type == ApiType.SDK:
-        assert connection_identity.users.call_count == 3
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/users') == 3
 
 
 @pytest.mark.parametrize(
@@ -871,11 +809,11 @@ def test_users_exception(aggregator, check, dd_run_check, mock_http_get, connect
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_users_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -1021,44 +959,32 @@ def test_users_metrics(aggregator, check, dd_run_check):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {'http_error': {'/identity/v3/groups': MockResponse(status_code=500)}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'http_error': {'groups': MockResponse(status_code=500)}},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_identity'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_groups_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.group.count',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/groups') == 3
-    if api_type == ApiType.SDK:
-        assert connection_identity.groups.call_count == 3
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/groups') == 3
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {
@@ -1066,23 +992,14 @@ def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connec
                     '/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users': MockResponse(status_code=500)
                 }
             },
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'http_error': {'group_users': {'89b36a4c32c44b0ea8856b6357f101ea': MockResponse(status_code=500)}}},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_identity'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.group.count',
@@ -1124,17 +1041,12 @@ def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get, c
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users') == 1
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/groups/9acda6caf16e4828935f4f681ee8b3e5/users') == 1
-    if api_type == ApiType.SDK:
-        assert connection_identity.group_users.call_count == 2
-        assert connection_identity.group_users.call_args_list.count(mock.call('89b36a4c32c44b0ea8856b6357f101ea')) == 1
-        assert connection_identity.group_users.call_args_list.count(mock.call('9acda6caf16e4828935f4f681ee8b3e5')) == 1
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users') == 1
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/groups/9acda6caf16e4828935f4f681ee8b3e5/users') == 1
 
 
 @pytest.mark.parametrize(
@@ -1146,11 +1058,11 @@ def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get, c
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_groups_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -1196,40 +1108,28 @@ def test_groups_metrics(aggregator, check, dd_run_check):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {'http_error': {'/identity/v3/services': MockResponse(status_code=500)}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'http_error': {'services': MockResponse(status_code=500)}},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_identity'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_services_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_services_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.service.count',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/services') == 3
-    if api_type == ApiType.SDK:
-        assert connection_identity.services.call_count == 3
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/services') == 3
 
 
 @pytest.mark.parametrize(
@@ -1241,11 +1141,11 @@ def test_services_exception(aggregator, check, dd_run_check, mock_http_get, conn
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_services_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -1341,27 +1241,18 @@ def test_services_metrics(aggregator, check, dd_run_check):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {'http_error': {'/identity/v3/registered_limits': MockResponse(status_code=500)}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'http_error': {'registered_limits': MockResponse(status_code=500)}},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_identity'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.limit.limit',
@@ -1374,38 +1265,26 @@ def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_
             'service_id:82624ab61fb04f058d043facf315fa3c',
         ],
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/registered_limits') == 3
-    if api_type == ApiType.SDK:
-        assert connection_identity.registered_limits.call_count == 3
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/registered_limits') == 3
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {'http_error': {'/identity/v3/limits': MockResponse(status_code=500)}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'http_error': {'limits': MockResponse(status_code=500)}},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_identity'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connection_identity, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_limits_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.keystone.limit.limit',
@@ -1418,14 +1297,11 @@ def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connec
             'service_id:9408080f1970482aa0e38bc2d4ea34b7',
         ],
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/limits') == 3
-    if api_type == ApiType.SDK:
-        assert connection_identity.limits.call_count == 3
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/limits') == 3
 
 
 @pytest.mark.parametrize(
@@ -1437,11 +1313,11 @@ def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connec
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_limits_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(

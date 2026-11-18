@@ -7,7 +7,7 @@ from openstack.config import loader
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.models.types import copy_raw
-from datadog_checks.openstack_controller.api.type import ApiType
+from datadog_checks.openstack_controller.defaults import DEFAULT_DOMAIN_ID
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config
@@ -49,7 +49,8 @@ class OpenstackConfig:
         self.endpoint_interface = config.endpoint_interface
         self.endpoint_region_id = config.endpoint_region_id
         self.paginated_limit = config.paginated_limit
-        self.api_type = None
+        self.auth_url = None
+        self.user_domain = None
         self.validate()
 
     def validate(self):
@@ -107,7 +108,8 @@ class OpenstackConfig:
         else:
             self.log.info("Not detected `username` in config. Searching for legacy `user` config")
             self._validate_user_legacy()
-        self.api_type = ApiType.REST
+        self.auth_url = self.keystone_server_url
+        self.user_domain = {"id": self.domain_id}
 
     def _validate_user_legacy(self):
         if self.user is None:
@@ -131,4 +133,11 @@ class OpenstackConfig:
         self.log.debug("openstack_cloud_name: %s", self.openstack_cloud_name)
         config = loader.OpenStackConfig(load_envvars=False, config_files=[self.openstack_config_file_path])
         config.get_all_clouds()
-        self.api_type = ApiType.SDK
+        auth = config.get_one(cloud=self.openstack_cloud_name).get_auth_args()
+        # Kept as configured: it is the `keystone_server` tag value.
+        self.auth_url = auth.get('auth_url')
+        # `ApiRest` appends `/v3` itself, while `clouds.yaml` allows `auth_url` with or without it.
+        self.keystone_server_url = self.auth_url.rstrip('/').removesuffix('/v3')
+        self.username = auth.get('username')
+        self.password = auth.get('password')
+        self.user_domain = {"name": auth.get('user_domain_name', DEFAULT_DOMAIN_ID)}

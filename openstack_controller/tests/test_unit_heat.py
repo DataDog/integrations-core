@@ -6,13 +6,11 @@ import copy
 import logging
 import os
 
-import mock
 import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
     STACKS_METRICS_HEAT,
@@ -33,11 +31,11 @@ pytestmark = [
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_heat_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -51,27 +49,18 @@ def test_disable_heat_metrics(aggregator, dd_run_check, instance, openstack_cont
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'openstack_v3_password', 'instance', 'api_type'),
+    ('mock_http_post', 'instance'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['orchestration'])}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'catalog': []},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_post', 'openstack_v3_password'],
+    indirect=['mock_http_post'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -89,14 +78,11 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         args, kwargs = call
         args_list += list(args)
     assert args_list.count('http://127.0.0.1:8004/heat-api') == 0
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_post.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
-    if api_type == ApiType.SDK:
-        assert openstack_connection.call_count == 4
+    args_list = []
+    for call in mock_http_post.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     assert '`heat` component not found in catalog' in caplog.text
 
 
@@ -111,12 +97,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         pytest.param(
             {'http_error': {'/heat-api': MockResponse(status_code=500)}},
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -146,12 +132,12 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         pytest.param(
             {'elapsed_total_seconds': {'/heat-api': 0.30706}},
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_service_check(
@@ -182,7 +168,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_heat', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {
@@ -191,43 +177,24 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
                     '/heat-api/v1/6e39099cccde4f809b003d9e0dd09304/stacks': MockResponse(status_code=500),
                 }
             },
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {
-                'http_error': {
-                    'stacks': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
-                    }
-                }
-            },
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_heat'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_stacks_exception(aggregator, check, dd_run_check, mock_http_get, connection_heat, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_stacks_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.heat.stack.count',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8004/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks') == 1
-    if api_type == ApiType.SDK:
-        assert connection_heat.stacks.call_count == 2
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8004/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks') == 1
 
 
 @pytest.mark.parametrize(
@@ -241,11 +208,11 @@ def test_stacks_exception(aggregator, check, dd_run_check, mock_http_get, connec
         pytest.param(
             configs.SDK,
             STACKS_METRICS_HEAT,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_stacks_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
     for metric in metrics:
@@ -259,12 +226,11 @@ def test_stacks_metrics(aggregator, check, dd_run_check, metrics):
 
 
 @pytest.mark.parametrize(
-    ('instance', 'paginated_limit', 'api_type', 'expected_api_calls', 'metrics'),
+    ('instance', 'paginated_limit', 'expected_api_calls', 'metrics'),
     [
         pytest.param(
             configs.REST,
             1,
-            ApiType.REST,
             3,
             STACKS_METRICS_HEAT,
             id='api rest small limit',
@@ -272,73 +238,37 @@ def test_stacks_metrics(aggregator, check, dd_run_check, metrics):
         pytest.param(
             configs.REST,
             1000,
-            ApiType.REST,
             1,
             STACKS_METRICS_HEAT,
             id='api rest high limit',
         ),
-        pytest.param(
-            configs.SDK,
-            1,
-            ApiType.SDK,
-            2,
-            STACKS_METRICS_HEAT,
-            id='api sdk small limit',
-        ),
-        pytest.param(
-            configs.SDK,
-            1000,
-            ApiType.SDK,
-            2,
-            STACKS_METRICS_HEAT,
-            id='api sdk high limit',
-        ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'connection_heat', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_stacks_pagination(
     aggregator,
     instance,
     openstack_controller_check,
     paginated_limit,
     expected_api_calls,
-    api_type,
     dd_run_check,
     mock_http_get,
-    connection_heat,
     metrics,
 ):
     paginated_instance = copy.deepcopy(instance)
     paginated_instance['paginated_limit'] = paginated_limit
     dd_run_check(openstack_controller_check(paginated_instance))
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
-            limit = params.get('limit')
-            args_list += [(args[0], limit)]
-        assert (
-            args_list.count(
-                ('http://127.0.0.1:8004/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks', paginated_limit)
-            )
-            == expected_api_calls
-        )
-    else:
-        assert connection_heat.stacks.call_count == expected_api_calls
-        assert (
-            connection_heat.stacks.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=paginated_limit)
-            )
-            == 1
-        )
-        assert (
-            connection_heat.stacks.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=paginated_limit)
-            )
-            == 1
-        )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+        params = kwargs.get('params', {})
+        limit = params.get('limit')
+        args_list += [(args[0], limit)]
+    assert (
+        args_list.count(('http://127.0.0.1:8004/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks', paginated_limit))
+        == expected_api_calls
+    )
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],

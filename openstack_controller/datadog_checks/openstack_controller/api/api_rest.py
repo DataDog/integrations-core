@@ -21,7 +21,7 @@ class ApiRest(Api):
         self._current_project_id = None
 
     def auth_url(self):
-        return self.config.keystone_server_url
+        return self.config.auth_url
 
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
@@ -55,7 +55,7 @@ class ApiRest(Api):
                         "user": {
                             "name": self.config.username,
                             "password": self.config.password,
-                            "domain": {"id": self.config.domain_id},
+                            "domain": self.config.user_domain,
                         }
                     },
                 },
@@ -75,7 +75,7 @@ class ApiRest(Api):
                         "user": {
                             "name": self.config.username,
                             "password": self.config.password,
-                            "domain": {"id": self.config.domain_id},
+                            "domain": self.config.user_domain,
                         }
                     },
                 },
@@ -96,7 +96,7 @@ class ApiRest(Api):
                         "user": {
                             "name": self.config.username,
                             "password": self.config.password,
-                            "domain": {"id": self.config.domain_id},
+                            "domain": self.config.user_domain,
                         }
                     },
                 },
@@ -434,7 +434,12 @@ class ApiRest(Api):
             params = {'detail': True}
             url = '{}/v1/nodes'.format(ironic_endpoint)
 
-        return self.make_paginated_request(url, 'nodes', 'uuid', params=params)
+        nodes = self.make_paginated_request(url, 'nodes', 'uuid', params=params)
+        for node in nodes:
+            # Before microversion 1.2, Ironic reports the `available` provision state as null.
+            if node.get('provision_state') is None:
+                node['provision_state'] = 'available'
+        return nodes
 
     def get_baremetal_portgroups(self, node_id):
         return self.make_paginated_request(

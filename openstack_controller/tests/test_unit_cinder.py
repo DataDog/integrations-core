@@ -5,13 +5,11 @@ import copy
 import logging
 import os
 
-import mock
 import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
 pytestmark = [
@@ -33,15 +31,15 @@ pytestmark = [
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_block_storage_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -63,11 +61,11 @@ def test_disable_block_storage_metrics(aggregator, dd_run_check, instance, opens
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_block_storage_components_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -91,7 +89,7 @@ def test_disable_block_storage_components_metrics(aggregator, dd_run_check, inst
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'openstack_v3_password', 'instance', 'api_type'),
+    ('mock_http_post', 'instance'),
     [
         pytest.param(
             {
@@ -99,23 +97,14 @@ def test_disable_block_storage_components_metrics(aggregator, dd_run_check, inst
                     '/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['block-storage', 'volumev3'])
                 }
             },
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'catalog': []},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_post', 'openstack_v3_password'],
+    indirect=['mock_http_post'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -133,14 +122,11 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         args, kwargs = call
         args_list += list(args)
     assert args_list.count('http://127.0.0.1:8776/volume/v3/') == 0
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_post.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
-    if api_type == ApiType.SDK:
-        assert openstack_connection.call_count == 4
+    args_list = []
+    for call in mock_http_post.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     assert '`block-storage` component not found in catalog' in caplog.text
 
 
@@ -155,12 +141,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         pytest.param(
             {'http_error': {'/volume/v3/': MockResponse(status_code=500)}},
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -190,12 +176,12 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         pytest.param(
             None,
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_post'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time_block_storage(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -226,12 +212,12 @@ def test_response_time_block_storage(aggregator, check, dd_run_check, mock_http_
         pytest.param(
             None,
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_post'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time_volumev3(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -260,11 +246,11 @@ def test_response_time_volumev3(aggregator, check, dd_run_check, mock_http_get):
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_block_storage_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -508,11 +494,11 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             configs.SDK_MICROVERSION_3_70,
-            id='api sdk microversion 3.70',
+            id='clouds.yaml microversion 3.70',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_block_storage_metrics_microversion_3_70(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -554,12 +540,11 @@ def test_block_storage_metrics_microversion_3_70(aggregator, check, dd_run_check
 
 
 @pytest.mark.parametrize(
-    ('instance', 'paginated_limit', 'api_type', 'expected_api_calls_proj_1', 'expected_api_calls_proj_2'),
+    ('instance', 'paginated_limit', 'expected_api_calls_proj_1', 'expected_api_calls_proj_2'),
     [
         pytest.param(
             configs.REST,
             1,
-            ApiType.REST,
             2,
             1,
             id='api rest low limit',
@@ -567,30 +552,13 @@ def test_block_storage_metrics_microversion_3_70(aggregator, check, dd_run_check
         pytest.param(
             configs.REST,
             1000,
-            ApiType.REST,
             1,
             1,
             id='api rest high limit',
         ),
-        pytest.param(
-            configs.SDK,
-            1,
-            ApiType.SDK,
-            2,
-            1,
-            id='api sdk low limit',
-        ),
-        pytest.param(
-            configs.SDK,
-            1000,
-            ApiType.SDK,
-            1,
-            1,
-            id='api sdk high limit',
-        ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_block_storage_volumes_pagination(
     aggregator,
     instance,
@@ -598,48 +566,31 @@ def test_block_storage_volumes_pagination(
     paginated_limit,
     expected_api_calls_proj_1,
     expected_api_calls_proj_2,
-    api_type,
     dd_run_check,
-    connection_block_storage,
     mock_http_get,
 ):
     paginated_instance = copy.deepcopy(instance)
     paginated_instance['paginated_limit'] = paginated_limit
     dd_run_check(openstack_controller_check(paginated_instance))
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
-            limit = params.get('limit')
-            args_list += [(args[0], limit)]
-        assert (
-            args_list.count(
-                ('http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/detail', paginated_limit)
-            )
-            == expected_api_calls_proj_1
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+        params = kwargs.get('params', {})
+        limit = params.get('limit')
+        args_list += [(args[0], limit)]
+    assert (
+        args_list.count(
+            ('http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/detail', paginated_limit)
         )
-        assert (
-            args_list.count(
-                ('http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304/volumes/detail', paginated_limit)
-            )
-            == expected_api_calls_proj_2
+        == expected_api_calls_proj_1
+    )
+    assert (
+        args_list.count(
+            ('http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304/volumes/detail', paginated_limit)
         )
-    else:
-        assert connection_block_storage.volumes.call_count == 2
-        assert (
-            connection_block_storage.volumes.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=paginated_limit)
-            )
-            == 1
-        )
-        assert (
-            connection_block_storage.volumes.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=paginated_limit)
-            )
-            == 1
-        )
+        == expected_api_calls_proj_2
+    )
     aggregator.assert_metric(
         'openstack.cinder.volume.count',
         count=1,
@@ -703,12 +654,11 @@ def test_block_storage_volumes_pagination(
 
 
 @pytest.mark.parametrize(
-    ('instance', 'paginated_limit', 'api_type', 'expected_api_calls_proj_1', 'expected_api_calls_proj_2'),
+    ('instance', 'paginated_limit', 'expected_api_calls_proj_1', 'expected_api_calls_proj_2'),
     [
         pytest.param(
             configs.REST,
             1,
-            ApiType.REST,
             2,
             1,
             id='api rest low limit',
@@ -716,30 +666,13 @@ def test_block_storage_volumes_pagination(
         pytest.param(
             configs.REST,
             1000,
-            ApiType.REST,
             1,
             1,
             id='api rest high limit',
         ),
-        pytest.param(
-            configs.SDK,
-            1,
-            ApiType.SDK,
-            2,
-            1,
-            id='api sdk low limit',
-        ),
-        pytest.param(
-            configs.SDK,
-            1000,
-            ApiType.SDK,
-            1,
-            1,
-            id='api sdk high limit',
-        ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_block_storage_snapshots_pagination(
     aggregator,
     instance,
@@ -747,48 +680,31 @@ def test_block_storage_snapshots_pagination(
     paginated_limit,
     expected_api_calls_proj_1,
     expected_api_calls_proj_2,
-    api_type,
     dd_run_check,
-    connection_block_storage,
     mock_http_get,
 ):
     paginated_instance = copy.deepcopy(instance)
     paginated_instance['paginated_limit'] = paginated_limit
     dd_run_check(openstack_controller_check(paginated_instance))
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
-            limit = params.get('limit')
-            args_list += [(args[0], limit)]
-        assert (
-            args_list.count(
-                ('http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/snapshots/detail', paginated_limit)
-            )
-            == expected_api_calls_proj_1
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+        params = kwargs.get('params', {})
+        limit = params.get('limit')
+        args_list += [(args[0], limit)]
+    assert (
+        args_list.count(
+            ('http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/snapshots/detail', paginated_limit)
         )
-        assert (
-            args_list.count(
-                ('http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304/snapshots/detail', paginated_limit)
-            )
-            == expected_api_calls_proj_2
+        == expected_api_calls_proj_1
+    )
+    assert (
+        args_list.count(
+            ('http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304/snapshots/detail', paginated_limit)
         )
-    else:
-        assert connection_block_storage.snapshots.call_count == 2
-        assert (
-            connection_block_storage.snapshots.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=paginated_limit)
-            )
-            == 1
-        )
-        assert (
-            connection_block_storage.snapshots.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=paginated_limit)
-            )
-            == 1
-        )
+        == expected_api_calls_proj_2
+    )
     aggregator.assert_metric(
         'openstack.cinder.snapshot.count',
         count=1,
