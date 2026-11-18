@@ -536,9 +536,10 @@ pipeline:
       grok:
         # Prefer high_res_timestamp (ISO 8601 with offset), then time_generated, then timestamp
         # (receive_time in Threat, URL, Data Filtering and GlobalProtect formats; start in GTP).
-        # Times without an offset are firewall-local and are parsed as UTC.
+        # Times without an offset are firewall-local and are parsed as UTC. Firewalls that don't
+        # populate high_res_timestamp send a 1969-12-31 placeholder, which is skipped.
         matchRules: |
-          high_res_timestamp %{data}high_res_timestamp=%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):pan_event_time}%{data}
+          high_res_timestamp %{data}high_res_timestamp=(?!1969-)%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):pan_event_time}%{data}
           time_generated %{data}(?<![\w.])time_generated=%{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}%{data}
           timestamp %{data}(?<![\w.])timestamp=%{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}%{data}
         supportRules: ''
@@ -670,7 +671,8 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              misc_url %{data}misc="*%{regex("[^,\"]*"):ocsf.evidence.url.url_string}%{data}
+              misc_url_quoted %{data}misc="+%{regex("[^\"]+"):ocsf.evidence.url.url_string}"+%{data}
+              misc_url %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.url.url_string}%{data}
     - type: pipeline
       name: misc field filename extraction
       enabled: true
@@ -679,16 +681,18 @@ pipeline:
       filter:
         query: "@type:THREAT @subtype:(file OR virus OR wildfire-virus OR wildfire OR data)"
       processors:
-        - type: attribute-remapper
-          name: Map `misc` to `ocsf.evidence.file.name`
+        - type: grok-parser
+          name: Parse `misc` to `ocsf.evidence.file.name`
           enabled: true
-          sources:
-            - misc
-          sourceType: attribute
-          target: ocsf.evidence.file.name
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: true
+          source: message
+          samples:
+            - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, type=THREAT, subtype=virus, evt.name=block-url, misc=invoice_2025.pdf, threatid=Eicar Test File"
+            - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, type=THREAT, subtype=data, evt.name=alert, misc=\"payroll, Q3.xlsx\", threatid=\"Credit Card Numbers\""
+          grok:
+            supportRules: ""
+            matchRules: |-
+              misc_file_quoted %{data}misc="+%{regex("[^\"]+"):ocsf.evidence.file.name}"+%{data}
+              misc_file %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.file.name}%{data}
         - type: string-builder-processor
           name: Add type_id
           enabled: true
