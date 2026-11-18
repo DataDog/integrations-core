@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 from datetime import datetime, timedelta
+from unittest.mock import Mock
 
 import pytest
 
+from datadog_checks.ibm_db2 import activity
 from datadog_checks.ibm_db2.activity import IDENTITY_COLUMNS, normalize_activity
 
 pytestmark = pytest.mark.unit
@@ -128,3 +130,51 @@ def test_obfuscation_failure(activity_row: dict, monkeypatch: pytest.MonkeyPatch
 
     monkeypatch.setattr('datadog_checks.base.utils.db.query_metrics.obfuscation.obfuscate_sql_with_metadata', fail)
     assert normalize_activity(activity_row, 'orders') is None
+
+
+@pytest.mark.parametrize('limit', ['rows', 'text', 'budget'])
+def test_activity_reader_limits(monkeypatch: pytest.MonkeyPatch, limit: str):
+    """Bound returned rows and UTF-8 SQL bytes without forwarding an oversized statement fragment."""
+    monkeypatch.setattr(activity, 'ACTIVITY_MAX_ROWS', 2)
+    monkeypatch.setattr(activity, 'ACTIVITY_MAX_TEXT_BYTES', 8)
+    monkeypatch.setattr(activity, 'ACTIVITY_TEXT_BUDGET', 8)
+    rows = {
+        'rows': [{'stmt_text': 'a'}, {'stmt_text': 'b'}, {'stmt_text': 'c'}, False],
+        'text': [{'stmt_text': None, 'stmt_text_bytes': 9}, {'stmt_text': 'é' * 5}, {'stmt_text': 'c'}, False],
+        'budget': [{'stmt_text': '12345'}, {'stmt_text': '67890'}, False],
+    }[limit]
+    cursor = object()
+    prepare, release = Mock(return_value=cursor), Mock()
+    monkeypatch.setattr(activity.ibm_db, 'prepare', prepare)
+    monkeypatch.setattr(activity.ibm_db, 'execute', Mock())
+    monkeypatch.setattr(activity.ibm_db, 'fetch_assoc', Mock(side_effect=rows))
+    monkeypatch.setattr(activity.ibm_db, 'free_stmt', release)
+    result, stats = activity.read_activity('connection')
+    assert [row['stmt_text'] for row in result] == {'rows': ['a', 'b'], 'text': [], 'budget': ['12345']}[limit]
+    assert (
+        stats
+        == {
+            'rows': {'row_limit': 1, 'text_limit': 0, 'text_budget': 0},
+            'text': {'row_limit': 1, 'text_limit': 2, 'text_budget': 0},
+            'budget': {'row_limit': 0, 'text_limit': 0, 'text_budget': 1},
+        }[limit]
+    )
+    prepare.assert_called_once_with(
+        'connection', activity.ACTIVITY_QUERY, {activity.ibm_db.SQL_ATTR_QUERY_TIMEOUT: activity.ACTIVITY_QUERY_TIMEOUT}
+    )
+    release.assert_called_once_with(cursor)
+
+
+@pytest.mark.parametrize('stage', ['execute', 'fetch_assoc'])
+def test_activity_reader_failure_releases_statement(monkeypatch: pytest.MonkeyPatch, stage: str):
+    """A failed monitoring read must propagate its error and release the native statement, never return idle data."""
+    cursor = object()
+    monkeypatch.setattr(activity.ibm_db, 'prepare', Mock(return_value=cursor))
+    monkeypatch.setattr(activity.ibm_db, 'execute', Mock())
+    monkeypatch.setattr(activity.ibm_db, 'fetch_assoc', Mock())
+    monkeypatch.setattr(activity.ibm_db, stage, Mock(side_effect=RuntimeError('SQLSTATE=HYT00')))
+    release = Mock()
+    monkeypatch.setattr(activity.ibm_db, 'free_stmt', release)
+    with pytest.raises(RuntimeError, match='SQLSTATE=HYT00'):
+        activity.read_activity('connection')
+    release.assert_called_once_with(cursor)
