@@ -508,8 +508,7 @@ pipeline:
           threat_with_useragent %{_header}%{_kv}misc=%{_q}%{data:misc}%{_sep}threatid=%{_q}%{data:threatid}%{_sep}(?=category=)%{_kv}http.useragent=%{_q}%{data:http.useragent}%{_sep}(?=filetype=)%{_kv}
           threat %{_header}%{_kv}misc=%{_q}%{data:misc}%{_sep}threatid=%{_q}%{data:threatid}%{_sep}(?=category=)%{_kv}
           config %{_header}%{_kv}path=%{_q}%{data:path}%{_sep}before_change_detail=%{_q}%{data:before_change_detail}%{_sep}after_change_detail=%{_q}%{data:after_change_detail}%{_sep}(?=seqno=)%{_kv}
-          globalprotect %{_header}%{_kv}error=%{_q}%{data:error}%{_sep}opaque=%{_q}%{data:opaque}%{_sep}(?=(?:gp_)?status=)%{_kv}
-          system %{_header}%{_kv}opaque=%{_q}%{data:opaque}%{_sep}(?=seqno=)%{_kv}
+          system %{_header}%{_kv}severity=%{_q}%{word:severity}%{_sep}opaque=%{_q}%{data:opaque}%{_sep}(?=seqno=)%{_kv}
           rule_panos %{_header}%{_kv}
         supportRules: |
           _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^")}
