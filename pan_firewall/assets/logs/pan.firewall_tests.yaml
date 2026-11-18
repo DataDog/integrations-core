@@ -1346,14 +1346,18 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
  -
-  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=CORRELATION, subtype=compromised-host,\tvsys=vsys1,\tevt.name=beacon-detection,\tobject=,\tmodule=correlation,\tseverity=high,\topaque=\"Host 10.60.2.100 visited known malware URL, score=85 (19 times).\",\tseqno=7699920671375145866, actionflags=0x0, vsys_name=,\tdevice_name=fw-a"
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=CORRELATION, subtype=compromised-host, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, usr.id=CORP\\jdoe, vsys=vsys1, category=compromised-host, severity=high, vsys_name=, device_name=fw-a, vsys_id=1, objectname=beacon-detection, object_id=6005, evidence=\"Host visited known malware URL, score=85 (19 times).\""
   result:
     custom:
-      actionflags: "0x0"
+      category: "compromised-host"
       device_name: "fw-a"
-      evt:
-        name: "beacon-detection"
-      module: "correlation"
+      evidence: "Host visited known malware URL, score=85 (19 times)."
+      network:
+        client:
+          geoip: {}
+          ip: "10.60.2.100"
+      object_id: 6005
+      objectname: "beacon-detection"
       ocsf:
         activity_id: 99
         activity_name: "CORRELATION"
@@ -1366,22 +1370,23 @@ tests:
             name: "Palo Alto Networks Firewall"
             uid: "016201026426"
             vendor_name: "Palo Alto Networks"
-          sequence: 7699920671375145866
           version: "1.5.0"
         severity: "High"
         severity_id: 4
         time: 1794997275000
-      opaque: "Host 10.60.2.100 visited known malware URL, score=85 (19 times)."
       pan_event_time: 1794997275000
       pan_status: "error"
-      seqno: 7699920671375145866
       serial: "016201026426"
       severity: "high"
       subtype: "compromised-host"
+      time_generated: "2026/11/18 10:21:15"
       timestamp: "2026/11/18 10:21:15"
       type: "CORRELATION"
+      usr:
+        id: "CORP\\jdoe"
       vsys: "vsys1"
-    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=CORRELATION, subtype=compromised-host,\tvsys=vsys1,\tevt.name=beacon-detection,\tobject=,\tmodule=correlation,\tseverity=high,\topaque=\"Host 10.60.2.100 visited known malware URL, score=85 (19 times).\",\tseqno=7699920671375145866, actionflags=0x0, vsys_name=,\tdevice_name=fw-a"
+      vsys_id: 1
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=CORRELATION, subtype=compromised-host, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, usr.id=CORP\\jdoe, vsys=vsys1, category=compromised-host, severity=high, vsys_name=, device_name=fw-a, vsys_id=1, objectname=beacon-detection, object_id=6005, evidence=\"Host visited known malware URL, score=85 (19 times).\""
     status: "error"
     tags:
      - "source:LOGS_SOURCE"
