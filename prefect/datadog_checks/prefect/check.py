@@ -50,8 +50,8 @@ class PrefectCheck(AgentCheck, ConfigMixin):
     def _parse_config(self):
         url = self.config.prefect_url.rstrip('/')
 
-        if self.config.auth_string is not None:
-            username, _, password = self.config.auth_string.partition(':')
+        if self.config.prefect_userpass is not None:
+            username, _, password = self.config.prefect_userpass.partition(':')
             http_config = dict(self.instance, username=username, password=password)
             self._http = RequestsWrapper(http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 

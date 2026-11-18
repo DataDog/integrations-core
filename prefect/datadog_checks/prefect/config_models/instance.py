@@ -97,7 +97,6 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     allow_redirects: Optional[bool] = None
-    auth_string: Optional[str] = Field(None, pattern='^[^:]+:.+$')
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None
     aws_host: Optional[str] = None
@@ -126,6 +125,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     prefect_url: str
+    prefect_userpass: Optional[str] = Field(None, pattern='^[^:]+:.+$')
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None

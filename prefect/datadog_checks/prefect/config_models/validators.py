@@ -11,10 +11,10 @@ if TYPE_CHECKING:
 
 
 def check_instance(model: InstanceConfig) -> InstanceConfig:
-    if model.auth_string is not None:
+    if model.prefect_userpass is not None:
         if model.username is not None or model.password is not None:
-            raise ValueError('`auth_string` cannot be combined with `username` or `password`')
+            raise ValueError('`prefect_userpass` cannot be combined with `username` or `password`')
         if cast(str, model.auth_type).lower() != 'basic':
-            raise ValueError('`auth_string` requires `auth_type: basic`')
+            raise ValueError('`prefect_userpass` requires `auth_type: basic`')
 
     return model

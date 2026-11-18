@@ -36,7 +36,7 @@ No additional installation is needed on your server.
 #### Authentication
 
 For a self-hosted server using `PREFECT_SERVER_API_AUTH_STRING`, set the
-`auth_string` option to the same `user:password` secret used by Prefect clients
+`prefect_userpass` option to the same `user:password` secret used by Prefect clients
 in `PREFECT_API_AUTH_STRING`. The integration does not read Prefect environment
 variables automatically. For example, reference a secret resolved by the
 [Agent secret management mechanism][11]:
@@ -44,12 +44,12 @@ variables automatically. For example, reference a secret resolved by the
 ```yaml
 instances:
   - prefect_url: https://prefect.example/api
-    auth_string: ENC[prefect_api_auth_string]
+    prefect_userpass: ENC[prefect_api_auth_string]
 ```
 
 Passwords may contain colons. Alternatively, keep using the existing separate
-`username` and `password` options. Do not combine them with `auth_string`, and
-use `auth_string` only with basic authentication. Use HTTPS when sending credentials
+`username` and `password` options. Do not combine them with `prefect_userpass`, and
+use `prefect_userpass` only with basic authentication. Use HTTPS when sending credentials
 to a remote server.
 
 ### Validation

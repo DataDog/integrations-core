@@ -22,7 +22,7 @@ files:
         type: string
         example: http://localhost:4200/api
       fleet_configurable: false
-    - name: auth_string
+    - name: prefect_userpass
       description: |
         Basic authentication credentials in `user:password` format, matching
         Prefect's `PREFECT_API_AUTH_STRING` client setting. Use the same secret

@@ -15,10 +15,10 @@ pytestmark = pytest.mark.unit
 @pytest.mark.parametrize(
     'credentials,expected',
     [
-        ({'auth_string': 'platform:secret'}, 'platform:secret'),
-        ({'auth_string': 'platform:secret', 'auth_type': 'BASIC'}, 'platform:secret'),
-        ({'auth_string': 'platform:secret', 'auth_type': 'bAsIc'}, 'platform:secret'),
-        ({'auth_string': 'platform:secret:with:colons'}, 'platform:secret:with:colons'),
+        ({'prefect_userpass': 'platform:secret'}, 'platform:secret'),
+        ({'prefect_userpass': 'platform:secret', 'auth_type': 'BASIC'}, 'platform:secret'),
+        ({'prefect_userpass': 'platform:secret', 'auth_type': 'bAsIc'}, 'platform:secret'),
+        ({'prefect_userpass': 'platform:secret:with:colons'}, 'platform:secret:with:colons'),
         ({'username': 'platform', 'password': 'secret'}, 'platform:secret'),
         ({}, None),
     ],
@@ -47,12 +47,12 @@ def test_authentication_header(credentials: dict[str, str], expected: str | None
 @pytest.mark.parametrize(
     'credentials',
     [
-        {'auth_string': 'missing-separator'},
-        {'auth_string': ':secret'},
-        {'auth_string': 'platform:'},
-        {'auth_string': 'platform:secret', 'username': 'other'},
-        {'auth_string': 'platform:secret', 'password': 'other'},
-        {'auth_string': 'platform:secret', 'auth_type': 'digest'},
+        {'prefect_userpass': 'missing-separator'},
+        {'prefect_userpass': ':secret'},
+        {'prefect_userpass': 'platform:'},
+        {'prefect_userpass': 'platform:secret', 'username': 'other'},
+        {'prefect_userpass': 'platform:secret', 'password': 'other'},
+        {'prefect_userpass': 'platform:secret', 'auth_type': 'digest'},
     ],
 )
 def test_invalid_authentication_rejected(credentials: dict[str, str], mocker):
