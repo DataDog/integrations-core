@@ -315,7 +315,7 @@
                     {
                         "id": 3874631803760662,
                         "definition": {
-                            "title": "CRITICALs",
+                            "title": "Critical signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -334,7 +334,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:vault status:critical"
+                                                "query": "source:vault status:critical $user"
                                             }
                                         }
                                     ],
@@ -357,7 +357,7 @@
                             "precision": 0,
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Avault%20status%3Acritical"
                                 }
                             ]
@@ -372,7 +372,7 @@
                     {
                         "id": 6041021068351281,
                         "definition": {
-                            "title": "HIGHs",
+                            "title": "High signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -391,7 +391,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:vault status:high"
+                                                "query": "source:vault status:high $user"
                                             }
                                         }
                                     ],
@@ -414,7 +414,7 @@
                             "precision": 0,
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Avault%20status%3Ahigh"
                                 }
                             ]
@@ -429,7 +429,7 @@
                     {
                         "id": 9715726999467385,
                         "definition": {
-                            "title": "Security Signals",
+                            "title": "Security signals by rule",
                             "type": "toplist",
                             "style": {},
                             "requests": [
@@ -456,7 +456,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault"
+                                                "query": "source:vault $user"
                                             }
                                         }
                                     ],
@@ -480,7 +480,7 @@
                             ],
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Avault%20%40workflow.rule.name%3A{{@workflow.rule.name.value}}"
                                 }
                             ]
@@ -522,7 +522,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault"
+                                                "query": "source:vault $user"
                                             }
                                         }
                                     ],
@@ -546,7 +546,7 @@
                             ],
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Avault%20%40usr.id%3A{{@usr.id.value}}"
                                 }
                             ]
@@ -561,7 +561,7 @@
                     {
                         "id": 5788258583119805,
                         "definition": {
-                            "title": "MEDIUMs",
+                            "title": "Medium signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -580,7 +580,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:vault status:medium"
+                                                "query": "source:vault status:medium $user"
                                             }
                                         }
                                     ],
@@ -603,7 +603,7 @@
                             "precision": 0,
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Avault%20status%3Amedium"
                                 }
                             ]
@@ -618,7 +618,7 @@
                     {
                         "id": 4625981237303137,
                         "definition": {
-                            "title": "LOWs",
+                            "title": "Low signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -637,7 +637,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:vault status:low"
+                                                "query": "source:vault status:low $user"
                                             }
                                         }
                                     ],
@@ -660,7 +660,7 @@
                             "precision": 0,
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Avault%20status%3Alow"
                                 }
                             ]
@@ -675,7 +675,7 @@
                     {
                         "id": 2265398439906149,
                         "definition": {
-                            "title": "INFOs",
+                            "title": "Info signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -694,7 +694,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:vault status:info"
+                                                "query": "source:vault status:info $user"
                                             }
                                         }
                                     ],
@@ -717,7 +717,7 @@
                             "precision": 0,
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Avault%20status%3Ainfo"
                                 }
                             ]
@@ -759,7 +759,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:vault @type:response ((@request.mount_type:kv @request.operation:read) OR (@request.mount_type:kv (@request.operation:delete OR @http.url_details.path:(*\\/destroy\\/* OR *\\/delete\\/*)))) $user $client_ip $mount_type $operation $path",
+                                        "query_string": "source:vault @type:response ((@request.mount_type:kv @request.operation:read -@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*)) OR (@request.mount_type:kv (@request.operation:delete OR (@http.url_details.path:(*\\/destroy\\/* OR *\\/delete\\/*) @request.operation:(create OR update))))) $user $client_ip $mount_type $operation $path",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -834,7 +834,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read -@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -896,7 +896,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read -@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -958,7 +958,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response -@http.url_details.path:(auth\\/* OR sys\\/* OR identity\\/*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1029,7 +1029,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read -@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1095,7 +1095,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response ((@request.mount_type:kv (@request.operation:delete OR @http.url_details.path:(*\\/destroy\\/* OR *\\/delete\\/*))) OR (@request.mount_type:transit @http.url_details.path:*\\/export\\/*)) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response ((@request.mount_type:kv (@request.operation:delete OR (@http.url_details.path:(*\\/destroy\\/* OR *\\/delete\\/*) @request.operation:(create OR update)))) OR (@request.mount_type:transit @http.url_details.path:*\\/export\\/*)) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1226,7 +1226,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response (((@auth.policies:root OR @http.url_details.path:sys\\/generate-root*)) OR (@http.url_details.path:(sys\\/policy\\/* OR sys\\/policies\\/* OR identity\\/group*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/audit* OR sys\\/auth\\/* OR sys\\/mounts\\/*) @request.operation:(create OR update OR delete))) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response (((@auth.policies:root OR @http.url_details.path:sys\\/generate-root*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/policy\\/* OR sys\\/policies\\/* OR identity\\/group*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/audit* OR sys\\/auth\\/* OR sys\\/mounts\\/*) @request.operation:(create OR update OR delete))) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1297,7 +1297,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response (((@auth.policies:root OR @http.url_details.path:sys\\/generate-root*)) OR (@http.url_details.path:(sys\\/policy\\/* OR sys\\/policies\\/* OR identity\\/group*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/audit* OR sys\\/auth\\/* OR sys\\/mounts\\/*) @request.operation:(create OR update OR delete))) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response (((@auth.policies:root OR @http.url_details.path:sys\\/generate-root*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/policy\\/* OR sys\\/policies\\/* OR identity\\/group*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/audit* OR sys\\/auth\\/* OR sys\\/mounts\\/*) @request.operation:(create OR update OR delete))) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1375,7 +1375,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @http.url_details.path:auth\\/*\\/login* $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @http.url_details.path:(auth\\/*\\/login* OR auth\\/*\\/oidc\\/callback*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1486,7 +1486,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @http.url_details.path:auth\\/*\\/login* (@error:* OR @error.message:*) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @http.url_details.path:(auth\\/*\\/login* OR auth\\/*\\/oidc\\/callback*) (@error:* OR @error.message:*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
