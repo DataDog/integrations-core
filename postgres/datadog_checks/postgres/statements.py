@@ -37,7 +37,7 @@ SELECT {cols}
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
   WHERE query != '{insufficient_privilege}'
-  AND query NOT LIKE '{ddignore_comment}%%'
+  AND query NOT LIKE '%%{ddignore_comment}%%'
   {queryid_filter}
   {filters}
   {extra_clauses}

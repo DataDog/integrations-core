@@ -675,7 +675,7 @@ def test_commenter_cursor_functionality(pg_instance: Dict[str, str]):
                 assert len(result) == 3
                 assert all(isinstance(row[0], int) for row in result)
 
-        # Verify SQL comment with DDIGNORE is prepended
+        # Verify SQL comment is prepended and the DDIGNORE marker is appended
         _verify_sql_comment_prepended(pg_instance, "generate_series", True)
 
         # Test multiple queries to ensure CommenterCursor works consistently
@@ -715,12 +715,11 @@ def _verify_sql_comment_prepended(pg_instance, query_pattern, ignore_query_metri
                 query_text = query_text.decode('utf-8')
 
             expected_comment = "/* service='datadog-agent' */"
-
-            if ignore_query_metric:
-                expected_comment = f"/* DDIGNORE */ {expected_comment}"
-
             assert query_text.startswith(expected_comment), (
                 f"Query should start with '{expected_comment}', but got: {query_text[:100]}..."
+            )
+            assert query_text.endswith("/* DDIGNORE */") == ignore_query_metric, (
+                f"Unexpected DDIGNORE marker for ignore_query_metric={ignore_query_metric}: {query_text[-100:]}"
             )
     finally:
         super_conn.close()

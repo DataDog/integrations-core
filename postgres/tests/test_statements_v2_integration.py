@@ -555,7 +555,7 @@ def test_ignored_queries_do_not_cause_lookup_cycles_v2(aggregator, integration_c
         refetched_ddignore.update(replayed)
         texts = original_fetch(keys)
         for key, text in texts.items():
-            if text and text.startswith(DDIGNORE_COMMENT):
+            if text and DDIGNORE_COMMENT in text:
                 ddignore_keys_seen.add(key)
         return texts
 
@@ -580,11 +580,7 @@ def test_ignored_queries_do_not_cause_lookup_cycles_v2(aggregator, integration_c
 
     conn.close()
 
-    if not ddignore_keys_seen:
-        # Some Postgres versions (e.g. 18) normalize the leading comment out of the stored
-        # pg_stat_statements text, so /* DDIGNORE */ queries never reach the fetch path and
-        # there is nothing to assert about skipping them here.
-        pytest.skip("No /* DDIGNORE */ queries surfaced in pg_stat_statements on this version")
+    assert ddignore_keys_seen, "No /* DDIGNORE */ queries surfaced in pg_stat_statements"
     assert not refetched_ddignore, (
         f"DDIGNORE keys were re-fetched on later cycles instead of being skipped: {sorted(refetched_ddignore)}"
     )

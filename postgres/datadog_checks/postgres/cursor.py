@@ -13,6 +13,14 @@ DD_QUERY_ATTRIBUTES = {
 }
 
 
+def _append_ddignore_comment(query):
+    # pg_stat_statements drops anything after the terminating semicolon, so the marker goes before it.
+    query = query.rstrip()
+    if query.endswith(';'):
+        return '{} {};'.format(query[:-1].rstrip(), DDIGNORE_COMMENT)
+    return '{} {}'.format(query, DDIGNORE_COMMENT)
+
+
 class BaseCommenterCursor:
     def __init__(self, *args, **kwargs):
         self.__attributes = DD_QUERY_ATTRIBUTES
@@ -22,10 +30,13 @@ class BaseCommenterCursor:
         '''
         When ignore is True, a DDIGNORE comment will be added to the query.
         This comment indicates that the query should be ignored in query metrics.
+
+        The DDIGNORE comment is appended rather than prepended: Postgres 18 strips leading comments from the
+        text stored in pg_stat_statements, which would hide a leading marker from the query metrics filters.
         '''
         query = add_sql_comment(query, prepand=True, **self.__attributes)
         if ignore_query_metric:
-            query = '{} {}'.format(DDIGNORE_COMMENT, query)
+            query = _append_ddignore_comment(query)
         return super().execute(query, params, binary=binary, prepare=prepare)
 
 

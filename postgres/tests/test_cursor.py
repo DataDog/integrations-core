@@ -3,7 +3,22 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.postgres.cursor import _append_ddignore_comment
+
 from .utils import _get_superconn
+
+
+@pytest.mark.parametrize(
+    'query, expected',
+    [
+        pytest.param('SELECT 1', 'SELECT 1 /* DDIGNORE */', id='no_semicolon'),
+        # pg_stat_statements discards anything after the terminating semicolon, taking the marker with it.
+        pytest.param('SELECT 1;', 'SELECT 1 /* DDIGNORE */;', id='semicolon'),
+        pytest.param('SELECT 1 ;  \n', 'SELECT 1 /* DDIGNORE */;', id='semicolon_whitespace'),
+    ],
+)
+def test_append_ddignore_comment(query, expected):
+    assert _append_ddignore_comment(query) == expected
 
 
 @pytest.mark.integration
@@ -51,8 +66,7 @@ def __check_prepand_sql_comment(pg_instance, ignore):
         )
         result = cursor.fetchall()
         assert len(result) > 0
-        comment = '/* service=\'datadog-agent\' */'
-        if ignore:
-            comment = '{} {}'.format('/* DDIGNORE */', comment)
-        assert result[0][0].startswith(comment)
+        assert result[0][0].startswith('/* service=\'datadog-agent\' */')
+        # Postgres 18 strips leading comments from pg_stat_statements text, so the marker must trail the query.
+        assert result[0][0].endswith('/* DDIGNORE */') == ignore
     super_conn.close()
