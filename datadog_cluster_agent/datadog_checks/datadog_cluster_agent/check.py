@@ -131,10 +131,10 @@ class DatadogClusterAgentCheck(OpenMetricsBaseCheck):
         self._counter_state = {}
 
     def check(self, instance):
-        super(DatadogClusterAgentCheck, self).check(instance)
         expired = time.time() - COUNTER_STATE_EXPIRATION
         for key in [key for key, (_, last_seen) in self._counter_state.items() if last_seen < expired]:
             del self._counter_state[key]
+        super(DatadogClusterAgentCheck, self).check(instance)
 
     # Counters are diffed here instead of in the Agent, which keys its state on the full tag set: a leader election
     # changes `is_leader`, and the Agent would flush the counter's lifetime total as a single delta.
