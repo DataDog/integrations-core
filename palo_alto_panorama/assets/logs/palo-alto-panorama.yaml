@@ -1267,7 +1267,7 @@ pipeline:
           sourceType: attribute
           target: usr.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Processors for "Config" log type
@@ -1776,12 +1776,32 @@ pipeline:
           preserveSource: true
           overrideOnConflict: true
         - type: attribute-remapper
-          name: Map `suser` to `ocsf.evidence.actor.user.name`
+          name: Map `suser`, `srcuser` to `ocsf.evidence.actor.user.name`
           enabled: true
           sources:
             - suser
+            - srcuser
           sourceType: attribute
           target: ocsf.evidence.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: grok-parser
+          name: Parse `ocsf.evidence.actor.user.name` to user domain and name
+          enabled: true
+          source: ocsf.evidence.actor.user.name
+          samples:
+            - "example\\user2"
+          grok:
+            supportRules: ""
+            matchRules: 'domain_and_name %{regex("[^\\\\]+"):ocsf.evidence.actor.user.domain}\\%{data:ocsf.evidence.actor.user.name}'
+        - type: attribute-remapper
+          name: Map `duser` to `ocsf.evidence.dst_endpoint.owner.name`
+          enabled: true
+          sources:
+            - duser
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.owner.name
           targetType: attribute
           preserveSource: true
           overrideOnConflict: true

@@ -1176,7 +1176,8 @@ tests:
         evidences:
           - actor:
               user:
-                name: "example\\user2"
+                domain: "example"
+                name: "user2"
             dst_endpoint:
               ip: "185.64.148.0"
               location:
@@ -3020,7 +3021,8 @@ tests:
         evidences:
           - actor:
               user:
-                name: "example\\jdoe"
+                domain: "example"
+                name: "jdoe"
             dst_endpoint:
               ip: "203.0.113.34"
               port: 80
