@@ -101,14 +101,16 @@ def resolve_placeholder_name(requested: str, package_names: dict[str, str]) -> s
     """Resolve a user-requested name to its PyPI package name.
 
     Accepts an integration name (`n8n`), its dashed variant, or the package name itself
-    (`datadog-n8n`), as well as the names of retired placeholders.
+    (`datadog-n8n`), as well as the names of retired placeholders. Matching follows PyPI's
+    name normalization: case is ignored, and dashes and underscores are equivalent.
     """
-    normalized = requested.replace('-', '_')
+    normalized = requested.replace('_', '-').lower()
     for integration_name, package_name in package_names.items():
-        if requested in (integration_name, package_name) or normalized == integration_name:
+        if normalized in (integration_name.replace('_', '-'), package_name.replace('_', '-').lower()):
             return package_name
-    if requested in RETIRED_PLACEHOLDER_NAMES:
-        return requested
+    for retired_name in RETIRED_PLACEHOLDER_NAMES:
+        if normalized == retired_name.replace('_', '-').lower():
+            return retired_name
     return None
 
 
@@ -171,12 +173,15 @@ def build_placeholder(name: str, workdir: Path) -> Path:
     (project_dir / 'pyproject.toml').write_text(
         PYPROJECT_TEMPLATE.format(name=name, module=module, version=PLACEHOLDER_VERSION)
     )
-    subprocess.run(
-        [sys.executable, '-m', 'hatchling', 'build', '-t', 'wheel', '-d', 'dist'],
-        cwd=project_dir,
-        check=True,
-        capture_output=True,
-    )
+    try:
+        subprocess.run(
+            [sys.executable, '-m', 'hatchling', 'build', '-t', 'wheel', '-d', 'dist'],
+            cwd=project_dir,
+            check=True,
+            capture_output=True,
+        )
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f'hatchling build failed for {name}: {e.stderr.decode(errors="replace")}') from e
     (wheel,) = (project_dir / 'dist').glob('*.whl')
     return wheel
 

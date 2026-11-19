@@ -19,7 +19,8 @@ def placeholders(app: Application, names: tuple[str, ...], dry_run: bool) -> Non
     """Publish placeholder packages to PyPI.
 
     With NAMES, publish only those integrations; each name may be an integration name (n8n) or a
-    package name (datadog-n8n). Without NAMES, publish every package whose PyPI release is missing
+    package name (datadog-n8n), and packages whose PyPI release is newer than the empty 0.0.1
+    placeholder are skipped. Without NAMES, publish every package whose PyPI release is missing
     or still the empty 0.0.1 placeholder.
 
     Authentication: in GitHub Actions with `id-token: write`, each package mints a short-lived
@@ -38,13 +39,16 @@ def placeholders(app: Application, names: tuple[str, ...], dry_run: bool) -> Non
 
     package_names = placeholder_package_names(app.repo)
     if names:
-        selected = []
+        resolved_names = []
         for requested in names:
             resolved = resolve_placeholder_name(requested, package_names)
             if resolved is None:
                 app.abort(f'Unknown integration or package name: {requested}')
-            selected.append(resolved)
-        selected = sorted(set(selected))
+            resolved_names.append(resolved)
+        resolved_names = sorted(set(resolved_names))
+        selected = [name for name in resolved_names if needs_placeholder(name)]
+        for name in set(resolved_names) - set(selected):
+            app.display_info(f'  skip {name} (already published)')
     else:
         candidates = sorted(set(package_names.values()) | set(RETIRED_PLACEHOLDER_NAMES))
         selected = [name for name in candidates if needs_placeholder(name)]

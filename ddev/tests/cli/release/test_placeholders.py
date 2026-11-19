@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from ddev.release.placeholders import (
+    PYPI_UPLOAD_URL,
     TOKEN_ENV_VAR,
     build_placeholder,
     get_api_token,
@@ -18,6 +19,7 @@ from ddev.release.placeholders import (
     oidc_publishing_available,
     placeholder_package_names,
     resolve_placeholder_name,
+    upload_placeholder,
 )
 
 FakeIntegration = namedtuple('FakeIntegration', ['name', 'path'])
@@ -64,6 +66,20 @@ class TestResolvePlaceholderName:
         assert resolve_placeholder_name('kafka-consumer', package_names) == 'datadog-kafka-consumer'
         assert resolve_placeholder_name('datadog-tokumx', package_names) == 'datadog-tokumx'
         assert resolve_placeholder_name('whatever', package_names) is None
+
+    @pytest.mark.parametrize(
+        ('requested', 'expected'),
+        [
+            ('kafka_consumer', 'datadog-kafka-consumer'),
+            ('datadog-kafka_consumer', 'datadog-kafka-consumer'),
+            ('Datadog-N8N', 'datadog-n8n'),
+            ('datadog_tokumx', 'datadog-tokumx'),
+        ],
+    )
+    def test_matches_names_the_way_pypi_normalizes_them(self, requested, expected):
+        package_names = {'n8n': 'datadog-n8n', 'kafka_consumer': 'datadog-kafka-consumer'}
+
+        assert resolve_placeholder_name(requested, package_names) == expected
 
 
 class TestNeedsPlaceholder:
@@ -156,3 +172,51 @@ class TestBuildPlaceholder:
             metadata = archive.read('datadog_n8n-0.0.2.dist-info/METADATA').decode()
         assert 'datadog_n8n/__init__.py' in names
         assert 'https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install' in metadata
+
+    def test_build_failure_carries_the_hatchling_output(self, tmp_path, mocker):
+        import subprocess
+
+        error = subprocess.CalledProcessError(1, ['hatchling', 'build'], stderr=b'invalid metadata')
+        mocker.patch('ddev.release.placeholders.subprocess.run', side_effect=error)
+
+        with pytest.raises(RuntimeError, match='invalid metadata'):
+            build_placeholder('datadog-n8n', tmp_path)
+
+
+class TestUploadPlaceholder:
+    def test_uploads_with_token_auth_and_skip_existing(self, mocker):
+        uploaded = mocker.patch('ddev.release.placeholders.upload')
+
+        upload_placeholder(Path('dist/x.whl'), 'pypi-xxx')
+
+        settings, dists = uploaded.call_args.args
+        assert dists == ['dist/x.whl']
+        assert settings.repository_config['repository'] == PYPI_UPLOAD_URL
+        assert settings.username == '__token__'
+        assert settings.password == 'pypi-xxx'
+        assert settings.skip_existing is True
+
+
+class TestPlaceholdersCommand:
+    def test_dry_run_lists_the_selected_names(self, ddev, mocker):
+        mocker.patch('ddev.release.placeholders.needs_placeholder', return_value=True)
+
+        result = ddev('release', 'placeholders', 'n8n', '--dry-run')
+
+        assert result.exit_code == 0, result.output
+        assert 'datadog-n8n' in result.output
+
+    def test_skips_names_that_already_have_a_release(self, ddev, mocker):
+        mocker.patch('ddev.release.placeholders.needs_placeholder', return_value=False)
+
+        result = ddev('release', 'placeholders', 'n8n', '--dry-run')
+
+        assert result.exit_code == 0, result.output
+        assert 'skip datadog-n8n (already published)' in result.output
+        assert 'Nothing to publish.' in result.output
+
+    def test_unknown_name_aborts(self, ddev):
+        result = ddev('release', 'placeholders', 'not-an-integration', '--dry-run')
+
+        assert result.exit_code == 1
+        assert 'Unknown integration or package name: not-an-integration' in result.output
