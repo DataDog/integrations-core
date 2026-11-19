@@ -998,7 +998,7 @@ tests:
           direction_id: 2
           protocol_name: "tcp"
           session:
-            uid: "123456.0"
+            uid: "123456"
         count: 1
         device:
           name: "fw-01"
@@ -2787,7 +2787,7 @@ tests:
             uid: "6005"
           desc: "Example evidence"
           title: "object-01"
-          uid: "012345678905-6005-1791167544000"
+          uid: "012345678905-6005-10.10.100.87-1791167544000"
         is_alert: true
         metadata:
           event_code: "CORRELATION"
@@ -2882,7 +2882,7 @@ tests:
           name: "pan-01"
           type: "Firewall"
           type_id: 9
-          uid: "1000000001"
+          uid: "001000000001"
         disposition: "Allowed"
         disposition_id: 1
         dst_endpoint:
@@ -3026,7 +3026,7 @@ tests:
           name: "fw-02"
           type: "Firewall"
           type_id: 9
-          uid: "1.000000002E9"
+          uid: "001000000002"
         disposition: "Alert"
         disposition_id: 19
         evidences:
@@ -3171,7 +3171,7 @@ tests:
           name: "fw-03"
           type: "Firewall"
           type_id: 9
-          uid: "1000000003"
+          uid: "001000000003"
         disposition: "Dropped"
         disposition_id: 6
         evidences:
@@ -3298,7 +3298,7 @@ tests:
           name: "fw-03"
           type: "Firewall"
           type_id: 9
-          uid: "1000000003"
+          uid: "001000000003"
         disposition: "Alert"
         disposition_id: 19
         evidences:
