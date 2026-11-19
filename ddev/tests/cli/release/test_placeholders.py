@@ -190,7 +190,7 @@ class TestUploadPlaceholder:
         upload_placeholder(Path('dist/x.whl'), 'pypi-xxx')
 
         settings, dists = uploaded.call_args.args
-        assert dists == ['dist/x.whl']
+        assert Path(dists[0]) == Path('dist/x.whl')
         assert settings.repository_config['repository'] == PYPI_UPLOAD_URL
         assert settings.username == '__token__'
         assert settings.password == 'pypi-xxx'
