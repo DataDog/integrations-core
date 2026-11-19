@@ -34,8 +34,6 @@ If you need to further configure the check:
 
 See [metadata.csv][7] for a list of metrics provided by this check.
 
-The `is_leader` tag is only added to gauges. Counts don't carry it, so a leader election doesn't start a new series and inflate them.
-
 ### Events
 
 The Datadog-Cluster-Agent integration does not include any events.

@@ -1,1 +1,1 @@
-Stop tagging counts with `is_leader`. A leader election started a new series for every count and submitted its lifetime total as a single value. Queries that filter or group counts by `is_leader` need to be updated.
+Compute count deltas in the check so a leader election, which changes the `is_leader` tag, no longer submits each counter's lifetime total as a single value.

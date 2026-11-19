@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import time
+
 from datadog_checks.base import OpenMetricsBaseCheck
 
 DEFAULT_METRICS = {
@@ -92,11 +94,11 @@ DEFAULT_METRICS = {
 }
 
 LEADER_TAG_PREFIX = 'is_leader:'
+# Matches the Agent's default `check_sampler_stateful_metric_expiration_time`.
+COUNTER_STATE_EXPIRATION = 25 * 60 * 60
 
 
 def _without_leader_tag(tags):
-    if not tags:
-        return tags
     return [tag for tag in tags if not tag.startswith(LEADER_TAG_PREFIX)]
 
 
@@ -126,17 +128,40 @@ class DatadogClusterAgentCheck(OpenMetricsBaseCheck):
             },
             default_namespace='datadog.cluster_agent',
         )
+        self._counter_state = {}
 
-    # A leadership change flips `is_leader` on every series the pod reports. For counters, the new tag set is a new
-    # context, so its first value (the pod's lifetime total) would be flushed as a single delta.
-    def monotonic_count(self, name, value, tags=None, *args, **kwargs):
-        super(DatadogClusterAgentCheck, self).monotonic_count(name, value, _without_leader_tag(tags), *args, **kwargs)
+    def check(self, instance):
+        super(DatadogClusterAgentCheck, self).check(instance)
+        expired = time.time() - COUNTER_STATE_EXPIRATION
+        for key in [key for key, (_, last_seen) in self._counter_state.items() if last_seen < expired]:
+            del self._counter_state[key]
+
+    # Counters are diffed here instead of in the Agent, which keys its state on the full tag set: a leader election
+    # changes `is_leader`, and the Agent would flush the counter's lifetime total as a single delta.
+    def monotonic_count(
+        self, name, value, tags=None, hostname=None, device_name=None, raw=False, flush_first_value=False
+    ):
+        tags = list(tags or [])
+        key = (name, hostname, device_name, raw, tuple(sorted(_without_leader_tag(tags))))
+        previous = self._counter_state.get(key)
+        self._counter_state[key] = (value, time.time())
+
+        if previous is None:
+            if not flush_first_value:
+                return
+            delta = value
+        elif value < previous[0]:
+            delta = value
+        else:
+            delta = value - previous[0]
+
+        self.count(name, delta, tags=tags, hostname=hostname, device_name=device_name, raw=raw)
 
     def submit_histogram_bucket(
         self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, *args, **kwargs
     ):
         if monotonic:
-            tags = _without_leader_tag(tags)
+            tags = _without_leader_tag(tags or [])
         super(DatadogClusterAgentCheck, self).submit_histogram_bucket(
             name, value, lower_bound, upper_bound, monotonic, hostname, tags, *args, **kwargs
         )
