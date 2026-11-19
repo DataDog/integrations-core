@@ -257,6 +257,31 @@ def test_flow_config_rejects_duplicate_input_names():
         )
 
 
+@pytest.mark.parametrize(
+    ("other_snapshot", "rejected"),
+    [(True, True), (False, False)],
+    ids=["both-snapshot", "one-snapshot"],
+)
+def test_flow_config_snapshot_names_must_differ_beyond_case(other_snapshot, rejected):
+    """Snapshot copies are named after their input, so case-only differences share one file on macOS and Windows."""
+    config = {
+        "name": "demo",
+        "inputs": [
+            {"name": "Spec", "label": "Spec", "type": "path", "snapshot": True},
+            {"name": "spec", "label": "Other spec", "type": "path", "snapshot": other_snapshot},
+        ],
+        "flow": [],
+    }
+
+    if rejected:
+        with pytest.raises(
+            ValidationError, match="Snapshot input names must differ by more than letter case: 'Spec' and 'spec'"
+        ):
+            FlowConfig.model_validate(config)
+    else:
+        FlowConfig.model_validate(config)
+
+
 def test_flow_config_injects_missing_built_in_inputs():
     config = FlowConfig(name="demo", flow=[])
 
@@ -278,6 +303,31 @@ def test_flow_config_rejects_reserved_input_names(reserved_name: str) -> None:
 def test_flow_input_rejects_as_content_for_non_path():
     with pytest.raises(ValidationError, match="'as_content' may only be used with path inputs"):
         models.FlowInput(name="subject", label="Subject", input_type="string", as_content=True)
+
+
+def test_flow_input_rejects_snapshot_for_object():
+    with pytest.raises(ValidationError, match="'snapshot' may only be used with path inputs"):
+        object_input(snapshot=True)
+
+
+def test_flow_input_rejects_snapshot_on_object_field():
+    """A nested snapshot field is never captured, so it must not be declarable."""
+    with pytest.raises(ValidationError, match="'snapshot' may not be used on object field 'spec'"):
+        object_input(fields=[{"name": "spec", "label": "Spec", "type": "path", "snapshot": True}])
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        ({"input_type": "string"}, "'snapshot' may only be used with path inputs"),
+        ({"input_type": "path", "as_content": True}, "'as_content' and 'snapshot' are mutually exclusive"),
+        ({"input_type": "path", "multi": True}, "'snapshot' may not be used with multi inputs"),
+    ],
+    ids=["non-path", "as-content", "multi"],
+)
+def test_flow_input_rejects_invalid_snapshot(kwargs, message):
+    with pytest.raises(ValidationError, match=message):
+        models.FlowInput(name="source", label="Source", snapshot=True, **kwargs)
 
 
 def test_flow_input_rejects_placeholder_for_boolean():
@@ -677,3 +727,29 @@ def test_flow_input_path_as_content_rejects_nonexistent_path(tmp_path):
 
     with pytest.raises(ValueError, match="Input 'source' path does not exist"):
         flow_input.convert_runtime_value(missing)
+
+
+def test_flow_input_snapshot_returns_canonical_path(tmp_path):
+    (tmp_path / "nested").mkdir()
+    (tmp_path / "spec.md").write_text("requirements", encoding="utf-8")
+    flow_input = models.FlowInput(name="source", label="Source", input_type="path", snapshot=True)
+
+    assert flow_input.convert_runtime_value(tmp_path / "nested" / ".." / "spec.md") == str(
+        tmp_path.resolve() / "spec.md"
+    )
+
+
+def test_flow_input_snapshot_rejects_nonexistent_path(tmp_path):
+    flow_input = models.FlowInput(name="source", label="Source", input_type="path", snapshot=True)
+
+    with pytest.raises(ValueError, match="Input 'source' path does not exist"):
+        flow_input.convert_runtime_value(tmp_path / "missing.md")
+
+
+def test_flow_input_snapshot_rejects_unreadable_file(tmp_path):
+    source = tmp_path / "spec.md"
+    source.write_bytes(b"\xff\xfe not utf-8")
+    flow_input = models.FlowInput(name="source", label="Source", input_type="path", snapshot=True)
+
+    with pytest.raises(ValueError, match="Input 'source' path could not be read"):
+        flow_input.convert_runtime_value(source)

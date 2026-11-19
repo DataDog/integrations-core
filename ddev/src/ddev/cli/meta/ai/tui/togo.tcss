@@ -674,6 +674,16 @@ ModalScreen {
     height: auto;
 }
 
+.pinned-input-source {
+    height: auto;
+    color: $foreground;
+}
+
+.pinned-input-note {
+    height: auto;
+    color: $text-muted;
+}
+
 .multi-items {
     height: auto;
 }
