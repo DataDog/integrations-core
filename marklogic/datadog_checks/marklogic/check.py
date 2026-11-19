@@ -6,8 +6,8 @@ from typing import Any, Dict, Generator, List, Tuple  # noqa: F401
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
-    HTTPClientConnectTimeoutError,
     HTTPClientStatusError,
+    HTTPClientTimeoutError,
 )
 
 from .api import MarkLogicApi
@@ -57,8 +57,8 @@ class MarklogicCheck(AgentCheck):
         # type: (Any) -> None
         try:
             raw_resources = self.api.get_resources()
-        # Connect timeouts are not connection errors, so they are listed separately.
-        except (HTTPClientStatusError, HTTPClientConnectionError, HTTPClientConnectTimeoutError) as e:
+        # requests reported connect and response-body read timeouts as connection errors.
+        except (HTTPClientStatusError, HTTPClientConnectionError, HTTPClientTimeoutError) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable",
                 self._config.url,

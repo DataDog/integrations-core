@@ -8,6 +8,11 @@ from mock.mock import MagicMock
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+)
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
 
@@ -15,6 +20,7 @@ from .common import (
     CUSTOM_TAGS,
     GITALY_METRICS,
     GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+    GITLAB_PROMETHEUS_ENDPOINT,
     GITLAB_SIDEKIQ_PROMETHEUS_ENDPOINT,
     GITLAB_TAGS,
     GITLAB_URL,
@@ -264,3 +270,22 @@ def test_check_submit_metadata(
     else:
         assert version_requests == []
         datadog_agent.assert_metadata_count(0)
+
+
+@pytest.mark.parametrize(
+    'error',
+    [
+        pytest.param(HTTPClientConnectionError('connection refused'), id='connection'),
+        pytest.param(HTTPClientConnectTimeoutError('connect timed out'), id='connect-timeout'),
+        pytest.param(HTTPClientReadTimeoutError('read timed out'), id='read-timeout'),
+    ],
+)
+def test_legacy_scrape_failure_reports_critical(
+    dd_run_check, aggregator, mock_data, fake_http, gitlab_check, get_config, error
+):
+    fake_http.register_response('GET', GITLAB_PROMETHEUS_ENDPOINT, error)
+    check = gitlab_check(get_config(False))
+
+    dd_run_check(check)
+
+    aggregator.assert_service_check('gitlab.prometheus_endpoint_up', status=AgentCheck.CRITICAL)

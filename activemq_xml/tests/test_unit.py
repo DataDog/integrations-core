@@ -5,7 +5,11 @@ import pytest
 
 from datadog_checks.activemq_xml import ActiveMQXML
 from datadog_checks.activemq_xml.activemq_xml import QUEUE_URL, SUBSCRIBER_URL, TOPIC_URL
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientConnectTimeoutError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+)
 
 from .common import CHECK_NAME
 
@@ -17,6 +21,7 @@ URL = 'http://localhost:8161'
     [
         pytest.param(HTTPClientConnectionError('Connection refused'), id='connection'),
         pytest.param(HTTPClientConnectTimeoutError('Connect timed out'), id='connect-timeout'),
+        pytest.param(HTTPClientReadTimeoutError('Read timed out'), id='read-timeout'),
     ],
 )
 def test_suppress_errors_skips_unreachable_broker(dd_run_check, aggregator, fake_http, error):

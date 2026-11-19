@@ -14,6 +14,7 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
     HTTPClientConnectTimeoutError,
     HTTPClientError,
+    HTTPClientReadTimeoutError,
 )
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.marklogic import MarklogicCheck
@@ -149,6 +150,7 @@ def test_metadata_integration(aggregator, datadog_agent):
     [
         pytest.param(HTTPClientConnectionError('connection refused'), id='connection error'),
         pytest.param(HTTPClientConnectTimeoutError('connect timed out'), id='connect timeout'),
+        pytest.param(HTTPClientReadTimeoutError('read timed out'), id='read timeout'),
         pytest.param(FakeHTTPResponse(status_code=500), id='error status'),
     ],
 )
