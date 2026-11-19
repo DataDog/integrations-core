@@ -1,0 +1,1 @@
+Fix a `TypeError` in the request timeout handler that prevented the `marathon.can_connect` CRITICAL service check from being submitted.
