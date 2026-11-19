@@ -3,12 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
 
-import mock
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
@@ -16,7 +14,7 @@ from datadog_checks.dev.docker import get_docker_hostname
 from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.utils import find_free_port
 
-from .common import DEFAULT_GATEWAY_URL
+from .common import DEFAULT_GATEWAY_URL, TOKEN_URL
 
 USE_POWERFLEX_LAB = os.environ.get('USE_POWERFLEX_LAB')
 POWERFLEX_GATEWAY_URL = os.environ.get('POWERFLEX_GATEWAY_URL')
@@ -70,61 +68,52 @@ def instance():
     }
 
 
-def _get_url_path(url):
-    parsed = urlparse(url)
-    return parsed.path.replace('::', '__')
+FROZEN_NOW = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+FROZEN_SINCE = FROZEN_NOW.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+# The fake matches exact URLs, and the alert and event queries embed the collection time.
+QUERY_SUFFIXES = {
+    '/rest/v1/alerts': f'?filter=last_updated ge {FROZEN_SINCE}',
+    '/rest/v1/events': f'?filter=timestamp ge {FROZEN_SINCE}',
+}
+
+
+class FrozenDatetime(datetime):
+    @classmethod
+    def now(cls, tz=None):
+        return FROZEN_NOW.astimezone(tz) if tz is not None else FROZEN_NOW.replace(tzinfo=None)
+
+
+@pytest.fixture
+def frozen_now(monkeypatch):
+    monkeypatch.setattr('datadog_checks.dell_powerflex.check.datetime', FrozenDatetime)
+    return FROZEN_SINCE
 
 
 @pytest.fixture(scope='function')
 def mock_responses():
+    """Map each fixture's request URL to its parsed JSON body."""
     responses_map = {}
-
-    def load_fixtures():
-        root = os.path.join(get_here(), 'fixtures', 'GET')
-        for file in Path(root).rglob('*'):
-            if file.is_file():
-                relative = file.relative_to(root)
-                path = '/' + str(relative.parent) if str(relative.parent) != '.' else '/'
-                responses_map.setdefault(path, {})[file.stem] = json.loads(file.read_text())
-
-    def get(url, file='response', **kwargs):
-        return responses_map.get(_get_url_path(url), {}).get(file)
-
-    load_fixtures()
-    yield get
+    root = os.path.join(get_here(), 'fixtures', 'GET')
+    for file in Path(root).rglob('*'):
+        if file.is_file():
+            relative = file.relative_to(root)
+            path = '/' + str(relative.parent).replace('__', '::')
+            url = f'{DEFAULT_GATEWAY_URL}{path}{QUERY_SUFFIXES.get(path, "")}'
+            responses_map[url] = json.loads(file.read_text())
+    return responses_map
 
 
 @pytest.fixture
-def mock_http_call(mock_responses):
-    def call(url, file='response', **kwargs):
-        data = mock_responses(url, file=file, **kwargs)
-        if data is not None:
-            return data
-        resp = requests.models.Response()
-        resp.status_code = 404
-        resp.reason = "Not Found"
-        resp.url = url
-        raise requests.exceptions.HTTPError(response=resp)
-
-    yield call
+def mock_auth(fake_http_response):
+    fake_http_response(TOKEN_URL, method='POST', json_data={'access_token': 'fake-token', 'expires_in': 300})
 
 
 @pytest.fixture
-def mock_auth(monkeypatch):
-    def post(url, *args, **kwargs):
-        token_response = {'access_token': 'fake-token', 'expires_in': 300}
-        mock_json = mock.MagicMock(return_value=token_response)
-        return mock.MagicMock(json=mock_json, status_code=200)
-
-    monkeypatch.setattr('requests.Session.post', mock.MagicMock(side_effect=post))
+def mock_get_responses(fake_http_response, mock_responses, frozen_now):
+    for url, data in mock_responses.items():
+        fake_http_response(url, json_data=data)
 
 
 @pytest.fixture
-def mock_http_get(monkeypatch, mock_http_call, mock_auth):
-    def get(url, *args, **kwargs):
-        mock_json = mock.MagicMock(return_value=mock_http_call(url, **kwargs))
-        return mock.MagicMock(json=mock_json, status_code=200)
-
-    mock_get = mock.MagicMock(side_effect=get)
-    monkeypatch.setattr('requests.Session.get', mock_get)
-    return mock_get
+def mock_http_get(mock_get_responses, mock_auth, fake_http):
+    return fake_http
