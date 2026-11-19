@@ -1271,11 +1271,18 @@ PROCEDURE_STATEMENTS = ["SELECT * FROM Ï‘ings WHERE id = @P1", "SELECT id FROM Ï
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'call,params',
+    [
+        pytest.param("{CALL bobProcParams (?, ?)}", (1, 'foo'), id='rpc'),
+        pytest.param("EXEC bobProcParams @P1 = 2, @P2 = 'bar'", (), id='exec_in_batch'),
+    ],
+)
 def test_query_plans_of_stored_procedure_statements(
-    aggregator, datadog_agent, dd_run_check, dbm_instance_xe_plans, bob_conn_str
+    aggregator, datadog_agent, dd_run_check, dbm_instance_xe_plans, bob_conn_str, call, params
 ):
     """
-    A two-statement procedure, called by RPC and with EXEC in a batch, gets one real plan per statement inside it,
+    A two-statement procedure, called by RPC or with EXEC in a batch, gets one real plan per statement inside it,
     with the statement and its query signature, and the procedure's name and signature, which link it to the
     procedure as its estimated plans are.
     """
@@ -1283,9 +1290,7 @@ def test_query_plans_of_stored_procedure_statements(
     # the first run starts after the events already in the session
     dd_run_check(check, cancel=False)
 
-    conn_str = bob_conn_str + 'APP={};'.format(XE_PLANS_TEST_APP)
-    call_procedure(conn_str, "{CALL bobProcParams (?, ?)}", (1, 'foo'))
-    call_procedure(conn_str, "EXEC bobProcParams @P1 = 2, @P2 = 'bar'")
+    call_procedure(bob_conn_str + 'APP={};'.format(XE_PLANS_TEST_APP), call, params)
 
     events = []
     deadline = time.time() + 30
@@ -1298,7 +1303,6 @@ def test_query_plans_of_stored_procedure_statements(
         if len(events) >= len(PROCEDURE_STATEMENTS):
             break
 
-    # both calls run the same statements with the same plans, so one plan of each is sent
     # the statement as `tsql_frame` delimits it, which can include its semicolon
     assert sorted(e['db']['statement'].rstrip(';') for e in events) == sorted(PROCEDURE_STATEMENTS)
     for event in events:
