@@ -6,6 +6,7 @@ import pytest
 
 from datadog_checks.envoy import Envoy
 
+from ..common import SERVER_INFO_URL
 from .common import INSTANCES
 
 
@@ -20,11 +21,11 @@ def test_run(benchmark):
     benchmark(c.check, instance)
 
 
-def test_fixture(benchmark, fixture_path, mock_http_response):
+def test_fixture(benchmark, fixture_path, serve_fixture_file):
     instance = INSTANCES['main']
     c = Envoy('envoy', {}, [instance])
 
-    mock_http_response(file_path=fixture_path('legacy/multiple_services'))
+    serve_fixture_file(fixture_path('legacy/multiple_services'), instance['stats_url'], SERVER_INFO_URL)
 
     # Run once to get logging of unknown metrics out of the way.
     c.check(instance)

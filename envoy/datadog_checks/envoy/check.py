@@ -157,6 +157,7 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'envoy'
 
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
