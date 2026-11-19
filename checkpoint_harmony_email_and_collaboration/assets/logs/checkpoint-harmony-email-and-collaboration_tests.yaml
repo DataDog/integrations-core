@@ -979,7 +979,7 @@ tests:
             "conversation_type" : "chat",
             "is_deleted" : false,
             "size" : 4663,
-            "file_hash" : "dummy_5b3e7a9c2d4f6a1e8f0d",
+            "file_hash" : "5b3e7a9c2d4f6a1e8f0d5b3e7a9c2d4f",
             "is_restored" : false,
             "mime_type" : "text/csv",
             "user_id" : "dummy_4d6a7f5e8c3b2a9d1e0f",
@@ -1106,7 +1106,7 @@ tests:
             conversation_type: "chat"
             direction: "internal"
             download_url: "https://test-my.sharepoint.com/personal/Card_dump_details_2025_test_file_2.csv"
-            file_hash: "dummy_5b3e7a9c2d4f6a1e8f0d"
+            file_hash: "5b3e7a9c2d4f6a1e8f0d5b3e7a9c2d4f"
             file_name: "Card_dump_details_2025_test_file_2.csv"
             from_chat: true
             is_deleted: false
@@ -1267,6 +1267,10 @@ tests:
           type: Regular File
           url:
             url_string: https://test-my.sharepoint.com/personal/Card_dump_details_2025_test_file_2.csv
+          hashes:
+            - value: 5b3e7a9c2d4f6a1e8f0d5b3e7a9c2d4f
+              algorithm_id: 1
+              algorithm: MD5
         status_id: 1
         action_id: 3
         activity_id: 1

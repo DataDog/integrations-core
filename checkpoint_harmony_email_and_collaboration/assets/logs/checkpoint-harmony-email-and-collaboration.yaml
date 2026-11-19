@@ -2104,6 +2104,51 @@ pipeline:
           enabled: true
           attributeToExclude: ocsf.tmp_org
         - type: grok-parser
+          name: Parse `event.entity.entity_payload.file_hash` to `ocsf.tmp_file_hash.value`
+          enabled: true
+          source: event.entity.entity_payload.file_hash
+          samples:
+            - 5b3e7a9c2d4f6a1e8f0d5b3e7a9c2d4f
+          grok:
+            supportRules: ''
+            matchRules: |
+              md5 %{regex("[0-9a-fA-F]{32}"):ocsf.tmp_file_hash.value}
+        - type: category-processor
+          name: ocsf.tmp_file_hash.algorithm_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.tmp_file_hash.value:*'
+              name: '1'
+          target: ocsf.tmp_file_hash.algorithm_id
+        - type: category-processor
+          name: ocsf.tmp_file_hash.algorithm
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.tmp_file_hash.value:*'
+              name: MD5
+          target: ocsf.tmp_file_hash.algorithm
+        - type: attribute-remapper
+          name: Map `ocsf.tmp_file_hash.algorithm_id` to `ocsf.tmp_file_hash.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.tmp_file_hash.algorithm_id
+          sourceType: attribute
+          target: ocsf.tmp_file_hash.algorithm_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Move attributes into file hashes array
+          enabled: true
+          operation:
+            source: ocsf.tmp_file_hash
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: grok-parser
           name: Parse `event.entity.entity_payload.file_name` to `ocsf.file.ext`
           enabled: true
           source: event.entity.entity_payload.file_name
@@ -2723,6 +2768,13 @@ pipeline:
               targets:
                 name: ocsf.file.type
                 id: ocsf.file.type_id
+            - type: schema-remapper
+              name: Map `ocsf.file.hashes` to `ocsf.file.hashes`
+              sources:
+                - ocsf.file.hashes
+              target: ocsf.file.hashes
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-remapper
               name: Map `event.entity.saas_info.saas_entity_id` to `ocsf.file.uid`
               sources:
