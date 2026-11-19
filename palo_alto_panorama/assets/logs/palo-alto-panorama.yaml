@@ -1620,10 +1620,11 @@ pipeline:
             - "<14>Nov 16 08:07:01 pan-01.example.com serial=001000000001|type=TRAFFIC|subtype=start"
             - "<13>Nov 16 10:07:01 panorama-01.example.com 1,2026/11/16 10:07:01,001000000002,THREAT,file,2817"
           grok:
-            supportRules: ""
+            supportRules: |-
+              _syslog_header (<%{integer}>)?(%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) %{notSpace}
             matchRules: |-
-              kv_serial .*?[ |]serial=%{regex("[^|, ]+"):ocsf.device.uid}.*
-              csv_serial .*? [0-9]*,[^,]*,%{regex("[^,]+"):ocsf.device.uid},.*
+              kv_serial (.*?[ |])?serial=%{regex("[^|, ]+"):ocsf.device.uid}.*
+              csv_serial (%{_syslog_header} )?[0-9]*,[^,]*,%{regex("[^,]+"):ocsf.device.uid},(TRAFFIC|THREAT|DECRYPTION|CORRELATION),.*
     - type: pipeline
       name: OCSF evidence URL for THREAT url logs
       enabled: true
@@ -2307,10 +2308,11 @@ pipeline:
             - "<14>Nov 16 08:07:01 pan-01.example.com serial=001000000001|type=TRAFFIC|subtype=start|sessionid=36137871|repeatcnt=1"
             - "<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,TRAFFIC,end,2049,2026/10/05 16:15:07,10.0.0.10,185.64.148.0,203.0.113.5,185.64.148.0,allow-web,,,ssl,vsys1,trust,untrust,ethernet1/1,ethernet1/2,log-forwarding,2026/10/05 16:15:07,123456,1"
           grok:
-            supportRules: ""
+            supportRules: |-
+              _syslog_header (<%{integer}>)?(%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) %{notSpace}
             matchRules: |-
-              kv_session .*?[ |,]sessionid=%{regex("[0-9]+"):ocsf.connection_info.session.uid}.*
-              csv_session .*? [0-9]*,(?:(?:"[^"]*"|[^,]*),){21}%{regex("[0-9]+"):ocsf.connection_info.session.uid},.*
+              kv_session (.*?[ |,])?sessionid=%{regex("[0-9]+"):ocsf.connection_info.session.uid}.*
+              csv_session (%{_syslog_header} )?[0-9]*,[^,]*,[^,]*,TRAFFIC,(?:(?:"[^"]*"|[^,]*),){18}%{regex("[0-9]+"):ocsf.connection_info.session.uid},.*
         - type: arithmetic-processor
           name: Calculate `ocsf.duration` from `elapsed`
           enabled: true

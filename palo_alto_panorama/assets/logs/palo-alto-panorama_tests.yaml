@@ -3375,3 +3375,335 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1794845222000
+ -
+  sample: "1,2026/10/05 16:15:08,012345678901,TRAFFIC,end,2049,2026/10/05 16:15:07,10.0.0.10,185.64.148.0,203.0.113.5,185.64.148.0,rule-01,example\\user1,,ssl,vsys1,trust,untrust,ethernet1/2,ethernet1/1,log-profile-01,2026/10/05 16:15:07,123456,1,51515,443,40404,443,0x40001c,tcp,allow,5120,1024,4096,20,2026/10/05 16:14:52,15,computer-and-internet-info,,7300000000000000001,0x8000000000000000,10.0.0.0-10.255.255.255,FR,,10,10,tcp-fin,11,0,0,0,,fw-01,from-policy,,,0,,0,,N/A,0,0,0,0,00000000-0000-4000-8000-000000000001,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2026-10-05T16:15:07.123+00:00,,,encrypted-tunnel,networking,browser-based,4,\"used-by-malware,able-to-transfer-file\",,ssl,no,no,0,,"
+  result:
+    custom:
+      actflag: "0x8000000000000000"
+      actsrc: "from-policy"
+      app: "ssl"
+      appcat: "networking"
+      appflap: 0
+      appsaas: "no"
+      appstate: "no"
+      apptech: "browser-based"
+      associd: 0
+      bytes: 5120
+      cat: "computer-and-internet-info"
+      chunk: 0
+      chunkrcvd: 0
+      chunksent: 0
+      dg_hier_level_1: 11
+      dg_hier_level_2: 0
+      dg_hier_level_3: 0
+      dg_hier_level_4: 0
+      dloc: "FR"
+      dport: 443
+      dst: "185.64.148.0"
+      dstzone: "untrust"
+      dvc: "fw-01"
+      elapsed: 15
+      flags: "0x40001c"
+      high_res_timestamp: "2026-10-05T16:15:07.123+00:00"
+      http2conn: 0
+      inboundif: "ethernet1/2"
+      logset: "log-profile-01"
+      natdport: 443
+      natdst: "185.64.148.0"
+      natsport: 40404
+      natsrc: "203.0.113.5"
+      network:
+        bytes_read: 1024
+        bytes_written: 4096
+        client:
+          geoip: {}
+          ip: "10.0.0.10"
+          port: 51515
+        destination:
+          geoip:
+            city:
+              name: "Paris"
+            continent:
+              code: "EU"
+              name: "Europe"
+            country:
+              iso_code: "FR"
+              name: "France"
+            ipAddress: "185.64.148.0"
+            location:
+              latitude: 48.90654
+              longitude: 2.33339
+            subdivision:
+              iso_code: "FR-IDF"
+              name: "Île-de-France"
+            timezone: "Europe/Paris"
+          ip: "185.64.148.0"
+          port: 443
+      ocsf:
+        action: "Allowed"
+        action_id: 1
+        activity_id: 2
+        activity_name: "Close"
+        app_name: "ssl"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        connection_info:
+          direction: "Outbound"
+          direction_id: 2
+          protocol_name: "tcp"
+          session:
+            uid: "123456"
+        count: 1
+        device:
+          name: "fw-01"
+          type: "Firewall"
+          type_id: 9
+          uid: "012345678901"
+        disposition: "Allowed"
+        disposition_id: 1
+        dst_endpoint:
+          interface_name: "ethernet1/1"
+          ip: "185.64.148.0"
+          location:
+            city: "Paris"
+            continent: "Europe"
+            country: "FR"
+            lat: 48.90654
+            long: 2.33339
+            region: "FR-IDF"
+          port: 443
+          zone: "untrust"
+        duration: 15000
+        firewall_rule:
+          name: "rule-01"
+          uid: "00000000-0000-4000-8000-000000000001"
+        metadata:
+          event_code: "TRAFFIC"
+          log_name: "TRAFFIC"
+          original_time: "2026/10/05 16:15:07"
+          product:
+            name: "Panorama"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "host"
+           - "security_control"
+          uid: "7300000000000000001"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          interface_name: "ethernet1/2"
+          ip: "10.0.0.10"
+          owner:
+            name: "example\\user1"
+          port: 51515
+          zone: "trust"
+        status: "Success"
+        status_detail: "tcp-fin"
+        status_id: 1
+        time: 1791216907000
+        traffic:
+          bytes: 5120
+          bytes_in: 4096
+          bytes_out: 1024
+          chunks: 0
+          chunks_in: 0
+          chunks_out: 0
+          packets: 20
+          packets_in: 10
+          packets_out: 10
+      offloaded: 0
+      outboundif: "ethernet1/1"
+      palo:
+        alto:
+          panorama:
+            action: "allow"
+            appchar: "used-by-malware,able-to-transfer-file"
+            apprisk: 4
+            pkt: 20
+            pktrcvd: 10
+            pktsent: 10
+            vsys: "vsys1"
+      parentid: 0
+      proto: "tcp"
+      receive_time: "2026/10/05 16:15:08"
+      repeatcnt: 1
+      rule: "rule-01"
+      ruleuuid: "00000000-0000-4000-8000-000000000001"
+      seq: 7300000000000000001
+      serial: "012345678901"
+      sessionendreason: "tcp-fin"
+      sessionid: 123456
+      sloc: "10.0.0.0-10.255.255.255"
+      sport: 51515
+      src: "10.0.0.10"
+      srczone: "trust"
+      start: "2026/10/05 16:14:52"
+      subcatapp: "encrypted-tunnel"
+      subtype: "end"
+      suser: "example\\user1"
+      time_generated: "2026/10/05 16:15:07"
+      timestamp: 1791216907000
+      tunnel: "N/A"
+      tunneledapp: "ssl"
+      tunnelid: 0
+      type: "TRAFFIC"
+    message: '1,2026/10/05 16:15:08,012345678901,TRAFFIC,end,2049,2026/10/05 16:15:07,10.0.0.10,185.64.148.0,203.0.113.5,185.64.148.0,rule-01,example\user1,,ssl,vsys1,trust,untrust,ethernet1/2,ethernet1/1,log-profile-01,2026/10/05 16:15:07,123456,1,51515,443,40404,443,0x40001c,tcp,allow,5120,1024,4096,20,2026/10/05 16:14:52,15,computer-and-internet-info,,7300000000000000001,0x8000000000000000,10.0.0.0-10.255.255.255,FR,,10,10,tcp-fin,11,0,0,0,,fw-01,from-policy,,,0,,0,,N/A,0,0,0,0,00000000-0000-4000-8000-000000000001,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2026-10-05T16:15:07.123+00:00,,,encrypted-tunnel,networking,browser-based,4,"used-by-malware,able-to-transfer-file",,ssl,no,no,0,,'
+    service: "TRAFFIC"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1791216907000
+ -
+  sample: "1,2026/11/16 10:07:01,001000000002,THREAT,file,2817,2026/11/16 10:06:59,10.2.21.64,203.0.113.34,198.51.100.129,203.0.113.34,Example URL Exception Rule 1,example\\jdoe,,ocsp,vsys1,zone_INSIDE,zone_OUTSIDE,ae3.1501,ae10,Example Log forwarding,2026/11/16 10:06:59,6389852,2,57846,80,6141,80,0x406000,tcp,alert,\"Q4Tz8nXkpuvcRcmKJJ3+hxwqLXD5tMPBZRGuy12oAQcdnBQRK0Y6DEL7lstzNeA\",DER Encoded X509 Certificate(52209),Example_URL_Exceptions,low,server-to-client,7705462235869186469,0x8000000000000000,10.0.0.0-10.255.255.255,United States,,,0,,,1,,,,,,,,0,740,0,0,0,,fw-02,ocsp.pca.example.com/MFIwUDBOMEwwSjAJBgUrDgMCGgUABBQZm9vYmFyMTI/Q4Tz8nXkpuvcRcmKJJ3+hxwqLXD5tMPBZRGuy12oAQcdnBQRK0Y6DEL7lstzNeAZXhhbXA,,,,0,,0,,N/A,N/A,AppThreat-9172-10351,0x0,0,4294967295,,,b21e6d94-5c3a-4f78-a0d2-91c8e47f3a05,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0,2026-11-16T10:07:00.716-06:00,,,,infrastructure,networking,client-server,2,\"has-known-vulnerability,pervasive-use\",,ocsp,no,no,,,NonProxyTraffic"
+  result:
+    custom:
+      actflags: "0x8000000000000000"
+      app: "ocsp"
+      appcat: "networking"
+      appsaas: "no"
+      appstate: "no"
+      apptech: "client-server"
+      assoc_id: 0
+      cat: "Example_URL_Exceptions"
+      cluster: "NonProxyTraffic"
+      contentver: "AppThreat-9172-10351"
+      dg_hier_level_1: 740
+      dg_hier_level_2: 0
+      dg_hier_level_3: 0
+      dg_hier_level_4: 0
+      dir: "server-to-client"
+      dloc: "United States"
+      dport: 80
+      dst: "203.0.113.34"
+      dstzone: "zone_OUTSIDE"
+      dvc: "fw-02"
+      flags: "0x406000"
+      high_res_timestamp: "2026-11-16T10:07:00.716-06:00"
+      http2conn: 0
+      inboundif: "ae3.1501"
+      logset: "Example Log forwarding"
+      misc: "Q4Tz8nXkpuvcRcmKJJ3+hxwqLXD5tMPBZRGuy12oAQcdnBQRK0Y6DEL7lstzNeA"
+      natdport: 80
+      natdst: "203.0.113.34"
+      natsport: 6141
+      natsrc: "198.51.100.129"
+      network:
+        client:
+          geoip: {}
+          ip: "10.2.21.64"
+          port: 57846
+        destination:
+          geoip: {}
+          ip: "203.0.113.34"
+          port: 80
+      ocsf:
+        action: "Observed"
+        action_id: 3
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        count: 2
+        device:
+          name: "fw-02"
+          type: "Firewall"
+          type_id: 9
+          uid: "001000000002"
+        disposition: "Alert"
+        disposition_id: 19
+        evidences:
+          - actor:
+              user:
+                domain: "example"
+                name: "jdoe"
+            dst_endpoint:
+              ip: "203.0.113.34"
+              port: 80
+              zone: "zone_OUTSIDE"
+            file:
+              name: "Q4Tz8nXkpuvcRcmKJJ3+hxwqLXD5tMPBZRGuy12oAQcdnBQRK0Y6DEL7lstzNeA"
+              type: "Regular File"
+              type_id: 1
+            src_endpoint:
+              ip: "10.2.21.64"
+              port: 57846
+              zone: "zone_INSIDE"
+        finding_info:
+          analytic:
+            category: "file"
+            name: "DER Encoded X509 Certificate"
+            type: "Rule"
+            type_id: 1
+            uid: "52209"
+            version: "AppThreat-9172-10351"
+          title: "DER Encoded X509 Certificate"
+          uid: "7705462235869186469"
+        firewall_rule:
+          name: "Example URL Exception Rule 1"
+          uid: "b21e6d94-5c3a-4f78-a0d2-91c8e47f3a05"
+        is_alert: true
+        metadata:
+          event_code: "THREAT"
+          log_name: "THREAT"
+          original_time: "2026/11/16 10:06:59"
+          product:
+            name: "Panorama"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
+          uid: "7705462235869186469"
+          version: "1.5.0"
+        severity: "Low"
+        severity_id: 2
+        status: "New"
+        status_id: 1
+        time: 1794845219000
+      outboundif: "ae10"
+      palo:
+        alto:
+          panorama:
+            action: "alert"
+            appchar: "has-known-vulnerability,pervasive-use"
+            apprisk: 2
+            vsys: "vsys1"
+      parent_session_id: 0
+      partial_hash: 0
+      pcapip: 0
+      ppid: 4294967295
+      proto: "tcp"
+      receive_time: "2026/11/16 10:07:01"
+      repeatcnt: 2
+      reportid: 0
+      rule: "Example URL Exception Rule 1"
+      ruleuuid: "b21e6d94-5c3a-4f78-a0d2-91c8e47f3a05"
+      seqno: 7705462235869186469
+      serial: 1000000002
+      sessionid: 6389852
+      severity: "low"
+      sloc: "10.0.0.0-10.255.255.255"
+      sport: 57846
+      src: "10.2.21.64"
+      srczone: "zone_INSIDE"
+      status: "info"
+      subcatApp: "infrastructure"
+      subtype: "file"
+      suser: "example\\jdoe"
+      thrcategory: "N/A"
+      threatid: "DER Encoded X509 Certificate(52209)"
+      time_generated: "2026/11/16 10:06:59"
+      timestamp: 1794845219000
+      tunnel: "N/A"
+      tunneledapp: "ocsp"
+      tunnelid: 0
+      type: "THREAT"
+      urlidx: 1
+    message: '1,2026/11/16 10:07:01,001000000002,THREAT,file,2817,2026/11/16 10:06:59,10.2.21.64,203.0.113.34,198.51.100.129,203.0.113.34,Example URL Exception Rule 1,example\jdoe,,ocsp,vsys1,zone_INSIDE,zone_OUTSIDE,ae3.1501,ae10,Example Log forwarding,2026/11/16 10:06:59,6389852,2,57846,80,6141,80,0x406000,tcp,alert,"Q4Tz8nXkpuvcRcmKJJ3+hxwqLXD5tMPBZRGuy12oAQcdnBQRK0Y6DEL7lstzNeA",DER Encoded X509 Certificate(52209),Example_URL_Exceptions,low,server-to-client,7705462235869186469,0x8000000000000000,10.0.0.0-10.255.255.255,United States,,,0,,,1,,,,,,,,0,740,0,0,0,,fw-02,ocsp.pca.example.com/MFIwUDBOMEwwSjAJBgUrDgMCGgUABBQZm9vYmFyMTI/Q4Tz8nXkpuvcRcmKJJ3+hxwqLXD5tMPBZRGuy12oAQcdnBQRK0Y6DEL7lstzNeAZXhhbXA,,,,0,,0,,N/A,N/A,AppThreat-9172-10351,0x0,0,4294967295,,,b21e6d94-5c3a-4f78-a0d2-91c8e47f3a05,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0,2026-11-16T10:07:00.716-06:00,,,,infrastructure,networking,client-server,2,"has-known-vulnerability,pervasive-use",,ocsp,no,no,,,NonProxyTraffic'
+    service: "THREAT"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1794845219000
