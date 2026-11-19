@@ -3532,3 +3532,181 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
+ -
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=virus, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\josé, dstuser=,\tapp=web-browsing,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tnatsport=3230,\tnatdport=443,\tflags=0x400000,\tproto=tcp,\t evt.name=block,\tmisc=\"facture_été.pdf\",\tthreatid=\"Virus/Win32.Généric\",\tcategory=any,\tseverity=high,\tdirection=client-to-server,\tseqno=7699920671375145866,\tactionflags=0x0,\tnetwork.client.geoip.country.name=10.0.0.0-10.255.255.255,\tdstloc=United States,\tcontenttype=,\tpcap_id=0,\tfiledigest=,\tcloud=,\turl_idx=0,\thttp.useragent=\"\",\tfiletype=,\txff=\treferer=,\tsender=,\tsubject=,\trecipient=,\treportid=0,\tvsys_name=,\tdevice_name=fw-a,\tsrc_uuid=,\tdst_uuid=,\thttp_method=,\ttunnel_id=0, imsi=0, monitortag=, imei=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tthr_category=virus,\tcontentver=AppThreat-9173-10354,\tassoc_id=0,\tppid=4294967295,\thttp_headers=, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+  result:
+    custom:
+      actionflags: "0x0"
+      app: "web-browsing"
+      assoc_id: 0
+      category: "any"
+      contentver: "AppThreat-9173-10354"
+      destination_zone: "untrust"
+      device_name: "fw-a"
+      direction: "client-to-server"
+      dstloc: "United States"
+      evt:
+        name: "block"
+      flags: "0x400000"
+      high_res_timestamp: "2026-11-18T10:21:15.123+00:00"
+      imsi: 0
+      inbound_if: "ethernet1/2"
+      logset: "ndm-panorama"
+      misc: "facture_été.pdf"
+      natdport: 443
+      natdst: "93.184.216.34"
+      natsport: 3230
+      natsrc: "72.138.81.50"
+      network:
+        client:
+          geoip: {}
+          ip: "10.60.2.100"
+          port: 51022
+        destination:
+          ip: "93.184.216.34"
+          port: 443
+      ocsf:
+        action: "Denied"
+        action_id: 2
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        confidence: "Unknown"
+        confidence_id: 0
+        disposition: "Blocked"
+        disposition_id: 2
+        evidences:
+         -
+          actor:
+            app_name: "web-browsing"
+            session:
+              uid: "957465"
+            user:
+              name: "CORP\\josé"
+          connection_info:
+            direction: "Unknown"
+            direction_id: 0
+            protocol_name: "tcp"
+          device:
+            name: "fw-a"
+            type: "Firewall"
+            type_id: 9
+          dst_endpoint:
+            ip: "93.184.216.34"
+            port: 443
+            zone: "untrust"
+          file:
+            name: "facture_été.pdf"
+            type: "Regular File"
+            type_id: 1
+          src_endpoint:
+            ip: "10.60.2.100"
+            port: 51022
+            zone: "trust"
+        finding_info:
+          analytic:
+            category: "virus"
+            name: "trust-out"
+            type: "Rule"
+            type_id: 1
+          product:
+            name: "Palo Alto Networks Firewall"
+            vendor_name: "Palo Alto Networks"
+          title: "Virus/Win32.Généric"
+          uid: "016201026426-7699920671375145866"
+        firewall_rule:
+          name: "trust-out"
+        is_alert: true
+        metadata:
+          event_code: "THREAT"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "016201026426"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "security_control"
+          sequence: 7699920671375145866
+          version: "1.5.0"
+        severity: "High"
+        severity_id: 4
+        status: "New"
+        status_detail: "block"
+        status_id: 1
+        time: 1794997275123
+      outbound_if: "ethernet1/1"
+      pan_event_time: 1794997275123
+      pan_status: "error"
+      parent_session_id: 0
+      pcap_id: 0
+      ppid: 4294967295
+      proto: "tcp"
+      repeatcnt: 1
+      reportid: 0
+      rule: "trust-out"
+      seqno: 7699920671375145866
+      serial: "016201026426"
+      sessionid: 957465
+      severity: "high"
+      source_zone: "trust"
+      subtype: "virus"
+      thr_category: "virus"
+      threatid: "Virus/Win32.Généric"
+      time_generated: "2026/11/18 10:21:15"
+      timestamp: "2026/11/18 10:21:17"
+      tunnel: "N/A"
+      tunnel_id: 0
+      type: "THREAT"
+      url_idx: 0
+      usr:
+        id: "CORP\\josé"
+      vsys: "vsys1"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:17, serial=016201026426, type=THREAT, subtype=virus, time_generated=2026/11/18 10:21:15, network.client.ip=10.60.2.100, network.destination.ip=93.184.216.34, natsrc=72.138.81.50, natdst=93.184.216.34, rule=trust-out, usr.id=CORP\\josé, dstuser=,\tapp=web-browsing,\tvsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\tlogset=ndm-panorama,\tsessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tnatsport=3230,\tnatdport=443,\tflags=0x400000,\tproto=tcp,\t evt.name=block,\tmisc=\"facture_été.pdf\",\tthreatid=\"Virus/Win32.Généric\",\tcategory=any,\tseverity=high,\tdirection=client-to-server,\tseqno=7699920671375145866,\tactionflags=0x0,\tnetwork.client.geoip.country.name=10.0.0.0-10.255.255.255,\tdstloc=United States,\tcontenttype=,\tpcap_id=0,\tfiledigest=,\tcloud=,\turl_idx=0,\thttp.useragent=\"\",\tfiletype=,\txff=\treferer=,\tsender=,\tsubject=,\trecipient=,\treportid=0,\tvsys_name=,\tdevice_name=fw-a,\tsrc_uuid=,\tdst_uuid=,\thttp_method=,\ttunnel_id=0, imsi=0, monitortag=, imei=,\tparent_session_id=0,\tparent_start_time=,\ttunnel=N/A,\tthr_category=virus,\tcontentver=AppThreat-9173-10354,\tassoc_id=0,\tppid=4294967295,\thttp_headers=, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1794997275123
+ -
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=SYSTEM, subtype=auth,\tvsys=vsys1,\tevt.name=auth-success,\tobject=,\tmodule=general,\tseverity=informational,\topaque=\"用户 张伟 登录成功, from 10.0.0.1\",\tseqno=7699920671375145866, actionflags=0x0, vsys_name=, device_name=fw-a, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+  result:
+    custom:
+      actionflags: "0x0"
+      device_name: "fw-a"
+      evt:
+        name: "auth-success"
+      high_res_timestamp: "2026-11-18T10:21:15.123+00:00"
+      module: "general"
+      ocsf:
+        activity_id: 99
+        activity_name: "SYSTEM"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "SYSTEM"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "016201026426"
+            vendor_name: "Palo Alto Networks"
+          sequence: 7699920671375145866
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1794997275123
+      opaque: "用户 张伟 登录成功, from 10.0.0.1"
+      pan_event_time: 1794997275123
+      pan_status: "info"
+      seqno: 7699920671375145866
+      serial: "016201026426"
+      severity: "informational"
+      subtype: "auth"
+      timestamp: "2026/11/18 10:21:15"
+      type: "SYSTEM"
+      vsys: "vsys1"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=SYSTEM, subtype=auth,\tvsys=vsys1,\tevt.name=auth-success,\tobject=,\tmodule=general,\tseverity=informational,\topaque=\"用户 张伟 登录成功, from 10.0.0.1\",\tseqno=7699920671375145866, actionflags=0x0, vsys_name=, device_name=fw-a, high_res_timestamp=2026-11-18T10:21:15.123+00:00"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1794997275123

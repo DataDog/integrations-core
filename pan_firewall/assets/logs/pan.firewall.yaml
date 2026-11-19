@@ -502,7 +502,7 @@ pipeline:
         matchRules: |
           rule_panos %{_header}%{_kv}
         supportRules: |
-          _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^")}
+          _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^\\p{L}\\p{N}")}
           _header (?:[^=]*\s)?
     - type: grok-parser
       name: Keep `serial` as a string
