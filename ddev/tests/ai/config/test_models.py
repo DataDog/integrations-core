@@ -257,6 +257,31 @@ def test_flow_config_rejects_duplicate_input_names():
         )
 
 
+@pytest.mark.parametrize(
+    ("other_snapshot", "rejected"),
+    [(True, True), (False, False)],
+    ids=["both-snapshot", "one-snapshot"],
+)
+def test_flow_config_snapshot_names_must_differ_beyond_case(other_snapshot, rejected):
+    """Snapshot copies are named after their input, so case-only differences share one file on macOS and Windows."""
+    config = {
+        "name": "demo",
+        "inputs": [
+            {"name": "Spec", "label": "Spec", "type": "path", "snapshot": True},
+            {"name": "spec", "label": "Other spec", "type": "path", "snapshot": other_snapshot},
+        ],
+        "flow": [],
+    }
+
+    if rejected:
+        with pytest.raises(
+            ValidationError, match="Snapshot input names must differ by more than letter case: 'Spec' and 'spec'"
+        ):
+            FlowConfig.model_validate(config)
+    else:
+        FlowConfig.model_validate(config)
+
+
 def test_flow_config_injects_missing_built_in_inputs():
     config = FlowConfig(name="demo", flow=[])
 

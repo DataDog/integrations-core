@@ -476,7 +476,26 @@ class FlowConfig(BaseModel):
             )
         if len(names) != len(set(names)):
             raise ValueError("Input names must be unique")
-        return [*inputs, *BUILT_IN_FLOW_INPUTS]
+        combined = [*inputs, *BUILT_IN_FLOW_INPUTS]
+        _reject_case_colliding_snapshots(combined)
+        return combined
+
+
+def _reject_case_colliding_snapshots(inputs: list[FlowInput]) -> None:
+    """Reject snapshot inputs whose names differ only by case.
+
+    Each snapshot is copied to a file named after its input, so on a case-insensitive
+    filesystem (the macOS and Windows defaults) such inputs would share one copy and the
+    later capture would silently replace the earlier one.
+    """
+    by_folded_name: dict[str, list[str]] = {}
+    for flow_input in inputs:
+        if flow_input.snapshot:
+            by_folded_name.setdefault(flow_input.name.casefold(), []).append(flow_input.name)
+    collisions = [names for names in by_folded_name.values() if len(names) > 1]
+    if collisions:
+        described = ", ".join(" and ".join(repr(name) for name in names) for names in collisions)
+        raise ValueError(f"Snapshot input names must differ by more than letter case: {described}")
 
 
 class PhaseEnvelope(BaseModel):
