@@ -1,0 +1,54 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "70dd1fd3-03af-4ae6-ba66-79bab7a77547",
+  "app_id": "amazon-lambda",
+  "owner": "aws-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "description": "Run code in response to events and automatically manage compute resources required by that code.",
+    "title": "AWS Lambda",
+    "media": [],
+    "classifier_tags": [
+      "Category::AWS",
+      "Category::Cloud",
+      "Category::Containers",
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Category::Tracing",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "url": "https://docs.datadoghq.com/serverless/aws_lambda/lambda_microvm",
+        "resource_type": "documentation"
+      },
+      {
+        "url": "https://www.datadoghq.com/blog/monitoring-cloud-run-datadog/",
+        "resource_type": "blog"
+      },
+      {
+        "url": "https://www.datadoghq.com/blog/azure-container-apps/",
+        "resource_type": "blog"
+      }
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_name": "Amazon Lambda",
+      "events": {
+        "creates_events": true
+      },
+      "source_type_id": 145
+    },
+    "dashboards": {
+      "aws_lambda_microvm_monitoring": "assets/dashboards/aws_lambda_microvm_monitoring.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
