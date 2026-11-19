@@ -3,9 +3,6 @@
   "layout_type": "ordered",
   "notify_list": [],
   "reflow_type": "fixed",
-  "tags": [
-    "ai:modified_with_ai"
-  ],
   "template_variables": [
     {
       "available_values": [],
