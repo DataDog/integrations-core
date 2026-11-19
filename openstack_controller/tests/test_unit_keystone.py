@@ -11,7 +11,7 @@ import pytest
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from tests.common import remove_service_from_catalog
+from tests.common import remove_service_from_catalog, version_identity_endpoints
 
 pytestmark = [
     pytest.mark.unit,
@@ -509,6 +509,27 @@ def test_regions_exception(aggregator, check, dd_run_check, mock_http_get):
         args, _ = call
         args_list += list(args)
     assert args_list.count('http://127.0.0.1:8080/identity/v3/regions') == 3
+
+
+@pytest.mark.parametrize(
+    ('mock_http_post', 'instance'),
+    [
+        pytest.param(
+            {'replace': {'/identity/v3/auth/tokens': version_identity_endpoints}},
+            configs.REST,
+            id='api rest',
+        ),
+    ],
+    indirect=['mock_http_post'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_versioned_identity_endpoint(aggregator, check, dd_run_check, mock_http_get):
+    """Keystone catalogs often register the identity endpoint with its `/v3` suffix."""
+    dd_run_check(check)
+    requested_urls = [call.args[0] for call in mock_http_get.call_args_list]
+    assert 'http://127.0.0.1:8080/identity/v3/regions' in requested_urls
+    assert not [url for url in requested_urls if '/v3/v3/' in url]
+    aggregator.assert_metric('openstack.keystone.region.count', count=2)
 
 
 @pytest.mark.parametrize(

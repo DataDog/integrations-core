@@ -134,66 +134,52 @@ class ApiRest(Api):
             self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
             self.http.options['headers']['OpenStack-API-Version'] = self.config.cinder_microversion
 
+    def _identity_endpoint(self):
+        # Catalogs often register Keystone with its `/v3` suffix, which the identity request paths already include.
+        return self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value).rstrip('/').removesuffix('/v3')
+
     def get_identity_regions(self):
-        response = self.http.get(
-            '{}/v3/regions'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/regions'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('regions', [])
 
     def get_identity_domains(self):
-        response = self.http.get(
-            '{}/v3/domains'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/domains'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('domains', [])
 
     def get_identity_projects(self):
-        response = self.http.get(
-            '{}/v3/projects'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/projects'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('projects', [])
 
     def get_identity_users(self):
-        response = self.http.get(
-            '{}/v3/users'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/users'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('users', [])
 
     def get_identity_groups(self):
-        response = self.http.get(
-            '{}/v3/groups'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/groups'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('groups', [])
 
     def get_identity_group_users(self, group_id):
-        response = self.http.get(
-            '{}/v3/groups/{}/users'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value), group_id)
-        )
+        response = self.http.get('{}/v3/groups/{}/users'.format(self._identity_endpoint(), group_id))
         response.raise_for_status()
         return response.json().get('users', [])
 
     def get_identity_services(self):
-        response = self.http.get(
-            '{}/v3/services'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/services'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('services', [])
 
     def get_identity_registered_limits(self):
-        response = self.http.get(
-            '{}/v3/registered_limits'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/registered_limits'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('registered_limits', [])
 
     def get_identity_limits(self):
-        response = self.http.get(
-            '{}/v3/limits'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/limits'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('limits', [])
 
