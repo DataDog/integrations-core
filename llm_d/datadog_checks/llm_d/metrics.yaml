@@ -12,6 +12,8 @@ llm_d_epp_request_output_tokens: epp.request.output_tokens
 llm_d_epp_request_cached_tokens: epp.request.cached_tokens
 llm_d_epp_request_size_bytes: epp.request.size.bytes
 llm_d_epp_response_size_bytes: epp.response.size.bytes
+llm_d_epp_request_processing_duration_seconds: epp.request.processing_duration.seconds
+llm_d_epp_response_processing_duration_seconds: epp.response.processing_duration.seconds
 llm_d_epp_request_running: epp.request.running
 
 # EPP InferencePool and per-endpoint metrics.
@@ -40,6 +42,9 @@ llm_d_epp_prefix_indexer_size: epp.prefix_indexer.size
 llm_d_epp_prefix_indexer_hit_ratio: epp.prefix_indexer.hit_ratio
 llm_d_epp_prefix_indexer_hit_bytes: epp.prefix_indexer.hit_bytes
 llm_d_epp_prefix_predicted_cached_tokens: epp.prefix.predicted_cached_tokens
+llm_d_epp_prefix_best_predicted_cached_tokens: epp.prefix.best_predicted_cached_tokens
+llm_d_epp_prefix_best_available_cached_tokens: epp.prefix.best_available_cached_tokens
+llm_d_epp_prefix_prompt_tokens: epp.prefix.prompt_tokens
 
 # EPP KV-cache index and event metrics.
 llm_d_epp_kv_cache_index_admissions: epp.kv_cache_index.admissions

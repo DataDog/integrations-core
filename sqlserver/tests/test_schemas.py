@@ -228,7 +228,9 @@ def test_collect_views(aggregator, dbm_instance, integration_check, sa_conn):
         assert view_name in view['definition']
         assert {column['name'] for column in view['columns']} == {'id', 'name', 'population'}
         for column in view['columns']:
-            assert set(column) == {'name', 'data_type', 'nullable', 'ordinal_position'}
+            assert set(column) == {'name', 'data_type', 'nullable', 'ordinal_position'} | (
+                {'max_length'} if column['data_type'] == 'varchar' else set()
+            )
         assert [column['ordinal_position'] for column in view['columns']] == ['1', '2', '3']
     finally:
         with sa_conn.cursor() as cursor:
