@@ -84,9 +84,12 @@ def test_database_identifier_payloads(
 
 
 @pytest.mark.parametrize('dbm, enabled', [(False, True), (True, False), (True, True)])
-def test_query_metrics_initialization_health(instance: dict, aggregator: AggregatorStub, dbm: bool, enabled: bool):
+@pytest.mark.parametrize('activity_enabled', [False, True])
+def test_query_metrics_initialization_health(
+    instance: dict, aggregator: AggregatorStub, dbm: bool, enabled: bool, activity_enabled: bool
+):
     """Initialization carries the assigned check ID and feature state, without duplicate events on subsequent runs."""
-    instance.update(dbm=dbm, query_metrics={'enabled': enabled})
+    instance.update(dbm=dbm, query_metrics={'enabled': enabled}, query_activity={'enabled': activity_enabled})
     check = IbmDb2Check('ibm_db2', {}, [instance])
     check.check_id = 'ibm_db2:assigned-id'
     with mock.patch.object(check._connection, 'connect'):
@@ -101,7 +104,10 @@ def test_query_metrics_initialization_health(instance: dict, aggregator: Aggrega
         assert event['status'] == 'ok'
         assert event['check_id'] == 'ibm_db2:assigned-id'
         assert event['data']['database_instance'] == check.database_identifier
-        assert event['data']['features'] == [{'key': 'query_metrics', 'name': 'Query Metrics', 'enabled': enabled}]
+        assert event['data']['features'] == [
+            {'key': 'query_metrics', 'name': 'Query Metrics', 'enabled': enabled},
+            {'key': 'query_activity', 'name': 'Query Activity', 'enabled': activity_enabled},
+        ]
         assert instance['password'] not in stdlib_json.dumps(event)
 
 

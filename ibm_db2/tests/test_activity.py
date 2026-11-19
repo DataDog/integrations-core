@@ -7,6 +7,7 @@ from unittest.mock import Mock
 
 import pytest
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.ibm_db2 import activity
 from datadog_checks.ibm_db2.activity import IDENTITY_COLUMNS, normalize_activity
 
@@ -201,3 +202,135 @@ def test_activity_reader_failure_releases_statement(monkeypatch: pytest.MonkeyPa
     with pytest.raises(RuntimeError, match='SQLSTATE=HYT00'):
         activity.read_activity('connection')
     release.assert_called_once_with(cursor)
+
+
+@pytest.mark.parametrize('dbm, enabled', [(False, False), (False, True), (True, False), (True, True)])
+def test_query_activity_registration(
+    instance: dict,
+    aggregator: AggregatorStub,
+    monkeypatch: pytest.MonkeyPatch,
+    activity_row: dict,
+    dbm: bool,
+    enabled: bool,
+):
+    """Only explicit DBM sampling submits activity with configured tags in the common envelope."""
+    from datadog_checks.ibm_db2 import IbmDb2Check, query_samples
+
+    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
+    instance.update(dbm=dbm, query_metrics={'enabled': False}, query_activity={'enabled': enabled}, service='orders')
+    instance['tags'] = ['custom_tag:query-activity']
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    source = Mock(return_value=([activity_row], {'row_limit': 0}))
+    monkeypatch.setattr(query_samples, 'read_activity', source)
+    if dbm:
+        monkeypatch.setattr(check._query_samples._connection, 'ensure_connected', Mock())
+    check.run_async_jobs(check.tags)
+    events = aggregator.get_event_platform_events('dbm-activity')
+    assert len(events) == source.call_count == int(dbm and enabled)
+    if events:
+        event = events[0]
+        assert event['ddsource'] == 'ibm_db2'
+        assert event['dbm_type'] == 'activity'
+        assert event['service'] == 'orders'
+        assert 'custom_tag:query-activity' in event['ddtags']
+        assert event['host'] == check.reported_hostname
+        assert event['database_instance'] == check.database_identifier
+        assert event['collection_interval'] == 10
+        assert event['ibm_db2_activity'][0]['database_name'] == instance['db']
+        assert 'LITERAL_SECRET' not in json.dumps(event)
+        assert 'RAW_SECRET' not in json.dumps(event)
+        assert event['ibm_db2_activity'][0]['dd_comments'] == ['COMMENT_SECRET']
+        owned_handle = object()
+        check._query_samples._connection.conn = owned_handle
+        with pytest.MonkeyPatch.context() as patch:
+            close = Mock()
+            patch.setattr(activity.ibm_db, 'close', close)
+            check.cancel()
+            close.assert_called_once_with(owned_handle)
+
+
+@pytest.mark.parametrize('serializer_name', ['stdlib', 'orjson'])
+@pytest.mark.parametrize('multibyte', [False, True])
+def test_query_activity_payload_cap(
+    instance: dict,
+    aggregator: AggregatorStub,
+    monkeypatch: pytest.MonkeyPatch,
+    activity_row: dict,
+    serializer_name: str,
+    multibyte: bool,
+):
+    """Cap serialized bytes, including multibyte context, while retaining the oldest-first prefix."""
+    from datadog_checks.ibm_db2 import IbmDb2Check, query_samples
+
+    serializer = json if serializer_name == 'stdlib' else pytest.importorskip('orjson')
+    monkeypatch.setattr(query_samples, 'json', serializer)
+    if multibyte:
+        activity_row.update(client_applname='表' * 512, client_wrkstnname='表' * 512)
+    instance.update(dbm=True, query_activity={'enabled': True})
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    collector = check._query_samples
+    monkeypatch.setattr(collector._connection, 'ensure_connected', Mock())
+    rows = [activity_row, {**activity_row, 'application_handle': 42}]
+    monkeypatch.setattr(query_samples, 'read_activity', lambda _connection: (rows, {'row_limit': 0}))
+    collector.run_job()
+    event = aggregator.get_event_platform_events('dbm-activity')[0]
+    assert len(event['ibm_db2_activity']) == 2
+    one_row = {**event, 'ibm_db2_activity': event['ibm_db2_activity'][:1]}
+    encoded = serializer.dumps(one_row)
+    limit = len(encoded.encode('utf-8') if isinstance(encoded, str) else encoded) + 16
+    if multibyte:
+        assert len(str(event)) < limit
+    monkeypatch.setattr(query_samples, 'ACTIVITY_PAYLOAD_MAX_BYTES', limit)
+    aggregator.reset()
+    collector.run_job()
+    capped = aggregator.get_event_platform_events('dbm-activity')[0]
+    encoded = aggregator.get_event_platform_events('dbm-activity', parse_json=False)[0]
+    assert len(encoded.encode('utf-8') if isinstance(encoded, str) else encoded) <= limit
+    assert [row['application_handle'] for row in capped['ibm_db2_activity']] == [activity_row['application_handle']]
+    aggregator.assert_metric('dd.ibm_db2.query_activity.payload_limit', value=1)
+
+
+def test_query_activity_failed_read_is_not_idle(
+    instance: dict, aggregator: AggregatorStub, monkeypatch: pytest.MonkeyPatch
+):
+    """A failed read produces no snapshot, while a subsequent successful idle read emits an empty observation."""
+    from datadog_checks.ibm_db2 import IbmDb2Check, query_samples
+
+    instance.update(dbm=True, query_activity={'enabled': True})
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    collector = check._query_samples
+    monkeypatch.setattr(collector._connection, 'ensure_connected', Mock())
+    source = Mock(side_effect=[RuntimeError('SQLSTATE=HYT00'), ([], {'row_limit': 0})])
+    monkeypatch.setattr(query_samples, 'read_activity', source)
+    with pytest.raises(RuntimeError, match='SQLSTATE=HYT00'):
+        collector.run_job()
+    assert not aggregator.get_event_platform_events('dbm-activity')
+    collector.run_job()
+    assert aggregator.get_event_platform_events('dbm-activity')[0]['ibm_db2_activity'] == []
+
+
+@pytest.mark.parametrize('connection_error', [False, True])
+def test_query_activity_error_health(
+    instance: dict, aggregator: AggregatorStub, monkeypatch: pytest.MonkeyPatch, connection_error: bool
+):
+    """Connection and read failures report sanitized feature health without fabricating an idle snapshot."""
+    from datadog_checks.ibm_db2 import IbmDb2Check, query_samples
+    from datadog_checks.ibm_db2.connection import Db2ConnectionError
+
+    monkeypatch.delenv('DBM_THREADED_JOB_RUN_SYNC', raising=False)
+    instance.update(dbm=True, query_activity={'enabled': True})
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    collector = check._query_samples
+    error = (Db2ConnectionError if connection_error else RuntimeError)('SECRET SQLSTATE=42501')
+    connect = Mock(side_effect=error) if connection_error else Mock()
+    monkeypatch.setattr(collector._connection, 'ensure_connected', connect)
+    monkeypatch.setattr(query_samples, 'read_activity', Mock(side_effect=error))
+    collector.run_job_loop(check.tags)
+    collector.wait_for_completion()
+    health = [event for event in aggregator.get_event_platform_events('dbm-health') if event['name'] == 'unknown_error']
+    assert len(health) == 1
+    assert health[0]['data']['job_name'] == 'query-activity'
+    assert health[0]['data']['sqlstate'] == '42501'
+    assert 'SECRET' not in json.dumps(health)
+    assert not aggregator.get_event_platform_events('dbm-activity')
+    check.cancel()
