@@ -11,6 +11,8 @@ HOST = get_docker_hostname()
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
 DATANODE_URI = 'http://{}:9870/'.format(HOST)
+DATANODE_BEANS_URL = DATANODE_URI + 'jmx?qry=Hadoop:service=DataNode,name=FSDatasetState*'
+DATANODE_INFO_URL = DATANODE_URI + 'jmx?qry=Hadoop:service=DataNode,name=DataNodeInfo'
 
 CUSTOM_TAGS = ['optional:tag1']
 
