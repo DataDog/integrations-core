@@ -517,15 +517,16 @@ pipeline:
     - type: grok-parser
       name: Copy `device_name` to a lowercase `device_hostname`
       enabled: true
-      source: message
+      source: device_name
       samples:
-        - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end, device_name=PA-3220"
+        - "PA-3220"
       grok:
         # Metric tags are lowercase and log attribute search is case-sensitive. `device_hostname`
         # matches the metric tag of the same name, so dashboards can filter logs and metrics with
-        # one template variable. `device_name` keeps the firewall's own spelling.
+        # one template variable. `device_name` keeps the firewall's own spelling. Read from the
+        # parsed attribute, not the message, so text inside a free-text field can't be picked up.
         matchRules: |
-          device_hostname %{data}(?<![\w.])device_name=%{regex("[^,\\s\"]+"):device_hostname:lowercase}%{greedyData}
+          device_hostname %{data:device_hostname:lowercase}
         supportRules: ''
     - type: attribute-remapper
       name: Keep `subtype` as a string
@@ -538,24 +539,49 @@ pipeline:
       targetFormat: string
       preserveSource: false
       overrideOnConflict: true
-    - type: grok-parser
+    - type: pipeline
       name: Extract the PAN-OS event time into `pan_event_time`
       enabled: true
-      source: message
-      samples:
-        - "timestamp=2025/09/03 19:41:10, serial=016201026426, type=THREAT, subtype=url, time_generated=2025/09/03 19:40:32, high_res_timestamp=2025-09-03T12:40:32.123-07:00"
-        - "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, serial=016201026426, type=THREAT, subtype=url, time_generated=2025/09/03 19:40:32"
-        - "<14>Sep  3 19:43:20 PA-3220 timestamp=2025/09/03 19:43:20, serial=016201026426, type=SYSTEM, subtype=general"
-      grok:
-        # Prefer high_res_timestamp (ISO 8601 with offset), then time_generated, then timestamp
-        # (receive_time in Threat, URL, Data Filtering and GlobalProtect formats; start in GTP).
+      filter:
+        query: "*"
+      processors:
+        # Event time, read from the parsed attributes (not the message, so a URL parameter such as
+        # `?high_res_timestamp=...` inside a free-text field can't be picked up). The steps run from
+        # lowest to highest precedence and each overwrites `pan_event_time` only if its attribute
+        # parses: `timestamp` (receive_time in Threat, URL, Data Filtering and GlobalProtect formats;
+        # start in GTP), then `time_generated`, then `high_res_timestamp` (ISO 8601 with offset).
         # Times without an offset are firewall-local and are parsed as UTC. Firewalls that don't
         # populate high_res_timestamp send a 1969-12-31 placeholder, which is skipped.
-        matchRules: |
-          high_res_timestamp %{data}high_res_timestamp=(?!1969-)%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):pan_event_time}%{greedyData}
-          time_generated %{data}(?<![\w.])time_generated=%{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}%{greedyData}
-          timestamp %{data}(?<![\w.])timestamp=%{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}%{greedyData}
-        supportRules: ''
+        - type: grok-parser
+          name: Parse `timestamp` into `pan_event_time`
+          enabled: true
+          source: timestamp
+          samples:
+            - "2025/09/03 19:41:10"
+          grok:
+            matchRules: |
+              timestamp %{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}
+            supportRules: ''
+        - type: grok-parser
+          name: Parse `time_generated` into `pan_event_time`
+          enabled: true
+          source: time_generated
+          samples:
+            - "2025/09/03 19:40:32"
+          grok:
+            matchRules: |
+              time_generated %{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}
+            supportRules: ''
+        - type: grok-parser
+          name: Parse `high_res_timestamp` into `pan_event_time`
+          enabled: true
+          source: high_res_timestamp
+          samples:
+            - "2025-09-03T12:40:32.123-07:00"
+          grok:
+            matchRules: |
+              high_res_timestamp (?!1969-)%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):pan_event_time}
+            supportRules: ''
     - type: date-remapper
       name: Define `pan_event_time` as the official date of the log
       enabled: true
