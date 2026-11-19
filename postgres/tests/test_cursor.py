@@ -1,9 +1,15 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import psycopg
 import pytest
 
-from datadog_checks.postgres.cursor import LEADING_COMMENTS_STRIPPED_SERVER_VERSION_NUM, _add_comments
+from datadog_checks.postgres.cursor import (
+    LEADING_COMMENTS_STRIPPED_SERVER_VERSION_NUM,
+    BaseCommenterCursor,
+    _add_comments,
+    _stores_leading_comments,
+)
 
 from .utils import _get_superconn
 
@@ -53,6 +59,60 @@ SERVICE = {'service': 'datadog-agent'}
 )
 def test_add_comments(query, ignore, leading, expected):
     assert _add_comments(query, SERVICE, ignore, leading) == expected
+
+
+class _FakeInfo:
+    def __init__(self, server_version):
+        self._server_version = server_version
+
+    @property
+    def server_version(self):
+        if isinstance(self._server_version, Exception):
+            raise self._server_version
+        return self._server_version
+
+
+class _FakeConnection:
+    def __init__(self, server_version):
+        self.info = _FakeInfo(server_version)
+
+
+class _RecordingCursor:
+    """Stands in for psycopg.ClientCursor, recording the queries that reach the server."""
+
+    def __init__(self, connection):
+        self.connection = connection
+        self.executed = []
+
+    def execute(self, query, params=None, binary=False, prepare=None):
+        self.executed.append(query)
+
+
+class _FakeCommenterCursor(BaseCommenterCursor, _RecordingCursor):
+    pass
+
+
+@pytest.mark.parametrize(
+    'server_version, expected_leading',
+    [
+        pytest.param(170012, True, id='pg17'),
+        pytest.param(180007, False, id='pg18'),
+        # libpq reports 0 when it has no usable connection state.
+        pytest.param(0, True, id='no_version'),
+        pytest.param(psycopg.OperationalError('the connection is closed'), True, id='closed_connection'),
+    ],
+)
+def test_stores_leading_comments(server_version, expected_leading):
+    assert _stores_leading_comments(_FakeCommenterCursor(_FakeConnection(server_version))) is expected_leading
+
+
+def test_execute_still_sends_the_query_when_the_server_version_is_unreadable():
+    """Reading the version runs before every query, so a failure must leave the query to report its own error."""
+    cursor = _FakeCommenterCursor(_FakeConnection(psycopg.OperationalError('the connection is closed')))
+
+    cursor.execute('SELECT 1', ignore_query_metric=True)
+
+    assert cursor.executed == ["/* DDIGNORE */ /* service='datadog-agent' */ SELECT 1"]
 
 
 @pytest.mark.integration
