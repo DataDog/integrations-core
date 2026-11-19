@@ -50,11 +50,11 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
-# Postgres quotes the start of the failing query. The Agent's comments are leading before PG 18 and trailing from
-# PG 18, where leading comments are stripped from pg_stat_statements.
+# Postgres quotes the start of the failing explain call, which the Agent validates against
+# `SELECT * FROM pg_stat_activity`. The Agent's comments lead the call before PG 18 and trail it from PG 18.
 if POSTGRES_VERSION and int(POSTGRES_VERSION.split('.')[0]) >= 18:
     UNDEFINED_EXPLAIN_FUNCTION_EXCERPT = (
-        "SELECT datadog.explain_statement('SELECT * FROM kennel WHERE...\n" + " " * 15 + "^\n"
+        "SELECT datadog.explain_statement('SELECT * FROM pg_stat_acti...\n" + " " * 15 + "^\n"
     )
 else:
     UNDEFINED_EXPLAIN_FUNCTION_EXCERPT = (
@@ -688,7 +688,7 @@ def test_failed_explain_handling(
             "dogs_noschema",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-no_plans_possible",
+            "error:explain-invalid_schema-<class 'psycopg.errors.InvalidSchemaName'>",
             [{'code': 'invalid_schema', 'message': "<class 'psycopg.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
             [],
