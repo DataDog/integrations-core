@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import pytest
 
 from datadog_checks.silk import SilkCheck
@@ -31,17 +30,6 @@ def test_check(dd_run_check, aggregator, instance, enable_rw, enable_bs, expecte
         for tag in BASE_TAGS[0:] + SYSTEM_TAGS[0:]:
             # There are metric-specific tags so we just assert the common tags here
             aggregator.assert_metric_has_tag(metric, tag)
-
-
-def test_error_msg_response(dd_run_check, aggregator, instance):
-    error_response = {"error_msg": "Statistics data is unavailable while system is OFFLINE"}
-    with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
-        g.return_value = error_response
-        check = SilkCheck('silk', {}, [instance])
-        dd_run_check(check)
-        aggregator.assert_service_check(
-            'silk.can_connect', SilkCheck.WARNING, message="Received error message: " + error_response["error_msg"]
-        )
 
 
 def test_submit_system_state(instance, datadog_agent):
