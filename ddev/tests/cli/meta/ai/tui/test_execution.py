@@ -1993,14 +1993,13 @@ async def test_default_builder_forwards_runtime_variables(tmp_path: Path) -> Non
     assert call_kwargs["runtime_variables"] == {"max_timeout": "120", "integration": "My Integration"}
 
 
-async def test_fresh_real_run_clears_only_computed_flow_directory(tmp_path: Path) -> None:
+async def test_fresh_real_run_clears_only_computed_flow_directory(tmp_path: Path):
     """A fresh run removes stale state for its flow without touching sibling runs."""
-    from unittest.mock import patch
-
     from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
-    flow = _make_flow()
+    flow = _make_flow(phases=[])
+    flow.agents.clear()
     run_root = ai_runs_dir(tmp_path)
     run_dir = run_root / flow_slug(flow)
     sibling = run_root / "other-flow"
@@ -2010,40 +2009,37 @@ async def test_fresh_real_run_clears_only_computed_flow_directory(tmp_path: Path
     (run_dir / "phase_1_memory.md").write_text("secret")
     (run_dir / "agent.log").write_text("old")
     (sibling / "keep.txt").write_text("keep")
-    fake_ddev_app, mock_orch_instance = _setup_default_builder_mocks(tmp_path)
+    fake_ddev_app, _ = _setup_default_builder_mocks(tmp_path)
 
-    with patch("ddev.ai.runtime.orchestrator.PhaseOrchestrator", return_value=mock_orch_instance):
-        app = _app_with_repo(flow, fake_ddev_app)
-        async with app.run_test() as pilot:
-            await pilot.pause()
-            await app.push_screen(ExecutionScreen(flow))
-            await pilot.pause()
+    app = _app_with_repo(flow, fake_ddev_app)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        await app.push_screen(ExecutionScreen(flow, runtime_variables={"integration": "test"}))
+        await pilot.pause()
 
     assert run_dir.is_dir()
     assert list(run_dir.iterdir()) == []
     assert (sibling / "keep.txt").read_text() == "keep"
 
 
-async def test_resume_real_run_preserves_existing_flow_directory(tmp_path: Path) -> None:
+async def test_resume_real_run_preserves_existing_flow_directory(tmp_path: Path):
     """Resume never clears checkpoint, memory, or agent-log state."""
-    from unittest.mock import patch
-
     from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
-    flow = _make_flow()
+    flow = _make_flow(phases=[])
+    flow.agents.clear()
     run_dir = ai_runs_dir(tmp_path) / flow_slug(flow)
     run_dir.mkdir(parents=True)
     stale = run_dir / "agent.log"
     stale.write_text("keep")
-    fake_ddev_app, mock_orch_instance = _setup_default_builder_mocks(tmp_path)
+    fake_ddev_app, _ = _setup_default_builder_mocks(tmp_path)
 
-    with patch("ddev.ai.runtime.orchestrator.PhaseOrchestrator", return_value=mock_orch_instance):
-        app = _app_with_repo(flow, fake_ddev_app)
-        async with app.run_test() as pilot:
-            await pilot.pause()
-            await app.push_screen(ExecutionScreen(flow, resume=True))
-            await pilot.pause()
+    app = _app_with_repo(flow, fake_ddev_app)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        await app.push_screen(ExecutionScreen(flow, resume=True, runtime_variables={"integration": "test"}))
+        await pilot.pause()
 
     assert stale.read_text() == "keep"
 

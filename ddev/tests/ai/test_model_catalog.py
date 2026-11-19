@@ -437,6 +437,17 @@ def test_invalid_catalog_error_has_path(tmp_path: Path, catalog: str, match: str
     assert match in str(error.value)
 
 
+@pytest.mark.parametrize("model_id", ["unqualified", "/missing-provider", "missing-model/"])
+def test_catalog_load_rejects_unqualified_gateway_binding(tmp_path: Path, model_id: str):
+    catalog = MINIMAL_CATALOG + (
+        f"      ai-gateway:\n        protocol: anthropic-messages\n        model: \"{model_id}\"\n"
+    )
+    path = write_catalog(tmp_path / "custom.yaml", catalog)
+
+    with pytest.raises(ValueError, match=r"(?s)models\.fixture-model.*AI Gateway binding must use <provider>/<model>"):
+        ModelResolver(path)
+
+
 def test_missing_catalog_file(tmp_path: Path):
     path = tmp_path / "absent.yaml"
     with pytest.raises(ValueError, match=escape(f"Could not read model catalog {path}")):
