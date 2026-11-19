@@ -362,6 +362,11 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Destination Intermediate IP Addresses
+    path: ocsf.dst_endpoint.intermediate_ips
+    source: log
+  - groups:
+      - OCSF
     name: Destination IP Address
     path: ocsf.dst_endpoint.ip
     source: log
@@ -520,6 +525,11 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Source Intermediate IP Addresses
+    path: ocsf.src_endpoint.intermediate_ips
+    source: log
+  - groups:
+      - OCSF
     name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
@@ -583,6 +593,11 @@ facets:
       - OCSF
     name: Source Endpoint Network Zone
     path: ocsf.src_endpoint.zone
+    source: log
+  - groups:
+      - OCSF
+    name: Status Code
+    path: ocsf.status_code
     source: log
   - groups:
       - OCSF
@@ -2313,6 +2328,69 @@ pipeline:
             matchRules: |-
               kv_session (.*?[ |,])?sessionid=%{regex("[0-9]+"):ocsf.connection_info.session.uid}.*
               csv_session (%{_syslog_header} )?[0-9]*,[^,]*,[^,]*,TRAFFIC,(?:(?:"(?:[^"]|"")*"|[^,]*),){18}%{regex("[0-9]+"):ocsf.connection_info.session.uid},.*
+        # A NAT address means the firewall translated the address, unless it is empty, `0.0.0.0` or equal to the
+        # original address. Each original and NAT pair is joined into the endpoint `ip` field, so a grok rule can
+        # compare the two. The grok rule then rewrites `ip`, and the schema mappers below set its final value.
+        - type: string-builder-processor
+          name: Join `network.client.ip` and `natsrc` into `ocsf.src_endpoint.ip`
+          enabled: true
+          template: "%{network.client.ip}|%{natsrc}"
+          target: ocsf.src_endpoint.ip
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Join `network.destination.ip` and `natdst` into `ocsf.dst_endpoint.ip`
+          enabled: true
+          template: "%{network.destination.ip}|%{natdst}"
+          target: ocsf.dst_endpoint.ip
+          replaceMissing: true
+        # Source NAT: `src` stays the source IP, and `natsrc` is the translated address the traffic left through.
+        - type: grok-parser
+          name: Parse `ocsf.src_endpoint.ip` to `ocsf.src_endpoint.ip`, `ocsf.src_endpoint.nat_ip`
+          enabled: true
+          source: ocsf.src_endpoint.ip
+          samples:
+            - "10.0.0.10|203.0.113.5"
+            - "10.0.0.15|0.0.0.0"
+            - "10.0.0.15|10.0.0.15"
+            - "10.0.0.15|"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              not_translated %{regex("[^|]*"):ocsf.src_endpoint.ip}\|(?:\1|0\.0\.0\.0)?
+              translated %{regex("[^|]*"):ocsf.src_endpoint.ip}\|%{regex("[^|]+"):ocsf.src_endpoint.nat_ip}
+        # Destination NAT: `natdst` is the host the traffic reached, and `dst` is the address the client targeted.
+        - type: grok-parser
+          name: Parse `ocsf.dst_endpoint.ip` to `ocsf.dst_endpoint.ip`, `ocsf.dst_endpoint.nat_ip`
+          enabled: true
+          source: ocsf.dst_endpoint.ip
+          samples:
+            - "203.0.113.9|10.0.1.20"
+            - "10.0.1.20|0.0.0.0"
+            - "185.64.148.0|185.64.148.0"
+            - "10.0.1.20|"
+            - "|10.0.1.20"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              not_translated %{regex("[^|]*"):ocsf.dst_endpoint.ip}\|(?:\1|0\.0\.0\.0)?
+              translated %{regex("[^|]+"):ocsf.dst_endpoint.nat_ip}\|%{regex("[^|]+"):ocsf.dst_endpoint.ip}
+              no_original \|%{regex("[^|]+"):ocsf.dst_endpoint.ip}
+        - type: array-processor
+          name: Move `ocsf.src_endpoint.nat_ip` into `ocsf.src_endpoint.intermediate_ips`
+          enabled: true
+          operation:
+            source: ocsf.src_endpoint.nat_ip
+            target: ocsf.src_endpoint.intermediate_ips
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move `ocsf.dst_endpoint.nat_ip` into `ocsf.dst_endpoint.intermediate_ips`
+          enabled: true
+          operation:
+            source: ocsf.dst_endpoint.nat_ip
+            target: ocsf.dst_endpoint.intermediate_ips
+            preserveSource: false
+            type: append
         - type: arithmetic-processor
           name: Calculate `ocsf.duration` from `elapsed`
           enabled: true
@@ -2374,6 +2452,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `ocsf.src_endpoint.intermediate_ips` to `ocsf.src_endpoint.intermediate_ips`
+              sources:
+                - ocsf.src_endpoint.intermediate_ips
+              target: ocsf.src_endpoint.intermediate_ips
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
               name: Map `sport`, `network.client.port` to `ocsf.src_endpoint.port`
               sources:
                 - sport
@@ -2404,11 +2489,19 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `dst`, `network.destination.ip` to `ocsf.dst_endpoint.ip`
+              name: Map `ocsf.dst_endpoint.ip`, `dst`, `network.destination.ip` to `ocsf.dst_endpoint.ip`
               sources:
+                - ocsf.dst_endpoint.ip
                 - dst
                 - network.destination.ip
               target: ocsf.dst_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.intermediate_ips` to `ocsf.dst_endpoint.intermediate_ips`
+              sources:
+                - ocsf.dst_endpoint.intermediate_ips
+              target: ocsf.dst_endpoint.intermediate_ips
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -2514,6 +2607,13 @@ pipeline:
                 - sessionendreason
                 - err
               target: ocsf.status_detail
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `sessionendreason` to `ocsf.status_code`
+              sources:
+                - sessionendreason
+              target: ocsf.status_code
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper

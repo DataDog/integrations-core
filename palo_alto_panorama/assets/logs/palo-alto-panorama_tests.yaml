@@ -142,6 +142,7 @@ tests:
           port: 42071
           zone: "LAN"
         status: "Success"
+        status_code: "tcp-rst-from-server"
         status_detail: "tcp-rst-from-server"
         status_id: 1
         time: 1706180577000
@@ -779,6 +780,8 @@ tests:
         severity: "Informational"
         severity_id: 1
         src_endpoint:
+          intermediate_ips:
+           - "203.0.113.5"
           ip: "10.0.0.14"
           port: 51517
           zone: "trust"
@@ -1039,12 +1042,15 @@ tests:
         severity_id: 1
         src_endpoint:
           interface_name: "ethernet1/2"
+          intermediate_ips:
+           - "203.0.113.5"
           ip: "10.0.0.10"
           owner:
             name: "example\\user1"
           port: 51515
           zone: "trust"
         status: "Success"
+        status_code: "tcp-fin"
         status_detail: "tcp-fin"
         status_id: 1
         time: 1791216907000
@@ -1399,10 +1405,13 @@ tests:
         severity_id: 1
         src_endpoint:
           interface_name: "ethernet1/2"
+          intermediate_ips:
+           - "203.0.113.5"
           ip: "10.0.0.13"
           port: 53535
           zone: "trust"
         status: "Success"
+        status_code: "aged-out"
         status_detail: "aged-out"
         status_id: 1
         time: 1791216907000
@@ -1536,6 +1545,7 @@ tests:
           port: 60329
           zone: "GWLB"
         status: "Success"
+        status_code: "tcp-fin"
         status_detail: "tcp-fin"
         status_id: 1
         time: 1791234908000
@@ -1685,6 +1695,7 @@ tests:
           port: 49906
           zone: "zone-02"
         status: "Failure"
+        status_code: "policy-deny"
         status_detail: "policy-deny"
         status_id: 2
         time: 1791234908000
@@ -1833,6 +1844,7 @@ tests:
           port: 44616
           zone: "zone-03"
         status: "Failure"
+        status_code: "policy-deny"
         status_detail: "policy-deny"
         status_id: 2
         time: 1791234908000
@@ -1981,6 +1993,7 @@ tests:
           port: 52004
           zone: "zone-01"
         status: "Failure"
+        status_code: "policy-deny"
         status_detail: "policy-deny"
         status_id: 2
         time: 1791234907000
@@ -2683,6 +2696,8 @@ tests:
         severity_id: 1
         src_endpoint:
           interface_name: "ae3.1501"
+          intermediate_ips:
+           - "203.0.113.4"
           ip: "10.10.0.5"
           owner:
             name: "example\\user1"
@@ -2916,6 +2931,7 @@ tests:
           port: 49542
           zone: "vpn-clients"
         status: "Unknown"
+        status_code: "n/a"
         status_detail: "n/a"
         status_id: 0
         time: 1794845220000
@@ -3495,12 +3511,15 @@ tests:
         severity_id: 1
         src_endpoint:
           interface_name: "ethernet1/2"
+          intermediate_ips:
+           - "203.0.113.5"
           ip: "10.0.0.10"
           owner:
             name: "example\\user1"
           port: 51515
           zone: "trust"
         status: "Success"
+        status_code: "tcp-fin"
         status_detail: "tcp-fin"
         status_id: 1
         time: 1791216907000
@@ -3707,3 +3726,110 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1794845219000
+ -
+  sample: "<14>Oct  5 16:15:08 panorama-01 serial=012345678901|type=TRAFFIC|subtype=end|time_generated=Oct 05 2026 16:15:07 GMT|src=10.0.0.15|dst=203.0.113.9|natsrc=0.0.0.0|natdst=10.0.1.20|rule=rule-05|app=ldap|vsys=vsys1|from=trust|to=dmz|sessionid=123469|repeatcnt=1|sport=51518|dport=389|natsport=0|natdport=0|proto=tcp|act=allow|bytes=900|bytes_sent=300|bytes_received=600|pkt=8|seq=7300000000000000009|dvc=fw-01"
+  result:
+    custom:
+      app: "ldap"
+      bytes: 900
+      dport: 389
+      dst: "203.0.113.9"
+      dstzone: "dmz"
+      dvc: "fw-01"
+      natdport: 0
+      natdst: "10.0.1.20"
+      natsport: 0
+      natsrc: "0.0.0.0"
+      network:
+        bytes_read: 300
+        bytes_written: 600
+        client:
+          geoip: {}
+          ip: "10.0.0.15"
+          port: 51518
+        destination:
+          geoip: {}
+          ip: "203.0.113.9"
+          port: 389
+      ocsf:
+        action: "Allowed"
+        action_id: 1
+        activity_id: 2
+        activity_name: "Close"
+        app_name: "ldap"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        connection_info:
+          direction: "Outbound"
+          direction_id: 2
+          protocol_name: "tcp"
+          session:
+            uid: "123469"
+        count: 1
+        device:
+          name: "fw-01"
+          type: "Firewall"
+          type_id: 9
+          uid: "012345678901"
+        disposition: "Allowed"
+        disposition_id: 1
+        dst_endpoint:
+          intermediate_ips:
+           - "203.0.113.9"
+          ip: "10.0.1.20"
+          port: 389
+          zone: "dmz"
+        firewall_rule:
+          name: "rule-05"
+        metadata:
+          event_code: "TRAFFIC"
+          log_name: "TRAFFIC"
+          original_time: "Oct 05 2026 16:15:07 GMT"
+          product:
+            name: "Panorama"
+            vendor_name: "Palo Alto Networks"
+          profiles:
+           - "host"
+           - "security_control"
+          uid: "7300000000000000009"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.0.0.15"
+          port: 51518
+          zone: "trust"
+        status: "Unknown"
+        status_id: 0
+        time: 1791216907000
+        traffic:
+          bytes: 900
+          bytes_in: 600
+          bytes_out: 300
+          packets: 8
+      palo:
+        alto:
+          panorama:
+            action: "allow"
+            pkt: 8
+            vsys: "vsys1"
+      proto: "tcp"
+      repeatcnt: 1
+      rule: "rule-05"
+      seq: 7300000000000000009
+      serial: "012345678901"
+      sessionid: 123469
+      sport: 51518
+      src: "10.0.0.15"
+      srczone: "trust"
+      subtype: "end"
+      time_generated: "Oct 05 2026 16:15:07 GMT"
+      timestamp: 1791216907000
+      type: "TRAFFIC"
+    message: "<14>Oct  5 16:15:08 panorama-01 serial=012345678901|type=TRAFFIC|subtype=end|time_generated=Oct 05 2026 16:15:07 GMT|src=10.0.0.15|dst=203.0.113.9|natsrc=0.0.0.0|natdst=10.0.1.20|rule=rule-05|app=ldap|vsys=vsys1|from=trust|to=dmz|sessionid=123469|repeatcnt=1|sport=51518|dport=389|natsport=0|natdport=0|proto=tcp|act=allow|bytes=900|bytes_sent=300|bytes_received=600|pkt=8|seq=7300000000000000009|dvc=fw-01"
+    service: "TRAFFIC"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1791216907000
