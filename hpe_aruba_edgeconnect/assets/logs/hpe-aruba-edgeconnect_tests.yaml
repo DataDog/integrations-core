@@ -152,6 +152,19 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1780393103000
  -
+  sample: "Jun  2 09:45:48 2026 edge-01 mgmtd[25974]: nodejs@system action /cn/st2/action/orchestratorliveness succeeded params:orchestrator_state="
+  result:
+    custom:
+      host_name: "edge-01"
+      process:
+        component: "mgmtd"
+        pid: 25974
+      timestamp: 1780393548000
+    message: "nodejs@system action /cn/st2/action/orchestratorliveness succeeded params:orchestrator_state="
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1780393548000
+ -
   sample: "May 21 09:45:48 2026 edge-01 mgmtd[25974]: nodejs@system action /cn/st2/action/orchestratorliveness succeeded params:orchestrator_state="
   result:
     custom:
