@@ -539,7 +539,7 @@ def test_full_sampling_cache_skips_plan_construction(aggregator, xe_instance):
         handler = make_handler(xe_instance, server)
 
     with mock.patch(
-        'datadog_checks.sqlserver.xe_collection.query_plan_events.obfuscate_xml_plan', side_effect=lambda plan, _: plan
+        'datadog_checks.sqlserver.statements.obfuscate_xml_plan', side_effect=lambda plan, _: plan
     ) as obfuscate_xml_plan:
         run_from_ring_buffer(handler, server, make_event(query_plan_hash=1), make_event(query_plan_hash=2))
 
@@ -547,6 +547,36 @@ def test_full_sampling_cache_skips_plan_construction(aggregator, xe_instance):
     assert obfuscate_xml_plan.call_count == 1
     assert_events_metric(aggregator, handler, 'collected', 'query_post_execution_plan_profile', 1)
     assert_events_metric(aggregator, handler, 'rate_limited', 'query_post_execution_plan_profile', 1)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('collect_raw_query_statement', [False, True])
+def test_plan_that_fails_to_obfuscate_is_sent_without_definition(aggregator, xe_instance, collect_raw_query_statement):
+    """
+    A plan that fails to obfuscate is still sent, without its definition and with a collection error, as estimated
+    plans are, and its raw copy keeps the raw plan.
+    """
+    server = FakeServer()
+    handler = make_handler(xe_instance, server, collect_raw_query_statement=collect_raw_query_statement)
+
+    with mock.patch(
+        'datadog_checks.sqlserver.statements.obfuscate_xml_plan', side_effect=ValueError('unparsable plan')
+    ):
+        run_from_ring_buffer(handler, server, make_event())
+
+    plan = plan_events(aggregator)[0]['db']['plan']
+    assert plan['definition'] is None
+    assert plan['collection_errors'] == [{'code': 'obfuscate_xml_plan_error', 'message': 'unparsable plan'}]
+    if collect_raw_query_statement:
+        assert plan_events(aggregator, dbm_type='rqp')[0]['db']['plan']['definition'] == fixture_plan(
+            PLAN_PROFILE_FIXTURE
+        )
+    assert_events_metric(aggregator, handler, 'obfuscate_xml_plan_error', 'query_post_execution_plan_profile', 1)
+    assert not [
+        metric
+        for metric in aggregator.metrics('dd.sqlserver.xe.query_plans.events')
+        if 'status:collected' in metric.tags
+    ]
 
 
 @pytest.mark.unit
