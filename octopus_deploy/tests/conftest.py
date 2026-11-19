@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import datetime
 import json
 import os
 from pathlib import Path
@@ -9,12 +10,12 @@ from urllib.parse import urlparse
 
 import mock
 import pytest
-import requests
 
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
-from datadog_checks.dev.http import MockResponse
 
 from .constants import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_OCTOPUS_LAB
 
@@ -182,22 +183,21 @@ def mock_http_call(mock_responses):
         response = mock_responses(method, url, file=file, headers=headers, params=params)
         if response is not None:
             return response
-        http_response = requests.models.Response()
-        http_response.status_code = 404
-        http_response.reason = "Not Found"
-        http_response.url = url
-        raise requests.exceptions.HTTPError(response=http_response)
+        not_found = FakeHTTPResponse(status_code=404, reason='Not Found', url=url)
+        raise HTTPClientStatusError(f'404 Client Error: Not Found for url: {url}', response=not_found)
 
     yield call
 
 
 @pytest.fixture
-def mock_http_get(request, monkeypatch, mock_http_call):
+def mock_http_get(request, mocker, fake_http, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.pop('http_error', {})
     data = param.pop('mock_data', {})
     elapsed_total_seconds = param.pop('elapsed_total_seconds', {})
 
+    # Responses depend on the request's path and params, which `register_response` cannot compute, so every client
+    # created through `fake_http` answers from this function instead.
     def get(url, *args, **kwargs):
         args = copy.deepcopy(args)
         kwargs = copy.deepcopy(kwargs)
@@ -206,14 +206,14 @@ def mock_http_get(request, monkeypatch, mock_http_call):
         if http_error and url in http_error:
             return http_error[url]
         if data and url in data:
-            return MockResponse(json_data=data[url], status_code=200)
+            return FakeHTTPResponse(json_result=data[url])
         headers = kwargs.get('headers')
         params = kwargs.get('params')
-        mock_elapsed = mock.MagicMock(total_seconds=mock.MagicMock(return_value=elapsed_total_seconds.get(url, 0.0)))
-        mock_json = mock.MagicMock(return_value=mock_http_call(method, url, headers=headers, params=params))
-        mock_status_code = mock.MagicMock(return_value=200)
-        return CopyingMock(elapsed=mock_elapsed, json=mock_json, status_code=mock_status_code)
+        return FakeHTTPResponse(
+            json_result=mock_http_call(method, url, headers=headers, params=params),
+            elapsed=datetime.timedelta(seconds=elapsed_total_seconds.get(url, 0.0)),
+        )
 
     mock_get = CopyingMock(side_effect=get)
-    monkeypatch.setattr('requests.Session.get', mock_get)
+    mocker.patch.object(FakeHTTPClient, 'get', mock_get)
     return mock_get

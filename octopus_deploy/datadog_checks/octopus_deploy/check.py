@@ -7,11 +7,16 @@ import time
 from collections.abc import Iterable
 
 from cachetools import TTLCache
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.discovery.discovery import Discovery
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientInvalidURLError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.octopus_deploy.config_models.instance import ProjectGroups, Projects
 
@@ -43,6 +48,7 @@ EVENT_TO_ALERT_TYPE = {
 
 class OctopusDeployCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'octopus_deploy'
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super(OctopusDeployCheck, self).__init__(name, init_config, instances)
@@ -103,7 +109,12 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             if report_service_check:
                 self.gauge('api.can_connect', 1, tags=self._base_tags)
             return response.json()
-        except (Timeout, HTTPError, InvalidURL, ConnectionError) as e:
+        except (
+            HTTPClientTimeoutError,
+            HTTPClientStatusError,
+            HTTPClientInvalidURLError,
+            HTTPClientConnectionError,
+        ) as e:
             if report_service_check:
                 self.gauge('api.can_connect', 0, tags=self._base_tags)
                 raise CheckException(
