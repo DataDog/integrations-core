@@ -89,6 +89,10 @@ integration/amazon_eks_blueprints:
 - changed-files:
   - any-glob-to-any-file:
     - amazon_eks_blueprints/**/*
+integration/amazon_lambda:
+- changed-files:
+  - any-glob-to-any-file:
+    - amazon_lambda/**/*
 integration/amazon_msk:
 - changed-files:
   - any-glob-to-any-file:

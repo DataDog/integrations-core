@@ -5,7 +5,11 @@
   "owner": "aws-integrations",
   "display_on_public_website": true,
   "tile": {
-    "description": "Run code in response to events and automatically manage compute resources required by that code.",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Troubleshooting",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor AWS Lambda metrics, logs, and traces.",
     "title": "AWS Lambda",
     "media": [],
     "classifier_tags": [
