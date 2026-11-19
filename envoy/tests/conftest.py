@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import os
 import threading
 import time
@@ -79,6 +80,25 @@ def exercise_envoy():
     yield
     stop.set()
     thread.join(timeout=2)
+
+
+@pytest.fixture
+def serve_fixture_file(fake_http_response):
+    """Serve a fixture file's content at every given URL and return the content."""
+
+    def serve(path, *urls):
+        with open(path, 'rb') as f:
+            content = f.read()
+        # A fake response does not derive `json()` from its body, so decode it the way a real response would.
+        try:
+            json_outcome = {'json_result': json.loads(content)}
+        except json.JSONDecodeError as e:
+            json_outcome = {'json_error': e}
+        for url in urls:
+            fake_http_response(url, content, **json_outcome)
+        return content
+
+    return serve
 
 
 @pytest.fixture

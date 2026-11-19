@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from functools import wraps
 
-import requests
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 
 
 def handle_error(f):
@@ -12,7 +13,8 @@ def handle_error(f):
         try:
             result = f(check, *args, **kwargs)
             return result
-        except requests.exceptions.RequestException as e:
+        # requests raised JSON decoding errors as a RequestException; the layer raises them outside its tree.
+        except (HTTPClientError, json.JSONDecodeError) as e:
             check.log.debug(
                 "Encountered a RequestException in '%s' [%s]: %s",
                 f.__name__,

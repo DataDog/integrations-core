@@ -5,10 +5,13 @@
 from copy import deepcopy
 from urllib.parse import urlparse
 
-import requests
-
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientTimeoutError,
+)
 
 from .metrics import METRICS_LIST
 
@@ -25,6 +28,7 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
     DEFAULT_CONNECT_TIMEOUT = 5
     DEFAULT_RECEIVE_TIMEOUT = 15
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     HTTP_CONFIG_REMAPPER = {
         'receive_timeout': {'name': 'read_timeout', 'default': DEFAULT_RECEIVE_TIMEOUT},
@@ -52,7 +56,8 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         try:
             self.process(scraper_config)
             self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, OpenMetricsBaseCheck.OK, tags=custom_tags)
-        except requests.exceptions.ConnectionError as e:
+        # A connect timeout was a requests ConnectionError, so it still counts as the endpoint being unreachable.
+        except (HTTPClientConnectionError, HTTPClientConnectTimeoutError) as e:
             # Unable to connect to the metrics endpoint
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
@@ -135,7 +140,7 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
             else:
                 r.raise_for_status()
 
-        except requests.exceptions.Timeout:
+        except HTTPClientTimeoutError:
             # If there's a timeout
             self.service_check(
                 self.MASTER_SERVICE_CHECK_NAME,
