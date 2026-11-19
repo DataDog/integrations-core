@@ -514,6 +514,18 @@ pipeline:
         matchRules: |
           serial %{data}(?<![\w.])serial=%{regex("[^,\\s\"]+"):serial}%{data}
         supportRules: ''
+    - type: grok-parser
+      name: Lowercase `device_name` to match the `device_hostname` metric tag
+      enabled: true
+      source: message
+      samples:
+        - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end, device_name=PA-3220"
+      grok:
+        # Metric tags are lowercase, and log attribute search is case-sensitive, so a dashboard
+        # filter on `device_hostname` only matches logs whose `device_name` is lowercase too.
+        matchRules: |
+          device_name %{data}(?<![\w.])device_name=%{regex("[^,\\s\"]+"):device_name:lowercase}%{data}
+        supportRules: ''
     - type: attribute-remapper
       name: Keep `subtype` as a string
       enabled: true

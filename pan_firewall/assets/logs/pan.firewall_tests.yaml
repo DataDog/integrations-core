@@ -13,7 +13,7 @@ tests:
       chunks: 0
       chunks_received: 0
       chunks_sent: 0
-      device_name: "PPCMOCK-PA820-A"
+      device_name: "ppcmock-pa820-a"
       dstloc: "United States"
       elapsed: 250
       evt:
@@ -173,7 +173,7 @@ tests:
       app: "web-browsing"
       category: "malware"
       destination_zone: "L3_Untrust"
-      device_name: "PA-3220"
+      device_name: "pa-3220"
       direction: "client-to-server"
       dstloc: "United States"
       evt:
@@ -217,7 +217,7 @@ tests:
             direction_id: 0
             protocol_name: "tcp"
           device:
-            name: "PA-3220"
+            name: "pa-3220"
             type: "Firewall"
             type_id: 9
           dst_endpoint:
@@ -293,7 +293,7 @@ tests:
       app: "web-browsing"
       category: "malware"
       destination_zone: "L3_Untrust"
-      device_name: "PA-3220"
+      device_name: "pa-3220"
       direction: "client-to-server"
       evt:
         name: "block-url"
@@ -334,7 +334,7 @@ tests:
             direction_id: 0
             protocol_name: "tcp"
           device:
-            name: "PA-3220"
+            name: "pa-3220"
             type: "Firewall"
             type_id: 9
           dst_endpoint:
@@ -407,7 +407,7 @@ tests:
       actionflags: "0x0"
       app: "dns"
       category: "command-and-control"
-      device_name: "PA-3220"
+      device_name: "pa-3220"
       evt:
         name: "sinkhole"
       flags: "0x40407a"
@@ -447,7 +447,7 @@ tests:
             direction_id: 0
             protocol_name: "udp"
           device:
-            name: "PA-3220"
+            name: "pa-3220"
             type: "Firewall"
             type_id: 9
           dst_endpoint:
@@ -519,7 +519,7 @@ tests:
   result:
     custom:
       actionflags: "0x0"
-      device_name: "PA-3220"
+      device_name: "pa-3220"
       evt:
         name: "general"
       module: "general"
@@ -563,7 +563,7 @@ tests:
       after_change_detail: "Detail-1"
       before_change_detail: "Detail-1"
       client: "Client-1"
-      device_name: "PA-1001"
+      device_name: "pa-1001"
       evt:
         name: "edit"
         outcome: "Outcome-1"
@@ -614,7 +614,7 @@ tests:
       chunks: 0
       chunks_received: 0
       chunks_sent: 0
-      device_name: "PA-1001"
+      device_name: "pa-1001"
       dstloc: "Dstloc-2"
       elapsed: 0
       evt:
@@ -719,7 +719,7 @@ tests:
       assoc_id: 0
       category: "Category-1"
       contentver: "Contentver-3"
-      device_name: "PA-1001"
+      device_name: "pa-1001"
       direction: "client-to-server"
       dstloc: "Dstloc-2"
       evt:
@@ -765,7 +765,7 @@ tests:
             direction_id: 0
             protocol_name: "tcp"
           device:
-            name: "PA-1001"
+            name: "pa-1001"
             type: "Firewall"
             type_id: 9
           dst_endpoint:
@@ -845,7 +845,7 @@ tests:
       assoc_id: 0
       category: "Category-5"
       contentver: "Contentver-2"
-      device_name: "PA-1012"
+      device_name: "pa-1012"
       direction: "client-to-server"
       dstloc: "Dstloc-4"
       evt:
@@ -892,7 +892,7 @@ tests:
             direction_id: 0
             protocol_name: "tcp"
           device:
-            name: "PA-1012"
+            name: "pa-1012"
             type: "Firewall"
             type_id: 9
           dst_endpoint:
