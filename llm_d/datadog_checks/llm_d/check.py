@@ -14,7 +14,7 @@ from datadog_checks.base.errors import SkipInstanceError
 
 class LlmDCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
-    __NAMESPACE__ = 'llm_d'
+    __NAMESPACE__ = 'llm_d_inference'
 
     def __init__(self, name: str, init_config: dict[str, Any], instances: list[dict[str, Any]]) -> None:
         # llm-d ships as part of the GPU monitoring SKU; only run it when GPU monitoring is on.
@@ -27,8 +27,10 @@ class LlmDCheck(OpenMetricsBaseCheckV2):
             'histogram_buckets_as_distributions': True,
             'collect_counters_with_distributions': True,
             'rename_labels': {
-                # InferencePool name, which identifies the deployment.
-                'name': 'inference_pool',
+                # EPP pool name, labelled `name` on pool metrics and `inference_pool` on Flow Control metrics.
+                # The `inference_pool` tag comes from the pod annotation instead, so the two don't collide.
+                'name': 'llm_d_pool',
+                'inference_pool': 'llm_d_pool',
                 # Scheduler and in-flight metrics describe the target endpoint, not the scraped pod.
                 'namespace': 'endpoint_namespace',
                 'port': 'endpoint_port',
