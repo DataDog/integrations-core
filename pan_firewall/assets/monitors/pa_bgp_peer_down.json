@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\nBGP peer {{peer.name}} ({{peer_ip.name}}, AS {{remote_as.name}}) in virtual router {{vr.name}} on firewall {{device_ip.name}} has not been in the established state for the last 5 minutes. Routes learned from this peer are no longer being exchanged. Check the peer's reachability and session configuration.\n{{/is_alert}}\n\n{{#is_recovery}}\nBGP peer {{peer.name}} ({{peer_ip.name}}, AS {{remote_as.name}}) in virtual router {{vr.name}} on firewall {{device_ip.name}} is established again.\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] BGP peer {{peer.name}} ({{peer_ip.name}}) is down on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_5m):max:pan_firewall.bgp.peer.status{*} by {device_ip,vr,peer,peer_ip,remote_as} <= 0",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the session state of each BGP peer on the firewall. A peer that leaves the established state stops exchanging routes, which can blackhole or reroute traffic that depends on it. Peers that are down on purpose, such as disabled or decommissioned peers, alert until they are removed from the configuration; exclude them by adding `!peer:<name>` to the query.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "BGP peer is not established",
+  "version": 2
+}

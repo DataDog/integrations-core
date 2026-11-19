@@ -1,0 +1,36 @@
+{
+  "created_at": "2026-11-18",
+  "definition": {
+    "message": "{{#is_alert}}\nFirewall {{@device_name.name}} logged {{value}} critical-severity threat(s) in the last 5 minutes that were detected but not blocked. Check which security profile or exception let the threat through, and review the source and destination in the log sample.\n{{/is_alert}}\n\n{{#is_recovery}}\nFirewall {{@device_name.name}} has logged no unblocked critical threats in the last 5 minutes.\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Critical threat detected but not blocked on {{@device_name.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "timeout_h": 0,
+      "enable_logs_sample": true,
+      "on_missing_data": "default",
+      "new_group_delay": 0,
+      "groupby_simple_monitor": false,
+      "thresholds": {
+        "critical": 0
+      }
+    },
+    "priority": null,
+    "query": "logs(\"source:pan.firewall @type:THREAT @severity:critical @evt.name:alert\").index(\"*\").rollup(\"count\").by(\"@device_name\").last(\"5m\") > 0",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "log alert"
+  },
+  "description": "Alerts when a firewall logs a critical-severity threat whose action is `alert`: the threat was detected but not blocked, usually because a security profile is set to alert only or an exception applies. Blocked critical threats (drop, reset, block and similar actions) are intentionally excluded, since the firewall already stopped them; their volume is on the dashboard. Requires Palo Alto Networks Firewall log collection.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Critical threat detected but not blocked",
+  "version": 2
+}

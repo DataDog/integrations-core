@@ -1,0 +1,38 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\nManagement-plane memory on firewall {{device_ip.name}} has averaged {{value}}% used over the last 15 minutes. Management services, logging and commits may slow down or fail. Check for runaway management processes.\n{{/is_alert}}\n\n{{#is_warning}}\nManagement-plane memory on firewall {{device_ip.name}} has averaged {{value}}% used over the last 15 minutes. Free memory is running low; this monitor alerts above 95%.\n{{/is_warning}}\n\n{{#is_recovery}}\nManagement-plane memory usage on firewall {{device_ip.name}} is back below 80%.\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Management-plane memory usage is high on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 95,
+        "critical_recovery": 80,
+        "warning": 85,
+        "warning_recovery": 80
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_15m):avg:pan_firewall.mgmt.memory.used_pct{*} by {device_ip} > 95",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the percentage of management-plane memory in use on each firewall. When it runs out, management services such as the web interface, the API, logging, and commits slow down or fail.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Management-plane memory usage is high",
+  "version": 2
+}

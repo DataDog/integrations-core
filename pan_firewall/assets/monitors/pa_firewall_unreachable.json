@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\nThe Agent has not been able to reach the API of firewall {{device_ip.name}} for the last 5 minutes. Check that the device is up, that its management interface is reachable from the Agent host, and that nothing (a firewall rule, a proxy or a changed management IP) blocks HTTPS from the Agent to the firewall.\n{{/is_alert}}\n\n{{#is_recovery}}\nFirewall {{device_ip.name}} is answering the Agent's API requests again.\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Firewall {{device_ip.name}} is unreachable",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_5m):max:pan_firewall.can_connect{*} by {device_ip} <= 0",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks whether the firewall's XML API answers the Agent on each check run. A firewall that stops responding for several minutes may be down, overloaded, or cut off from the network, and no other metric from it can be trusted until it answers again.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Firewall is unreachable",
+  "version": 2
+}

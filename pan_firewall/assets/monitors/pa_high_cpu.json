@@ -1,0 +1,38 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\nManagement-plane CPU on firewall {{device_ip.name}} has averaged {{value}}% over the last 15 minutes. The web interface, API, commits and logging may slow down or fail. Look for long-running commits, large log queries or reports, many concurrent admin or API sessions, or an unusually high logging rate.\n{{/is_alert}}\n\n{{#is_warning}}\nManagement-plane CPU on firewall {{device_ip.name}} has averaged {{value}}% over the last 15 minutes. Headroom for management tasks is shrinking; this monitor alerts above 95%.\n{{/is_warning}}\n\n{{#is_recovery}}\nManagement-plane CPU on firewall {{device_ip.name}} is back below 75%.\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Management-plane CPU utilization is high on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 95,
+        "critical_recovery": 75,
+        "warning": 80,
+        "warning_recovery": 75
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_15m):avg:pan_firewall.mgmt.cpu.used{*} by {device_ip} > 95",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the management-plane CPU of each firewall. The management plane runs the web interface, the XML API, commits, logging and reporting; when it stays saturated, admin access, commits and log processing slow down or fail. It does not forward traffic.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Management-plane CPU utilization is high",
+  "version": 2
+}

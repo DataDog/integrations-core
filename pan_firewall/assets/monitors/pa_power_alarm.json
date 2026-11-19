@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\nPower sensor {{sensor.name}} in slot {{slot.name}} on firewall {{device_ip.name}} reports a voltage outside its allowed range. Check the power supply and its feed.\n{{/is_alert}}\n\n{{#is_recovery}}\nPower sensor {{sensor.name}} in slot {{slot.name}} on firewall {{device_ip.name}} is back within its allowed voltage range.\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Power sensor {{sensor.name}} is in alarm on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 1
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_15m):max:pan_firewall.power.alarm.high{*} by {device_ip,slot,sensor} + max:pan_firewall.power.alarm.low{*} by {device_ip,slot,sensor} >= 1",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks whether any power sensor on the firewall reports a voltage above its maximum or below its minimum. A power alarm points to a failing power supply or an unstable feed that can take the device down.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Power sensor is in alarm",
+  "version": 2
+}
