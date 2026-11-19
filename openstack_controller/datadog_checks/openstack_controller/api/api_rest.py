@@ -347,11 +347,9 @@ class ApiRest(Api):
         item_list = []
         params = {} if params is None else params
 
-        if self.config.paginated_limit is None:
-            response_json = make_request(url, params)
-            return response_json if resource_name is None else response_json.get(resource_name, [])
-
-        params['limit'] = self.config.paginated_limit
+        # Without `paginated_limit`, servers still split long collections into pages of their default size.
+        if self.config.paginated_limit is not None:
+            params['limit'] = self.config.paginated_limit
         while True:
             self.log.debug(
                 "making paginated request [limit=%s, marker=%s]",
