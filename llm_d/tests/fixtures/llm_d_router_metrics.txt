@@ -1,0 +1,1070 @@
+# Captured from llm-d-router v1.0.0 EPP (commit b9393d1a9f1d5a72ecd86f8d2b643ab54c2a9b92) in standalone mode
+# (--endpoint-selector, no InferencePool) with the P/D EndpointPickerConfig, routing Qwen/Qwen3-0.6B to a prefill
+# and a decode vLLM v0.31.0 (NixlConnector), the decode one behind the v1.0.0 P/D sidecar. Only llm_d_epp_*
+# families are kept; Go runtime, process, and controller-runtime families are dropped. Pod, namespace, and EPP
+# names are replaced with neutral values; samples are unchanged. In standalone mode, the `name` label on pool
+# metrics is the EPP Deployment name.
+# HELP llm_d_epp_average_kv_cache_utilization [ALPHA] The average kv cache utilization for an inference server pool.
+# TYPE llm_d_epp_average_kv_cache_utilization gauge
+llm_d_epp_average_kv_cache_utilization{name="llm-d-epp"} 0.01
+# HELP llm_d_epp_average_queue_size [ALPHA] The average number of requests pending in the model server queue.
+# TYPE llm_d_epp_average_queue_size gauge
+llm_d_epp_average_queue_size{name="llm-d-epp"} 0.5
+# HELP llm_d_epp_average_running_requests [ALPHA] The average number of running requests across model servers in the pool.
+# TYPE llm_d_epp_average_running_requests gauge
+llm_d_epp_average_running_requests{name="llm-d-epp"} 0
+# HELP llm_d_epp_datalayer_poll_errors_total [ALPHA] Data-source poll errors per source type.
+# TYPE llm_d_epp_datalayer_poll_errors_total counter
+llm_d_epp_datalayer_poll_errors_total{source_type="metrics-data-source"} 1
+# HELP llm_d_epp_disagg_decision_total [ALPHA] Total number of disaggregation routing decisions made
+# TYPE llm_d_epp_disagg_decision_total counter
+llm_d_epp_disagg_decision_total{decision_type="prefill-decode",model_name="Qwen/Qwen3-0.6B",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler"} 1611
+# HELP llm_d_epp_info [ALPHA] General information of the current build of Inference Extension.
+# TYPE llm_d_epp_info gauge
+llm_d_epp_info{build_ref="v1.0.0",commit="b9393d1a9f1d5a72ecd86f8d2b643ab54c2a9b92"} 1
+# HELP llm_d_epp_per_endpoint_nixl_failed_notifications_total [ALPHA] The number of failed NIXL KV cache notifications reported by each underlying endpoint.
+# TYPE llm_d_epp_per_endpoint_nixl_failed_notifications_total counter
+llm_d_epp_per_endpoint_nixl_failed_notifications_total{model_server_endpoint="llm-d-decode-0-rank-0",name="llm-d-epp"} 0
+llm_d_epp_per_endpoint_nixl_failed_notifications_total{model_server_endpoint="llm-d-prefill-0-rank-0",name="llm-d-epp"} 0
+# HELP llm_d_epp_per_endpoint_nixl_failed_transfers_total [ALPHA] The number of failed NIXL KV cache transfers reported by each underlying endpoint.
+# TYPE llm_d_epp_per_endpoint_nixl_failed_transfers_total counter
+llm_d_epp_per_endpoint_nixl_failed_transfers_total{model_server_endpoint="llm-d-decode-0-rank-0",name="llm-d-epp"} 0
+llm_d_epp_per_endpoint_nixl_failed_transfers_total{model_server_endpoint="llm-d-prefill-0-rank-0",name="llm-d-epp"} 0
+# HELP llm_d_epp_per_endpoint_nixl_kv_expired_requests_total [ALPHA] The number of requests whose KV cache expired before it was read, reported by each underlying endpoint.
+# TYPE llm_d_epp_per_endpoint_nixl_kv_expired_requests_total counter
+llm_d_epp_per_endpoint_nixl_kv_expired_requests_total{model_server_endpoint="llm-d-decode-0-rank-0",name="llm-d-epp"} 0
+llm_d_epp_per_endpoint_nixl_kv_expired_requests_total{model_server_endpoint="llm-d-prefill-0-rank-0",name="llm-d-epp"} 0
+# HELP llm_d_epp_per_endpoint_queue_size [ALPHA] The total number of requests pending in the model server queue for each underlying endpoint.
+# TYPE llm_d_epp_per_endpoint_queue_size gauge
+llm_d_epp_per_endpoint_queue_size{model_server_endpoint="llm-d-decode-0-rank-0",name="llm-d-epp"} 1
+llm_d_epp_per_endpoint_queue_size{model_server_endpoint="llm-d-prefill-0-rank-0",name="llm-d-epp"} 0
+# HELP llm_d_epp_plugin_duration_seconds [ALPHA] Plugin processing latency distribution in seconds for each extension point, plugin type and plugin name.
+# TYPE llm_d_epp_plugin_duration_seconds histogram
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.0001"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.0002"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.0005"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.001"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.002"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.005"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.01"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.02"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.05"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.1"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 1614
+llm_d_epp_plugin_duration_seconds_sum{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 0.03024875099999996
+llm_d_epp_plugin_duration_seconds_count{extension_point="DataProducer",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="0.0001"} 1610
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="0.0002"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="0.0005"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="0.001"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="0.002"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="0.005"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="0.01"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="0.02"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="0.05"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="0.1"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer",le="+Inf"} 1614
+llm_d_epp_plugin_duration_seconds_sum{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer"} 0.031630309000000016
+llm_d_epp_plugin_duration_seconds_count{extension_point="DataProducer",plugin_name="token-producer",plugin_type="token-producer"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="0.0001"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="0.0002"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="0.0005"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="0.001"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="0.002"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="0.005"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="0.01"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="0.02"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="0.05"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="0.1"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter",le="+Inf"} 1614
+llm_d_epp_plugin_duration_seconds_sum{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter"} 0.0013359619999999972
+llm_d_epp_plugin_duration_seconds_count{extension_point="Filter",plugin_name="decode-filter",plugin_type="decode-filter"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="0.0001"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="0.0002"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="0.0005"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="0.001"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="0.002"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="0.005"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="0.01"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="0.02"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="0.05"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="0.1"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter",le="+Inf"} 1613
+llm_d_epp_plugin_duration_seconds_sum{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter"} 0.0008960240000000007
+llm_d_epp_plugin_duration_seconds_count{extension_point="Filter",plugin_name="prefill-filter",plugin_type="prefill-filter"} 1613
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="0.0001"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="0.0002"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="0.0005"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="0.001"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="0.002"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="0.005"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="0.01"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="0.02"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="0.05"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="0.1"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector",le="+Inf"} 3224
+llm_d_epp_plugin_duration_seconds_sum{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector"} 0.0028486150000000057
+llm_d_epp_plugin_duration_seconds_count{extension_point="Filter",plugin_name="utilization-detector",plugin_type="utilization-detector"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="0.0001"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="0.0002"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="0.0005"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="0.001"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="0.002"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="0.005"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="0.01"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="0.02"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="0.05"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="0.1"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker",le="+Inf"} 3224
+llm_d_epp_plugin_duration_seconds_sum{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker"} 0.003022468
+llm_d_epp_plugin_duration_seconds_count{extension_point="Picker",plugin_name="max-score-picker",plugin_type="max-score-picker"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.0001"} 1609
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.0002"} 1610
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.0005"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.001"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.002"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.005"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.01"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.02"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.05"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.1"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 1611
+llm_d_epp_plugin_duration_seconds_sum{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 0.024972776000000002
+llm_d_epp_plugin_duration_seconds_count{extension_point="PreRequest",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.0001"} 1609
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.0002"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.0005"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.001"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.002"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.005"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.01"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.02"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.05"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.1"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="+Inf"} 1611
+llm_d_epp_plugin_duration_seconds_sum{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler"} 0.007612114999999989
+llm_d_epp_plugin_duration_seconds_count{extension_point="PreRequest",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="0.0001"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="0.0002"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="0.0005"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="0.001"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="0.002"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="0.005"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="0.01"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="0.02"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="0.05"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="0.1"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider",le="+Inf"} 1611
+llm_d_epp_plugin_duration_seconds_sum{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider"} 0.0007110149999999987
+llm_d_epp_plugin_duration_seconds_count{extension_point="PreRequest",plugin_name="prefix-based-pd-decider",plugin_type="prefix-based-pd-decider"} 1611
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.0001"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.0002"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.0005"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.001"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.002"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.005"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.01"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.02"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.05"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.1"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="+Inf"} 1614
+llm_d_epp_plugin_duration_seconds_sum{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler"} 0.0012575499999999996
+llm_d_epp_plugin_duration_seconds_count{extension_point="ProcessProfilesResults",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler"} 1614
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.0001"} 4839
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.0002"} 4840
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.0005"} 4841
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.001"} 4841
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.002"} 4841
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.005"} 4841
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.01"} 4841
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.02"} 4841
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.05"} 4841
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="0.1"} 4841
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler",le="+Inf"} 4841
+llm_d_epp_plugin_duration_seconds_sum{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler"} 0.026730947999999956
+llm_d_epp_plugin_duration_seconds_count{extension_point="ProfilePicker",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler"} 4841
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.0001"} 2013
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.0002"} 2227
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.0005"} 2232
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.001"} 2232
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.002"} 2232
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.005"} 2232
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.01"} 2232
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.02"} 2232
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.05"} 2232
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.1"} 2232
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="+Inf"} 2232
+llm_d_epp_plugin_duration_seconds_sum{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser"} 0.1515418529999999
+llm_d_epp_plugin_duration_seconds_count{extension_point="RequestParsing",plugin_name="openai-parser",plugin_type="openai-parser"} 2232
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.0001"} 61183
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.0002"} 61184
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.0005"} 61184
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.001"} 61184
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.002"} 61184
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.005"} 61184
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.01"} 61184
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.02"} 61184
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.05"} 61184
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="0.1"} 61184
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser",le="+Inf"} 61184
+llm_d_epp_plugin_duration_seconds_sum{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser"} 0.37691855199999635
+llm_d_epp_plugin_duration_seconds_count{extension_point="ResponseParsing",plugin_name="openai-parser",plugin_type="openai-parser"} 61184
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.0001"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.0002"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.0005"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.001"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.002"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.005"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.01"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.02"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.05"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.1"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="+Inf"} 3224
+llm_d_epp_plugin_duration_seconds_sum{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer"} 0.004253972999999987
+llm_d_epp_plugin_duration_seconds_count{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="0.0001"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="0.0002"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="0.0005"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="0.001"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="0.002"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="0.005"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="0.01"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="0.02"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="0.05"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="0.1"} 3224
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer",le="+Inf"} 3224
+llm_d_epp_plugin_duration_seconds_sum{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer"} 0.0023332959999999986
+llm_d_epp_plugin_duration_seconds_count{extension_point="Scorer",plugin_name="queue-scorer",plugin_type="queue-scorer"} 3224
+# HELP llm_d_epp_prefix_best_available_cached_tokens [ALPHA] Highest prefix-cache prediction among the request's candidate endpoints before filtering, per request. The modality label holds the request's carried modalities as a comma-joined sorted list (none for text-only), matching the mm.modality span attribute; each request is observed once.
+# TYPE llm_d_epp_prefix_best_available_cached_tokens histogram
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1"} 12
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8"} 12
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16"} 12
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32"} 12
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="64"} 540
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="128"} 540
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="256"} 540
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="512"} 1087
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1024"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="2048"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="4096"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8192"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16384"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32768"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="65536"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="131072"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="262144"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="524288"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1.048576e+06"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 1611
+llm_d_epp_prefix_best_available_cached_tokens_sum{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 577792
+llm_d_epp_prefix_best_available_cached_tokens_count{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1611
+# HELP llm_d_epp_prefix_best_predicted_cached_tokens [ALPHA] Highest prefix-cache prediction among the endpoints the scheduler selected from, per request. The modality label holds the request's carried modalities as a comma-joined sorted list (none for text-only), matching the mm.modality span attribute; each request is observed once.
+# TYPE llm_d_epp_prefix_best_predicted_cached_tokens histogram
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1"} 12
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8"} 12
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16"} 12
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32"} 12
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="64"} 540
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="128"} 540
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="256"} 540
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="512"} 1087
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1024"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="2048"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="4096"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8192"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16384"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32768"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="65536"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="131072"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="262144"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="524288"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1.048576e+06"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 1611
+llm_d_epp_prefix_best_predicted_cached_tokens_sum{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 577792
+llm_d_epp_prefix_best_predicted_cached_tokens_count{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1611
+# HELP llm_d_epp_prefix_indexer_hit_bytes [ALPHA] Length of the prefix match in number of bytes in the cache lookup.
+# TYPE llm_d_epp_prefix_indexer_hit_bytes histogram
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0"} 12
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16"} 12
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32"} 12
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="64"} 12
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="128"} 12
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="256"} 540
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="512"} 540
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1024"} 540
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="2048"} 1087
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="4096"} 1611
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8192"} 1611
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16384"} 1611
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32768"} 1611
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="65536"} 1611
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 1611
+llm_d_epp_prefix_indexer_hit_bytes_sum{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 2.311168e+06
+llm_d_epp_prefix_indexer_hit_bytes_count{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1611
+# HELP llm_d_epp_prefix_indexer_hit_ratio [ALPHA] Ratio of prefix length matched to total prefix length in the cache lookup.
+# TYPE llm_d_epp_prefix_indexer_hit_ratio histogram
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0"} 12
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.1"} 252
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.2"} 476
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.3"} 690
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.4"} 778
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.5"} 1002
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.6"} 1080
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.7"} 1083
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.8"} 1409
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.9"} 1554
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1"} 1611
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 1611
+llm_d_epp_prefix_indexer_hit_ratio_sum{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 691.214954275165
+llm_d_epp_prefix_indexer_hit_ratio_count{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1611
+# HELP llm_d_epp_prefix_indexer_size [ALPHA] Size of the prefix indexer.
+# TYPE llm_d_epp_prefix_indexer_size gauge
+llm_d_epp_prefix_indexer_size{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 14400
+# HELP llm_d_epp_prefix_predicted_cached_tokens [ALPHA] Prompt tokens the producer predicted the scheduler's chosen endpoint holds in its prefix cache, per request. The modality label holds the request's carried modalities as a comma-joined sorted list (none for text-only), matching the mm.modality span attribute; each request is observed once.
+# TYPE llm_d_epp_prefix_predicted_cached_tokens histogram
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1"} 12
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8"} 12
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16"} 12
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32"} 12
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="64"} 540
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="128"} 540
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="256"} 540
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="512"} 1087
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1024"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="2048"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="4096"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8192"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16384"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32768"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="65536"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="131072"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="262144"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="524288"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1.048576e+06"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 1611
+llm_d_epp_prefix_predicted_cached_tokens_sum{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 577792
+llm_d_epp_prefix_predicted_cached_tokens_count{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1611
+# HELP llm_d_epp_prefix_prompt_tokens [ALPHA] Prompt tokens the producer measured its prediction against, per request. The modality label holds the request's carried modalities as a comma-joined sorted list (none for text-only), matching the mm.modality span attribute; each request is observed once.
+# TYPE llm_d_epp_prefix_prompt_tokens histogram
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1"} 0
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8"} 0
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16"} 0
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32"} 3
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="64"} 3
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="128"} 103
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="256"} 191
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="512"} 521
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1024"} 1029
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="2048"} 1244
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="4096"} 1611
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8192"} 1611
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16384"} 1611
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32768"} 1611
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="65536"} 1611
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="131072"} 1611
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="262144"} 1611
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="524288"} 1611
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1.048576e+06"} 1611
+llm_d_epp_prefix_prompt_tokens_bucket{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 1611
+llm_d_epp_prefix_prompt_tokens_sum{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1.815904e+06
+llm_d_epp_prefix_prompt_tokens_count{endpoint_role="prefill",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1611
+# HELP llm_d_epp_ready_endpoints [ALPHA] The number of ready endpoints in the inference server pool.
+# TYPE llm_d_epp_ready_endpoints gauge
+llm_d_epp_ready_endpoints{name="llm-d-epp"} 2
+# HELP llm_d_epp_request_cached_tokens [ALPHA] Distribution of prompt tokens read from cache per request, as reported by the model server in the response.
+# TYPE llm_d_epp_request_cached_tokens histogram
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="16"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="32"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="64"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="128"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="256"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="512"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1024"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2048"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="4096"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8192"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="16384"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="32768"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="65536"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="131072"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="262144"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="524288"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1.048576e+06"} 1609
+llm_d_epp_request_cached_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 1609
+llm_d_epp_request_cached_tokens_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 0
+llm_d_epp_request_cached_tokens_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1609
+# HELP llm_d_epp_request_duration_seconds [ALPHA] End-to-end request latency distribution in seconds.
+# TYPE llm_d_epp_request_duration_seconds histogram
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="0.005"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="0.025"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="0.05"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="0.1"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="0.2"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="0.4"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="0.6"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="0.8"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="1"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="1.25"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="1.5"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="2"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="3"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="4"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="5"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="6"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="8"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="10"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="15"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="20"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="30"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="45"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="60"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="120"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="180"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="240"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="300"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="360"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="480"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="600"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="900"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="1200"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="1800"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="2700"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="3600"} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="+Inf"} 2
+llm_d_epp_request_duration_seconds_sum{fairness_id="default-flow",model_name="",priority="0",target_model_name=""} 0.001946427
+llm_d_epp_request_duration_seconds_count{fairness_id="default-flow",model_name="",priority="0",target_model_name=""} 2
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.005"} 0
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.025"} 0
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.05"} 0
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.1"} 33
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.2"} 142
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.4"} 523
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.6"} 805
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.8"} 1017
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1"} 1156
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1.25"} 1288
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1.5"} 1384
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2"} 1443
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="3"} 1532
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="4"} 1537
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="5"} 1550
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="6"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="10"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="15"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="20"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="30"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="45"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="60"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="120"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="180"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="240"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="300"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="360"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="480"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="600"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="900"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1200"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1800"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2700"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="3600"} 1609
+llm_d_epp_request_duration_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 1609
+llm_d_epp_request_duration_seconds_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1537.1436456279998
+llm_d_epp_request_duration_seconds_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1609
+# HELP llm_d_epp_request_error_total [ALPHA] Total number of request errors.
+# TYPE llm_d_epp_request_error_total counter
+llm_d_epp_request_error_total{error_code="ModelServerError",fairness_id="default-flow",model_name="",priority="0",target_model_name=""} 2
+llm_d_epp_request_error_total{error_code="ServiceUnavailable",fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 621
+# HELP llm_d_epp_request_input_tokens [ALPHA] Input token count distribution per request.
+# TYPE llm_d_epp_request_input_tokens histogram
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1"} 0
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8"} 0
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="16"} 0
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="32"} 3
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="64"} 3
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="128"} 190
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="256"} 292
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="512"} 613
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1024"} 1133
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2048"} 1562
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="4096"} 1609
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8192"} 1609
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="16384"} 1609
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="32768"} 1609
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="65536"} 1609
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="131072"} 1609
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="262144"} 1609
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="524288"} 1609
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1.048576e+06"} 1609
+llm_d_epp_request_input_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 1609
+llm_d_epp_request_input_tokens_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1.286781e+06
+llm_d_epp_request_input_tokens_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1609
+# HELP llm_d_epp_request_ntpot_seconds [ALPHA] Normalized time per output token in seconds (end-to-end latency divided by output token count).
+# TYPE llm_d_epp_request_ntpot_seconds histogram
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.001"} 0
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.002"} 16
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.005"} 333
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.01"} 476
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.02"} 593
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.05"} 1444
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.1"} 1559
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.2"} 1603
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.5"} 1609
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1"} 1609
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2"} 1609
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="5"} 1609
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="10"} 1609
+llm_d_epp_request_ntpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 1609
+llm_d_epp_request_ntpot_seconds_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 42.02135111710259
+llm_d_epp_request_ntpot_seconds_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1609
+# HELP llm_d_epp_request_output_tokens [ALPHA] Output token count distribution per request.
+# TYPE llm_d_epp_request_output_tokens histogram
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1"} 19
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8"} 215
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="16"} 537
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="32"} 713
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="64"} 1116
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="128"} 1373
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="256"} 1609
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="512"} 1609
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1024"} 1609
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2048"} 1609
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="4096"} 1609
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8192"} 1609
+llm_d_epp_request_output_tokens_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 1609
+llm_d_epp_request_output_tokens_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 123790
+llm_d_epp_request_output_tokens_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1609
+# HELP llm_d_epp_request_processing_duration_seconds [ALPHA] EPP request processing latency distribution in seconds, from request receipt until the request body has been handled, including admission control.
+# TYPE llm_d_epp_request_processing_duration_seconds histogram
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.0005"} 1558
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.001"} 2213
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.002"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.005"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.01"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.015"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.025"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.04"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.06"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.1"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.25"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="0.5"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="1"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="2.5"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="5"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="10"} 2232
+llm_d_epp_request_processing_duration_seconds_bucket{le="+Inf"} 2232
+llm_d_epp_request_processing_duration_seconds_sum 0.8764490050000011
+llm_d_epp_request_processing_duration_seconds_count 2232
+# HELP llm_d_epp_request_running [ALPHA] Current number of active running requests.
+# TYPE llm_d_epp_request_running gauge
+llm_d_epp_request_running{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 2
+# HELP llm_d_epp_request_size_bytes [ALPHA] Incoming request body size distribution in bytes.
+# TYPE llm_d_epp_request_size_bytes histogram
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="64"} 0
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="128"} 0
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="256"} 3
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="512"} 3
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1024"} 191
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2048"} 521
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="4096"} 1029
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8192"} 1244
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="16384"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="32768"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="65536"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="131072"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="262144"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="524288"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1.048576e+06"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2.097152e+06"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="4.194304e+06"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8.388608e+06"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1.6777216e+07"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="3.3554432e+07"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="6.7108864e+07"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1.34217728e+08"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2.68435456e+08"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="5.36870912e+08"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1.073741824e+09"} 1611
+llm_d_epp_request_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 1611
+llm_d_epp_request_size_bytes_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 7.466275e+06
+llm_d_epp_request_size_bytes_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1611
+# HELP llm_d_epp_request_streaming_itl_seconds [ALPHA] Inter-token latency in seconds for streaming requests, measured as the time between consecutive response body chunks.
+# TYPE llm_d_epp_request_streaming_itl_seconds histogram
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.001"} 2132
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.005"} 34034
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.01"} 35527
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.02"} 46682
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.04"} 58766
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.06"} 58771
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.08"} 58773
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.1"} 58773
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.15"} 58773
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.2"} 58773
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.3"} 58773
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.5"} 58773
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.75"} 58773
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1"} 58773
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2"} 58773
+llm_d_epp_request_streaming_itl_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 58773
+llm_d_epp_request_streaming_itl_seconds_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 548.5295728929982
+llm_d_epp_request_streaming_itl_seconds_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 58773
+# HELP llm_d_epp_request_streaming_tpot_seconds [ALPHA] Average time per output token in seconds for streaming requests, computed as (e2e - TTFT) / (output_tokens - 1).
+# TYPE llm_d_epp_request_streaming_tpot_seconds histogram
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.0005"} 0
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.00205"} 183
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.005"} 319
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.01"} 320
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.02"} 550
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.04"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.06"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.08"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.1"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.125"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.15"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.2"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.3"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.4"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.5"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.6"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.8"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2"} 790
+llm_d_epp_request_streaming_tpot_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 790
+llm_d_epp_request_streaming_tpot_seconds_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 10.075977076860056
+llm_d_epp_request_streaming_tpot_seconds_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 790
+# HELP llm_d_epp_request_total [ALPHA] Total number of processed requests.
+# TYPE llm_d_epp_request_total counter
+llm_d_epp_request_total{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1611
+# HELP llm_d_epp_request_ttft_seconds [ALPHA] Time to first token in seconds, measured from request received to first response byte. For non-streaming requests, this equals total request duration.
+# TYPE llm_d_epp_request_ttft_seconds histogram
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="0.005"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="0.025"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="0.05"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="0.1"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="0.2"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="0.4"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="0.6"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="0.8"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="1"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="1.25"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="1.5"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="2"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="3"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="4"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="5"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="6"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="8"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="10"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="15"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="20"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="30"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="45"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="60"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="120"} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name="",le="+Inf"} 2
+llm_d_epp_request_ttft_seconds_sum{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name=""} 0.001948833
+llm_d_epp_request_ttft_seconds_count{fairness_id="default-flow",model_name="",priority="0",streaming="false",target_model_name=""} 2
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="0.005"} 0
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="0.025"} 0
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="0.05"} 0
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="0.1"} 14
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="0.2"} 79
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="0.4"} 269
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="0.6"} 408
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="0.8"} 517
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="1"} 587
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="1.25"} 656
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="1.5"} 704
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="2"} 730
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="3"} 772
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="4"} 777
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="5"} 783
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="6"} 810
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="8"} 810
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="10"} 810
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="15"} 810
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="20"} 810
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="30"} 810
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="45"} 810
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="60"} 810
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="120"} 810
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 810
+llm_d_epp_request_ttft_seconds_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B"} 755.4540435179999
+llm_d_epp_request_ttft_seconds_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="false",target_model_name="Qwen/Qwen3-0.6B"} 810
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="0.005"} 0
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="0.025"} 0
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="0.05"} 61
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="0.1"} 103
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="0.2"} 462
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="0.4"} 667
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="0.6"} 718
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="0.8"} 734
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="1"} 759
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="1.25"} 771
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="1.5"} 785
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="2"} 793
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="3"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="4"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="5"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="6"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="8"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="10"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="15"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="20"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="30"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="45"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="60"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="120"} 799
+llm_d_epp_request_ttft_seconds_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 799
+llm_d_epp_request_ttft_seconds_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B"} 233.54871975599994
+llm_d_epp_request_ttft_seconds_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",streaming="true",target_model_name="Qwen/Qwen3-0.6B"} 799
+# HELP llm_d_epp_response_processing_duration_seconds [ALPHA] EPP response processing latency distribution in seconds: the sum of per-chunk handler time for a streamed response, or the interval from response headers to completion for a non-streaming response.
+# TYPE llm_d_epp_response_processing_duration_seconds histogram
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.0001"} 781
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.00025"} 1016
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.0005"} 1150
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.001"} 1362
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.0025"} 1557
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.005"} 1594
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.01"} 1611
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.025"} 1611
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.05"} 1611
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.1"} 1611
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.25"} 1611
+llm_d_epp_response_processing_duration_seconds_bucket{le="0.5"} 1611
+llm_d_epp_response_processing_duration_seconds_bucket{le="1"} 1611
+llm_d_epp_response_processing_duration_seconds_bucket{le="2.5"} 1611
+llm_d_epp_response_processing_duration_seconds_bucket{le="5"} 1611
+llm_d_epp_response_processing_duration_seconds_bucket{le="+Inf"} 1611
+llm_d_epp_response_processing_duration_seconds_sum 0.8559062300000009
+llm_d_epp_response_processing_duration_seconds_count 1611
+# HELP llm_d_epp_response_size_bytes [ALPHA] Outgoing response body size distribution in bytes.
+# TYPE llm_d_epp_response_size_bytes histogram
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="1"} 0
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="8"} 0
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="16"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="32"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="64"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="128"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="256"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="512"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="1024"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="2048"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="4096"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="8192"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="16384"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="32768"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="65536"} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="",priority="0",target_model_name="",le="+Inf"} 2
+llm_d_epp_response_size_bytes_sum{fairness_id="default-flow",model_name="",priority="0",target_model_name=""} 18
+llm_d_epp_response_size_bytes_count{fairness_id="default-flow",model_name="",priority="0",target_model_name=""} 2
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1"} 0
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8"} 0
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="16"} 0
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="32"} 0
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="64"} 0
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="128"} 0
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="256"} 0
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="512"} 328
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1024"} 561
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2048"} 876
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="4096"} 970
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="8192"} 1169
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="16384"} 1376
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="32768"} 1496
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="65536"} 1609
+llm_d_epp_response_size_bytes_bucket{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 1609
+llm_d_epp_response_size_bytes_sum{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1.5189571e+07
+llm_d_epp_response_size_bytes_count{fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1609
+# HELP llm_d_epp_scheduler_attempts_total [ALPHA] Total number of scheduling attempts.
+# TYPE llm_d_epp_scheduler_attempts_total counter
+llm_d_epp_scheduler_attempts_total{endpoint_name="",namespace="",port="",status="failure",target_model_name="Qwen/Qwen3-0.6B"} 3
+llm_d_epp_scheduler_attempts_total{endpoint_name="llm-d-decode-2",namespace="llm-d",port="8000",status="success",target_model_name="Qwen/Qwen3-0.6B"} 935
+llm_d_epp_scheduler_attempts_total{endpoint_name="llm-d-decode-1",namespace="llm-d",port="8000",status="success",target_model_name="Qwen/Qwen3-0.6B"} 75
+llm_d_epp_scheduler_attempts_total{endpoint_name="llm-d-decode-0",namespace="llm-d",port="8000",status="success",target_model_name="Qwen/Qwen3-0.6B"} 601
+# HELP llm_d_epp_scheduler_e2e_duration_seconds [ALPHA] End-to-end scheduling latency distribution in seconds.
+# TYPE llm_d_epp_scheduler_e2e_duration_seconds histogram
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.0001"} 0
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.0002"} 348
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.0005"} 1602
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.001"} 1612
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.002"} 1614
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.005"} 1614
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.01"} 1614
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.02"} 1614
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.05"} 1614
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.1"} 1614
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.2"} 1614
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.5"} 1614
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="1"} 1614
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="+Inf"} 1614
+llm_d_epp_scheduler_e2e_duration_seconds_sum 0.3924442939999996
+llm_d_epp_scheduler_e2e_duration_seconds_count 1614
+# HELP llm_d_epp_std_dev_kv_cache_utilization [ALPHA] The standard deviation kv cache utilization for an inference server pool.
+# TYPE llm_d_epp_std_dev_kv_cache_utilization gauge
+llm_d_epp_std_dev_kv_cache_utilization{name="llm-d-epp"} 0
+# HELP llm_d_epp_std_dev_queue_size [ALPHA] The standard deviation number of requests pending in the model server queue.
+# TYPE llm_d_epp_std_dev_queue_size gauge
+llm_d_epp_std_dev_queue_size{name="llm-d-epp"} 0.71
+# HELP llm_d_epp_std_dev_running_requests [ALPHA] The standard deviation number of running requests across model servers in the pool.
+# TYPE llm_d_epp_std_dev_running_requests gauge
+llm_d_epp_std_dev_running_requests{name="llm-d-epp"} 0
+
+# Synthesized, NOT captured: families v1.0.0 only emits when the feature is enabled or used (Flow Control,
+# precise prefix cache KV-cache index and events, ext_proc stream metrics, in-flight load producer, data layer
+# extract errors). Names, types, HELP text, labels, and bucket ladders match llm-d-router v1.0.0 source:
+#   pkg/epp/metrics/llm_d_router_metrics.go, pkg/epp/metrics/grpc_stream_metrics.go,
+#   pkg/kvcache/metrics/collector.go,
+#   pkg/epp/framework/plugins/requestcontrol/dataproducer/inflightload/metrics.go
+# HELP llm_d_epp_datalayer_extract_errors_total [ALPHA] Extract errors per source/extractor type.
+# TYPE llm_d_epp_datalayer_extract_errors_total counter
+llm_d_epp_datalayer_extract_errors_total{extractor_type="core-metrics-extractor",source_type="metrics-data-source"} 0
+# HELP llm_d_epp_extproc_stream_duration_seconds [ALPHA] Duration an ext_proc gRPC stream stays open, in seconds.
+# TYPE llm_d_epp_extproc_stream_duration_seconds histogram
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.001"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.005"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.01"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.05"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.1"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.5"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="1"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="5"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="10"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="30"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="60"} 1
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="120"} 1
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="300"} 2
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="600"} 3
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="+Inf"} 3
+llm_d_epp_extproc_stream_duration_seconds_sum 575
+llm_d_epp_extproc_stream_duration_seconds_count 3
+# HELP llm_d_epp_extproc_streams_inflight [ALPHA] Number of ext_proc gRPC streams currently open.
+# TYPE llm_d_epp_extproc_streams_inflight gauge
+llm_d_epp_extproc_streams_inflight 4
+# HELP llm_d_epp_extproc_streams_total [ALPHA] Total ext_proc gRPC streams completed, by gRPC status code.
+# TYPE llm_d_epp_extproc_streams_total counter
+llm_d_epp_extproc_streams_total{code="OK"} 3
+# HELP llm_d_epp_flow_control_capacity_utilization_bytes [ALPHA] Fraction of a priority band's effective byte-size capacity currently occupied, aggregated over every flow in the band (0.0-1.0). The denominator falls back to a default when the band does not configure one, so every configured band reports a series. The all-bands rollup is a separate metric, flow_control_global_capacity_utilization_bytes.
+# TYPE llm_d_epp_flow_control_capacity_utilization_bytes gauge
+llm_d_epp_flow_control_capacity_utilization_bytes{inference_pool="llm-d-epp",priority="0"} 0.01
+# HELP llm_d_epp_flow_control_capacity_utilization_requests [ALPHA] Fraction of a priority band's effective request-count capacity currently occupied, aggregated over every flow in the band (0.0-1.0). The denominator falls back to a default when the band does not configure one, so every configured band reports a series. The all-bands rollup is a separate metric, flow_control_global_capacity_utilization_requests.
+# TYPE llm_d_epp_flow_control_capacity_utilization_requests gauge
+llm_d_epp_flow_control_capacity_utilization_requests{inference_pool="llm-d-epp",priority="0"} 0.02
+# HELP llm_d_epp_flow_control_detector_saturation [ALPHA] Saturation signal reported by an individual saturation detector, labeled by the detector reference name and by the pipeline stage ('prefill' or 'decode') whose endpoints were evaluated. Recorded by the max composite saturation detector for each of its children in scope on every evaluation, so operators can tell which signal (e.g. concurrency vs queue depth) is driving flow_control_pool_saturation in each stage. The stage label is empty when the detector is evaluated without stage partitioning.
+# TYPE llm_d_epp_flow_control_detector_saturation gauge
+llm_d_epp_flow_control_detector_saturation{detector="utilization-detector",stage="decode"} 0.6
+# HELP llm_d_epp_flow_control_dispatch_cycle_duration_seconds [ALPHA] Distribution of time taken for each internal dispatch cycle in the Flow Control layer.
+# TYPE llm_d_epp_flow_control_dispatch_cycle_duration_seconds histogram
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.0001"} 1
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.0002"} 2
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.0005"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.001"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.002"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.005"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.01"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.02"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.05"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.1"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="+Inf"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_sum 0.0006
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_count 3
+# HELP llm_d_epp_flow_control_global_capacity_utilization_bytes [ALPHA] Fraction of the global byte-size capacity currently occupied across all priority bands (0.0-1.0). Global capacity is optional and unset by default; this series is emitted only when it is configured. Kept separate from flow_control_capacity_utilization_bytes so aggregations over the per-band family do not double count the rollup.
+# TYPE llm_d_epp_flow_control_global_capacity_utilization_bytes gauge
+llm_d_epp_flow_control_global_capacity_utilization_bytes{inference_pool="llm-d-epp"} 0.01
+# HELP llm_d_epp_flow_control_global_capacity_utilization_requests [ALPHA] Fraction of the global request-count capacity currently occupied across all priority bands (0.0-1.0). Global capacity is optional and unset by default; this series is emitted only when it is configured. Kept separate from flow_control_capacity_utilization_requests so aggregations over the per-band family do not double count the rollup.
+# TYPE llm_d_epp_flow_control_global_capacity_utilization_requests gauge
+llm_d_epp_flow_control_global_capacity_utilization_requests{inference_pool="llm-d-epp"} 0.02
+# HELP llm_d_epp_flow_control_pending_reclaim [ALPHA] Sum of outstanding and cooling pending-reclaim debits, in saturation-gauge units.
+# TYPE llm_d_epp_flow_control_pending_reclaim gauge
+llm_d_epp_flow_control_pending_reclaim{inference_pool="llm-d-epp"} 0
+# HELP llm_d_epp_flow_control_pool_saturation [ALPHA] Pool saturation signal gating Flow Control dispatch. The stage label partitions by pipeline role: 'prefill' and 'decode' are per-stage signals, 'effective' is max(prefill, decode) and is the value used for gating. 1.0 is the gating set point; values above 1.0 indicate the magnitude of oversubscription past it. An empty pool reads as 1.0. With the default utilization detector, endpoints with missing or stale metrics score as fully saturated under stalenessPolicy=saturated; see flow_control_stale_endpoints.
+# TYPE llm_d_epp_flow_control_pool_saturation gauge
+llm_d_epp_flow_control_pool_saturation{inference_pool="llm-d-epp",stage="effective"} 0.6
+# HELP llm_d_epp_flow_control_queue_bytes [ALPHA] Current total size in bytes of requests actively held in the Flow Control queue.
+# TYPE llm_d_epp_flow_control_queue_bytes gauge
+llm_d_epp_flow_control_queue_bytes{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 1800
+# HELP llm_d_epp_flow_control_queue_size [ALPHA] Current number of requests actively held in the Flow Control queue.
+# TYPE llm_d_epp_flow_control_queue_size gauge
+llm_d_epp_flow_control_queue_size{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 2
+# HELP llm_d_epp_flow_control_reclaim_target [ALPHA] Last computed reclamation deficit, in saturation-gauge units.
+# TYPE llm_d_epp_flow_control_reclaim_target gauge
+llm_d_epp_flow_control_reclaim_target{inference_pool="llm-d-epp"} 0
+# HELP llm_d_epp_flow_control_request_enqueue_duration_seconds [ALPHA] Distribution of time taken to enqueue requests into the Flow Control layer.
+# TYPE llm_d_epp_flow_control_request_enqueue_duration_seconds histogram
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.0001"} 2
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.0002"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.0005"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.001"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.002"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.005"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.01"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.02"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.05"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.1"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="+Inf"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_sum{fairness_id="default-flow",outcome="Dispatched",priority="0"} 0.00032
+llm_d_epp_flow_control_request_enqueue_duration_seconds_count{fairness_id="default-flow",outcome="Dispatched",priority="0"} 3
+# HELP llm_d_epp_flow_control_request_queue_duration_seconds [ALPHA] Distribution of total time requests spend in the Flow Control layer (from enqueue to final outcome).
+# TYPE llm_d_epp_flow_control_request_queue_duration_seconds histogram
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.0001"} 0
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.0005"} 0
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.001"} 0
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.005"} 2
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.01"} 2
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.025"} 2
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.05"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.1"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.25"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="0.5"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="1"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="2.5"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="5"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="10"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="30"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="60"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B",le="+Inf"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_sum{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 0.036
+llm_d_epp_flow_control_request_queue_duration_seconds_count{fairness_id="default-flow",inference_pool="llm-d-epp",model_name="Qwen/Qwen3-0.6B",outcome="Dispatched",priority="0",target_model_name="Qwen/Qwen3-0.6B"} 3
+# HELP llm_d_epp_flow_control_requests_total [ALPHA] Total number of requests processed by the Flow Control layer.
+# TYPE llm_d_epp_flow_control_requests_total counter
+llm_d_epp_flow_control_requests_total{inference_pool="llm-d-epp",outcome="Dispatched",priority="0"} 42
+# HELP llm_d_epp_flow_control_revocation_confirmation_seconds [ALPHA] Time from revocation issue to confirmed stream termination.
+# TYPE llm_d_epp_flow_control_revocation_confirmation_seconds histogram
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="0.005"} 0
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="0.01"} 0
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="0.025"} 0
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="0.05"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="0.1"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="0.25"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="0.5"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="1"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="2.5"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="5"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="10"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llm-d-epp",le="+Inf"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_sum{inference_pool="llm-d-epp"} 0.04
+llm_d_epp_flow_control_revocation_confirmation_seconds_count{inference_pool="llm-d-epp"} 1
+# HELP llm_d_epp_flow_control_revocations_issued_total [ALPHA] Total number of in-flight eviction revocations issued, labeled by the demand band's priority.
+# TYPE llm_d_epp_flow_control_revocations_issued_total counter
+llm_d_epp_flow_control_revocations_issued_total{inference_pool="llm-d-epp",priority="0"} 1
+# HELP llm_d_epp_flow_control_revocations_total [ALPHA] Total number of in-flight eviction revocations by terminal outcome (confirmed, timed_out). Every issued revocation eventually increments exactly one outcome.
+# TYPE llm_d_epp_flow_control_revocations_total counter
+llm_d_epp_flow_control_revocations_total{inference_pool="llm-d-epp",outcome="confirmed"} 1
+# HELP llm_d_epp_flow_control_stale_endpoints [ALPHA] Number of candidate endpoints whose metrics are missing or older than the staleness threshold, as of the most recent saturation evaluation. Recorded by the utilization saturation detector, which scores these endpoints according to stalenessPolicy: saturated by default or excluded under ignore. A nonzero value during a dispatch stall indicates a metrics collection problem rather than genuine overload. Labeled by the pipeline stage ('prefill' or 'decode') whose endpoints were evaluated; the stage label is empty when the detector is evaluated without stage partitioning.
+# TYPE llm_d_epp_flow_control_stale_endpoints gauge
+llm_d_epp_flow_control_stale_endpoints{detector="utilization-detector",stage="decode"} 0
+# HELP llm_d_epp_inflight_requests [ALPHA] Current number of in-flight requests per endpoint, as tracked by the in-flight load producer.
+# TYPE llm_d_epp_inflight_requests gauge
+llm_d_epp_inflight_requests{endpoint_name="llm-d-decode-0",fairness_id="default-flow",namespace="llm-d",priority="0",producer_name="inflight-load-producer"} 2
+# HELP llm_d_epp_inflight_tokens [ALPHA] Current number of in-flight tokens per endpoint (uncached prompt tokens, optionally plus estimated output), as tracked by the in-flight load producer.
+# TYPE llm_d_epp_inflight_tokens gauge
+llm_d_epp_inflight_tokens{endpoint_name="llm-d-decode-0",fairness_id="default-flow",namespace="llm-d",priority="0",producer_name="inflight-load-producer"} 480
+# HELP llm_d_epp_kv_cache_events_active_subscribers [ALPHA] Number of ZMQ subscribers currently managed, including those retrying a failed connection
+# TYPE llm_d_epp_kv_cache_events_active_subscribers gauge
+llm_d_epp_kv_cache_events_active_subscribers 2
+# HELP llm_d_epp_kv_cache_events_dedup_removed_hashes_forwarded_total [ALPHA] Block hashes forwarded for eviction after the KV-event dedup filter (block hashes, not BlockRemoved events)
+# TYPE llm_d_epp_kv_cache_events_dedup_removed_hashes_forwarded_total counter
+llm_d_epp_kv_cache_events_dedup_removed_hashes_forwarded_total 113
+# HELP llm_d_epp_kv_cache_events_dedup_removed_hashes_suppressed_total [ALPHA] Block hashes whose removal was suppressed by the KV-event dedup filter (block hashes, not BlockRemoved events)
+# TYPE llm_d_epp_kv_cache_events_dedup_removed_hashes_suppressed_total counter
+llm_d_epp_kv_cache_events_dedup_removed_hashes_suppressed_total 7
+# HELP llm_d_epp_kv_cache_events_messages_received_total [ALPHA] Total number of messages received from ZMQ subscribers
+# TYPE llm_d_epp_kv_cache_events_messages_received_total counter
+llm_d_epp_kv_cache_events_messages_received_total{pod_identifier="llm-d/llm-d-decode-0"} 1020
+# HELP llm_d_epp_kv_cache_events_pool_capacity [ALPHA] Number of worker shards (capacity) in the event processing pool
+# TYPE llm_d_epp_kv_cache_events_pool_capacity gauge
+llm_d_epp_kv_cache_events_pool_capacity 4
+# HELP llm_d_epp_kv_cache_events_pool_queue_depth [ALPHA] Total number of messages queued across all worker shards
+# TYPE llm_d_epp_kv_cache_events_pool_queue_depth gauge
+llm_d_epp_kv_cache_events_pool_queue_depth 0
+# HELP llm_d_epp_kv_cache_events_removals_skipped_total [ALPHA] Total number of KV-cache removal events skipped for groups excluded from prefix indexing
+# TYPE llm_d_epp_kv_cache_events_removals_skipped_total counter
+llm_d_epp_kv_cache_events_removals_skipped_total{cache_kind="sliding_window",reason="excluded_group"} 0
+# HELP llm_d_epp_kv_cache_events_stores_skipped_total [ALPHA] Total number of KV-cache store events skipped before prefix indexing
+# TYPE llm_d_epp_kv_cache_events_stores_skipped_total counter
+llm_d_epp_kv_cache_events_stores_skipped_total{cache_kind="sliding_window",reason="excluded_group"} 0
+# HELP llm_d_epp_kv_cache_events_subscriber_reconnections_total [ALPHA] Total number of ZMQ subscriber reconnection attempts
+# TYPE llm_d_epp_kv_cache_events_subscriber_reconnections_total counter
+llm_d_epp_kv_cache_events_subscriber_reconnections_total{pod_identifier="llm-d/llm-d-decode-0"} 1
+# HELP llm_d_epp_kv_cache_events_zmq_errors_total [ALPHA] Total number of ZMQ subscriber errors
+# TYPE llm_d_epp_kv_cache_events_zmq_errors_total counter
+llm_d_epp_kv_cache_events_zmq_errors_total{operation="recv",pod_identifier="llm-d/llm-d-decode-0"} 0
+# HELP llm_d_epp_kv_cache_index_admissions_total [ALPHA] Total number of KV-block admissions
+# TYPE llm_d_epp_kv_cache_index_admissions_total counter
+llm_d_epp_kv_cache_index_admissions_total 900
+# HELP llm_d_epp_kv_cache_index_evictions_total [ALPHA] Total number of KV-block evictions
+# TYPE llm_d_epp_kv_cache_index_evictions_total counter
+llm_d_epp_kv_cache_index_evictions_total 120
+# HELP llm_d_epp_kv_cache_index_lookup_hits_total [ALPHA] Contiguous prefix blocks matched by the best pod per lookup
+# TYPE llm_d_epp_kv_cache_index_lookup_hits_total counter
+llm_d_epp_kv_cache_index_lookup_hits_total 310
+# HELP llm_d_epp_kv_cache_index_lookup_latency_seconds [ALPHA] Duration of Lookup and WalkKeys calls in seconds, including WalkKeys callbacks
+# TYPE llm_d_epp_kv_cache_index_lookup_latency_seconds histogram
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.005"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.01"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.025"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.05"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.1"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.25"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.5"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="1"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="2.5"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="5"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="10"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="+Inf"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_sum 0.0043
+llm_d_epp_kv_cache_index_lookup_latency_seconds_count 3
+# HELP llm_d_epp_kv_cache_index_lookup_requests_total [ALPHA] Total number of lookup calls
+# TYPE llm_d_epp_kv_cache_index_lookup_requests_total counter
+llm_d_epp_kv_cache_index_lookup_requests_total 42
+# HELP llm_d_epp_kv_cache_index_max_pod_hit_count_total [ALPHA] Longest contiguous per-pod prefix chain observed per lookup
+# TYPE llm_d_epp_kv_cache_index_max_pod_hit_count_total counter
+llm_d_epp_kv_cache_index_max_pod_hit_count_total 310
+
+# Synthesized, NOT captured: families newer than v1.0.0, transcribed from llm-d-router main @
+# 7bdf81e1b121f730926824d66eee59e6f826a593. The api_surface label is also newer than v1.0.0, so it only appears
+# here.
+#   pkg/epp/metrics/llm_d_router_metrics.go   request outcome, scheduler failures, data layer polls
+#   pkg/epp/framework/plugins/scheduling/filter/endpointhealth/metrics.go   endpoint health
+# HELP llm_d_epp_datalayer_poll_duration_seconds [ALPHA] Data-source poll duration per source type.
+# TYPE llm_d_epp_datalayer_poll_duration_seconds histogram
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.0005"} 0
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.001"} 0
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.0025"} 1
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.005"} 2
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.01"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.025"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.05"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.1"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.25"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.5"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="1"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="2.5"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="+Inf"} 3
+llm_d_epp_datalayer_poll_duration_seconds_sum{source_type="metrics-data-source"} 0.011
+llm_d_epp_datalayer_poll_duration_seconds_count{source_type="metrics-data-source"} 3
+# HELP llm_d_epp_datalayer_polls_total [ALPHA] Data-source polls per source type and outcome.
+# TYPE llm_d_epp_datalayer_polls_total counter
+llm_d_epp_datalayer_polls_total{outcome="success",source_type="metrics-data-source"} 1200
+# HELP llm_d_epp_endpoint_health_ejections_total [ALPHA] Endpoints marked unhealthy by the endpoint health filter, by reason.
+# TYPE llm_d_epp_endpoint_health_ejections_total counter
+llm_d_epp_endpoint_health_ejections_total{plugin_name="endpoint-health-filter",reason="poll"} 1
+# HELP llm_d_epp_endpoint_health_excluded_endpoints [ALPHA] Endpoints the endpoint health filter currently excludes from scheduling.
+# TYPE llm_d_epp_endpoint_health_excluded_endpoints gauge
+llm_d_epp_endpoint_health_excluded_endpoints{plugin_name="endpoint-health-filter"} 0
+# HELP llm_d_epp_endpoint_health_fail_open_total [ALPHA] Filter calls in which every candidate was unhealthy and all candidates were kept.
+# TYPE llm_d_epp_endpoint_health_fail_open_total counter
+llm_d_epp_endpoint_health_fail_open_total{plugin_name="endpoint-health-filter"} 0
+# HELP llm_d_epp_endpoint_health_readmissions_total [ALPHA] Unhealthy marks cleared by the endpoint health filter, by reason.
+# TYPE llm_d_epp_endpoint_health_readmissions_total counter
+llm_d_epp_endpoint_health_readmissions_total{plugin_name="endpoint-health-filter",reason="poll"} 1
+# HELP llm_d_epp_request_outcome_total [ALPHA] Total number of requests by how they ended.
+# TYPE llm_d_epp_request_outcome_total counter
+llm_d_epp_request_outcome_total{api_surface="chat_completions",fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",outcome="completed",priority="0",reason="",target_model_name="Qwen/Qwen3-0.6B"} 40
+llm_d_epp_request_outcome_total{api_surface="chat_completions",fairness_id="default-flow",model_name="Qwen/Qwen3-0.6B",outcome="rejected",priority="0",reason="rejected-saturated",target_model_name="Qwen/Qwen3-0.6B"} 2
+# HELP llm_d_epp_scheduler_failures_total [ALPHA] Total number of failed scheduling attempts, by reason.
+# TYPE llm_d_epp_scheduler_failures_total counter
+llm_d_epp_scheduler_failures_total{reason="all_filtered"} 1

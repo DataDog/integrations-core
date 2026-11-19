@@ -1,0 +1,147 @@
+id: krakend
+# See app_id in your integration's manifest.json file to learn more:
+# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
+metric_id: krakend
+# If for some reason id must be different than app_id, add the app_id in this field instead.
+# If id and app_id already match, this field can be left blank.
+backend_only: false
+facets:
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
+    path: duration
+    source: log
+    type: double
+    unit:
+      family: time
+      name: nanosecond
+  - groups:
+      - Web Access
+    name: URL Path
+    path: http.url_details.path
+    source: log
+  - description: Defines the context of the application log (e.g. ENDPOINT, SERVICE...)
+    facetType: list
+    groups:
+      - KrakenD
+    name: App Context
+    path: krakend.app.context
+    source: log
+    type: string
+  - description: Identify application (KRAKEND) and access logs (GIN)
+    facetType: list
+    groups:
+      - KrakenD
+    name: Module
+    path: krakend.module
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: KrakenD Agent Integration
+  enabled: true
+  filter:
+    query: source:krakend
+  processors:
+    - type: grok-parser
+      name: Parse KrakenD logs
+      enabled: true
+      source: message
+      samples:
+        - '[GIN] 2025/07/29 - 10:00:08 | 200 |    1.199041ms |   162.159.200.1 | GET      "/api/valid"'
+        - "[ENDPOINT: /api/invalid] invalid status code 500 [GET /invalid/]: http://api:8000/invalid/"
+        - "[KRAKEND] 2025/07/30 - 09:08:32.857 \e[31m▶ ERROR\e[0m [ENDPOINT: /api/not-found] invalid status code 404 [GET /hastalavista/]: http://api:8000/hastalavista/"
+        - "[KRAKEND] 2025/07/30 - 16:41:43.155 ▶ INFO\e[0m [ENDPOINT: /api/cancelled][JWTValidator] Validator disabled for this endpoint"
+        - "[KRAKEND] 2025/07/30 - 16:44:53.638 ▶ INFO\e[0m Starting the KrakenD instance"
+      grok:
+        supportRules: >-
+          message_content \[%{data:krakend.app.context}: %{regex("[^\\]]+"):http.url_details:url}\]%{data:krakend.app.message}
+
+          ansi_escape_code (\e\[[0-9;]*m)?
+
+          duration_rule ((%{integer:krakend.duration.hours}h)?%{integer:krakend.duration.minutes}m%{number:duration:scale(1000000000)}s|%{number:duration}ns|(%{number:duration:scale(1000000)}ms)?(%{number:duration:scale(1000000000)}s)?(%{number:duration:scale(1000)}µs)?)
+        # Check continuation prefixes separately so their capture needs no nested repetition.
+        matchRules: >-
+          access_log_with_errors \[%{regex("GIN"):krakend.module}\] %{date("yyyy/MM/dd - HH:mm:ss"):timestamp}\s+\|\s+%{integer:http.status_code}\s+\|\s+%{duration_rule}\s+\|\s+%{ip:network.client.ip}\s+\|\s+%{word:http.method}\s+"%{regex("[^\\r\\n]*"):http.url_details.path}"\r?\n%{regex("(?![\\s\\S]*\\n(?![ \\t]*Error #[0-9]{2,}: ))[ \\t]*Error #[0-9]{2,}: [\\s\\S]*"):krakend.error.details}
+
+          access_log \[%{word:krakend.module}\] %{date("yyyy/MM/dd - HH:mm:ss"):timestamp}\s+\|\s+%{integer:http.status_code}\s+\|\s+%{duration_rule}\s+\|\s+%{ip:network.client.ip}\s+\|\s+%{word:http.method}\s+"%{data:http.url_details.path}"
+
+          application_log \[%{word:krakend.module}\] %{date("yyyy/MM/dd - HH:mm:ss.SSS"):timestamp}\s*?%{ansi_escape_code}▶ %{word:level:lowercase}\s*?%{ansi_escape_code} %{message_content}
+
+          application_log_simple \[%{word:krakend.module}\] %{date("yyyy/MM/dd - HH:mm:ss.SSS"):timestamp}\s*?%{ansi_escape_code}▶ %{word:level:lowercase}\s*?%{ansi_escape_code} %{data:krakend.app.message}
+
+          structured_application_log %{message_content}
+    - type: pipeline
+      name: Convert compound GIN durations to nanoseconds
+      enabled: true
+      filter:
+        query: "@krakend.duration.minutes:*"
+      processors:
+        - type: arithmetic-processor
+          name: Sum duration components
+          enabled: true
+          expression: "krakend.duration.hours * 3600000000000 + krakend.duration.minutes * 60000000000 + duration"
+          target: duration
+          replaceMissing: true
+        # Remap onto the existing duration to drop the components without replacing its value.
+        - type: attribute-remapper
+          name: Remove duration hours
+          enabled: true
+          sources:
+            - krakend.duration.hours
+          sourceType: attribute
+          target: duration
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Remove duration minutes
+          enabled: true
+          sources:
+            - krakend.duration.minutes
+          sourceType: attribute
+          target: duration
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: attribute-remapper
+      name: Clean version
+      enabled: true
+      sources:
+        - "@version"
+      sourceType: attribute
+      target: version
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Clean timestamp attribute
+      enabled: true
+      sources:
+        - "@timestamp"
+      sourceType: attribute
+      target: timestamp
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: status-remapper
+      name: Remap level to status
+      enabled: true
+      sources:
+        - level
+    - type: date-remapper
+      name: Remap timestamp to date
+      enabled: true
+      sources:
+        - timestamp
+    - type: attribute-remapper
+      name: Add namespace to module
+      enabled: true
+      sources:
+        - module
+      sourceType: attribute
+      target: krakend.module
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false

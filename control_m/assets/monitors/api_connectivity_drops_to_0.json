@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "title": "API connectivity drops to 0",
+  "tags": [
+    "integration:control-m"
+  ],
+  "definition": {
+    "name": "[Control-M] API connectivity down",
+    "type": "query alert",
+    "query": "min(last_10m):min:control_m.can_connect{*} by {control_m_instance} < 1",
+    "message": "{{#is_alert}}\nThe Control-M API is unreachable from the Datadog Agent.\n\n- Instance: {{control_m_instance.name}}\n- Auth method: {{auth_method.name}}\n\nCheck that the Control-M Automation API endpoint is up, the Agent host has network access, and the configured token or credentials are valid.\n{{/is_alert}}\n\n{{#is_recovery}}\nControl-M API connectivity has been restored for {{control_m_instance.name}}.\n{{/is_recovery}}",
+    "tags": [
+      "integration:control-m"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 1
+      },
+      "notify_audit": false,
+      "on_missing_data": "default",
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "include_tags": true,
+      "new_group_delay": 60,
+      "silenced": {}
+    },
+    "priority": 1
+  },
+  "created_at": "2026-03-23",
+  "last_updated_at": "2026-03-23",
+  "description": "Alerts when the Datadog Agent can no longer reach the Control-M Automation API endpoint."
+}

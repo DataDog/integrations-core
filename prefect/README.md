@@ -2,9 +2,9 @@
 
 ## Overview
 
-This check monitors [Prefect Server][1] through the Datadog Agent.
+This check monitors [Prefect server][1] through the Datadog Agent.
 
-Prefect is a Python-first workflow orchestration platform used to schedule and execute flows and tasks across work pools, work queues, and workers. This integration collects orchestration health and performance metrics and events directly from the [Prefect Server API][2] and supports [log collection][3] for comprehensive monitoring.
+Prefect is a Python-first workflow orchestration platform used to schedule and execute flows and tasks across work pools, work queues, and workers. This integration collects orchestration health and performance metrics and events directly from the [Prefect server API][2] and supports [log collection][3] for comprehensive monitoring.
 
 ### What this integration monitors
 
@@ -33,6 +33,65 @@ No additional installation is needed on your server.
 1. Edit the `prefect.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Prefect performance data. See the [sample prefect.d/conf.yaml][6] for all available configuration options.
 
 2. [Restart the Agent][7].
+
+#### Authentication
+
+For a self-hosted server using `PREFECT_SERVER_API_AUTH_STRING`, set the
+`prefect_userpass` option to the same `user:password` secret used by Prefect clients
+in `PREFECT_API_AUTH_STRING`. The integration does not read Prefect environment
+variables automatically. For example, reference a secret resolved by the
+[Agent secret management mechanism][14]:
+
+```yaml
+instances:
+  - prefect_url: https://prefect.example/api
+    prefect_userpass: ENC[prefect_api_auth_string]
+```
+
+Passwords may contain colons. Alternatively, keep using the existing separate
+`username` and `password` options. Do not combine them with `prefect_userpass`, and
+use `prefect_userpass` only with basic authentication. Use HTTPS when sending credentials
+to a remote server.
+
+### Configure the Related Databases dashboard section
+
+The Related Databases section of the Prefect dashboard shows the PostgreSQL database and Redis instance that Prefect server uses. This section requires the Datadog [PostgreSQL][11] and [Redis][12] integrations to monitor those instances. Set the same `service` on the Prefect, PostgreSQL, and Redis instances, then select that value in the `service` template variable to filter the whole dashboard.
+
+The PostgreSQL widgets stay empty if Prefect server uses its default SQLite database. They show data only when `PREFECT_SERVER_DATABASE_CONNECTION_URL` points to a PostgreSQL database. The Redis widgets stay empty unless Prefect server uses the `prefect-redis` package for event messaging, with `PREFECT_MESSAGING_BROKER` and `PREFECT_MESSAGING_CACHE` set to `prefect_redis.messaging`. For more information, see [Scale self-hosted Prefect][13].
+
+1. Set `service` on the instance in your `prefect.d/conf.yaml` file:
+
+    ```yaml
+    instances:
+      - prefect_url: http://localhost:4200/api
+        service: prefect
+    ```
+
+2. In your `postgres.d/conf.yaml` file, add an instance for the Prefect database. Set `dbname` to the database name in `PREFECT_SERVER_DATABASE_CONNECTION_URL`, and set `dbstrict` to `true`. If another instance already monitors the server, add this one as a separate instance.
+
+    **Note**: Without `dbstrict`, the check collects per-database metrics for every database on the server. If the server is shared, the dashboard includes other applications' databases.
+
+    ```yaml
+    instances:
+      - host: <POSTGRES_HOST>
+        port: 5432
+        username: datadog
+        password: <PASSWORD>
+        dbname: prefect
+        dbstrict: true
+        service: prefect
+    ```
+
+3. Set `service` on the instance in your `redisdb.d/conf.yaml` file:
+
+    ```yaml
+    instances:
+      - host: <REDIS_HOST>
+        port: 6379
+        service: prefect
+    ```
+
+4. [Restart the Agent][7].
 
 ### Validation
 
@@ -70,10 +129,13 @@ After you enable it, the integration submits flow-run, task-run, and ready or no
 The Prefect integration does not include any service checks.
 
 
-## Troubleshooting
+## Uninstallation
+
+To disable the integration, rename the configuration file from `prefect.d/conf.yaml` to `prefect.d/conf.yaml.example`. Alternatively, if you are running a containerized environment, you can remove the annotation used to enable the integration.
+
+## Support
 
 Need help? Contact [Datadog support][10].
-
 
 [1]: https://www.prefect.io/
 [2]: https://docs.prefect.io/v3/api-ref/rest-api/server/index
@@ -85,3 +147,7 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/prefect/metadata.csv
 [10]: https://docs.datadoghq.com/help/
+[11]: https://docs.datadoghq.com/integrations/postgres/
+[12]: https://docs.datadoghq.com/integrations/redis/
+[13]: https://docs.prefect.io/v3/advanced/self-hosted
+[14]: https://docs.datadoghq.com/agent/configuration/secrets-management/

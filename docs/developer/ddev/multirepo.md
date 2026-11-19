@@ -10,7 +10,7 @@ When you run a `ddev` command, it searches for a `.ddev.toml` file in the curren
 
 **Key aspects:**
 
-*   **Override Mechanism:** Settings defined in `.ddev.toml` take precedence over the same settings in the global configuration. Settings unique to either file are combined.
+*   **Override Mechanism:** Settings defined in `.ddev.toml` take precedence over the same settings in the global configuration. Settings unique to either file are combined. The `[ai]` table is global-only: ddev ignores it in override files and prints a warning naming the file.
 *   **Discovery:** `ddev` automatically finds the closest `.ddev.toml` by traversing up the directory tree from your current location.
 *   **Use Case:** Ideal for setting a specific `repo` path for a project checkout, managing different worktrees of the same repository, or defining other project-specific configurations without altering the global settings.
 

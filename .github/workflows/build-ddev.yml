@@ -125,9 +125,9 @@ jobs:
           os: windows-2022
         # macOS
         - target: aarch64-apple-darwin
-          os: macos-14
+          os: macos-15
         - target: x86_64-apple-darwin
-          os: macos-14-large
+          os: macos-15-large
 
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -180,7 +180,7 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install uv
-      uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       with:
         enable-cache: false
 
@@ -464,7 +464,7 @@ jobs:
     needs:
     - define-tags
     - binaries
-    runs-on: macos-14-large
+    runs-on: macos-15-large
     permissions:
       # needed for dd-sts
       id-token: write
@@ -551,7 +551,7 @@ jobs:
     needs:
     - define-tags
     - binaries
-    runs-on: macos-14-large
+    runs-on: macos-15-large
     environment: ddev-sign-upload
     permissions:
       # needed for dd-sts

@@ -352,6 +352,20 @@ async def test_a_jobs_listing_not_yet_visible_after_dispatch_is_retried(
     assert failed_by_operation(sink) == {"refresh_jobs": 0}
 
 
+async def test_list_jobs_collects_every_page(tmp_path: Path):
+    client = FakeAsyncGitHubClient()
+    expected = [make_workflow_job(id=idx, name=f"job-{idx}") for idx in range(51)]
+    client.mock_response(
+        "list_workflow_jobs",
+        [make_workflow_jobs_list(expected[:50]), make_workflow_jobs_list(expected[50:])],
+    )
+    runner = make_runner(client, tmp_path)
+
+    jobs = await runner._list_jobs(123, "batch-1", "listing workflow jobs")
+
+    assert [job.id for job in jobs] == [job.id for job in expected]
+
+
 async def test_a_workflow_run_not_yet_visible_after_dispatch_is_retried(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
@@ -436,7 +450,7 @@ async def test_collection_publishes_outcomes_before_a_cancellable_artifact_reque
         assert collecting.state is ExecutionState.ARTIFACT_DOWNLOAD
         assert collecting.status is Status.FAILURE
         assert collecting.jobs[0].conclusion == "failure"
-        assert client.last_call("list_workflow_jobs").kwargs["per_page"] == 100
+        assert client.last_call("list_workflow_jobs").kwargs["per_page"] == 50
         assert artifacts.last_call("list_workflow_run_artifacts").kwargs["per_page"] == 100
     finally:
         task.cancel()
@@ -532,7 +546,7 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
             ),
             (),
             "master",
-            "master-sha",
+            "master-master-sha",
             False,
             id="master",
         ),
@@ -543,10 +557,11 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
                 checkout_sha="agent-sha",
                 head_branch="test-agent",
                 all_targets=False,
+                context="test-agent",
             ),
-            ("context:test-agent",),
+            (),
             "test-agent",
-            "agent-sha",
+            "test-agent-agent-sha",
             False,
             id="custom-context",
         ),
@@ -577,6 +592,33 @@ def test_run_identity_and_context_reach_workflow_and_job_tags(
     assert not any(tag.startswith(("git.", "dispatcher.head_sha", "dispatcher.head_branch")) for tag in job_tags)
 
 
+@pytest.mark.parametrize(
+    ("head_branch", "head_tag"),
+    [
+        pytest.param("master", None, id="branch-run"),
+        pytest.param(None, "7.85.0-rc.8", id="tag-run"),
+    ],
+)
+def test_a_batch_is_sent_only_the_ref_the_run_actually_has(
+    tmp_path: Path, head_branch: str | None, head_tag: str | None
+):
+    """GitHub rejects undeclared inputs, and an empty one would attribute results to no ref."""
+    run = ResolvedRun(
+        repository="DataDog/integrations-core",
+        head_sha="a-sha",
+        checkout_sha="a-sha",
+        head_branch=head_branch,
+        head_tag=head_tag,
+        all_targets=False,
+    )
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, run=run)
+
+    inputs = runner._build_inputs(make_batch("batch-context"))
+
+    assert inputs.get("head_branch") == head_branch
+    assert inputs.get("head_tag") == head_tag
+
+
 def test_job_tags_keep_caller_values_inside_one_transport_field(tmp_path: Path):
     run = ResolvedRun(
         repository="DataDog/integrations-core",
@@ -584,8 +626,9 @@ def test_job_tags_keep_caller_values_inside_one_transport_field(tmp_path: Path):
         checkout_sha="agent-sha",
         head_branch="test-agent",
         all_targets=False,
+        context="release,candidate\nunsafe\rvalue",
     )
-    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, run=run, tags=("context:release,candidate\nunsafe\rvalue",))
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, run=run)
 
     inputs = runner._build_inputs(make_batch("batch-context"))
     [job] = decode_job_list(inputs["job_list"])
