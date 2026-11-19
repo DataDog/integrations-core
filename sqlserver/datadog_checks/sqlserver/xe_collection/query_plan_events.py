@@ -7,6 +7,7 @@ import copy
 import re
 import time
 from collections import Counter, OrderedDict
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Iterator
 
@@ -122,6 +123,9 @@ FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
 # The error of a read from a checkpoint whose file is gone. Drivers that don't report the error number are covered by
 # comparing the checkpoint's file with the oldest file retained.
 EVENT_FILE_NOT_FOUND_ERROR_PATTERN = re.compile(r"\b25717\b")
+# The start file of a read from the oldest file retained: every file name sorts at or after it, so
+# `EVENT_FILE_READ_FROM_START_FILE_QUERY` returns the rows of every file.
+ALL_RETAINED_FILES = ""
 # The statement of a tsql_frame action, extracted as query metrics extract it from sys.dm_exec_query_stats, so they
 # compute the same query signature.
 FRAME_STATEMENT_QUERY = """\
@@ -222,6 +226,23 @@ def event_file_pattern(file_name: str) -> str:
     return EVENT_FILE_SUFFIX_PATTERN.sub("*.xel", file_name)
 
 
+@dataclass
+class EventFilePosition:
+    """Where the reads of an event_file target are. A session created again with another file gets a new position."""
+
+    # The path of every file of the target, from `event_file_pattern`.
+    pattern: str
+    # The file and offset of the last buffer read in full. Reads start after it.
+    checkpoint: tuple[str, int] | None = None
+    # Without a checkpoint, reads start at the start of this file and go on into the files after it: the file the
+    # first run found empty, or `ALL_RETAINED_FILES` after the checkpoint's file is gone. It's None until the first
+    # run's lookup of the newest buffer succeeds.
+    start_file: str | None = None
+    # The buffer a read starts with when the previous runs read it in part, as a run reads at most `max_events`
+    # events, and the number of its events read.
+    partial_buffer: tuple[tuple[str, int], int] | None = None
+
+
 class QueryPlanEventsHandler(XESessionBase):
     """
     Collects real execution plans from the `datadog_query_plans` XE session, which customers create and start, with
@@ -250,17 +271,7 @@ class QueryPlanEventsHandler(XESessionBase):
         self._statement_text_cache: TTLCache = TTLCache(
             maxsize=STATEMENT_TEXT_CACHE_MAX_SIZE, ttl=STATEMENT_TEXT_CACHE_TTL_SECONDS
         )
-        # The event_file checkpoint: the file and offset of the last buffer read in full. Reads start after it, or
-        # without one at the start of the file the first run found empty, going on into the files after it, or at the
-        # start of the oldest file retained, after the checkpoint's file is gone.
-        self._event_file_checkpoint: tuple[str, int] | None = None
-        self._event_file_start_file: str | None = None
-        self._event_file_read_retained_files = False
-        # The buffer a read starts with when the previous runs read it in part, as a run reads at most `max_events`
-        # events, and the number of its events read.
-        self._event_file_partial_buffer: tuple[tuple[str, int], int] | None = None
-        self._event_file_pattern: str | None = None
-        self._event_file_started = False
+        self._event_file_position: EventFilePosition | None = None
         # The current setup problem, so its warning is logged once and its health event goes back to OK when fixed.
         self._session_problem: SqlServerHealthEvent | None = None
         self._statuses: Counter = Counter()
@@ -502,72 +513,65 @@ class QueryPlanEventsHandler(XESessionBase):
         read from the checkpoint fails otherwise, the next run retries it.
         """
         pattern = event_file_pattern(current_file)
-        if pattern != self._event_file_pattern:
+        if self._event_file_position is None or self._event_file_position.pattern != pattern:
             # A session created again with another file starts over.
-            self._event_file_pattern = pattern
-            self._event_file_checkpoint = None
-            self._event_file_start_file = None
-            self._event_file_partial_buffer = None
-            self._event_file_read_retained_files = False
-            self._event_file_started = False
-        if self._event_file_checkpoint is None and not self._event_file_started:
+            self._event_file_position = EventFilePosition(pattern)
+        position = self._event_file_position
+        # A position has a start file once the first run's lookup succeeds, before any checkpoint.
+        if position.start_file is None:
             cursor.execute(EVENT_FILE_LAST_BUFFER_QUERY, (current_file,))
             row = cursor.fetchone()
             # Only once the lookup succeeds, so a failed one is retried rather than the history read.
-            self._event_file_started = True
-            self._event_file_start_file = current_file
+            position.start_file = current_file
             if row:
-                self._event_file_checkpoint = (row[0], int(row[1]))
+                position.checkpoint = (row[0], int(row[1]))
                 return None, False
 
         rows = None
-        if self._event_file_checkpoint is not None:
-            limit = self._event_file_read_limit()
+        if position.checkpoint is not None:
+            limit = self._event_file_read_limit(position)
             try:
-                cursor.execute(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY, (limit, pattern, *self._event_file_checkpoint))
+                cursor.execute(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY, (limit, pattern, *position.checkpoint))
                 rows = cursor.fetchall()
             except Exception as e:
                 raise_if_cancelled(self._cancel_event)
-                if not self._event_file_checkpoint_file_gone(cursor, pattern, e):
+                if not self._event_file_checkpoint_file_gone(cursor, position, e):
                     self._log.warning(
                         "Failed to read %s after %s, retrying at the next run: %s",
                         self.session_name,
-                        self._event_file_checkpoint,
+                        position.checkpoint,
                         e,
                     )
                     return None, False
                 self._log.info(
                     "The file of the %s checkpoint %s is gone, reading from the oldest file retained: %s",
                     self.session_name,
-                    self._event_file_checkpoint,
+                    position.checkpoint,
                     e,
                 )
                 # The read starts at another position, where the count of the partial buffer's events read doesn't
                 # apply. The events read again are skipped by key.
-                self._event_file_checkpoint = None
-                self._event_file_partial_buffer = None
-                self._event_file_read_retained_files = True
+                position = self._event_file_position = EventFilePosition(pattern, start_file=ALL_RETAINED_FILES)
         read_from_file_start = rows is None
         if read_from_file_start:
-            limit = self._event_file_read_limit()
-            if self._event_file_read_retained_files:
-                cursor.execute(EVENT_FILE_READ_QUERY, (limit, pattern))
-            elif current_file == self._event_file_start_file:
+            limit = self._event_file_read_limit(position)
+            if current_file == position.start_file:
                 cursor.execute(EVENT_FILE_READ_QUERY, (limit, current_file))
             else:
-                # The start file rolled over, or the session restarted, before a buffer was read in full.
-                cursor.execute(EVENT_FILE_READ_FROM_START_FILE_QUERY, (limit, pattern, self._event_file_start_file))
+                # The start file rolled over, or the session restarted, before a buffer was read in full, or every file
+                # retained is read.
+                cursor.execute(EVENT_FILE_READ_FROM_START_FILE_QUERY, (limit, pattern, position.start_file))
             rows = cursor.fetchall()
-        new_rows = self._advance_event_file_checkpoint(rows, limit) if rows else []
+        new_rows = self._advance_event_file_checkpoint(position, rows, limit) if rows else []
         if not new_rows:
             return None, read_from_file_start
         return "<events>{}</events>".format("".join(row[0] for row in new_rows if row[0])), read_from_file_start
 
-    def _event_file_read_limit(self) -> int:
+    def _event_file_read_limit(self, position: EventFilePosition) -> int:
         # The events of the partial buffer read before are read again, and skipped.
-        return self.max_events + (self._event_file_partial_buffer[1] if self._event_file_partial_buffer else 0)
+        return self.max_events + (position.partial_buffer[1] if position.partial_buffer else 0)
 
-    def _event_file_checkpoint_file_gone(self, cursor: Any, pattern: str, error: Exception) -> bool:
+    def _event_file_checkpoint_file_gone(self, cursor: Any, position: EventFilePosition, error: Exception) -> bool:
         """
         Whether a read from the checkpoint failed because its file is gone, as after rollovers, rather than for a
         reason the next run can retry.
@@ -575,16 +579,16 @@ class QueryPlanEventsHandler(XESessionBase):
         if EVENT_FILE_NOT_FOUND_ERROR_PATTERN.search(str(error)):
             return True
         try:
-            cursor.execute(EVENT_FILE_OLDEST_FILE_QUERY, (pattern,))
+            cursor.execute(EVENT_FILE_OLDEST_FILE_QUERY, (position.pattern,))
             row = cursor.fetchone()
         except Exception as e:
             raise_if_cancelled(self._cancel_event)
             self._log.debug("Failed to read the oldest file of %s: %s", self.session_name, e)
             return False
         # The file names end with the time they were created at, so the files the target removed sort first.
-        return row is None or self._event_file_checkpoint[0] < row[0]
+        return row is None or position.checkpoint[0] < row[0]
 
-    def _advance_event_file_checkpoint(self, rows: list, limit: int) -> list:
+    def _advance_event_file_checkpoint(self, position: EventFilePosition, rows: list, limit: int) -> list:
         """
         The rows of a read to process, at most `max_events` not read before, after the checkpoint moves past them and
         no further. A checkpoint is a whole buffer, so a read stopped within a buffer, by its limit or by `max_events`,
@@ -592,22 +596,22 @@ class QueryPlanEventsHandler(XESessionBase):
         """
         buffers = [(row[1], int(row[2])) for row in rows]
         skipped = 0
-        if self._event_file_partial_buffer is not None:
-            partial_buffer, partial_rows = self._event_file_partial_buffer
+        if position.partial_buffer is not None:
+            partial_buffer, partial_rows = position.partial_buffer
             while skipped < min(partial_rows, len(rows)) and buffers[skipped] == partial_buffer:
                 skipped += 1
         # The rows after the first `max_events` new ones are left to the next runs.
         end = min(len(rows), skipped + self.max_events)
         if end == len(rows) < limit:
             # The read reached the end of the files, so its last buffer is complete.
-            self._event_file_checkpoint = buffers[end - 1]
-            self._event_file_partial_buffer = None
+            position.checkpoint = buffers[end - 1]
+            position.partial_buffer = None
         else:
             last_buffer_start = buffers.index(buffers[end - 1])
             if last_buffer_start > 0:
-                self._event_file_checkpoint = buffers[last_buffer_start - 1]
+                position.checkpoint = buffers[last_buffer_start - 1]
             # Otherwise the whole read is within its first buffer, and the checkpoint stays before it.
-            self._event_file_partial_buffer = (buffers[end - 1], end - last_buffer_start)
+            position.partial_buffer = (buffers[end - 1], end - last_buffer_start)
         return rows[skipped:end]
 
     def _plan_events(self, cursor: Any) -> Iterator[dict]:
