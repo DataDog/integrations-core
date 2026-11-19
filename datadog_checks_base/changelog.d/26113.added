@@ -1,0 +1,1 @@
+Add optional `retain_absent_keys`, `max_size` and `emit_new_keys` parameters to `StatementMetrics` to support per-plan delta computation.
