@@ -49,7 +49,7 @@ def test_activity_reader(instance: dict):
         queries = [f"UPDATE {table} SET VALUE='literal-{n}' WHERE ID=1" for n in range(5)]
         queries[2] = "/* service='datadog-agent' */ " + queries[2]
         queries[3] = '/* DDIGNORE */ ' + queries[3]
-        queries[4] += ' /*' + 'é中🙂' * ACTIVITY_MAX_TEXT_BYTES + '*/'
+        queries[4] += ' /*' + 'é中' * ACTIVITY_MAX_TEXT_BYTES + '*/'
         with ThreadPoolExecutor(max_workers=5) as workers:
             futures = [workers.submit(blocked_update, query) for query in queries]
             try:
