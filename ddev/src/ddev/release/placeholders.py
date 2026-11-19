@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import httpx
+from twine.commands.upload import upload
+from twine.settings import Settings
 
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncProcessor
@@ -70,13 +72,11 @@ RETIRED_PLACEHOLDER_NAMES = (
 
 # Real packages maintained in this repository. They are published through their own release process
 # and must never be overwritten with a placeholder.
-EXCLUDED_PACKAGE_NAMES = frozenset(
-    {
-        'ddev',
-        'datadog-checks-base',
-        'datadog-checks-dev',
-        'datadog-checks-downloader',
-    }
+EXCLUDED_PACKAGE_NAMES = (
+    'ddev',
+    'datadog-checks-base',
+    'datadog-checks-dev',
+    'datadog-checks-downloader',
 )
 
 
@@ -187,9 +187,6 @@ def upload_placeholder(wheel: Path, token: str) -> None:
     Placeholders publish without provenance attestations: they are not consumed as dependencies,
     and `gh-action-pypi-publish` only attests uploads made through trusted publishing.
     """
-    from twine.commands.upload import upload
-    from twine.settings import Settings
-
     upload(
         Settings(
             repository_url=PYPI_UPLOAD_URL,
@@ -232,18 +229,11 @@ class PlaceholderProcessor(SyncProcessor[PlaceholderMessage]):
 
 
 class PlaceholderOrchestrator(EventBusOrchestrator):
-    def __init__(
-        self,
-        app: Application,
-        names: list[str],
-        token: str | None,
-        max_workers: int = 4,
-        max_timeout: float = 3600.0,
-    ):
+    def __init__(self, app: Application, names: list[str], token: str | None):
         super().__init__(
             logger=app.logger,
-            max_timeout=max_timeout,
-            executor=ThreadPoolExecutor(max_workers=max_workers),
+            max_timeout=3600.0,
+            executor=ThreadPoolExecutor(max_workers=4),
         )
         self._app = app
         self._names = names
@@ -255,7 +245,7 @@ class PlaceholderOrchestrator(EventBusOrchestrator):
             self.submit_message(PlaceholderMessage(id=name))
 
     async def on_message_received(self, message: BaseMessage) -> None:
-        self._app.display_info(f'Publishing {message.id}')
+        """Required hook; per-package logging comes from the processor instead."""
 
     async def on_finalize(self, exception: Exception | None) -> None:
         if exception is not None:

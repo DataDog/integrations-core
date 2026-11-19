@@ -1,1 +1,1 @@
-Add `ddev release placeholders publish` command for claiming PyPI placeholder package names.
+Add `ddev release placeholders` command for claiming PyPI placeholder package names.

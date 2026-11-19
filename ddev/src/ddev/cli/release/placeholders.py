@@ -11,18 +11,11 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-@click.group(short_help='Manage PyPI placeholder packages')
-def placeholders():
-    """Manage the placeholder packages that claim `datadog-*` names on PyPI."""
-
-
-@placeholders.command()
+@click.command(short_help='Claim PyPI placeholder package names')
 @click.argument('names', nargs=-1)
 @click.option('--dry-run', is_flag=True, help='List the packages that would be published, then exit.')
-@click.option('--max-workers', type=int, default=4, help='Maximum number of packages built and uploaded concurrently.')
-@click.option('--max-timeout', type=float, default=3600.0, help='Maximum total seconds before the run stops.')
 @click.pass_obj
-def publish(app: Application, names: tuple[str, ...], dry_run: bool, max_workers: int, max_timeout: float) -> None:
+def placeholders(app: Application, names: tuple[str, ...], dry_run: bool) -> None:
     """Publish placeholder packages to PyPI.
 
     With NAMES, publish only those integrations; each name may be an integration name (n8n) or a
@@ -51,6 +44,7 @@ def publish(app: Application, names: tuple[str, ...], dry_run: bool, max_workers
             if resolved is None:
                 app.abort(f'Unknown integration or package name: {requested}')
             selected.append(resolved)
+        selected = sorted(set(selected))
     else:
         candidates = sorted(set(package_names.values()) | set(RETIRED_PLACEHOLDER_NAMES))
         selected = [name for name in candidates if needs_placeholder(name)]
@@ -71,13 +65,7 @@ def publish(app: Application, names: tuple[str, ...], dry_run: bool, max_workers
             'or run in GitHub Actions with trusted publishing.'
         )
 
-    orchestrator = PlaceholderOrchestrator(
-        app,
-        selected,
-        token,
-        max_workers=max_workers,
-        max_timeout=max_timeout,
-    )
+    orchestrator = PlaceholderOrchestrator(app, selected, token)
     orchestrator.run()
 
     if orchestrator.had_failures:

@@ -48,4 +48,4 @@ jobs:
         cache-profile: local-ddev
 
     - name: Publish placeholders
-      run: ddev release placeholders publish
+      run: ddev release placeholders
