@@ -2,11 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
+
 import psycopg
 
 from datadog_checks.base.utils.db.sql_commenter import add_sql_comment
 from datadog_checks.postgres.encoding import decode_with_encodings
 from datadog_checks.postgres.util import DDIGNORE_COMMENT
+
+log = logging.getLogger(__name__)
 
 DD_QUERY_ATTRIBUTES = {
     'service': 'datadog-agent',
@@ -23,6 +27,21 @@ def _append_ddignore_comment(query):
     if query.endswith(';'):
         return '{} {};'.format(query[:-1].rstrip(), DDIGNORE_COMMENT)
     return '{} {}'.format(query, DDIGNORE_COMMENT)
+
+
+def _stores_leading_comments(cursor):
+    """
+    Whether the server keeps leading comments in the text stored in pg_stat_statements.
+
+    This runs before every query, so it must never fail one. The version is read from the state libpq
+    holds for the connection, with no round trip. When it cannot be read, for example on a closed
+    connection, fall back to leading comments and let the query itself report the real error.
+    """
+    try:
+        return cursor.connection.info.server_version < LEADING_COMMENTS_STRIPPED_SERVER_VERSION_NUM
+    except (psycopg.Error, AttributeError, TypeError) as e:
+        log.debug("Could not read the server version to place query comments, using leading comments: %s", e)
+        return True
 
 
 def _add_comments(query, attributes, ignore_query_metric, leading):
@@ -49,8 +68,7 @@ class BaseCommenterCursor:
         When ignore is True, a DDIGNORE comment will be added to the query.
         This comment indicates that the query should be ignored in query metrics.
         '''
-        leading = self.connection.info.server_version < LEADING_COMMENTS_STRIPPED_SERVER_VERSION_NUM
-        query = _add_comments(query, self.__attributes, ignore_query_metric, leading)
+        query = _add_comments(query, self.__attributes, ignore_query_metric, _stores_leading_comments(self))
         return super().execute(query, params, binary=binary, prepare=prepare)
 
 
