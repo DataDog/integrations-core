@@ -3,9 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, Generator, List, Tuple  # noqa: F401
 
-from requests.exceptions import ConnectionError, HTTPError
-
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientStatusError,
+)
 
 from .api import MarkLogicApi
 from .config import Config
@@ -25,6 +28,7 @@ from .utils import is_resource_included
 class MarklogicCheck(AgentCheck):
     __NAMESPACE__ = 'marklogic'
     SERVICE_CHECK_CONNECT = 'can_connect'
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
@@ -53,7 +57,8 @@ class MarklogicCheck(AgentCheck):
         # type: (Any) -> None
         try:
             raw_resources = self.api.get_resources()
-        except (HTTPError, ConnectionError) as e:
+        # Connect timeouts are not connection errors, so they are listed separately.
+        except (HTTPClientStatusError, HTTPClientConnectionError, HTTPClientConnectTimeoutError) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable",
                 self._config.url,

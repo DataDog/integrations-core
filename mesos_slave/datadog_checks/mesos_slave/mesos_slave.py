@@ -9,14 +9,14 @@ Collects metrics from mesos slave node.
 
 from urllib.parse import urlparse
 
-from requests.exceptions import Timeout
-
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.http_exceptions import HTTPClientTimeoutError
 
 DEFAULT_MASTER_PORT = 5050
 
 
 class MesosSlave(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     GAUGE = AgentCheck.gauge
     MONOTONIC_COUNT = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = "mesos_slave.can_connect"
@@ -188,7 +188,7 @@ class MesosSlave(AgentCheck):
         try:
             resp = self.http.get(url)
             resp.raise_for_status()
-        except Timeout:
+        except HTTPClientTimeoutError:
             self.warning("Timeout for %s seconds when connecting to URL: %s", self.http.options['timeout'], url)
             raise
         except Exception as e:
