@@ -244,6 +244,9 @@ class QueryPlanEventsHandler(XESessionBase):
         self._seen_plans_ratelimiter = RateLimitingTTLCache(
             maxsize=RATE_LIMITER_MAX_SIZE, ttl=60 * 60 / samples_per_hour
         )
+        # The event of the slowest execution read per query_hash and query_plan_hash pair, the only one whose plan is
+        # kept, as the others aren't sent.
+        self._slowest_plan_events: dict[tuple, dict] = {}
         self._statement_text_cache: TTLCache = TTLCache(
             maxsize=STATEMENT_TEXT_CACHE_MAX_SIZE, ttl=STATEMENT_TEXT_CACHE_TTL_SECONDS
         )
@@ -307,11 +310,12 @@ class QueryPlanEventsHandler(XESessionBase):
         return not (seen and self._skip_seen_events)
 
     def _parse_plan_event(self, event: etree._Element, event_data: dict) -> bool:
+        plan_data = None
         try:
             for data in event.findall('./data'):
                 name = data.get('name')
                 if name == 'showplan_xml':
-                    event_data['showplan_xml'] = parse_showplan_xml(data)
+                    plan_data = data
                 elif name == 'object_type':
                     event_data['object_type'] = extract_text_representation(data) or extract_value(data)
                 elif name:
@@ -320,20 +324,60 @@ class QueryPlanEventsHandler(XESessionBase):
             for action in event.findall("./action[@name='tsql_frame']"):
                 event_data.pop('tsql_frame', None)
                 event_data.update(parse_tsql_frame(action))
-            plan = event_data.get('showplan_xml') or ''
-            event_data['query_hash'] = hash_to_hex(event_data.get('query_hash')) or self._plan_hash(
-                PLAN_QUERY_HASH_PATTERN, plan
-            )
-            event_data['query_plan_hash'] = hash_to_hex(event_data.get('query_plan_hash')) or self._plan_hash(
-                PLAN_QUERY_PLAN_HASH_PATTERN, plan
-            )
+            event_data['query_hash'] = hash_to_hex(event_data.get('query_hash'))
+            event_data['query_plan_hash'] = hash_to_hex(event_data.get('query_plan_hash'))
+            plan = None
+            if not (event_data['query_hash'] and event_data['query_plan_hash']):
+                # Without the query_hash or query_plan_hash action, the hashes are read from the plan.
+                plan = parse_showplan_xml(plan_data) if plan_data is not None else None
+                event_data['query_hash'] = event_data['query_hash'] or self._plan_hash(
+                    PLAN_QUERY_HASH_PATTERN, plan or ''
+                )
+                event_data['query_plan_hash'] = event_data['query_plan_hash'] or self._plan_hash(
+                    PLAN_QUERY_PLAN_HASH_PATTERN, plan or ''
+                )
             if event_data.get('plan_handle'):
                 event_data['plan_handle'] = event_data['plan_handle'].lower().removeprefix('0x')
+            self._keep_slowest_plan(event_data, plan_data, plan)
         except Exception as e:
             self._log.debug("Failed to parse %s event: %s", event_data.get('event_name'), e)
             self._statuses[("error", event_data.get('event_name'))] += 1
             return False
         return True
+
+    def _keep_slowest_plan(self, event_data: dict, plan_data: etree._Element | None, plan: str | None) -> None:
+        """
+        Keeps the event's plan, as `showplan_xml`, when it's the slowest execution read so far of its query and plan
+        shape and isn't rate limited. The plan is serialized only then, as a read can hold `max_events` plans.
+        """
+        event_name = event_data.get('event_name')
+        key = (event_data.get('query_hash'), event_data.get('query_plan_hash'))
+        slowest = self._slowest_plan_events.get(key)
+        if self._is_rate_limited(key) or (
+            slowest is not None and (event_data.get('duration_ms') or 0) <= (slowest.get('duration_ms') or 0)
+        ):
+            self._statuses[("rate_limited", event_name)] += 1
+            return
+        if plan is None and plan_data is not None:
+            plan = parse_showplan_xml(plan_data)
+        if not plan or not any(element in plan for element in RUNTIME_ELEMENTS):
+            self._statuses[("no_runtime_data", event_name)] += 1
+            return
+        if len(plan.encode('utf-8')) > self._max_plan_size_bytes:
+            self._statuses[("too_large", event_name)] += 1
+            return
+        if slowest is not None:
+            del slowest['showplan_xml']
+            self._statuses[("rate_limited", slowest.get('event_name'))] += 1
+        event_data['showplan_xml'] = plan
+        self._slowest_plan_events[key] = event_data
+
+    def _is_rate_limited(self, key: tuple) -> bool:
+        """Whether a plan of this query and plan shape can't be sent now, so building it would be wasted work."""
+        return (
+            key in self._seen_plans_ratelimiter
+            or len(self._seen_plans_ratelimiter) >= self._seen_plans_ratelimiter.maxsize
+        )
 
     @staticmethod
     def _plan_hash(pattern: re.Pattern, plan: str) -> str | None:
@@ -361,6 +405,7 @@ class QueryPlanEventsHandler(XESessionBase):
         if target_name is None:
             return
         started = time.time()
+        self._slowest_plan_events = {}
         if target_name == EVENT_FILE_TARGET:
             xml_data, self._skip_seen_events = self._read_event_file(cursor, file_name) if file_name else (None, False)
         else:
@@ -374,7 +419,7 @@ class QueryPlanEventsHandler(XESessionBase):
         if not events:
             return
         self._submit_lag(events)
-        for plan_event in self._plan_events(cursor, events):
+        for plan_event in self._plan_events(cursor):
             self._check.database_monitoring_query_sample(json.dumps(plan_event, default=default_json_event_encoding))
 
     def _submit_lag(self, events: list[dict]) -> None:
@@ -565,30 +610,13 @@ class QueryPlanEventsHandler(XESessionBase):
             self._event_file_partial_buffer = (buffers[end - 1], end - last_buffer_start)
         return rows[skipped:end]
 
-    def _plan_events(self, cursor: Any, events: list[dict]) -> Iterator[dict]:
+    def _plan_events(self, cursor: Any) -> Iterator[dict]:
         """The plan events, and their raw copies, of the events read, the slowest execution per query and plan."""
-        slowest: dict[tuple, dict] = {}
-        for event in events:
-            event_name = event.get('event_name')
-            plan = event.get('showplan_xml')
-            if not plan or not any(element in plan for element in RUNTIME_ELEMENTS):
-                self._statuses[("no_runtime_data", event_name)] += 1
-                continue
-            if len(plan.encode('utf-8')) > self._max_plan_size_bytes:
-                self._statuses[("too_large", event_name)] += 1
-                continue
-            key = (event.get('query_hash'), event.get('query_plan_hash'))
-            current = slowest.get(key)
-            if current is None or (event.get('duration_ms') or 0) > (current.get('duration_ms') or 0):
-                if current is not None:
-                    self._statuses[("rate_limited", current.get('event_name'))] += 1
-                slowest[key] = event
-            else:
-                self._statuses[("rate_limited", event_name)] += 1
-
+        slowest, self._slowest_plan_events = self._slowest_plan_events, {}
         for key, event in slowest.items():
             event_name = event.get('event_name')
-            if key in self._seen_plans_ratelimiter:
+            # The sampling cache can fill up while this read's plans are sent.
+            if self._is_rate_limited(key):
                 self._statuses[("rate_limited", event_name)] += 1
                 continue
             raise_if_cancelled(self._cancel_event)

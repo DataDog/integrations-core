@@ -477,6 +477,41 @@ def test_rate_limit_keeps_the_slowest_execution(aggregator, xe_instance):
 
 
 @pytest.mark.unit
+def test_events_read_keep_only_the_plans_that_may_be_sent(xe_instance):
+    """A read holds one plan per query and plan shape, the slowest execution's, rather than `max_events` plans."""
+    handler = make_handler(xe_instance, FakeServer())
+
+    events = handler._process_events(
+        '<events>{}</events>'.format(
+            ''.join(
+                make_event(timestamp=timestamp(second), duration_us=duration_us)
+                for second, duration_us in [(1, 2_000_000), (2, 5_000_000), (3, 3_000_000)]
+            )
+        )
+    )
+
+    assert [event['timestamp'] for event in events if 'showplan_xml' in event] == [timestamp(2)]
+
+
+@pytest.mark.unit
+def test_full_sampling_cache_skips_plan_construction(aggregator, xe_instance):
+    """Once the sampling cache is full, the plans it would reject aren't built, which obfuscates them."""
+    server = FakeServer()
+    with mock.patch('datadog_checks.sqlserver.xe_collection.query_plan_events.RATE_LIMITER_MAX_SIZE', 1):
+        handler = make_handler(xe_instance, server)
+
+    with mock.patch(
+        'datadog_checks.sqlserver.xe_collection.query_plan_events.obfuscate_xml_plan', side_effect=lambda plan, _: plan
+    ) as obfuscate_xml_plan:
+        run_from_ring_buffer(handler, server, make_event(query_plan_hash=1), make_event(query_plan_hash=2))
+
+    assert len(plan_events(aggregator)) == 1
+    assert obfuscate_xml_plan.call_count == 1
+    assert_events_metric(aggregator, handler, 'collected', 'query_post_execution_plan_profile', 1)
+    assert_events_metric(aggregator, handler, 'rate_limited', 'query_post_execution_plan_profile', 1)
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize('value', [None, 0, -1, 'invalid'])
 @pytest.mark.parametrize('option', ['samples_per_hour_per_query', 'max_plan_size_bytes'])
 def test_unset_or_invalid_options_use_their_default(aggregator, xe_instance, option, value):
