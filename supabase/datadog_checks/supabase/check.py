@@ -19,6 +19,7 @@ from .metrics import RENAME_LABELS_MAP, STORAGE_API_METRICS, SUPABASE_METRICS
 
 class SupabaseCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances=None):
         super(SupabaseCheck, self).__init__(name, init_config, instances)

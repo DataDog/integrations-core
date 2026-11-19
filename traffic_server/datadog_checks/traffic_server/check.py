@@ -13,6 +13,7 @@ SERVICE_CHECK_CONNECT = "can_connect"
 
 class TrafficServerCheck(AgentCheck):
     __NAMESPACE__ = 'traffic_server'
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super(TrafficServerCheck, self).__init__(name, init_config, instances)
