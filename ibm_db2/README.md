@@ -248,13 +248,8 @@ GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_CONNECTION TO USER <DATADOG_USER>;
 GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_APPLICATION_HANDLE TO USER <DATADOG_USER>;
 ```
 
-The reader selects the oldest local activities first, with limits of 1,000 rows, 16 KiB
-per SQL statement, and a 5-second statement timeout. Long statements are truncated at a
-valid UTF-8 boundary and marked `query_truncated: truncated`. Activity payloads have a
-20 MB limit on serialized size, matching query metrics.
-These output limits do not bound the monitoring function's internal scan. Successful idle
-polls emit empty snapshots; collection failures report feature health instead. Internal
-`dd.ibm_db2.query_activity.*` telemetry exposes cap hits and normalization drops.
+Each collection reports up to 1,000 in-flight statements, oldest first. Statements longer
+than 16 KiB are truncated and marked `query_truncated: truncated`.
 
 #### Disable automatic client reroute
 
