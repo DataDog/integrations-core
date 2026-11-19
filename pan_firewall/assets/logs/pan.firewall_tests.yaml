@@ -3710,3 +3710,237 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1794997275123
+ -
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=CORRELATION, subtype=compromised-host,\tvsys=vsys1,\tevt.name=beacon-detection,\tobject=,\tmodule=correlation,\tseverity=high,\topaque=Host 10.60.2.100 visited known malware URL (19 times).,\tseqno=7699920671375145866, actionflags=0x0, vsys_name=,\tdevice_name=fw-a"
+  result:
+    custom:
+      actionflags: "0x0"
+      device_name: "fw-a"
+      evt:
+        name: "beacon-detection"
+      module: "correlation"
+      ocsf:
+        activity_id: 99
+        activity_name: "CORRELATION"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "CORRELATION"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "016201026426"
+            vendor_name: "Palo Alto Networks"
+          sequence: 7699920671375145866
+          version: "1.5.0"
+        severity: "High"
+        severity_id: 4
+        time: 1794997275000
+      opaque: "Host 10.60.2.100 visited known malware URL (19 times)."
+      pan_event_time: 1794997275000
+      pan_status: "error"
+      seqno: 7699920671375145866
+      serial: "016201026426"
+      severity: "high"
+      subtype: "compromised-host"
+      timestamp: "2026/11/18 10:21:15"
+      type: "CORRELATION"
+      vsys: "vsys1"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=CORRELATION, subtype=compromised-host,\tvsys=vsys1,\tevt.name=beacon-detection,\tobject=,\tmodule=correlation,\tseverity=high,\topaque=Host 10.60.2.100 visited known malware URL (19 times).,\tseqno=7699920671375145866, actionflags=0x0, vsys_name=,\tdevice_name=fw-a"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1794997275000
+ -
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=HIPMATCH, subtype=0, time_generated=2026/11/18 10:21:15,\tusr.id=CORP\\jdoe, vsys=vsys1, machinename=LAPTOP-JDOE, os=Windows, network.client.ip=10.60.2.100, matchname=corp-hip-profile, repeatcnt=1,\tmatchtype=object,\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=,\tdevice_name=fw-a,\tvsys_id=1,\tsrcipv6=2001:db8::10,\thostid="
+  result:
+    custom:
+      actionflags: "0x0"
+      device_name: "fw-a"
+      machinename: "LAPTOP-JDOE"
+      matchname: "corp-hip-profile"
+      matchtype: "object"
+      network:
+        client:
+          geoip: {}
+          ip: "10.60.2.100"
+      ocsf:
+        activity_id: 99
+        activity_name: "HIPMATCH"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "HIPMATCH"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "016201026426"
+            vendor_name: "Palo Alto Networks"
+          sequence: 7699920671375145866
+          version: "1.5.0"
+        severity: "Unknown"
+        severity_id: 0
+        time: 1794997275000
+      os: "Windows"
+      pan_event_time: 1794997275000
+      repeatcnt: 1
+      seqno: 7699920671375145866
+      serial: "016201026426"
+      srcipv6: "2001:db8::10"
+      subtype: "0"
+      time_generated: "2026/11/18 10:21:15"
+      timestamp: "2026/11/18 10:21:15"
+      type: "HIPMATCH"
+      usr:
+        id: "CORP\\jdoe"
+      vsys: "vsys1"
+      vsys_id: 1
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=HIPMATCH, subtype=0, time_generated=2026/11/18 10:21:15,\tusr.id=CORP\\jdoe, vsys=vsys1, machinename=LAPTOP-JDOE, os=Windows, network.client.ip=10.60.2.100, matchname=corp-hip-profile, repeatcnt=1,\tmatchtype=object,\tseqno=7699920671375145866,\tactionflags=0x0, vsys_name=,\tdevice_name=fw-a,\tvsys_id=1,\tsrcipv6=2001:db8::10,\thostid="
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1794997275000
+ -
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=SCTP, network.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34, rule=trust-out, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tproto=sctp,\taction=allow, vsys_name=,\tdevice_name=fw-a,\tseqno=7699920671375145866,\tassoc_id=0,\tppid=4294967295,\tseverity=low,\tsctp_chunk_type=DATA,\tsctp_event_type=association-established,\tverif_tag_1=0x1a2b3c4d,\tverif_tag_2=0x5e6f7a8b,\tsctp_cause_code=0,\tdiam_app_id=0,\tdiam_cmd_code=0,\tdiam_avp_code=0,\tstream_id=0,\tassoc_end_reason=,\top_code=0,\tsccp_calling_ssn=0,\tsccp_calling_gt=,\tsctp_filter=,\tchunks=0,\tchunks_sent=0,\tchunks_received=0,\tpackets=12,\tpkts_sent=6,\tpkts_received=6"
+  result:
+    custom:
+      action: "allow"
+      assoc_id: 0
+      chunks: 0
+      chunks_received: 0
+      chunks_sent: 0
+      destination_zone: "untrust"
+      device_name: "fw-a"
+      diam_app_id: 0
+      diam_avp_code: 0
+      diam_cmd_code: 0
+      inbound_if: "ethernet1/2"
+      logset: "ndm-panorama"
+      network:
+        client:
+          geoip: {}
+          ip: "10.60.2.100"
+          port: 51022
+        destination:
+          ip: "93.184.216.34"
+          port: 443
+      ocsf:
+        activity_id: 99
+        activity_name: "SCTP"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "SCTP"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "016201026426"
+            vendor_name: "Palo Alto Networks"
+          sequence: 7699920671375145866
+          version: "1.5.0"
+        severity: "Low"
+        severity_id: 2
+        time: 1794997275000
+      op_code: 0
+      outbound_if: "ethernet1/1"
+      packets: 12
+      pan_event_time: 1794997275000
+      pan_status: "notice"
+      pkts_received: 6
+      pkts_sent: 6
+      ppid: 4294967295
+      proto: "sctp"
+      repeatcnt: 1
+      rule: "trust-out"
+      sccp_calling_ssn: 0
+      sctp_cause_code: 0
+      sctp_chunk_type: "DATA"
+      sctp_event_type: "association-established"
+      seqno: 7699920671375145866
+      serial: "016201026426"
+      sessionid: 957465
+      severity: "low"
+      source_zone: "trust"
+      stream_id: 0
+      timestamp: "2026/11/18 10:21:15"
+      type: "SCTP"
+      verif_tag_1: "0x1a2b3c4d"
+      verif_tag_2: "0x5e6f7a8b"
+      vsys: "vsys1"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:21:15, serial=016201026426, type=SCTP, network.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34, rule=trust-out, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=ndm-panorama, sessionid=957465,\trepeatcnt=1,\tnetwork.client.port=51022,\tnetwork.destination.port=443,\tproto=sctp,\taction=allow, vsys_name=,\tdevice_name=fw-a,\tseqno=7699920671375145866,\tassoc_id=0,\tppid=4294967295,\tseverity=low,\tsctp_chunk_type=DATA,\tsctp_event_type=association-established,\tverif_tag_1=0x1a2b3c4d,\tverif_tag_2=0x5e6f7a8b,\tsctp_cause_code=0,\tdiam_app_id=0,\tdiam_cmd_code=0,\tdiam_avp_code=0,\tstream_id=0,\tassoc_end_reason=,\top_code=0,\tsccp_calling_ssn=0,\tsccp_calling_gt=,\tsctp_filter=,\tchunks=0,\tchunks_sent=0,\tchunks_received=0,\tpackets=12,\tpkts_sent=6,\tpkts_received=6"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1794997275000
+ -
+  sample: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:20:01, serial=016201026426, type=GTP, subtype=start,\tnetwork.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34, rule=trust-out, app=web-browsing, vsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1, logset=ndm-panorama,\tsessionid=957465,\tnetwork.client.port=51022,\tnetwork.destination.port=443, proto=tcp,\tevt.name=allow,\tevent_type=tunnel-create,\tmsisdn=15551234567,\tapn=internet.example,\trat=EUTRAN,\tmsg_type=create-session-request,\tend_ip_adr=10.200.0.7,\tteid1=0x1001,\tteid2=0x2002,\tgtp_interface=S11,\tcause_code=16,\tseverity=informational,\tmcc=310,\tmnc=410,\tarea_code=0x1a2b,\tcell_id=0x3c4d,\tevent_code=0,\tsrcloc=10.0.0.0-10.255.255.255,\tdstloc=United States,\timsi=0,\timei=,\tstart=2026/11/18 10:20:01,\telapsed=3,\ttunnel_insp_rule=inspect-gre"
+  result:
+    custom:
+      apn: "internet.example"
+      app: "web-browsing"
+      area_code: "0x1a2b"
+      cause_code: 16
+      cell_id: "0x3c4d"
+      destination_zone: "untrust"
+      dstloc: "United States"
+      elapsed: 3
+      end_ip_adr: "10.200.0.7"
+      event_code: 0
+      event_type: "tunnel-create"
+      evt:
+        name: "allow"
+      gtp_interface: "S11"
+      imsi: 0
+      inbound_if: "ethernet1/2"
+      logset: "ndm-panorama"
+      mcc: 310
+      mnc: 410
+      msg_type: "create-session-request"
+      msisdn: 15551234567
+      network:
+        client:
+          geoip: {}
+          ip: "10.60.2.100"
+          port: 51022
+        destination:
+          ip: "93.184.216.34"
+          port: 443
+      ocsf:
+        activity_id: 99
+        activity_name: "GTP"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        metadata:
+          event_code: "GTP"
+          product:
+            name: "Palo Alto Networks Firewall"
+            uid: "016201026426"
+            vendor_name: "Palo Alto Networks"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        time: 1794997201000
+      outbound_if: "ethernet1/1"
+      pan_event_time: 1794997201000
+      pan_status: "info"
+      proto: "tcp"
+      rat: "EUTRAN"
+      rule: "trust-out"
+      serial: "016201026426"
+      sessionid: 957465
+      severity: "informational"
+      source_zone: "trust"
+      srcloc: "10.0.0.0-10.255.255.255"
+      start: "2026/11/18 10:20:01"
+      subtype: "start"
+      teid1: "0x1001"
+      teid2: "0x2002"
+      timestamp: "2026/11/18 10:20:01"
+      tunnel_insp_rule: "inspect-gre"
+      type: "GTP"
+      vsys: "vsys1"
+    message: "<14>Nov 18 10:21:17 fw-a timestamp=2026/11/18 10:20:01, serial=016201026426, type=GTP, subtype=start,\tnetwork.client.ip=10.60.2.100,\tnetwork.destination.ip=93.184.216.34, rule=trust-out, app=web-browsing, vsys=vsys1,\tsource_zone=trust,\tdestination_zone=untrust,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1, logset=ndm-panorama,\tsessionid=957465,\tnetwork.client.port=51022,\tnetwork.destination.port=443, proto=tcp,\tevt.name=allow,\tevent_type=tunnel-create,\tmsisdn=15551234567,\tapn=internet.example,\trat=EUTRAN,\tmsg_type=create-session-request,\tend_ip_adr=10.200.0.7,\tteid1=0x1001,\tteid2=0x2002,\tgtp_interface=S11,\tcause_code=16,\tseverity=informational,\tmcc=310,\tmnc=410,\tarea_code=0x1a2b,\tcell_id=0x3c4d,\tevent_code=0,\tsrcloc=10.0.0.0-10.255.255.255,\tdstloc=United States,\timsi=0,\timei=,\tstart=2026/11/18 10:20:01,\telapsed=3,\ttunnel_insp_rule=inspect-gre"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1794997201000
