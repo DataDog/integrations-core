@@ -578,7 +578,7 @@
           },
           {
             "definition": {
-              "description": "Management-plane memory and swap used, as a percentage of total, per firewall. Sustained swap use means the management plane is short of memory.",
+              "description": "Management-plane memory in use (not available to processes) and swap used, as a percentage of total, per firewall. Sustained swap use means the management plane is short of memory.",
               "legend_columns": [
                 "avg",
                 "max",
@@ -592,7 +592,7 @@
                   "formulas": [
                     {
                       "alias": "Memory used",
-                      "formula": "query1",
+                      "formula": "100 * (1 - query1 / query3)",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -615,12 +615,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:pan_firewall.mgmt.memory.used_pct{$firewall,$panorama} by {device_hostname}"
+                      "query": "avg:pan_firewall.mgmt.memory.available{$firewall,$panorama} by {device_hostname}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
                       "query": "avg:pan_firewall.mgmt.swap.used_pct{$firewall,$panorama} by {device_hostname}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:pan_firewall.mgmt.memory.total{$firewall,$panorama} by {device_hostname}"
                     }
                   ],
                   "response_format": "timeseries"
@@ -795,7 +800,7 @@
           },
           {
             "definition": {
-              "description": "Temperature and power sensors that were in alarm at some point in the selected time range. Virtual firewalls (VM-Series) have no sensors and show No data.",
+              "description": "Temperature and power sensors that were in alarm at some point in the selected time range. Virtual firewalls (VM-Series) have no sensors and show 0.",
               "precision": 0,
               "requests": [
                 {
@@ -1100,13 +1105,13 @@
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:pan_firewall.ipsec.tunnel.rx.bytes{$firewall,$panorama} by {device_hostname,tunnel,peer_ip,gateway}.as_rate()"
+                      "query": "sum:pan_firewall.ipsec.tunnel.rx.bytes{$firewall,$panorama} by {device_hostname,tunnel,peer_ip,gateway}.as_rate().rollup(sum, 600)"
                     },
                     {
                       "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:pan_firewall.ipsec.tunnel.tx.bytes{$firewall,$panorama} by {device_hostname,tunnel,peer_ip,gateway}.as_rate()"
+                      "query": "sum:pan_firewall.ipsec.tunnel.tx.bytes{$firewall,$panorama} by {device_hostname,tunnel,peer_ip,gateway}.as_rate().rollup(sum, 600)"
                     }
                   ],
                   "response_format": "scalar",
@@ -1163,7 +1168,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:pan_firewall.ipsec.tunnel.rx.bytes{$firewall,$panorama} by {device_hostname,tunnel}.as_rate()"
+                      "query": "sum:pan_firewall.ipsec.tunnel.rx.bytes{$firewall,$panorama} by {device_hostname,tunnel}.as_rate().rollup(sum, 600)"
                     }
                   ],
                   "response_format": "timeseries"
@@ -1211,7 +1216,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:pan_firewall.ipsec.tunnel.tx.bytes{$firewall,$panorama} by {device_hostname,tunnel}.as_rate()"
+                      "query": "sum:pan_firewall.ipsec.tunnel.tx.bytes{$firewall,$panorama} by {device_hostname,tunnel}.as_rate().rollup(sum, 600)"
                     }
                   ],
                   "response_format": "timeseries"
@@ -1409,7 +1414,7 @@
           },
           {
             "definition": {
-              "description": "OSPF neighbor adjacency state changes in the selected time range. Requires `collect_ospf: true` in the integration configuration; shows No data while OSPF collection is off (the default).",
+              "description": "OSPF neighbor adjacency state changes in the selected time range. Sent only by the Advanced Routing Engine, and requires `collect_ospf: true` in the integration configuration; shows No data while OSPF collection is off (the default).",
               "precision": 0,
               "requests": [
                 {
@@ -1990,7 +1995,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:pan_firewall.interface.rx.bytes{$firewall,$panorama} by {device_hostname,interface}.as_rate()"
+                      "query": "sum:pan_firewall.interface.rx.bytes{$firewall,$panorama} by {device_hostname,interface}.as_rate().rollup(sum, 600)"
                     }
                   ],
                   "response_format": "timeseries"
@@ -2038,7 +2043,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:pan_firewall.interface.tx.bytes{$firewall,$panorama} by {device_hostname,interface}.as_rate()"
+                      "query": "sum:pan_firewall.interface.tx.bytes{$firewall,$panorama} by {device_hostname,interface}.as_rate().rollup(sum, 600)"
                     }
                   ],
                   "response_format": "timeseries"
@@ -2264,7 +2269,7 @@
                       "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:pan_firewall.api.authentication.status{$firewall,$panorama} by {device_id}.rollup(max)"
+                      "query": "max:pan_firewall.api.authentication.status{$firewall,$panorama} by {device_ip}.rollup(max)"
                     }
                   ],
                   "response_format": "scalar"

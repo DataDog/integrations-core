@@ -28,7 +28,7 @@
     ],
     "type": "query alert"
   },
-  "description": "Tracks the percentage of space used on each file system of the firewall. A full file system can stop logging, block software and content updates, and prevent commits. The log partition `/opt/panlogs` is excluded: PAN-OS fills it up to the log quota and purges the oldest logs automatically, so high usage there is normal.",
+  "description": "Tracks the percentage of space used on each file system of the firewall. A full file system can stop logging and block updates and commits. The log partition `/opt/panlogs` is excluded: PAN-OS fills it up to the log quota and purges the oldest logs, so high usage there is normal.",
   "last_updated_at": "2026-11-18",
   "tags": [
     "integration:pan-firewall"

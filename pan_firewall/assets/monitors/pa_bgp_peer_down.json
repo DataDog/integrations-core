@@ -1,7 +1,7 @@
 {
   "created_at": "2026-11-04",
   "definition": {
-    "message": "{{#is_alert}}\nBGP peer {{peer.name}} ({{peer_ip.name}}, AS {{remote_as.name}}) in virtual router {{vr.name}} on firewall {{device_ip.name}} has not been in the established state for the last 5 minutes. Routes learned from this peer are no longer being exchanged. Check the peer's reachability and session configuration.\n{{/is_alert}}\n\n{{#is_recovery}}\nBGP peer {{peer.name}} ({{peer_ip.name}}, AS {{remote_as.name}}) in virtual router {{vr.name}} on firewall {{device_ip.name}} is established again.\n{{/is_recovery}}",
+    "message": "{{#is_alert}}\nBGP peer {{peer.name}} ({{peer_ip.name}}, AS {{remote_as.name}}) in virtual router {{vr.name}} on firewall {{device_ip.name}} has not been in the established state for the last 5 minutes. Routes learned from this peer are no longer being exchanged. Check the peer's reachability and session configuration. If this peer is down on purpose, exclude it by adding `!peer:{{peer.name}}` to the query.\n{{/is_alert}}\n\n{{#is_recovery}}\nBGP peer {{peer.name}} ({{peer_ip.name}}, AS {{remote_as.name}}) in virtual router {{vr.name}} on firewall {{device_ip.name}} is established again.\n{{/is_recovery}}",
     "name": "[Palo Alto Networks Firewall] BGP peer {{peer.name}} ({{peer_ip.name}}) is down on {{device_ip.name}}",
     "options": {
       "escalation_message": "",
@@ -25,7 +25,7 @@
     ],
     "type": "query alert"
   },
-  "description": "Tracks the session state of each BGP peer on the firewall. A peer that leaves the established state stops exchanging routes, which can blackhole or reroute traffic that depends on it. Peers that are down on purpose, such as disabled or decommissioned peers, alert until they are removed from the configuration; exclude them by adding `!peer:<name>` to the query. On an active/passive HA pair, the passive firewall does not run dynamic routing, so its peers report as not established and alert until a failover.",
+  "description": "Tracks the session state of each BGP peer on the firewall. A peer that leaves the established state stops exchanging routes, which can blackhole or reroute traffic. On an active/passive HA pair, the passive firewall does not run dynamic routing, so its peers alert until a failover.",
   "last_updated_at": "2026-11-18",
   "tags": [
     "integration:pan-firewall"

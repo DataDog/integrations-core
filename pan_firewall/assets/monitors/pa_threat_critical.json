@@ -26,7 +26,7 @@
     ],
     "type": "log alert"
   },
-  "description": "Alerts when a firewall logs a critical-severity threat whose action is `alert`: the threat was detected but not blocked, usually because a security profile is set to alert only or an exception applies. Blocked critical threats (drop, reset, block and similar actions) are intentionally excluded, since the firewall already stopped them; their volume is on the dashboard. Requires Palo Alto Networks Firewall log collection.",
+  "description": "Alerts when a firewall logs a critical-severity threat with action `alert`: detected but not blocked. Blocked critical threats are excluded, since the firewall already stopped them; their volume is on the dashboard. Requires Palo Alto Networks Firewall log collection.",
   "last_updated_at": "2026-11-18",
   "tags": [
     "integration:pan-firewall"

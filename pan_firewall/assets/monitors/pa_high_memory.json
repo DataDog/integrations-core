@@ -22,13 +22,13 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_15m):avg:pan_firewall.mgmt.memory.used_pct{*} by {device_ip} > 95",
+    "query": "avg(last_15m):100 * (1 - avg:pan_firewall.mgmt.memory.available{*} by {device_ip} / avg:pan_firewall.mgmt.memory.total{*} by {device_ip}) > 95",
     "tags": [
       "integration:pan-firewall"
     ],
     "type": "query alert"
   },
-  "description": "Tracks the percentage of management-plane memory in use on each firewall. When it runs out, management services such as the web interface, the API, logging, and commits slow down or fail.",
+  "description": "Tracks the percentage of management-plane memory in use (not available to processes) on each firewall. When it runs out, management services such as the web interface, the API, logging, and commits slow down or fail.",
   "last_updated_at": "2026-11-18",
   "tags": [
     "integration:pan-firewall"

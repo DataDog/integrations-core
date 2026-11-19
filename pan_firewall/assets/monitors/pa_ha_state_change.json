@@ -26,7 +26,7 @@
     ],
     "type": "log alert"
   },
-  "description": "Alerts when a firewall logs an HA state change (PAN-OS system log, subtype `ha`, event `state-change`), such as a failover between active and passive. Both peers log the change, so a failover alerts once per firewall. A reboot or a unit entering the suspended state also alerts. Requires Palo Alto Networks Firewall log collection.",
+  "description": "Alerts when a firewall logs an HA state change (system log, subtype `ha`, event `state-change`), such as a failover. Both peers log it, so a failover alerts once per firewall. A reboot or a suspended unit also alerts. Requires Palo Alto Networks Firewall log collection.",
   "last_updated_at": "2026-11-18",
   "tags": [
     "integration:pan-firewall"
