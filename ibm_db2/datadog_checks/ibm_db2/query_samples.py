@@ -3,11 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from operator import attrgetter
 from time import time
 from typing import TYPE_CHECKING
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .activity import normalize_activity, read_activity
 from .connection import Db2Connection, Db2ConnectionError
@@ -40,6 +42,7 @@ class QuerySamplesCollector(DBMAsyncJob):
         self._config = config
         self._connection = Db2Connection(check, config)
 
+    @tracked_method(agent_check_getter=attrgetter('_check'))
     def run_job(self) -> None:
         try:
             connection = self._connection.ensure_connected()
