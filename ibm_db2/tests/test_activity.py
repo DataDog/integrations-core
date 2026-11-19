@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 from datetime import datetime, timedelta
+from unittest.mock import Mock
 
 import pytest
 
+from datadog_checks.ibm_db2 import activity
 from datadog_checks.ibm_db2.activity import IDENTITY_COLUMNS, normalize_activity
 
 pytestmark = pytest.mark.unit
@@ -128,3 +130,74 @@ def test_obfuscation_failure(activity_row: dict, monkeypatch: pytest.MonkeyPatch
 
     monkeypatch.setattr('datadog_checks.base.utils.db.query_metrics.obfuscation.obfuscate_sql_with_metadata', fail)
     assert normalize_activity(activity_row, 'orders') is None
+
+
+@pytest.mark.parametrize('count, expected_limit', [(1, 0), (3, 1)])
+def test_activity_reader_limits(monkeypatch: pytest.MonkeyPatch, count: int, expected_limit: int):
+    """Return an oldest-first prefix and report whether the extra fetched row exceeded the cap."""
+    monkeypatch.setattr(activity, 'ACTIVITY_MAX_ROWS', 2)
+    rows = [{'stmt_text': str(index)} for index in range(count)]
+    cursor = object()
+    prepare, release = Mock(return_value=cursor), Mock()
+    monkeypatch.setattr(activity.ibm_db, 'prepare', prepare)
+    monkeypatch.setattr(activity.ibm_db, 'execute', Mock())
+    monkeypatch.setattr(activity.ibm_db, 'fetch_assoc', Mock(side_effect=[*rows, False]))
+    monkeypatch.setattr(activity.ibm_db, 'free_stmt', release)
+    result, stats = activity.read_activity('connection')
+    assert result == rows[:2]
+    assert stats == {'row_limit': expected_limit}
+    prepare.assert_called_once_with(
+        'connection', activity.ACTIVITY_QUERY, {activity.ibm_db.SQL_ATTR_QUERY_TIMEOUT: activity.ACTIVITY_QUERY_TIMEOUT}
+    )
+    release.assert_called_once_with(cursor)
+
+
+@pytest.mark.parametrize(
+    'text, database_bytes, expected_text, truncated',
+    [
+        ('SELECT 1', 8, 'SELECT 1', 'not_truncated'),
+        ('é' * 8192, 8192, 'é' * 8192, 'not_truncated'),
+        ('é' * 10000, 10000, 'é' * 8192, 'truncated'),
+        ('中' * 6000, 12000, '中' * 5461, 'truncated'),
+        ('é' * 10000, 50000, 'é' * 8192, 'truncated'),
+        ('A' * 16384, 50000, 'A' * 16384, 'truncated'),
+        (None, None, None, None),
+    ],
+)
+def test_activity_reader_utf8_limit(
+    monkeypatch: pytest.MonkeyPatch,
+    activity_row: dict,
+    text: str | None,
+    database_bytes: int | None,
+    expected_text: str | None,
+    truncated: str | None,
+):
+    """Code-page expansion must not exceed the UTF-8 cap or hide either source of truncation."""
+    row = {**activity_row, 'stmt_text': text, 'stmt_text_bytes': database_bytes}
+    monkeypatch.setattr(activity.ibm_db, 'prepare', Mock())
+    monkeypatch.setattr(activity.ibm_db, 'execute', Mock())
+    monkeypatch.setattr(activity.ibm_db, 'fetch_assoc', Mock(side_effect=[row, False]))
+    monkeypatch.setattr(activity.ibm_db, 'free_stmt', Mock())
+    rows, _ = activity.read_activity('connection')
+    assert len(rows) == 1
+    assert rows[0]['stmt_text'] == expected_text
+    result = normalize_activity(rows[0], 'orders')
+    if truncated is None:
+        assert result is None
+    else:
+        assert result['query_truncated'] == truncated
+
+
+@pytest.mark.parametrize('stage', ['execute', 'fetch_assoc'])
+def test_activity_reader_failure_releases_statement(monkeypatch: pytest.MonkeyPatch, stage: str):
+    """A failed monitoring read must propagate its error and release the native statement, never return idle data."""
+    cursor = object()
+    monkeypatch.setattr(activity.ibm_db, 'prepare', Mock(return_value=cursor))
+    monkeypatch.setattr(activity.ibm_db, 'execute', Mock())
+    monkeypatch.setattr(activity.ibm_db, 'fetch_assoc', Mock())
+    monkeypatch.setattr(activity.ibm_db, stage, Mock(side_effect=RuntimeError('SQLSTATE=HYT00')))
+    release = Mock()
+    monkeypatch.setattr(activity.ibm_db, 'free_stmt', release)
+    with pytest.raises(RuntimeError, match='SQLSTATE=HYT00'):
+        activity.read_activity('connection')
+    release.assert_called_once_with(cursor)
