@@ -1,3 +1,17 @@
+## What does this PR do?
+
+<!-- Give a minimal but complete description of the change and how it works. -->
+
+
+
+## Motivation
+
+<!--
+  Briefly explain why this change is needed and how it fits in: is it part of a bigger project, and
+  how does it fit into it? Are there related or follow-up PRs? Link only the references a reviewer
+  needs (e.g. Jira ticket, design doc, upstream docs or changelog, related PRs).
+-->
+
 ## Checklist before requesting review
 
 <!--
@@ -10,7 +24,7 @@
 - [ ] I self-reviewed the full diff, and this description matches the final change
   <!--
     How to verify: run `gh pr diff <PR> --repo DataDog/integrations-core`, review every changed line,
-    and compare the final diff with the description below.
+    and compare the final diff with the description above.
   -->
 - [ ] Tests cover the change, or this description explains why none are needed
   <!--
@@ -28,18 +42,4 @@
 <!--
   QA label: PRs that only change code owned exclusively by @DataDog/agent-integrations (see
   `.github/CODEOWNERS`) always use `qa/skip-qa`, never `qa/required`.
--->
-
-## What does this PR do?
-
-<!-- Give a minimal but complete description of the change and how it works. -->
-
-
-
-## Motivation
-
-<!--
-  Briefly explain why this change is needed and how it fits in: is it part of a bigger project, and
-  how does it fit into it? Are there related or follow-up PRs? Link only the references a reviewer
-  needs (e.g. Jira ticket, design doc, upstream docs or changelog, related PRs).
 -->

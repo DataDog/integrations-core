@@ -383,6 +383,7 @@ MIRROR_CALLS = [
         {'archive_download_url': 'https://x/zip'},
     ),
     ('get_ref', lambda f, _: f.get_ref('o', 'r', 'heads/main'), {'ref': 'heads/main'}),
+    ('get_tag', lambda f, _: f.get_tag('o', 'r', 't' * 40), {'tag_sha': 't' * 40}),
     ('create_ref', lambda f, _: f.create_ref('o', 'r', 'refs/heads/x', 'abc123'), {'sha': 'abc123'}),
     ('get_content', lambda f, _: f.get_content('o', 'r', 'release.json'), {'path': 'release.json'}),
     (

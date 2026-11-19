@@ -1,1 +1,0 @@
-Add the `collect_histograms_as_distributions` OpenMetrics V2 option, which submits histogram buckets as distributions without the `upper_bound` and `lower_bound` tags on Agents that support it.

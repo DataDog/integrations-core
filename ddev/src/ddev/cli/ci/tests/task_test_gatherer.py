@@ -120,7 +120,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
         self._lock = threading.Lock()
         self._logger = monitor.logger
         self.monitor = monitor
-        self._metrics = MetricsHelper(monitor.metrics)
+        self._metrics = MetricsHelper(monitor)
 
     def process_message(self, message: BatchFinished | BatchProgressUpdate) -> None:
         if isinstance(message, BatchProgressUpdate):
@@ -143,21 +143,16 @@ class TaskTestGatherer(SyncProcessor[BatchFinished | BatchProgressUpdate]):
             len(message.batch_jobs),
             batch_job_count=len(message.batch_jobs),
         )
-        try:
-            gathered = self._gather_results(message)
-            published = gathered is not None and self._publish_results(message, gathered)
-        except Exception:
-            self._metrics.record_operation(Operation.GATHER_BATCH_RESULTS, failed=True)
-            self._metrics.log_failed_operation(
-                Operation.GATHER_BATCH_RESULTS,
-                self._logger,
-                "Failed to gather results for batch %s",
-                message.batch_id,
-                exc_info=True,
-            )
-            raise
-        if published:
-            self._metrics.record_operation(Operation.GATHER_BATCH_RESULTS, failed=False)
+        with self._metrics.operation(Operation.GATHER_BATCH_RESULTS) as op:
+            try:
+                gathered = self._gather_results(message)
+                published = gathered is not None and self._publish_results(message, gathered)
+            except Exception:
+                op.fail("Failed to gather results for batch %s", message.batch_id)
+                raise
+            # Not published: the bus is shutting down or another attempt won the batch.
+            if not published:
+                op.abandon()
 
     def _gather_results(
         self,

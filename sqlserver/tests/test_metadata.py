@@ -97,6 +97,7 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     assert event['dbms'] == "sqlserver"
     assert event['kind'] == "sqlserver_configs"
     assert len(event["metadata"]) > 0
+    assert not any(tag.startswith('dd.internal') for tag in event['tags'])
 
 
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
@@ -126,6 +127,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
+                                'max_length': 255,
                                 'default': 'None',
                                 'nullable': True,
                             },
@@ -175,6 +177,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
+                                'max_length': 255,
                                 'default': 'None',
                                 'nullable': True,
                             },
@@ -231,6 +234,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
+                                'max_length': 255,
                                 'default': 'None',
                                 'nullable': True,
                             },
@@ -262,18 +266,21 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'RestaurantName',
                                 'data_type': 'varchar',
+                                'max_length': 255,
                                 'default': 'None',
                                 'nullable': True,
                             },
                             {
                                 'name': 'District',
                                 'data_type': 'varchar',
+                                'max_length': 100,
                                 'default': 'None',
                                 'nullable': True,
                             },
                             {
                                 'name': 'Review',
                                 'data_type': 'varchar',
+                                'max_length': -1,
                                 'default': 'None',
                                 'nullable': True,
                             },
@@ -299,18 +306,21 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'RestaurantName',
                                 'data_type': 'varchar',
+                                'max_length': 255,
                                 'default': 'None',
                                 'nullable': True,
                             },
                             {
                                 'name': 'District',
                                 'data_type': 'varchar',
+                                'max_length': 100,
                                 'default': 'None',
                                 'nullable': True,
                             },
                             {
                                 'name': 'Cuisine',
                                 'data_type': 'varchar',
+                                'max_length': 100,
                                 'default': 'None',
                                 'nullable': True,
                             },
@@ -356,7 +366,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             },
                         ],
                         'foreign_keys': [],
-                        'partitions': {'partition_count': 3},
+                        'partitions': {'partition_count': 4},
                         'indexes': [
                             {
                                 'name': 'ix_include',
@@ -381,6 +391,19 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'key_columns': 'c,a',
                                 'included_columns': 'e',
                                 'column_names': 'a,c,e',
+                            },
+                            {
+                                'name': 'ix_filtered',
+                                'type': 2,
+                                'is_unique': False,
+                                'is_primary_key': False,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                # Only filtered indexes carry filter_definition; FOR JSON omits it when NULL.
+                                'filter_definition': '([e] IS NOT NULL)',
+                                'key_columns': 'a',
+                                'included_columns': '',
+                                'column_names': 'a',
                             },
                         ],
                     },

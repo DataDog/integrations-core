@@ -1,1 +1,0 @@
-Run every eligible target when a pull request changes `.ddev/dispatcher.toml`.

@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 13.4.0 / 2026-10-01
+## 13.6.0 / 2026-11-16
+
+***Security***:
+
+* Bump `pyasn1` to 0.6.5 to address CVE-2026-119194, CVE-2026-119195, CVE-2026-119196, and CVE-2026-119197. ([#25968](https://github.com/DataDog/integrations-core/pull/25968))
+
+## 13.5.0 / 2026-10-29
+
+***Added***:
+
+* Add a generic BFD session fragment (``bfdSessTable``/``bfdSessPerfTable``) to the Arista, Juniper, F5 BIG-IP, NEC Univerge, and generic Cisco profiles. ([#25033](https://github.com/DataDog/integrations-core/pull/25033))
+
+## 13.4.0 / 2026-10-01 / Agent 7.85.0
 
 ***Added***:
 

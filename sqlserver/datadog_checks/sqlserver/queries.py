@@ -29,14 +29,57 @@ FROM
     sys.tables
 """
 
-COLUMN_QUERY = """
+VIEWS_QUERY = """
 SELECT
-    c.name, t.name as data_type, coalesce(dc.definition, 'None') as "default", c.is_nullable AS nullable
+    v.object_id AS view_id,
+    v.name AS view_name,
+    v.schema_id,
+    CONVERT(varchar(33), v.create_date, 126) AS create_date,
+    CONVERT(varchar(33), v.modify_date, 126) AS modify_date,
+    m.definition
+FROM
+    sys.views v
+    LEFT JOIN sys.sql_modules m ON v.object_id = m.object_id
+WHERE
+    v.is_ms_shipped = 0
+"""
+
+# max_length, precision and scale are raw sys.columns values, set only for the
+# types whose declaration uses them and NULL otherwise. FOR JSON PATH leaves
+# NULLs out; the pre-2017 per-table path sends them as null. max_length is in
+# bytes (twice the declared length for nchar and nvarchar) and -1 for (max)
+# types. data_type stays the bare type name. PRECISION is a reserved keyword,
+# so the aliases are bracketed.
+COLUMN_LENGTHS = """
+    CASE WHEN t.name IN ('char', 'varchar', 'nchar', 'nvarchar', 'binary', 'varbinary')
+        THEN c.max_length END AS max_length,
+    CASE WHEN t.name IN ('decimal', 'numeric') THEN c.precision END AS [precision],
+    CASE WHEN t.name IN ('decimal', 'numeric', 'datetime2', 'time', 'datetimeoffset')
+        THEN c.scale END AS [scale]"""
+
+COLUMN_QUERY = f"""
+SELECT
+    c.name, t.name as data_type, coalesce(dc.definition, 'None') as "default", c.is_nullable AS nullable,
+    {COLUMN_LENGTHS}
 FROM
     sys.columns c
     INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
     LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id
 WHERE c.object_id = schema_tables.table_id
+"""
+
+VIEW_COLUMN_QUERY = f"""
+SELECT
+    c.name,
+    t.name AS data_type,
+    c.is_nullable AS nullable,
+    {COLUMN_LENGTHS},
+    CONVERT(varchar(10), c.column_id) AS ordinal_position
+FROM
+    sys.columns c
+    INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+WHERE c.object_id = schema_views.view_id
+ORDER BY c.column_id
 """
 
 PARTITIONS_QUERY = """
@@ -52,6 +95,7 @@ GROUP BY object_id
 INDEX_QUERY = """
 SELECT
     i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled,
+    MAX(i.filter_definition) AS filter_definition,
     ISNULL(STRING_AGG(
         CASE
             WHEN ic.is_included_column = 0 AND ic.key_ordinal > 0 THEN
@@ -93,6 +137,7 @@ SELECT
     i.is_primary_key,
     i.is_unique_constraint,
     i.is_disabled,
+    i.filter_definition,
     ISNULL(STUFF((
         SELECT ',' + col.value('(k/text())[1]', 'nvarchar(max)')
         FROM cols.x.nodes('/c') AS T(col)

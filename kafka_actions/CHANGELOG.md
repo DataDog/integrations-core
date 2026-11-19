@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 2.12.0 / 2026-11-16
+
+***Security***:
+
+* Bump `pymongo` to 4.18.3 to address CVE-2026-106435. ([#25968](https://github.com/DataDog/integrations-core/pull/25968))
+
+## 2.11.0 / 2026-10-21 / Agent 7.85.0
+
+***Added***:
+
+* Upgrade PyMongo to 4.18.2. ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
+
 ## 2.10.1 / 2026-10-01
 
 ***Fixed***:

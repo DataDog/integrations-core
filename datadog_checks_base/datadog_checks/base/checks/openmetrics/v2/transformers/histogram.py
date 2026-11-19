@@ -19,12 +19,12 @@ def get_histogram(check, metric_name, modifiers, global_options):
 
     if global_options['collect_histogram_buckets']:
         if global_options['histogram_buckets_as_distributions']:
-            omit_histogram_bound_tags = global_options['omit_histogram_bound_tags']
+            collect_histograms_as_distributions = global_options['collect_histograms_as_distributions']
             bound_tag_prefixes = global_options['histogram_bound_tag_prefixes']
             # Pass `multiple_buckets` only when needed, so overrides with the older signature keep working
             submit_histogram_bucket_method = (
                 partial(check.submit_histogram_bucket, multiple_buckets=True)
-                if omit_histogram_bound_tags
+                if collect_histograms_as_distributions
                 else check.submit_histogram_bucket
             )
 
@@ -42,7 +42,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                     # bucket to its upper bound, as the agent already does for the +Inf top bucket
                     lower_bound = upper_bound
 
-                if omit_histogram_bound_tags:
+                if collect_histograms_as_distributions:
                     tags = remove_bound_tags(tags, bound_tag_prefixes)
 
                 submit_histogram_bucket_method(

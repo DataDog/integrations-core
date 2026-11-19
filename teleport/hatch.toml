@@ -17,3 +17,6 @@ matrix.setup.env-vars = [
 
 [envs.default]
 e2e-env = false
+
+[envs.default.env-vars]
+TELEPORT_VERSION = "17.2.9"

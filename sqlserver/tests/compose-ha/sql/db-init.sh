@@ -30,6 +30,6 @@ else
 fi
 
 #use the SA password from the environment variable
-$SQLCMD_EXEC -C -N -S localhost -U sa -P $SA_PASSWORD -d master -i $SQL_SCRIPT
+$SQLCMD_EXEC -C -N -S localhost -U sa -P $SA_PASSWORD -d master -I -i $SQL_SCRIPT
 
 echo "#######      AOAG script execution completed     #######"

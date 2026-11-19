@@ -26,24 +26,11 @@ on:
     - cron: "0 2 * * *"
 
 jobs:
-  cache:
-    uses: ./.github/workflows/cache-shared-deps.yml
-
   test:
-    needs:
-      - cache
-
     uses: ./.github/workflows/test-all.yml
     with:
       repo: core
 
-      # Options
-      # Because -m starts with a dash,
-      # click (the library used to build the CLI) will
-      # interpret it as an option, not as an argument.
-      # To avoid this, using -- syntax,
-      # which tells the command that everything following it
-      # should be treated as positional arguments, not options
       pytest-args: '-m "not flaky"'
     secrets: inherit
 
@@ -52,22 +39,6 @@ jobs:
       contents: read
       # needed for dd-sts in test-target.yml
       id-token: write
-
-  publish-test-results:
-    needs:
-      - test
-
-    if: success() || failure()
-    concurrency:
-      group: test-results
-
-    permissions:
-      checks: write
-      pull-requests: write
-      contents: write
-
-    uses: ./.github/workflows/test-results-master.yml
-    secrets: inherit
 
   upload-coverage:
     needs:

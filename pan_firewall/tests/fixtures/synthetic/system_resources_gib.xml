@@ -1,0 +1,7 @@
+<!-- Derived from fw-a/system_resources.xml: the Mem and Swap lines rewritten in GiB, rounded to 1 decimal as top does; the other `top` header lines unchanged and the process table removed. -->
+<response status="success"><result><![CDATA[top - 04:49:12 up  2:00,  1 user,  load average: 2.60, 1.45, 1.18
+Tasks: 228 total,   2 running, 225 sleeping,   0 stopped,   1 zombie
+%Cpu(s):  8.2 us,  4.9 sy,  0.0 ni, 85.2 id,  0.0 wa,  1.6 hi,  0.0 si,  0.0 st
+GiB Mem :     15.4 total,      0.4 free,      4.7 used,     10.3 buff/cache
+GiB Swap:      3.9 total,      3.9 free,      0.0 used.      5.0 avail Mem 
+]]></result></response>

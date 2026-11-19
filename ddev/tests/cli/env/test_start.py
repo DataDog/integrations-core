@@ -139,7 +139,7 @@ def test_basic(ddev, helpers, data_dir, write_result_file, mocker):
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -179,7 +179,7 @@ def test_agent_build_config(ddev, config_file, helpers, data_dir, write_result_f
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -244,7 +244,7 @@ def test_agent_build_env_var(ddev, config_file, helpers, data_dir, write_result_
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -285,7 +285,7 @@ def test_agent_build_flag(ddev, config_file, helpers, data_dir, write_result_fil
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -322,7 +322,7 @@ def test_local_dev(ddev, helpers, local_repo, data_dir, write_result_file, mocke
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -359,7 +359,7 @@ def test_local_base(ddev, helpers, local_repo, data_dir, write_result_file, mock
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -399,7 +399,7 @@ def test_env_vars(ddev, helpers, data_dir, write_result_file, mocker):
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -436,7 +436,7 @@ def test_env_vars_apm_enabled_from_metadata(ddev, helpers, data_dir, write_resul
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -493,7 +493,7 @@ def test_env_vars_override_config(ddev, helpers, data_dir, write_result_file, mo
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -519,8 +519,16 @@ def test_env_vars_override_config(ddev, helpers, data_dir, write_result_file, mo
     )
 
 
-def test_logs_detection(ddev, helpers, data_dir, write_result_file, mocker):
-    metadata = {E2EMetadata.ENV_VARS: {f'{E2EEnvVars.LOGS_DIR_PREFIX}1': 'path'}}
+# `TempDir` lowercases the key suffix, and only Windows uppercases environment variable names
+@pytest.mark.parametrize(
+    'logs_dir_env_var',
+    [
+        pytest.param('DDEV_E2E_ENV_temp_dir_dd_log_1', id='posix'),
+        pytest.param('DDEV_E2E_ENV_TEMP_DIR_DD_LOG_1', id='windows'),
+    ],
+)
+def test_logs_detection(ddev, helpers, data_dir, write_result_file, mocker, logs_dir_env_var):
+    metadata = {E2EMetadata.ENV_VARS: {logs_dir_env_var: 'path'}}
     config = {}
     mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': metadata, 'config': config}))
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
@@ -537,7 +545,7 @@ def test_logs_detection(ddev, helpers, data_dir, write_result_file, mocker):
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -574,7 +582,7 @@ def test_dogstatsd(ddev, helpers, data_dir, write_result_file, mocker):
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}
@@ -626,7 +634,7 @@ def test_mount_log(ddev, helpers, data_dir, write_result_file, mocker):
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
 
         Stop environment -> ddev env stop {integration} {environment}
-        Execute tests -> ddev env test {integration} {environment}
+        Execute tests -> ddev env test {integration} --envs {environment}
         Check status -> ddev env agent {integration} {environment} status
         Trigger run -> ddev env agent {integration} {environment} check
         Reload config -> ddev env reload {integration} {environment}

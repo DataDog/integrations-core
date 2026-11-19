@@ -78,7 +78,7 @@ WORKER_METRICS_MOCK = [
     'component.request_bytes.count',
     'component.response_bytes.count',
     'component.inflight_requests',
-    'dynamo_component_model_load_time_seconds',
+    'component.model_load_time.seconds',
     'component.errors.count',
     'component.cancellation.count',
     'component.queue_depth',
@@ -144,6 +144,9 @@ WORKER_HISTOGRAM_BUCKETS_MOCK = [
     'component.router.output_sequence_tokens',
     'component.router.kv_hit_rate',
     'component.router.overlap_blocks_lost',
+    'component.router.kv_transfer_estimated_latency.seconds',
+    'component.router.shared_cache_hit_rate',
+    'component.router.shared_cache_beyond_blocks',
 ]
 
 FRONTEND_METRICS_MOCK.extend(

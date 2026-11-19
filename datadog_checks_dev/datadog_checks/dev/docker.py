@@ -533,11 +533,13 @@ class ComposeFileUp(LazyFunction):
         if self.service_name:
             self.command.append(self.service_name)
 
-    def __call__(self):
+    def __call__(self) -> None:
         args = {'check': True}
         if self.capture is not None:
             args['capture'] = self.capture
-        return run_command(self.command, **args)
+        # `environment_run` stores the setup result in `os.environ`, and captured image pulls can exceed the
+        # size limit for an environment variable, which breaks every later subprocess.
+        run_command(self.command, **args)
 
 
 class ComposeFileLogs(LazyFunction):

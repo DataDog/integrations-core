@@ -179,3 +179,19 @@ def test_get_pbs_release_info(mocker, archs, expected):
     )
 
     assert get_pbs_release_info(mock_app, '3.13.9') == expected
+
+
+def test_get_latest_python_version_skips_excluded(mocker):
+    from ddev.cli.meta.scripts.upgrade_python import get_latest_python_version
+
+    mocker.patch.dict(
+        'ddev.cli.meta.scripts.upgrade_python.EXCLUDED_PYTHON_VERSIONS', {'3.13.16': 'broken'}, clear=True
+    )
+    response = mocker.MagicMock()
+    response.text = '<a href="3.13.15/">3.13.15/</a>\n<a href="3.13.16/">3.13.16/</a>'
+    mocker.patch('ddev.cli.meta.scripts.upgrade_python.httpx.get', return_value=response)
+
+    assert get_latest_python_version(mocker.MagicMock(), '3.13') == '3.13.15'
+
+    response.text += '\n<a href="3.13.17/">3.13.17/</a>'
+    assert get_latest_python_version(mocker.MagicMock(), '3.13') == '3.13.17'

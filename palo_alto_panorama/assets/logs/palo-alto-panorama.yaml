@@ -362,11 +362,56 @@ pipeline:
           12:15:30|tunnel=IPsec|bytes=847|bytes_sent=781|bytes_received=66|pkt=4|pkts_sent=3|pkts_received=1|max_encap=1|unknown_proto=2|strict_check=2|tunnel_fragment=3|sessions_created=2|sessions_closed=3|session_end_reason=threat|action_source=allow|start=2024/01/01
           12:30:15|elapsed=0|tunnel_insp_rule=insepction_rule_1|remote_user_ip=10.1.2.3|remote_user_id=40201234567|rule_uuid=731925f6-8e55-xxyy-b82f-910b26004dfd|pcap_id=1223xa155545|dynusergroup_name=agnet145|src_edl=10.0.1.2|dst_edl=10.0.3.4|high_res_timestamp=2024-01-16T14:15:34.518+05:30|nssai_sd=|nssai_sst=|pdu_session_id=1234758662|subcategory_of_app=encrypted-tunnel|category_of_app=business-systems|technology_of_app=browser-based|risk_of_app=1|characteristic_of_app=used-by-malware,able-to-transfer-file|container_of_app=google|is_saas_of_app=1|sanctioned_state_of_app=0|cluster_name=test-nw-cluster
       grok:
-        supportRules: ""
-        matchRules: >
-          rule_panorama (<%{integer}>)?((%{date("MMM  d HH:mm:ss")}|%{date("MMM
-          dd HH:mm:ss")}) (%{notSpace})?) %{data::keyvalue("="," \"/:,(){};+",
-          "", "|")}
+        supportRules: |-
+          _syslog_header (<%{integer}>)?(%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) %{notSpace}
+        matchRules: |-
+          rule_panos_csv_traffic (%{_syslog_header} )?%{regex("[0-9]*,[^,]*,[^,]*,TRAFFIC,.*")::csv("future_use_1,receive_time,serial,type,subtype,future_use_6,time_generated,src,dst,natsrc,natdst,rule,suser,duser,app,vsys,from,to,inboundif,outboundif,logset,future_use_22,sessionid,repeatcnt,sport,dport,natsport,natdport,flags,proto,act,bytes,bytes_sent,bytes_received,pkt,start,elapsed,cat,future_use_39,seq,actflag,sloc,dloc,future_use_44,pktsent,pktrcvd,sessionendreason,dg_hier_level_1,dg_hier_level_2,dg_hier_level_3,dg_hier_level_4,vsysname,dvc,actsrc,suuid,duuid,tunnelid,monitortag,parentid,parentst,tunnel,associd,chunk,chunksent,chunkrcvd,ruleuuid,http2conn,appflap,policyid,link,sdwan_cluster,sdwan_device_type,sdwan_cluster_type,sdwan_site,dynusrgrp,xffip,scat,sprofile,smodel,sven,sosfam,sosver,shost,smac,dcat,dprofile,dmodel,dven,dosfam,dosver,dhost,dmac,contid,podnamespace,podname,sedl,dedl,hostid,srnum,sdag,ddag,sessionown,high_res_timestamp,nssai_sst,nssai_sd,subcatapp,appcat,apptech,apprisk,appchar,appcont,tunneledapp,appsaas,appstate,offloaded,flowtype,cluster")}
+          rule_panos_csv_threat (%{_syslog_header} )?%{regex("[0-9]*,[^,]*,[^,]*,THREAT,.*")::csv("future_use_1,receive_time,serial,type,subtype,future_use_6,time_generated,src,dst,natsrc,natdst,rule,suser,duser,app,vsys,from,to,inboundif,outboundif,logset,future_use_22,sessionid,repeatcnt,sport,dport,natsport,natdport,flags,proto,act,misc,threatid,cat,severity,dir,seqno,actflags,sloc,dloc,future_use_41,contenttype,pcapip,filedigest,cloud,urlidx,useragent,filetype,xff,ref,sender,sub,recipient,reportid,dg_hier_level_1,dg_hier_level_2,dg_hier_level_3,dg_hier_level_4,vsysname,dvc,future_use_61,suuid,duuid,http_method,tunnelid,monitortag,parent_session_id,parent_start_time,tunnel,thrcategory,contentver,future_use_72,assoc_id,ppid,httpheaders,urlcategory,ruleuuid,http2conn,dynusrgrp,xffip,scat,sprofile,smodel,sven,sosfam,sosver,shost,smac,dcat,dprofile,dmodel,dven,dosfam,dosver,dhost,dmac,contid,podnamespace,podname,src_edl,dst_edl,hostid,srnum,domain_edl,src_dag,dst_dag,partial_hash,high_res_timestamp,reason,justification,nssai_sst,subcatApp,appcat,apptech,apprisk,appchar,appcont,tunneledapp,appsaas,appstate,cloudreportid,flowtype,cluster")}
+          rule_panos_csv_system (%{_syslog_header} )?%{regex("[0-9]*,[^,]*,[^,]*,SYSTEM,.*")::csv("future_use_1,receive_time,serial,type,subtype,future_use_6,time_generated,vsys,eventid,object,future_use_11,future_use_12,module,severity,opaque,seqno,actionflags,dg_hier_level_1,dg_hier_level_2,dg_hier_level_3,dg_hier_level_4,vsys_name,device_name,future_use_24,future_use_25,high_res_timestamp")}
+          rule_pan_firewall_keyvalue (%{_syslog_header} )?%{regex("[A-Za-z0-9_.]+=[^|,]*, [A-Za-z0-9_.]+=.*")::keyvalue("=", " \"/:(){};+@")}
+          rule_panorama (<%{integer}>)?((%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) (%{notSpace})?) %{data::keyvalue("="," \"/:,(){};+", "", "|")}
+    # The csv filter needs a unique name for every column, including the unnamed FUTURE_USE ones. Remapping
+    # them onto `type`, which every parsed log has, drops them without changing `type`.
+    - type: attribute-remapper
+      name: Remove the FUTURE_USE columns of default PAN-OS CSV logs
+      enabled: true
+      sources:
+        - future_use_1
+        - future_use_6
+        - future_use_11
+        - future_use_12
+        - future_use_22
+        - future_use_24
+        - future_use_25
+        - future_use_39
+        - future_use_41
+        - future_use_44
+        - future_use_61
+        - future_use_72
+      sourceType: attribute
+      target: type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: grok-parser
+      name: Parsing exact sequence numbers from default PAN-OS CSV logs
+      enabled: true
+      source: message
+      samples:
+        - <14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,SYSTEM,general,0,2026/10/05 16:15:07,,general,,0,0,general,informational,"User admin logged in",7300000000000000003,0x0,0,0,0,0,,fw-01
+      grok:
+        # The csv filter infers numbers as doubles, which rounds 19-digit `seq`/`seqno` values. Skip the
+        # fields before them (quoted fields may contain commas and `""` escaped quotes) and extract them as
+        # integers.
+        supportRules: |-
+          _syslog_header (<%{integer}>)?(%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) %{notSpace}
+          _field (?:"(?:[^"]|"")*"|[^,]*),
+          _fields_5 %{_field}%{_field}%{_field}%{_field}%{_field}
+          _csv_prefix (%{_syslog_header} )?[0-9]*,[^,]*,[^,]*,
+        matchRules: |-
+          rule_panos_csv_traffic_seq %{_csv_prefix}TRAFFIC,%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{integer:seq}(,.*)?
+          rule_panos_csv_threat_seqno %{_csv_prefix}THREAT,%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_field}%{_field}%{integer:seqno}(,.*)?
+          rule_panos_csv_system_seqno %{_csv_prefix}SYSTEM,%{_fields_5}%{_fields_5}%{_field}%{integer:seqno}(,.*)?
     - type: grok-parser
       name: Parsing 'time_generated' to 'timestamp' (epoch)
       enabled: true
@@ -375,7 +420,57 @@ pipeline:
         - Jan 24 2024 10:30:11 GMT
       grok:
         supportRules: ""
-        matchRules: date_rule %{date("MMM dd yyyy HH:mm:ss z"):timestamp}
+        matchRules: |-
+          date_rule %{date("MMM dd yyyy HH:mm:ss z"):timestamp}
+          panos_date_rule %{date("yyyy/MM/dd HH:mm:ss"):timestamp}
+    - type: pipeline
+      name: Processors for timestamps of default PAN-OS CSV logs
+      enabled: true
+      filter:
+        # The default CSV format's `time_generated` is the firewall's local time without an offset.
+        # `high_res_timestamp` (PAN-OS 10.0+) carries the firewall's offset but is the management plane's
+        # receive time, so only its offset is applied to `time_generated`. Other formats' `time_generated`
+        # does not match the date pattern below and is left unchanged.
+        query: '@high_res_timestamp:*'
+      processors:
+        - type: grok-parser
+          name: Extract the UTC offset of 'high_res_timestamp'
+          enabled: true
+          source: high_res_timestamp
+          samples:
+            - 2026-10-05T16:15:07.123+05:30
+          grok:
+            supportRules: ""
+            matchRules: |-
+              high_res_offset_rule %{regex("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+")}%{regex("Z|[+-][0-9]{2}:[0-9]{2}"):time_generated_with_offset}
+        # The string builder reads the extracted offset and replaces it with the joined value.
+        - type: string-builder-processor
+          name: Join 'time_generated' and its UTC offset
+          enabled: true
+          template: "%{time_generated} %{time_generated_with_offset}"
+          target: time_generated_with_offset
+          replaceMissing: false
+        - type: grok-parser
+          name: Parsing 'time_generated' with its UTC offset to 'timestamp' (epoch)
+          enabled: true
+          source: time_generated_with_offset
+          samples:
+            - 2026/10/05 16:15:07 +05:30
+          grok:
+            supportRules: ""
+            matchRules: |-
+              panos_date_offset_rule %{date("yyyy/MM/dd HH:mm:ss ZZ"):timestamp}
+        # Remapping onto an attribute that is already set drops the helper without changing the target.
+        - type: attribute-remapper
+          name: Remove the joined 'time_generated' string
+          enabled: true
+          sources:
+            - time_generated_with_offset
+          sourceType: attribute
+          target: time_generated
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
@@ -416,44 +511,44 @@ pipeline:
         query: '@type:("DECRYPTION" OR "TRAFFIC" OR "THREAT" OR "START" OR "END") '
       processors:
         - type: attribute-remapper
-          name: Map `natsrc` to `network.client.ip`
+          name: Map `src` to `network.client.ip`
           enabled: true
           sources:
-            - natsrc
+            - src
           sourceType: attribute
           target: network.client.ip
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `natdst` to `network.destination.ip`
+          name: Map `dst` to `network.destination.ip`
           enabled: true
           sources:
-            - natdst
+            - dst
           sourceType: attribute
           target: network.destination.ip
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `natsport` to `network.client.port`
+          name: Map `sport` to `network.client.port`
           enabled: true
           sources:
-            - natsport
+            - sport
           sourceType: attribute
           target: network.client.port
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `natdport` to `network.destination.port`
+          name: Map `dport` to `network.destination.port`
           enabled: true
           sources:
-            - natdport
+            - dport
           sourceType: attribute
           target: network.destination.port
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: geo-ip-parser
           name: Map `network.client.ip` to `network.client.geoip`
@@ -470,20 +565,22 @@ pipeline:
           target: network.destination.geoip
           ip_processing_behavior: do-nothing
         - type: attribute-remapper
-          name: Map `from` to `srczone`
+          name: Map `from` and `source_zone` to `srczone`
           enabled: true
           sources:
             - from
+            - source_zone
           sourceType: attribute
           target: srczone
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `to` to `dstzone`
+          name: Map `to` and `destination_zone` to `dstzone`
           enabled: true
           sources:
             - to
+            - destination_zone
           sourceType: attribute
           target: dstzone
           targetType: attribute
@@ -543,6 +640,26 @@ pipeline:
           target: palo.alto.panorama.action
           targetType: attribute
           preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `evt.name` to `palo.alto.panorama.action`
+          enabled: true
+          sources:
+            - evt.name
+          sourceType: attribute
+          target: palo.alto.panorama.action
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `session_end_reason` to `sessionendreason`
+          enabled: true
+          sources:
+            - session_end_reason
+          sourceType: attribute
+          target: sessionendreason
+          targetType: attribute
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Processors for "User ID" log type

@@ -1,0 +1,8 @@
+<!-- Derived from fw-a/disk_space.xml: the /opt/panlogs row given a filesystem name too long for its column, so df wraps the row onto two lines. The other rows are copied from fw-a. -->
+<response status="success"><result><![CDATA[Filesystem      Size  Used Avail Use% Mounted on
+/dev/root        12G  4.8G  6.5G  43% /
+none            7.7G   76K  7.7G   1% /dev
+/dev/mapper/pan-very-long-volume-name
+                 11G   60M   11G   1% /opt/panlogs
+tmpfs            12G  7.2G  4.2G  64% /dev/shm
+]]></result></response>

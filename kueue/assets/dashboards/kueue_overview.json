@@ -1,0 +1,2005 @@
+{
+  "title": "Kueue Overview",
+  "description": "",
+  "widgets": [
+    {
+      "id": 8001001,
+      "definition": {
+        "title": "About",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9001001,
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/kueue_large.svg",
+              "url_dark_theme": "/static/images/logos/kueue_reversed_large.svg",
+              "sizing": "contain",
+              "margin": "md",
+              "has_background": false,
+              "has_border": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 9001002,
+            "definition": {
+              "type": "note",
+              "content": "Kueue is a Kubernetes-native job queueing system that admits batch, training, and AI workloads based on quotas and priorities across ClusterQueues, LocalQueues, ResourceFlavors, and Cohorts. This dashboard tracks admission, queue congestion, quota utilization, fairness, preemptions, and queue health.\n\n**Useful links:**\n- [Datadog Kueue Integration Documentation](https://docs.datadoghq.com/integrations/kueue/)\n- [Kueue Official Website](https://kueue.sigs.k8s.io/)",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 6
+      }
+    },
+    {
+      "id": 8001002,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9001003,
+            "definition": {
+              "type": "note",
+              "content": "Key health and activity signals at a glance for quick detection of problems and drill-down into the relevant section.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 1
+            }
+          },
+          {
+            "id": 9001004,
+            "definition": {
+              "title": "Pending Workloads",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.pending_workloads{$kueue_cluster_queue,$replica_role}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 9001005,
+            "definition": {
+              "title": "Inadmissible Workloads",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.pending_workloads{status:inadmissible,$kueue_cluster_queue,$replica_role}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 9001010,
+            "definition": {
+              "title": "Monitors",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:kueue)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false,
+              "show_investigation": false
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 9001006,
+            "definition": {
+              "title": "Admission rate per hour",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Admitted per hour",
+                      "formula": "query1 * 3600"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.admitted.workloads.count{$kueue_cluster_queue,$replica_role}.as_rate()"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 9001007,
+            "definition": {
+              "title": "Avg Admission Wait Time",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Avg wait",
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.admission.wait_time.seconds.sum{$kueue_cluster_queue,$replica_role}.as_count()"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kueue.admission.wait_time.seconds.count{$kueue_cluster_queue,$replica_role}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 8,
+        "height": 6
+      }
+    },
+    {
+      "id": 8001004,
+      "definition": {
+        "title": "Quota and Fairness",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9003001,
+            "definition": {
+              "type": "note",
+              "content": "ClusterQueue resource usage versus nominal quota per resource, plus cohort and ClusterQueue fairness through weighted share.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9003002,
+            "definition": {
+              "title": "CPU Usage vs Nominal Quota",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Usage",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Nominal quota",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.cluster_queue.resource_usage.cpu{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kueue.cluster_queue.nominal_quota.cpu{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9003003,
+            "definition": {
+              "title": "GPU Usage vs Nominal Quota",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Usage",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Nominal quota",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.cluster_queue.resource_usage.gpu{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kueue.cluster_queue.nominal_quota.gpu{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9003005,
+            "definition": {
+              "title": "Memory Usage vs Nominal Quota",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Usage",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Nominal quota",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.cluster_queue.resource_usage.memory{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kueue.cluster_queue.nominal_quota.memory{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9003004,
+            "definition": {
+              "title": "Cohort Weighted Share",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kueue.cohort.weighted_share{$cohort,$replica_role} by {cohort}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9003006,
+            "definition": {
+              "title": "Highest Weighted Share ClusterQueues",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kueue.cluster_queue.weighted_share{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9003007,
+            "definition": {
+              "title": "Highest Pending GPU Requests",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.cluster_queue.resource_pending.gpu{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 8001003,
+      "definition": {
+        "title": "Queueing Health",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9002001,
+            "definition": {
+              "type": "note",
+              "content": "Workload admission and queue congestion: pending and admitted workloads, admission wait time, and per-ClusterQueue backlog.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9002002,
+            "definition": {
+              "title": "Pending Workloads by Status",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.pending_workloads{$kueue_cluster_queue,$replica_role} by {status}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9002003,
+            "definition": {
+              "title": "Admitted Active Workloads by ClusterQueue",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.admitted.active_workloads{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9002004,
+            "definition": {
+              "title": "Avg Admission Wait Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Avg wait time",
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.admission.wait_time.seconds.sum{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kueue.admission.wait_time.seconds.count{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9002005,
+            "definition": {
+              "title": "Inadmissible Admission Attempts",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.admission.attempts.count{$replica_role,result:inadmissible} by {result}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9002006,
+            "definition": {
+              "title": "ClusterQueue Backlog",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.pending_workloads{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kueue.admitted.active_workloads{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:kueue.reserving.active_workloads{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Pending",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Admitted active",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Reserving active",
+                      "formula": "query3"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 8,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 14,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 8001005,
+      "definition": {
+        "title": "Preemptions and Evictions",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9004001,
+            "definition": {
+              "type": "note",
+              "content": "Preemption and eviction activity by ClusterQueue and reason to detect thrashing and workload churn.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9004002,
+            "definition": {
+              "title": "Preempted Workloads by Reason",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.preempted_workloads.count{$preempting_cluster_queue,$replica_role} by {reason}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9004003,
+            "definition": {
+              "title": "Evicted Workloads by Reason",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.evicted_workloads.count{$kueue_cluster_queue,$replica_role} by {reason}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9004004,
+            "definition": {
+              "title": "Preemptions by ClusterQueue",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.preempted_workloads.count{$preempting_cluster_queue,$replica_role} by {preempting_cluster_queue}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9004005,
+            "definition": {
+              "title": "Evictions by ClusterQueue",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.evicted_workloads.count{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9004006,
+            "definition": {
+              "title": "Preemption Skips",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.admission_cycle.preemption_skips{$kueue_cluster_queue,$replica_role}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9004007,
+            "definition": {
+              "title": "Avg Eviction Latency",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Avg eviction latency",
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.workload.eviction_latency.seconds.sum{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kueue.workload.eviction_latency.seconds.count{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 7,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 22,
+        "width": 12,
+        "height": 11
+      }
+    },
+    {
+      "id": 8001006,
+      "definition": {
+        "title": "ClusterQueue and LocalQueue Status",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9005001,
+            "definition": {
+              "type": "note",
+              "content": "Status and health of ClusterQueues and LocalQueues, and workload completion signals to spot queues that cannot admit work.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9005002,
+            "definition": {
+              "title": "ClusterQueue Status",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.cluster_queue.status{$kueue_cluster_queue,$replica_role} by {status}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "order_by": "values",
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9005003,
+            "definition": {
+              "title": "Inactive or Unknown LocalQueues",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.local_queue.status{$kueue_local_queue AND $replica_role AND (active:false OR active:unknown)} by {kueue_local_queue}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "legend": "automatic",
+                  "type": "stacked"
+                },
+                "palette": "red"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9005004,
+            "definition": {
+              "title": "Pending Workloads by LocalQueue",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.local_queue.pending_workloads{$kueue_local_queue,$replica_role} by {kueue_local_queue,status}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9005005,
+            "definition": {
+              "title": "Finished Workloads by ClusterQueue",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.finished_workloads{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9005006,
+            "definition": {
+              "title": "Quota-reserved Workloads",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.quota_reserved.workloads.count{$kueue_cluster_queue,$replica_role} by {kueue_cluster_queue}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 33,
+        "width": 12,
+        "height": 8,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 8001007,
+      "definition": {
+        "title": "Controller and Runtime Health",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9006001,
+            "definition": {
+              "type": "note",
+              "content": "Health of the Kueue controller manager: reconciliation throughput and errors, work queue depth, leader election, and process resource usage.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9006002,
+            "definition": {
+              "title": "Reconcile Errors",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Errors",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kueue.controller.runtime.reconcile_errors.count{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9006003,
+            "definition": {
+              "title": "Work Queue Depth",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Work queue depth",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.workqueue.depth{*}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9006004,
+            "definition": {
+              "title": "Reconcile Time",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Average reconcile time",
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.controller.runtime.reconcile_time.seconds.sum{*}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:kueue.controller.runtime.reconcile_time.seconds.count{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9006005,
+            "definition": {
+              "title": "Active Workers",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Active workers",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kueue.controller.runtime.active_workers{*}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 9006006,
+            "definition": {
+              "title": "Process CPU and Memory",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "CPU seconds per second",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kueue.process.cpu.seconds.count{*}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "Resident memory",
+                      "formula": "query1"
+                    }
+                  ],
+                  "on_right_yaxis": true,
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kueue.process.resident_memory.bytes{*}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ],
+              "right_yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 41,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 8001008,
+      "definition": {
+        "title": "Logs",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9007001,
+            "definition": {
+              "type": "note",
+              "content": "Kueue controller manager logs, with errors and critical events highlighted.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9007002,
+            "definition": {
+              "title": "Error and Critical Logs",
+              "requests": [
+                {
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "full"
+                    }
+                  ],
+                  "query": {
+                    "data_source": "logs_stream",
+                    "indexes": [],
+                    "query_string": "source:kueue status:(alert OR error OR critical)"
+                  },
+                  "response_format": "event_list"
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 9007003,
+            "definition": {
+              "title": "Log Volume by Status",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "status",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:kueue"
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 49,
+        "width": 12,
+        "height": 6
+      }
+    },
+    {
+      "id": 8001009,
+      "definition": {
+        "title": "Events",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9008001,
+            "definition": {
+              "type": "note",
+              "content": "Kueue events, with alert and error events highlighted and event volume grouped by status.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9008002,
+            "definition": {
+              "title": "Warning and Error Events",
+              "requests": [
+                {
+                  "columns": [],
+                  "query": {
+                    "data_source": "event_stream",
+                    "event_size": "s",
+                    "query_string": "source:kueue status:(warn OR alert OR error OR critical)"
+                  },
+                  "response_format": "event_list"
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 9008003,
+            "definition": {
+              "title": "Event Volume by Status",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "events",
+                      "group_by": [
+                        {
+                          "facet": "status",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:kueue"
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 55,
+        "width": 12,
+        "height": 6
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "replica_role",
+      "prefix": "replica_role",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kueue_cluster_queue",
+      "prefix": "kueue_cluster_queue",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "preempting_cluster_queue",
+      "prefix": "preempting_cluster_queue",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "cohort",
+      "prefix": "cohort",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kueue_local_queue",
+      "prefix": "kueue_local_queue",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

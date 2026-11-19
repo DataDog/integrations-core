@@ -111,6 +111,18 @@ class CollectRawQueryStatement(BaseModel):
     enabled: Optional[bool] = None
 
 
+class CollectRoles(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    exclude_databases: Optional[tuple[str, ...]] = None
+    include_databases: Optional[tuple[str, ...]] = None
+    max_query_duration: Optional[float] = None
+
+
 class CollectSchemas(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -357,6 +369,7 @@ class InstanceConfig(BaseModel):
     collect_default_database: Optional[bool] = None
     collect_function_metrics: Optional[bool] = None
     collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
+    collect_roles: Optional[CollectRoles] = None
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     collect_wal_metrics: Optional[bool] = None

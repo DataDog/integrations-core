@@ -2,13 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 2.7.0 / 2026-10-01
+## 2.7.0 / 2026-10-01 / Agent 7.85.0
 
 ***Added***:
 
 * Add `proxmox.vm.cpu.max` and `proxmox.node.cpu.max` to report the vCPU count of each virtual machine and the logical processor count of each node. ([#25188](https://github.com/DataDog/integrations-core/pull/25188))
 
-## 2.6.1 / 2026-09-30
+## 2.6.1 / 2026-09-30 / Agent 7.84.2
 
 ***Fixed***:
 

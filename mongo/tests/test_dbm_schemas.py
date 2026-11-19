@@ -7,6 +7,7 @@ import os
 
 import mock
 import pytest
+from pymongo.errors import OperationFailure
 
 from . import common
 from .common import HERE
@@ -18,7 +19,10 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
 
 @mock_now(1715911398.1112723)
 @common.standalone
-def test_mongo_schemas_standalone(aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check):
+@pytest.mark.parametrize('profiling_enabled', [False, True])
+def test_mongo_schemas_standalone(
+    aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check, caplog, profiling_enabled: bool
+):
     instance_integration_cluster_autodiscovery['reported_database_hostname'] = "mongohost"
     instance_integration_cluster_autodiscovery['dbm'] = True
     instance_integration_cluster_autodiscovery['schemas'] = {'enabled': True, 'run_sync': True}
@@ -29,7 +33,25 @@ def test_mongo_schemas_standalone(aggregator, instance_integration_cluster_autod
     mongo_check = check(instance_integration_cluster_autodiscovery)
     aggregator.reset()
     with mock_pymongo("standalone"):
-        run_check_once(mongo_check, dd_run_check)
+        list_collections = mongo_check.api_client.list_authorized_collections
+        sample = mongo_check.api_client.sample
+
+        def list_with_profiler(db_name: str, limit: int | None = None) -> list[str]:
+            names = list_collections(db_name, limit=limit)
+            return names + ['system.profile'] if profiling_enabled else names
+
+        def sample_with_profiler(db_name: str, coll_name: str, sample_size: int) -> list[dict]:
+            if coll_name == 'system.profile':
+                raise OperationFailure('$sample requires documents with _id', code=28793)
+            return list(sample(db_name, coll_name, sample_size))
+
+        with (
+            mock.patch.object(mongo_check.api_client, 'list_authorized_collections', side_effect=list_with_profiler),
+            mock.patch.object(mongo_check.api_client, 'sample', side_effect=sample_with_profiler),
+        ):
+            run_check_once(mongo_check, dd_run_check)
+
+    assert 'Error collecting schema' not in caplog.text
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     mongodb_databases = [e for e in dbm_metadata if e['kind'] == 'mongodb_databases']

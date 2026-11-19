@@ -1,0 +1,9 @@
+{
+  "interface_type": "tracing-library",
+  "source_type_id": 92087906,
+  "source_type_name": "OpenAI Agent Observability",
+  "interface_title": "Agent Observability",
+  "is_primary": false,
+  "auto_install": false,
+  "creates_events": false
+}

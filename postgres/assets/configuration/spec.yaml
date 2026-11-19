@@ -73,7 +73,8 @@ files:
       fleet_configurable: true
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index, view, etc.) metrics.
-        If enabled, `dbname` should be specified to collect database-specific relations metrics.
+        Use `dbname` to collect relation metrics for a single database — by default, `dbname` is `postgres` —
+        or enable `database_autodiscovery` to collect relation metrics across all databases on the instance.
         You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
         from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
         Each relation generates many metrics (dozens per relation, plus several more for each index).
@@ -1102,6 +1103,65 @@ files:
             example:
               - "customer.*"
 
+    - name: collect_roles
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        Enable collection of database roles.
+      options:
+        - name: enabled
+          fleet_configurable: true
+          description: |
+            Enable collection of database roles. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          fleet_configurable: true
+          description: |
+            The database role collection interval (in seconds).
+          value:
+            type: number
+            example: 600
+        - name: max_query_duration
+          fleet_configurable: true
+          description: |
+            Maximum duration of the query to collect role information in seconds.
+          value:
+            type: number
+            example: 60
+        - name: include_databases
+          fleet_configurable: true
+          description: |
+            A list of regex patterns to include databases.
+            Any database whose name matches any one of these patterns will be included.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example: []
+        - name: exclude_databases
+          fleet_configurable: true
+          description: |
+            A list of regex patterns to exclude databases.
+            Any database whose name matches any one of these patterns will be excluded.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privatedb.*"
+            default:
+              - "template0"
+              - "template1"
+              - "rdsadmin"
+              - "azure_maintenance"
+              - "cloudsqladmin"
+              - "alloydbadmin"
+              - "alloydbmetadata"
+
     - name: collect_column_statistics
       description: |
         Enable collection of column statistics from pg_stats.
@@ -1534,7 +1594,6 @@ files:
         Enabling this option will allow the collection and ingestion of raw query statements and 
         explain plans into Datadog, which can then become viewable in query samples or explain plans. 
         This option is disabled by default.
-        Note: Collection of raw query statements is currently in preview.
         This option only applies when dbm is enabled.
       options:
         - name: enabled

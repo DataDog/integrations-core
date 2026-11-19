@@ -2,16 +2,14 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import base64
-import ctypes
-import ctypes.util
 import heapq
 import json
 import marshal
-import platform
 from collections import defaultdict
 from time import time
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.native_memory import malloc_trim
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
@@ -29,29 +27,6 @@ LAG_EXTRAPOLATION_LIMIT_SECONDS = 600
 BROKER_TIMESTAMPS_SAVE_INTERVAL = 300
 
 
-def load_malloc_trim():
-    """Return glibc's ``malloc_trim`` on Linux, or ``None`` where it is unavailable (macOS, musl)."""
-    if platform.system() != 'Linux':
-        return None
-    try:
-        libc = ctypes.CDLL(ctypes.util.find_library('c') or 'libc.so.6', use_errno=True)
-        trim = libc.malloc_trim
-    except (OSError, AttributeError):
-        return None
-    trim.argtypes = [ctypes.c_size_t]
-    trim.restype = ctypes.c_int
-    return trim
-
-
-MALLOC_TRIM = load_malloc_trim()
-
-
-def malloc_trim():
-    """Return glibc per-arena free memory to the OS after a run; no-op where unavailable."""
-    if MALLOC_TRIM is not None:
-        MALLOC_TRIM(0)
-
-
 class KafkaCheck(AgentCheck):
     __NAMESPACE__ = 'kafka'
 
@@ -62,7 +37,6 @@ class KafkaCheck(AgentCheck):
         self._data_streams_enabled = self.config._data_streams_enabled
         self._max_timestamps = int(self.instance.get('timestamp_history_size', MAX_TIMESTAMPS))
         self.client = KafkaClient(self.config, self.log)
-        self.topic_partition_cache = {}
         self.broker_timestamps = None
         self.broker_timestamps_last_save = 0
         self.check_initializations.insert(0, self.config.validate_config)
@@ -319,10 +293,14 @@ class KafkaCheck(AgentCheck):
 
             for topic, partitions in topics.items():
                 if not partitions:
-                    if topic in self.topic_partition_cache:
-                        partitions = self.topic_partition_cache[topic]
-                    else:
-                        partitions = self.topic_partition_cache[topic] = self.client.get_partitions_for_topic(topic)
+                    partitions = self.client.get_partitions_for_topic(topic)
+                    if not partitions:
+                        self.log.warning(
+                            "Topic %s configured for consumer group %s has no partitions in the cluster, skipping it",
+                            topic,
+                            consumer_group,
+                        )
+                        continue
                 topic_partitions = [(topic, p) for p in partitions]
 
                 groups.append((consumer_group, topic_partitions))
@@ -539,22 +517,15 @@ class KafkaCheck(AgentCheck):
             self.log.debug('No partitions to check for offsets')
             return {}, ""
 
-        dd_consumer_group = "datadog-agent"
+        cluster_id = self.client.get_cluster_id()
 
-        self.client.open_consumer(dd_consumer_group)
-        try:
-            cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+        self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
 
-            self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
-
-            result = {}
-            for topic, partition, offset in self.client.get_partition_offsets(
-                partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
-            ):
-                result[(topic, partition)] = offset
-        finally:
-            if self.config._close_admin_client:
-                self.client.close_consumer()
+        result = {}
+        for topic, partition, offset in self.client.get_partition_offsets(
+            partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
+        ):
+            result[(topic, partition)] = offset
 
         self.log.debug('Got %s highwater offsets', len(result))
         return result, cluster_id

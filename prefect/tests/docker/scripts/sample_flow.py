@@ -1,7 +1,7 @@
 from prefect import flow, task
 
 
-@task(name="add")
+@task(name="add", tags=["e2e-tag", "math"])
 def add(a: int, b: int) -> int:
     return a + b
 

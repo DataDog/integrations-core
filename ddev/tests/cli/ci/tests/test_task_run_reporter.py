@@ -910,8 +910,9 @@ async def test_a_shutdown_report_that_never_landed_says_so_on_the_run_page(kind:
         await reporter.publish_shutdown(_shutdown_request(kind))
 
     assert reporter.pr_comment_failed
-    [error] = [event for event in handler.events if event.get("operation") == "publish_report"]
-    assert error["level"] == "error"
+    [error] = [
+        event for event in handler.events if event.get("operation") == "publish_report" and event["level"] == "error"
+    ]
     assert error["event"] == "Failed to publish the shutdown PR comment"
 
 

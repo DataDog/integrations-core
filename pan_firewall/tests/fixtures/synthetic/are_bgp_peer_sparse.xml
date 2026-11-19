@@ -1,0 +1,4 @@
+<!-- Synthetic: one ARE BGP peer that never came up, shaped like the `dead-peer` of fw-b/are_bgp_peer_detail.xml with only the summary keys, and a `detail` that holds neither `messageStats` nor `addressFamilyInfo`. -->
+<response status="success"><result>
+  <json>{"sparse-peer": {"remote-as": 65098, "state": "Active", "peer-ip": "10.60.1.249", "peer-group-name": "lab", "status-time": 12.0, "detail": {"bgpState": "Active"}}}</json>
+</result></response>

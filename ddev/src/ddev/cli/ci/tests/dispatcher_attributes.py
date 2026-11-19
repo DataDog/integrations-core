@@ -70,6 +70,10 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         'git.branch',
         metric_tag=True,
     ),
+    'head_tag': AttributeSpec(
+        'git.tag',
+        metric_tag=True,
+    ),
     'checkout_sha': AttributeSpec(
         'dispatcher.checkout_sha',
         test_tag=True,
@@ -111,6 +115,18 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         'dispatcher.operation',
         console_tag=True,
         metric_tag=True,
+    ),
+    'operation_result': AttributeSpec(
+        'dispatcher.operation.result',
+        console_tag=True,
+        metric_tag=True,
+    ),
+    'operation_duration_seconds': AttributeSpec(
+        'dispatcher.operation.duration_seconds',
+    ),
+    # One entry per cause, each with its own fields, so causes of one operation never overwrite each other.
+    'operation_failures': AttributeSpec(
+        'dispatcher.operation.failures',
     ),
     'outcome': AttributeSpec(
         'dispatcher.outcome',
@@ -359,6 +375,7 @@ PROTECTED_RUN_FIELDS = frozenset(
         'repo',
         'repository_url',
         'head_branch',
+        'head_tag',
         'head_sha',
         'checkout_sha',
         'context',
@@ -486,11 +503,10 @@ def repository_fields(owner: str, repo: str) -> dict[str, str]:
 
 
 def run_fields(run: ResolvedRun, *, tags: Sequence[str] = ()) -> dict[str, Any]:
-    """Project run identity, retaining caller context only for non-PR runs."""
+    """Project run identity; the context is the run's, never a caller tag's."""
     fields: dict[str, Any] = tag_fields(tags)
     for name in PROTECTED_RUN_FIELDS:
-        if name != 'context':
-            fields.pop(name, None)
+        fields.pop(name, None)
 
     fields.update(
         {
@@ -498,17 +514,15 @@ def run_fields(run: ResolvedRun, *, tags: Sequence[str] = ()) -> dict[str, Any]:
             **repository_fields(run.owner, run.repo),
             'head_sha': run.head_sha,
             'head_branch': run.head_branch,
+            'head_tag': run.head_tag,
             'checkout_sha': run.checkout_sha,
             'pr_number': run.pr_number,
             'base_branch': run.base_branch,
             'base_sha': run.base_sha,
             'is_fork': run.is_fork,
+            'context': 'pr' if run.pr_number is not None else run.context,
         }
     )
-    if run.pr_number is not None:
-        fields['context'] = 'pr'
-    elif 'context' not in fields:
-        fields['context'] = 'master'
     return fields
 
 

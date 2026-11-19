@@ -211,6 +211,15 @@ instances:
     #
     # collect_counters_with_distributions: false
 
+    ## @param collect_histograms_as_distributions - boolean - optional - default: false
+    ## Whether or not to send histogram buckets as Datadog distribution metrics without the `upper_bound`
+    ## and `lower_bound` tags. This implicitly enables the `histogram_buckets_as_distributions` option.
+    ##
+    ## This option requires an Agent version that supports submitting histogram buckets without bound
+    ## tags. On older Agent versions, the check fails with a configuration error.
+    #
+    # collect_histograms_as_distributions: false
+
     ## @param use_process_start_time - boolean - optional - default: false
     ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
     ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
@@ -646,10 +655,23 @@ instances:
     #
     # cluster_check: true
 
+    ## @param collect_follower_metrics - boolean - optional - default: false
+    ## Collect samples labeled `replica_role:follower`.
+    ##
+    ## When Kueue runs with more than one replica, every replica exports the same state gauges, while counters,
+    ## histograms and LocalQueue resource metrics come from the leader only. By default, the check drops follower
+    ## samples so state gauges are not reported twice. Samples without a `replica_role` label, such as Go runtime
+    ## and process metrics, are always collected.
+    #
+    # collect_follower_metrics: false
+
     ## @param collect_workload_events - boolean - optional - default: true
     ## Collect Kueue Workload lifecycle events by polling Workload custom resources from the Kubernetes API.
     ##
     ## This requires `get` and `list` RBAC permissions on `workloads.kueue.x-k8s.io`.
+    ##
+    ## Events are only submitted when the scraped Kueue replica reports `replica_role` as `leader` or `standalone`,
+    ## or does not report it at all. This avoids duplicate events when one instance is configured per Kueue replica.
     #
     # collect_workload_events: true
 

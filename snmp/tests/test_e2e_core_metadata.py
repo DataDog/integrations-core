@@ -38,6 +38,7 @@ def assert_device_metadata(aggregator, expected_device):
     assert len(event1['devices']) == 1
 
     actual_device = event1['devices'][0]
+    expected_device['agent_hostname'] = common.get_agent_hostname()
     for device in [actual_device, expected_device]:
         device.get('tags', []).sort()
 
@@ -65,6 +66,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
             'integration': 'snmp',
             'devices': [
                 {
+                    'agent_hostname': common.get_agent_hostname(),
                     'description': 'BIG-IP Virtual Edition : Linux '
                     '3.10.0-862.14.4.el7.ve.x86_64 : BIG-IP software '
                     'release 15.0.1, build 0.0.11',
@@ -210,6 +212,7 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
     device_id = 'default:' + device_ip
 
     device = {
+        'agent_hostname': common.get_agent_hostname(),
         'description': 'Cisco IOS Software, IOS-XE Software, Catalyst L3 Switch '
         'Software (CAT3K_CAA-UNIVERSALK9-M), Version 03.06.06E RELEASE '
         'SOFTWARE (fc1) Technical Support: '
