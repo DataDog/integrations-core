@@ -227,14 +227,11 @@ not already have an authority that grants access, run this in each monitored dat
 GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_PKG_CACHE_STMT TO USER <DATADOG_USER>;
 ```
 
-#### Query activity
+#### Enable query activity collection
 
-Query activity collection is opt-in during preview. It observes in-flight statements independently
-of Query Metrics' package-cache counters and uses the same normalized query signatures.
-Snapshots include elapsed time, native execution identity, and available session context.
-Sampling can miss short statements; repeated observations describe the same running
-execution, and elapsed time is not completed-query duration. Collection defaults to 10 seconds
-and the minimum interval is one second.
+Query activity collection is opt-in during Preview. It observes in-flight statements independently of package-cache counters that query metrics use and uses the same normalized query signatures.
+
+Snapshots include elapsed time, native execution identity, and available session context. Sampling can miss short statements. Repeated snapshots of a long-running statement describe the same execution. Elapsed time is how long the statement has run so far, not its total duration. The collection interval defaults to 10 seconds, with a minimum of 1 second.
 
 ```yaml
 dbm: true
@@ -243,8 +240,7 @@ query_activity:
   collection_interval: 10
 ```
 
-In addition to the existing monitoring permissions, the connection needs `CONNECT` and
-permission to execute these routines in each monitored database:
+In addition to the existing monitoring permissions, the connection needs `CONNECT` and permission to execute these routines in each monitored database:
 
 ```sql
 GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_ACTIVITY TO USER <DATADOG_USER>;
