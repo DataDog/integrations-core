@@ -5,6 +5,7 @@
 import datetime
 import json as json_module
 import logging
+import re
 from abc import abstractmethod
 from io import BytesIO
 from time import time
@@ -31,6 +32,15 @@ from .xml_tools import extract_int_value, extract_value
 
 EVENT_FILE_TARGET = "event_file"
 RING_BUFFER_TARGET = "ring_buffer"
+# The error of a read of a session or its target that the login isn't allowed, as SQL Server 2022 reports a missing
+# permission ("The user does not have permission to perform this action.", "VIEW SERVER PERFORMANCE STATE permission
+# was denied"), or of a file the server isn't allowed to open, such as a blob without a credential on Azure.
+TARGET_READ_DENIED_ERROR_PATTERN = re.compile(r"permission|access is denied|credential", re.IGNORECASE)
+TARGET_READ_PERMISSIONS = (
+    "VIEW SERVER STATE, or VIEW SERVER PERFORMANCE STATE on SQL Server 2022 and later, or VIEW DATABASE STATE on Azure "
+    "SQL Database. On Azure SQL Database and Managed Instance, where the event_file target writes to Azure Blob "
+    "Storage, the server also needs a credential for the container."
+)
 # The session and its targets. Only the event_file target's data is read: it holds the current file's path, while a
 # ring buffer's data is all its events.
 SESSION_TARGETS_QUERY = """\
@@ -44,6 +54,19 @@ WHERE s.name = ?
 
 def agent_check_getter(self):
     return self._check
+
+
+def is_target_read_denied(error: Exception) -> bool:
+    """Whether a read of a session or its target failed because the login or the server isn't allowed it."""
+    return bool(TARGET_READ_DENIED_ERROR_PATTERN.search(str(error)))
+
+
+def event_file_current_file(target_data: str | None) -> str | None:
+    """The current file of an event_file target, from its target data. Raises `etree.XMLSyntaxError` on invalid XML."""
+    if not target_data:
+        return None
+    file_element = etree.fromstring(target_data.encode('utf-8')).find('.//File')
+    return file_element.get('name') if file_element is not None else None
 
 
 class TimestampHandler:
@@ -127,6 +150,7 @@ class XESessionBase(DBMAsyncJob):
     COLLECTED_DATA_NAME: str
     SESSION_DOCS_URL: str
     SESSION_SQL: str
+    TARGET_READ_DENIED_HEALTH_EVENT: SqlServerHealthEvent
 
     def __init__(self, check, config, session_name):
         self.session_name = session_name
@@ -190,6 +214,8 @@ class XESessionBase(DBMAsyncJob):
         self._check_azure_status()
         # The current setup problem, so its warning is logged once and its health event goes back to OK when fixed.
         self._session_problem: SqlServerHealthEvent | None = None
+        # Whether the last read of the session or its target was denied, so its warning is logged once.
+        self._target_read_denied = False
 
     # Methods to allow subclasses to extend field definitions
     def get_numeric_fields(self, event_type=None):
@@ -271,14 +297,39 @@ class XESessionBase(DBMAsyncJob):
         return None, None
 
     def _event_file_current_file(self, target_data: str | None) -> str | None:
-        if not target_data:
-            return None
         try:
-            file_element = etree.fromstring(target_data.encode('utf-8')).find('.//File')
+            return event_file_current_file(target_data)
         except etree.XMLSyntaxError as e:
             self._log.debug("Failed to parse the event_file target data of %s: %s", self.session_name, e)
             return None
-        return file_element.get('name') if file_element is not None else None
+
+    def _report_target_read(self, denied_error: Exception | None) -> None:
+        """
+        Reports a read of the session or its target that was denied, with a health event and a warning logged once,
+        and the read working again.
+        """
+        denied = denied_error is not None
+        if denied == self._target_read_denied:
+            return
+        self._target_read_denied = denied
+        if not denied:
+            self._check.health.submit_health_event(name=self.TARGET_READ_DENIED_HEALTH_EVENT, status=HealthStatus.OK)
+            self._log.info("The Agent can read the %s XE session again", self.session_name)
+            return
+        self._check.health.submit_health_event(
+            name=self.TARGET_READ_DENIED_HEALTH_EVENT,
+            status=HealthStatus.WARNING,
+            data={"session_name": self.session_name, "error": str(denied_error)},
+        )
+        self._log.warning(
+            "The Agent isn't allowed to read the %s XE session, so no %s are collected: %s The Datadog login needs %s "
+            "See %s",
+            self.session_name,
+            self.COLLECTED_DATA_NAME,
+            denied_error,
+            TARGET_READ_PERMISSIONS,
+            self.SESSION_DOCS_URL,
+        )
 
     def _report_session_problem(self, problem: SqlServerHealthEvent | None, message: str = "") -> None:
         if problem == self._session_problem:

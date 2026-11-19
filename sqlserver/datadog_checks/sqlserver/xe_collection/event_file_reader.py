@@ -11,6 +11,8 @@ from typing import Any, Iterator, NamedTuple
 
 from datadog_checks.sqlserver.utils import raise_if_cancelled
 
+from .base import is_target_read_denied
+
 # The event_file target writes `<filename>_0_<timestamp>.xel` files, a new one at each rollover or session start.
 EVENT_FILE_SUFFIX_PATTERN = re.compile(r"_\d+_\d+\.xel$", re.IGNORECASE)
 
@@ -154,6 +156,9 @@ class EventFileReader:
                 first_batch = cursor.fetchmany(EVENT_FILE_FETCH_BATCH_SIZE)
             except Exception as e:
                 raise_if_cancelled(self._cancel_event)
+                if is_target_read_denied(e):
+                    # Not retried or recovered from, so the handler reports it. The checkpoint stays.
+                    raise
                 if not self._checkpoint_file_gone(cursor, position, e):
                     self._log.warning(
                         "Failed to read %s after %s, retrying at the next run: %s",
