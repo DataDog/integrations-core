@@ -151,6 +151,9 @@ treemap*.png
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/onboard-evalya/
+!.claude/skills/togo-prd
+.agents/skills/*
+!.agents/skills/togo-prd/
 
 # Claude Code PR review artifacts
 .agint-review/
