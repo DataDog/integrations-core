@@ -28,7 +28,7 @@ from datadog_checks.sqlserver.statements import obfuscate_xml_plan
 from datadog_checks.sqlserver.utils import raise_if_cancelled
 
 from .base import EVENT_FILE_TARGET, XESessionBase, agent_check_getter
-from .event_file_reader import EventFileReader
+from .event_file_reader import EventFileEvent, EventFileReader
 from .xml_tools import extract_field, extract_text_representation, extract_value
 
 if TYPE_CHECKING:
@@ -46,6 +46,8 @@ PLAN_SOURCES = {
 
 DEFAULT_SAMPLES_PER_HOUR_PER_QUERY = 4
 DEFAULT_MAX_PLAN_SIZE_BYTES = 1_000_000
+# What an event holds besides its plan: its other fields and actions, and the XML around them.
+PLAN_EVENT_ENVELOPE_BYTES = 64 * 1024
 RATE_LIMITER_MAX_SIZE = 10_000
 STATEMENT_TEXT_CACHE_MAX_SIZE = 10_000
 STATEMENT_TEXT_CACHE_TTL_SECONDS = 600
@@ -198,7 +200,13 @@ class QueryPlanEventsHandler(XESessionBase):
         self._statement_text_cache: TTLCache = TTLCache(
             maxsize=STATEMENT_TEXT_CACHE_MAX_SIZE, ttl=STATEMENT_TEXT_CACHE_TTL_SECONDS
         )
-        self._event_file_reader = EventFileReader(self.session_name, self.max_events, self._log, self._cancel_event)
+        self._event_file_reader = EventFileReader(
+            self.session_name,
+            self.max_events,
+            self._max_event_bytes(self._max_plan_size_bytes),
+            self._log,
+            self._cancel_event,
+        )
         self._statuses: Counter = Counter()
         # The keys of the events read, the newest last, and whether the current read skips the events read before. The
         # ring buffer returns all its events at every read, and so can a read from a file's start without checkpoint,
@@ -222,6 +230,16 @@ class QueryPlanEventsHandler(XESessionBase):
             self._log.warning("`collect_xe.query_plans.%s` must be at least 1, using %s", name, default)
             return default
         return value
+
+    @staticmethod
+    def _max_event_bytes(max_plan_size_bytes: int) -> int:
+        """
+        The largest event_file event read, in the UTF-16 bytes `DATALENGTH` counts, so that the events whose plan is
+        too large aren't fetched. A plan's UTF-16 size is at most twice its UTF-8 size, which `max_plan_size_bytes`
+        limits, and the event adds its envelope. An event that passes can still hold a plan that's too large, which is
+        then skipped once parsed.
+        """
+        return 2 * max_plan_size_bytes + PLAN_EVENT_ENVELOPE_BYTES
 
     def get_numeric_fields(self, event_type=None):
         return {**super().get_numeric_fields(event_type), **PLAN_EVENT_NUMERIC_FIELDS}
@@ -343,15 +361,16 @@ class QueryPlanEventsHandler(XESessionBase):
         started = time.time()
         self._slowest_plan_events = {}
         if target_name == EVENT_FILE_TARGET:
-            xml_data, self._skip_seen_events = self._read_event_file(cursor, file_name) if file_name else (None, False)
+            file_events, self._skip_seen_events = (
+                self._read_event_file(cursor, file_name) if file_name else (iter(()), False)
+            )
+            # The events are fetched as they're parsed, so the read time of an event_file target includes the parsing.
+            events = self._process_event_file_events(file_events)
+            self._submit_read_time(target_name, started)
         else:
             xml_data, self._skip_seen_events = self._read_ring_buffer(cursor), True
-        self._check.histogram(
-            "dd.sqlserver.xe.query_plans.read_time",
-            (time.time() - started) * 1000,
-            **self._check.debug_stats_kwargs(tags=["target:" + target_name]),
-        )
-        events = self._process_events(xml_data) if xml_data else []
+            self._submit_read_time(target_name, started)
+            events = self._process_events(xml_data) if xml_data else []
         if not events:
             return
         self._submit_lag(events)
@@ -372,9 +391,39 @@ class QueryPlanEventsHandler(XESessionBase):
             **self._check.debug_stats_kwargs(),
         )
 
+    def _submit_read_time(self, target_name: str, started: float) -> None:
+        self._check.histogram(
+            "dd.sqlserver.xe.query_plans.read_time",
+            (time.time() - started) * 1000,
+            **self._check.debug_stats_kwargs(tags=["target:" + target_name]),
+        )
+
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _read_event_file(self, cursor: Any, current_file: str) -> tuple[str | None, bool]:
+    def _read_event_file(self, cursor: Any, current_file: str) -> tuple[Iterator[EventFileEvent], bool]:
         return self._event_file_reader.read(cursor, current_file)
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _process_event_file_events(self, file_events: Iterator[EventFileEvent]) -> list[dict]:
+        """
+        The data of the events of an event_file read, each parsed on its own as it's fetched, so that a read holds one
+        batch of events and the plans kept rather than all its events. Every event is iterated, which moves the read's
+        position past them.
+        """
+        events = []
+        for file_event in file_events:
+            if file_event.data is None:
+                self._statuses[("too_large", file_event.name)] += 1
+                continue
+            try:
+                element = etree.fromstring(self._xml_bytes(file_event.data))
+            except (etree.XMLSyntaxError, UnicodeEncodeError) as e:
+                self._log.debug("Failed to parse %s event: %s", file_event.name, e)
+                self._statuses[("error", file_event.name)] += 1
+                continue
+            event_data = self._process_event(element)
+            if event_data is not None:
+                events.append(event_data)
+        return events
 
     def _plan_events(self, cursor: Any) -> Iterator[dict]:
         """The plan events, and their raw copies, of the events read, the slowest execution per query and plan."""

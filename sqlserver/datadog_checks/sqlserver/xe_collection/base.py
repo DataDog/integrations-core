@@ -372,31 +372,15 @@ class XESessionBase(DBMAsyncJob):
 
         processed_events = []
         try:
-            try:
-                xml_stream = BytesIO(xml_data.encode('utf-8'))
-            except UnicodeEncodeError:
-                self._log.debug("UTF-8 encoding failed, falling back to UTF-16")
-                xml_stream = BytesIO(xml_data.encode('utf-16'))
+            xml_stream = BytesIO(self._xml_bytes(xml_data))
 
             # Only parse 'end' events for <event> tags
             context = etree.iterparse(xml_stream, events=('end',), tag='event')
 
             for _, elem in context:
-                try:
-                    if self._is_new_event(elem):
-                        # Extract event attributes
-                        event_data = {"timestamp": elem.get('timestamp'), "event_name": elem.get('name', '')}
-
-                        # Process the event using appropriate handler
-                        event_name = event_data["event_name"]
-                        if event_name in self._event_handlers:
-                            handler = self._event_handlers[event_name]
-                            if handler(elem, event_data):
-                                processed_events.append(event_data)
-                        else:
-                            self._log.debug(f"No handler for event type: {event_name}")
-                except Exception as e:
-                    self._log.error(f"Error processing event {elem.get('name', 'unknown')}: {e}")
+                event_data = self._process_event(elem)
+                if event_data is not None:
+                    processed_events.append(event_data)
 
                 # Free memory for processed elements
                 elem.clear()
@@ -415,6 +399,33 @@ class XESessionBase(DBMAsyncJob):
         except Exception as e:
             self._log.error(f"Error processing ring buffer events: {e}")
             return []
+
+    def _xml_bytes(self, xml_data: str) -> bytes:
+        """XML text encoded for lxml: as UTF-8, or as UTF-16 when it can't be UTF-8, as with unpaired surrogates."""
+        try:
+            return xml_data.encode('utf-8')
+        except UnicodeEncodeError:
+            self._log.debug("UTF-8 encoding failed, falling back to UTF-16")
+            return xml_data.encode('utf-16')
+
+    def _process_event(self, elem: etree._Element) -> dict | None:
+        """The data of an `<event>` element, or None when it was read before, has no handler or fails to process."""
+        try:
+            if self._is_new_event(elem):
+                # Extract event attributes
+                event_data = {"timestamp": elem.get('timestamp'), "event_name": elem.get('name', '')}
+
+                # Process the event using appropriate handler
+                event_name = event_data["event_name"]
+                if event_name in self._event_handlers:
+                    handler = self._event_handlers[event_name]
+                    if handler(elem, event_data):
+                        return event_data
+                else:
+                    self._log.debug(f"No handler for event type: {event_name}")
+        except Exception as e:
+            self._log.error(f"Error processing event {elem.get('name', 'unknown')}: {e}")
+        return None
 
     def _is_new_event(self, event: etree._Element) -> bool:
         """Whether an event wasn't read before: by default, whether it's newer than the last event timestamp."""

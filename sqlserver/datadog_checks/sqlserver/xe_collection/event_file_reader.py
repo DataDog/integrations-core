@@ -7,7 +7,7 @@ import logging
 import re
 import threading
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Iterator, NamedTuple
 
 from datadog_checks.sqlserver.utils import raise_if_cancelled
 
@@ -20,26 +20,32 @@ SELECT TOP 1 file_name, file_offset
 FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
 ORDER BY file_offset DESC
 """
+# The columns of a read: the event's XML, or NULL when its `DATALENGTH`, in UTF-16 bytes, is over the limit, which
+# keeps the row for the checkpoint without sending the event; its buffer; and the event's name.
+EVENT_FILE_READ_COLUMNS = """\
+CASE WHEN DATALENGTH(event_data) <= ? THEN event_data END AS event_data, file_name, file_offset, object_name"""
 # The reads and checkpoints rely on `sys.fn_xe_file_target_read_file` returning rows in (file_name, file_offset) order,
 # as it reads the files and their buffers one after the other. The documentation doesn't guarantee it, but
 # `ORDER BY file_name, file_offset` could sort every row after the checkpoint before `TOP` applies.
-EVENT_FILE_READ_QUERY = """\
-SELECT TOP (?) event_data, file_name, file_offset
+EVENT_FILE_READ_QUERY = f"""\
+SELECT TOP (?) {EVENT_FILE_READ_COLUMNS}
 FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
 """
 # The events of the file the reading started at and the next ones, before the first checkpoint. The file names end with
 # the time they were created at, so the files before it sort first.
-EVENT_FILE_READ_FROM_START_FILE_QUERY = """\
-SELECT TOP (?) event_data, file_name, file_offset
+EVENT_FILE_READ_FROM_START_FILE_QUERY = f"""\
+SELECT TOP (?) {EVENT_FILE_READ_COLUMNS}
 FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
 WHERE file_name >= ?
 """
 # Reading from a checkpoint returns the events of the buffers after it, in this file and the next ones, including the
 # file a restarted session starts.
-EVENT_FILE_READ_FROM_CHECKPOINT_QUERY = """\
-SELECT TOP (?) event_data, file_name, file_offset
+EVENT_FILE_READ_FROM_CHECKPOINT_QUERY = f"""\
+SELECT TOP (?) {EVENT_FILE_READ_COLUMNS}
 FROM sys.fn_xe_file_target_read_file(?, NULL, ?, ?)
 """
+# The rows fetched at a time. A read holds one batch of events, rather than its `max_events` events.
+EVENT_FILE_FETCH_BATCH_SIZE = 10
 # The oldest file the target still retains, as the files are read oldest first.
 EVENT_FILE_OLDEST_FILE_QUERY = """\
 SELECT TOP 1 file_name
@@ -64,6 +70,14 @@ def event_file_pattern(file_name: str) -> str:
     return EVENT_FILE_SUFFIX_PATTERN.sub("*.xel", file_name)
 
 
+class EventFileEvent(NamedTuple):
+    """An event of an event_file read."""
+
+    name: str
+    # The event's XML, or None when it's larger than the reader's `max_event_bytes`.
+    data: str | None
+
+
 @dataclass
 class EventFilePosition:
     """Where the reads of an event_file target are. A session created again with another file gets a new position."""
@@ -84,25 +98,34 @@ class EventFilePosition:
 class EventFileReader:
     """
     Reads the new events of an XE session's event_file target, at most `max_events` per read, keeping its position
-    between reads.
+    between reads. The events are fetched in batches, and those over `max_event_bytes` aren't fetched at all.
     """
 
     def __init__(
-        self, session_name: str, max_events: int, log: logging.LoggerAdapter, cancel_event: threading.Event
+        self,
+        session_name: str,
+        max_events: int,
+        max_event_bytes: int,
+        log: logging.LoggerAdapter,
+        cancel_event: threading.Event,
     ) -> None:
         self._session_name = session_name
         self._max_events = max_events
+        self._max_event_bytes = max_event_bytes
         self._log = log
         self._cancel_event = cancel_event
         self._position: EventFilePosition | None = None
 
-    def read(self, cursor: Any, current_file: str) -> tuple[str | None, bool]:
+    def read(self, cursor: Any, current_file: str) -> tuple[Iterator[EventFileEvent], bool]:
         """
-        The new events of the event_file target whose current file is `current_file`, as one XML document, and whether
-        it can hold events read before, as a read from the start of a file can. The first run starts at the newest
-        buffer of the current file, so it doesn't replay the history, and when that file is empty, the next runs read
-        it and the files after it until a checkpoint. When the checkpoint's file is gone, reading starts over at the
-        oldest file retained, and when a read from the checkpoint fails otherwise, the next run retries it.
+        The new events of the event_file target whose current file is `current_file`, and whether they can include
+        events read before, as a read from the start of a file can. The events are fetched as they're iterated, and
+        the position moves past them once they all are, so the cursor isn't used for anything else until then.
+
+        The first run starts at the newest buffer of the current file, so it doesn't replay the history, and when that
+        file is empty, the next runs read it and the files after it until a checkpoint. When the checkpoint's file is
+        gone, reading starts over at the oldest file retained, and when a read from the checkpoint fails otherwise, the
+        next run retries it.
         """
         pattern = event_file_pattern(current_file)
         if self._position is None or self._position.pattern != pattern:
@@ -117,14 +140,18 @@ class EventFileReader:
             position.start_file = current_file
             if row:
                 position.checkpoint = (row[0], int(row[1]))
-                return None, False
+                return iter(()), False
 
-        rows = None
+        # The first batch is fetched here, as a read from a checkpoint whose file is gone can fail at the first fetch.
+        first_batch = None
         if position.checkpoint is not None:
             limit = self._read_limit(position)
             try:
-                cursor.execute(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY, (limit, pattern, *position.checkpoint))
-                rows = cursor.fetchall()
+                cursor.execute(
+                    EVENT_FILE_READ_FROM_CHECKPOINT_QUERY,
+                    (limit, self._max_event_bytes, pattern, *position.checkpoint),
+                )
+                first_batch = cursor.fetchmany(EVENT_FILE_FETCH_BATCH_SIZE)
             except Exception as e:
                 raise_if_cancelled(self._cancel_event)
                 if not self._checkpoint_file_gone(cursor, position, e):
@@ -134,7 +161,7 @@ class EventFileReader:
                         position.checkpoint,
                         e,
                     )
-                    return None, False
+                    return iter(()), False
                 self._log.info(
                     "The file of the %s checkpoint %s is gone, reading from the oldest file retained: %s",
                     self._session_name,
@@ -144,20 +171,20 @@ class EventFileReader:
                 # The read starts at another position, where the count of the partial buffer's events read doesn't
                 # apply. The events read again are skipped by key.
                 position = self._position = EventFilePosition(pattern, start_file=ALL_RETAINED_FILES)
-        read_from_file_start = rows is None
+        read_from_file_start = first_batch is None
         if read_from_file_start:
             limit = self._read_limit(position)
             if current_file == position.start_file:
-                cursor.execute(EVENT_FILE_READ_QUERY, (limit, current_file))
+                cursor.execute(EVENT_FILE_READ_QUERY, (limit, self._max_event_bytes, current_file))
             else:
                 # The start file rolled over, or the session restarted, before a buffer was read in full, or every file
                 # retained is read.
-                cursor.execute(EVENT_FILE_READ_FROM_START_FILE_QUERY, (limit, pattern, position.start_file))
-            rows = cursor.fetchall()
-        new_rows = self._advance_checkpoint(position, rows, limit) if rows else []
-        if not new_rows:
-            return None, read_from_file_start
-        return "<events>{}</events>".format("".join(row[0] for row in new_rows if row[0])), read_from_file_start
+                cursor.execute(
+                    EVENT_FILE_READ_FROM_START_FILE_QUERY,
+                    (limit, self._max_event_bytes, pattern, position.start_file),
+                )
+            first_batch = cursor.fetchmany(EVENT_FILE_FETCH_BATCH_SIZE)
+        return self._new_events(cursor, position, first_batch, limit), read_from_file_start
 
     def _read_limit(self, position: EventFilePosition) -> int:
         # The events of the partial buffer read before are read again, and skipped.
@@ -180,21 +207,43 @@ class EventFileReader:
         # The file names end with the time they were created at, so the files the target removed sort first.
         return row is None or position.checkpoint[0] < row[0]
 
-    def _advance_checkpoint(self, position: EventFilePosition, rows: list, limit: int) -> list:
+    def _new_events(
+        self, cursor: Any, position: EventFilePosition, batch: list, limit: int
+    ) -> Iterator[EventFileEvent]:
         """
-        The rows of a read to process, at most `max_events` not read before, after the checkpoint moves past them and
-        no further. A checkpoint is a whole buffer, so a read stopped within a buffer, by its limit or by `max_events`,
-        checkpoints on the buffer before it, and the next read skips the events of that buffer already read.
+        The events of a read to process, at most `max_events` not read before, fetched one batch at a time. Only the
+        buffer of each row is kept, to move the checkpoint once the read's rows are all fetched.
         """
-        buffers = [(row[1], int(row[2])) for row in rows]
+        buffers: list[tuple[str, int]] = []
         skipped = 0
-        if position.partial_buffer is not None:
-            partial_buffer, partial_rows = position.partial_buffer
-            while skipped < min(partial_rows, len(rows)) and buffers[skipped] == partial_buffer:
-                skipped += 1
-        # The rows after the first `max_events` new ones are left to the next runs.
-        end = min(len(rows), skipped + self._max_events)
-        if end == len(rows) < limit:
+        skipping = position.partial_buffer is not None
+        while batch:
+            for event_data, file_name, file_offset, event_name in batch:
+                index = len(buffers)
+                buffers.append((file_name, int(file_offset)))
+                # The events of the partial buffer that the previous runs read, at the start of the read.
+                if skipping and index < position.partial_buffer[1] and buffers[index] == position.partial_buffer[0]:
+                    skipped += 1
+                    continue
+                skipping = False
+                # The rows after the first `max_events` new ones are left to the next runs.
+                if index < skipped + self._max_events:
+                    yield EventFileEvent(event_name, event_data)
+            batch = cursor.fetchmany(EVENT_FILE_FETCH_BATCH_SIZE)
+        if buffers:
+            self._advance_checkpoint(position, buffers, skipped, limit)
+
+    def _advance_checkpoint(
+        self, position: EventFilePosition, buffers: list[tuple[str, int]], skipped: int, limit: int
+    ) -> None:
+        """
+        Moves the checkpoint past the events of a read, given the buffer of each of its rows and the number of rows
+        skipped at its start, and no further. A checkpoint is a whole buffer, so a read stopped within a buffer, by its
+        limit or by `max_events`, checkpoints on the buffer before it, and the next read skips the events of that
+        buffer already read.
+        """
+        end = min(len(buffers), skipped + self._max_events)
+        if end == len(buffers) < limit:
             # The read reached the end of the files, so its last buffer is complete.
             position.checkpoint = buffers[end - 1]
             position.partial_buffer = None
@@ -204,4 +253,3 @@ class EventFileReader:
                 position.checkpoint = buffers[last_buffer_start - 1]
             # Otherwise the whole read is within its first buffer, and the checkpoint stays before it.
             position.partial_buffer = (buffers[end - 1], end - last_buffer_start)
-        return rows[skipped:end]

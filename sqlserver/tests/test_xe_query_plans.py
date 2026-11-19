@@ -17,6 +17,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.base import SESSION_TARGETS_QUERY
 from datadog_checks.sqlserver.xe_collection.event_file_reader import (
     ALL_RETAINED_FILES,
+    EVENT_FILE_FETCH_BATCH_SIZE,
     EVENT_FILE_LAST_BUFFER_QUERY,
     EVENT_FILE_OLDEST_FILE_QUERY,
     EVENT_FILE_READ_FROM_CHECKPOINT_QUERY,
@@ -25,7 +26,9 @@ from datadog_checks.sqlserver.xe_collection.event_file_reader import (
     event_file_pattern,
 )
 from datadog_checks.sqlserver.xe_collection.query_plan_events import (
+    DEFAULT_MAX_PLAN_SIZE_BYTES,
     FRAME_STATEMENT_QUERY,
+    PLAN_EVENT_ENVELOPE_BYTES,
     QUERY_STATS_STATEMENT_QUERY,
     QueryPlanEventsHandler,
 )
@@ -46,6 +49,9 @@ PLAN_HANDLE = '0600050012eb2f1b60fced1f12000000010000000000000000000000000000000
 SQL_HANDLE = '0x0200000012EB2F1BB0F35DCC64332DC0EB7A17EDFDB853E60000000000000000000000000000000000000000'
 CURRENT_FILE = '/var/opt/mssql/log/datadog_query_plans_0_134080000000000000.xel'
 BLOB_CURRENT_FILE = 'https://account.blob.core.windows.net/xe/datadog_query_plans_0_134080000000000000.xel'
+# The largest event an event_file read fetches, in UTF-16 bytes: twice the default plan size limit, which is in UTF-8
+# bytes, and the event's envelope.
+DEFAULT_MAX_EVENT_BYTES = 2 * DEFAULT_MAX_PLAN_SIZE_BYTES + PLAN_EVENT_ENVELOPE_BYTES
 # The current file, and the path the files are read with, of local and Azure Blob Storage event_file targets.
 EVENT_FILE_PATHS = [
     pytest.param(CURRENT_FILE, '/var/opt/mssql/log/datadog_query_plans*.xel', id='local'),
@@ -151,6 +157,19 @@ class FakeEventFile:
                 rows.extend((event, name, offset) for event in events)
         return rows
 
+    @staticmethod
+    def read_rows(rows: list[tuple[str, str, int]], top: int, max_event_bytes: int) -> list[tuple]:
+        """The rows of a read: the event, or None over `max_event_bytes` UTF-16 bytes, its buffer and its name."""
+        return [
+            (
+                event if len(event.encode('utf-16-le')) <= max_event_bytes else None,
+                name,
+                offset,
+                etree.fromstring(event).get('name'),
+            )
+            for event, name, offset in rows[:top]
+        ]
+
     def matching_files(self, path: str) -> list[str]:
         return sorted(self.files) if path == self.pattern else [path]
 
@@ -164,19 +183,21 @@ class FakeEventFile:
             rows = self.rows(self.matching_files(params[0]))
             return [(rows[0][1],)] if rows else []
         if sql == EVENT_FILE_READ_QUERY:
-            top, path = params
-            return self.rows(self.matching_files(path))[:top]
+            top, max_event_bytes, path = params
+            return self.read_rows(self.rows(self.matching_files(path)), top, max_event_bytes)
         if sql == EVENT_FILE_READ_FROM_START_FILE_QUERY:
-            top, path, start_file = params
-            return self.rows([name for name in self.matching_files(path) if name >= start_file])[:top]
+            top, max_event_bytes, path, start_file = params
+            rows = self.rows([name for name in self.matching_files(path) if name >= start_file])
+            return self.read_rows(rows, top, max_event_bytes)
         if sql == EVENT_FILE_READ_FROM_CHECKPOINT_QUERY:
-            top, _pattern, file_name, offset = params
+            top, max_event_bytes, _pattern, file_name, offset = params
             if self.checkpoint_read_errors:
                 raise self.checkpoint_read_errors.pop(0)
             if file_name not in self.files:
                 raise Exception(self.file_gone_error.format(file_name))
             files = sorted(self.files)
-            return self.rows(files[files.index(file_name) :], after=(file_name, offset))[:top]
+            rows = self.rows(files[files.index(file_name) :], after=(file_name, offset))
+            return self.read_rows(rows, top, max_event_bytes)
         return None
 
 
@@ -190,6 +211,10 @@ class FakeServer:
         self.frame_text = frame_text
         self.query_stats_text = query_stats_text
         self.queries: list[tuple[str, tuple]] = []
+        # The rows the cursors returned through `fetchmany`, as the event_file reads fetch them.
+        self.rows_fetched = 0
+        # The size of the largest event fetched, in UTF-16 bytes.
+        self.largest_event_fetched = 0
 
     def execute(self, sql: str, params: tuple) -> list:
         self.queries.append((sql, params))
@@ -230,6 +255,16 @@ class FakeCursor:
 
     def fetchall(self):
         return list(self._rows)
+
+    def fetchmany(self, size):
+        batch, self._rows = self._rows[:size], self._rows[size:]
+        self._server.rows_fetched += len(batch)
+        for row in batch:
+            if row[0] is not None:
+                self._server.largest_event_fetched = max(
+                    self._server.largest_event_fetched, len(row[0].encode('utf-16-le'))
+                )
+        return batch
 
 
 class FakeConnection:
@@ -650,7 +685,13 @@ def test_event_file_first_run_starts_at_the_newest_buffer(aggregator, xe_instanc
     server.event_file.add_buffer(distinct_event(4), distinct_event(5))
     handler.run_job()
     assert sent_timestamps(aggregator) == [timestamp(4), timestamp(5)]
-    assert server.executed(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY)[-1] == (1000, read_path, current_file, 2048)
+    assert server.executed(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY)[-1] == (
+        1000,
+        DEFAULT_MAX_EVENT_BYTES,
+        read_path,
+        current_file,
+        2048,
+    )
 
 
 @pytest.mark.unit
@@ -810,11 +851,16 @@ def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint
 
     assert sent_timestamps(aggregator) == [timestamp(1), timestamp(2)]
     # checkpoints are files the read returned, and the reads after them cover every file of the target
-    assert {params[1:3] for params in server.executed(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY)} == {
+    assert {params[2:4] for params in server.executed(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY)} == {
         (read_path, current_file)
     }
     if checkpoint_file_removed:
-        assert server.executed(EVENT_FILE_READ_FROM_START_FILE_QUERY)[-1] == (1000, read_path, ALL_RETAINED_FILES)
+        assert server.executed(EVENT_FILE_READ_FROM_START_FILE_QUERY)[-1] == (
+            1000,
+            DEFAULT_MAX_EVENT_BYTES,
+            read_path,
+            ALL_RETAINED_FILES,
+        )
 
 
 @pytest.mark.unit
@@ -879,6 +925,75 @@ def test_event_file_checkpoint_read_failure(aggregator, xe_instance, read_before
         handler.run_job()
 
     assert sent_timestamps(aggregator) == [timestamp(second) for second in expected]
+
+
+def too_large_counts(aggregator) -> int:
+    return sum(
+        metric.value
+        for metric in aggregator.metrics('dd.sqlserver.xe.query_plans.events')
+        if 'status:too_large' in metric.tags
+    )
+
+
+@pytest.mark.unit
+def test_event_file_events_over_the_size_limit_are_too_large(aggregator, xe_instance):
+    """
+    An event too large to hold a plan within `max_plan_size_bytes` isn't fetched, and counts as too large once. The
+    events around it, in its buffer too, are each sent once, and the checkpoint moves past it.
+    """
+    max_plan_size_bytes = 20_000
+    max_event_bytes = 2 * max_plan_size_bytes + PLAN_EVENT_ENVELOPE_BYTES
+    server = FakeServer()
+    # no rate limit, which would also stop the events read before
+    handler = make_handler(
+        xe_instance, server, max_events=2, samples_per_hour_per_query=10**9, max_plan_size_bytes=max_plan_size_bytes
+    )
+    handler.run_job()
+    oversized_event = make_event(
+        timestamp=timestamp(2),
+        query_plan_hash=2,
+        plan_transform=lambda plan: plan.replace(
+            '<ShowPlanXML', '<ShowPlanXML Padding="{}"'.format('x' * max_event_bytes)
+        ),
+    )
+    server.event_file.add_buffer(distinct_event(1), oversized_event)
+    server.event_file.add_buffer(distinct_event(3), distinct_event(4))
+    server.event_file.add_buffer(distinct_event(5))
+
+    runs = []
+    for _ in range(4):
+        aggregator.reset()
+        handler.run_job()
+        runs.append((sent_timestamps(aggregator), too_large_counts(aggregator)))
+
+    assert runs == [([timestamp(1)], 1), ([timestamp(3), timestamp(4)], 0), ([timestamp(5)], 0), ([], 0)]
+    assert server.largest_event_fetched <= max_event_bytes
+
+
+@pytest.mark.unit
+def test_event_file_events_are_parsed_as_they_are_fetched(aggregator, xe_instance):
+    """A read holds one batch of fetched events at a time, rather than all its events at once."""
+    server = FakeServer()
+    # no rate limit, so that every event is sent
+    handler = make_handler(xe_instance, server, samples_per_hour_per_query=10**9)
+    handler.run_job()
+    count = 3 * EVENT_FILE_FETCH_BATCH_SIZE + 1
+    server.event_file.add_buffer(*(distinct_event(second) for second in range(count)))
+    fetched_before = server.rows_fetched
+    fetched_when_parsed = []
+    parse_plan_event = handler._parse_plan_event
+
+    def record_fetched_rows(event, event_data):
+        fetched_when_parsed.append(server.rows_fetched - fetched_before)
+        return parse_plan_event(event, event_data)
+
+    handler.register_event_handler('query_post_execution_plan_profile', record_fetched_rows)
+    handler.run_job()
+
+    # each event is parsed once its batch is fetched, and before the next batch is
+    batch = EVENT_FILE_FETCH_BATCH_SIZE
+    assert fetched_when_parsed == [min(count, (i // batch + 1) * batch) for i in range(count)]
+    assert len(plan_events(aggregator)) == count
 
 
 @pytest.mark.unit
