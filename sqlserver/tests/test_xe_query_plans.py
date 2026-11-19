@@ -18,6 +18,7 @@ from datadog_checks.sqlserver.xe_collection.query_plan_events import (
     EVENT_FILE_LAST_BUFFER_QUERY,
     EVENT_FILE_OLDEST_FILE_QUERY,
     EVENT_FILE_READ_FROM_CHECKPOINT_QUERY,
+    EVENT_FILE_READ_FROM_START_FILE_QUERY,
     EVENT_FILE_READ_QUERY,
     FRAME_STATEMENT_QUERY,
     QUERY_STATS_STATEMENT_QUERY,
@@ -123,8 +124,9 @@ class FakeEventFile:
         self.current_file = current_file
         self.pattern = event_file_pattern(current_file)
         self.file_gone_error = CHECKPOINT_FILE_GONE_ERRORS['odbc']
-        # The errors of the next reads from a checkpoint.
+        # The errors of the next reads from a checkpoint, and of the next lookups of the newest buffer.
         self.checkpoint_read_errors: list[Exception] = []
+        self.last_buffer_errors: list[Exception] = []
 
     def add_buffer(self, *events: str) -> None:
         buffers = self.files[self.current_file]
@@ -150,6 +152,8 @@ class FakeEventFile:
 
     def responses(self, sql: str, params: tuple):
         if sql == EVENT_FILE_LAST_BUFFER_QUERY:
+            if self.last_buffer_errors:
+                raise self.last_buffer_errors.pop(0)
             rows = self.rows([params[0]])
             return [(rows[-1][1], rows[-1][2])] if rows else []
         if sql == EVENT_FILE_OLDEST_FILE_QUERY:
@@ -158,6 +162,9 @@ class FakeEventFile:
         if sql == EVENT_FILE_READ_QUERY:
             top, path = params
             return self.rows(self.matching_files(path))[:top]
+        if sql == EVENT_FILE_READ_FROM_START_FILE_QUERY:
+            top, path, start_file = params
+            return self.rows([name for name in self.matching_files(path) if name >= start_file])[:top]
         if sql == EVENT_FILE_READ_FROM_CHECKPOINT_QUERY:
             top, _pattern, file_name, offset = params
             if self.checkpoint_read_errors:
@@ -614,6 +621,53 @@ def test_event_file_reads_max_events_per_run(aggregator, xe_instance, buffers, e
         runs.append(sent_timestamps(aggregator))
 
     assert runs == [[timestamp(second) for second in run] for run in expected_runs]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'steps,expected',
+    [
+        pytest.param(
+            ['run', [1, 2, 3], 'run', 'new_file', [4]], [1, 2, 3, 4], id='first_buffer_read_in_part_then_rollover'
+        ),
+        pytest.param(['run', [1], [2], 'new_file', [3]], [1, 2, 3], id='empty_file_then_rollover'),
+        pytest.param(
+            ['run', [1], [2], 'session_stopped_run', 'new_file', [3]], [1, 2, 3], id='empty_file_then_session_restart'
+        ),
+        pytest.param([[1], 'failing_tail_lookup_run', 'run', [2]], [2], id='tail_lookup_failure'),
+    ],
+)
+def test_event_file_before_the_first_checkpoint(aggregator, xe_instance, steps, expected):
+    """
+    Until a buffer is read in full, reading goes on from the file the first run started at into the files after it, a
+    rollover's or a restarted session's, and not the files before it. A first run whose lookup of the newest buffer
+    fails is retried at the next run, rather than the history read. Each execution is sent once.
+    """
+    server = FakeServer()
+    # the history, in a file before the one the first run starts at
+    server.event_file.add_buffer(distinct_event(0))
+    server.event_file.start_file()
+    # no rate limit, which would also stop the events read before
+    handler = make_handler(xe_instance, server, max_events=2, samples_per_hour_per_query=10**9)
+    for step in steps:
+        if step == 'run':
+            handler.run_job()
+        elif step == 'new_file':
+            server.event_file.start_file()
+        elif step == 'session_stopped_run':
+            server.targets = []
+            handler.run_job()
+            server.targets = None
+        elif step == 'failing_tail_lookup_run':
+            server.event_file.last_buffer_errors.append(Exception('Query timeout expired (SQLExecDirectW)'))
+            with pytest.raises(Exception, match='Query timeout expired'):
+                handler.run_job()
+        else:
+            server.event_file.add_buffer(*(distinct_event(second) for second in step))
+    for _ in range(3):
+        handler.run_job()
+
+    assert sent_timestamps(aggregator) == [timestamp(second) for second in expected]
 
 
 @pytest.mark.unit
