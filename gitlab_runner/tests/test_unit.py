@@ -6,6 +6,11 @@ from copy import deepcopy
 
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+)
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
 
@@ -55,3 +60,21 @@ def test_job_queue_duration_metric(aggregator, dd_run_check, mock_data):
     aggregator.assert_metric('gitlab_runner.gitlab_runner_job_queue_duration_seconds.sum', tags=expected_tags)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'error',
+    [
+        pytest.param(HTTPClientConnectionError('connection refused'), id='connection'),
+        pytest.param(HTTPClientConnectTimeoutError('connect timed out'), id='connect-timeout'),
+        pytest.param(HTTPClientReadTimeoutError('read timed out'), id='read-timeout'),
+    ],
+)
+def test_scrape_failure_reports_critical(aggregator, dd_run_check, mock_data, fake_http, error):
+    fake_http.register_response('GET', common.GITLAB_RUNNER_URL, error)
+    check = GitlabRunnerCheck('gitlab_runner', common.CONFIG['init_config'], instances=common.CONFIG['instances'])
+
+    dd_run_check(check)
+
+    aggregator.assert_service_check(GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabRunnerCheck.CRITICAL)
