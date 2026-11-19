@@ -187,6 +187,29 @@ FROM
     ],
 }
 
+QUERY_PG_PARTITIONED = {
+    'name': 'pg_partitioned',
+    'query': """
+SELECT current_database(),
+       N.nspname,
+       C.relname,
+       I.inhparent::regclass AS partition_of,
+       (SELECT count(*) FROM pg_inherits P WHERE P.inhparent = C.oid)
+FROM pg_class C
+LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+LEFT JOIN pg_inherits I ON (I.inhrelid = C.oid)
+WHERE C.relkind = 'p'
+    AND NOT (nspname = ANY('{{pg_catalog,information_schema}}'))
+    AND {relations} {limits}""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'partition_of', 'type': 'tag_not_null'},
+        {'name': 'relation.partitions', 'type': 'gauge'},
+    ],
+}
+
 # We used to rely on pg_stat_user_tables to get tuples and scan metrics
 # However, using this view is inefficient as it groups by aggregation on oid and schema
 # behind the hood, leading to possible temporary bytes being written to handle the sort.
@@ -419,7 +442,7 @@ INDEX_BLOAT = {
 }
 
 RELATION_METRICS = [STATIO_METRICS]
-DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS, LOCK_METRICS]
+DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, QUERY_PG_PARTITIONED, IDX_METRICS, LOCK_METRICS]
 
 
 class RelationsManager(object):

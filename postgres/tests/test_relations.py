@@ -219,6 +219,58 @@ def test_partition_relation(aggregator, integration_check, pg_instance):
         aggregator.assert_metric("postgresql.toast_size", value=8192, count=1, tags=part_2_tags)
         aggregator.assert_metric("postgresql.total_size", value=172032, count=1, tags=part_2_tags)
 
+    parent_tags = _get_expected_tags(check, pg_instance, db=pg_instance["dbname"], table="test_part", schema="public")
+    aggregator.assert_metric("postgresql.relation.partitions", value=2, count=1, tags=parent_tags)
+    aggregator.assert_metric("postgresql.table_size", count=0, tags=parent_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+@requires_over_11
+def test_nested_partition_relation(aggregator, integration_check, pg_instance):
+    conn = _get_superconn(pg_instance)
+    with conn.cursor() as cursor:
+        cursor.execute("DROP TABLE IF EXISTS test_nested")
+        cursor.execute("CREATE TABLE test_nested (id int, scope text, at date) PARTITION BY LIST (scope)")
+        cursor.execute(
+            "CREATE TABLE test_nested_default PARTITION OF test_nested"
+            " FOR VALUES IN ('default') PARTITION BY RANGE (at)"
+        )
+        cursor.execute(
+            "CREATE TABLE test_nested_default_2025 PARTITION OF test_nested_default"
+            " FOR VALUES FROM ('2025-01-01') TO ('2026-01-01')"
+        )
+        cursor.execute(
+            "CREATE TABLE test_nested_default_2026 PARTITION OF test_nested_default"
+            " FOR VALUES FROM ('2026-01-01') TO ('2027-01-01')"
+        )
+        cursor.execute("CREATE TABLE test_nested_other PARTITION OF test_nested FOR VALUES IN ('other')")
+    try:
+        pg_instance["relations"] = [{"relation_regex": "test_nested.*"}]
+        check = integration_check(pg_instance)
+        check.check(pg_instance)
+
+        def tags(table, partition_of=None):
+            parent = {"partition_of": partition_of} if partition_of else {}
+            return _get_expected_tags(
+                check, pg_instance, db=pg_instance["dbname"], table=table, schema="public", **parent
+            )
+
+        aggregator.assert_metric("postgresql.relation.partitions", value=2, count=1, tags=tags("test_nested"))
+        aggregator.assert_metric(
+            "postgresql.relation.partitions", value=2, count=1, tags=tags("test_nested_default", "test_nested")
+        )
+        aggregator.assert_metric("postgresql.relation.partitions", count=2)
+        aggregator.assert_metric(
+            "postgresql.relation.tuples", count=1, tags=tags("test_nested_default_2025", "test_nested_default")
+        )
+        aggregator.assert_metric("postgresql.relation.tuples", count=1, tags=tags("test_nested_other", "test_nested"))
+        aggregator.assert_metric("postgresql.relation.tuples", count=0, tags=tags("test_nested_default", "test_nested"))
+    finally:
+        with conn.cursor() as cursor:
+            cursor.execute("DROP TABLE IF EXISTS test_nested")
+        conn.close()
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
