@@ -1,0 +1,1 @@
+Add optional `retain_absent_keys` and `max_size` parameters to `StatementMetrics` so a key missing from one collection keeps its previous reading instead of being dropped.

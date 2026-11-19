@@ -1,0 +1,1 @@
+Fix `sqlserver.queries.*` reporting a cached plan lifetime counter as a single interval value by taking deltas per query plan hash.
