@@ -156,10 +156,12 @@ class EventFileReader:
                 first_batch = cursor.fetchmany(EVENT_FILE_FETCH_BATCH_SIZE)
             except Exception as e:
                 raise_if_cancelled(self._cancel_event)
-                if is_target_read_denied(e):
+                # Checked first, as the error of a gone file holds its path, which can match a denied read's error.
+                checkpoint_file_gone = self._checkpoint_file_gone(cursor, position, e)
+                if not checkpoint_file_gone and is_target_read_denied(e):
                     # Not retried or recovered from, so the handler reports it. The checkpoint stays.
                     raise
-                if not self._checkpoint_file_gone(cursor, position, e):
+                if not checkpoint_file_gone:
                     self._log.warning(
                         "Failed to read %s after %s, retrying at the next run: %s",
                         self._session_name,
