@@ -348,7 +348,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:n8n.active.workflow.count{$host}",
+                      "query": "max:n8n.active.workflow.count{$host}",
                       "aggregator": "last"
                     }
                   ],
@@ -3270,7 +3270,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:n8n.workflows.total{*}",
+                      "query": "max:n8n.workflows.total{*}",
                       "aggregator": "last"
                     }
                   ],
