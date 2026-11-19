@@ -10,6 +10,8 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.datadog_cluster_agent import DatadogClusterAgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
+from .conftest import mock_metrics_response
+
 NAMESPACE = 'datadog.cluster_agent'
 
 METRICS = [
@@ -96,7 +98,10 @@ def test_check(aggregator, instance, mock_metrics_endpoint):
 
     for metric in METRICS:
         aggregator.assert_metric(NAMESPACE + '.' + metric)
-        aggregator.assert_metric_has_tag_prefix(NAMESPACE + '.' + metric, 'is_leader:')
+
+    for stub in _submitted(aggregator):
+        has_leader_tag = any(tag.startswith('is_leader:') for tag in stub.tags)
+        assert has_leader_tag != (stub.type == aggregator.MONOTONIC_COUNT), stub
 
     aggregator.assert_metric(
         NAMESPACE + '.metadata_streaming.history_resyncs',
@@ -106,6 +111,36 @@ def test_check(aggregator, instance, mock_metrics_endpoint):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_leadership_change_keeps_counter_contexts(aggregator, instance, metrics_text):
+    # Regression test: a leadership change used to create new counter contexts, flushing each counter's lifetime
+    # total as a single delta.
+    check = DatadogClusterAgentCheck('datadog_cluster_agent', {}, [instance])
+    as_follower = metrics_text.replace('is_leader="true"', 'is_leader="false"')
+
+    with mock_metrics_response(as_follower):
+        check.check(instance)
+        check.check(instance)
+    follower_stubs = _submitted(aggregator)
+    aggregator.reset()
+
+    # Metrics listed before `leader_election_is_leader` pick up the new value one scrape later.
+    with mock_metrics_response(metrics_text):
+        check.check(instance)
+        check.check(instance)
+    leader_stubs = _submitted(aggregator)
+
+    assert _monotonic_contexts(aggregator, follower_stubs) == _monotonic_contexts(aggregator, leader_stubs)
+    aggregator.assert_metric(NAMESPACE + '.go.goroutines', tags=['is_leader:true'])
+
+
+def _submitted(aggregator):
+    return [stub for name in aggregator.metric_names for stub in aggregator.metrics(name)]
+
+
+def _monotonic_contexts(aggregator, stubs):
+    return {(stub.name, tuple(sorted(stub.tags))) for stub in stubs if stub.type == aggregator.MONOTONIC_COUNT}
 
 
 # Minimal E2E testing

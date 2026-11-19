@@ -1226,7 +1226,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:datadog.cluster_agent.datadog.requests{$cluster, $namespace, $leader } by {status}.as_count()"
+                                            "query": "sum:datadog.cluster_agent.datadog.requests{$cluster, $namespace} by {status}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2146,7 +2146,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:datadog.cluster_agent.autoscaling.workload.horizontal_scaling_actions{$cluster ,$leader,namespace:$namespace.value} by {autoscaler_name,status}.as_count()"
+                                            "query": "sum:datadog.cluster_agent.autoscaling.workload.horizontal_scaling_actions{$cluster,namespace:$namespace.value} by {autoscaler_name,status}.as_count()"
                                         }
                                     ],
                                     "formulas": [

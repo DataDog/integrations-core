@@ -91,6 +91,14 @@ DEFAULT_METRICS = {
     'workloadmeta_subscribers': 'workloadmeta.subscribers',
 }
 
+LEADER_TAG_PREFIX = 'is_leader:'
+
+
+def _without_leader_tag(tags):
+    if not tags:
+        return tags
+    return [tag for tag in tags if not tag.startswith(LEADER_TAG_PREFIX)]
+
 
 class DatadogClusterAgentCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
@@ -117,4 +125,18 @@ class DatadogClusterAgentCheck(OpenMetricsBaseCheck):
                 }
             },
             default_namespace='datadog.cluster_agent',
+        )
+
+    # A leadership change flips `is_leader` on every series the pod reports. For counters, the new tag set is a new
+    # context, so its first value (the pod's lifetime total) would be flushed as a single delta.
+    def monotonic_count(self, name, value, tags=None, *args, **kwargs):
+        super(DatadogClusterAgentCheck, self).monotonic_count(name, value, _without_leader_tag(tags), *args, **kwargs)
+
+    def submit_histogram_bucket(
+        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, *args, **kwargs
+    ):
+        if monotonic:
+            tags = _without_leader_tag(tags)
+        super(DatadogClusterAgentCheck, self).submit_histogram_bucket(
+            name, value, lower_bound, upper_bound, monotonic, hostname, tags, *args, **kwargs
         )
