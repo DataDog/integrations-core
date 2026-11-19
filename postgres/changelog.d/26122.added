@@ -1,0 +1,1 @@
+Report `postgresql.relation.partitions` with a `partition_of` tag for every partitioned table, so nested partition trees can be reconstructed.
