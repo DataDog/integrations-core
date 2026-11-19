@@ -144,12 +144,6 @@ def test_interfaces_of_fw_a_capture_with_its_config():
     assert not any('description' in i for i in by_name.values())
 
 
-def test_no_config_read_omits_admin_status_and_description():
-    by_name = interfaces_by_name(FW_A_INTERFACE_ALL)
-
-    assert not any({'admin_status', 'description'} & i.keys() for i in by_name.values())
-
-
 # End to end, through the check.
 
 

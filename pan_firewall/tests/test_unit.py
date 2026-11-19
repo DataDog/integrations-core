@@ -15,7 +15,7 @@ from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_
 from datadog_checks.pan_firewall.collectors.routing import OSPF_NEIGHBOR_CMD
 from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError
-from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
+from datadog_checks.pan_firewall.xml_utils import num, parse_response
 
 from .common import (
     CREDENTIALS,
@@ -95,10 +95,6 @@ def test_num_never_raises(xml, path, expected):
     assert num(None if xml is None else ET.fromstring(xml), path) == expected
 
 
-def test_text_on_missing_element_is_the_default():
-    assert text(None, 'v', 'fallback') == 'fallback'
-
-
 def test_fixtures_hold_no_secrets():
     files = [p for p in FIXTURES.rglob('*') if p.is_file()]
     assert files
@@ -112,11 +108,6 @@ def test_fixtures_hold_no_secrets():
 
 
 FIREWALLS = {name: ip for ip, name in FIREWALL_SETS.items()}
-
-
-def new_static_check():
-    instance = {'firewalls': list(FIREWALLS.values()), 'firewall_credentials': CREDENTIALS}
-    return PanFirewallCheck('pan_firewall', {}, [instance])
 
 
 # Each optional collector: its default, and whether a request is one of its own.

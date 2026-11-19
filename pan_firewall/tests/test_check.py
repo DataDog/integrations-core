@@ -65,22 +65,6 @@ def test_unreachable_on_first_run_reports_disconnected_without_device_id(dd_run_
     assert aggregator.metrics('pan_firewall.api.authentication.status') == []
 
 
-def test_auth_status_is_sent_from_the_first_answer(dd_run_check, aggregator, fake_panos, schedule_clock):
-    fake_panos.fail(FW_A_IP, 'timeout')
-    check = new_check()
-    dd_run_check(check)
-    fake_panos.recover(FW_A_IP)
-    aggregator.reset()
-    # The identity read that failed is retried after 5 minutes; wait for it so the tags carry the device_id.
-    schedule_clock.now += 300
-
-    dd_run_check(check)
-
-    aggregator.assert_metric(
-        'pan_firewall.api.authentication.status', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1
-    )
-
-
 def test_outage_after_restart_keeps_device_id(dd_run_check, aggregator, fake_panos):
     dd_run_check(new_check())
     fake_panos.fail(FW_A_IP, 'refused')

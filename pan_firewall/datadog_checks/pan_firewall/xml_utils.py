@@ -30,13 +30,13 @@ def check_response(root: Element) -> Element:
     return root
 
 
-def text(elem: Element | None, path: str, default: str | None = None) -> str | None:
-    """The stripped text at `path`, or `default` if absent or empty."""
+def text(elem: Element | None, path: str) -> str | None:
+    """The stripped text at `path`, or None if absent or empty."""
     if elem is None:
-        return default
+        return None
     value = elem.findtext(path)
     if value is None or not value.strip():
-        return default
+        return None
     return value.strip()
 
 

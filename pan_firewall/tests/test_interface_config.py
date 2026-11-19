@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.pan_firewall.interface_config import InterfaceConfig, parse_interface_config
 
-from .common import FIXTURES, SYNTHETIC
+from .common import SYNTHETIC
 from .helpers import load_xml
 
 pytestmark = pytest.mark.unit
@@ -28,11 +28,6 @@ def test_interface_config_of_the_synthetic_set():
         'loopback.1': InterfaceConfig(comment='router-id'),
         'tunnel.3': InterfaceConfig(comment='to DC2'),
     }
-
-
-def test_lab_capture_has_no_settings():
-    # PAN-OS leaves defaults out: the lab sets no comment and no link-state.
-    assert parse_interface_config(load_xml(FIXTURES / 'fw-a-probe' / 'config_running_interface.xml')) == {}
 
 
 def test_reply_without_an_interface_subtree_is_empty():

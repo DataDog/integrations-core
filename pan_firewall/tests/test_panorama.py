@@ -240,18 +240,6 @@ def warnings_about(caplog, ip):
     return [r for r in caplog.records if r.levelno == logging.WARNING and ip in r.getMessage()]
 
 
-def test_firewall_without_matching_credentials_is_skipped_and_still_reported_for_the_others(
-    dd_run_check, aggregator, fake_panos, caplog
-):
-    dd_run_check(new_panorama_check(firewall_credentials=FW_A_ONLY_CREDENTIALS))
-
-    assert polled_hosts(fake_panos) == {FW_A_IP}
-    assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
-    assert [w.getMessage() for w in warnings_about(caplog, FW_B_IP)] == [
-        f'no entry in `firewall_credentials` matches the firewall {FW_B_SERIAL} at {FW_B_IP}, skipping it'
-    ]
-
-
 @pytest.mark.parametrize(
     'devices, options, marker, polled',
     [

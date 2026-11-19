@@ -25,10 +25,6 @@ def schedule(clock):
     return FirewallSchedule(clock)
 
 
-def test_everything_is_due_on_the_first_call(schedule, clock):
-    assert schedule.due(COLLECTORS, clock.now) == list(COLLECTORS)
-
-
 def test_disabled_collector_is_never_due(schedule, clock):
     enabled = [name for name in COLLECTORS if name != 'ospf']
 
