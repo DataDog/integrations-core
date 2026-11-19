@@ -12,6 +12,7 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
+from ddev.ai.tools.http.response_store import ResponseStore
 from ddev.ai.tools.registry import ToolRegistry
 from tests.ai.config.utils import make_agent_config
 
@@ -26,13 +27,20 @@ def file_registry(policy) -> FileRegistry:
     return FileRegistry(policy=policy)
 
 
-def test_runtime_factory_delegates_agent_building_and_builds_tools(file_registry):
+@pytest.fixture
+def response_store(tmp_path) -> ResponseStore:
+    return ResponseStore(tmp_path / "responses")
+
+
+def test_runtime_factory_delegates_agent_building_and_builds_tools(file_registry, response_store):
     agent = MagicMock()
     provider = MagicMock()
     provider.build_agent.return_value = agent
     provider_registry = AgentProviderRegistry()
     provider_registry.register("custom", provider)
-    factory = AgentRuntimeFactory(provider_registry=provider_registry, file_registry=file_registry)
+    factory = AgentRuntimeFactory(
+        provider_registry=provider_registry, file_registry=file_registry, response_store=response_store
+    )
     config = make_agent_config(provider="custom", tools=["read_file"])
 
     runtime = build_runtime(factory, config, scope=AgentScope("p1", AgentRole.PHASE, "p1"))
@@ -47,12 +55,14 @@ def test_runtime_factory_delegates_agent_building_and_builds_tools(file_registry
     )
 
 
-def make_factory(file_registry: FileRegistry) -> AgentRuntimeFactory:
+def make_factory(file_registry: FileRegistry, response_store: ResponseStore) -> AgentRuntimeFactory:
     provider = MagicMock()
     provider.build_agent.return_value = MagicMock()
     provider_registry = AgentProviderRegistry()
     provider_registry.register("test", provider)
-    return AgentRuntimeFactory(provider_registry=provider_registry, file_registry=file_registry)
+    return AgentRuntimeFactory(
+        provider_registry=provider_registry, file_registry=file_registry, response_store=response_store
+    )
 
 
 # Opaque stand-in: build_runtime forwards it untouched and only the spawn tool stores it.
@@ -75,17 +85,19 @@ def build_runtime(
     )
 
 
-def test_build_runtime_uses_config_tools(file_registry):
+def test_build_runtime_uses_config_tools(file_registry, response_store):
     config = make_agent_config(provider="test", tools=["read_file"])
-    runtime = build_runtime(make_factory(file_registry), config, scope=AgentScope("p1", AgentRole.PHASE, "p1"))
+    runtime = build_runtime(
+        make_factory(file_registry, response_store), config, scope=AgentScope("p1", AgentRole.PHASE, "p1")
+    )
 
     assert len(runtime.tool_registry.definitions) == 1
     assert runtime.tool_registry.definitions[0]["name"] == "read_file"
 
 
-def test_build_runtime_propagates_context_to_tool_registry(file_registry, mocker):
+def test_build_runtime_propagates_context_to_tool_registry(file_registry, response_store, mocker):
     config = make_agent_config(provider="test", tools=["spawn_subagent", "spawn_identical_subagents"])
-    factory = make_factory(file_registry)
+    factory = make_factory(file_registry, response_store)
     scope = AgentScope(owner_id="p1", role=AgentRole.PHASE, phase_id="p1")
     sentinel_process_factory = object()
     tool_registry = ToolRegistry([])
@@ -105,10 +117,11 @@ def test_build_runtime_propagates_context_to_tool_registry(file_registry, mocker
         file_registry=file_registry,
         agent_config=config,
         process_factory=sentinel_process_factory,
+        response_store=response_store,
     )
 
 
-async def test_runtime_factory_scopes_delete_file_tool_to_integration_root(tmp_path):
+async def test_runtime_factory_scopes_delete_file_tool_to_integration_root(tmp_path, response_store):
     policy = FileAccessPolicy(write_root=tmp_path, integration_name="My Integration")
     integration_root = policy._integration_root
     integration_root.mkdir()
@@ -117,7 +130,9 @@ async def test_runtime_factory_scopes_delete_file_tool_to_integration_root(tmp_p
     provider.build_agent.return_value = MagicMock()
     provider_registry = AgentProviderRegistry()
     provider_registry.register("test", provider)
-    factory = AgentRuntimeFactory(provider_registry=provider_registry, file_registry=file_registry)
+    factory = AgentRuntimeFactory(
+        provider_registry=provider_registry, file_registry=file_registry, response_store=response_store
+    )
     config = make_agent_config(provider="test", tools=["delete_file"])
     scope = AgentScope("p1", AgentRole.PHASE, "p1")
 
@@ -140,39 +155,43 @@ async def test_runtime_factory_scopes_delete_file_tool_to_integration_root(tmp_p
     assert not inside.exists()
 
 
-def test_build_runtime_reuses_shared_file_registry(file_registry):
+def test_build_runtime_reuses_shared_file_registry(file_registry, response_store):
     config = make_agent_config(provider="test", tools=["read_file", "edit_file"])
     scope = AgentScope(owner_id="owner", role=AgentRole.PHASE, phase_id="owner")
-    runtime = build_runtime(make_factory(file_registry), config, scope=scope)
+    runtime = build_runtime(make_factory(file_registry, response_store), config, scope=scope)
 
     for tool in runtime.tool_registry._tools.values():
         assert tool._registry is file_registry
         assert tool._owner_id == "owner"
 
 
-def test_build_runtime_native_tool_in_registry(file_registry):
+def test_build_runtime_native_tool_in_registry(file_registry, response_store):
     config = make_agent_config(provider="test", tools=["read_file", "web_search"])
-    runtime = build_runtime(make_factory(file_registry), config, scope=AgentScope("p1", AgentRole.PHASE, "p1"))
+    runtime = build_runtime(
+        make_factory(file_registry, response_store), config, scope=AgentScope("p1", AgentRole.PHASE, "p1")
+    )
 
     assert runtime.tool_registry.native_tool_names == ("web_search",)
     assert len(runtime.tool_registry.definitions) == 1
     assert runtime.tool_registry.definitions[0]["name"] == "read_file"
 
 
-def test_build_runtime_no_native_tools_empty_list(file_registry):
+def test_build_runtime_no_native_tools_empty_list(file_registry, response_store):
     config = make_agent_config(provider="test", tools=["read_file"])
-    runtime = build_runtime(make_factory(file_registry), config, scope=AgentScope("p1", AgentRole.PHASE, "p1"))
+    runtime = build_runtime(
+        make_factory(file_registry, response_store), config, scope=AgentScope("p1", AgentRole.PHASE, "p1")
+    )
 
     assert runtime.tool_registry.native_tool_names == ()
 
 
-async def test_shared_registry_does_not_share_parent_read_authorization(file_registry, tmp_path):
+async def test_shared_registry_does_not_share_parent_read_authorization(file_registry, tmp_path, response_store):
     config = make_agent_config(provider="test", tools=[])
     path = tmp_path / "file.txt"
     path.write_text("before", encoding="utf-8")
     file_registry.record("parent", str(path), "before")
 
-    factory = make_factory(file_registry)
+    factory = make_factory(file_registry, response_store)
     child_config = config.model_copy(update={"tools": ["edit_file"]})
     child_scope = AgentScope(owner_id="parent.sub.001-child", role=AgentRole.SUBAGENT, phase_id="parent")
     runtime = build_runtime(factory, child_config, system_prompt="sys", scope=child_scope)
