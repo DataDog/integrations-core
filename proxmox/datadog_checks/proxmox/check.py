@@ -4,12 +4,18 @@
 
 import re
 from collections.abc import Callable
+from json import JSONDecodeError
 from typing import Any, cast
-
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientInvalidURLError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
+from datadog_checks.base.utils.http_protocol import HTTPResponse
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.proxmox.config_models import ConfigMixin
 
@@ -31,7 +37,14 @@ from .constants import (
 from .resource_filters import create_resource_filter, is_resource_collected_by_filters
 
 NULL_DEFAULT = object()
-API_ERRORS = (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError, CheckException)
+HTTP_ERRORS = (
+    HTTPClientStatusError,
+    HTTPClientInvalidURLError,
+    HTTPClientConnectionError,
+    HTTPClientTimeoutError,
+    JSONDecodeError,
+)
+API_ERRORS = (*HTTP_ERRORS, CheckException)
 
 
 def resource_type_for_event_type(event_type):
@@ -44,6 +57,7 @@ def resource_type_for_event_type(event_type):
 
 class ProxmoxCheck(AgentCheck, ConfigMixin):
     HA_SUPPORTED = True
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'proxmox'
 
     def __init__(self, name, init_config, instances):
@@ -182,7 +196,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
 
     def _response_data[T](
         self,
-        response: Any,
+        response: HTTPResponse,
         url: str,
         expected_type: type[T],
         null_default: T | object = NULL_DEFAULT,
@@ -192,12 +206,12 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             error = f"Proxmox API returned HTTP {response.status_code} for {url}"
             if detail := self._error_detail(response):
                 error = f"{error}: {detail}"
-            raise HTTPError(error, response=response)
+            raise HTTPClientStatusError(error, response=response)
 
         return self._extract_data(response.json(), url, expected_type, null_default)
 
     @staticmethod
-    def _error_detail(response: Any) -> str | None:
+    def _error_detail(response: HTTPResponse) -> str | None:
         """Return the Proxmox error message from an error response, falling back to the HTTP reason."""
         try:
             body = response.json()
@@ -213,7 +227,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             hostname_response = self.http.get(url)
             hostname_json = hostname_response.json()
             hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", vm_name)
-        except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError, AttributeError) as e:
+        except (*HTTP_ERRORS, AttributeError) as e:
             self.log.info(
                 "Failed to get hostname for vm %s on node %s; endpoint: %s; %s",
                 vm_id,

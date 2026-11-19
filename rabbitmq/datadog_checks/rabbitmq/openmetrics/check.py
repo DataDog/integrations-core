@@ -8,6 +8,7 @@ from . import metrics
 
 class RabbitMQOpenMetrics(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = "rabbitmq"
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 

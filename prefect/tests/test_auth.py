@@ -1,10 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from base64 import b64encode
-
 import pytest
-from requests import Response
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.prefect import PrefectCheck
@@ -23,25 +20,13 @@ pytestmark = pytest.mark.unit
         ({}, None),
     ],
 )
-def test_authentication_header(credentials: dict[str, str], expected: str | None, mocker):
+def test_authentication_credentials(credentials: dict[str, str], expected: str | None):
     # A secured Prefect server must receive the same credentials in either supported configuration format.
-    url = 'https://prefect.example/api'
-    check = PrefectCheck('prefect', {}, [{'prefect_url': url, **credentials}])
+    check = PrefectCheck('prefect', {}, [{'prefect_url': 'https://prefect.example/api', **credentials}])
     check.run_check_initializations()
-    response = Response()
-    response.status_code = 200
-    response._content = b'true'
-    send = mocker.patch('requests.sessions.Session.send', return_value=response)
 
-    assert check.client.get('/health') is True
-
-    request = send.call_args.args[0]
-    assert request.url == f'{url}/health'
-    header = request.headers.get('Authorization')
-    if expected is None:
-        assert header is None
-    else:
-        assert header == f'Basic {b64encode(expected.encode()).decode()}'
+    assert check.client.http is check.http
+    assert check.http.options['auth'] == (None if expected is None else tuple(expected.split(':', 1)))
 
 
 @pytest.mark.parametrize(
@@ -55,12 +40,11 @@ def test_authentication_header(credentials: dict[str, str], expected: str | None
         {'prefect_userpass': 'platform:secret', 'auth_type': 'digest'},
     ],
 )
-def test_invalid_authentication_rejected(credentials: dict[str, str], mocker):
+def test_invalid_authentication_rejected(credentials: dict[str, str], fake_http):
     check = PrefectCheck('prefect', {}, [{'prefect_url': 'https://prefect.example/api', **credentials}])
-    send = mocker.patch('requests.sessions.Session.send')
 
     with pytest.raises(ConfigurationError) as error:
         check.run_check_initializations()
 
     assert 'secret' not in str(error.value)
-    send.assert_not_called()
+    assert fake_http.requests == []
