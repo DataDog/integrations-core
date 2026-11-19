@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import copy
 import re
 import time
 from collections import Counter, OrderedDict
@@ -22,9 +21,8 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.health import SqlServerHealthEvent
-from datadog_checks.sqlserver.statements import obfuscate_xml_plan
+from datadog_checks.sqlserver.statements import build_plan_events
 from datadog_checks.sqlserver.utils import raise_if_cancelled
 
 from .base import EVENT_FILE_TARGET, XESessionBase, agent_check_getter
@@ -436,7 +434,7 @@ class QueryPlanEventsHandler(XESessionBase):
                 continue
             raise_if_cancelled(self._cancel_event)
             try:
-                plan_events = self._create_plan_events(cursor, event)
+                plan_events, plan_obfuscated = self._create_plan_events(cursor, event)
             except Exception as e:
                 raise_if_cancelled(self._cancel_event)
                 self._log.debug(
@@ -447,20 +445,15 @@ class QueryPlanEventsHandler(XESessionBase):
             if not self._seen_plans_ratelimiter.acquire(key):
                 self._statuses[("rate_limited", event_name)] += 1
                 continue
-            self._statuses[("collected", event_name)] += 1
+            # A plan that fails to obfuscate is sent without its definition, with a collection error.
+            self._statuses[("collected" if plan_obfuscated else "obfuscate_xml_plan_error", event_name)] += 1
             yield from plan_events
 
-    def _create_plan_events(self, cursor: Any, event: dict) -> list[dict]:
+    def _create_plan_events(self, cursor: Any, event: dict) -> tuple[list[dict], bool]:
+        """The plan event of an execution, and its raw copy, and whether its plan was obfuscated."""
         raw_plan = event['showplan_xml']
-        try:
-            obfuscated_plan = obfuscate_xml_plan(raw_plan, self._config.obfuscator_options)
-        except Exception:
-            if self._config.log_unobfuscated_plans:
-                self._log.warning("Failed to obfuscate plan=[%s]", repr(raw_plan))
-            raise
-
         raw_statement = self._statement_text(cursor, event)
-        collection_errors = None
+        collection_errors = []
         obfuscated_statement = query_signature = None
         metadata: dict = {}
         if raw_statement:
@@ -476,9 +469,9 @@ class QueryPlanEventsHandler(XESessionBase):
             query_signature = compute_sql_signature(obfuscated_statement)
             metadata = statement['metadata']
         else:
-            collection_errors = [
+            collection_errors.append(
                 {'code': "statement_text_unavailable", 'message': "the statement is no longer in the plan cache"}
-            ]
+            )
 
         database_name = event.get('database_name') or None
         tags = list(self._check.tag_manager.get_tags())
@@ -487,53 +480,39 @@ class QueryPlanEventsHandler(XESessionBase):
         # The per-execution fields, named as in the other XE events.
         execution = self._normalize_event(event)
         execution.pop('xe_type', None)
-        plan_event = {
-            "host": self._check.reported_hostname,
-            "database_instance": self._check.database_identifier,
-            "ddagentversion": self._check.agent_version,
-            "ddsource": "sqlserver",
-            "ddtags": ",".join(tags),
-            "timestamp": time.time() * 1000,
-            "dbm_type": "plan",
-            "cloud_metadata": self._check.cloud_metadata,
-            "sqlserver_version": self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-            "sqlserver_engine_edition": self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            "service": self._config.service,
-            "db": {
-                "instance": database_name,
-                "plan": {
-                    "definition": obfuscated_plan,
-                    "signature": event.get('query_plan_hash'),
-                    "type": "real",
-                    "source": PLAN_SOURCES[event['event_name']],
-                    "collection_errors": collection_errors,
-                },
-                "query_signature": query_signature,
-                "statement": obfuscated_statement,
-                "metadata": {
-                    "tables": metadata.get('tables'),
-                    "commands": metadata.get('commands'),
-                    "comments": metadata.get('comments'),
-                },
+        obfuscation_errors: list[Exception] = []
+        plan_events = build_plan_events(
+            self._check,
+            self._config,
+            raw_plan=raw_plan,
+            plan={
+                "signature": event.get('query_plan_hash'),
+                "type": "real",
+                "source": PLAN_SOURCES[event['event_name']],
             },
-            "sqlserver": {
+            instance=database_name,
+            db={"query_signature": query_signature, "statement": obfuscated_statement},
+            metadata={
+                "tables": metadata.get('tables'),
+                "commands": metadata.get('commands'),
+                "comments": metadata.get('comments'),
+            },
+            sqlserver={
                 "query_hash": event.get('query_hash'),
                 "query_plan_hash": event.get('query_plan_hash'),
                 "plan_handle": event.get('plan_handle'),
                 **execution,
             },
-        }
-        if not self._collect_raw_query:
-            return [plan_event]
-        raw_plan_event = copy.deepcopy(plan_event)
-        raw_plan_event["dbm_type"] = "rqp"  # raw query plan
-        raw_plan_event["db"]["plan"]["definition"] = raw_plan
-        raw_plan_event["db"]["statement"] = raw_statement
-        # query_plan_hash only identifies the plan shape, so the raw plan's own hash links the two events.
-        raw_plan_signature = compute_sql_signature(raw_plan)
-        raw_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
-        plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
-        return [raw_plan_event, plan_event]
+            tags=tags,
+            collect_raw=self._collect_raw_query,
+            log_context="query_hash=[{}] query_plan_hash=[{}] plan_handle=[{}]".format(
+                event.get('query_hash'), event.get('query_plan_hash'), event.get('plan_handle')
+            ),
+            on_obfuscation_error=obfuscation_errors.append,
+            collection_errors=collection_errors,
+            raw_db={"statement": raw_statement},
+        )
+        return plan_events, not obfuscation_errors
 
     def _statement_text(self, cursor: Any, event: dict) -> str | None:
         """

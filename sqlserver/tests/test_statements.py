@@ -11,7 +11,7 @@ import re
 import time
 from collections import namedtuple
 from concurrent.futures.thread import ThreadPoolExecutor
-from copy import copy
+from copy import copy, deepcopy
 from unittest.mock import ANY
 
 import mock
@@ -19,7 +19,8 @@ import pytest
 from lxml import etree as ET
 
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
@@ -30,6 +31,7 @@ from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_STANDARD,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_SERVERNAME,
+    STATIC_INFO_VERSION,
 )
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
@@ -1556,3 +1558,103 @@ def test_plan_lookup_failure_during_cancellation_propagates(dbm_instance):
         pytest.raises(Exception, match='Job loop cancelled'),
     ):
         list(check.statement_metrics._collect_plans([_plan_row('cancelled')], mock.Mock(), float('inf')))
+
+
+PLAN_EVENT_TIMESTAMP = 1_800_000_000.0
+PAYLOAD_RAW_PLAN = '<ShowPlanXML><QueryPlan CompileTime="1"/></ShowPlanXML>'
+
+
+def _expected_plan_event(check, row, definition, collection_errors, is_plan_encrypted) -> dict:
+    """A plan event of `_collect_plans`, with its fields in the order they're serialized."""
+    return {
+        "host": check.reported_hostname,
+        "database_instance": check.database_identifier,
+        "ddagentversion": check.agent_version,
+        "ddsource": "sqlserver",
+        "ddtags": ",".join(check.tag_manager.get_tags() + ["db:master"]),
+        "timestamp": PLAN_EVENT_TIMESTAMP * 1000,
+        "dbm_type": "plan",
+        "cloud_metadata": check.cloud_metadata,
+        "sqlserver_version": check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+        "sqlserver_engine_edition": check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+        "service": check._config.service,
+        "db": {
+            "instance": "master",
+            "plan": {
+                "definition": definition,
+                "signature": row['query_plan_hash'],
+                "collection_errors": collection_errors,
+            },
+            "query_signature": None if row['is_proc'] else row['query_signature'],
+            "procedure_signature": row['procedure_signature'],
+            "procedure_name": row['procedure_name'],
+            "statement": row['procedure_text'] if row['is_proc'] else row['text'],
+            "metadata": {"tables": row['dd_tables'], "commands": row['dd_commands'], "comments": row['dd_comments']},
+        },
+        "sqlserver": {
+            "is_plan_encrypted": is_plan_encrypted,
+            "is_statement_encrypted": row['is_encrypted'],
+            "query_hash": row['query_hash'],
+            "query_plan_hash": row['query_plan_hash'],
+            "plan_handle": row['plan_handle'],
+            "execution_count": row.get('execution_count'),
+            "total_elapsed_time": row.get('total_elapsed_time'),
+        },
+    }
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('collect_raw_query_statement', [False, True], ids=['plan', 'raw_copy'])
+@pytest.mark.parametrize('case', ['statement', 'procedure', 'obfuscation_error', 'encrypted'])
+def test_collect_plans_payload(aggregator, dbm_instance, case, collect_raw_query_statement):
+    """The serialized plan events, and their raw copies, have the fields and order the backend reads."""
+    if collect_raw_query_statement:
+        dbm_instance['collect_raw_query_statement'] = {'enabled': True}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    check.static_info_cache[STATIC_INFO_VERSION] = 'Microsoft SQL Server 2022'
+    check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = ENGINE_EDITION_ENTERPRISE
+    row = _plan_row('payload', plan_handle='proc-plan-handle' if case == 'procedure' else None)
+    row.update(execution_count=3, total_elapsed_time=42)
+    if case == 'procedure':
+        row.update(procedure_text='CREATE PROCEDURE p AS SELECT 1', procedure_signature='proc-sig', procedure_name='p')
+    if case == 'encrypted':
+        row['is_encrypted'] = True
+    raw_plan, is_plan_encrypted = (None, True) if case == 'encrypted' else (PAYLOAD_RAW_PLAN, False)
+    definition = obfuscate_xml_plan(raw_plan, check._config.obfuscator_options) if raw_plan else None
+    collection_errors = None
+    obfuscate_patch = mock.patch('datadog_checks.sqlserver.statements.obfuscate_xml_plan', wraps=obfuscate_xml_plan)
+    if case == 'obfuscation_error':
+        definition = None
+        collection_errors = [{'code': 'obfuscate_xml_plan_error', 'message': 'bad plan'}]
+        obfuscate_patch = mock.patch(
+            'datadog_checks.sqlserver.statements.obfuscate_xml_plan', side_effect=ValueError('bad plan')
+        )
+    if case == 'encrypted':
+        collection_errors = [{'code': 'plan_encrypted', 'message': 'cannot collect encrypted plan'}]
+
+    with (
+        mock.patch.object(check.statement_metrics, '_load_plan', return_value=(raw_plan, is_plan_encrypted)),
+        mock.patch('datadog_checks.sqlserver.statements.time.time', return_value=PLAN_EVENT_TIMESTAMP),
+        obfuscate_patch,
+    ):
+        events = list(check.statement_metrics._collect_plans([row], mock.Mock(), float('inf')))
+
+    plan_event = _expected_plan_event(check, row, definition, collection_errors, is_plan_encrypted)
+    expected = [plan_event]
+    if collect_raw_query_statement:
+        raw_plan_event = deepcopy(plan_event)
+        raw_plan_event['dbm_type'] = 'rqp'
+        raw_plan_event['db']['plan']['definition'] = raw_plan
+        if raw_plan:
+            plan_event['db']['plan']['raw_signature'] = compute_sql_signature(raw_plan)
+            raw_plan_event['db']['plan']['raw_signature'] = compute_sql_signature(raw_plan)
+        expected = [raw_plan_event, plan_event]
+    assert [json.dumps(event, default=default_json_event_encoding) for event in events] == [
+        json.dumps(event, default=default_json_event_encoding) for event in expected
+    ]
+    if case == 'obfuscation_error':
+        aggregator.assert_metric(
+            'dd.sqlserver.statements.error',
+            value=1,
+            tags=check.debug_tags() + ["error:obfuscate-xml-plan-<class 'ValueError'>"],
+        )
