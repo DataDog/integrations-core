@@ -164,7 +164,6 @@ facets:
     name: Finding Information Created Time
     path: ocsf.finding_info.created_time
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Finding Info Title
@@ -235,13 +234,11 @@ facets:
     name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
-  - facetType: range
-    groups:
+  - groups:
       - OCSF
     name: Event Time
     path: ocsf.time
     source: log
-    type: integer
 pipeline:
   type: pipeline
   name: Check Point Harmony Email & Collaboration
@@ -527,6 +524,23 @@ pipeline:
             matchRules: |
               frac6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.created_time}
               frac0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.created_time}
+        - type: grok-parser
+          name: Parse `event.entity.entity_info.entity_updated` to `ocsf.finding_info.modified_time`
+          enabled: true
+          source: event.entity.entity_info.entity_updated
+          samples:
+            - '2026-11-06T18:29:08.331334Z'
+          grok:
+            supportRules: ''
+            matchRules: |
+              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.finding_info.modified_time}
+              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.finding_info.modified_time}
+        - type: string-builder-processor
+          name: Add risk details
+          enabled: true
+          template: '%{event.security_event.entity_payload.event_metadata.ap_detection_reasons}'
+          target: ocsf.risk_details
+          replaceMissing: false
         - type: attribute-remapper
           name: Map `event.security_event.saas_info.entity_id` to `ocsf.resource.uid`
           enabled: true
@@ -544,6 +558,16 @@ pipeline:
             - event.security_event.saas_info.entity_type
           sourceType: attribute
           target: ocsf.resource.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.subject` to `ocsf.resource.name`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.subject
+          sourceType: attribute
+          target: ocsf.resource.name
           targetType: attribute
           preserveSource: true
           overrideOnConflict: true
@@ -612,6 +636,24 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.to` to `ocsf.evidence.email.to_mailboxes`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.to
+          sourceType: attribute
+          target: ocsf.evidence.email.to_mailboxes
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Append `event.entity.entity_payload.orig_recipient` to `ocsf.evidence.email.delivered_to_list`
+          enabled: true
+          operation:
+            source: event.entity.entity_payload.orig_recipient
+            target: ocsf.evidence.email.delivered_to_list
+            preserveSource: true
+            type: append
         - type: attribute-remapper
           name: Map `event.entity.entity_payload.cc` to `ocsf.evidence.email.cc`
           enabled: true
@@ -776,10 +818,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: true
         - type: attribute-remapper
-          name: Map `event.security_event.saas_info.saas_actor_payload.email` to `ocsf.evidence.user.name`
+          name: Map `event.security_event.saas_info.saas_actor_payload.full_name` to `ocsf.evidence.user.name`
           enabled: true
           sources:
-            - event.security_event.saas_info.saas_actor_payload.email
+            - event.security_event.saas_info.saas_actor_payload.full_name
           sourceType: attribute
           target: ocsf.evidence.user.name
           targetType: attribute
@@ -931,6 +973,26 @@ pipeline:
             matchRules: |
               sentinel 0\.0\.0\.0
               valid %{ip:ocsf.evidence.src_endpoint.ip}
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.geo_city` to `ocsf.evidence.src_endpoint.location.city`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.geo_city
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.city
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.geo_region` to `ocsf.evidence.src_endpoint.location.region`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.geo_region
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.region
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
         - type: category-processor
           name: ocsf.evidence.src_endpoint.type_id
           enabled: true
@@ -1151,7 +1213,7 @@ pipeline:
                   name: Unknown
                   id: 0
                 - filter:
-                    query: '@event.security_event.entity_payload.current_state:(new OR New)'
+                    query: '@event.security_event.entity_payload.current_state:(new OR New OR detected OR Detected)'
                   name: New
                   id: 1
                 - filter:
@@ -1368,6 +1430,20 @@ pipeline:
               sources:
                 - ocsf.finding_info.created_time
               target: ocsf.finding_info.created_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.modified_time` to `ocsf.finding_info.modified_time`
+              sources:
+                - ocsf.finding_info.modified_time
+              target: ocsf.finding_info.modified_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.risk_details` to `ocsf.risk_details`
+              sources:
+                - ocsf.risk_details
+              target: ocsf.risk_details
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -1725,7 +1801,7 @@ pipeline:
                   name: Unknown
                   id: 0
                 - filter:
-                    query: '@event.security_event.entity_payload.current_state:(new OR New)'
+                    query: '@event.security_event.entity_payload.current_state:(new OR New OR detected OR Detected)'
                   name: New
                   id: 1
                 - filter:
@@ -1962,6 +2038,17 @@ pipeline:
             matchRules: |
               frac6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.created_time}
               frac0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.created_time}
+        - type: grok-parser
+          name: Parse `event.entity.entity_info.entity_updated` to `ocsf.finding_info.modified_time`
+          enabled: true
+          source: event.entity.entity_info.entity_updated
+          samples:
+            - '2026-11-06T18:29:08.331334Z'
+          grok:
+            supportRules: ''
+            matchRules: |
+              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.finding_info.modified_time}
+              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.finding_info.modified_time}
         - type: string-builder-processor
           name: Add DLP rule names
           enabled: true
@@ -2242,7 +2329,7 @@ pipeline:
                   name: Unknown
                   id: 0
                 - filter:
-                    query: '@event.security_event.entity_payload.current_state:(new OR New)'
+                    query: '@event.security_event.entity_payload.current_state:(new OR New OR detected OR Detected)'
                   name: New
                   id: 1
                 - filter:
@@ -2412,6 +2499,13 @@ pipeline:
               sources:
                 - ocsf.finding_info.created_time
               target: ocsf.finding_info.created_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.modified_time` to `ocsf.finding_info.modified_time`
+              sources:
+                - ocsf.finding_info.modified_time
+              target: ocsf.finding_info.modified_time
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
