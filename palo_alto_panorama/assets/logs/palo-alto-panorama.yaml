@@ -2312,7 +2312,7 @@ pipeline:
               _syslog_header (<%{integer}>)?(%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) %{notSpace}
             matchRules: |-
               kv_session (.*?[ |,])?sessionid=%{regex("[0-9]+"):ocsf.connection_info.session.uid}.*
-              csv_session (%{_syslog_header} )?[0-9]*,[^,]*,[^,]*,TRAFFIC,(?:(?:"[^"]*"|[^,]*),){18}%{regex("[0-9]+"):ocsf.connection_info.session.uid},.*
+              csv_session (%{_syslog_header} )?[0-9]*,[^,]*,[^,]*,TRAFFIC,(?:(?:"(?:[^"]|"")*"|[^,]*),){18}%{regex("[0-9]+"):ocsf.connection_info.session.uid},.*
         - type: arithmetic-processor
           name: Calculate `ocsf.duration` from `elapsed`
           enabled: true
