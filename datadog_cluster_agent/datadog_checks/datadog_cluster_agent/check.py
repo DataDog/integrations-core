@@ -156,12 +156,3 @@ class DatadogClusterAgentCheck(OpenMetricsBaseCheck):
             delta = value - previous[0]
 
         self.count(name, delta, tags=tags, hostname=hostname, device_name=device_name, raw=raw)
-
-    def submit_histogram_bucket(
-        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, *args, **kwargs
-    ):
-        if monotonic:
-            tags = _without_leader_tag(tags or [])
-        super(DatadogClusterAgentCheck, self).submit_histogram_bucket(
-            name, value, lower_bound, upper_bound, monotonic, hostname, tags, *args, **kwargs
-        )
