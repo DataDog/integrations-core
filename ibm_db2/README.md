@@ -227,39 +227,6 @@ not already have an authority that grants access, run this in each monitored dat
 GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_PKG_CACHE_STMT TO USER <DATADOG_USER>;
 ```
 
-#### Query activity
-
-Query activity collection is opt-in during preview. It observes in-flight statements independently
-of Query Metrics' package-cache counters and uses the same normalized query signatures.
-Snapshots include elapsed time, native execution identity, and available session context.
-Sampling can miss short statements; repeated observations describe the same running
-execution, and elapsed time is not completed-query duration. Collection defaults to 10 seconds
-and the minimum interval is one second.
-
-```yaml
-dbm: true
-query_activity:
-  enabled: true
-  collection_interval: 10
-```
-
-In addition to the existing monitoring permissions, the connection needs `CONNECT` and
-permission to execute these routines in each monitored database:
-
-```sql
-GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_ACTIVITY TO USER <DATADOG_USER>;
-GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_CONNECTION TO USER <DATADOG_USER>;
-GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_APPLICATION_HANDLE TO USER <DATADOG_USER>;
-```
-
-The reader selects the oldest local activities first, with limits of 1,000 rows, 16 KiB
-per SQL statement, and a 5-second statement timeout. Long statements are truncated at a
-valid UTF-8 boundary and marked `query_truncated: truncated`. Activity payloads have a
-20 MB limit on serialized size, matching query metrics.
-These output limits do not bound the monitoring function's internal scan. Successful idle
-polls emit empty snapshots; collection failures report feature health instead. Internal
-`dd.ibm_db2.query_activity.*` telemetry exposes cap hits and normalization drops.
-
 #### Disable automatic client reroute
 
 A direct address alone does not prevent the IBM driver from using an alternate server.
