@@ -5,7 +5,9 @@ from copy import deepcopy
 
 import mock
 import pytest
+import requests
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.marathon import Marathon
 
 from .common import INSTANCE_INTEGRATION
@@ -124,3 +126,31 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
         }
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://localhost:8080/v2/queue', **http_wargs)
+
+
+@pytest.mark.parametrize(
+    'extra_config, expected_timeout',
+    [
+        pytest.param({}, 5.0, id="default timeout"),
+        pytest.param({'read_timeout': 3}, 3.0, id="read_timeout"),
+    ],
+)
+def test_get_json_timeout_submits_critical(aggregator, extra_config, expected_timeout):
+    instance = deepcopy(INSTANCE_INTEGRATION)
+    instance.update(extra_config)
+    check = Marathon('marathon', {}, instances=[instance])
+    url = 'http://localhost:8080/v2/apps'
+
+    session = mock.MagicMock()
+    session.get.side_effect = requests.exceptions.ReadTimeout
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=session):
+        with pytest.raises(Exception, match='Timeout when hitting {}'.format(url)):
+            check.get_json(url, None)
+
+    aggregator.assert_service_check(
+        Marathon.SERVICE_CHECK_NAME,
+        status=AgentCheck.CRITICAL,
+        message='{} timed out after {} seconds.'.format(url, expected_timeout),
+        tags=['url:{}'.format(url)],
+        count=1,
+    )
