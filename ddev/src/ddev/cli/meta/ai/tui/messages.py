@@ -8,6 +8,8 @@ No widget imports — this module is safe to import anywhere in the TUI package.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from textual.message import Message
 
 from ddev.ai.agent.scope import AgentScope
@@ -43,6 +45,15 @@ class PhaseErrored(Message):
 
 class RunErrored(Message):
     """Fired when orchestration stops because a phase failed."""
+
+
+class InputDiverged(Message):
+    """Fired when a resumed run keeps a snapshot input whose source file has since changed."""
+
+    def __init__(self, name: str, snapshot_path: Path) -> None:
+        super().__init__()
+        self.name = name
+        self.snapshot_path = snapshot_path
 
 
 class ExecutionFailed(Message):
