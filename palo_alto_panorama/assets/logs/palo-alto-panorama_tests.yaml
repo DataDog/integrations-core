@@ -311,7 +311,7 @@ tests:
             type_id: 1
             uid: "9999"
             version: "AppThreat-0-0"
-          title: "9999"
+          title: "9999(9999)"
           uid: "7312400435275366420"
         firewall_rule:
           name: "Block URL and Apps"
@@ -2104,7 +2104,7 @@ tests:
             type_id: 1
             uid: "109010004"
             version: "AppThreat-9154-10270"
-          title: "Proxy:host-04.example.com"
+          title: "Proxy:host-04.example.com(109010004)"
           uid: "7675920106454133059"
         firewall_rule:
           name: "rule-02"
@@ -2244,7 +2244,7 @@ tests:
             type_id: 1
             uid: "9999"
             version: "AppThreat-0-0"
-          title: "9999"
+          title: "9999(9999)"
           uid: "7629135285335571214"
         firewall_rule:
           name: "rule-07"
@@ -2381,7 +2381,7 @@ tests:
             type_id: 1
             uid: "109010004"
             version: "AppThreat-9154-10270"
-          title: "Proxy:host-04.example.com"
+          title: "Proxy:host-04.example.com(109010004)"
           uid: "7692458174297510569"
         firewall_rule:
           name: "rule-08"
@@ -2522,7 +2522,7 @@ tests:
             type_id: 1
             uid: "99950"
             version: "AppThreat-9154-10270"
-          title: "Inline Cloud Analyzed SQL Injection Traffic Detection"
+          title: "Inline Cloud Analyzed SQL Injection Traffic Detection(99950)"
           uid: "7692468671212893711"
         firewall_rule:
           name: "rule-09"
@@ -3054,7 +3054,7 @@ tests:
             type_id: 1
             uid: "52209"
             version: "AppThreat-9172-10351"
-          title: "DER Encoded X509 Certificate"
+          title: "DER Encoded X509 Certificate(52209)"
           uid: "7705462235869186469"
         firewall_rule:
           name: "Example URL Exception Rule 1"
@@ -3191,7 +3191,7 @@ tests:
             type_id: 1
             uid: "8723"
             version: "AppThreat-0-0"
-          title: "TCP SYN with data"
+          title: "TCP SYN with data(8723)"
           uid: "7675920106542801317"
         is_alert: true
         metadata:
@@ -3318,7 +3318,7 @@ tests:
             type_id: 1
             uid: "8002"
             version: "AppThreat-0-0"
-          title: "SCAN: Host Sweep"
+          title: "SCAN: Host Sweep(8002)"
           uid: "7675920106543412254"
         is_alert: true
         metadata:
@@ -3640,7 +3640,7 @@ tests:
             type_id: 1
             uid: "52209"
             version: "AppThreat-9172-10351"
-          title: "DER Encoded X509 Certificate"
+          title: "DER Encoded X509 Certificate(52209)"
           uid: "7705462235869186469"
         firewall_rule:
           name: "Example URL Exception Rule 1"

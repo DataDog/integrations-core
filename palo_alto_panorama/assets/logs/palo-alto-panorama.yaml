@@ -2024,11 +2024,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `ocsf.finding_info.analytic.name`, `objectname`, `threatid` to `ocsf.finding_info.title`
+              name: Map `threatid`, `ocsf.finding_info.analytic.name`, `objectname` to `ocsf.finding_info.title`
               sources:
+                - threatid
                 - ocsf.finding_info.analytic.name
                 - objectname
-                - threatid
               target: ocsf.finding_info.title
               preserveSource: true
               overrideOnConflict: true
