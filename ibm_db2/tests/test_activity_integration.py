@@ -136,7 +136,7 @@ def test_query_activity_e2e(
                 row = matching[0]
                 assert row['elapsed_ns'] > 0
                 assert row['executable_id'] == hexlify(expected['executable_id']).decode('ascii')
-                assert row['dd_comments'] == ['ACTIVITY_E2E']
+                assert row['dd_comments'] == ['/* ACTIVITY_E2E */']
                 assert row['query_truncated'] == 'not_truncated'
             finally:
                 ibm_db.rollback(admin)
