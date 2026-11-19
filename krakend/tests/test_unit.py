@@ -16,9 +16,9 @@ from tests.types import InstanceBuilder
 
 
 @pytest.fixture
-def ready_check(check: KrakendCheck, dd_run_check: Callable, mock_http_response: Callable, aggregator: AggregatorStub):
+def ready_check(check: KrakendCheck, dd_run_check: Callable, fake_http_response: Callable, aggregator: AggregatorStub):
     mocked_metrics_path = Path(__file__).parent / "fixtures" / "metrics.txt"
-    mock_http_response(mocked_metrics_path.read_text())
+    fake_http_response(check.instance["openmetrics_endpoint"], mocked_metrics_path.read_text())
     dd_run_check(check)
     dd_run_check(check)
 

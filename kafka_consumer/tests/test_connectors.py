@@ -6,6 +6,8 @@ import copy
 import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.connectors import CONNECTOR_EVENT_TOPICS_MAX, TOPICS_FETCH_MAX_PER_RUN
@@ -285,14 +287,6 @@ def test_config_event_survives_topics_fetch_failure(run_connect_check, aggregato
     assert all(event['topics'] == [] for event in events)
 
 
-class FakeHttpError(Exception):
-    """Stand-in for a requests HTTPError carrying an HTTP status code."""
-
-    def __init__(self, status_code):
-        super().__init__(f"HTTP {status_code}")
-        self.response = mock.MagicMock(status_code=status_code)
-
-
 def test_topics_transient_failure_retried_next_run(run_connect_check):
     def get(url, **kwargs):
         if url.endswith('/topics'):
@@ -310,7 +304,7 @@ def test_topics_transient_failure_retried_next_run(run_connect_check):
 def test_topics_unsupported_endpoint_backed_off(run_connect_check):
     def get(url, **kwargs):
         if url.endswith('/topics'):
-            raise FakeHttpError(404)
+            raise HTTPClientStatusError('404 Client Error', response=FakeHTTPResponse(status_code=404))
         response = mock.MagicMock()
         response.json.return_value = {} if 'connector-plugins' in url else SAMPLE_CONNECTORS_RESPONSE
         return response

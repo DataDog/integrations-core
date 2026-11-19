@@ -16,6 +16,7 @@ class Kong(AgentCheck):
     """
 
     METRIC_PREFIX = 'kong.'
+    AGNOSTIC_HTTP_CLIENT = True
 
     HTTP_CONFIG_REMAPPER = {'ssl_validation': {'name': 'tls_verify'}}
 

@@ -17,6 +17,11 @@ from .common import (
 )
 
 
+def read_fixture(filename):
+    with open(get_fixture_path(filename), 'rb') as f:
+        return f.read()
+
+
 @pytest.mark.parametrize(
     'fixture_name, expected_metrics',
     [
@@ -26,8 +31,8 @@ from .common import (
         ('reports', REPORTS_METRICS),
     ],
 )
-def test_kyverno_mock_metrics(dd_run_check, aggregator, mock_http_response, fixture_name, expected_metrics):
-    mock_http_response(file_path=get_fixture_path(f'{fixture_name}_controller.txt'))
+def test_kyverno_mock_metrics(dd_run_check, aggregator, fake_http_response, fixture_name, expected_metrics):
+    fake_http_response(OM_MOCKED_INSTANCE['openmetrics_endpoint'], read_fixture(f'{fixture_name}_controller.txt'))
     check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
@@ -38,8 +43,8 @@ def test_kyverno_mock_metrics(dd_run_check, aggregator, mock_http_response, fixt
     aggregator.assert_service_check('kyverno.openmetrics.health', ServiceCheck.OK)
 
 
-def test_kyverno_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(status_code=503)
+def test_kyverno_mock_invalid_endpoint(dd_run_check, aggregator, fake_http_response):
+    fake_http_response(OM_MOCKED_INSTANCE['openmetrics_endpoint'], status_code=503)
     check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
     with pytest.raises(Exception):
         dd_run_check(check)
@@ -47,8 +52,8 @@ def test_kyverno_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_respo
     aggregator.assert_service_check('kyverno.openmetrics.health', ServiceCheck.CRITICAL)
 
 
-def test_kyverno_label_remap(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('remap_labels.txt'))
+def test_kyverno_label_remap(dd_run_check, aggregator, fake_http_response):
+    fake_http_response(OM_MOCKED_INSTANCE['openmetrics_endpoint'], read_fixture('remap_labels.txt'))
     check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
     relabeled_tags = ['kyverno_namespace:foo', 'kyverno_name:baz', 'go_version:go1.21.10']
     dd_run_check(check)
