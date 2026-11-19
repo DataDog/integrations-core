@@ -13,7 +13,6 @@ from lxml import etree as ET
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import ensure_unicode, to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     RateLimitingTTLCache,
@@ -24,6 +23,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.query_metrics import QueryMetrics
 from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
 
 DEFAULT_COLLECTION_INTERVAL = 60
@@ -48,150 +48,107 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "total_spills",
 ]
 
+# Keep one DMV row per counter lifetime in every query variant. Aggregate only after differencing.
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
-    select
+    select TOP {limit}
         qs.query_hash,
         qs.query_plan_hash,
-        qs.last_execution_time,
-        qs.last_elapsed_time,
-        CONCAT(
-            CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1)) as plan_handle_and_offsets,
-           (select value from sys.dm_exec_plan_attributes(qs.plan_handle) where attribute = 'dbid') as dbid,
-           eps.object_id as sproc_object_id,
-           {query_metrics_columns}
+        qs.plan_handle,
+        qs.statement_start_offset,
+        qs.statement_end_offset,
+        qs.plan_generation_num,
+        qs.creation_time,
+        CAST((select value from sys.dm_exec_plan_attributes(qs.plan_handle) where attribute = 'dbid') as int) as dbid,
+        eps.object_id as sproc_object_id,
+        {query_metrics_columns}
     from sys.dm_exec_query_stats qs
     left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
-),
-qstats_aggr as (
-    select
-        query_hash,
-        query_plan_hash,
-        CAST(qs.dbid as int) as dbid,
-        D.name as database_name,
-        max(plan_handle_and_offsets) as plan_handle_and_offsets,
-        max(last_execution_time) as last_execution_time,
-        max(last_elapsed_time) as last_elapsed_time,
-        sproc_object_id,
-        {query_metrics_column_sums}
-    from qstats qs
-    left join sys.databases D on qs.dbid = D.database_id
-    group by query_hash, query_plan_hash, qs.dbid, D.name, sproc_object_id
-),
-qstats_aggr_split as (
-    select TOP {limit}
-        convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
-        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
-        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
-        *
-    from qstats_aggr
-    where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
+    where DATEADD(ms, qs.last_elapsed_time / 1000, qs.last_execution_time) > dateadd(second, -?, getdate())
+    order by qs.last_execution_time desc, qs.plan_handle, qs.statement_start_offset, qs.statement_end_offset
 )
 select
-    SUBSTRING(text, (statement_start_offset / 2) + 1,
-    ((CASE statement_end_offset
-        WHEN -1 THEN DATALENGTH(text)
-        ELSE statement_end_offset END
-            - statement_start_offset) / 2) + 1) AS statement_text,
+    SUBSTRING(qt.text, (s.statement_start_offset / 2) + 1,
+        ((CASE s.statement_end_offset
+            WHEN -1 THEN DATALENGTH(qt.text)
+            ELSE s.statement_end_offset END
+            - s.statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
-    encrypted as is_encrypted,
-    OBJECT_SCHEMA_NAME(s.sproc_object_id, s.dbid) as schema_name,
-    OBJECT_NAME(s.sproc_object_id, s.dbid) as procedure_name,
-    s.* from qstats_aggr_split s
-    cross apply sys.dm_exec_sql_text(s.plan_handle) qt
+    qt.encrypted as is_encrypted,
+    D.name as database_name,
+    OBJECT_SCHEMA_NAME(s.sproc_object_id, CAST(s.dbid as int)) as schema_name,
+    OBJECT_NAME(s.sproc_object_id, CAST(s.dbid as int)) as procedure_name,
+    s.*
+from qstats s
+cross apply sys.dm_exec_sql_text(s.plan_handle) qt
+left join sys.databases D on s.dbid = D.database_id
 """
 
-# This query is an optimized version of the statement metrics query
-# which removes the additional database aggregate dimension
+# Avoid admin-only plan attributes when secondary tags are disabled.
 STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
-with qstats_aggr as (
+with qstats as (
     select TOP {limit}
         qs.query_hash,
         qs.query_plan_hash,
-        max(CONCAT(
-            CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1))) as plan_handle_and_offsets,
+        qs.plan_handle,
+        qs.statement_start_offset,
+        qs.statement_end_offset,
+        qs.plan_generation_num,
+        qs.creation_time,
         eps.object_id as sproc_object_id,
-        {query_metrics_column_sums}
-        from sys.dm_exec_query_stats qs
-        left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
-        where qs.last_execution_time > dateadd(second, -?, getdate())
-        group by qs.query_hash, qs.query_plan_hash, eps.object_id
-),
-qstats_aggr_split as (select
-    convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
-    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
-    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
-    * from qstats_aggr
+        {query_metrics_columns}
+    from sys.dm_exec_query_stats qs
+    left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
+    where DATEADD(ms, qs.last_elapsed_time / 1000, qs.last_execution_time) > dateadd(second, -?, getdate())
+    order by qs.last_execution_time desc, qs.plan_handle, qs.statement_start_offset, qs.statement_end_offset
 )
 select
-    SUBSTRING(text, (statement_start_offset / 2) + 1,
-        ((CASE statement_end_offset
-        WHEN -1 THEN DATALENGTH(text)
-        ELSE statement_end_offset
-    END - statement_start_offset) / 2) + 1) AS statement_text,
+    SUBSTRING(qt.text, (s.statement_start_offset / 2) + 1,
+        ((CASE s.statement_end_offset
+            WHEN -1 THEN DATALENGTH(qt.text)
+            ELSE s.statement_end_offset END
+            - s.statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
-    encrypted as is_encrypted,
+    qt.encrypted as is_encrypted,
+    qt.dbid as dbid,
     {database_name_column}
-    s.* from qstats_aggr_split s
-    cross apply sys.dm_exec_sql_text(s.plan_handle) qt
+    s.*
+from qstats s
+cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
 
 STATEMENT_METRICS_QUERY_AZURE_SQL_DATABASE = """\
 with qstats as (
-    select
+    select TOP {limit}
         qs.query_hash,
         qs.query_plan_hash,
-        qs.last_execution_time,
-        qs.last_elapsed_time,
-        CONCAT(
-            CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
-            CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1)) as plan_handle_and_offsets,
-           (select value from sys.dm_exec_plan_attributes(qs.plan_handle) where attribute = 'dbid') as dbid,
-           eps.object_id as sproc_object_id,
-           {query_metrics_columns}
+        qs.plan_handle,
+        qs.statement_start_offset,
+        qs.statement_end_offset,
+        qs.plan_generation_num,
+        qs.creation_time,
+        CAST((select value from sys.dm_exec_plan_attributes(qs.plan_handle) where attribute = 'dbid') as int) as dbid,
+        eps.object_id as sproc_object_id,
+        {query_metrics_columns}
     from sys.dm_exec_query_stats qs
     left join sys.dm_exec_procedure_stats eps ON eps.plan_handle = qs.plan_handle
-),
-qstats_aggr as (
-    select
-        query_hash,
-        query_plan_hash,
-        CAST(qs.dbid as int) as dbid,
-        DB_NAME(CAST(qs.dbid as int)) as database_name,
-        max(plan_handle_and_offsets) as plan_handle_and_offsets,
-        max(last_execution_time) as last_execution_time,
-        max(last_elapsed_time) as last_elapsed_time,
-        sproc_object_id,
-        {query_metrics_column_sums}
-    from qstats qs
-    group by query_hash, query_plan_hash, qs.dbid, sproc_object_id
-),
-qstats_aggr_split as (
-    select TOP {limit}
-        convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
-        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
-        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
-        *
-    from qstats_aggr
-    where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
+    where DATEADD(ms, qs.last_elapsed_time / 1000, qs.last_execution_time) > dateadd(second, -?, getdate())
+    order by qs.last_execution_time desc, qs.plan_handle, qs.statement_start_offset, qs.statement_end_offset
 )
 select
-    SUBSTRING(text, (statement_start_offset / 2) + 1,
-    ((CASE statement_end_offset
-        WHEN -1 THEN DATALENGTH(text)
-        ELSE statement_end_offset END
-            - statement_start_offset) / 2) + 1) AS statement_text,
+    SUBSTRING(qt.text, (s.statement_start_offset / 2) + 1,
+        ((CASE s.statement_end_offset
+            WHEN -1 THEN DATALENGTH(qt.text)
+            ELSE s.statement_end_offset END
+            - s.statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
-    encrypted as is_encrypted,
-    OBJECT_SCHEMA_NAME(s.sproc_object_id, s.dbid) as schema_name,
-    OBJECT_NAME(s.sproc_object_id, s.dbid) as procedure_name,
-    s.* from qstats_aggr_split s
-    cross apply sys.dm_exec_sql_text(s.plan_handle) qt
+    qt.encrypted as is_encrypted,
+    DB_NAME(CAST(s.dbid as int)) as database_name,
+    OBJECT_SCHEMA_NAME(s.sproc_object_id, CAST(s.dbid as int)) as schema_name,
+    OBJECT_NAME(s.sproc_object_id, CAST(s.dbid as int)) as procedure_name,
+    s.*
+from qstats s
+cross apply sys.dm_exec_sql_text(s.plan_handle) qt
 """
 
 PLAN_LOOKUP_QUERY = """\
@@ -279,7 +236,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.enforce_collection_interval_deadline = is_affirmative(
             self._config.statement_metrics_config.get('enforce_collection_interval_deadline', True)
         )
-        self._state = StatementMetrics()
+        self._state = QueryMetrics(max_size=max(20000, 2 * self.dm_exec_query_stats_row_limit))
         self._init_caches()
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
@@ -331,11 +288,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
         database_name_column = ""
         if self.disable_secondary_tags:
-            # If disable_secondary_tags is enabled, we need to use the query without aggregates
+            # Avoid the secondary database/procedure metadata lookups when disabled.
             statements_query = STATEMENT_METRICS_QUERY_NO_AGGREGATES
             if is_azure_sql_database(engine_edition):
-                # This query does not group by database, so elsewhere a row can span several. Azure SQL Database
-                # connects to one, so DB_NAME() names it. Keep it argument-less: resolving a dbid needs
+                # Azure SQL Database connects to one database, so DB_NAME() names it.
+                # Keep it argument-less: resolving a dbid needs
                 # sys.dm_exec_plan_attributes, admin-only on the Basic/S0/S1 tiers this setting works around.
                 database_name_column = "DB_NAME() as database_name,"
         elif is_azure_sql_database(engine_edition):
@@ -347,7 +304,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
         self._statement_metrics_query = statements_query.format(
             query_metrics_columns=', '.join(['qs.{} as {}'.format(col, col) for col in available_columns]),
-            query_metrics_column_sums=', '.join(['sum(qs.{}) as {}'.format(c, c) for c in available_columns]),
             limit=self.dm_exec_query_stats_row_limit,
             proc_char_limit=self._config.stored_procedure_characters_limit,
             database_name_column=database_name_column,
@@ -375,6 +331,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         self.log.debug("loaded sql server statement metrics len(rows)=%s", len(rows))
+        if len(rows) >= self.dm_exec_query_stats_row_limit:
+            self.log.warning(
+                "SQL Server query metrics reached dm_exec_query_stats_row_limit=%s; "
+                "some cached statements may be omitted. Consider increasing query_metrics.dm_exec_query_stats_row_limit.",
+                self.dm_exec_query_stats_row_limit,
+            )
         return rows
 
     def _should_include_query_metrics_row(self, row):
@@ -491,15 +453,25 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     def _collect_metrics_rows(self, cursor):
         rows = self._load_raw_query_metrics_rows(cursor)
         rows = self._normalize_queries(rows)
-        if not rows:
-            return []
-        metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
-        return rows
+        metric_columns = [c for c in SQL_SERVER_QUERY_METRICS_COLUMNS if rows and c in rows[0]]
+        deltas = self._state.compute_deltas(rows, metric_columns)
+        # Preserve the reporting dimensions and top-query ranking, summing increments
+        # rather than lifetime counters from a changing set of cached plans.
+        merged = {}
+        for row in deltas:
+            key = _row_key(row)
+            if key not in merged:
+                merged[key] = dict(row)
+            else:
+                for metric in metric_columns:
+                    merged[key][metric] += row[metric]
+        return list(merged.values())
 
     @staticmethod
     def _to_metrics_payload_row(row):
         row = dict(row.items())
+        for field in ('creation_time', 'plan_generation_num'):
+            row.pop(field, None)
         # remove the statement_text field, so we do not forward deobfuscated text
         # to the backend
         if 'statement_text' in row:

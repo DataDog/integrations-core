@@ -877,6 +877,44 @@ def test_statement_metrics_query_database_name_column(
     assert ('sys.dm_exec_plan_attributes' in query) == expect_plan_attributes
 
 
+def test_statement_metrics_merge_deltas_before_ranking(instance_docker):
+    check = _statement_metrics_check(instance_docker, ENGINE_EDITION_STANDARD, False)
+    collector = check.statement_metrics
+
+    def row(handle: str, signature: str, executions: int, elapsed: int) -> dict:
+        return {
+            'plan_handle': handle,
+            'query_signature': signature,
+            'query_hash': signature,
+            'query_plan_hash': 'same-shape',
+            'statement_start_offset': 0,
+            'statement_end_offset': -1,
+            'plan_generation_num': 1,
+            'creation_time': '2026-11-19T10:00:00',
+            'execution_count': executions,
+            'total_elapsed_time': elapsed,
+        }
+
+    baseline = [row('a', 'combined', 100, 1000), row('b', 'combined', 5000, 1000), row('c', 'other', 10, 1000)]
+    current = [row('a', 'combined', 101, 1200), row('b', 'combined', 5002, 1200), row('c', 'other', 11, 1300)]
+    with (
+        mock.patch.object(collector, '_load_raw_query_metrics_rows', side_effect=[baseline, current]),
+        mock.patch.object(collector, '_normalize_queries', side_effect=lambda rows: rows),
+    ):
+        assert collector._collect_metrics_rows(None) == []
+        rows = collector._collect_metrics_rows(None)
+
+    assert len(rows) == 2
+    payload = collector._to_metrics_payload(rows, max_queries=1)
+    assert len(payload['sqlserver_rows']) == 1
+    result = payload['sqlserver_rows'][0]
+    assert result['query_signature'] == 'combined'
+    assert result['execution_count'] == 3
+    assert result['total_elapsed_time'] == 400
+    assert 'creation_time' not in result
+    assert 'plan_generation_num' not in result
+
+
 @pytest.mark.parametrize(
     'configured_database, row_database_name, expected',
     [

@@ -31,6 +31,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_SERVERNAME,
 )
+from datadog_checks.sqlserver.query_metrics import QueryMetrics
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
@@ -121,6 +122,59 @@ def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
         if r.message.startswith("found available sys.dm_exec_query_stats columns"):
             times_columns_loaded += 1
     assert times_columns_loaded == 1, "columns should have been loaded only once"
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('variant', ['default', 'no_secondary_tags', 'azure_sql_database'])
+def test_shared_plan_hash_counter_lifetimes(dbm_instance, datadog_conn_docker, bob_conn, variant):
+    """SDBM-3132: an idle handle returning must emit one execution, not its lifetime total."""
+    dbm_instance['query_metrics']['disable_secondary_tags'] = variant == 'no_secondary_tags'
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    if variant == 'azure_sql_database':
+        # Exercise the Azure query's SQL syntax on the local engine. This does not
+        # validate Azure's permission model, which requires an Azure environment.
+        check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = ENGINE_EDITION_SQL_DATABASE
+    statement = f'SELECT COUNT(*) AS sdbm3132_{variant} FROM dbo.ϑings WHERE id > @p'
+
+    def execute(arithabort: str, count: int):
+        for _ in range(count):
+            bob_conn.execute_with_retries(
+                f"SET ARITHABORT {arithabort}; EXEC sp_executesql N'{statement}', N'@p int', @p=0;",
+                (),
+                database='datadog_test-1',
+            )
+
+    def collect() -> list[dict]:
+        with datadog_conn_docker.cursor() as cursor:
+            query = check.statement_metrics._get_statement_metrics_query_cached(cursor)
+            cursor.execute(query, (1,))
+            columns = [c[0] for c in cursor.description]
+            rows = [dict(zip(columns, values)) for values in cursor.fetchall()]
+        return [r for r in rows if (r['statement_text'] or '').strip() == statement]
+
+    try:
+        execute('OFF', 3)
+        execute('ON', 17)
+        initial = collect()
+        assert len({r['plan_handle'] for r in initial}) == 2
+        assert len({r['query_plan_hash'] for r in initial}) == 1
+        assert all(len(r['plan_handle']) == 64 for r in initial)
+        state = QueryMetrics()
+        assert state.compute_deltas(initial, ['execution_count']) == []
+
+        # The query's recency filter must actually omit the idle handle.
+        time.sleep(2)
+        execute('OFF', 1)
+        active = collect()
+        assert len(active) == 1
+        assert sum(r['execution_count'] for r in state.compute_deltas(active, ['execution_count'])) == 1
+        execute('ON', 1)
+        returned = collect()
+        assert len(returned) == 2
+        assert sum(r['execution_count'] for r in state.compute_deltas(returned, ['execution_count'])) == 1
+    finally:
+        bob_conn.execute_with_retries('SET ARITHABORT OFF;', (), database='datadog_test-1', return_result=False)
 
 
 test_statement_metrics_and_plans_parameterized = (
