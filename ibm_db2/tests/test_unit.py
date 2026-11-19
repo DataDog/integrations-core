@@ -634,26 +634,26 @@ def test_cancel_closes_check_and_custom_query_connections(instance):
 @pytest.mark.parametrize(
     'options, expected',
     [
-        ({}, {'enabled': False, 'collection_interval': 1}),
-        ({'query_samples': None}, {'enabled': False, 'collection_interval': 1}),
-        ({'query_samples': {'enabled': True}}, {'enabled': True, 'collection_interval': 1}),
-        ({'query_samples': {'collection_interval': 0.5}}, {'enabled': False, 'collection_interval': 0.5}),
+        ({}, {'enabled': False, 'collection_interval': 10}),
+        ({'query_activity': None}, {'enabled': False, 'collection_interval': 10}),
+        ({'query_activity': {'enabled': True}}, {'enabled': True, 'collection_interval': 10}),
+        ({'query_activity': {'collection_interval': 1}}, {'enabled': False, 'collection_interval': 1}),
         (
-            {'query_samples': {'enabled': None, 'collection_interval': None}},
-            {'enabled': False, 'collection_interval': 1},
+            {'query_activity': {'enabled': None, 'collection_interval': None}},
+            {'enabled': False, 'collection_interval': 10},
         ),
     ],
 )
-def test_query_samples_config_defaults(instance: dict, options: dict, expected: dict):
+def test_query_activity_config_defaults(instance: dict, options: dict, expected: dict):
     """Old configurations keep sampling disabled, and partial/null options retain usable scheduling defaults."""
     instance.update(options)
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    assert check._config.query_samples.model_dump() == expected
+    assert check._config.query_activity.model_dump() == expected
 
 
-@pytest.mark.parametrize('interval', [0, -1, 'invalid'])
-def test_query_samples_invalid_interval(instance: dict, interval: object):
+@pytest.mark.parametrize('interval', [0, 0.5, -1, 'invalid'])
+def test_query_activity_invalid_interval(instance: dict, interval: object):
     """Reject unusable sampling cadences before a background collector can be started."""
-    instance['query_samples'] = {'enabled': True, 'collection_interval': interval}
+    instance['query_activity'] = {'enabled': True, 'collection_interval': interval}
     with pytest.raises(ConfigurationError):
         IbmDb2Check('ibm_db2', {}, [instance])

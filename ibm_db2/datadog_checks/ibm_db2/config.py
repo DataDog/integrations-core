@@ -39,14 +39,14 @@ def build_config(check: IbmDb2Check) -> InstanceConfig:
             **query_metrics,
         }
 
-    query_samples = instance.get('query_samples')
-    if query_samples is None:
-        query_samples = {}
-    if isinstance(query_samples, Mapping):
-        args['query_samples'] = {
+    query_activity = instance.get('query_activity')
+    if query_activity is None:
+        query_activity = {}
+    if isinstance(query_activity, Mapping):
+        args['query_activity'] = {
             'enabled': False,
-            'collection_interval': 1,
-            **{key: value for key, value in query_samples.items() if value is not None},
+            'collection_interval': 10,
+            **{key: value for key, value in query_activity.items() if value is not None},
         }
 
     custom_queries = list(instance.get('custom_queries', []))
