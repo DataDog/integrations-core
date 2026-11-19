@@ -1,0 +1,1 @@
+Send `ceph.num_mons.active` on every Ceph release, and stop running `mon_status` on Octopus and later, where Ceph removed it.
