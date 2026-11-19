@@ -29,6 +29,7 @@ from datadog_checks.sqlserver.xe_collection.query_plan_events import (
     DEFAULT_MAX_PLAN_SIZE_BYTES,
     FRAME_STATEMENT_QUERY,
     PLAN_EVENT_ENVELOPE_BYTES,
+    PROCEDURE_QUERY,
     QUERY_STATS_STATEMENT_QUERY,
     QueryPlanEventsHandler,
 )
@@ -71,9 +72,12 @@ def make_event(
     query_plan_hash: int | None = None,
     plan_transform=None,
     activity_id: str | None = None,
+    object_type: str | None = None,
 ) -> str:
     """A fixture event as `fn_xe_file_target_read_file` returns it, with some fields replaced."""
     event = load_event(fixture)
+    if object_type:
+        event.find("./data[@name='object_type']/text").text = object_type
     if timestamp:
         event.set('timestamp', timestamp)
     if activity_id:
@@ -210,6 +214,8 @@ class FakeServer:
         self.ring_buffer = None
         self.frame_text = frame_text
         self.query_stats_text = query_stats_text
+        # (object_id, database_id) -> (schema name, procedure name, procedure text)
+        self.procedures: dict[tuple[int, int], tuple[str, str, str]] = {}
         self.queries: list[tuple[str, tuple]] = []
         # The rows the cursors returned through `fetchmany`, as the event_file reads fetch them.
         self.rows_fetched = 0
@@ -233,6 +239,10 @@ class FakeServer:
             return [(self.frame_text,)] if self.frame_text else []
         if sql == QUERY_STATS_STATEMENT_QUERY:
             return [(self.query_stats_text,)] if self.query_stats_text else []
+        if sql == PROCEDURE_QUERY:
+            object_id, database_id, char_limit, _plan_handle = params
+            schema_name, name, text = self.procedures.get((object_id, database_id), (None, None, None))
+            return [(schema_name, name, text[:char_limit] if text else None)]
         rows = self.event_file.responses(sql, params)
         if rows is None:
             raise AssertionError("unexpected query: {!r}".format(sql))
@@ -668,6 +678,44 @@ def test_statement_text(
     if expected_statement is None:
         assert events[0]['db']['query_signature'] is None
         assert [e['code'] for e in events[0]['db']['plan']['collection_errors']] == ['statement_text_unavailable']
+
+
+# The object and database of the fixtures' events.
+FIXTURE_PROCEDURE_KEY = (456125202, 5)
+PROCEDURE_TEXT = "CREATE PROCEDURE dbo.Orders_Report @customer_id int AS SELECT 1 WHERE 2 = @customer_id"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('object_type', ['PROC', 'PREPARED'])
+def test_procedure_fields(aggregator, datadog_agent, xe_instance, object_type):
+    """
+    The plan of a statement run in a stored procedure has the procedure name and signature of its estimated plans,
+    so it links to the procedure, and keeps its own statement. The procedure is looked up once per plan handle.
+    """
+    server = FakeServer()
+    server.procedures[FIXTURE_PROCEDURE_KEY] = ('dbo', 'Orders_Report', PROCEDURE_TEXT)
+    xe_instance['stored_procedure_characters_limit'] = 40
+    handler = make_handler(xe_instance, server)
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=mock_obfuscate_sql):
+        # two plan shapes of the same statement
+        run_from_ring_buffer(
+            handler,
+            server,
+            make_event(object_type=object_type),
+            make_event(object_type=object_type, query_plan_hash=1),
+        )
+
+    events = plan_events(aggregator)
+    assert [e['db']['statement'] for e in events] == [mock_obfuscate_sql(STATEMENT)] * 2
+    procedures = {(e['db']['procedure_name'], e['db']['procedure_signature']) for e in events}
+    if object_type == 'PROC':
+        # the text query metrics compute the procedure signature from: the first characters, obfuscated
+        assert procedures == {('dbo.orders_report', compute_sql_signature(mock_obfuscate_sql(PROCEDURE_TEXT[:40])))}
+        assert len(server.executed(PROCEDURE_QUERY)) == 1
+    else:
+        assert procedures == {(None, None)}
+        assert server.executed(PROCEDURE_QUERY) == []
 
 
 def sent_timestamps(aggregator) -> list[str]:

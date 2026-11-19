@@ -96,6 +96,18 @@ ORDER BY CASE WHEN qs.statement_start_offset = ? THEN 0 ELSE 1 END
 """
 # No statement starts at this offset.
 UNKNOWN_OFFSET = -2
+# The stored procedure a plan's statement ran in, as query metrics resolve it for estimated plans: its schema and name,
+# and the start of its text, from the plan handle, whose text is the procedure's.
+PROCEDURE_QUERY = """\
+SELECT OBJECT_SCHEMA_NAME(o.object_id, o.database_id), OBJECT_NAME(o.object_id, o.database_id),
+    SUBSTRING(qt.text, 1, o.char_limit)
+FROM (SELECT CAST(? AS int) AS object_id, CAST(? AS int) AS database_id, CAST(? AS int) AS char_limit) o
+OUTER APPLY sys.dm_exec_sql_text(CONVERT(varbinary(64), ?, 1)) qt
+"""
+# The object type of the statements executed in a stored procedure.
+PROCEDURE_OBJECT_TYPE = "PROC"
+# The procedure signature of estimated plans whose procedure text fails to obfuscate.
+PROCEDURE_OBFUSCATION_ERROR = "__procedure_obfuscation_error__"
 
 PLAN_EVENT_NUMERIC_FIELDS = {
     "cpu_time": 0,
@@ -487,6 +499,7 @@ class QueryPlanEventsHandler(XESessionBase):
                 {'code': "statement_text_unavailable", 'message': "the statement is no longer in the plan cache"}
             )
 
+        procedure_name, procedure_signature = self._procedure(cursor, event)
         database_name = event.get('database_name') or None
         tags = list(self._check.tag_manager.get_tags())
         if database_name:
@@ -505,7 +518,12 @@ class QueryPlanEventsHandler(XESessionBase):
                 "source": PLAN_SOURCES[event['event_name']],
             },
             instance=database_name,
-            db={"query_signature": query_signature, "statement": obfuscated_statement},
+            db={
+                "query_signature": query_signature,
+                "procedure_signature": procedure_signature,
+                "procedure_name": procedure_name,
+                "statement": obfuscated_statement,
+            },
             metadata={
                 "tables": metadata.get('tables'),
                 "commands": metadata.get('commands'),
@@ -556,6 +574,46 @@ class QueryPlanEventsHandler(XESessionBase):
                 ("0x" + plan_handle, "0x" + query_hash, offset),
             )
         return None
+
+    def _procedure(self, cursor: Any, event: dict) -> tuple[str | None, str | None]:
+        """
+        The name and signature of the stored procedure the plan's statement ran in, computed as query metrics compute
+        them for estimated plans, so that the plan links to its procedure. None outside procedures.
+        """
+        if event.get('object_type') != PROCEDURE_OBJECT_TYPE:
+            return None, None
+        try:
+            object_id = int(event['object_id'])
+            database_id = int(event['source_database_id'])
+        except (KeyError, TypeError, ValueError):
+            return None, None
+        plan_handle = event.get('plan_handle') or ''
+        key = ("procedure", object_id, database_id, plan_handle)
+        if key in self._statement_text_cache:
+            return self._statement_text_cache[key]
+        limit = self._config.stored_procedure_characters_limit
+        try:
+            cursor.execute(
+                PROCEDURE_QUERY, (object_id, database_id, limit, "0x" + plan_handle if plan_handle else None)
+            )
+            schema_name, name, text = cursor.fetchone() or (None, None, None)
+        except Exception as e:
+            raise_if_cancelled(self._cancel_event)
+            self._log.debug("Failed to look up procedure object_id=%s database_id=%s: %s", object_id, database_id, e)
+            return None, None
+        procedure_name = "{}.{}".format(schema_name, name).lower() if schema_name and name else None
+        procedure_signature = None
+        if text:
+            try:
+                obfuscated_text = obfuscate_sql_with_metadata(
+                    text, self._config.obfuscator_options, replace_null_character=True
+                )['query']
+                procedure_signature = compute_sql_signature(obfuscated_text)
+            except Exception as e:
+                self._log.debug("Failed to obfuscate the text of procedure %s: %s", procedure_name, e)
+                procedure_signature = PROCEDURE_OBFUSCATION_ERROR
+        self._statement_text_cache[key] = procedure_name, procedure_signature
+        return procedure_name, procedure_signature
 
     def _cached_statement_text(self, cursor: Any, key: tuple, query: str, params: tuple) -> str | None:
         if key in self._statement_text_cache:
