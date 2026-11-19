@@ -517,7 +517,7 @@ pipeline:
         - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end"
       grok:
         matchRules: |
-          serial %{data}(?<![\w.])serial=%{regex("[^,\\s\"]+"):serial}%{data}
+          serial %{data}(?<![\w.])serial=%{regex("[^,\\s\"]+"):serial}%{greedyData}
         supportRules: ''
     - type: grok-parser
       name: Copy `device_name` to a lowercase `device_hostname`
@@ -530,7 +530,7 @@ pipeline:
         # matches the metric tag of the same name, so dashboards can filter logs and metrics with
         # one template variable. `device_name` keeps the firewall's own spelling.
         matchRules: |
-          device_hostname %{data}(?<![\w.])device_name=%{regex("[^,\\s\"]+"):device_hostname:lowercase}%{data}
+          device_hostname %{data}(?<![\w.])device_name=%{regex("[^,\\s\"]+"):device_hostname:lowercase}%{greedyData}
         supportRules: ''
     - type: attribute-remapper
       name: Keep `subtype` as a string
@@ -557,9 +557,9 @@ pipeline:
         # Times without an offset are firewall-local and are parsed as UTC. Firewalls that don't
         # populate high_res_timestamp send a 1969-12-31 placeholder, which is skipped.
         matchRules: |
-          high_res_timestamp %{data}high_res_timestamp=(?!1969-)%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):pan_event_time}%{data}
-          time_generated %{data}(?<![\w.])time_generated=%{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}%{data}
-          timestamp %{data}(?<![\w.])timestamp=%{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}%{data}
+          high_res_timestamp %{data}high_res_timestamp=(?!1969-)%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):pan_event_time}%{greedyData}
+          time_generated %{data}(?<![\w.])time_generated=%{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}%{greedyData}
+          timestamp %{data}(?<![\w.])timestamp=%{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}%{greedyData}
         supportRules: ''
     - type: date-remapper
       name: Define `pan_event_time` as the official date of the log
@@ -689,8 +689,8 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              misc_url_quoted %{data}misc="+%{regex("[^\"]+"):ocsf.evidence.url.url_string}"+%{data}
-              misc_url %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.url.url_string}%{data}
+              misc_url_quoted %{data}misc="+%{regex("[^\"]+"):ocsf.evidence.url.url_string}"+%{greedyData}
+              misc_url %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.url.url_string}%{greedyData}
     - type: pipeline
       name: misc field filename extraction
       enabled: true
@@ -709,8 +709,8 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              misc_file_quoted %{data}misc="+%{regex("[^\"]+"):ocsf.evidence.file.name}"+%{data}
-              misc_file %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.file.name}%{data}
+              misc_file_quoted %{data}misc="+%{regex("[^\"]+"):ocsf.evidence.file.name}"+%{greedyData}
+              misc_file %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.file.name}%{greedyData}
         - type: string-builder-processor
           name: Add type_id
           enabled: true
