@@ -99,6 +99,7 @@ tests:
               o4: "04"
               o5: "60"
               o6: "01"
+            mac_raw: "AA:BB:CC:04:60:01"
           message_class: "Passed-Authentication"
           message_code: "5200"
           message_id: "0000000128"
@@ -225,6 +226,7 @@ tests:
               o4: "04"
               o5: "20"
               o6: "01"
+            mac_raw: "AA:BB:CC:04:20:01"
           message_class: "Failed-Attempt"
           message_code: "5400"
           message_id: "0000000131"
@@ -332,6 +334,7 @@ tests:
               o4: "04"
               o5: "30"
               o6: "01"
+            mac_raw: "AA:BB:CC:04:30:01"
           message_class: "RADIUS"
           message_code: "5434"
           message_id: "0000000135"
@@ -421,6 +424,7 @@ tests:
               o4: "04"
               o5: "60"
               o6: "01"
+            mac_raw: "AA:BB:CC:04:60:01"
           message_class: "Radius-Accounting"
           message_code: "3000"
           message_id: "0000000129"
@@ -1010,6 +1014,7 @@ tests:
               o4: "10"
               o5: "13"
               o6: "01"
+            mac_raw: "00-1B-54-10-13-01"
           message_class: "Passed-Authentication"
           message_code: "5200"
           message_id: "0000000025"
@@ -1133,6 +1138,7 @@ tests:
               o4: "10"
               o5: "14"
               o6: "01"
+            mac_raw: "AA-BB-CC-10-14-01"
           message_class: "Passed-Authentication"
           message_code: "5200"
           message_id: "0000000026"
@@ -1352,6 +1358,7 @@ tests:
               o4: "10"
               o5: "21"
               o6: "01"
+            mac_raw: "AA-BB-CC-10-21-01"
           message_class: "Passed-Authentication"
           message_code: "5200"
           message_id: "0000000027"
@@ -1528,6 +1535,7 @@ tests:
               o4: "10"
               o5: "32"
               o6: "01"
+            mac_raw: "AA-BB-CC-10-32-01"
           message_class: "Passed-Authentication"
           message_code: "5200"
           message_id: "0000000034"
@@ -1665,6 +1673,7 @@ tests:
               o4: "10"
               o5: "33"
               o6: "01"
+            mac_raw: "AA-BB-CC-10-33-01"
           message_class: "Failed-Attempt"
           message_code: "5400"
           message_id: "0000000037"
@@ -1838,6 +1847,7 @@ tests:
               o4: "10"
               o5: "23"
               o6: "01"
+            mac_raw: "AA-BB-CC-10-23-01"
           message_class: "Failed-Attempt"
           message_code: "5411"
           message_id: "0000000047"
@@ -2013,6 +2023,7 @@ tests:
               o4: "10"
               o5: "51"
               o6: "01"
+            mac_raw: "AA-BB-CC-10-51-01"
           message_class: "Passed-Authentication"
           message_code: "5200"
           message_id: "0000052517"
@@ -2155,6 +2166,7 @@ tests:
               o4: "10"
               o5: "71"
               o6: "01"
+            mac_raw: "AA-BB-CC-10-71-01"
           message_class: "Radius-Accounting"
           message_code: "3002"
           message_id: "0000052522"
@@ -2203,6 +2215,15 @@ tests:
             ProfilerServer: "ise-1.lab.devnetsandbox.local"
           category: "Profiler"
           endpoint:
+            mac: "3c:a9:f4:10:61:01"
+            mac_octets:
+              o1: "3c"
+              o2: "a9"
+              o3: "f4"
+              o4: "10"
+              o5: "61"
+              o6: "01"
+            mac_raw: "3C:A9:F4:10:61:01"
             properties: "PolicyVersion=0\\,IPSEC=IPSEC#Is IPSEC Device#No\\,EndPointPolicyID=2ac6a950-8c00-11e6-996c-525400b48521\\,LogicalProfile=\\,EndPointVersion=1\\,FirstCollection=1794475835441\\,CacheUpdateTime=1794475835457\\,StaticAssignment=false\\,User-Name=luis_test\\,NmapScanCount=0\\,NetworkDeviceName=luis_mac_radius_sim\\,AAA-Server=ise-1\\,MessageCode=3002\\,epid=epid:707524704360329216\\,Device Type=Device Type#All Device Types#RadiusSimulator\\,Device IP Address=192.168.254.11\\,PortalUser=\\,NetworkDeviceGroups=IPSEC#Is IPSEC Device#No\\, Location#All Locations#Spain#Madrid\\, Device Type#All Device Types#RadiusSimulator\\,BYODRegistration=Unknown\\,Calling-Station-ID=3C-A9-F4-10-61-01\\,Total Certainty Factor=5\\,Network Device Profile=Cisco\\,IdentityGroupID=aa10ae00-8bff-11e6-996c-525400b48521\\,PostureApplicable=Yes\\,NAS-Identifier=luis-eap-nad\\,NmapSubnetScanID=0\\,NAS-Port-Type=Ethernet\\,TimeToProfile=4\\,DeviceRegistrationStatus=NotRegistered\\,TotalAuthenLatency=4\\,MatchedPolicyID=2ac6a950-8c00-11e6-996c-525400b48521\\,Service-Type=Framed\\,FeedService=false\\,StaticGroupAssignment=false\\,NAS-Port-Id=GigabitEthernet1/0/61\\,LastActivity=1794475835441\\,LastNmapScanTime=0\\,ClientLatency=0\\,UpdateTime=0\\,Framed-IP-Address=10.99.1.61\\,Location=Location#All Locations#Spain#Madrid"
           message_class: "Profiler"
           message_code: "80002"
@@ -2219,6 +2240,9 @@ tests:
             level2: "Madrid"
         evt:
           name: "Profiler"
+        network:
+          client:
+            ip: "10.99.1.61"
         syslog:
           hostname: "ise-1"
           priority: 182
@@ -2258,6 +2282,7 @@ tests:
               o4: "11"
               o5: "12"
               o6: "01"
+            mac_raw: "AA-BB-CC-11-12-01"
           message_class: "Guest"
           message_code: "5418"
           message_id: "0000052621"
@@ -2314,6 +2339,16 @@ tests:
             SponsorUser: "SelfRegistration"
             UserName: "SelfRegistration"
           category: "Guest"
+          endpoint:
+            mac: "aa:bb:cc:11:12:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "11"
+              o5: "12"
+              o6: "01"
+            mac_raw: "AA:BB:CC:11:12:01"
           message_class: "Guest"
           message_code: "86006"
           message_id: "0000052622"
@@ -2326,6 +2361,9 @@ tests:
           severity: "INFO"
         evt:
           name: "Guest"
+        network:
+          client:
+            ip: "192.168.254.11"
         syslog:
           hostname: "ise-1"
           priority: 182
@@ -2376,6 +2414,7 @@ tests:
               o4: "11"
               o5: "12"
               o6: "01"
+            mac_raw: "AA-BB-CC-11-12-01"
           message_class: "Guest"
           message_code: "5231"
           message_id: "0000052629"
@@ -2422,6 +2461,15 @@ tests:
             ProfilerServer: "ise-1.lab.devnetsandbox.local"
           category: "Profiler"
           endpoint:
+            mac: "aa:bb:cc:11:12:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "11"
+              o5: "12"
+              o6: "01"
+            mac_raw: "AA:BB:CC:11:12:01"
             properties: "PortalUser.GuestType=Daily (default)\\,AuthenticationMethod=Lookup\\,DestinationPort=1812\\,PortalUser.GuestStatus=Active\\,allowEasyWiredSession=false\\,PostureExpiry=\\,SelectedAccessService=Default Network Access\\,NetworkDeviceName=luis_mac_radius_sim\\,DestinationIPAddress=10.10.20.77\\,PortalUser.EmailAddress=luis@test.com\\,SelectedAuthenticationIdentityStores=Internal Endpoints\\,MessageCode=5418\\,PortalUser.PhoneNumber=+6881111\\,epid=epid:707534784984117248\\,Device Type=Device Type#All Device Types#RadiusSimulator\\,MacAddress=AA:BB:CC:11:12:01\\,AuthenticationStatus=UnknownUser\\,NetworkDeviceGroups=IPSEC#Is IPSEC Device#No\\, Location#All Locations#Spain#Madrid\\, Device Type#All Device Types#RadiusSimulator\\,IdentitySelectionMatchedRule=MAB\\,BYODRegistration=No\\,OriginalUserName=aabbcc111201\\,PreviousDeviceRegistrationStatus=NotRegistered\\,Total Certainty Factor=110\\,UserType=NON_GUEST\\,IdentityGroupID=aa178bd0-8bff-11e6-996c-525400b48521\\,NAS-Identifier=luis-eap-nad\\,NAS-Port-Type=Wireless - IEEE 802.11\\,StepData=6= Normalised Radius.RadiusFlowType\\, 7=Internal Endpoints\\, 16= Radius.NAS-Port-Type\\, 17= Network Access.UserName\\, 18= IdentityGroup.Name (2 times)\\, 19= EndPoints.LogicalProfile\\,RegistrationTimeStamp=1794478760660\\,PhoneID=\\,TimeToProfile=521072\\,DeviceRegistrationStatus=Pending\\,RadiusFlowType=WirelessMAB\\,ResponseTime=134\\,SSID=00-11-22-AA-00-01:luis-guest\\,CreateTime=1794478239647\\,UseCase=Host Lookup\\,StaticGroupAssignment=true\\,DTLSSupport=Unknown\\,LastActivity=1794478760670\\,LastNmapScanTime=1794478321924\\,ClientLatency=0\\,UpdateTime=0\\,NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c\\,NetworkDeviceProfileName=Cisco\\,IpAddress=192.168.254.11\\,PostureAssessmentStatus=Pending\\,PolicyVersion=0\\,IPSEC=IPSEC#Is IPSEC Device#No\\,AuditSessionId=luisx111201\\,EndPointPolicyID=af55d860-4fbf-11ed-a871-0050568f5811\\,LogicalProfile=\\,EndPointVersion=16\\,FirstCollection=1794478239606\\,CacheUpdateTime=1794478760679\\,IdentityStoreGUID=9eee92b0-8c01-11e6-996c-525400b48521\\,IdentityPolicyMatchedRule=MAB\\,StaticAssignment=false\\,User-Name=aabbcc111201\\,NmapScanCount=2\\,AAA-Server=ise-1\\,LastAUPAccepted=1794478526155\\,IsThirdPartyDeviceFlow=false\\,162-udp=snmptrap\\,IsRegistered=true\\,Device IP Address=192.168.254.11\\,PortalUser.LastName=Test\\,PortalUser=luistest\\,AllowedProtocolMatchedRule=MAB\\,PortalUser.FirstName=Luis\\,Calling-Station-ID=AA-BB-CC-11-12-01\\,FailureReason=22056 Subject not found in the applicable identity store(s)\\,Network Device Profile=Cisco\\,MDMServerID=\\,Called-Station-ID=00-11-22-AA-00-01:luis-guest\\,OperatingSystem=OS X\\,PostureApplicable=Yes\\,PortalUser.Location=San Jose\\,NmapSubnetScanID=0\\,PreviousMACAddress=AA:BB:CC:11:12:01\\,Portal.Name=Self-Registered Guest Portal (default)\\,Device Identifier=\\,TotalAuthenLatency=23\\,MatchedPolicyID=af55d860-4fbf-11ed-a871-0050568f5811\\,PortalUser.CreationType=Self Registration Guest\\,AUPAccepted=true\\,161-udp=snmp\\,Service-Type=Call Check\\,PortalName=Self-Registered Guest Portal (default)\\,UserName=INVALID\\,FeedService=false\\,SelectedAuthorizationProfiles=Cisco_WebAuth\\,host-name=\\,Response=\\{User-Name=AA-BB-CC-11-12-01\\; Class=CACS:luisx111201:ise-1/583701566/43\\; cisco-av-pair=url-redirect-acl=ACL_WEBAUTH_REDIRECT\\; cisco-av-pair=url-redirect=https://ise-1.lab.devnetsandbox.local:8443/portal/gateway?sessionId=luisx111201&portal=f09aaac2-f101-45ed-832f-fda201ab7639&action=cwa&token=07d2941ce8888f58087b1309f8298374\\; LicenseTypes=1\\; \\}\\,EPMacAddress=AA:BB:CC:11:12:01\\,EndPointMACAddress=AA-BB-CC-11-12-01\\,Framed-IP-Address=192.168.254.11\\,AuthorizationPolicyMatchedRule=Wi-Fi_Redirect_to_Guest_Login\\,Device Name=AA:BB:CC:11:12:01\\,UniqueSubjectID=8123e0641375fcf055590d4af10c079db5bdf74d\\,Location=Location#All Locations#Spain#Madrid"
           message_class: "Profiler"
           message_code: "80002"
@@ -2438,6 +2486,9 @@ tests:
             level2: "Madrid"
         evt:
           name: "Profiler"
+        network:
+          client:
+            ip: "192.168.254.11"
         syslog:
           hostname: "ise-1"
           priority: 182
@@ -2500,6 +2551,7 @@ tests:
               o4: "11"
               o5: "12"
               o6: "01"
+            mac_raw: "AA-BB-CC-11-12-01"
           message_class: "Dynamic-Authorization"
           message_code: "5417"
           message_id: "0000052640"
@@ -2536,6 +2588,16 @@ tests:
             EndpointCoA: "Reauth"
             NADAddress: "192.168.254.11"
           category: "MyDevices"
+          endpoint:
+            mac: "aa:bb:cc:11:12:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "11"
+              o5: "12"
+              o6: "01"
+            mac_raw: "AA-BB-CC-11-12-01"
           message_class: "MyDevices"
           message_code: "88015"
           message_id: "0000052641"
@@ -2643,6 +2705,7 @@ tests:
               o4: "11"
               o5: "12"
               o6: "01"
+            mac_raw: "AA-BB-CC-11-12-01"
           message_class: "Passed-Authentication"
           message_code: "5236"
           message_id: "0000052642"
@@ -2701,6 +2764,9 @@ tests:
           severity: "NOTICE"
         evt:
           name: "MyDevices"
+        network:
+          client:
+            ip: "192.168.254.11"
         syslog:
           hostname: "ise-1"
           priority: 181
@@ -2914,6 +2980,7 @@ tests:
               o4: "10"
               o5: "21"
               o6: "01"
+            mac_raw: "AA-BB-CC-10-21-01"
           message_class: "Passed-Authentication"
           message_code: "5200"
           message_id: "0000000000"
@@ -3039,6 +3106,7 @@ tests:
               o4: "10"
               o5: "82"
               o6: "01"
+            mac_raw: "AA-BB-CC-10-82-01"
           message_class: "Failed-Attempt"
           message_code: "5400"
           message_id: "0000000000"
@@ -3086,6 +3154,16 @@ tests:
             OperationStatus: "FAILURE"
             OperationType: "APPLY_POLICY_BY_MAC:AA:BB:CC:10:82:01:LUIS_QUARANTINE"
           category: "Posture_and_Client_Provisioning_Audit"
+          endpoint:
+            mac: "aa:bb:cc:10:82:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "10"
+              o5: "82"
+              o6: "01"
+            mac_raw: "AA:BB:CC:10:82:01"
           message_class: "EPS"
           message_code: "87751"
           message_id: "0000000000"
@@ -3139,6 +3217,7 @@ tests:
               o4: "10"
               o5: "81"
               o6: "01"
+            mac_raw: "AA-BB-CC-10-81-01"
           message_class: "Dynamic-Authorization"
           message_code: "11213"
           message_id: "0000000000"

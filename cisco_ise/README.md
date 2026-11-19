@@ -110,11 +110,11 @@ The Cisco ISE integration collects ISE's syslog messages and parses them with th
 - The message body gives the event time with milliseconds, the message code (`cisco_ise.message_code`, for example `5200` for a passed authentication), the severity, and ISE's own fields. The log status is ISE's severity, also on messages split into segments, where it comes from the syslog priority.
 <!-- RFC Q2 (proposed answer): ISE key names kept under cisco_ise.attributes.*, site split into cisco_ise.site.level1..5 (RFC v11). -->
 - ISE's fields keep their names under `cisco_ise.attributes.*` (for example `cisco_ise.attributes.NetworkDeviceName`, `cisco_ise.attributes.FailureReason`), and the authorization result `Response={...}` is parsed under `cisco_ise.response.*`.
-- Derived fields: the site levels, the normalized endpoint MAC address (`cisco_ise.endpoint.mac`), and the TACACS+ command (`cisco_ise.tacacs.command`, `cisco_ise.tacacs.command_name`).
+- Derived fields: the site levels, the endpoint MAC address normalized to `aa:bb:cc:dd:ee:ff` (`cisco_ise.endpoint.mac`, from whichever MAC field the message has, such as `Calling-Station-ID` or the profiler's `EndpointMacAddress`; ISE's original value is in `cisco_ise.endpoint.mac_raw`), and the TACACS+ command (`cisco_ise.tacacs.command`, `cisco_ise.tacacs.command_name`).
 - Authorization result, from `Response={...}`: the VLAN (`cisco_ise.authorization.vlan`), the downloadable ACL (`cisco_ise.authorization.dacl`), and the Security Group Tag as ISE logs it, in hexadecimal (`cisco_ise.authorization.sgt`, for example `0004-00`).
 - The SSID of wireless logins (`cisco_ise.ssid`), taken from ISE's `SSID` field when it has the form `<access point MAC>:<SSID>`.
 - Profiler messages (`80002`): the endpoint vendor (`cisco_ise.attributes.EndpointOUI`) and ISE's list of endpoint properties as one string (`cisco_ise.endpoint.properties`).
-- Standard attributes: `usr.name`, `network.client.ip`, and `evt.name` (ISE's message class, for example `Passed-Authentication` or `Failed-Attempt`).
+- Standard attributes: `usr.name`, `network.client.ip` (the endpoint or administrator IP; for guest and My Devices portal messages, the IP of the browser as ISE saw it), and `evt.name` (ISE's message class, for example `Passed-Authentication` or `Failed-Attempt`).
 
 ISE logs unknown users as `INVALID`, so failed logins by non-existing users are grouped under `usr.name:INVALID`. For downloadable ACL requests (`5232`), ISE puts the ACL name (`#ACSACL#-...`) in `UserName`; it is not mapped to `usr.name`.
 
