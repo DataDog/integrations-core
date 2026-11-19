@@ -2405,7 +2405,7 @@
           },
           {
             "definition": {
-              "description": "Threat log events by severity. Requires Palo Alto Networks Firewall log collection; shows No data without it. Follows the firewall filter through the logs' device_name attribute; the Panorama filter does not apply to logs.",
+              "description": "Threat log events by severity. Requires Palo Alto Networks Firewall log collection; shows No data without it. Follows the firewall filter through the logs' device_name attribute; logs without a device_name are always shown, since they cannot be matched to a firewall; the Panorama filter does not apply to logs.",
               "requests": [
                 {
                   "formulas": [
@@ -2435,7 +2435,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall @type:THREAT @device_name:$firewall.value"
+                        "query": "source:pan.firewall @type:THREAT (@device_name:$firewall.value OR -@device_name:*)"
                       }
                     }
                   ],
@@ -2458,7 +2458,7 @@
           },
           {
             "definition": {
-              "description": "Most frequent threat log subtypes, such as virus, spyware or vulnerability. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_name attribute; the Panorama filter does not apply to logs.",
+              "description": "Most frequent threat log subtypes, such as virus, spyware or vulnerability. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_name attribute; logs without a device_name are always shown, since they cannot be matched to a firewall; the Panorama filter does not apply to logs.",
               "requests": [
                 {
                   "formulas": [
@@ -2488,7 +2488,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall @type:THREAT @device_name:$firewall.value"
+                        "query": "source:pan.firewall @type:THREAT (@device_name:$firewall.value OR -@device_name:*)"
                       }
                     }
                   ],
@@ -2511,7 +2511,7 @@
           },
           {
             "definition": {
-              "description": "Client IPs that triggered the most threat log events. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_name attribute; the Panorama filter does not apply to logs.",
+              "description": "Client IPs that triggered the most threat log events. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_name attribute; logs without a device_name are always shown, since they cannot be matched to a firewall; the Panorama filter does not apply to logs.",
               "requests": [
                 {
                   "formulas": [
@@ -2541,7 +2541,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall @type:THREAT @device_name:$firewall.value"
+                        "query": "source:pan.firewall @type:THREAT (@device_name:$firewall.value OR -@device_name:*)"
                       }
                     }
                   ],
@@ -2598,7 +2598,7 @@
           },
           {
             "definition": {
-              "description": "Recent Palo Alto Networks Firewall logs with alert, error or critical status. The device_name column is the firewall that sent the log. Follows the firewall filter through the logs' device_name attribute.",
+              "description": "Recent Palo Alto Networks Firewall logs with alert, error or critical status. The device_name column is the firewall that sent the log. Follows the firewall filter through the logs' device_name attribute; logs without a device_name are always shown, since they cannot be matched to a firewall.",
               "requests": [
                 {
                   "columns": [
@@ -2630,7 +2630,7 @@
                   "query": {
                     "data_source": "logs_stream",
                     "indexes": [],
-                    "query_string": "source:pan.firewall status:(alert OR error OR critical) @device_name:$firewall.value",
+                    "query_string": "source:pan.firewall status:(alert OR error OR critical) (@device_name:$firewall.value OR -@device_name:*)",
                     "sort": {
                       "column": "timestamp",
                       "order": "desc"
@@ -2653,7 +2653,7 @@
           },
           {
             "definition": {
-              "description": "Palo Alto Networks Firewall log volume over time by status. A drop to zero means logs stopped arriving. Follows the firewall filter through the logs' device_name attribute; the Panorama filter does not apply to logs.",
+              "description": "Palo Alto Networks Firewall log volume over time by status. A drop to zero means logs stopped arriving. Follows the firewall filter through the logs' device_name attribute; logs without a device_name are always shown, since they cannot be matched to a firewall; the Panorama filter does not apply to logs.",
               "legend_columns": [
                 "avg",
                 "max",
@@ -2692,7 +2692,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall @device_name:$firewall.value"
+                        "query": "source:pan.firewall (@device_name:$firewall.value OR -@device_name:*)"
                       }
                     }
                   ],
