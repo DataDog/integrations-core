@@ -22,7 +22,7 @@ def make_provider_registry(*names: str) -> AgentProviderRegistry:
     registry = AgentProviderRegistry()
     for name in names:
         if name == "anthropic":
-            registry.register(name, AnthropicProvider("test-key"))
+            registry.register(name, AnthropicProvider())
         else:
             provider = MagicMock()
             provider.default_model.return_value = "default-model"

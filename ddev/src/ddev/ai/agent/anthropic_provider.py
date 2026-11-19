@@ -4,43 +4,59 @@
 
 from __future__ import annotations
 
-from functools import cached_property
-from typing import Any, Final
+from typing import TYPE_CHECKING, Any, Final
 
 import anthropic
 
 from ddev.ai.agent.anthropic_agent import DEFAULT_MAX_TOKENS, AnthropicAgent
+from ddev.ai.agent.anthropic_client import check_messages_access, messages_client
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.model_catalog import ANTHROPIC, ModelResolver, ResolvedModel, Route
 from ddev.ai.tools.registry import ToolRegistry
 
+if TYPE_CHECKING:
+    from ddev.ai.agent.provider import ModelAccessCheck
+    from ddev.ai.runtime.connections import RouteConnection
+
 DEFAULT_MODEL: Final[str] = "sonnet"
-GATEWAY_EXECUTION_PENDING: Final[str] = (
-    "Executing models through AI Gateway is not implemented yet; gateway mode currently "
-    "supports model resolution and flow validation only"
-)
 
 
 class AnthropicProvider:
-    """Builds Anthropic agents and lazily owns their shared SDK client."""
+    """Resolves model bindings and builds agents with an Anthropic Messages client."""
 
     def __init__(
         self,
-        api_key: str | None,
         *,
-        route: Route = Route.DIRECT,
         resolver: ModelResolver | None = None,
-    ):
-        self._api_key = api_key
-        self._route = route
+        connection: RouteConnection | None = None,
+    ) -> None:
         self._resolver = ModelResolver() if resolver is None else resolver
+        self._connection = connection
+        self._client: anthropic.AsyncAnthropic | None = None
 
-    @cached_property
+    def for_run(self, connection: RouteConnection) -> AnthropicProvider:
+        return AnthropicProvider(resolver=self._resolver, connection=connection)
+
+    @property
     def client(self) -> anthropic.AsyncAnthropic:
-        if self._api_key is None:
-            raise ValueError("Direct Anthropic execution requires an API key")
-        return anthropic.AsyncAnthropic(api_key=self._api_key)
+        if self._client is None:
+            self._client = messages_client(self._run_connection())
+        return self._client
+
+    def _run_connection(self) -> RouteConnection:
+        if self._connection is None:
+            raise ValueError("Agent execution requires prepared run resources.")
+        return self._connection
+
+    async def check_access(self, agent_config: AgentConfig) -> ModelAccessCheck:
+        model = self.resolve_model(agent_config.model)
+        return await check_messages_access(self.client, model)
+
+    async def close(self) -> None:
+        client, self._client = self._client, None
+        if client is not None:
+            await client.close()
 
     def default_model(self) -> str:
         return DEFAULT_MODEL
@@ -51,17 +67,25 @@ class AnthropicProvider:
 
     def resolve_model(self, model: str) -> ResolvedModel:
         """Resolve a model name to its binding on the captured route."""
-        return self._resolver.resolve(model, route=self._route, provider=ANTHROPIC)
+        connection = self._run_connection()
+        resolved = self._resolver.resolve(model, route=connection.route, provider=ANTHROPIC)
+        connection.validate_binding(resolved)
+        return resolved
 
-    def validate_config(self, agent_config: AgentConfig):
-        """Validate Anthropic-specific agent configuration."""
-        resolved = self.resolve_model(agent_config.model)
-        # Unset falls back to the agent default.
+    def validate_config(self, agent_config: AgentConfig, *, route: Route | None = None) -> None:
+        """Validate model limits and, when known, the binding selected for execution."""
+        if self._connection is not None:
+            resolved = self.resolve_model(agent_config.model)
+            canonical, spec = resolved.canonical, resolved.model
+        elif route is not None:
+            resolved = self._resolver.resolve(agent_config.model, route=route, provider=ANTHROPIC)
+            canonical, spec = resolved.canonical, resolved.model
+        else:
+            canonical, spec = self._resolver.model_spec(agent_config.model, provider=ANTHROPIC)
         requested = DEFAULT_MAX_TOKENS if agent_config.max_tokens is None else agent_config.max_tokens
-        output_limit = resolved.model.max_output_tokens
-        if output_limit is not None and requested > output_limit:
+        if spec.max_output_tokens is not None and requested > spec.max_output_tokens:
             raise ValueError(
-                f"max_tokens {requested} exceeds the {output_limit}-token output limit of model {resolved.canonical!r}"
+                f"max_tokens {requested} exceeds the {spec.max_output_tokens}-token output limit of model {canonical!r}"
             )
 
     def build_agent(
@@ -73,8 +97,6 @@ class AnthropicProvider:
         owner_id: str,
     ) -> BaseAgent[Any]:
         resolved = self.resolve_model(agent_config.model)
-        if self._route is Route.AI_GATEWAY:
-            raise ValueError(GATEWAY_EXECUTION_PENDING)
         kwargs: dict[str, Any] = {}
         if agent_config.max_tokens is not None:
             kwargs["max_tokens"] = agent_config.max_tokens

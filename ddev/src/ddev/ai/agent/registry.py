@@ -4,13 +4,17 @@
 
 from __future__ import annotations
 
+import asyncio
+from collections.abc import Callable
 from typing import Any, Protocol
 
 from ddev.ai.agent.anthropic_provider import AnthropicProvider
 from ddev.ai.agent.base import BaseAgent
-from ddev.ai.agent.provider import AgentProvider
+from ddev.ai.agent.provider import AgentProvider, ModelAccessCheck
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.model_catalog import ANTHROPIC, ModelResolver, Route
+from ddev.ai.runtime.connections import RouteConnection
+from ddev.ai.runtime.tokens import DirectTokenProducer
 from ddev.ai.tools.registry import ToolRegistry
 
 
@@ -25,9 +29,34 @@ class AgentProviderConfig(Protocol):
 class AgentProviderRegistry:
     """Dispatches agent construction to configured providers."""
 
-    def __init__(self):
+    def __init__(
+        self,
+        *,
+        requested_route: Route = Route.DIRECT,
+        make_direct_tokens: Callable[[], DirectTokenProducer] | None = None,
+    ) -> None:
         self._providers: dict[str, AgentProvider] = {}
         self._model_index: dict[str, set[str]] = {}
+        self.requested_route = requested_route
+        self._make_direct_tokens = make_direct_tokens
+
+    def direct_tokens_for_run(self) -> DirectTokenProducer:
+        return DirectTokenProducer({}) if self._make_direct_tokens is None else self._make_direct_tokens()
+
+    def for_run(self, connection: RouteConnection) -> AgentProviderRegistry:
+        """Bind providers to the effective connection without changing the config registry."""
+        registry = AgentProviderRegistry(requested_route=self.requested_route)
+        for name, provider in self._providers.items():
+            registry.register(name, provider.for_run(connection))
+        return registry
+
+    async def check_access(self, config: AgentConfig) -> ModelAccessCheck:
+        return await self._get_provider(config.provider).check_access(config)
+
+    async def close(self) -> None:
+        async with asyncio.TaskGroup() as group:
+            for provider in self._providers.values():
+                group.create_task(provider.close())
 
     def register(self, name: str, provider: AgentProvider):
         if name in self._providers:
@@ -57,8 +86,10 @@ class AgentProviderRegistry:
             raise ValueError(f"Agent provider {name!r} is not available")
         return provider
 
-    def validate_config(self, agent_config: AgentConfig):
-        self._get_provider(agent_config.provider).validate_config(agent_config)
+    def validate_config(self, agent_config: AgentConfig) -> None:
+        # A Gateway request can still take the direct route at startup.
+        route = Route.DIRECT if self.requested_route is Route.DIRECT else None
+        self._get_provider(agent_config.provider).validate_config(agent_config, route=route)
 
     def build_agent(
         self,
@@ -82,10 +113,18 @@ def build_agent_provider_registry(config: AgentProviderConfig) -> AgentProviderR
     # Captured here so later config or file edits cannot reroute agents from this registry.
     route = Route.AI_GATEWAY if config.use_ai_gateway else Route.DIRECT
     resolver = ModelResolver(config.models_catalog) if config.models_catalog else ModelResolver()
-    registry = AgentProviderRegistry()
     if route is Route.AI_GATEWAY:
-        # Resolution and flow validation must work without the direct Anthropic key.
-        registry.register(ANTHROPIC, AnthropicProvider(None, route=route, resolver=resolver))
-    elif config.anthropic_api_key:
-        registry.register(ANTHROPIC, AnthropicProvider(config.anthropic_api_key, route=route, resolver=resolver))
+        # Do not read direct credentials unless startup needs to fall back.
+        registry = AgentProviderRegistry(
+            requested_route=route,
+            make_direct_tokens=lambda: DirectTokenProducer({ANTHROPIC: lambda: config.anthropic_api_key}),
+        )
+        registry.register(ANTHROPIC, AnthropicProvider(resolver=resolver))
+    else:
+        api_key = config.anthropic_api_key
+        registry = AgentProviderRegistry(
+            requested_route=route, make_direct_tokens=lambda: DirectTokenProducer({ANTHROPIC: lambda: api_key})
+        )
+        if api_key:
+            registry.register(ANTHROPIC, AnthropicProvider(resolver=resolver))
     return registry

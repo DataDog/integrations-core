@@ -2,20 +2,51 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
+import asyncio
+from collections.abc import Callable
+from dataclasses import dataclass
 from functools import cached_property
 
 from ddev.ai.agent.build import AgentRuntimeFactory, AgentRuntimeFactoryProtocol
+from ddev.ai.agent.exceptions import AgentConnectionError, ModelAccessError
+from ddev.ai.agent.provider import ModelAccessCheck
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import AgentConfig
+from ddev.ai.model_catalog import Route
 from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.react.factory import ReActProcessFactory
+from ddev.ai.runtime.connections import DirectConnection, GatewayConnection, RouteConnection
+from ddev.ai.runtime.gateway_auth import DD_AUTH_INSTALL_HELP, LOGIN_HELP, GatewayAuthError, GatewayTokenProducer
+from ddev.ai.runtime.tokens import TokenProducer
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
+from ddev.config.model import ConfigurationError
+
+
+@dataclass(frozen=True)
+class RunRoute:
+    """Record the route requested in config and the route fixed at startup for the whole run.
+
+    The routes differ only on fallback; the reason is shown in the run log and TUI.
+    """
+
+    requested: Route
+    effective: Route
+    fallback_reason: str | None = None
+
+    def describe(self) -> str:
+        """Summarize the route choice without including credentials."""
+        description = f"Requested route: {self.requested}; effective route: {self.effective}."
+        if self.fallback_reason:
+            return f"{description} {self.fallback_reason} AI Gateway access was not checked."
+        return description
 
 
 class RunResources:
-    """Supplies the raw resources phases use to build their runtime factories."""
+    """Owns a run's model clients and credentials and supplies resources to its phases."""
 
     def __init__(
         self,
@@ -24,10 +55,88 @@ class RunResources:
         agents: dict[str, AgentConfig],
         callbacks: Callbacks,
     ) -> None:
-        self._provider_registry = provider_registry
+        self._configured_registry = provider_registry
+        self._run_registry: AgentProviderRegistry | None = None
         self._file_access_policy = file_access_policy
         self._agents = agents
         self._callbacks = callbacks
+        self._tokens: TokenProducer | None = None
+        self._connection: RouteConnection | None = None
+        self._route: RunRoute | None = None
+
+    async def prepare(
+        self, report_route: Callable[[RunRoute], None], *, initial_agent: AgentConfig | None
+    ) -> ModelAccessCheck | None:
+        """Validate every model on the chosen route, then probe the first scheduled Gateway model.
+
+        Fall back to direct execution only when `dd-auth` is missing, not when the Gateway denies access.
+        """
+        requested = self._configured_registry.requested_route
+        reason = None
+        gateway_tokens = GatewayTokenProducer() if requested is Route.AI_GATEWAY else None
+        if gateway_tokens is not None and not gateway_tokens.available:
+            gateway_tokens = None
+            reason = "dd-auth was not found on PATH."
+
+        if gateway_tokens is None:
+            direct_tokens = self._configured_registry.direct_tokens_for_run()
+            tokens: TokenProducer = direct_tokens
+            connection: RouteConnection = DirectConnection(direct_tokens)
+        else:
+            direct_tokens = None
+            tokens = gateway_tokens
+            connection = GatewayConnection(gateway_tokens)
+        self._tokens = tokens
+        self._connection = connection
+        registry = self._configured_registry.for_run(connection)
+        self._run_registry = registry
+        try:
+            for config in self._agents.values():
+                registry.validate_config(config)
+            if reason is not None and direct_tokens is not None:
+                for provider in {config.provider for config in self._agents.values()}:
+                    if not direct_tokens.has_key(provider):
+                        raise GatewayAuthError(f"No direct credential is configured for {provider}.")
+        except (ConfigurationError, GatewayAuthError, ValueError) as error:
+            if reason is not None:
+                raise GatewayAuthError(
+                    f"Requested route: ai-gateway; no effective route. {reason} "
+                    f"{DD_AUTH_INSTALL_HELP} Direct fallback unavailable: {error}"
+                ) from None
+            raise
+
+        self._route = RunRoute(requested, connection.route, reason)
+        report_route(self._route)
+        if gateway_tokens is None or initial_agent is None:
+            return None
+
+        try:
+            await tokens.token_for(initial_agent.provider)
+            return await registry.check_access(initial_agent)
+        except AgentConnectionError as error:
+            if error.timed_out:
+                raise GatewayAuthError(f"AI Gateway startup check timed out. Retry the run. {LOGIN_HELP}") from None
+            raise AgentConnectionError(f"AI Gateway startup connection failed. Retry the run. {LOGIN_HELP}") from None
+        except ModelAccessError:
+            raise GatewayAuthError(f"AI Gateway startup check failed. Retry the run. {LOGIN_HELP}") from None
+        except asyncio.CancelledError as error:
+            error.add_note(f"AI Gateway startup cancelled. {LOGIN_HELP}")
+            raise
+
+    async def close(self) -> None:
+        """Drop the run's credentials and close its bound providers."""
+        tokens, self._tokens = self._tokens, None
+        if tokens is not None:
+            tokens.clear()
+        registry, self._run_registry = self._run_registry, None
+        connection, self._connection = self._connection, None
+        self._route = None
+        try:
+            if registry is not None:
+                await registry.close()
+        finally:
+            if connection is not None:
+                await connection.aclose()
 
     @cached_property
     def file_registry(self) -> FileRegistry:
@@ -45,7 +154,7 @@ class RunResources:
     def agent_runtime_factory(self) -> AgentRuntimeFactoryProtocol:
         """Ready-to-use generic runtime factory."""
         return AgentRuntimeFactory(
-            provider_registry=self._provider_registry,
+            provider_registry=self._run_registry or self._configured_registry,
             file_registry=self.file_registry,
         )
 

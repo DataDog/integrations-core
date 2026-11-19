@@ -5,7 +5,7 @@
 import logging
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -42,6 +42,8 @@ def provider_registry() -> AgentProviderRegistry:
     provider = MagicMock()
     provider.default_model.return_value = DEFAULT_MODEL
     provider.supported_models.return_value = frozenset({DEFAULT_MODEL})
+    provider.for_run.return_value = provider
+    provider.close = AsyncMock()
     registry.register("anthropic", provider)
     return registry
 
