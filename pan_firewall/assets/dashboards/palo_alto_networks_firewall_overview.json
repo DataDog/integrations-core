@@ -104,6 +104,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "avg",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "avg:pan_firewall.can_connect{$firewall,$panorama} by {device_ip}.rollup(avg)"
@@ -149,6 +150,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "min",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.can_connect{$firewall,$panorama} by {device_ip}.rollup(min)"
@@ -170,7 +172,7 @@
           },
           {
             "definition": {
-              "description": "IPsec tunnels that were active for the whole selected time range. Tunnels that dropped or were initializing at any point are not counted.",
+              "description": "IPsec tunnels that were active for the whole selected time range: both their lowest and highest state readings are active. Tunnels that were inactive or initializing at any point are not counted.",
               "precision": 0,
               "requests": [
                 {
@@ -178,14 +180,21 @@
                   "formulas": [
                     {
                       "alias": "Tunnels up all range",
-                      "formula": "count_nonzero(1 - abs(query1 - 1))"
+                      "formula": "count_nonzero(clamp_min(1 - abs(qmin - 1) - abs(qmax - 1), 0))"
                     }
                   ],
                   "queries": [
                     {
+                      "aggregator": "min",
                       "data_source": "metrics",
-                      "name": "query1",
+                      "name": "qmin",
                       "query": "min:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}.rollup(min)"
+                    },
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "qmax",
+                      "query": "max:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}.rollup(max)"
                     }
                   ],
                   "response_format": "scalar"
@@ -228,6 +237,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "min",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}.rollup(min)"
@@ -273,6 +283,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "min",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.panorama.can_connect{$panorama} by {panorama_host}.rollup(min)"
@@ -318,6 +329,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "min",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.bgp.peer.status{$firewall,$panorama} by {device_id,vr,peer}.rollup(min)"
@@ -363,7 +375,11 @@
                   "response_format": "scalar"
                 }
               ],
-              "time": {},
+              "time": {
+                "type": "live",
+                "unit": "minute",
+                "value": 15
+              },
               "title": "HA state of reachable firewalls",
               "type": "sunburst"
             },
@@ -412,6 +428,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "min",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.license.days_left{$firewall,$panorama}.rollup(min)"
@@ -645,6 +662,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "max:pan_firewall.dataplane.cpu.utilization{$firewall,$panorama}.rollup(max)"
@@ -666,7 +684,7 @@
           },
           {
             "definition": {
-              "description": "Fullest file system across the selected firewalls in the time range. Reported every 30 minutes. A full log or config partition can stop logging or block commits.",
+              "description": "Fullest file system across the selected firewalls in the time range, excluding the log partition `/opt/panlogs`, which PAN-OS fills up to the log quota and purges by design. Reported every 30 minutes. A full config or root partition can block commits and content updates.",
               "precision": 2,
               "requests": [
                 {
@@ -701,9 +719,10 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:pan_firewall.disk.used_pct{$firewall,$panorama}.rollup(max)"
+                      "query": "max:pan_firewall.disk.used_pct{$firewall,$panorama,!mount:/opt/panlogs}.rollup(max)"
                     }
                   ],
                   "response_format": "scalar"
@@ -741,6 +760,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "max:pan_firewall.temperature.current{$firewall,$panorama}.rollup(max)"
@@ -786,16 +806,19 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "max:pan_firewall.temperature.alarm{$firewall,$panorama} by {device_id,sensor,slot}.rollup(max)"
                     },
                     {
+                      "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query2",
                       "query": "max:pan_firewall.power.alarm.high{$firewall,$panorama} by {device_id,sensor,slot}.rollup(max)"
                     },
                     {
+                      "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query3",
                       "query": "max:pan_firewall.power.alarm.low{$firewall,$panorama} by {device_id,sensor,slot}.rollup(max)"
@@ -1254,6 +1277,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "max:pan_firewall.bgp.peer.restart{$firewall,$panorama} by {device_id,vr,peer}.rollup(max)"
@@ -1305,6 +1329,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "sum:pan_firewall.bgp.peer.connections.dropped{$firewall,$panorama}.rollup(sum)"
@@ -1350,6 +1375,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "min",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.ospf.neighbor.status{$firewall,$panorama} by {device_id,vr,neighbor}.rollup(min)"
@@ -1395,6 +1421,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "sum:pan_firewall.ospf.neighbor.state_changes{$firewall,$panorama}.rollup(sum)"
@@ -1664,21 +1691,25 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "sum:pan_firewall.interface.rx.errors{$firewall,$panorama} by {device_hostname,interface}.rollup(sum)"
                     },
                     {
+                      "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query2",
                       "query": "sum:pan_firewall.interface.rx.drops{$firewall,$panorama} by {device_hostname,interface}.rollup(sum)"
                     },
                     {
+                      "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query3",
                       "query": "sum:pan_firewall.interface.forward_errors{$firewall,$panorama} by {device_hostname,interface}.rollup(sum)"
                     },
                     {
+                      "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query4",
                       "query": "sum:pan_firewall.interface.flow_state{$firewall,$panorama} by {device_hostname,interface}.rollup(sum)"
@@ -1700,7 +1731,7 @@
           },
           {
             "definition": {
-              "description": "Data-plane packet drops by cause (aspect), such as policy, session or resource limits. A growing resource or session aspect means the firewall is running out of capacity.",
+              "description": "Data-plane packet drops by cause (aspect), such as session, resource or tunnel. A growing resource or session aspect means the firewall is running out of capacity. Requires `collect_global_counters: true` in the integration configuration; shows No data while global counter collection is off (the default).",
               "legend_columns": [
                 "avg",
                 "max",
@@ -2169,6 +2200,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "max:pan_firewall.license.expired{$firewall,$panorama} by {device_id,feature}.rollup(max)"
@@ -2219,6 +2251,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "max:pan_firewall.api.authentication.status{$firewall,$panorama} by {device_id}.rollup(max)"
@@ -2274,6 +2307,7 @@
                   ],
                   "queries": [
                     {
+                      "aggregator": "min",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}.rollup(min)"
