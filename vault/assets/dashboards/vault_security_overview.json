@@ -48,7 +48,7 @@
                         "id": 6806324622707781,
                         "definition": {
                             "type": "note",
-                            "content": "Use this dashboard to monitor HashiCorp Vault audit logs, including:\n\n- Who reads, deletes, and exports secrets\n- Root token use\n- Changes to policies, identity groups, and configuration\n- How identities authenticate and when they are denied access\n\nAudit logs come from a Vault [audit device](https://developer.hashicorp.com/vault/docs/audit) and are collected with `source:vault`. Vault writes a request entry and a response entry for every call. This dashboard counts only responses.\n\nFor further reading, see:\n\n- [Vault integration documentation](https://docs.datadoghq.com/integrations/vault/)\n\n- [Vault audit devices](https://developer.hashicorp.com/vault/docs/audit)\n\n- [Datadog Cloud SIEM](https://docs.datadoghq.com/security/cloud_siem/)",
+                            "content": "Use this dashboard to monitor HashiCorp Vault audit logs, including:\n\n- Who reads, deletes, and exports secrets\n- Root token use\n- Changes to policies, identity groups, and configuration\n- How identities authenticate and when they are denied access\n\nAudit logs come from a Vault [audit device](https://developer.hashicorp.com/vault/docs/audit) and are collected with `source:vault`. Vault writes a request entry and a response entry for every call. This dashboard counts only responses.\n\nKV secret reads leave out KV v2 metadata, configuration, and subkeys requests. Audit logs don't record the KV version, so a KV v1 secret at a path ending in metadata, config, or subkeys can be left out too if it has a field named current_version, max_versions, or subkeys.\n\nFor further reading, see:\n\n- [Vault integration documentation](https://docs.datadoghq.com/integrations/vault/)\n\n- [Vault audit devices](https://developer.hashicorp.com/vault/docs/audit)\n\n- [Datadog Cloud SIEM](https://docs.datadoghq.com/security/cloud_siem/)",
                             "background_color": "transparent",
                             "font_size": "14",
                             "text_align": "left",
@@ -759,7 +759,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:vault @type:response ((@request.mount_type:kv @request.operation:read -(@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) ((@response.data.current_version:* OR @response.data.max_versions:* OR @response.data.subkeys:*) OR ((-@response.mount_type:* OR @response.status:error) -@http.url_details.path:(*\\/data\\/*metadata OR *\\/data\\/*metadata\\/* OR *\\/data\\/*config OR *\\/data\\/*subkeys\\/*))))) OR (@request.mount_type:kv (@request.operation:delete OR (@http.url_details.path:(*\\/destroy\\/* OR *\\/delete\\/*) @request.operation:(create OR update) @request.data.versions:*)))) $user $client_ip $mount_type $operation $path",
+                                        "query_string": "source:vault @type:response ((@request.mount_type:kv @request.operation:read -(@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) ((@response.data.current_version:* OR @response.data.max_versions:* OR @response.data.subkeys:*) OR ((-@response.mount_type:* OR @response.status:error) -(@http.url_details.path:(*\\/data\\/*metadata OR *\\/data\\/*metadata\\/* OR *\\/data\\/*config OR *\\/data\\/*subkeys\\/*) -@http.url_details.path:(*\\/metadata\\/data\\/* OR *\\/metadata\\/*\\/data\\/* OR *\\/subkeys\\/data\\/* OR *\\/subkeys\\/*\\/data\\/*)))))) OR (@request.mount_type:kv (@request.operation:delete OR (@http.url_details.path:(*\\/destroy\\/* OR *\\/delete\\/*) @request.operation:(create OR update) @request.data.versions:*)))) $user $client_ip $mount_type $operation $path",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -834,7 +834,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read -(@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) ((@response.data.current_version:* OR @response.data.max_versions:* OR @response.data.subkeys:*) OR ((-@response.mount_type:* OR @response.status:error) -@http.url_details.path:(*\\/data\\/*metadata OR *\\/data\\/*metadata\\/* OR *\\/data\\/*config OR *\\/data\\/*subkeys\\/*)))) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read -(@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) ((@response.data.current_version:* OR @response.data.max_versions:* OR @response.data.subkeys:*) OR ((-@response.mount_type:* OR @response.status:error) -(@http.url_details.path:(*\\/data\\/*metadata OR *\\/data\\/*metadata\\/* OR *\\/data\\/*config OR *\\/data\\/*subkeys\\/*) -@http.url_details.path:(*\\/metadata\\/data\\/* OR *\\/metadata\\/*\\/data\\/* OR *\\/subkeys\\/data\\/* OR *\\/subkeys\\/*\\/data\\/*))))) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -896,7 +896,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read -(@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) ((@response.data.current_version:* OR @response.data.max_versions:* OR @response.data.subkeys:*) OR ((-@response.mount_type:* OR @response.status:error) -@http.url_details.path:(*\\/data\\/*metadata OR *\\/data\\/*metadata\\/* OR *\\/data\\/*config OR *\\/data\\/*subkeys\\/*)))) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read -(@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) ((@response.data.current_version:* OR @response.data.max_versions:* OR @response.data.subkeys:*) OR ((-@response.mount_type:* OR @response.status:error) -(@http.url_details.path:(*\\/data\\/*metadata OR *\\/data\\/*metadata\\/* OR *\\/data\\/*config OR *\\/data\\/*subkeys\\/*) -@http.url_details.path:(*\\/metadata\\/data\\/* OR *\\/metadata\\/*\\/data\\/* OR *\\/subkeys\\/data\\/* OR *\\/subkeys\\/*\\/data\\/*))))) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1029,7 +1029,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read -(@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) ((@response.data.current_version:* OR @response.data.max_versions:* OR @response.data.subkeys:*) OR ((-@response.mount_type:* OR @response.status:error) -@http.url_details.path:(*\\/data\\/*metadata OR *\\/data\\/*metadata\\/* OR *\\/data\\/*config OR *\\/data\\/*subkeys\\/*)))) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @request.mount_type:kv @request.operation:read -(@http.url_details.path:(*\\/metadata OR *\\/metadata\\/* OR *\\/config OR *\\/subkeys\\/*) ((@response.data.current_version:* OR @response.data.max_versions:* OR @response.data.subkeys:*) OR ((-@response.mount_type:* OR @response.status:error) -(@http.url_details.path:(*\\/data\\/*metadata OR *\\/data\\/*metadata\\/* OR *\\/data\\/*config OR *\\/data\\/*subkeys\\/*) -@http.url_details.path:(*\\/metadata\\/data\\/* OR *\\/metadata\\/*\\/data\\/* OR *\\/subkeys\\/data\\/* OR *\\/subkeys\\/*\\/data\\/*))))) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
