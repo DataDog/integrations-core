@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2026-11-19",
+    "last_updated_at": "2026-11-19",
+    "title": "Dynamo is rejecting requests",
+    "description": "The Dynamo frontend is rejecting requests because of resource exhaustion. Clients receive errors instead of completions until worker capacity frees up.",
+    "definition": {
+        "name": "[Dynamo] High request rejection rate for model {{model.name}}",
+        "type": "query alert",
+        "query": "sum(last_15m):sum:dynamo.frontend.model.rejection.count{*} by {model}.as_count() / sum:dynamo.frontend.requests.count{*} by {model}.as_count() > 0.05",
+        "message": "{{#is_warning}}\nThe Dynamo frontend rejected more than {{warn_threshold}} of requests for model {{model.name}}.\n{{/is_warning}}\n{{#is_alert}}\nThe Dynamo frontend rejected more than {{threshold}} of requests for model {{model.name}}.\n{{/is_alert}}\n{{#is_recovery}}\nThe Dynamo request rejection rate for model {{model.name}} is back to normal.\n{{/is_recovery}}\n\nRejections happen when workers run out of capacity. Scale out workers or reduce the incoming request rate.",
+        "tags": [
+            "integration:dynamo"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 0.05,
+                "warning": 0.01
+            },
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": null,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:dynamo"
+    ]
+}

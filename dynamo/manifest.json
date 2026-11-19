@@ -48,7 +48,14 @@
         "dynamo.trtllm"
       ]
     },
-    "monitors": {},
+    "monitors": {
+      "Dynamo time to first token is high": "assets/monitors/time_to_first_token.json",
+      "Dynamo requests are queueing": "assets/monitors/queued_requests.json",
+      "Dynamo is rejecting requests": "assets/monitors/rejection_rate.json"
+    },
+    "dashboards": {
+      "Dynamo Overview": "assets/dashboards/overview.json"
+    },
     "saved_views": {}
   },
   "author": {
