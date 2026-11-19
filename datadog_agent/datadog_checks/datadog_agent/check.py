@@ -8,6 +8,7 @@ from datadog_checks.datadog_agent.metrics import METRIC_MAP
 
 class DatadogAgentCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'datadog.agent'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 
