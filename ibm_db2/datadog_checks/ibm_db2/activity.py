@@ -23,23 +23,21 @@ CONTEXT_COLUMNS = (
 CONTEXT_MAX_CHARS = 512
 ACTIVITY_MAX_ROWS = 1_000
 ACTIVITY_MAX_TEXT_BYTES = 16_384
-ACTIVITY_TEXT_BUDGET = 4 * 1024 * 1024
 ACTIVITY_QUERY_TIMEOUT = 5
 
 ACTIVITY_QUERY = f"""/* DDIGNORE */
 SELECT A.MEMBER, A.APPLICATION_HANDLE, A.APPL_ID, A.UOW_ID, A.ACTIVITY_ID,
+       A.EXECUTABLE_ID, A.PLANID,
        A.LOCAL_START_TIME, CURRENT TIMESTAMP AS OBSERVED_TIMESTAMP, A.ACTIVITY_STATE,
        OCTET_LENGTH(A.STMT_TEXT) AS STMT_TEXT_BYTES,
-       CASE WHEN OCTET_LENGTH(A.STMT_TEXT) <= {ACTIVITY_MAX_TEXT_BYTES}
-            THEN CAST(A.STMT_TEXT AS VARCHAR({ACTIVITY_MAX_TEXT_BYTES} OCTETS)) END AS STMT_TEXT,
+       CAST(SUBSTRING(A.STMT_TEXT, 1, {ACTIVITY_MAX_TEXT_BYTES}, OCTETS)
+            AS VARCHAR({ACTIVITY_MAX_TEXT_BYTES} OCTETS)) AS STMT_TEXT,
        C.SESSION_AUTH_ID, C.APPLICATION_NAME, C.CLIENT_APPLNAME, C.CLIENT_HOSTNAME,
        C.CLIENT_WRKSTNNAME, C.CONNECTION_START_TIME
 FROM TABLE(SYSPROC.MON_GET_ACTIVITY(NULL, -1)) AS A
 LEFT JOIN TABLE(SYSPROC.MON_GET_CONNECTION(NULL, -1, 0)) AS C
   ON A.MEMBER = C.MEMBER AND A.APPLICATION_HANDLE = C.APPLICATION_HANDLE
 WHERE A.APPLICATION_HANDLE <> SYSPROC.MON_GET_APPLICATION_HANDLE()
-  AND A.STMT_TEXT NOT LIKE '/* DDIGNORE */%'
-  AND A.STMT_TEXT NOT LIKE '/* service=''datadog-agent'' */%'
 ORDER BY A.LOCAL_START_TIME, A.MEMBER, A.APPLICATION_HANDLE, A.UOW_ID, A.ACTIVITY_ID
 FETCH FIRST {ACTIVITY_MAX_ROWS + 1} ROWS ONLY
 """
@@ -53,8 +51,7 @@ def read_activity(connection: Any) -> tuple[list[dict[str, Any]], dict[str, int]
     """
     cursor = ibm_db.prepare(connection, ACTIVITY_QUERY, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: ACTIVITY_QUERY_TIMEOUT})
     rows = []
-    stats = {'row_limit': 0, 'text_limit': 0, 'text_budget': 0}
-    text_bytes = 0
+    stats = {'row_limit': 0}
     try:
         ibm_db.execute(cursor)
         for index in range(ACTIVITY_MAX_ROWS + 1):
@@ -64,18 +61,6 @@ def read_activity(connection: Any) -> tuple[list[dict[str, Any]], dict[str, int]
             if index == ACTIVITY_MAX_ROWS:
                 stats['row_limit'] = 1
                 break
-            text = row.get('stmt_text')
-            if (row.get('stmt_text_bytes') or 0) > ACTIVITY_MAX_TEXT_BYTES:
-                stats['text_limit'] += 1
-                continue
-            size = len(text.encode('utf-8')) if isinstance(text, str) else 0
-            if size > ACTIVITY_MAX_TEXT_BYTES:
-                stats['text_limit'] += 1
-                continue
-            if text_bytes + size > ACTIVITY_TEXT_BUDGET:
-                stats['text_budget'] = 1
-                break
-            text_bytes += size
             rows.append(row)
     finally:
         ibm_db.free_stmt(cursor)

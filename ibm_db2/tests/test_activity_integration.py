@@ -21,7 +21,7 @@ def _execute(connection: Any, query: str) -> None:
 
 
 def test_activity_reader(instance: dict):
-    """Read concurrent executions, omit Agent/oversized SQL, and stop reporting work after it completes."""
+    """Read concurrent and Agent-tagged executions, truncate UTF-8 SQL, and remove completed work."""
     target, user, password = get_connection_data(
         instance['db'], instance['username'], instance['password'], instance['host'], instance['port'], None, None, None
     )
@@ -46,21 +46,32 @@ def test_activity_reader(instance: dict):
             finally:
                 ibm_db.close(connection)
 
-        queries = [f"UPDATE {table} SET VALUE='literal-{n}' WHERE ID=1" for n in range(4)]
+        queries = [f"UPDATE {table} SET VALUE='literal-{n}' WHERE ID=1" for n in range(5)]
         queries[2] = "/* service='datadog-agent' */ " + queries[2]
-        queries[3] += ' /*' + 'é' * ACTIVITY_MAX_TEXT_BYTES + '*/'
-        with ThreadPoolExecutor(max_workers=4) as workers:
+        queries[3] = '/* DDIGNORE */ ' + queries[3]
+        queries[4] += ' /*' + 'é中🙂' * ACTIVITY_MAX_TEXT_BYTES + '*/'
+        with ThreadPoolExecutor(max_workers=5) as workers:
             futures = [workers.submit(blocked_update, query) for query in queries]
             try:
 
                 def assert_active() -> None:
                     rows, stats = read_activity(observer)
                     matching = [row for row in rows if table in (row['stmt_text'] or '')]
-                    assert {row['stmt_text'] for row in matching} == set(queries[:2])
-                    assert len({row['application_handle'] for row in matching}) == 2
+                    short = [row for row in matching if row['stmt_text_bytes'] <= ACTIVITY_MAX_TEXT_BYTES]
+                    assert {row['stmt_text'] for row in short} == set(queries[:4])
+                    assert len({row['application_handle'] for row in matching}) == 5
+                    long = [row for row in matching if row['stmt_text_bytes'] > ACTIVITY_MAX_TEXT_BYTES]
+                    assert len(long) == 1
+                    text = long[0]['stmt_text']
+                    assert len(text.encode('utf-8')) <= ACTIVITY_MAX_TEXT_BYTES
+                    assert text.rstrip() == queries[4].encode('utf-8')[:ACTIVITY_MAX_TEXT_BYTES].decode(
+                        'utf-8', errors='ignore'
+                    )
+                    assert long[0]['stmt_text_bytes'] == len(queries[4].encode('utf-8'))
+                    assert all(row['executable_id'] for row in matching)
                     assert all(row['observed_timestamp'] > row['local_start_time'] for row in matching)
                     assert all(row['session_auth_id'].strip() == instance['username'].upper() for row in matching)
-                    assert stats == {'row_limit': 0, 'text_limit': 1, 'text_budget': 0}
+                    assert stats == {'row_limit': 0}
 
                 WaitFor(assert_active, attempts=40, wait=0.25)()
             finally:

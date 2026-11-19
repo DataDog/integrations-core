@@ -132,33 +132,20 @@ def test_obfuscation_failure(activity_row: dict, monkeypatch: pytest.MonkeyPatch
     assert normalize_activity(activity_row, 'orders') is None
 
 
-@pytest.mark.parametrize('limit', ['rows', 'text', 'budget'])
-def test_activity_reader_limits(monkeypatch: pytest.MonkeyPatch, limit: str):
-    """Bound returned rows and UTF-8 SQL bytes without forwarding an oversized statement fragment."""
+@pytest.mark.parametrize('count, expected_limit', [(1, 0), (3, 1)])
+def test_activity_reader_limits(monkeypatch: pytest.MonkeyPatch, count: int, expected_limit: int):
+    """Return an oldest-first prefix and report whether the extra fetched row exceeded the cap."""
     monkeypatch.setattr(activity, 'ACTIVITY_MAX_ROWS', 2)
-    monkeypatch.setattr(activity, 'ACTIVITY_MAX_TEXT_BYTES', 8)
-    monkeypatch.setattr(activity, 'ACTIVITY_TEXT_BUDGET', 8)
-    rows = {
-        'rows': [{'stmt_text': 'a'}, {'stmt_text': 'b'}, {'stmt_text': 'c'}, False],
-        'text': [{'stmt_text': None, 'stmt_text_bytes': 9}, {'stmt_text': 'é' * 5}, {'stmt_text': 'c'}, False],
-        'budget': [{'stmt_text': '12345'}, {'stmt_text': '67890'}, False],
-    }[limit]
+    rows = [{'stmt_text': str(index)} for index in range(count)]
     cursor = object()
     prepare, release = Mock(return_value=cursor), Mock()
     monkeypatch.setattr(activity.ibm_db, 'prepare', prepare)
     monkeypatch.setattr(activity.ibm_db, 'execute', Mock())
-    monkeypatch.setattr(activity.ibm_db, 'fetch_assoc', Mock(side_effect=rows))
+    monkeypatch.setattr(activity.ibm_db, 'fetch_assoc', Mock(side_effect=[*rows, False]))
     monkeypatch.setattr(activity.ibm_db, 'free_stmt', release)
     result, stats = activity.read_activity('connection')
-    assert [row['stmt_text'] for row in result] == {'rows': ['a', 'b'], 'text': [], 'budget': ['12345']}[limit]
-    assert (
-        stats
-        == {
-            'rows': {'row_limit': 1, 'text_limit': 0, 'text_budget': 0},
-            'text': {'row_limit': 1, 'text_limit': 2, 'text_budget': 0},
-            'budget': {'row_limit': 0, 'text_limit': 0, 'text_budget': 1},
-        }[limit]
-    )
+    assert result == rows[:2]
+    assert stats == {'row_limit': expected_limit}
     prepare.assert_called_once_with(
         'connection', activity.ACTIVITY_QUERY, {activity.ibm_db.SQL_ATTR_QUERY_TIMEOUT: activity.ACTIVITY_QUERY_TIMEOUT}
     )

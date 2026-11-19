@@ -1,1 +1,1 @@
-Prepare bounded local Db2 activity reads with statement cleanup and collection limits.
+Prepare local Db2 activity reads with row limits, UTF-8-safe statement truncation, native identifiers, and statement cleanup.
