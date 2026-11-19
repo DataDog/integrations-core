@@ -1,1 +1,0 @@
-Log the 'not running as root or sudo' notice once per check instance instead of on every collection interval when the agent runs as a non-root user.

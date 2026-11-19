@@ -70,10 +70,13 @@ After you enable it, the integration submits flow-run, task-run, and ready or no
 The Prefect integration does not include any service checks.
 
 
-## Troubleshooting
+## Uninstallation
+
+To disable the integration, rename the configuration file from `prefect.d/conf.yaml` to `prefect.d/conf.yaml.example`. Alternatively, if you are running a containerized environment, you can remove the annotation used to enable the integration.
+
+## Support
 
 Need help? Contact [Datadog support][10].
-
 
 [1]: https://www.prefect.io/
 [2]: https://docs.prefect.io/v3/api-ref/rest-api/server/index

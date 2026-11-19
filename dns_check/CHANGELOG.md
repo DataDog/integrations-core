@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.6.0 / 2026-11-16
+
+***Security***:
+
+* Bump `dnspython` to 2.9.2 to address CVE-2026-114605. ([#25968](https://github.com/DataDog/integrations-core/pull/25968))
+
 ## 5.5.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:

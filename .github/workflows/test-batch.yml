@@ -42,7 +42,7 @@ on:
         required: true
         type: string
       concurrency_key:
-        description: "What the batch cancels against: pr-<number> for a pull request, the commit SHA for a branch run"
+        description: "What the batch cancels against: pr-<number> for a pull request, <context>-<sha> for other runs"
         required: false
         default: ""
         type: string
@@ -51,8 +51,14 @@ on:
         required: true
         type: string
       head_branch:
-        description: "Branch the results belong to"
-        required: true
+        description: "Branch the results belong to. Empty for a tag run, which sends `head_tag` instead"
+        required: false
+        default: ""
+        type: string
+      head_tag:
+        description: "Release tag the results belong to, in place of `head_branch`"
+        required: false
+        default: ""
         type: string
       job_list:
         description: "The batch's jobs, as gzip+base64 of the plan's JSON"
@@ -182,17 +188,21 @@ jobs:
 
       # A status, not a check run: a check run at a SHA this workflow was not dispatched at gets filed
       # under whichever workflow already has a check suite there.
+      # The PR status keeps one stable name; other runs are named by context so runs on one commit do
+      # not overwrite each other's status.
       - name: Mark the batch pending
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BATCH_ID: ${{ inputs.batch_id }}
+          STATUS_CONTEXT: ${{
+            inputs.pr_number != '' && format('Dispatcher / {0} (beta, non-blocking)', inputs.batch_id) ||
+            format('Dispatcher ({0}) / {1} (beta, non-blocking)', inputs.context, inputs.batch_id) }}
           HEAD_SHA: ${{ inputs.head_sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           JOB_COUNT: ${{ steps.decode.outputs.count }}
         run: |
           set -euo pipefail
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=Dispatcher / ${BATCH_ID} (beta, non-blocking)" \
+            -f "context=${STATUS_CONTEXT}" \
             -f "state=pending" \
             -f "description=Running ${JOB_COUNT} job(s)" \
             -f "target_url=${RUN_URL}" \
@@ -238,6 +248,7 @@ jobs:
         env:
           HEAD_SHA: ${{ inputs.head_sha }}
           BRANCH: ${{ inputs.head_branch }}
+          TAG: ${{ inputs.head_tag }}
         run: |
           set -euo pipefail
 
@@ -249,7 +260,14 @@ jobs:
 
           {
             echo "DD_GIT_COMMIT_SHA=${HEAD_SHA}"
-            echo "DD_GIT_BRANCH=${BRANCH}"
+            # A tag run has no branch. Naming one would file its results under a ref that does
+            # not exist, and omitting both would let the tracer fall back to this workflow's own
+            # ambient branch, which is master.
+            if [[ -n "$TAG" ]]; then
+              echo "DD_GIT_TAG=${TAG}"
+            else
+              echo "DD_GIT_BRANCH=${BRANCH}"
+            fi
             echo "DD_GIT_REPOSITORY_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
             echo "DD_GIT_COMMIT_AUTHOR_EMAIL=${author_email}"
           } >> "$GITHUB_ENV"
@@ -363,6 +381,7 @@ jobs:
         env:
           HEAD_SHA: ${{ inputs.head_sha }}
           BRANCH: ${{ inputs.head_branch }}
+          TAG: ${{ inputs.head_tag }}
         run: |
           set -euo pipefail
 
@@ -373,7 +392,14 @@ jobs:
 
           {
             echo "DD_GIT_COMMIT_SHA=${HEAD_SHA}"
-            echo "DD_GIT_BRANCH=${BRANCH}"
+            # A tag run has no branch. Naming one would file its results under a ref that does
+            # not exist, and omitting both would let the tracer fall back to this workflow's own
+            # ambient branch, which is master.
+            if [[ -n "$TAG" ]]; then
+              echo "DD_GIT_TAG=${TAG}"
+            else
+              echo "DD_GIT_BRANCH=${BRANCH}"
+            fi
             echo "DD_GIT_REPOSITORY_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
             echo "DD_GIT_COMMIT_AUTHOR_EMAIL=${author_email}"
           } >> "$GITHUB_ENV"
@@ -452,7 +478,9 @@ jobs:
       - name: Settle the batch's result
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BATCH_ID: ${{ inputs.batch_id }}
+          STATUS_CONTEXT: ${{
+            inputs.pr_number != '' && format('Dispatcher / {0} (beta, non-blocking)', inputs.batch_id) ||
+            format('Dispatcher ({0}) / {1} (beta, non-blocking)', inputs.context, inputs.batch_id) }}
           HEAD_SHA: ${{ inputs.head_sha }}
           TEST_RESULT: ${{ inputs.is_fork == 'true' && needs.test_fork.result || needs.test.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -467,7 +495,7 @@ jobs:
           esac
 
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=Dispatcher / ${BATCH_ID} (beta, non-blocking)" \
+            -f "context=${STATUS_CONTEXT}" \
             -f "state=${state}" \
             -f "description=${description}" \
             -f "target_url=${RUN_URL}" \

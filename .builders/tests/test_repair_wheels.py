@@ -103,6 +103,63 @@ def test_repair_darwin_strips_libddwaf_before_delocate(
         assert LIBDDWAF_PATH not in wheel.namelist()
 
 
+def test_repair_darwin_given_external_wheel_needing_newer_macos_than_target_raises(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    source_built_dir = tmp_path / 'source-built'
+    source_external_dir = tmp_path / 'source-external'
+    built_dir = tmp_path / 'built'
+    external_dir = tmp_path / 'external'
+    for directory in (source_built_dir, source_external_dir, built_dir, external_dir):
+        directory.mkdir()
+
+    # PyPI's macOS 15-only orjson wheel, which pip prefers on a macos-15 arm64 runner
+    wheel_path = source_external_dir / 'orjson-3.13.0-cp313-cp313-macosx_15_0_arm64.whl'
+    write_wheel(wheel_path)
+
+    # delocate is a macOS-only native tool that isn't under test here
+    monkeypatch.setitem(sys.modules, 'delocate', SimpleNamespace(delocate_wheel=None))
+    monkeypatch.setenv('MACOSX_DEPLOYMENT_TARGET', '12.0')
+    # The host CPU architecture is a platform boundary: pin it so the result doesn't depend on the machine
+    monkeypatch.setattr(repair_wheels.os, 'uname', lambda: SimpleNamespace(machine='arm64'))
+
+    with pytest.raises(RuntimeError, match=r'orjson-3\.13\.0-cp313-cp313-macosx_15_0_arm64\.whl'):
+        repair_wheels.repair_darwin(
+            str(source_built_dir), str(source_external_dir), str(built_dir), str(external_dir)
+        )
+
+
+def test_repair_darwin_given_external_wheel_with_one_compatible_compressed_tag_keeps_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    source_built_dir = tmp_path / 'source-built'
+    source_external_dir = tmp_path / 'source-external'
+    built_dir = tmp_path / 'built'
+    external_dir = tmp_path / 'external'
+    for directory in (source_built_dir, source_external_dir, built_dir, external_dir):
+        directory.mkdir()
+
+    # PyPI's universal orjson wheel: only one of its compressed tags matches an arm64 host on macOS 12
+    wheel_path = (
+        source_external_dir
+        / 'orjson-3.13.0-cp313-cp313-macosx_10_15_x86_64.macosx_11_0_arm64.macosx_10_15_universal2.whl'
+    )
+    write_wheel(wheel_path)
+    original_contents = wheel_path.read_bytes()
+
+    # delocate is a macOS-only native tool that isn't under test here
+    monkeypatch.setitem(sys.modules, 'delocate', SimpleNamespace(delocate_wheel=None))
+    monkeypatch.setenv('MACOSX_DEPLOYMENT_TARGET', '12.0')
+    # The host CPU architecture is a platform boundary: pin it so the result doesn't depend on the machine
+    monkeypatch.setattr(repair_wheels.os, 'uname', lambda: SimpleNamespace(machine='arm64'))
+
+    repair_wheels.repair_darwin(
+        str(source_built_dir), str(source_external_dir), str(built_dir), str(external_dir)
+    )
+
+    assert (external_dir / wheel_path.name).read_bytes() == original_contents
+
+
 def test_repair_darwin_repairs_external_ddtrace_and_preserves_other_external_wheels(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -129,6 +186,8 @@ def test_repair_darwin_repairs_external_ddtrace_and_preserves_other_external_whe
 
     monkeypatch.setitem(sys.modules, 'delocate', SimpleNamespace(delocate_wheel=fake_delocate_wheel))
     monkeypatch.setenv('MACOSX_DEPLOYMENT_TARGET', '12.0')
+    # The arm64 external wheels must pass the macOS target check: pin the host CPU architecture
+    monkeypatch.setattr(repair_wheels.os, 'uname', lambda: SimpleNamespace(machine='arm64'))
 
     repair_wheels.repair_darwin(
         str(source_built_dir), str(source_external_dir), str(built_dir), str(external_dir)

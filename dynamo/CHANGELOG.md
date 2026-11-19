@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 1.0.0 / 2026-09-30
+## 1.1.0 / 2026-10-29
+
+***Added***:
+
+* Collect the Dynamo router KV transfer latency and shared cache metrics. ([#25737](https://github.com/DataDog/integrations-core/pull/25737))
+
+## 1.0.0 / 2026-09-30 / Agent 7.85.0
 
 ***Added***:
 

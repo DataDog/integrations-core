@@ -1,0 +1,1 @@
+Add an `orchestrator_api_key` option to authenticate to the Orchestrator with an API key.

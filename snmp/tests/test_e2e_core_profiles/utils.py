@@ -136,6 +136,62 @@ def assert_extend_generic_bgp4(aggregator, common_tags):
     )
 
 
+def assert_extend_cisco_bgp4_peer3(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.4.1.9.9.187.1.2.9.1.3.1.1.4.10.0.0.1|4x|0a000001
+1.3.6.1.4.1.9.9.187.1.2.9.1.4.1.1.4.10.0.0.1|4|blue
+1.3.6.1.4.1.9.9.187.1.2.9.1.5.1.1.4.10.0.0.1|2|6
+1.3.6.1.4.1.9.9.187.1.2.9.1.6.1.1.4.10.0.0.1|2|2
+1.3.6.1.4.1.9.9.187.1.2.9.1.7.1.1.4.10.0.0.1|2|4
+1.3.6.1.4.1.9.9.187.1.2.9.1.10.1.1.4.10.0.0.1|66|65000
+1.3.6.1.4.1.9.9.187.1.2.9.1.13.1.1.4.10.0.0.1|66|65001
+1.3.6.1.4.1.9.9.187.1.2.9.1.15.1.1.4.10.0.0.1|65|1520
+1.3.6.1.4.1.9.9.187.1.2.9.1.16.1.1.4.10.0.0.1|65|1310
+1.3.6.1.4.1.9.9.187.1.2.9.1.17.1.1.4.10.0.0.1|65|4820
+1.3.6.1.4.1.9.9.187.1.2.9.1.18.1.1.4.10.0.0.1|65|4710
+1.3.6.1.4.1.9.9.187.1.2.9.1.20.1.1.4.10.0.0.1|65|3
+1.3.6.1.4.1.9.9.187.1.2.9.1.21.1.1.4.10.0.0.1|66|86400
+1.3.6.1.4.1.9.9.187.1.2.9.1.22.1.1.4.10.0.0.1|2|120
+1.3.6.1.4.1.9.9.187.1.2.9.1.23.1.1.4.10.0.0.1|2|180
+1.3.6.1.4.1.9.9.187.1.2.9.1.24.1.1.4.10.0.0.1|2|60
+1.3.6.1.4.1.9.9.187.1.2.9.1.25.1.1.4.10.0.0.1|2|180
+1.3.6.1.4.1.9.9.187.1.2.9.1.26.1.1.4.10.0.0.1|2|60
+1.3.6.1.4.1.9.9.187.1.2.9.1.27.1.1.4.10.0.0.1|2|15
+1.3.6.1.4.1.9.9.187.1.2.9.1.28.1.1.4.10.0.0.1|2|30
+    """
+    # fmt: on
+    tags = common_tags + [
+        "remote_as:65001",
+        "admin_status:start",
+        "peer_state:established",
+        "neighbor:10.0.0.1",
+        "vrf_name:blue",
+    ]
+    metrics = [
+        "cbgpPeer3AdminStatus",
+        "cbgpPeer3NegotiatedVersion",
+        "cbgpPeer3RemoteAs",
+        "cbgpPeer3LocalAs",
+        "cbgpPeer3State",
+        "cbgpPeer3InUpdates",
+        "cbgpPeer3OutUpdates",
+        "cbgpPeer3InTotalMessages",
+        "cbgpPeer3OutTotalMessages",
+        "cbgpPeer3FsmEstablishedTransitions",
+        "cbgpPeer3FsmEstablishedTime",
+        "cbgpPeer3ConnectRetryInterval",
+        "cbgpPeer3HoldTime",
+        "cbgpPeer3KeepAlive",
+        "cbgpPeer3HoldTimeConfigured",
+        "cbgpPeer3KeepAliveConfigured",
+        "cbgpPeer3MinASOriginationInterval",
+        "cbgpPeer3MinRouteAdvertisementInterval",
+    ]
+    for metric in metrics:
+        aggregator.assert_metric("snmp." + metric, metric_type=aggregator.GAUGE, tags=tags)
+
+
 def assert_extend_cisco_cpu_memory(aggregator, common_tags):
     aggregator.assert_metric("snmp.memory.used", metric_type=aggregator.GAUGE, tags=common_tags + ["mem:18"])
     aggregator.assert_metric("snmp.ciscoMemoryPoolUsed", metric_type=aggregator.GAUGE, tags=common_tags)

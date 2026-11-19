@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 5.5.3 / 2026-10-01
+## 6.0.0 / 2026-10-29
+
+***Changed***:
+
+* Reject `thresholds` values at configuration load that the check misread, crashed on, ignored, or would breach for every process count (numeric strings such as `'5'` or `'inf'`, booleans, NaN, a positive infinite lower bound, a negative infinite upper bound, a lower bound above the upper bound, or an infinite value past the two bounds), so an instance with such a value now fails to load and sends no metrics instead of running. ([#25422](https://github.com/DataDog/integrations-core/pull/25422))
+
+***Fixed***:
+
+* Accept the `.inf` string for an unbounded `thresholds` upper bound so it survives JSON transport from Remote Config, and treat an explicit `null` threshold range as the default instead of crashing the check run. ([#25422](https://github.com/DataDog/integrations-core/pull/25422))
+
+## 5.5.3 / 2026-10-01 / Agent 7.85.0
 
 ***Fixed***:
 

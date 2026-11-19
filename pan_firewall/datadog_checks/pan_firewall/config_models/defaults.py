@@ -32,10 +32,6 @@ def instance_collect_rule_hits():
     return True
 
 
-def instance_collect_threats():
-    return True
-
-
 def instance_disable_generic_tags():
     return False
 

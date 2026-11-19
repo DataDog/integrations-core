@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 20.2.0 / 2026-11-03
+
+***Added***:
+
+* Include wheel contents validation in the `package` validation description. ([#25576](https://github.com/DataDog/integrations-core/pull/25576))
+* Add `--targets`, `--exclude-targets`, `--agent-image` and `--agent-image-windows` to `ddev ci dispatch-tests`.
+  Add `--head-tag` to `ddev ci dispatch-tests`, so a run started from a release tag is attributed to the tag rather than to a branch. ([#25686](https://github.com/DataDog/integrations-core/pull/25686))
+* Add an optional PyPI ddev version pin to reusable test workflows, preserve it in CI generation, and load shared actions and scripts from the reusable workflow commit. ([#25824](https://github.com/DataDog/integrations-core/pull/25824))
+
+***Fixed***:
+
+* Replace the misleading example in the `validators.py` template used by `ddev create` with guidance on spec constraints and the `check_instance` hook. ([#25552](https://github.com/DataDog/integrations-core/pull/25552))
+* Revert the Python version to 3.13.15 and make `upgrade-python-version` skip 3.13.16, which breaks concurrent imports in the Agent. ([#25585](https://github.com/DataDog/integrations-core/pull/25585))
+* Bump the pinned embedded Python version from 3.13.15 to 3.13.17. ([#25738](https://github.com/DataDog/integrations-core/pull/25738))
+* Make the `ddev validate labeler` fix-it message actionable for integrations without an Agent check, and keep bracketed text in `ddev validate all` failure output. ([#25780](https://github.com/DataDog/integrations-core/pull/25780))
+* Refresh Dispatcher GitHub credentials during long runs and before settling the aggregate commit status. ([#25786](https://github.com/DataDog/integrations-core/pull/25786))
+* Reuse the workflow's initial GitHub token and widen the retry backoff for Dispatcher credential refresh through octo-sts. ([#25792](https://github.com/DataDog/integrations-core/pull/25792))
+* Report the actual Dispatcher outcome and no-op reason in the aggregate commit status. ([#25847](https://github.com/DataDog/integrations-core/pull/25847))
+* Fill the pull request template, including its checklist, in the body of the milestone bump PR opened by `ddev release branch create`. ([#25851](https://github.com/DataDog/integrations-core/pull/25851))
+* Select testable targets when their CI setup scripts change and warn about script folders without a testable target. ([#25859](https://github.com/DataDog/integrations-core/pull/25859))
+
 ## 20.1.0 / 2026-10-15
 
 ***Added***:

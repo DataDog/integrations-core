@@ -1,1337 +1,335 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import os
-import subprocess
 import sys
+from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 
-from ddev.repo.core import Repository
-from ddev.utils.structures import EnvVars
-from tests.helpers.assertions import assert_calls
-from tests.helpers.mocks import MockPopen
-
-
-@pytest.fixture(autouse=True)
-def mock_worktrees(mocker):
-    # Mock the access to worktrees because these tests mock the global subprocess run
-    # Should be refactored to avoid such a broad mock
-    mocker.patch('ddev.utils.git.GitRepository.worktrees', return_value=[])
+from ddev.config.file import ConfigFileWithOverrides
+from ddev.repo.core import IntegrationRegistry, Repository
+from tests.helpers.runner import CliRunner
 
 
-class TestInputValidation:
-    @pytest.mark.parametrize('flag', ('--lint', '--fmt', '--bench', '--latest'))
-    def test_specific_environment_and_functionality(self, ddev, helpers, flag):
-        result = ddev('test', 'postgres:foo', flag)
+@pytest.mark.parametrize(
+    'args, text',
+    [
+        (('sample:foo',), 'ddev test sample --envs foo'),
+        (('sample', '--', '-m', 'unit'), '--pytest-args'),
+        (('sample', 'tests/test_file.py'), '--pytest-args'),
+        (('sample', '-k', 'case'), '--pytest-args'),
+        (('sample', '--env', 'foo'), '--envs'),
+    ],
+)
+def test_legacy_inputs_have_migration_examples(ddev: CliRunner, commands: MagicMock, args: tuple[str, ...], text: str):
+    result = ddev('test', *args)
+    assert result.exit_code == 2, result.output
+    assert text in result.output
+    assert 'postgres' in result.output or 'sample --envs foo' in result.output
+    commands.assert_not_called()
 
+
+@pytest.mark.parametrize('args', [('--envs', 'typo'), ('--envs', 'foo,'), ('--pytest-args', '-m "unit')])
+def test_invalid_input_does_not_recreate_environments(
+    ddev: CliRunner, commands: MagicMock, mocker: MockerFixture, args: tuple[str, ...]
+):
+    remove = mocker.patch('ddev.utils.platform.Platform.check_command')
+    result = ddev('test', 'sample', '--recreate', *args)
+    assert result.exit_code == 2, result.output
+    commands.assert_not_called()
+    remove.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'target, message', [('unknown', 'Unknown target: unknown'), ('hatch_only', 'No testable targets')]
+)
+def test_unavailable_target(ddev: CliRunner, target: str, message: str):
+    result = ddev('test', target)
+    assert result.exit_code == 1, result.output
+    assert message in result.output
+
+
+def test_explicit_selection_and_pytest_wiring(ddev: CliRunner, commands: MagicMock):
+    result = ddev('test', 'sample', '--envs', ' bar,foo,bar ', '--pytest-args', '-m "not flaky" "tests/a file.py"')
+    assert result.exit_code == 0, result.output
+    assert commands.call_args.args[0] == [
+        sys.executable,
+        '-m',
+        'hatch',
+        'env',
+        'run',
+        '--env',
+        'bar',
+        '--env',
+        'foo',
+        '--',
+        'test',
+        '--tb',
+        'short',
+        '-m',
+        'not flaky',
+        'tests/a file.py',
+    ]
+
+
+@pytest.mark.parametrize('args', [(), ('--envs', 'default'), ('--envs', 'default,foo')])
+def test_default_matrix_selection(ddev: CliRunner, commands: MagicMock, args: tuple[str, ...]):
+    result = ddev('test', 'sample', *args)
+    assert result.exit_code == 0, result.output
+    assert commands.call_args.args[0] == [
+        sys.executable,
+        '-m',
+        'hatch',
+        'env',
+        'run',
+        '--env',
+        'foo',
+        '--env',
+        'bar',
+        '--ignore-compat',
+        '--',
+        'test',
+        '--tb',
+        'short',
+    ]
+
+
+@pytest.mark.parametrize('changed', [False, True])
+def test_changed_target_detection(
+    ddev: CliRunner, commands: MagicMock, test_repo: Repository, mocker: MockerFixture, changed: bool
+):
+    targets = [test_repo.integrations.get('sample')] if changed else []
+    mocker.patch.object(IntegrationRegistry, 'iter_changed', return_value=iter(targets))
+    result = ddev('test')
+    assert result.exit_code == 0, result.output
+    if changed:
+        assert commands.call_count == 1
+    else:
+        commands.assert_not_called()
+        assert 'No changed testable targets' in result.output
+
+
+def test_all_targets_uses_only_testable_integrations(ddev: CliRunner, commands: MagicMock):
+    result = ddev('test', 'all')
+    assert result.exit_code == 0, result.output
+    assert commands.call_count == 1
+
+
+def test_all_targets_are_validated_before_testing(
+    ddev: CliRunner, commands: MagicMock, test_repo: Repository, mocker: MockerFixture
+):
+    other = test_repo.path / 'other'
+    other.mkdir()
+    (other / 'hatch.toml').write_text('[env.collectors.datadog-checks]\n')
+    (other / 'tests').mkdir()
+    result = ddev('test', 'all', '--envs', 'foo')
+    assert result.exit_code == 2, result.output
+    assert 'Unknown environments: foo' in result.output
+    commands.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'flag, script',
+    [
+        ('--lint', 'all'),
+        ('-s', 'all'),
+        ('--lint-unsafe', 'style-unsafe'),
+        ('--fmt', 'fmt'),
+        ('-fs', 'fmt'),
+        ('--fmt-unsafe', 'fmt-unsafe'),
+    ],
+)
+def test_lint_and_format_on_hatch_only_targets(ddev: CliRunner, commands: MagicMock, flag: str, script: str):
+    result = ddev('test', 'hatch_only', flag)
+    assert result.exit_code == 0, result.output
+    assert commands.call_args.args[0] == [
+        sys.executable,
+        '-m',
+        'hatch',
+        'env',
+        'run',
+        '--env',
+        'lint',
+        '--',
+        script,
+    ]
+
+
+@pytest.mark.parametrize('option', [('--envs', 'foo'), ('--pytest-args', '-x')])
+def test_lint_rejects_test_inputs(ddev: CliRunner, commands: MagicMock, option: tuple[str, ...]):
+    result = ddev('test', 'sample', '--lint', *option)
+    assert result.exit_code == 1, result.output
+    assert 'Lint and format modes do not accept' in result.output
+    commands.assert_not_called()
+
+
+def test_list_on_hatch_only_targets(ddev: CliRunner, mocker: MockerFixture):
+    run = mocker.patch('ddev.utils.platform.Platform.check_command')
+    result = ddev('test', 'hatch_only', '--list')
+    assert result.exit_code == 0, result.output
+    run.assert_called_once_with([sys.executable, '-m', 'hatch', 'env', 'show'])
+
+
+@pytest.mark.parametrize('mode, script', [('--bench', ['benchmark']), ('--latest', ['test', '--run-latest-metrics'])])
+def test_mode_filters_intersect_selection(
+    ddev: CliRunner, commands: MagicMock, mocker: MockerFixture, mode: str, script: list[str]
+):
+    remove = mocker.patch('ddev.utils.platform.Platform.check_command')
+    env = 'bench' if mode == '--bench' else 'latest'
+    result = ddev('test', 'sample', mode, '--envs', f'foo,{env}', '--recreate')
+    assert result.exit_code == 0, result.output
+    assert f'Excluded sample:foo by {env if env == "latest" else "benchmark"}-env option.' in result.output
+    assert commands.call_args.args[0] == [
+        sys.executable,
+        '-m',
+        'hatch',
+        'env',
+        'run',
+        '--env',
+        env,
+        '--',
+        *script,
+    ]
+    remove.assert_called_once_with([sys.executable, '-m', 'hatch', 'env', 'remove', env])
+
+
+def test_empty_python_intersection_skips_execution(ddev: CliRunner, commands: MagicMock):
+    result = ddev('test', 'sample', '--envs', 'foo', '--python-filter', '3.12')
+    assert result.exit_code == 0, result.output
+    assert 'Excluded sample:foo by Python filter 3.12.' in result.output
+    assert 'No eligible environments selected for sample.' in result.output
+    commands.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'flags, extra_args, initial_env, env_vars',
+    [
+        (('--junit',), ['--junit-xml', 'junit/test-unit-$HATCH_ENV_ACTIVE.xml', '--junit-prefix', 'sample'], {}, {}),
+        (
+            ('--junit', '--e2e'),
+            ['--junit-xml', 'junit/test-e2e-$HATCH_ENV_ACTIVE.xml', '--junit-prefix', 'sample', '-m', 'e2e'],
+            {},
+            {},
+        ),
+        (('--ddtrace',), ['--ddtrace'], {}, {'DDEV_TRACE_ENABLED': 'true', 'DD_SERVICE': 'ddev-integrations'}),
+        (
+            ('--ddtrace',),
+            ['--ddtrace'],
+            {'DD_SERVICE': 'sample-service', 'DD_ENV': 'staging'},
+            {'DDEV_TRACE_ENABLED': 'true', 'DD_SERVICE': 'sample-service', 'DD_ENV': 'staging'},
+        ),
+    ],
+)
+def test_test_plugins_and_environment(
+    ddev: CliRunner,
+    commands: MagicMock,
+    mocker: MockerFixture,
+    flags: tuple[str, ...],
+    extra_args: list[str],
+    initial_env: dict[str, str],
+    env_vars: dict[str, str],
+):
+    observed = {}
+    commands.side_effect = lambda *args, **kwargs: observed.update(os.environ) or ''
+    mocker.patch.dict(os.environ, initial_env)
+    result = ddev('test', 'sample', '--envs', 'foo', *flags)
+    assert result.exit_code == 0, result.output
+    assert commands.call_args.args[0][-len(extra_args) :] == extra_args
+    assert observed.items() >= env_vars.items()
+
+
+def test_memory_profiling_support(ddev: CliRunner, commands: MagicMock):
+    result = ddev('test', 'sample', '--envs', 'foo', '--memray')
+    if sys.platform == 'win32':
         assert result.exit_code == 1, result.output
-        assert result.output == helpers.dedent(
-            """
-            Cannot specify environments when using specific functionality like linting
-            """
-        )
-
-    def test_unknown_target(self, ddev, helpers):
-        result = ddev('test', 'foo')
-
-        assert result.exit_code == 1, result.output
-        assert result.output == helpers.dedent(
-            """
-            Unknown target: foo
-            """
-        )
-
-    def test_target_not_testable(self, ddev, helpers):
-        result = ddev('test', 'datadog_checks_dependency_provider')
-
-        assert result.exit_code == 1, result.output
-        assert result.output == helpers.dedent(
-            """
-            No testable targets found
-            """
-        )
-
-
-class TestHatchOnlyTarget:
-    @pytest.mark.parametrize(
-        'flag, script',
-        [
-            pytest.param('--lint', 'all', id='lint'),
-            pytest.param('--lint-unsafe', 'style-unsafe', id='lint-unsafe'),
-            pytest.param('--fmt', 'fmt', id='fmt'),
-            pytest.param('--fmt-unsafe', 'fmt-unsafe', id='fmt-unsafe'),
-        ],
-    )
-    def test_lint_and_format(self, ddev, mocker, flag, script):
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        result = ddev('test', 'checkpoint_harmony_endpoint', flag)
-
+        assert 'Memory profiling with `memray` is not supported on Windows' in result.output
+        commands.assert_not_called()
+    else:
         assert result.exit_code == 0, result.output
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--env', 'lint', '--', script],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
+        assert '--memray' in commands.call_args.args[0]
 
-    def test_list_environments(self, ddev, mocker):
-        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
-        result = ddev('test', 'checkpoint_harmony_endpoint', '--list')
+def test_configured_api_key_takes_precedence(
+    ddev: CliRunner, commands: MagicMock, config_file: ConfigFileWithOverrides, mocker: MockerFixture
+):
+    config_file.model.orgs['default']['api_key'] = 'configured-key'
+    config_file.save()
+    mocker.patch.dict(os.environ, {'DD_API_KEY': 'ambient-key'})
+    observed = {}
+    commands.side_effect = lambda *args, **kwargs: observed.update(os.environ) or ''
+    result = ddev('test', 'sample', '--envs', 'foo')
+    assert result.exit_code == 0, result.output
+    assert observed['DD_API_KEY'] == 'configured-key'
 
-        assert result.exit_code == 0, result.output
-        assert not result.output
-        assert run.call_args_list == [
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'show'], shell=False),
+
+def test_e2e_marker_wiring(ddev: CliRunner, commands: MagicMock):
+    result = ddev('test', 'sample', '--envs', 'foo', '--e2e', '--pytest-args', '-m "a or b" --markers')
+    assert result.exit_code == 0, result.output
+    assert commands.call_args.args[0][-3:] == ['-m', '(a or b) and e2e', '--markers']
+
+
+@pytest.mark.parametrize('flag, verbose, quiet', [('-v', '2', None), ('-qq', None, '1')])
+def test_hatch_verbosity(ddev: CliRunner, commands: MagicMock, flag: str, verbose: str | None, quiet: str | None):
+    observed = {}
+    commands.side_effect = lambda *args, **kwargs: observed.update(os.environ) or ''
+    result = ddev(flag, 'test', 'sample')
+    assert result.exit_code == 0, result.output
+    assert observed.get('HATCH_VERBOSE') == verbose
+    assert observed.get('HATCH_QUIET') == quiet
+
+
+def test_compat_recreates_selected_environments_with_minimum_base(
+    ddev: CliRunner, commands: MagicMock, mocker: MockerFixture
+):
+    observed = {}
+    commands.side_effect = lambda *args, **kwargs: observed.update(os.environ) or ''
+    remove = mocker.patch('ddev.utils.platform.Platform.check_command')
+    result = ddev('test', 'sample', '--compat', '--envs', 'bar')
+    assert result.exit_code == 0, result.output
+    assert observed['DDEV_TEST_BASE_PACKAGE_VERSION'] == '1.2.3'
+    assert [call.args[0] for call in remove.call_args_list] == [
+        [sys.executable, '-m', 'hatch', 'env', 'remove', 'bar'],
+        [sys.executable, '-m', 'hatch', 'env', 'remove', 'bar'],
+    ]
+
+
+@pytest.mark.parametrize('in_ci', [False, True])
+def test_coverage_report(
+    ddev: CliRunner, commands: MagicMock, test_repo: Repository, mocker: MockerFixture, in_ci: bool
+):
+    run = mocker.patch('ddev.utils.platform.Platform.check_command')
+    mocker.patch('ddev.utils.ci.running_in_ci', return_value=in_ci)
+    path = test_repo.path / 'sample'
+    (path / '.coverage').touch()
+    (path / 'coverage.xml').write_text('<class filename="tests/test_sample.py"/>')
+    result = ddev('test', 'sample', '--cov')
+    assert result.exit_code == 0, result.output
+    assert 'test-cov' in commands.call_args.args[0]
+    assert run.call_args_list[0].args[0] == [sys.executable, '-m', 'coverage', 'report', '--rcfile=../.coveragerc']
+    if in_ci:
+        assert run.call_args_list[1].args[0] == [
+            sys.executable,
+            '-m',
+            'coverage',
+            'xml',
+            '-i',
+            '--rcfile=../.coveragerc',
         ]
-
-    def test_not_testable_by_default(self, ddev, helpers):
-        result = ddev('test', 'checkpoint_harmony_endpoint')
-
-        assert result.exit_code == 1, result.output
-        assert result.output == helpers.dedent(
-            """
-            No testable targets found
-            """
-        )
-
-
-class TestListEnvironments:
-    def test_single_target(self, ddev, mocker):
-        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
-
-        result = ddev('test', 'postgres', '--list')
-
-        assert result.exit_code == 0, result.output
-        assert not result.output
-
-        assert run.call_args_list == [
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'show'], shell=False),
-        ]
-
-    def test_multiple_targets(self, ddev, helpers, mocker):
-        changed_files = ['nginx/pyproject.toml', 'win32_event_log/pyproject.toml']
-        changed_file_processes = helpers.changed_file_processes(changed_files)
-        run = mocker.patch(
-            'subprocess.run',
-            side_effect=[*changed_file_processes, *[mocker.MagicMock(returncode=0)] * len(changed_files)],
-        )
-
-        result = ddev('test', '--list')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ──────────────────────────────────── NGINX ─────────────────────────────────────
-            ────────────────────────────── Windows Event Log ───────────────────────────────
-            """
-        )
-
-        assert run.call_args_list[len(changed_file_processes) :] == [
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'show'], shell=False),
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'show'], shell=False),
-        ]
-
-
-class TestStandard:
-    def test_all_environments(self, ddev, helpers, mocker):
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        result = ddev('test', 'win32_event_log')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ────────────────────────────── Windows Event Log ───────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-
-    def test_specific_environments(self, ddev, helpers, mocker):
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        result = ddev('test', 'win32_event_log:foo,bar')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ────────────────────────────── Windows Event Log ───────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--env',
-                        'foo',
-                        '--env',
-                        'bar',
-                        '--',
-                        'test',
-                        '--tb',
-                        'short',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-
-    def test_changed_target_detection(self, ddev, helpers, mocker):
-        changed_files = ['nginx/pyproject.toml', 'win32_event_log/pyproject.toml']
-        changed_file_processes = helpers.changed_file_processes(changed_files)
-        mocker.patch(
-            'subprocess.run',
-            side_effect=changed_file_processes,
-        )
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=[MockPopen(returncode=0)] * len(changed_files),
-        )
-
-        result = ddev('test')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ──────────────────────────────────── NGINX ─────────────────────────────────────
-            ────────────────────────────── Windows Event Log ───────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                ),
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                ),
-            ],
-            ignored_kwargs=['env'],
-        )
-
-    def test_changed_no_modifications(self, ddev, helpers, mocker):
-        mocker.patch('subprocess.run')
-        mocker.patch('subprocess.Popen')
-        result = ddev('test')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            No changed testable targets found
-            """
-        )
-
-    def test_all_targets(self, ddev, helpers, mocker, repository):
-        repo = Repository("core", str(repository.path))
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        result = ddev('test', 'all')
-
-        assert result.exit_code == 0, result.output
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-                for _ in repo.integrations.iter_testable('all')
-            ],
-            ignored_kwargs=['env'],
-        )
-
-    def test_argument_forwarding(self, ddev, helpers, mocker):
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        result = ddev('test', 'win32_event_log', 'foo', 'bar')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ────────────────────────────── Windows Event Log ───────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--ignore-compat',
-                        '--',
-                        'test',
-                        '--tb',
-                        'short',
-                        'foo',
-                        'bar',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-
-    @pytest.mark.parametrize(
-        'flag, hatch_verbose, hatch_quiet',
-        [
-            pytest.param('-v', ('HATCH_VERBOSE', '2'), ('HATCH_QUIET', None), id='extra verbose'),
-            pytest.param('-qv', ('HATCH_VERBOSE', '1'), ('HATCH_QUIET', None), id='default verbose'),
-            pytest.param('-q', ('HATCH_VERBOSE', None), ('HATCH_QUIET', None), id='verbosity off'),
-            pytest.param('-qq', ('HATCH_VERBOSE', None), ('HATCH_QUIET', '1'), id='quiet'),
-        ],
-    )
-    def test_verbosity(self, ddev, helpers, mocker, flag, hatch_verbose, hatch_quiet):
-        env_vars = {}
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=lambda *args, **kwargs: env_vars.update(os.environ) or MockPopen(returncode=0),
-        )
-
-        result = ddev(flag, 'test', 'win32_event_log')
-
-        expected_command = [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test']
-
-        assert result.exit_code == 0, result.output
-        if flag.startswith('-v'):
-            assert result.output == helpers.dedent(
-                f"""
-                DEBUG: Targets: win32_event_log
-                ────────────────────────────── Windows Event Log ───────────────────────────────
-                DEBUG: Command: {expected_command!r}
-                """
-            )
-        else:
-            expected_command.extend(('--tb', 'short'))
-            assert result.output == helpers.dedent(
-                """
-                ────────────────────────────── Windows Event Log ───────────────────────────────
-                """
-            )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    expected_command,
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding="utf-8",
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-
-        verbose_env_var, verbose_value = hatch_verbose
-        if verbose_value is None:
-            assert verbose_env_var not in env_vars
-        else:
-            assert env_vars[verbose_env_var] == verbose_value
-
-        quiet_env_var, quiet_value = hatch_quiet
-        if quiet_value is None:
-            assert quiet_env_var not in env_vars
-        else:
-            assert env_vars[quiet_env_var] == quiet_value
-
-    def test_api_key(self, ddev, config_file, helpers, mocker):
-        config_file.model.orgs['default']['api_key'] = 'foo'
-        config_file.save()
-
-        env_vars = {}
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=lambda *args, **kwargs: env_vars.update(os.environ) or MockPopen(returncode=0),
-        )
-
-        with EnvVars({'DD_API_KEY': 'bar'}):
-            result = ddev('test', 'win32_event_log')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ────────────────────────────── Windows Event Log ───────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert env_vars['DD_API_KEY'] == 'foo'
-
-    def test_python_filter(self, ddev, helpers, mocker):
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        with EnvVars({'PYTHON_FILTER': '3.9'}):
-            result = ddev('test', 'win32_event_log')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ────────────────────────────── Windows Event Log ───────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--ignore-compat',
-                        '--filter',
-                        '{"python": "3.9"}',
-                        '--',
-                        'test',
-                        '--tb',
-                        'short',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-
-
-class TestSpecificFunctionality:
-    @pytest.mark.parametrize('flag', ('--lint', '-s'))
-    def test_lint(self, ddev, config_file, helpers, mocker, flag):
-        config_file.model.orgs['default']['api_key'] = 'foo'
-        config_file.save()
-
-        env_vars = {}
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=lambda *args, **kwargs: env_vars.update(os.environ) or MockPopen(returncode=0),
-        )
-
-        with EnvVars({'DD_API_KEY': 'bar'}):
-            result = ddev('test', 'postgres', flag)
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--env', 'lint', '--', 'all'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert env_vars['DD_API_KEY'] == 'bar'
-
-    @pytest.mark.parametrize(
-        'command_output, expected_guideline',
-        [
-            (b'`--unsafe-fixes`', "To fix any errors, run 'ddev test --fmt-unsafe'."),
-            (b'', "To fix any errors, run 'ddev test --fmt'."),
-        ],
-    )
-    def test_lint_unsafe(self, ddev, config_file, helpers, mocker, command_output, expected_guideline):
-        config_file.model.orgs['default']['api_key'] = 'foo'
-        config_file.save()
-
-        mocker.patch(
-            'subprocess.Popen',
-            return_value=MockPopen(returncode=1, stdout=command_output),
-        )
-
-        with EnvVars({'DD_API_KEY': 'bar'}):
-            result = ddev('test', 'postgres', '--lint')
-
-        assert result.exit_code == 1, result.output
-        assert expected_guideline in result.output
-
-    @pytest.mark.parametrize('flag', ('--fmt', '-fs'))
-    def test_fmt(self, ddev, config_file, helpers, mocker, flag):
-        config_file.model.orgs['default']['api_key'] = 'foo'
-        config_file.save()
-
-        env_vars = {}
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=lambda *args, **kwargs: env_vars.update(os.environ) or MockPopen(returncode=0),
-        )
-
-        with EnvVars({'DD_API_KEY': 'bar'}):
-            result = ddev('test', 'postgres', flag)
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--env', 'lint', '--', 'fmt'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert env_vars['DD_API_KEY'] == 'bar'
-
-    @pytest.mark.parametrize(
-        'command_output, expected_guideline',
-        [
-            (b'`--unsafe-fixes`', "You can try running 'ddev test --fmt-unsafe' to fix them."),
-            (b'', "You would need to fix them manually."),
-        ],
-    )
-    def test_fmt_unsafe(self, ddev, config_file, helpers, mocker, command_output, expected_guideline):
-        config_file.model.orgs['default']['api_key'] = 'foo'
-        config_file.save()
-
-        mocker.patch(
-            'subprocess.Popen',
-            return_value=MockPopen(returncode=1, stdout=command_output),
-        )
-
-        with EnvVars({'DD_API_KEY': 'bar'}):
-            result = ddev('test', '--fmt-unsafe', 'postgres')
-
-        assert result.exit_code == 1, result.output
-        assert expected_guideline in result.output
-
-    @pytest.mark.parametrize('flag', ('--bench', '-b'))
-    def test_bench(self, ddev, config_file, helpers, mocker, flag):
-        config_file.model.orgs['default']['api_key'] = 'foo'
-        config_file.save()
-
-        env_vars = {}
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=lambda *args, **kwargs: env_vars.update(os.environ) or MockPopen(returncode=0),
-        )
-
-        with EnvVars({'DD_API_KEY': 'bar'}):
-            result = ddev('test', 'postgres', flag)
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--filter',
-                        '{"benchmark-env": true}',
-                        '--',
-                        'benchmark',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert env_vars['DD_API_KEY'] == 'foo'
-
-    def test_latest(self, ddev, config_file, helpers, mocker):
-        config_file.model.orgs['default']['api_key'] = 'foo'
-        config_file.save()
-
-        env_vars = {}
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=lambda *args, **kwargs: env_vars.update(os.environ) or MockPopen(returncode=0),
-        )
-
-        with EnvVars({'DD_API_KEY': 'bar'}):
-            result = ddev('test', 'clickhouse', '--latest')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ────────────────────────────────── ClickHouse ──────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--filter',
-                        '{"latest-env": true}',
-                        '--',
-                        'test',
-                        '--run-latest-metrics',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert env_vars['DD_API_KEY'] == 'foo'
-
-
-class TestCoverage:
-    def test_local(self, ddev, helpers, mocker, repository):
-        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-        coverage_file = repository.path / 'postgres' / '.coverage'
-        coverage_file.touch()
-
-        with EnvVars({'GITHUB_ACTIONS': 'false', 'CI': 'false'}):
-            result = ddev('test', 'postgres', '--cov')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            ─────────────────────────────── Coverage report ────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test-cov', '--tb', 'short'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert run.call_args_list == [
-            mocker.call(
-                [sys.executable, '-m', 'coverage', 'report', '--rcfile=../.coveragerc'],
-                shell=False,
-            ),
-        ]
-        assert not coverage_file.exists()
-
-    def test_ci(self, ddev, helpers, mocker, repository):
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-        run = mocker.patch('subprocess.run', side_effect=[mocker.MagicMock(returncode=0)] * 2)
-        coverage_file = repository.path / 'postgres' / 'coverage.xml'
-        coverage_file.write_text(
-            helpers.dedent(
-                """
-                <?xml version="1.0" ?>
-                <coverage version="6.5.0" ...>
-                    <!-- Generated by coverage.py: https://coverage.readthedocs.io -->
-                    <!-- Based on https://raw.githubusercontent.com/cobertura/web/master/htdocs/xml/coverage-04.dtd -->
-                    <sources>
-                        <source>/</source>
-                    </sources>
-                    <packages>
-                        <package name="tests" ...>
-                            <classes>
-                                <class name="conftest.py" filename="tests/conftest.py" ...>
-                                    <methods/>
-                """
-            )
-        )
-
-        with EnvVars({'GITHUB_ACTIONS': 'true'}):
-            result = ddev('test', 'postgres', '--cov')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            ─────────────────────────────── Coverage report ────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test-cov', '--tb', 'short'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert run.call_args_list == [
-            mocker.call(
-                [sys.executable, '-m', 'coverage', 'report', '--rcfile=../.coveragerc'],
-                shell=False,
-            ),
-            mocker.call(
-                [sys.executable, '-m', 'coverage', 'xml', '-i', '--rcfile=../.coveragerc'],
-                shell=False,
-            ),
-        ]
-        assert coverage_file.read_text() == helpers.dedent(
-            """
-            <?xml version="1.0" ?>
-            <coverage version="6.5.0" ...>
-                <!-- Generated by coverage.py: https://coverage.readthedocs.io -->
-                <!-- Based on https://raw.githubusercontent.com/cobertura/web/master/htdocs/xml/coverage-04.dtd -->
-                <sources>
-                    <source>/</source>
-                </sources>
-                <packages>
-                    <package name="tests" ...>
-                        <classes>
-                            <class name="conftest.py" filename="postgres/tests/conftest.py" ...>
-                                <methods/>
-            """
-        )
-
-
-class TestJUnit:
-    def test_unit(self, ddev, helpers, mocker):
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        result = ddev('test', 'postgres', '--junit')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--ignore-compat',
-                        '--',
-                        'test',
-                        '--tb',
-                        'short',
-                        '--junit-xml',
-                        'junit/test-unit-$HATCH_ENV_ACTIVE.xml',
-                        '--junit-prefix',
-                        'postgres',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-
-    def test_e2e(self, ddev, helpers, mocker):
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        result = ddev('test', 'postgres', '--junit', '--e2e')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--ignore-compat',
-                        '--',
-                        'test',
-                        '--tb',
-                        'short',
-                        '-m',
-                        'e2e',
-                        '--junit-xml',
-                        'junit/test-e2e-$HATCH_ENV_ACTIVE.xml',
-                        '--junit-prefix',
-                        'postgres',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-
-
-class TestDDTrace:
-    @pytest.mark.requires_unix
-    def test_default(self, ddev, helpers, mocker):
-        env_vars = {}
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=lambda *args, **kwargs: env_vars.update(os.environ) or MockPopen(returncode=0),
-        )
-
-        result = ddev('test', 'postgres', '--ddtrace')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--ignore-compat',
-                        '--',
-                        'test',
-                        '--tb',
-                        'short',
-                        '--ddtrace',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert env_vars['DDEV_TRACE_ENABLED'] == 'true'
-        assert env_vars['DD_PROFILING_ENABLED'] == 'true'
-        assert env_vars['DD_SERVICE'] == 'ddev-integrations'
-        assert env_vars['DD_ENV'] == 'ddev-integrations'
-
-    @pytest.mark.requires_unix
-    def test_specific_tags(self, ddev, helpers, mocker):
-        env_vars = {}
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=lambda *args, **kwargs: env_vars.update(os.environ) or MockPopen(returncode=0),
-        )
-
-        with EnvVars({'DD_SERVICE': 'foo', 'DD_ENV': 'bar'}):
-            result = ddev('test', 'postgres', '--ddtrace')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--ignore-compat',
-                        '--',
-                        'test',
-                        '--tb',
-                        'short',
-                        '--ddtrace',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert env_vars['DDEV_TRACE_ENABLED'] == 'true'
-        assert env_vars['DD_PROFILING_ENABLED'] == 'true'
-        assert env_vars['DD_SERVICE'] == 'foo'
-        assert env_vars['DD_ENV'] == 'bar'
-
-    @pytest.mark.requires_windows
-    def test_windows_only_python3(self, ddev, helpers, mocker):
-        env_vars = {}
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=lambda *args, **kwargs: env_vars.update(os.environ) or MockPopen(returncode=0),
-        )
-
-        result = ddev('test', 'postgres:py3.11', '--ddtrace')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--env',
-                        'py3.11',
-                        '--',
-                        'test',
-                        '--tb',
-                        'short',
-                        '--ddtrace',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert env_vars['DDEV_TRACE_ENABLED'] == 'true'
-        assert env_vars['DD_PROFILING_ENABLED'] == 'true'
-        assert env_vars['DD_SERVICE'] == 'ddev-integrations'
-        assert env_vars['DD_ENV'] == 'ddev-integrations'
-
-
-class TestMemray:
-    @pytest.mark.requires_unix
-    def test_unix(self, ddev, helpers, mocker):
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        result = ddev('test', 'postgres', '--memray')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--ignore-compat',
-                        '--',
-                        'test',
-                        '--tb',
-                        'short',
-                        '--memray',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                )
-            ],
-            ignored_kwargs=['env'],
-        )
-
-    @pytest.mark.requires_windows
-    def test_windows(self, ddev, helpers, mocker):
-        mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        result = ddev('test', 'postgres', '--memray')
-
-        assert result.exit_code == 1, result.output
-        assert result.output == helpers.dedent(
-            """
-            Memory profiling with `memray` is not supported on Windows
-            """
-        )
-
-
-class TestRecreate:
-    def test_bench(self, ddev, helpers, mocker):
-        run = mocker.patch('subprocess.run', side_effect=[mocker.MagicMock(returncode=0)] * 2)
-        json_output = json.dumps({'foo': {'benchmark-env': True}, 'bar': {}, 'baz': {'benchmark-env': True}})
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=[MockPopen(returncode=0, stdout=json_output.encode()), MockPopen(returncode=0)],
-        )
-
-        result = ddev('test', 'postgres', '--bench', '--recreate')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert run.call_args_list == [
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'remove', 'foo'], shell=False),
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'remove', 'baz'], shell=False),
-        ]
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'show', '--json'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                ),
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--filter',
-                        '{"benchmark-env": true}',
-                        '--',
-                        'benchmark',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                ),
-            ],
-            ignored_kwargs=['env'],
-        )
-
-    def test_latest(self, ddev, helpers, mocker):
-        json_output = json.dumps({'foo': {'latest-env': True}, 'bar': {}, 'baz': {'latest-env': True}})
-        run = mocker.patch('subprocess.run', side_effect=[mocker.MagicMock(returncode=0)] * 2)
-        popen = mocker.patch(
-            'subprocess.Popen',
-            side_effect=[MockPopen(returncode=0, stdout=json_output.encode()), MockPopen(returncode=0)],
-        )
-
-        result = ddev('test', 'postgres', '--latest', '--recreate')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert run.call_args_list == [
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'remove', 'foo'], shell=False),
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'remove', 'baz'], shell=False),
-        ]
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'show', '--json'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                ),
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--filter',
-                        '{"latest-env": true}',
-                        '--',
-                        'test',
-                        '--run-latest-metrics',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                ),
-            ],
-            ignored_kwargs=['env'],
-        )
-
-    def test_specific_environments(self, ddev, helpers, mocker):
-        run = mocker.patch('subprocess.run', side_effect=[mocker.MagicMock(returncode=0)] * 2)
-        popen = mocker.patch(
-            'subprocess.Popen',
-            return_value=MockPopen(returncode=0),
-        )
-
-        result = ddev('test', 'postgres:foo,bar', '--recreate')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert run.call_args_list == [
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'remove', 'foo'], shell=False),
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'remove', 'bar'], shell=False),
-        ]
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [
-                        sys.executable,
-                        '-m',
-                        'hatch',
-                        'env',
-                        'run',
-                        '--env',
-                        'foo',
-                        '--env',
-                        'bar',
-                        '--',
-                        'test',
-                        '--tb',
-                        'short',
-                    ],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                ),
-            ],
-            ignored_kwargs=['env'],
-        )
-
-    def test_all_environments(self, ddev, helpers, mocker):
-        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        result = ddev('test', 'postgres', '--recreate')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert run.call_args_list == [
-            mocker.call([sys.executable, '-m', 'hatch', 'env', 'remove', 'default'], shell=False),
-        ]
-
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                ),
-            ],
-            ignored_kwargs=['env'],
-        )
-
-
-class TestPluginInteraction:
-    def test_minimum_base_package_version(self, ddev, helpers, mocker, repository):
-        import tomlkit
-
-        env_vars = {}
-        run = mocker.patch(
-            'subprocess.run',
-            side_effect=lambda *args, **kwargs: env_vars.update(os.environ) or mocker.MagicMock(returncode=0),
-        )
-        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
-
-        project_file = repository.path / 'postgres' / 'pyproject.toml'
-        data = tomlkit.parse(project_file.read_text())
-        data['project']['dependencies'] = ['datadog-checks-base>=9000,<10000']
-        project_file.write_text(tomlkit.dumps(data))
-
-        result = ddev('test', 'postgres', '--compat')
-
-        assert result.exit_code == 0, result.output
-        assert result.output == helpers.dedent(
-            """
-            ─────────────────────────────────── Postgres ───────────────────────────────────
-            """
-        )
-
-        assert run.call_args_list == [
-            mocker.call(
-                [sys.executable, '-m', 'hatch', 'env', 'remove', 'default'],
-                shell=False,
-            ),
-            mocker.call(
-                [sys.executable, '-m', 'hatch', 'env', 'remove', 'default'],
-                shell=False,
-            ),
-        ]
-        assert_calls(
-            popen.call_args_list,
-            [
-                mocker.call(
-                    [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
-                    shell=False,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    bufsize=1,
-                    encoding='utf-8',
-                ),
-            ],
-            ignored_kwargs=['env'],
-        )
-        assert env_vars['DDEV_TEST_BASE_PACKAGE_VERSION'] == '9000'
+        assert (path / 'coverage.xml').read_text() == '<class filename="sample/tests/test_sample.py"/>'
+    else:
+        assert not (path / '.coverage').exists()
+
+
+@pytest.mark.parametrize('flag', ['--lint', '--fmt'])
+def test_lint_guidance(ddev: CliRunner, commands: MagicMock, flag: str):
+    def failed_lint(command: list[str], **kwargs: Any) -> str:
+        kwargs['on_error'](1, '`--unsafe-fixes`')
+        return ''
+
+    commands.side_effect = failed_lint
+    result = ddev('test', 'sample', flag)
+    assert result.exit_code == 0, result.output
+    assert 'ddev test --fmt-unsafe' in result.output

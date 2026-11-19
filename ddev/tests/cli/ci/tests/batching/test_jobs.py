@@ -8,8 +8,8 @@ from __future__ import annotations
 import pytest
 
 from ddev.cli.ci.tests.batching.exceptions import PlanningError
-from ddev.cli.ci.tests.batching.jobs import expand_batch_jobs
-from ddev.e2e.agent_images import UnknownPythonVersion
+from ddev.cli.ci.tests.batching.jobs import AgentImageOverride, expand_batch_jobs
+from ddev.e2e.agent_images import UnknownPythonVersion, get_agent_image
 from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import env, make_unit
 
@@ -145,3 +145,45 @@ def test_multiple_units_expand_in_order_one_job_each():
         ("postgres (py3.12)", "postgres", "py3.12"),
         ("redis (py3.11)", "redis", "py3.11"),
     ]
+
+
+@pytest.mark.parametrize(
+    ("platform", "expected"),
+    [(PlatformName.LINUX, "custom-agent"), (PlatformName.WINDOWS, "custom-agent-servercore")],
+)
+def test_an_overridden_image_replaces_the_default_on_its_platform(platform: PlatformName, expected: str):
+    override = AgentImageOverride(linux="custom-agent", windows="custom-agent-servercore")
+    units = [make_unit(platform=platform, environment=env("py3.13", platform, python_version="3.13", e2e=True))]
+
+    [job] = expand_batch_jobs(units, agent_image_resolver=override)
+
+    assert job.agent_image == expected
+
+
+@pytest.mark.parametrize(
+    ("override", "platform"),
+    [
+        pytest.param(AgentImageOverride(windows="custom-agent-servercore"), PlatformName.LINUX, id="linux"),
+        pytest.param(AgentImageOverride(linux="custom-agent"), PlatformName.WINDOWS, id="windows"),
+    ],
+)
+def test_a_platform_without_an_override_keeps_the_default_image(override: AgentImageOverride, platform: PlatformName):
+    units = [make_unit(platform=platform, environment=env("py3.13", platform, python_version="3.13", e2e=True))]
+
+    [job] = expand_batch_jobs(units, agent_image_resolver=override)
+
+    assert job.agent_image == get_agent_image("3.13", platform)
+
+
+def test_an_override_does_not_mask_an_unknown_python_version_on_the_other_platform():
+    """The fallback is the real mapping, so its planning failures still surface."""
+    override = AgentImageOverride(linux="custom-agent")
+    units = [
+        make_unit(
+            platform=PlatformName.WINDOWS,
+            environment=env("py3.10", PlatformName.WINDOWS, python_version="3.10", e2e=True),
+        )
+    ]
+
+    with pytest.raises(PlanningError, match="needs an E2E Agent image"):
+        expand_batch_jobs(units, agent_image_resolver=override)
