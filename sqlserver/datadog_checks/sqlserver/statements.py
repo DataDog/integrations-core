@@ -28,6 +28,16 @@ from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_
 
 DEFAULT_COLLECTION_INTERVAL = 60
 
+# How many consecutive collections a plan may be absent from sys.dm_exec_query_stats before the
+# check forgets its last reading. One hour at the default collection interval.
+PLAN_STATE_RETENTION_CYCLES = 60
+
+# Cap on retained per-plan readings, as a multiple of dm_exec_query_stats_row_limit. One row
+# limit covers every plan a single collection can return, so the surplus is the budget for plans
+# that are currently idle. Without a cap, retention lets a plan-churning workload grow the cache
+# without bound.
+PLAN_STATE_MAX_SIZE_FACTOR = 2
+
 SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "execution_count",
     "total_worker_time",
@@ -208,6 +218,42 @@ def _row_key(row):
     return (row.get('database_name'), row['query_signature'], row['query_hash'], row.get('procedure_name'))
 
 
+def _plan_row_key(row):
+    """Key for the delta computation, one level finer than the reporting key.
+
+    Counters in sys.dm_exec_query_stats accumulate per cached plan, so differences between runs
+    have to be taken per plan. Differencing at `_row_key` instead sums several plans' lifetime
+    counters before subtracting, and that sum is not monotonic: STATEMENT_METRICS_QUERY returns
+    only plans that executed recently, so a plan falling idle makes the sum drop and the same
+    plan returning makes it jump by its entire lifetime value.
+
+    :param row: a normalized row from STATEMENT_METRICS_QUERY
+    :return: a tuple uniquely identifying one plan of this row
+    """
+    return _row_key(row) + (row.get('query_plan_hash'),)
+
+
+def _merge_plan_rows(rows, metric_columns):
+    """Collapse per-plan deltas back to the grain the metrics are reported at.
+
+    Summing deltas is safe; summing the lifetime counters they were derived from is not.
+
+    :param rows: derivative rows keyed by `_plan_row_key`
+    :param metric_columns: the metric columns to sum
+    :return: one row per `_row_key`
+    """
+    merged = {}
+    for row in rows:
+        key = _row_key(row)
+        existing = merged.get(key)
+        if existing is None:
+            merged[key] = row
+            continue
+        for column in metric_columns:
+            existing[column] += row[column]
+    return list(merged.values())
+
+
 XML_PLAN_OBFUSCATION_ATTRS = frozenset(
     {
         "StatementText",
@@ -280,7 +326,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.enforce_collection_interval_deadline = is_affirmative(
             self._config.statement_metrics_config.get('enforce_collection_interval_deadline', True)
         )
-        self._state = StatementMetrics()
+        # A plan missing from a collection has gone idle rather than disappeared, so its previous
+        # reading has to outlive the gap. Without this the per-plan deltas above would discard
+        # everything an intermittently executed plan accumulated between appearances. The cap
+        # keeps that retention bounded when a workload churns through plans.
+        self._state = StatementMetrics(
+            retain_absent_keys=PLAN_STATE_RETENTION_CYCLES,
+            max_size=PLAN_STATE_MAX_SIZE_FACTOR * self.dm_exec_query_stats_row_limit,
+        )
         self._init_caches()
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
@@ -495,8 +548,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if not rows:
             return []
         metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
-        return rows
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_plan_row_key)
+        return _merge_plan_rows(rows, metric_columns)
 
     @staticmethod
     def _to_metrics_payload_row(row):

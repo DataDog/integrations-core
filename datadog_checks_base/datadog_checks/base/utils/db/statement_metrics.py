@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from itertools import islice
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +20,22 @@ class StatementMetrics:
     in values between check runs.
     """
 
-    def __init__(self):
+    def __init__(self, retain_absent_keys=0, max_size=None):
+        """
+        :params retain_absent_keys (_int_): how many consecutive calls a key may be missing from
+            `rows` before its previous reading is discarded. The default of 0 drops a key as soon
+            as it is absent, which is correct when the source lists every row on every call.
+            Set it when the source only returns recently active rows: there an absent row means
+            idle rather than gone, and discarding its reading loses everything the row
+            accumulated while it was away, then re-baselines from scratch when it returns.
+        :params max_size (_int_): cap on retained readings, least-recently-seen evicted first.
+            Required whenever `retain_absent_keys` is non-zero: without it a workload that churns
+            through keys grows the cache without bound, since absence no longer frees anything.
+        """
         self._previous_statements = {}
+        self._retain_absent_keys = retain_absent_keys
+        self._max_size = max_size
+        self._absent_for = {}
 
     def compute_derivative_rows(self, rows, metrics, key, execution_indicators=None):
         """
@@ -106,7 +121,15 @@ class StatementMetrics:
         new_keys = merged_rows.keys()
         stale_keys = self._previous_statements.keys() - new_keys
         for k in stale_keys:
-            del self._previous_statements[k]
+            absent_for = self._absent_for.get(k, 0) + 1
+            if absent_for > self._retain_absent_keys:
+                del self._previous_statements[k]
+                self._absent_for.pop(k, None)
+            else:
+                self._absent_for[k] = absent_for
+        if self._absent_for:
+            for k in new_keys:
+                self._absent_for.pop(k, None)
 
         for row_key, row in merged_rows.items():
             prev = self._previous_statements.get(row_key)
@@ -117,10 +140,36 @@ class StatementMetrics:
                         prev[col] = row[col]
                     elif col in prev:
                         del prev[col]
+                if self._max_size is not None:
+                    # Re-insert so the mapping stays ordered least-recently-seen first.
+                    self._previous_statements[row_key] = self._previous_statements.pop(row_key)
             else:
                 self._previous_statements[row_key] = {col: row[col] for col in metrics if col in row}
 
+        self._evict_oldest()
+
         return result
+
+    def _evict_oldest(self):
+        """Drop least-recently-seen readings until the cache fits in `max_size`.
+
+        Dict iteration order is insertion order, and rows seen in a call are re-inserted, so the
+        keys at the front are the ones unseen for longest. Evicting those degrades to the
+        behaviour of a smaller retention window rather than losing currently active rows.
+        """
+        if self._max_size is None:
+            return
+        overflow = len(self._previous_statements) - self._max_size
+        if overflow <= 0:
+            return
+        for row_key in list(islice(self._previous_statements, overflow)):
+            del self._previous_statements[row_key]
+            self._absent_for.pop(row_key, None)
+        logger.debug(
+            'Evicted %s least-recently-seen statement metric rows to stay within max_size=%s',
+            overflow,
+            self._max_size,
+        )
 
 
 def _merge_duplicate_rows(rows, metrics, key):

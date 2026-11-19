@@ -522,3 +522,62 @@ class TestStatementMetrics:
         # Plan timing columns should not be present in the result
         assert 'min_plan_time' not in result[0]
         assert 'max_plan_time' not in result[0]
+
+
+class TestStatementMetricsIdleRowRetention:
+    """A source that only lists recently active rows needs its readings to outlive a gap.
+
+    sys.dm_exec_query_stats is such a source: the SQL Server check only asks for plans that
+    executed in the last few collections. Dropping a reading the moment its row is absent
+    loses everything that row accumulated while it was idle, and re-baselines from scratch
+    when it comes back.
+    """
+
+    METRICS = ['count']
+
+    @staticmethod
+    def key(row):
+        return row['k']
+
+    def test_absent_row_keeps_its_reading_and_resumes_correctly(self):
+        sm = StatementMetrics(retain_absent_keys=5)
+        k = self.key
+
+        assert [] == sm.compute_derivative_rows([{'k': 'busy', 'count': 10}, {'k': 'idle', 'count': 100}], self.METRICS, key=k)
+        # 'idle' is absent for two calls but keeps accumulating in the database
+        assert [{'k': 'busy', 'count': 5}] == sm.compute_derivative_rows([{'k': 'busy', 'count': 15}], self.METRICS, key=k)
+        assert [{'k': 'busy', 'count': 5}] == sm.compute_derivative_rows([{'k': 'busy', 'count': 20}], self.METRICS, key=k)
+
+        result = sorted(
+            sm.compute_derivative_rows(
+                [{'k': 'busy', 'count': 25}, {'k': 'idle', 'count': 130}], self.METRICS, key=k
+            ),
+            key=lambda r: r['k'],
+        )
+        # 'idle' reports the 30 it accumulated while absent, not its whole 130 lifetime
+        assert result == [{'k': 'busy', 'count': 5}, {'k': 'idle', 'count': 30}]
+
+    def test_default_still_drops_an_absent_row(self):
+        """Unchanged behaviour for sources that list every row on every call."""
+        sm = StatementMetrics()
+        k = self.key
+
+        sm.compute_derivative_rows([{'k': 'a', 'count': 10}], self.METRICS, key=k)
+        sm.compute_derivative_rows([], self.METRICS, key=k)
+        # 'a' returns as if never seen, so there is nothing to difference against
+        assert [] == sm.compute_derivative_rows([{'k': 'a', 'count': 50}], self.METRICS, key=k)
+
+    def test_max_size_evicts_the_least_recently_seen_row(self):
+        """Retention without a cap grows without bound when a workload churns through keys."""
+        sm = StatementMetrics(retain_absent_keys=100, max_size=3)
+        k = self.key
+
+        sm.compute_derivative_rows([{'k': 'keeper', 'count': 1}], self.METRICS, key=k)
+        for i in range(20):
+            sm.compute_derivative_rows(
+                [{'k': 'keeper', 'count': 2 + i}, {'k': 'churn-%s' % i, 'count': 1}], self.METRICS, key=k
+            )
+
+        assert len(sm._previous_statements) <= 3
+        # the continuously active row survives the churn; evicting it would be the worse failure
+        assert 'keeper' in sm._previous_statements
