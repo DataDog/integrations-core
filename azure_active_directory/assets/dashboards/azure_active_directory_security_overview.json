@@ -304,7 +304,7 @@
                     {
                         "id": 3874631803760662,
                         "definition": {
-                            "title": "CRITICALs",
+                            "title": "Critical signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -347,7 +347,7 @@
                             "custom_links": [
                                 {
                                     "label": "View related Security Signals",
-                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Acritical"
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Acritical&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
                         },
@@ -361,7 +361,7 @@
                     {
                         "id": 6041021068351281,
                         "definition": {
-                            "title": "HIGHs",
+                            "title": "High signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -404,7 +404,7 @@
                             "custom_links": [
                                 {
                                     "label": "View related Security Signals",
-                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Ahigh"
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Ahigh&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
                         },
@@ -470,7 +470,7 @@
                             "custom_links": [
                                 {
                                     "label": "View related Security Signals",
-                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20%40workflow.rule.name%3A%22{{@workflow.rule.name.value}}%22"
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20%40workflow.rule.name%3A%22{{@workflow.rule.name.value}}%22&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
                         },
@@ -536,7 +536,7 @@
                             "custom_links": [
                                 {
                                     "label": "View related Security Signals",
-                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20%40usr.id%3A{{@usr.id.value}}"
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20%40usr.id%3A%22{{@usr.id.value}}%22&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
                         },
@@ -550,7 +550,7 @@
                     {
                         "id": 5788258583119805,
                         "definition": {
-                            "title": "MEDIUMs",
+                            "title": "Medium signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -593,7 +593,7 @@
                             "custom_links": [
                                 {
                                     "label": "View related Security Signals",
-                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Amedium"
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Amedium&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
                         },
@@ -607,7 +607,7 @@
                     {
                         "id": 4625981237303137,
                         "definition": {
-                            "title": "LOWs",
+                            "title": "Low signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -650,7 +650,7 @@
                             "custom_links": [
                                 {
                                     "label": "View related Security Signals",
-                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Alow"
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Alow&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
                         },
@@ -664,7 +664,7 @@
                     {
                         "id": 2265398439906149,
                         "definition": {
-                            "title": "INFOs",
+                            "title": "Info signals",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -707,7 +707,7 @@
                             "custom_links": [
                                 {
                                     "label": "View related Security Signals",
-                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Ainfo"
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Ainfo&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
                         },
