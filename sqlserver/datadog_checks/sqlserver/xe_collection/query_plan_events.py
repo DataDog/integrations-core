@@ -98,6 +98,13 @@ EVENT_FILE_READ_QUERY = """\
 SELECT TOP (?) event_data, file_name, file_offset
 FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
 """
+# The events of the file the reading started at and the next ones, before the first checkpoint. The file names end with
+# the time they were created at, so the files before it sort first.
+EVENT_FILE_READ_FROM_START_FILE_QUERY = """\
+SELECT TOP (?) event_data, file_name, file_offset
+FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
+WHERE file_name >= ?
+"""
 # Reading from a checkpoint returns the events of the buffers after it, in this file and the next ones, including the
 # file a restarted session starts.
 EVENT_FILE_READ_FROM_CHECKPOINT_QUERY = """\
@@ -240,9 +247,10 @@ class QueryPlanEventsHandler(XESessionBase):
             maxsize=STATEMENT_TEXT_CACHE_MAX_SIZE, ttl=STATEMENT_TEXT_CACHE_TTL_SECONDS
         )
         # The event_file checkpoint: the file and offset of the last buffer read in full. Reads start after it, or
-        # without one at the start of the current file, after a first run found it empty, or at the start of the
-        # oldest file retained, after the checkpoint's file is gone.
+        # without one at the start of the file the first run found empty, going on into the files after it, or at the
+        # start of the oldest file retained, after the checkpoint's file is gone.
         self._event_file_checkpoint: tuple[str, int] | None = None
+        self._event_file_start_file: str | None = None
         self._event_file_read_retained_files = False
         # The buffer a read starts with when the previous runs read it in part, as a run reads at most `max_events`
         # events, and the number of its events read.
@@ -253,7 +261,7 @@ class QueryPlanEventsHandler(XESessionBase):
         self._session_problem: SqlServerHealthEvent | None = None
         self._statuses: Counter = Counter()
         # The keys of the events read, the newest last, and whether the current read skips the events read before. The
-        # ring buffer returns all its events at every read, and so can a read of the current file without checkpoint,
+        # ring buffer returns all its events at every read, and so can a read from a file's start without checkpoint,
         # while a read after the checkpoint only returns new events.
         self._seen_event_keys: OrderedDict[tuple, None] = OrderedDict()
         self._skip_seen_events = False
@@ -429,21 +437,25 @@ class QueryPlanEventsHandler(XESessionBase):
         """
         The new events of the event_file target, as one XML document, and whether it can hold events read before, as a
         read from the start of a file can. The first run starts at the newest buffer of the current file, so it doesn't
-        replay the history. When the checkpoint's file is gone, reading starts over at the oldest file retained, and
-        when a read from the checkpoint fails otherwise, the next run retries it.
+        replay the history, and when that file is empty, the next runs read it and the files after it until a
+        checkpoint. When the checkpoint's file is gone, reading starts over at the oldest file retained, and when a
+        read from the checkpoint fails otherwise, the next run retries it.
         """
         pattern = event_file_pattern(current_file)
         if pattern != self._event_file_pattern:
             # A session created again with another file starts over.
             self._event_file_pattern = pattern
             self._event_file_checkpoint = None
+            self._event_file_start_file = None
             self._event_file_partial_buffer = None
             self._event_file_read_retained_files = False
             self._event_file_started = False
         if self._event_file_checkpoint is None and not self._event_file_started:
-            self._event_file_started = True
             cursor.execute(EVENT_FILE_LAST_BUFFER_QUERY, (current_file,))
             row = cursor.fetchone()
+            # Only once the lookup succeeds, so a failed one is retried rather than the history read.
+            self._event_file_started = True
+            self._event_file_start_file = current_file
             if row:
                 self._event_file_checkpoint = (row[0], int(row[1]))
                 return None, False
@@ -478,9 +490,13 @@ class QueryPlanEventsHandler(XESessionBase):
         read_from_file_start = rows is None
         if read_from_file_start:
             limit = self._event_file_read_limit()
-            cursor.execute(
-                EVENT_FILE_READ_QUERY, (limit, pattern if self._event_file_read_retained_files else current_file)
-            )
+            if self._event_file_read_retained_files:
+                cursor.execute(EVENT_FILE_READ_QUERY, (limit, pattern))
+            elif current_file == self._event_file_start_file:
+                cursor.execute(EVENT_FILE_READ_QUERY, (limit, current_file))
+            else:
+                # The start file rolled over, or the session restarted, before a buffer was read in full.
+                cursor.execute(EVENT_FILE_READ_FROM_START_FILE_QUERY, (limit, pattern, self._event_file_start_file))
             rows = cursor.fetchall()
         new_rows = self._advance_event_file_checkpoint(rows, limit) if rows else []
         if not new_rows:
