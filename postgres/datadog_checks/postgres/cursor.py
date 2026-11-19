@@ -13,12 +13,30 @@ DD_QUERY_ATTRIBUTES = {
 }
 
 
+# Postgres 18 strips leading comments from the text stored in pg_stat_statements.
+LEADING_COMMENTS_STRIPPED_SERVER_VERSION_NUM = 180000
+
+
 def _append_ddignore_comment(query):
     # pg_stat_statements drops anything after the terminating semicolon, so the marker goes before it.
     query = query.rstrip()
     if query.endswith(';'):
         return '{} {};'.format(query[:-1].rstrip(), DDIGNORE_COMMENT)
     return '{} {}'.format(query, DDIGNORE_COMMENT)
+
+
+def _add_comments(query, attributes, ignore_query_metric, leading):
+    """
+    Add the service comment and, when ignore_query_metric is set, the DDIGNORE marker to the query.
+
+    Leading comments are kept on versions that store them in pg_stat_statements. Elsewhere they are
+    appended, since they would otherwise be missing from the stored text.
+    """
+    if leading:
+        query = add_sql_comment(query, prepand=True, **attributes)
+        return '{} {}'.format(DDIGNORE_COMMENT, query) if ignore_query_metric else query
+    query = add_sql_comment(query, prepand=False, **attributes)
+    return _append_ddignore_comment(query) if ignore_query_metric else query
 
 
 class BaseCommenterCursor:
@@ -30,13 +48,9 @@ class BaseCommenterCursor:
         '''
         When ignore is True, a DDIGNORE comment will be added to the query.
         This comment indicates that the query should be ignored in query metrics.
-
-        The DDIGNORE comment is appended rather than prepended: Postgres 18 strips leading comments from the
-        text stored in pg_stat_statements, which would hide a leading marker from the query metrics filters.
         '''
-        query = add_sql_comment(query, prepand=True, **self.__attributes)
-        if ignore_query_metric:
-            query = _append_ddignore_comment(query)
+        leading = self.connection.info.server_version < LEADING_COMMENTS_STRIPPED_SERVER_VERSION_NUM
+        query = _add_comments(query, self.__attributes, ignore_query_metric, leading)
         return super().execute(query, params, binary=binary, prepare=prepare)
 
 

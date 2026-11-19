@@ -50,6 +50,17 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
+# Postgres quotes the start of the failing query. The Agent's comments are leading before PG 18 and trailing from
+# PG 18, where leading comments are stripped from pg_stat_statements.
+if POSTGRES_VERSION and int(POSTGRES_VERSION.split('.')[0]) >= 18:
+    UNDEFINED_EXPLAIN_FUNCTION_EXCERPT = (
+        "SELECT datadog.explain_statement('SELECT * FROM kennel WHERE...\n" + " " * 15 + "^\n"
+    )
+else:
+    UNDEFINED_EXPLAIN_FUNCTION_EXCERPT = (
+        "... DDIGNORE */ /* service='datadog-agent' */ SELECT datadog.ex...\n" + " " * 61 + "^\n"
+    )
+
 
 @pytest.fixture(autouse=True)
 def auto_reset_pg_stat_statements(reset_pg_stat_statements):
@@ -696,8 +707,8 @@ def test_failed_explain_handling(
                 "datadog.explain_statement exists in the database. See "
                 "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#undefined-explain-function"
                 " for more details: function datadog.explain_statement(unknown) does not exist\nLINE 1: "
-                "/* service='datadog-agent' */ SELECT datadog.explain_stateme...\n"
-                "                                             ^\nHINT:  No function matches the given "
+                + UNDEFINED_EXPLAIN_FUNCTION_EXCERPT
+                + "HINT:  No function matches the given "
                 "name and argument types. You might need to add explicit type casts.\ncode=undefined-explain-function"
                 " dbname=dogs_nofunc host=stubbed.hostname",
             ],

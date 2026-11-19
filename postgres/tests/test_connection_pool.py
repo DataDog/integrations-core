@@ -12,6 +12,7 @@ from psycopg import Connection
 from psycopg.errors import AdminShutdown
 
 from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager, PostgresConnectionArgs
+from datadog_checks.postgres.cursor import LEADING_COMMENTS_STRIPPED_SERVER_VERSION_NUM
 
 from .utils import _get_superconn
 
@@ -664,7 +665,7 @@ def test_commenter_cursor_functionality(pg_instance: Dict[str, str]):
                 assert len(result) == 5
                 assert all(isinstance(row[0], int) for row in result)
 
-        # Verify SQL comment is prepended
+        # Verify the SQL comment placement
         _verify_sql_comment_prepended(pg_instance, "generate_series", False)
 
         # Test query with ignore_query_metric=True
@@ -675,7 +676,7 @@ def test_commenter_cursor_functionality(pg_instance: Dict[str, str]):
                 assert len(result) == 3
                 assert all(isinstance(row[0], int) for row in result)
 
-        # Verify SQL comment is prepended and the DDIGNORE marker is appended
+        # Verify the SQL comment and DDIGNORE marker placement
         _verify_sql_comment_prepended(pg_instance, "generate_series", True)
 
         # Test multiple queries to ensure CommenterCursor works consistently
@@ -714,13 +715,18 @@ def _verify_sql_comment_prepended(pg_instance, query_pattern, ignore_query_metri
             if isinstance(query_text, bytes):
                 query_text = query_text.decode('utf-8')
 
-            expected_comment = "/* service='datadog-agent' */"
-            assert query_text.startswith(expected_comment), (
-                f"Query should start with '{expected_comment}', but got: {query_text[:100]}..."
-            )
-            assert query_text.endswith("/* DDIGNORE */") == ignore_query_metric, (
-                f"Unexpected DDIGNORE marker for ignore_query_metric={ignore_query_metric}: {query_text[-100:]}"
-            )
+            service_comment = "/* service='datadog-agent' */"
+            ddignore_comment = "/* DDIGNORE */"
+            if super_conn.info.server_version >= LEADING_COMMENTS_STRIPPED_SERVER_VERSION_NUM:
+                expected = f"{service_comment} {ddignore_comment}" if ignore_query_metric else service_comment
+                assert query_text.endswith(expected), (
+                    f"Query should end with '{expected}', but got: {query_text[-100:]}"
+                )
+            else:
+                expected = f"{ddignore_comment} {service_comment}" if ignore_query_metric else service_comment
+                assert query_text.startswith(expected), (
+                    f"Query should start with '{expected}', but got: {query_text[:100]}..."
+                )
     finally:
         super_conn.close()
 
