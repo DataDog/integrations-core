@@ -14,6 +14,7 @@ from lxml import etree
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.utils import construct_use_statement
 from datadog_checks.sqlserver.xe_collection.base import SESSION_TARGETS_QUERY
 from datadog_checks.sqlserver.xe_collection.event_file_reader import (
     ALL_RETAINED_FILES,
@@ -1246,3 +1247,68 @@ def test_query_plans_from_xe_session(
         raw_values = parameter_runtime_values(raw_event['db']['plan']['definition'])
         # the values of one execution: the plans of the other executions are rate limited
         assert (raw_values['@P1'], re.sub(r"^N?'(.*)'$", r"\1", raw_values['@P2'])) in executions, raw_values
+
+
+def call_procedure(conn_str: str, sql: str, params: tuple = ()) -> None:
+    """Runs a procedure call, and reads all its result sets, as its statements run while they're read."""
+    conn = SelfHealingConnection(conn_str)
+    try:
+        with conn.conn.cursor() as cursor:
+            cursor.execute(construct_use_statement('datadog_test-1'))
+            cursor.execute(sql, params)
+            while True:
+                if cursor.description:
+                    cursor.fetchall()
+                if not cursor.nextset():
+                    break
+    finally:
+        conn.close()
+
+
+# The statements of the bobProcParams procedure of the test setup.
+PROCEDURE_STATEMENTS = ["SELECT * FROM ϑings WHERE id = @P1", "SELECT id FROM ϑings WHERE name = @P2"]
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_query_plans_of_stored_procedure_statements(
+    aggregator, datadog_agent, dd_run_check, dbm_instance_xe_plans, bob_conn_str
+):
+    """
+    A two-statement procedure, called by RPC and with EXEC in a batch, gets one real plan per statement inside it,
+    with the statement and its query signature, and the procedure's name and signature, which link it to the
+    procedure as its estimated plans are.
+    """
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance_xe_plans])
+    # the first run starts after the events already in the session
+    dd_run_check(check, cancel=False)
+
+    conn_str = bob_conn_str + 'APP={};'.format(XE_PLANS_TEST_APP)
+    call_procedure(conn_str, "{CALL bobProcParams (?, ?)}", (1, 'foo'))
+    call_procedure(conn_str, "EXEC bobProcParams @P1 = 2, @P2 = 'bar'")
+
+    events = []
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        # the session dispatches its events to its file every second
+        time.sleep(2)
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=mock_obfuscate_sql):
+            dd_run_check(check, cancel=False)
+        events = [e for e in plan_events(aggregator) if e['db'].get('procedure_name') == 'dbo.bobprocparams']
+        if len(events) >= len(PROCEDURE_STATEMENTS):
+            break
+
+    # both calls run the same statements with the same plans, so one plan of each is sent
+    # the statement as `tsql_frame` delimits it, which can include its semicolon
+    assert sorted(e['db']['statement'].rstrip(';') for e in events) == sorted(PROCEDURE_STATEMENTS)
+    for event in events:
+        assert event['db']['plan']['type'] == 'real'
+        assert event['db']['query_signature'] == compute_sql_signature(event['db']['statement'])
+        assert event['sqlserver']['object_type'] == 'PROC'
+        assert event['sqlserver']['object_name'] == 'bobProcParams'
+        assert event['sqlserver']['nest_level'] == 1
+        assert event['sqlserver']['client_app_name'] == XE_PLANS_TEST_APP
+        # each plan is the plan of its statement, not of the whole procedure
+        assert event['db']['plan']['definition'].count('<StmtSimple') == 1
+    procedure_signatures = {e['db']['procedure_signature'] for e in events}
+    assert len(procedure_signatures) == 1 and None not in procedure_signatures
