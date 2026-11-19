@@ -392,8 +392,16 @@ class QueryPlanEventsHandler(XESessionBase):
             file_events, self._skip_seen_events = (
                 self._read_event_file(cursor, file_name) if file_name else (iter(()), False)
             )
-            # The events are fetched as they're parsed, so the read time of an event_file target includes the parsing.
-            events = self._process_event_file_events(file_events)
+            # A read failing after some of its events are parsed doesn't move the position, so the next run reads them
+            # again, and mustn't skip them as seen.
+            seen_event_keys = self._seen_event_keys.copy()
+            try:
+                # The events are fetched as they're parsed, so the read time of an event_file target includes the
+                # parsing.
+                events = self._process_event_file_events(file_events)
+            except Exception:
+                self._seen_event_keys = seen_event_keys
+                raise
             self._submit_read_time(target_name, started)
         else:
             xml_data, self._skip_seen_events = self._read_ring_buffer(cursor), True

@@ -222,6 +222,8 @@ class FakeServer:
         self.rows_fetched = 0
         # The size of the largest event fetched, in UTF-16 bytes.
         self.largest_event_fetched = 0
+        # The outcomes of the next `fetchmany` calls: None fetches, an exception is raised.
+        self.fetch_errors: list[Exception | None] = []
 
     def execute(self, sql: str, params: tuple) -> list:
         self.queries.append((sql, params))
@@ -268,6 +270,8 @@ class FakeCursor:
         return list(self._rows)
 
     def fetchmany(self, size):
+        if self._server.fetch_errors and (error := self._server.fetch_errors.pop(0)):
+            raise error
         batch, self._rows = self._rows[:size], self._rows[size:]
         self._server.rows_fetched += len(batch)
         for row in batch:
@@ -901,7 +905,18 @@ def test_each_execution_is_sent_once(aggregator, xe_instance, target, first, sec
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize('current_file,read_path', EVENT_FILE_PATHS)
+@pytest.mark.parametrize(
+    'current_file,read_path',
+    [
+        *EVENT_FILE_PATHS,
+        # the error of the gone file holds its path, which matches a denied read's error
+        pytest.param(
+            '/var/opt/mssql/xe_permissions/datadog_query_plans_0_134080000000000000.xel',
+            '/var/opt/mssql/xe_permissions/datadog_query_plans*.xel',
+            id='path_like_a_denied_read',
+        ),
+    ],
+)
 @pytest.mark.parametrize('checkpoint_file_removed', [True, False], ids=['rollover', 'session_restart'])
 def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint_file_removed, current_file, read_path):
     """
@@ -1073,6 +1088,28 @@ def test_event_file_events_are_parsed_as_they_are_fetched(aggregator, xe_instanc
     batch = EVENT_FILE_FETCH_BATCH_SIZE
     assert fetched_when_parsed == [min(count, (i // batch + 1) * batch) for i in range(count)]
     assert len(plan_events(aggregator)) == count
+
+
+@pytest.mark.unit
+def test_event_file_read_failing_after_a_batch_sends_its_events_at_the_next_run(aggregator, xe_instance):
+    """
+    A read from a file's start that fails after some of its events are parsed sends them at the next run, which reads
+    them again and skips the events read before.
+    """
+    server = FakeServer()
+    # no rate limit, so that every event is sent
+    handler = make_handler(xe_instance, server, samples_per_hour_per_query=10**9)
+    # an empty file, so the next runs read from its start
+    handler.run_job()
+    count = EVENT_FILE_FETCH_BATCH_SIZE + 2
+    server.event_file.add_buffer(*(distinct_event(second) for second in range(count)))
+    server.fetch_errors = [None, Exception('Query timeout expired (SQLExecDirectW)')]
+
+    with pytest.raises(Exception, match='Query timeout expired'):
+        handler.run_job()
+    handler.run_job()
+
+    assert sent_timestamps(aggregator) == [timestamp(second) for second in range(count)]
 
 
 @pytest.mark.unit
