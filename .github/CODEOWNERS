@@ -271,6 +271,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /checkpoint_harmony_email_and_collaboration/manifest.json            @DataDog/saas-integrations @DataDog/documentation
 /checkpoint_harmony_email_and_collaboration/assets/logs/             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/cockroachdb_dedicated/                                             @DataDog/integrations-developer-platform
+/cockroachdb_dedicated/*.md                                         @DataDog/integrations-developer-platform @DataDog/documentation
+/cockroachdb_dedicated/manifest.json                                @DataDog/integrations-developer-platform @DataDog/documentation
+
 /contentful/                                                         @DataDog/saas-integrations
 /contentful/*.md                                                     @DataDog/saas-integrations @DataDog/documentation
 /contentful/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation

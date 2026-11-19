@@ -1,0 +1,40 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "cf999549-2bd8-47ba-9974-c14304412716",
+  "app_id": "cockroachdb-testing",
+  "owner": "integrations-developer-platform",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Test fixture for APW collection collision validation.",
+    "title": "CockroachDB Testing",
+    "media": [],
+    "classifier_tags": [
+      "Offering::Integration"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "CockroachDB Testing",
+      "source_type_id": 95103520,
+      "auto_install": false,
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  }
+}
