@@ -1,7 +1,7 @@
 {
   "created_at": "2026-11-18",
   "definition": {
-    "message": "{{#is_alert}}\nFirewall {{@device_name.name}} logged {{value}} critical-severity threat(s) in the last 5 minutes that were detected but not blocked. Check which security profile or exception let the threat through, and review the source and destination in the log sample.\n{{/is_alert}}",
+    "message": "{{#is_alert}}\n## What's happening?\n\nFirewall **{{@device_name.name}}** logged {{value}} critical-severity threat log(s) in the last 5 minutes that were detected but not blocked.\n{{/is_alert}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nA critical threat reached its destination, which may indicate an active exploit or compromise.\n\n---\n\n## Why?\n\nPossible causes:\n* **A security profile is set to alert instead of block** for this threat.\n* **A threat exception** lets this threat through.\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Review the source, destination and threat name in the log sample.\n2. Check which security rule and profile matched the traffic.\n3. Change the profile action to block, or remove the exception, if the threat should be stopped.\n4. Investigate the destination host for signs of compromise.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Logs](/logs?query=source:pan.firewall+@type:THREAT+@severity:critical+@evt.name:alert+@device_name:{{@device_name.name}})\n{{/is_recovery}}",
     "name": "[Palo Alto Networks Firewall] Critical threat detected but not blocked on {{@device_name.name}}",
     "options": {
       "escalation_message": "",

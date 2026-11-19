@@ -1,8 +1,9 @@
 {
+  "title": "Palo Alto Networks Firewall Overview",
   "description": "Palo Alto Networks next-generation firewalls enforce network security policy (traffic, threat, and URL inspection, IPsec VPN, routing) and are managed centrally through Panorama. This dashboard covers firewall reachability, management-plane and dataplane resources, hardware environment, IPsec tunnels, BGP and OSPF routing, licenses, interfaces, HA links, and firewall logs.",
   "layout_type": "ordered",
-  "notify_list": [],
   "reflow_type": "fixed",
+  "notify_list": [],
   "template_variables": [
     {
       "available_values": [],
@@ -17,7 +18,6 @@
       "prefix": "panorama_host"
     }
   ],
-  "title": "Palo Alto Networks Firewall Overview",
   "widgets": [
     {
       "definition": {
@@ -396,6 +396,18 @@
               "description": "The three licenses closest to expiry on the selected firewalls, per firewall and feature, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not included.",
               "requests": [
                 {
+                  "conditional_formats": [
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_yellow",
+                      "value": 60.0
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_red",
+                      "value": 30.0
+                    }
+                  ],
                   "formulas": [
                     {
                       "alias": "Days left",
@@ -2162,7 +2174,7 @@
         "is_column_break": true,
         "width": 12,
         "x": 0,
-        "y": 42
+        "y": 84
       }
     },
     {
@@ -2364,7 +2376,7 @@
         "height": 8,
         "width": 12,
         "x": 0,
-        "y": 57
+        "y": 99
       }
     },
     {
@@ -2433,7 +2445,6 @@
               "style": {
                 "palette": "semantic"
               },
-              "time": {},
               "title": "Threats by severity",
               "type": "toplist"
             },
@@ -2487,7 +2498,6 @@
               "style": {
                 "palette": "red"
               },
-              "time": {},
               "title": "Top threat types",
               "type": "toplist"
             },
@@ -2541,7 +2551,6 @@
               "style": {
                 "palette": "orange"
               },
-              "time": {},
               "title": "Top flagged client IPs",
               "type": "toplist"
             },
@@ -2560,7 +2569,7 @@
         "height": 6,
         "width": 12,
         "x": 0,
-        "y": 65
+        "y": 107
       }
     },
     {
@@ -2714,7 +2723,7 @@
         "height": 5,
         "width": 12,
         "x": 0,
-        "y": 71
+        "y": 113
       }
     }
   ]
