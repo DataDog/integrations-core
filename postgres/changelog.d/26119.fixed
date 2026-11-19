@@ -1,0 +1,1 @@
+Exclude the Agent's own `pg_stat_activity` queries from query metrics.

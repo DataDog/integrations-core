@@ -269,7 +269,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
-                cursor.execute(query, params)
+                cursor.execute(query, params, ignore_query_metric=True)
                 rows = cursor.fetchall()
 
         self._report_check_hist_metrics(start_time, len(rows), "get_active_connections")
@@ -305,7 +305,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
-                cursor.execute(query, params)
+                cursor.execute(query, params, ignore_query_metric=True)
                 rows = cursor.fetchall()
 
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")

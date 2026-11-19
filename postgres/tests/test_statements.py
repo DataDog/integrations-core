@@ -1241,6 +1241,29 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
         conn.close()
 
 
+@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
+def test_activity_queries_are_excluded_from_query_metrics(integration_check, dbm_instance, pg_stat_activity_view):
+    """The activity job runs these queries every cycle; unmarked, they surface as Agent-owned query metrics."""
+    dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
+    check = integration_check(dbm_instance)
+    check._connect()
+    run_one_check(check)
+
+    with _get_superconn(dbm_instance) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT query FROM pg_stat_statements WHERE query LIKE %s OR query LIKE %s",
+                ('%clock_timestamp() as now%', '%GROUP BY application_name, state, usename, datname%'),
+            )
+            stored = [row[0] for row in cursor.fetchall()]
+
+    assert stored, "the activity job's queries were not found in pg_stat_statements"
+    unmarked = [text for text in stored if '/* DDIGNORE */' not in text]
+    assert not unmarked, f"activity queries were not marked DDIGNORE: {unmarked}"
+
+
 @pytest.mark.parametrize(
     "reported_hostname,expected_hostname",
     [
