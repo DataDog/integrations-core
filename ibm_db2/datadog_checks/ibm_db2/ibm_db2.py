@@ -92,9 +92,9 @@ class IbmDb2Check(DatabaseCheck):
                             'enabled': self._config.query_metrics.enabled,
                         },
                         {
-                            'key': 'query_samples',
-                            'name': 'Query Samples',
-                            'enabled': self._config.query_samples.enabled,
+                            'key': 'query_activity',
+                            'name': 'Query Activity',
+                            'enabled': self._config.query_activity.enabled,
                         },
                     ],
                 },

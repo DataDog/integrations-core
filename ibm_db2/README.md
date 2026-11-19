@@ -227,19 +227,20 @@ not already have an authority that grants access, run this in each monitored dat
 GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_PKG_CACHE_STMT TO USER <DATADOG_USER>;
 ```
 
-#### Query samples
+#### Query activity
 
-Query sampling is opt-in during preview. It observes in-flight statements independently
+Query activity collection is opt-in during preview. It observes in-flight statements independently
 of Query Metrics' package-cache counters and uses the same normalized query signatures.
 Snapshots include elapsed time, native execution identity, and available session context.
 Sampling can miss short statements; repeated observations describe the same running
-execution, and elapsed time is not completed-query duration.
+execution, and elapsed time is not completed-query duration. Collection defaults to 10 seconds
+and the minimum interval is one second.
 
 ```yaml
 dbm: true
-query_samples:
+query_activity:
   enabled: true
-  collection_interval: 1
+  collection_interval: 10
 ```
 
 In addition to the existing monitoring permissions, the connection needs `CONNECT` and
@@ -256,7 +257,7 @@ per SQL statement, 4 MiB aggregate SQL, and a 5-second statement timeout. Final 
 payloads are limited to 4 MiB. Oversized statements are skipped without hashing fragments.
 These output limits do not bound the monitoring function's internal scan. Successful idle
 polls emit empty snapshots; collection failures report feature health instead. Internal
-`dd.ibm_db2.query_samples.*` telemetry exposes cap hits and normalization drops.
+`dd.ibm_db2.query_activity.*` telemetry exposes cap hits and normalization drops.
 
 #### Disable automatic client reroute
 

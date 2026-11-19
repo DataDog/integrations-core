@@ -30,12 +30,12 @@ class QuerySamplesCollector(DBMAsyncJob):
             check,
             config_host=config.host,
             min_collection_interval=config.min_collection_interval,
-            enabled=config.query_samples.enabled,
-            rate_limit=1 / config.query_samples.collection_interval,
+            enabled=config.query_activity.enabled,
+            rate_limit=1 / config.query_activity.collection_interval,
             expected_db_exceptions=(Db2ConnectionError,),
             dbms=check.dbms,
-            job_name='query-samples',
-            features=['query_samples'],
+            job_name='query-activity',
+            features=['query_activity'],
         )
         self._config = config
         self._connection = Db2Connection(check, config)
@@ -44,7 +44,7 @@ class QuerySamplesCollector(DBMAsyncJob):
         try:
             connection = self._connection.ensure_connected()
         except Db2ConnectionError as error:
-            self._check.health.submit_exception_health_event(error, data={'job_name': 'query-samples'})
+            self._check.health.submit_exception_health_event(error, data={'job_name': 'query-activity'})
             raise
         rows, stats = read_activity(connection)
         observations = []
@@ -56,7 +56,7 @@ class QuerySamplesCollector(DBMAsyncJob):
             'ddagentversion': self._check.agent_version,
             'ibm_db2_version': self._check.dbms_version,
             'timestamp': time() * 1000,
-            'collection_interval': self._config.query_samples.collection_interval,
+            'collection_interval': self._config.query_activity.collection_interval,
             'ddtags': self._check.tag_manager.get_tags(include_internal=False),
             'service': self._config.service,
             'ibm_db2_activity': observations,
@@ -78,7 +78,7 @@ class QuerySamplesCollector(DBMAsyncJob):
             size = next_size
             observations.append(normalized)
         for name, value in stats.items():
-            self._check.gauge(f'dd.ibm_db2.query_samples.{name}', value, **self._check.debug_stats_kwargs())
+            self._check.gauge(f'dd.ibm_db2.query_activity.{name}', value, **self._check.debug_stats_kwargs())
         self._check.database_monitoring_query_activity(json.dumps(payload, default=default_json_event_encoding))
 
     def shutdown(self) -> None:
