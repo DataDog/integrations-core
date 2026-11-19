@@ -19,6 +19,8 @@ def activity_row() -> dict:
         'appl_id': '127.0.0.1.1234.261117000000',
         'uow_id': 2,
         'activity_id': 1,
+        'executable_id': b'\x00\xab\xff',
+        'planid': 42,
         'local_start_time': datetime(2026, 11, 17, 23, 59, 59, 987654),
         'observed_timestamp': datetime(2026, 11, 19, 0, 0, 1, 123456),
         'stmt_text': "SELECT TABNAME FROM SYSCAT.TABLES WHERE TABSCHEMA = 'LITERAL_SECRET' /* COMMENT_SECRET */",
@@ -43,7 +45,7 @@ def obfuscator(monkeypatch: pytest.MonkeyPatch):
 
 
 def test_activity_observation(activity_row: dict):
-    """Preserve native execution context and subsecond elapsed time without forwarding raw SQL or comments."""
+    """Preserve execution context, extracted comments, and elapsed time without forwarding raw SQL."""
     result = normalize_activity(activity_row, 'orders')
     assert result['elapsed_ns'] == 86_401_135_802_000
     assert result['local_start_time'] == '2026-11-17T23:59:59.987654'
@@ -60,9 +62,35 @@ def test_activity_observation(activity_row: dict):
     assert result['database_name'] == 'orders'
     assert result['dd_tables'] == ['SYSCAT.TABLES']
     assert result['dd_commands'] == ['SELECT']
+    assert result['dd_comments'] == ['COMMENT_SECRET']
+    assert result['query_truncated'] == 'not_truncated'
+    assert result['executable_id'] == '00abff'
+    assert result['planid'] == 42
     assert result['statement'] == 'SELECT TABNAME FROM SYSCAT.TABLES WHERE TABSCHEMA = ?'
     assert result['query_signature'] == '90a75242b2190030'
-    assert 'SECRET' not in json.dumps(result)
+    assert 'LITERAL_SECRET' not in json.dumps(result)
+    assert 'RAW_SECRET' not in json.dumps(result)
+    assert 'eff_stmt_text' not in result
+
+
+@pytest.mark.parametrize('text_bytes, expected', [(16_384, 'not_truncated'), (16_385, 'truncated')])
+def test_activity_truncation(activity_row: dict, text_bytes: int, expected: str):
+    """Identify incomplete SQL from the reader's original byte count, including the exact limit."""
+    result = normalize_activity({**activity_row, 'stmt_text_bytes': text_bytes}, 'orders')
+    assert result['query_truncated'] == expected
+
+
+@pytest.mark.parametrize('missing', [None, 'absent'])
+def test_activity_optional_identifiers(activity_row: dict, missing: str | None):
+    """Unavailable package-cache identity must not discard an otherwise usable activity observation."""
+    for key in ('executable_id', 'planid'):
+        if missing is None:
+            activity_row[key] = None
+        else:
+            activity_row.pop(key)
+    result = normalize_activity(activity_row, 'orders')
+    assert result is not None
+    assert not {'executable_id', 'planid'} & result.keys()
 
 
 def test_activity_elapsed_survives_missing_context(activity_row: dict):

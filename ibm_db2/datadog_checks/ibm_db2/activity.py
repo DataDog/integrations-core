@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from binascii import hexlify
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -18,14 +19,15 @@ CONTEXT_COLUMNS = (
     'client_wrkstnname',
 )
 CONTEXT_MAX_CHARS = 512
+ACTIVITY_MAX_TEXT_BYTES = 16_384
 
 
 def normalize_activity(row: dict[str, Any], database: str) -> dict[str, Any] | None:
     """Build an allowlisted observation; both timestamps must come from the database's local clock.
 
     Connection context is optional and never contributes to execution identity: the monitoring
-    join may lose that context while an activity remains visible. Raw SQL and comment metadata
-    are never copied into the result. Unavailable SQL, timestamps, or identity omit the sample.
+    join may lose that context while an activity remains visible. SQL is obfuscated and its
+    extracted metadata is preserved. Unavailable SQL, timestamps, or identity omit the sample.
     """
     raw_text = row.get('stmt_text')
     start, observed = row.get('local_start_time'), row.get('observed_timestamp')
@@ -47,11 +49,19 @@ def normalize_activity(row: dict[str, Any], database: str) -> dict[str, Any] | N
         'query_signature': statement.query_signature,
         'dd_tables': statement.tables,
         'dd_commands': statement.commands,
+        'dd_comments': statement.comments,
+        'query_truncated': 'truncated'
+        if (row.get('stmt_text_bytes') or 0) > ACTIVITY_MAX_TEXT_BYTES
+        else 'not_truncated',
         'database_name': database,
-        'elapsed_ns': (elapsed.days * 86_400 + elapsed.seconds) * 1_000_000_000 + elapsed.microseconds * 1_000,
+        'elapsed_ns': elapsed // timedelta(microseconds=1) * 1_000,
         'local_start_time': start.isoformat(),
         **{column: row[column] for column in IDENTITY_COLUMNS},
     }
+    if row.get('executable_id') is not None:
+        result['executable_id'] = hexlify(row['executable_id']).decode('ascii')
+    if row.get('planid') is not None:
+        result['planid'] = row['planid']
     for column in CONTEXT_COLUMNS:
         value = row.get(column)
         if isinstance(value, str) and value.strip():
