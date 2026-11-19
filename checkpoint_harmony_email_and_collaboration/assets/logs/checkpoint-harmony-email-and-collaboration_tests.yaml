@@ -9808,7 +9808,7 @@ tests:
             event_trigger:
               id: 17200354944658873
               type: "Policy"
-            latest_change_time: 1.7943253148541316E9
+            latest_change_time: 1.7943253148541317E9
             matched_security_tool: "avanan_ap_scan"
             metadata_json:
               impersonate_nickname_new: false
@@ -9929,7 +9929,7 @@ tests:
         status: Resolved
         disposition_id: 3
         message: Phishing attempt detected in an email from user15@org20.example.com - 'Example email subject 6' (user16@org21.example.com's mailbox)
-        risk_details: Your users didn't communicate with the sender,Insignificant historical reputation with sender domain,Insignificant historical reputation with sender,Low-traffic 'From'-domain,Suspicious-looking email text,Email is marked as spam by Google,Phishing confiden
+        risk_details: "Your users didn't communicate with the sender,Insignificant historical reputation with sender domain,Insignificant historical reputation with sender,Low-traffic 'From'-domain,Suspicious-looking email text,Email is marked as spam by Google,Phishing confidence level - Highest,Email analysis indicates a possible Credentials Harvesting attack"
     message: "Phishing attempt detected in an email from user15@org20.example.com - 'Example email subject 6' (user16@org21.example.com's mailbox)"
     service: "google_mail"
     status: "critical"
@@ -10675,7 +10675,7 @@ tests:
             event_trigger:
               id: 17731767956615303
               type: "Policy"
-            latest_change_time: 1.7943247932831623E9
+            latest_change_time: 1.7943247932831624E9
             matched_security_tool: "avanan_ap_scan"
             metadata_json:
               impersonate_nickname_new: false
@@ -10807,7 +10807,7 @@ tests:
         status: Resolved
         disposition_id: 3
         message: Phishing attempt detected in an email from user50@org40.example.com - 'Example email subject 14' (user51@org24.example.com's mailbox)
-        risk_details: Microsoft SCL value was 1,Your users didn't communicate with the sender,Insignificant historical reputation with sender domain,Insignificant historical reputation with sender,Low-traffic 'From'-domain,DMARC check fails,Missing DKIM signature,Link to a low-
+        risk_details: "Microsoft SCL value was 1,Your users didn't communicate with the sender,Insignificant historical reputation with sender domain,Insignificant historical reputation with sender,Low-traffic 'From'-domain,DMARC check fails,Missing DKIM signature,Link to a low-traffic site,SPF check failed when checking sending IP: 198.51.100.156 for domain org40.example.com,'From' and 'Reply to' are different,Suspicious-looking email text,Phishing confidence level - Highest,Email analysis indicates a possible Credentials Harvesting attack"
     message: "Phishing attempt detected in an email from user50@org40.example.com - 'Example email subject 14' (user51@org24.example.com's mailbox)"
     service: "office365_emails"
     status: "critical"

@@ -164,6 +164,7 @@ facets:
     name: Finding Information Created Time
     path: ocsf.finding_info.created_time
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Finding Info Title
@@ -234,11 +235,13 @@ facets:
     name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Event Time
     path: ocsf.time
     source: log
+    type: integer
 pipeline:
   type: pipeline
   name: Check Point Harmony Email & Collaboration
