@@ -25,7 +25,7 @@ from datadog_checks.sqlserver.health import SqlServerHealthEvent
 from datadog_checks.sqlserver.statements import build_plan_events
 from datadog_checks.sqlserver.utils import raise_if_cancelled
 
-from .base import EVENT_FILE_TARGET, XESessionBase, agent_check_getter
+from .base import EVENT_FILE_TARGET, XESessionBase, agent_check_getter, is_target_read_denied
 from .event_file_reader import EventFileEvent, EventFileReader
 from .xml_tools import extract_field, extract_text_representation, extract_value
 
@@ -175,6 +175,7 @@ class QueryPlanEventsHandler(XESessionBase):
 
     SESSION_MISSING_HEALTH_EVENT = SqlServerHealthEvent.QUERY_PLANS_XE_SESSION_MISSING
     TARGET_UNSUPPORTED_HEALTH_EVENT = SqlServerHealthEvent.QUERY_PLANS_XE_TARGET_UNSUPPORTED
+    TARGET_READ_DENIED_HEALTH_EVENT = SqlServerHealthEvent.QUERY_PLANS_XE_TARGET_READ_DENIED
     COLLECTED_DATA_NAME = "real execution plans"
     SESSION_DOCS_URL = QUERY_PLANS_DOCS_URL
     SESSION_SQL = QUERY_PLANS_SESSION_SQL
@@ -353,9 +354,26 @@ class QueryPlanEventsHandler(XESessionBase):
 
     def _collect(self, cursor: Any) -> None:
         raise_if_cancelled(self._cancel_event)
+        try:
+            events = self._read_events(cursor)
+        except Exception as e:
+            if not is_target_read_denied(e):
+                raise
+            raise_if_cancelled(self._cancel_event)
+            self._report_target_read(e)
+            return
+        self._report_target_read(None)
+        if not events:
+            return
+        self._submit_lag(events)
+        for plan_event in self._plan_events(cursor):
+            self._check.database_monitoring_query_sample(json.dumps(plan_event, default=default_json_event_encoding))
+
+    def _read_events(self, cursor: Any) -> list[dict]:
+        """The new events of the session's target, read and parsed."""
         target_name, file_name = self._session_target(cursor)
         if target_name is None:
-            return
+            return []
         started = time.time()
         self._slowest_plan_events = {}
         if target_name == EVENT_FILE_TARGET:
@@ -369,11 +387,7 @@ class QueryPlanEventsHandler(XESessionBase):
             xml_data, self._skip_seen_events = self._read_ring_buffer(cursor), True
             self._submit_read_time(target_name, started)
             events = self._process_events(xml_data) if xml_data else []
-        if not events:
-            return
-        self._submit_lag(events)
-        for plan_event in self._plan_events(cursor):
-            self._check.database_monitoring_query_sample(json.dumps(plan_event, default=default_json_event_encoding))
+        return events
 
     def _submit_lag(self, events: list[dict]) -> None:
         """The time between the oldest event read and now."""

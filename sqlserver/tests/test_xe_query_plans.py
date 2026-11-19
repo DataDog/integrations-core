@@ -1055,6 +1055,48 @@ def test_session_health_events(aggregator, xe_instance, caplog):
     ]
 
 
+# A read the login isn't allowed, as SQL Server 2022 reports it.
+READ_DENIED_ERROR = "VIEW SERVER PERFORMANCE STATE permission was denied on object 'server', database 'master'. (300)"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('denied_read', ['newest_buffer_lookup', 'checkpoint_read'])
+def test_target_read_denied_health_events(aggregator, xe_instance, caplog, denied_read):
+    """
+    A denied read of the target sends a warning health event and logs once, until a read works again, which sends OK,
+    and the events after the checkpoint are then all sent.
+    """
+    server = FakeServer()
+    handler = make_handler(xe_instance, server, samples_per_hour_per_query=10**9)
+    caplog.set_level(logging.WARNING)
+    if denied_read == 'checkpoint_read':
+        server.event_file.add_buffer(distinct_event(1))
+        handler.run_job()
+        server.event_file.add_buffer(distinct_event(2))
+        errors = server.event_file.checkpoint_read_errors
+    else:
+        errors = server.event_file.last_buffer_errors
+    errors.extend([Exception(READ_DENIED_ERROR), Exception(READ_DENIED_ERROR)])
+
+    handler.run_job()
+    handler.run_job()
+    assert query_plans_health_events(aggregator) == [('query_plans_xe_target_read_denied', 'warning')]
+    warnings = [r.getMessage() for r in caplog.records if "isn't allowed to read" in r.getMessage()]
+    assert len(warnings) == 1
+    assert 'VIEW SERVER PERFORMANCE STATE on SQL Server 2022' in warnings[0]
+
+    server.event_file.add_buffer(distinct_event(3))
+    handler.run_job()
+    handler.run_job()
+
+    assert query_plans_health_events(aggregator) == [
+        ('query_plans_xe_target_read_denied', 'warning'),
+        ('query_plans_xe_target_read_denied', 'ok'),
+    ]
+    if denied_read == 'checkpoint_read':
+        assert sent_timestamps(aggregator) == [timestamp(2), timestamp(3)]
+
+
 @pytest.mark.unit
 def test_lag_and_read_time_metrics(aggregator, xe_instance):
     server = FakeServer()
