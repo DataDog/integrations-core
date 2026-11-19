@@ -61,6 +61,12 @@ def read_activity(connection: Any) -> tuple[list[dict[str, Any]], dict[str, int]
             if index == ACTIVITY_MAX_ROWS:
                 stats['row_limit'] = 1
                 break
+            if row['stmt_text']:
+                text = row['stmt_text'].encode('utf-8')
+                if len(text) > ACTIVITY_MAX_TEXT_BYTES:
+                    # Preserve evidence of truncation in either the database code page or UTF-8.
+                    row['stmt_text_bytes'] = max(row['stmt_text_bytes'], len(text))
+                    row['stmt_text'] = text[:ACTIVITY_MAX_TEXT_BYTES].decode('utf-8', errors='ignore')
             rows.append(row)
     finally:
         ibm_db.free_stmt(cursor)
