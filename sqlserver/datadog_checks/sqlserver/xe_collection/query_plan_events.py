@@ -231,14 +231,12 @@ class QueryPlanEventsHandler(XESessionBase):
     def __init__(self, check: SQLServer, config: SQLServerConfig):
         super().__init__(check, config, SESSION_NAME)
         query_plans_config = getattr(config, 'xe_collection_config', {}).get('query_plans', {}) or {}
-        samples_per_hour = int(query_plans_config.get('samples_per_hour_per_query', DEFAULT_SAMPLES_PER_HOUR_PER_QUERY))
-        if samples_per_hour < 1:
-            self._log.warning(
-                "`collect_xe.query_plans.samples_per_hour_per_query` must be at least 1, using %s",
-                DEFAULT_SAMPLES_PER_HOUR_PER_QUERY,
-            )
-            samples_per_hour = DEFAULT_SAMPLES_PER_HOUR_PER_QUERY
-        self._max_plan_size_bytes = int(query_plans_config.get('max_plan_size_bytes', DEFAULT_MAX_PLAN_SIZE_BYTES))
+        samples_per_hour = self._positive_int_option(
+            query_plans_config, 'samples_per_hour_per_query', DEFAULT_SAMPLES_PER_HOUR_PER_QUERY
+        )
+        self._max_plan_size_bytes = self._positive_int_option(
+            query_plans_config, 'max_plan_size_bytes', DEFAULT_MAX_PLAN_SIZE_BYTES
+        )
         # One plan per query and plan shape per interval, as the query_hash and query_plan_hash pair.
         self._seen_plans_ratelimiter = RateLimitingTTLCache(
             maxsize=RATE_LIMITER_MAX_SIZE, ttl=60 * 60 / samples_per_hour
@@ -268,6 +266,20 @@ class QueryPlanEventsHandler(XESessionBase):
 
         self.register_event_handler(PLAN_PROFILE_EVENT, self._parse_plan_event)
         self.register_event_handler(SHOWPLAN_EVENT, self._parse_plan_event)
+
+    def _positive_int_option(self, query_plans_config: dict, name: str, default: int) -> int:
+        """A `collect_xe.query_plans` option that must be at least 1, or its default when it's unset or invalid."""
+        value = query_plans_config.get(name)
+        if value is None:
+            return default
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            value = 0
+        if value < 1:
+            self._log.warning("`collect_xe.query_plans.%s` must be at least 1, using %s", name, default)
+            return default
+        return value
 
     def get_numeric_fields(self, event_type=None):
         return {**super().get_numeric_fields(event_type), **PLAN_EVENT_NUMERIC_FIELDS}

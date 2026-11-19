@@ -26,6 +26,7 @@ from datadog_checks.sqlserver.xe_collection.query_plan_events import (
     QueryPlanEventsHandler,
     event_file_pattern,
 )
+from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
 from .common import CHECK_NAME
 from .conftest import SelfHealingConnection
@@ -473,6 +474,39 @@ def test_rate_limit_keeps_the_slowest_execution(aggregator, xe_instance):
     run_from_ring_buffer(handler, server, make_event(timestamp=timestamp(5), duration_us=9_000_000))
     assert plan_events(aggregator) == []
     assert_events_metric(aggregator, handler, 'rate_limited', 'query_post_execution_plan_profile', 1)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('value', [None, 0, -1, 'invalid'])
+@pytest.mark.parametrize('option', ['samples_per_hour_per_query', 'max_plan_size_bytes'])
+def test_unset_or_invalid_options_use_their_default(aggregator, xe_instance, option, value):
+    """An empty or invalid option neither stops the XE handlers from starting nor drops every plan."""
+    server = FakeServer()
+    handler = make_handler(xe_instance, server, **{option: value})
+
+    run_from_ring_buffer(handler, server, make_event())
+
+    assert len(plan_events(aggregator)) == 1
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'query_plans_config,enabled',
+    [
+        pytest.param(None, False, id='null'),
+        pytest.param({'enabled': 'false'}, False, id='string_false'),
+        pytest.param({'enabled': 'true'}, True, id='string_true'),
+        pytest.param({'enabled': True}, True, id='true'),
+    ],
+)
+def test_query_plans_handler_registration(xe_instance, query_plans_config, enabled):
+    """The handler starts when `diagnose` checks the session, as both read `enabled` alike."""
+    xe_instance['collect_xe']['query_plans'] = query_plans_config
+    check = SQLServer(CHECK_NAME, {}, [xe_instance])
+
+    handlers = get_xe_session_handlers(check, check._config)
+
+    assert [type(handler) for handler in handlers] == ([QueryPlanEventsHandler] if enabled else [])
 
 
 @pytest.mark.unit
