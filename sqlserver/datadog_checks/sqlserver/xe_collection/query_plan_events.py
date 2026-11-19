@@ -7,7 +7,6 @@ import copy
 import re
 import time
 from collections import Counter, OrderedDict
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Iterator
 
@@ -15,7 +14,6 @@ from cachetools import TTLCache
 from dateutil import parser
 from lxml import etree
 
-from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
     RateLimitingTTLCache,
@@ -29,7 +27,8 @@ from datadog_checks.sqlserver.health import SqlServerHealthEvent
 from datadog_checks.sqlserver.statements import obfuscate_xml_plan
 from datadog_checks.sqlserver.utils import raise_if_cancelled
 
-from .base import XESessionBase, agent_check_getter
+from .base import EVENT_FILE_TARGET, XESessionBase, agent_check_getter
+from .event_file_reader import EventFileReader
 from .xml_tools import extract_field, extract_text_representation, extract_value
 
 if TYPE_CHECKING:
@@ -44,8 +43,6 @@ PLAN_SOURCES = {
     PLAN_PROFILE_EVENT: "xe_query_post_execution_plan_profile",
     SHOWPLAN_EVENT: "xe_query_post_execution_showplan",
 }
-EVENT_FILE_TARGET = "event_file"
-RING_BUFFER_TARGET = "ring_buffer"
 
 DEFAULT_SAMPLES_PER_HOUR_PER_QUERY = 4
 DEFAULT_MAX_PLAN_SIZE_BYTES = 1_000_000
@@ -63,8 +60,6 @@ RUNTIME_ELEMENTS = ("<RunTimeInformation", "<QueryTimeStats")
 # Used when the session has no query_hash or query_plan_hash action.
 PLAN_QUERY_HASH_PATTERN = re.compile(r'\bQueryHash="0x([0-9A-Fa-f]+)"')
 PLAN_QUERY_PLAN_HASH_PATTERN = re.compile(r'\bQueryPlanHash="0x([0-9A-Fa-f]+)"')
-# The event_file target writes `<filename>_0_<timestamp>.xel` files, a new one at each rollover or session start.
-EVENT_FILE_SUFFIX_PATTERN = re.compile(r"_\d+_\d+\.xel$", re.IGNORECASE)
 
 QUERY_PLANS_DOCS_URL = "https://docs.datadoghq.com/database_monitoring/guide/sql_real_execution_plans/"
 QUERY_PLANS_SESSION_SQL = """\
@@ -80,52 +75,6 @@ WITH (MAX_MEMORY = 8192 KB, EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS, MAX_
       TRACK_CAUSALITY = ON, STARTUP_STATE = ON);
 ALTER EVENT SESSION datadog_query_plans ON SERVER STATE = START;"""
 
-# The session and its targets. Only the event_file target's data is read: it holds the current file's path, while a
-# ring buffer's data is all its events.
-SESSION_TARGETS_QUERY = """\
-SELECT t.target_name,
-    CASE WHEN t.target_name = N'event_file' THEN CAST(t.target_data AS nvarchar(max)) END AS target_data
-FROM sys.dm_xe_{level}sessions s
-LEFT JOIN sys.dm_xe_{level}session_targets t ON s.address = t.event_session_address
-WHERE s.name = ?
-"""
-# The newest buffer of a file, where the first run starts instead of replaying the history.
-EVENT_FILE_LAST_BUFFER_QUERY = """\
-SELECT TOP 1 file_name, file_offset
-FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
-ORDER BY file_offset DESC
-"""
-# The reads and checkpoints rely on `sys.fn_xe_file_target_read_file` returning rows in (file_name, file_offset) order,
-# as it reads the files and their buffers one after the other. The documentation doesn't guarantee it, but
-# `ORDER BY file_name, file_offset` could sort every row after the checkpoint before `TOP` applies.
-EVENT_FILE_READ_QUERY = """\
-SELECT TOP (?) event_data, file_name, file_offset
-FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
-"""
-# The events of the file the reading started at and the next ones, before the first checkpoint. The file names end with
-# the time they were created at, so the files before it sort first.
-EVENT_FILE_READ_FROM_START_FILE_QUERY = """\
-SELECT TOP (?) event_data, file_name, file_offset
-FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
-WHERE file_name >= ?
-"""
-# Reading from a checkpoint returns the events of the buffers after it, in this file and the next ones, including the
-# file a restarted session starts.
-EVENT_FILE_READ_FROM_CHECKPOINT_QUERY = """\
-SELECT TOP (?) event_data, file_name, file_offset
-FROM sys.fn_xe_file_target_read_file(?, NULL, ?, ?)
-"""
-# The oldest file the target still retains, as the files are read oldest first.
-EVENT_FILE_OLDEST_FILE_QUERY = """\
-SELECT TOP 1 file_name
-FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
-"""
-# The error of a read from a checkpoint whose file is gone. Drivers that don't report the error number are covered by
-# comparing the checkpoint's file with the oldest file retained.
-EVENT_FILE_NOT_FOUND_ERROR_PATTERN = re.compile(r"\b25717\b")
-# The start file of a read from the oldest file retained: every file name sorts at or after it, so
-# `EVENT_FILE_READ_FROM_START_FILE_QUERY` returns the rows of every file.
-ALL_RETAINED_FILES = ""
 # The statement of a tsql_frame action, extracted as query metrics extract it from sys.dm_exec_query_stats, so they
 # compute the same query signature.
 FRAME_STATEMENT_QUERY = """\
@@ -215,34 +164,6 @@ def hash_to_hex(value: str | None) -> str | None:
         return None
 
 
-def event_file_pattern(file_name: str) -> str:
-    """
-    The path matching every file of the event_file target whose current file is `file_name`, for
-    `sys.fn_xe_file_target_read_file`: a wildcard pattern for local files, and the blob name prefix for Azure Blob
-    Storage URLs, as on Azure SQL Database and Managed Instance, where wildcards aren't allowed.
-    """
-    if file_name.lower().startswith("https://"):
-        return EVENT_FILE_SUFFIX_PATTERN.sub("", file_name)
-    return EVENT_FILE_SUFFIX_PATTERN.sub("*.xel", file_name)
-
-
-@dataclass
-class EventFilePosition:
-    """Where the reads of an event_file target are. A session created again with another file gets a new position."""
-
-    # The path of every file of the target, from `event_file_pattern`.
-    pattern: str
-    # The file and offset of the last buffer read in full. Reads start after it.
-    checkpoint: tuple[str, int] | None = None
-    # Without a checkpoint, reads start at the start of this file and go on into the files after it: the file the
-    # first run found empty, or `ALL_RETAINED_FILES` after the checkpoint's file is gone. It's None until the first
-    # run's lookup of the newest buffer succeeds.
-    start_file: str | None = None
-    # The buffer a read starts with when the previous runs read it in part, as a run reads at most `max_events`
-    # events, and the number of its events read.
-    partial_buffer: tuple[tuple[str, int], int] | None = None
-
-
 class QueryPlanEventsHandler(XESessionBase):
     """
     Collects real execution plans from the `datadog_query_plans` XE session, which customers create and start, with
@@ -251,6 +172,12 @@ class QueryPlanEventsHandler(XESessionBase):
     Each event is the actual plan of one statement execution, with its runtime parameter values. The session is read
     from its event_file target, or its ring_buffer target where there's no event_file target.
     """
+
+    SESSION_MISSING_HEALTH_EVENT = SqlServerHealthEvent.QUERY_PLANS_XE_SESSION_MISSING
+    TARGET_UNSUPPORTED_HEALTH_EVENT = SqlServerHealthEvent.QUERY_PLANS_XE_TARGET_UNSUPPORTED
+    COLLECTED_DATA_NAME = "real execution plans"
+    SESSION_DOCS_URL = QUERY_PLANS_DOCS_URL
+    SESSION_SQL = QUERY_PLANS_SESSION_SQL
 
     def __init__(self, check: SQLServer, config: SQLServerConfig):
         super().__init__(check, config, SESSION_NAME)
@@ -271,9 +198,7 @@ class QueryPlanEventsHandler(XESessionBase):
         self._statement_text_cache: TTLCache = TTLCache(
             maxsize=STATEMENT_TEXT_CACHE_MAX_SIZE, ttl=STATEMENT_TEXT_CACHE_TTL_SECONDS
         )
-        self._event_file_position: EventFilePosition | None = None
-        # The current setup problem, so its warning is logged once and its health event goes back to OK when fixed.
-        self._session_problem: SqlServerHealthEvent | None = None
+        self._event_file_reader = EventFileReader(self.session_name, self.max_events, self._log, self._cancel_event)
         self._statuses: Counter = Counter()
         # The keys of the events read, the newest last, and whether the current read skips the events read before. The
         # ring buffer returns all its events at every read, and so can a read from a file's start without checkpoint,
@@ -447,172 +372,9 @@ class QueryPlanEventsHandler(XESessionBase):
             **self._check.debug_stats_kwargs(),
         )
 
-    def _session_target(self, cursor: Any) -> tuple[str | None, str | None]:
-        """
-        The target to read, event_file first, and the event_file target's current file. Reports setup problems with a
-        health event and a warning.
-        """
-        level = "database_" if self._is_azure_sql_database else ""
-        cursor.execute(SESSION_TARGETS_QUERY.format(level=level), (self.session_name,))
-        rows = cursor.fetchall() or []
-        if not rows:
-            self._report_session_problem(
-                SqlServerHealthEvent.QUERY_PLANS_XE_SESSION_MISSING,
-                "The {} XE session doesn't exist or isn't running, so no real execution plans are collected.",
-            )
-            return None, None
-        targets = {row[0]: row[1] for row in rows if row[0]}
-        if EVENT_FILE_TARGET in targets:
-            self._report_session_problem(None)
-            return EVENT_FILE_TARGET, self._event_file_current_file(targets[EVENT_FILE_TARGET])
-        if RING_BUFFER_TARGET in targets:
-            self._report_session_problem(None)
-            return RING_BUFFER_TARGET, None
-        self._report_session_problem(
-            SqlServerHealthEvent.QUERY_PLANS_XE_TARGET_UNSUPPORTED,
-            "The {} XE session has no event_file or ring_buffer target, so no real execution plans are collected.",
-        )
-        return None, None
-
-    def _event_file_current_file(self, target_data: str | None) -> str | None:
-        if not target_data:
-            return None
-        try:
-            file_element = etree.fromstring(target_data.encode('utf-8')).find('.//File')
-        except etree.XMLSyntaxError as e:
-            self._log.debug("Failed to parse the event_file target data of %s: %s", self.session_name, e)
-            return None
-        return file_element.get('name') if file_element is not None else None
-
-    def _report_session_problem(self, problem: SqlServerHealthEvent | None, message: str = "") -> None:
-        if problem == self._session_problem:
-            return
-        if self._session_problem is not None:
-            self._check.health.submit_health_event(name=self._session_problem, status=HealthStatus.OK)
-        self._session_problem = problem
-        if problem is None:
-            self._log.info("The %s XE session is running with a supported target", self.session_name)
-            return
-        self._check.health.submit_health_event(
-            name=problem, status=HealthStatus.WARNING, data={"session_name": self.session_name}
-        )
-        self._log.warning(
-            "%s Create and start it as described in %s:\n%s",
-            message.format(self.session_name),
-            QUERY_PLANS_DOCS_URL,
-            QUERY_PLANS_SESSION_SQL,
-        )
-
     @tracked_method(agent_check_getter=agent_check_getter)
     def _read_event_file(self, cursor: Any, current_file: str) -> tuple[str | None, bool]:
-        """
-        The new events of the event_file target, as one XML document, and whether it can hold events read before, as a
-        read from the start of a file can. The first run starts at the newest buffer of the current file, so it doesn't
-        replay the history, and when that file is empty, the next runs read it and the files after it until a
-        checkpoint. When the checkpoint's file is gone, reading starts over at the oldest file retained, and when a
-        read from the checkpoint fails otherwise, the next run retries it.
-        """
-        pattern = event_file_pattern(current_file)
-        if self._event_file_position is None or self._event_file_position.pattern != pattern:
-            # A session created again with another file starts over.
-            self._event_file_position = EventFilePosition(pattern)
-        position = self._event_file_position
-        # A position has a start file once the first run's lookup succeeds, before any checkpoint.
-        if position.start_file is None:
-            cursor.execute(EVENT_FILE_LAST_BUFFER_QUERY, (current_file,))
-            row = cursor.fetchone()
-            # Only once the lookup succeeds, so a failed one is retried rather than the history read.
-            position.start_file = current_file
-            if row:
-                position.checkpoint = (row[0], int(row[1]))
-                return None, False
-
-        rows = None
-        if position.checkpoint is not None:
-            limit = self._event_file_read_limit(position)
-            try:
-                cursor.execute(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY, (limit, pattern, *position.checkpoint))
-                rows = cursor.fetchall()
-            except Exception as e:
-                raise_if_cancelled(self._cancel_event)
-                if not self._event_file_checkpoint_file_gone(cursor, position, e):
-                    self._log.warning(
-                        "Failed to read %s after %s, retrying at the next run: %s",
-                        self.session_name,
-                        position.checkpoint,
-                        e,
-                    )
-                    return None, False
-                self._log.info(
-                    "The file of the %s checkpoint %s is gone, reading from the oldest file retained: %s",
-                    self.session_name,
-                    position.checkpoint,
-                    e,
-                )
-                # The read starts at another position, where the count of the partial buffer's events read doesn't
-                # apply. The events read again are skipped by key.
-                position = self._event_file_position = EventFilePosition(pattern, start_file=ALL_RETAINED_FILES)
-        read_from_file_start = rows is None
-        if read_from_file_start:
-            limit = self._event_file_read_limit(position)
-            if current_file == position.start_file:
-                cursor.execute(EVENT_FILE_READ_QUERY, (limit, current_file))
-            else:
-                # The start file rolled over, or the session restarted, before a buffer was read in full, or every file
-                # retained is read.
-                cursor.execute(EVENT_FILE_READ_FROM_START_FILE_QUERY, (limit, pattern, position.start_file))
-            rows = cursor.fetchall()
-        new_rows = self._advance_event_file_checkpoint(position, rows, limit) if rows else []
-        if not new_rows:
-            return None, read_from_file_start
-        return "<events>{}</events>".format("".join(row[0] for row in new_rows if row[0])), read_from_file_start
-
-    def _event_file_read_limit(self, position: EventFilePosition) -> int:
-        # The events of the partial buffer read before are read again, and skipped.
-        return self.max_events + (position.partial_buffer[1] if position.partial_buffer else 0)
-
-    def _event_file_checkpoint_file_gone(self, cursor: Any, position: EventFilePosition, error: Exception) -> bool:
-        """
-        Whether a read from the checkpoint failed because its file is gone, as after rollovers, rather than for a
-        reason the next run can retry.
-        """
-        if EVENT_FILE_NOT_FOUND_ERROR_PATTERN.search(str(error)):
-            return True
-        try:
-            cursor.execute(EVENT_FILE_OLDEST_FILE_QUERY, (position.pattern,))
-            row = cursor.fetchone()
-        except Exception as e:
-            raise_if_cancelled(self._cancel_event)
-            self._log.debug("Failed to read the oldest file of %s: %s", self.session_name, e)
-            return False
-        # The file names end with the time they were created at, so the files the target removed sort first.
-        return row is None or position.checkpoint[0] < row[0]
-
-    def _advance_event_file_checkpoint(self, position: EventFilePosition, rows: list, limit: int) -> list:
-        """
-        The rows of a read to process, at most `max_events` not read before, after the checkpoint moves past them and
-        no further. A checkpoint is a whole buffer, so a read stopped within a buffer, by its limit or by `max_events`,
-        checkpoints on the buffer before it, and the next read skips the events of that buffer already read.
-        """
-        buffers = [(row[1], int(row[2])) for row in rows]
-        skipped = 0
-        if position.partial_buffer is not None:
-            partial_buffer, partial_rows = position.partial_buffer
-            while skipped < min(partial_rows, len(rows)) and buffers[skipped] == partial_buffer:
-                skipped += 1
-        # The rows after the first `max_events` new ones are left to the next runs.
-        end = min(len(rows), skipped + self.max_events)
-        if end == len(rows) < limit:
-            # The read reached the end of the files, so its last buffer is complete.
-            position.checkpoint = buffers[end - 1]
-            position.partial_buffer = None
-        else:
-            last_buffer_start = buffers.index(buffers[end - 1])
-            if last_buffer_start > 0:
-                position.checkpoint = buffers[last_buffer_start - 1]
-            # Otherwise the whole read is within its first buffer, and the checkpoint stays before it.
-            position.partial_buffer = (buffers[end - 1], end - last_buffer_start)
-        return rows[skipped:end]
+        return self._event_file_reader.read(cursor, current_file)
 
     def _plan_events(self, cursor: Any) -> Iterator[dict]:
         """The plan events, and their raw copies, of the events read, the slowest execution per query and plan."""

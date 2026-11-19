@@ -14,18 +14,20 @@ from lxml import etree
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.xe_collection.query_plan_events import (
+from datadog_checks.sqlserver.xe_collection.base import SESSION_TARGETS_QUERY
+from datadog_checks.sqlserver.xe_collection.event_file_reader import (
     ALL_RETAINED_FILES,
     EVENT_FILE_LAST_BUFFER_QUERY,
     EVENT_FILE_OLDEST_FILE_QUERY,
     EVENT_FILE_READ_FROM_CHECKPOINT_QUERY,
     EVENT_FILE_READ_FROM_START_FILE_QUERY,
     EVENT_FILE_READ_QUERY,
+    event_file_pattern,
+)
+from datadog_checks.sqlserver.xe_collection.query_plan_events import (
     FRAME_STATEMENT_QUERY,
     QUERY_STATS_STATEMENT_QUERY,
-    SESSION_TARGETS_QUERY,
     QueryPlanEventsHandler,
-    event_file_pattern,
 )
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 

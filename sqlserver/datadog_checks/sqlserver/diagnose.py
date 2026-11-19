@@ -17,12 +17,8 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION
 from datadog_checks.sqlserver.utils import is_azure_database, is_azure_sql_database
-from datadog_checks.sqlserver.xe_collection.query_plan_events import (
-    EVENT_FILE_TARGET,
-    PLAN_SOURCES,
-    QUERY_PLANS_DOCS_URL,
-    RING_BUFFER_TARGET,
-)
+from datadog_checks.sqlserver.xe_collection.base import EVENT_FILE_TARGET, RING_BUFFER_TARGET
+from datadog_checks.sqlserver.xe_collection.query_plan_events import PLAN_SOURCES, QUERY_PLANS_DOCS_URL
 from datadog_checks.sqlserver.xe_collection.query_plan_events import SESSION_NAME as QUERY_PLANS_SESSION_NAME
 
 CATEGORY_SQLSERVER = "sqlserver"

@@ -13,6 +13,7 @@ from dateutil import parser
 from lxml import etree
 
 from datadog_checks.base import is_affirmative
+from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -23,9 +24,22 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.health import SqlServerHealthEvent
 from datadog_checks.sqlserver.utils import is_azure_sql_database, raise_if_cancelled
 
 from .xml_tools import extract_int_value, extract_value
+
+EVENT_FILE_TARGET = "event_file"
+RING_BUFFER_TARGET = "ring_buffer"
+# The session and its targets. Only the event_file target's data is read: it holds the current file's path, while a
+# ring buffer's data is all its events.
+SESSION_TARGETS_QUERY = """\
+SELECT t.target_name,
+    CASE WHEN t.target_name = N'event_file' THEN CAST(t.target_data AS nvarchar(max)) END AS target_data
+FROM sys.dm_xe_{level}sessions s
+LEFT JOIN sys.dm_xe_{level}session_targets t ON s.address = t.event_session_address
+WHERE s.name = ?
+"""
 
 
 def agent_check_getter(self):
@@ -106,6 +120,14 @@ class XESessionBase(DBMAsyncJob):
     # Both rpc_completed and batch_completed use the result field
     TEXT_FIELDS = ["result"]
 
+    # Set by the handlers that find their target with `_session_target`: the health events of the session's setup
+    # problems, what the warnings say isn't collected without the session, and how to create it.
+    SESSION_MISSING_HEALTH_EVENT: SqlServerHealthEvent
+    TARGET_UNSUPPORTED_HEALTH_EVENT: SqlServerHealthEvent
+    COLLECTED_DATA_NAME: str
+    SESSION_DOCS_URL: str
+    SESSION_SQL: str
+
     def __init__(self, check, config, session_name):
         self.session_name = session_name
         self._check = check
@@ -166,6 +188,8 @@ class XESessionBase(DBMAsyncJob):
         self._conn_key_prefix = f"dbm-xe-{session_name}-"
         self._is_azure_sql_database = False
         self._check_azure_status()
+        # The current setup problem, so its warning is logged once and its health event goes back to OK when fixed.
+        self._session_problem: SqlServerHealthEvent | None = None
 
     # Methods to allow subclasses to extend field definitions
     def get_numeric_fields(self, event_type=None):
@@ -218,6 +242,62 @@ class XESessionBase(DBMAsyncJob):
                 cursor.execute(query, (self.session_name,))
 
                 return cursor.fetchone() is not None
+
+    def _session_target(self, cursor) -> tuple[str | None, str | None]:
+        """
+        The target to read, event_file first, and the event_file target's current file. Reports setup problems with a
+        health event and a warning.
+        """
+        level = "database_" if self._is_azure_sql_database else ""
+        cursor.execute(SESSION_TARGETS_QUERY.format(level=level), (self.session_name,))
+        rows = cursor.fetchall() or []
+        if not rows:
+            self._report_session_problem(
+                self.SESSION_MISSING_HEALTH_EVENT,
+                "The {session} XE session doesn't exist or isn't running, so no {data} are collected.",
+            )
+            return None, None
+        targets = {row[0]: row[1] for row in rows if row[0]}
+        if EVENT_FILE_TARGET in targets:
+            self._report_session_problem(None)
+            return EVENT_FILE_TARGET, self._event_file_current_file(targets[EVENT_FILE_TARGET])
+        if RING_BUFFER_TARGET in targets:
+            self._report_session_problem(None)
+            return RING_BUFFER_TARGET, None
+        self._report_session_problem(
+            self.TARGET_UNSUPPORTED_HEALTH_EVENT,
+            "The {session} XE session has no event_file or ring_buffer target, so no {data} are collected.",
+        )
+        return None, None
+
+    def _event_file_current_file(self, target_data: str | None) -> str | None:
+        if not target_data:
+            return None
+        try:
+            file_element = etree.fromstring(target_data.encode('utf-8')).find('.//File')
+        except etree.XMLSyntaxError as e:
+            self._log.debug("Failed to parse the event_file target data of %s: %s", self.session_name, e)
+            return None
+        return file_element.get('name') if file_element is not None else None
+
+    def _report_session_problem(self, problem: SqlServerHealthEvent | None, message: str = "") -> None:
+        if problem == self._session_problem:
+            return
+        if self._session_problem is not None:
+            self._check.health.submit_health_event(name=self._session_problem, status=HealthStatus.OK)
+        self._session_problem = problem
+        if problem is None:
+            self._log.info("The %s XE session is running with a supported target", self.session_name)
+            return
+        self._check.health.submit_health_event(
+            name=problem, status=HealthStatus.WARNING, data={"session_name": self.session_name}
+        )
+        self._log.warning(
+            "%s Create and start it as described in %s:\n%s",
+            message.format(session=self.session_name, data=self.COLLECTED_DATA_NAME),
+            self.SESSION_DOCS_URL,
+            self.SESSION_SQL,
+        )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_ring_buffer(self):
