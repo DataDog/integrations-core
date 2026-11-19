@@ -54,7 +54,8 @@ class Marathon(AgentCheck):
             or self.init_config.get('default_timeout')
             or self.DEFAULT_TIMEOUT
         )
-        # Kept on the check because the shape of `http.options['timeout']` depends on the branch below.
+        # The timeout handler reports this value. `http.options['timeout']` is an int or a (read, connect) tuple
+        # depending on the config, so it can't be indexed there.
         self._read_timeout = float(self.instance.get('read_timeout', timeout))
         if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
             # `default_timeout` config option will be removed with Agent 5
