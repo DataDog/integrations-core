@@ -201,11 +201,6 @@ facets:
     source: log
   - groups:
       - PAN Firewall
-    name: Destination Location
-    path: dstloc
-    source: log
-  - groups:
-      - PAN Firewall
     name: Session End Reason
     path: session_end_reason
     source: log
