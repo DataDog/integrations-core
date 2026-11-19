@@ -22,13 +22,13 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "min(last_2d):min:pan_firewall.license.days_left{*} by {device_ip,feature} <= 30",
+    "query": "max(last_2d):min:pan_firewall.license.days_left{*} by {device_ip,feature} <= 30",
     "tags": [
       "integration:pan-firewall"
     ],
     "type": "query alert"
   },
-  "description": "Tracks the number of days left before each licensed feature on the firewall expires. An expired subscription license stops the matching security service, such as threat prevention or URL filtering, from receiving updates.",
+  "description": "Tracks the number of days left before each licensed feature on the firewall expires. An expired subscription license stops the matching security service, such as threat prevention or URL filtering, from receiving updates. To stop alerting on a license you will not renew, add `!feature:<name>` to the query.",
   "last_updated_at": "2026-11-18",
   "tags": [
     "integration:pan-firewall"

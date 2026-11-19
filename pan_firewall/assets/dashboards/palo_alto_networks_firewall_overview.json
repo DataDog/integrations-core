@@ -393,31 +393,30 @@
           },
           {
             "definition": {
-              "description": "Days until the soonest-expiring license on the selected firewalls, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not included.",
-              "precision": 0,
+              "description": "The three licenses closest to expiry on the selected firewalls, per firewall and feature, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not included, and expired licenses are hidden; Expired licenses counts them.",
               "requests": [
                 {
-                  "conditional_formats": [
-                    {
-                      "comparator": "<=",
-                      "palette": "red_on_white",
-                      "value": 30.0
-                    },
-                    {
-                      "comparator": "<=",
-                      "palette": "yellow_on_white",
-                      "value": 60.0
-                    },
-                    {
-                      "comparator": ">",
-                      "palette": "green_on_white",
-                      "value": 60.0
-                    }
-                  ],
                   "formulas": [
                     {
                       "alias": "Days left",
-                      "formula": "query1",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<=",
+                          "palette": "red_on_white",
+                          "value": 30.0
+                        },
+                        {
+                          "comparator": "<=",
+                          "palette": "yellow_on_white",
+                          "value": 60.0
+                        },
+                        {
+                          "comparator": ">",
+                          "palette": "green_on_white",
+                          "value": 60.0
+                        }
+                      ],
+                      "formula": "cutoff_min(query1, 0)",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -431,19 +430,35 @@
                       "aggregator": "min",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:pan_firewall.license.days_left{$firewall,$panorama}.rollup(min)"
+                      "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}.rollup(min)"
                     }
                   ],
-                  "response_format": "scalar"
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 3,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
                 }
               ],
+              "style": {
+                "display": {
+                  "legend": "automatic",
+                  "type": "stacked"
+                }
+              },
               "time": {
                 "type": "live",
                 "unit": "day",
                 "value": 2
               },
-              "title": "Min license days left",
-              "type": "query_value"
+              "title": "Soonest-expiring licenses",
+              "type": "toplist"
             },
             "id": 7814932074117916,
             "layout": {
@@ -521,7 +536,6 @@
                 "avg",
                 "max",
                 "min",
-                "sum",
                 "value"
               ],
               "legend_layout": "horizontal",
@@ -569,7 +583,6 @@
                 "avg",
                 "max",
                 "min",
-                "sum",
                 "value"
               ],
               "legend_layout": "horizontal",
@@ -801,7 +814,7 @@
                   "formulas": [
                     {
                       "alias": "Sensors in alarm",
-                      "formula": "count_nonzero(query1) + count_nonzero(query2) + count_nonzero(query3)"
+                      "formula": "default_zero(count_nonzero(query1)) + default_zero(count_nonzero(query2)) + default_zero(count_nonzero(query3))"
                     }
                   ],
                   "queries": [
@@ -845,7 +858,6 @@
                 "avg",
                 "max",
                 "min",
-                "sum",
                 "value"
               ],
               "legend_layout": "horizontal",
@@ -1351,7 +1363,7 @@
           },
           {
             "definition": {
-              "description": "OSPF neighbors whose adjacency is not in the Full state. Requires `collect_ospf: true` in the integration configuration; shows No data while OSPF collection is off (the default).",
+              "description": "OSPF neighbors whose adjacency is not in the Full state. Requires `collect_ospf: true` in the integration configuration; shows No data while OSPF collection is off (the default). On a shared segment with three or more routers, two neighbors that are both DROther stay in 2-Way by design and are counted here.",
               "precision": 0,
               "requests": [
                 {
@@ -1502,7 +1514,7 @@
                       "aggregator": "max",
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "max:pan_firewall.bgp.peer.restart{$firewall,$panorama} by {device_hostname,vr,peer,remote_as}"
+                      "query": "max:pan_firewall.bgp.peer.restart{$firewall,$panorama} by {device_hostname,vr,peer,remote_as}.rollup(max)"
                     }
                   ],
                   "response_format": "scalar",
@@ -1955,7 +1967,6 @@
                 "avg",
                 "max",
                 "min",
-                "sum",
                 "value"
               ],
               "legend_layout": "horizontal",
@@ -2004,7 +2015,6 @@
                 "avg",
                 "max",
                 "min",
-                "sum",
                 "value"
               ],
               "legend_layout": "horizontal",
@@ -2273,30 +2283,30 @@
           },
           {
             "definition": {
-              "description": "Days until each license expires, per firewall and feature, lowest first, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not listed.",
+              "description": "Days until each license expires, per firewall and feature, lowest first, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not listed, and expired licenses show no value; Expired licenses counts them.",
               "requests": [
                 {
-                  "conditional_formats": [
-                    {
-                      "comparator": "<=",
-                      "palette": "white_on_red",
-                      "value": 30.0
-                    },
-                    {
-                      "comparator": "<=",
-                      "palette": "white_on_yellow",
-                      "value": 60.0
-                    },
-                    {
-                      "comparator": ">",
-                      "palette": "white_on_green",
-                      "value": 60.0
-                    }
-                  ],
                   "formulas": [
                     {
                       "alias": "Days left",
-                      "formula": "query1",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<=",
+                          "palette": "white_on_red",
+                          "value": 30.0
+                        },
+                        {
+                          "comparator": "<=",
+                          "palette": "white_on_yellow",
+                          "value": 60.0
+                        },
+                        {
+                          "comparator": ">",
+                          "palette": "white_on_green",
+                          "value": 60.0
+                        }
+                      ],
+                      "formula": "cutoff_min(query1, 0)",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -2313,7 +2323,17 @@
                       "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}.rollup(min)"
                     }
                   ],
-                  "response_format": "scalar"
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
                 }
               ],
               "time": {

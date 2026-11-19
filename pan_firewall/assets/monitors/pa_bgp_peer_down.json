@@ -12,7 +12,7 @@
       "notify_audit": false,
       "notify_no_data": false,
       "renotify_interval": 0,
-      "require_full_window": true,
+      "require_full_window": false,
       "thresholds": {
         "critical": 0
       },
@@ -25,7 +25,7 @@
     ],
     "type": "query alert"
   },
-  "description": "Tracks the session state of each BGP peer on the firewall. A peer that leaves the established state stops exchanging routes, which can blackhole or reroute traffic that depends on it. Peers that are down on purpose, such as disabled or decommissioned peers, alert until they are removed from the configuration; exclude them by adding `!peer:<name>` to the query.",
+  "description": "Tracks the session state of each BGP peer on the firewall. A peer that leaves the established state stops exchanging routes, which can blackhole or reroute traffic that depends on it. Peers that are down on purpose, such as disabled or decommissioned peers, alert until they are removed from the configuration; exclude them by adding `!peer:<name>` to the query. On an active/passive HA pair, the passive firewall does not run dynamic routing, so its peers report as not established and alert until a failover.",
   "last_updated_at": "2026-11-18",
   "tags": [
     "integration:pan-firewall"

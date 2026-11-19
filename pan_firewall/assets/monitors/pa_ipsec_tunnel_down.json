@@ -25,7 +25,7 @@
     ],
     "type": "query alert"
   },
-  "description": "Tracks the state of each IPsec tunnel on the firewall. A tunnel that is inactive, or stuck initializing because IKE or IPsec negotiation never completes, cuts connectivity to the remote site or service it connects. Tunnels that are down on purpose, or that only come up when traffic arrives (no tunnel monitor configured), alert until excluded; add `!tunnel:<name>` to the query to exclude one.",
+  "description": "Tracks the state of each IPsec tunnel on the firewall. A tunnel that is inactive, or stuck initializing because IKE or IPsec negotiation never completes, cuts connectivity to the remote site or service it connects. Tunnels that are down on purpose, or that only come up when traffic arrives (no tunnel monitor configured), alert until excluded; add `!tunnel:<name>` to the query to exclude one. On an active/passive HA pair, tunnels on the passive firewall can report as inactive and alert until a failover.",
   "last_updated_at": "2026-11-18",
   "tags": [
     "integration:pan-firewall"

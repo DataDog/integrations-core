@@ -1,7 +1,7 @@
 {
   "created_at": "2026-11-19",
   "definition": {
-    "message": "{{#is_alert}}\nFirewall {{device_ip.name}} has rejected the integration's API credentials for the last 10 minutes, so no metrics are collected from it. Check that the configured API key or user still exists, has not expired, and keeps an admin role with XML API access.\n{{/is_alert}}\n\n{{#is_recovery}}\nFirewall {{device_ip.name}} accepts the integration's credentials again.\n{{/is_recovery}}",
+    "message": "{{#is_alert}}\nFirewall {{device_ip.name}} has rejected the integration's API credentials, so no metrics are collected from it. Check that the configured API key or user still exists, has not expired, and keeps an admin role with XML API access.\n{{/is_alert}}\n\n{{#is_recovery}}\nFirewall {{device_ip.name}} accepts the integration's credentials again.\n{{/is_recovery}}",
     "name": "[Palo Alto Networks Firewall] Firewall {{device_ip.name}} rejects the integration's credentials",
     "options": {
       "escalation_message": "",
