@@ -3,10 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, SSLError, Timeout
-
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientInvalidURLError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 
 # Default settings
 DEFAULT_RM_URI = 'http://localhost:8088'
@@ -172,6 +176,7 @@ class YarnCheck(AgentCheck):
     Extract statistics from YARN's ResourceManger REST API
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
     _ALLOWED_APPLICATION_TAGS = ['applicationTags', 'applicationType', 'name', 'queue', 'user']
@@ -472,7 +477,7 @@ class YarnCheck(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
 
-        except Timeout as e:
+        except HTTPClientTimeoutError as e:
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -481,7 +486,8 @@ class YarnCheck(AgentCheck):
             )
             raise
 
-        except (HTTPError, InvalidURL, ConnectionError, SSLError) as e:
+        # HTTPClientSSLError is a HTTPClientConnectionError.
+        except (HTTPClientStatusError, HTTPClientInvalidURLError, HTTPClientConnectionError) as e:
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,

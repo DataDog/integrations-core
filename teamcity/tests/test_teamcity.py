@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-from mock import ANY, patch
 
 from datadog_checks.teamcity.constants import (
     SERVICE_CHECK_BUILD_PROBLEMS,
@@ -61,26 +60,12 @@ def test_build_event(dd_run_check, aggregator, rest_instance):
         pytest.param({}, {'verify': True}, id="legacy ssl config unset"),
     ],
 )
-def test_config(dd_run_check, extra_config, expected_http_kwargs):
+def test_config(extra_config, expected_http_kwargs):
     instance = deepcopy(LEGACY_REST_INSTANCE)
     instance.update(extra_config)
     check = TeamCityRest('teamcity', {}, [instance])
 
-    with patch('datadog_checks.base.utils.http.requests.Session.get') as r:
-        dd_run_check(check)
-
-        http_wargs = {
-            'auth': ANY,
-            'cert': ANY,
-            'headers': ANY,
-            'proxies': ANY,
-            'timeout': ANY,
-            'verify': ANY,
-            'allow_redirects': ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-
-        r.assert_called_with(ANY, **http_wargs)
+    assert {name: check.http.options[name] for name in expected_http_kwargs} == expected_http_kwargs
 
 
 @pytest.mark.parametrize(

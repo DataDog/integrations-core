@@ -19,14 +19,15 @@ from .common import PROMETHEUS_METRICS, PROMETHEUS_METRICS_2023_05_04, get_fixtu
 def test_omv2_check(
     aggregator,
     openmetrics_instance,
-    mock_http_response,
+    fake_http_response,
     dd_run_check,
     teamcity_om_check,
     fixture_path,
     metrics_set,
     node_id,
 ):
-    mock_http_response(file_path=get_fixture_path(fixture_path))
+    with open(get_fixture_path(fixture_path), 'rb') as f:
+        fake_http_response('http://localhost:8111/guestAuth/app/metrics', f.read())
     check = teamcity_om_check(openmetrics_instance)
     dd_run_check(check)
     for m in metrics_set:
