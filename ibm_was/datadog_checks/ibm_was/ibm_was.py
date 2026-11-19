@@ -5,6 +5,7 @@ import requests
 from lxml import etree
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
+from datadog_checks.base.utils.native_memory import malloc_trim
 
 from . import metrics, validation
 
@@ -39,6 +40,12 @@ class IbmWasCheck(AgentCheck):
             raise ConfigurationError("Please specify a servlet_url in the configuration file")
 
     def check(self, _):
+        try:
+            self._run_check()
+        finally:
+            malloc_trim()
+
+    def _run_check(self):
         data = self.make_request()
 
         try:
