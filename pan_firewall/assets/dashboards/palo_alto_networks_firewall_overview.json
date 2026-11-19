@@ -393,7 +393,7 @@
           },
           {
             "definition": {
-              "description": "The three licenses closest to expiry on the selected firewalls, per firewall and feature, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not included, and expired licenses are hidden; Expired licenses counts them.",
+              "description": "The three licenses closest to expiry on the selected firewalls, per firewall and feature, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not included.",
               "requests": [
                 {
                   "formulas": [
@@ -416,7 +416,7 @@
                           "value": 60.0
                         }
                       ],
-                      "formula": "cutoff_min(query1, 0)",
+                      "formula": "query1",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -2288,7 +2288,7 @@
           },
           {
             "definition": {
-              "description": "Days until each license expires, per firewall and feature, lowest first, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not listed, and expired licenses show no value; Expired licenses counts them.",
+              "description": "Days until each license expires, per firewall and feature, lowest first, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not listed.",
               "requests": [
                 {
                   "formulas": [
@@ -2311,7 +2311,7 @@
                           "value": 60.0
                         }
                       ],
-                      "formula": "cutoff_min(query1, 0)",
+                      "formula": "query1",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
