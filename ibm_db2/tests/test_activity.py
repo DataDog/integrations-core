@@ -249,12 +249,23 @@ def test_query_activity_registration(
             close.assert_called_once_with(owned_handle)
 
 
+@pytest.mark.parametrize('serializer_name', ['stdlib', 'orjson'])
+@pytest.mark.parametrize('multibyte', [False, True])
 def test_query_activity_payload_cap(
-    instance: dict, aggregator: AggregatorStub, monkeypatch: pytest.MonkeyPatch, activity_row: dict
+    instance: dict,
+    aggregator: AggregatorStub,
+    monkeypatch: pytest.MonkeyPatch,
+    activity_row: dict,
+    serializer_name: str,
+    multibyte: bool,
 ):
-    """The payload estimate keeps an oldest-first prefix and records the cap hit."""
+    """Cap serialized bytes, including multibyte context, while retaining the oldest-first prefix."""
     from datadog_checks.ibm_db2 import IbmDb2Check, query_samples
 
+    serializer = json if serializer_name == 'stdlib' else pytest.importorskip('orjson')
+    monkeypatch.setattr(query_samples, 'json', serializer)
+    if multibyte:
+        activity_row.update(client_applname='表' * 512, client_wrkstnname='表' * 512)
     instance.update(dbm=True, query_activity={'enabled': True})
     check = IbmDb2Check('ibm_db2', {}, [instance])
     collector = check._query_samples
@@ -264,13 +275,17 @@ def test_query_activity_payload_cap(
     collector.run_job()
     event = aggregator.get_event_platform_events('dbm-activity')[0]
     assert len(event['ibm_db2_activity']) == 2
-    envelope_size = len(str({**event, 'ibm_db2_activity': []}))
-    limit = envelope_size + len(str(event['ibm_db2_activity'][0])) + 16
+    one_row = {**event, 'ibm_db2_activity': event['ibm_db2_activity'][:1]}
+    encoded = serializer.dumps(one_row)
+    limit = len(encoded.encode('utf-8') if isinstance(encoded, str) else encoded) + 16
+    if multibyte:
+        assert len(str(event)) < limit
     monkeypatch.setattr(query_samples, 'ACTIVITY_PAYLOAD_MAX_BYTES', limit)
     aggregator.reset()
     collector.run_job()
     capped = aggregator.get_event_platform_events('dbm-activity')[0]
-    assert envelope_size + sum(len(str(row)) for row in capped['ibm_db2_activity']) <= limit
+    encoded = aggregator.get_event_platform_events('dbm-activity', parse_json=False)[0]
+    assert len(encoded.encode('utf-8') if isinstance(encoded, str) else encoded) <= limit
     assert [row['application_handle'] for row in capped['ibm_db2_activity']] == [activity_row['application_handle']]
     aggregator.assert_metric('dd.ibm_db2.query_activity.payload_limit', value=1)
 

@@ -22,6 +22,11 @@ if TYPE_CHECKING:
 ACTIVITY_PAYLOAD_MAX_BYTES = 20_000_000
 
 
+def _json_size(value: dict) -> int:
+    encoded = json.dumps(value, default=default_json_event_encoding)
+    return len(encoded.encode('utf-8') if isinstance(encoded, str) else encoded)
+
+
 class QuerySamplesCollector(DBMAsyncJob):
     def __init__(self, check: IbmDb2Check, config: InstanceConfig):
         super().__init__(
@@ -60,14 +65,14 @@ class QuerySamplesCollector(DBMAsyncJob):
             'service': self._config.service,
             'ibm_db2_activity': observations,
         }
-        size = len(str(payload))
+        size = _json_size(payload)
         stats.update(normalization_dropped=0, payload_limit=0)
         for row in rows:
             normalized = normalize_activity(row, self._config.db)
             if normalized is None:
                 stats['normalization_dropped'] += 1
                 continue
-            next_size = size + len(str(normalized))
+            next_size = size + _json_size(normalized) + (2 if observations else 0)
             if next_size > ACTIVITY_PAYLOAD_MAX_BYTES:
                 stats['payload_limit'] = 1
                 break
