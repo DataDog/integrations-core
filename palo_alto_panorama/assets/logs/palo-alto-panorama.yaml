@@ -525,11 +525,6 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Source Intermediate IP Addresses
-    path: ocsf.src_endpoint.intermediate_ips
-    source: log
-  - groups:
-      - OCSF
     name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
@@ -2331,6 +2326,8 @@ pipeline:
         # A NAT address means the firewall translated the address, unless it is empty, `0.0.0.0` or equal to the
         # original address. Each original and NAT pair is joined into the endpoint `ip` field, so a grok rule can
         # compare the two. The grok rule then rewrites `ip`, and the schema mappers below set its final value.
+        # The destination string also carries the NAT port and the GeoIP location of the original destination,
+        # so that both follow the address the grok rule selects.
         - type: string-builder-processor
           name: Join `network.client.ip` and `natsrc` into `ocsf.src_endpoint.ip`
           enabled: true
@@ -2338,9 +2335,9 @@ pipeline:
           target: ocsf.src_endpoint.ip
           replaceMissing: true
         - type: string-builder-processor
-          name: Join `network.destination.ip` and `natdst` into `ocsf.dst_endpoint.ip`
+          name: Join `network.destination.ip`, `natdst`, `natdport` and `network.destination.geoip` into `ocsf.dst_endpoint.ip`
           enabled: true
-          template: "%{network.destination.ip}|%{natdst}"
+          template: "%{network.destination.ip}|%{natdst}|%{natdport}|%{network.destination.geoip.country.iso_code}|%{network.destination.geoip.subdivision.iso_code}|%{network.destination.geoip.city.name}|%{network.destination.geoip.continent.name}|%{network.destination.geoip.location.latitude}|%{network.destination.geoip.location.longitude}"
           target: ocsf.dst_endpoint.ip
           replaceMissing: true
         # Source NAT: `src` stays the source IP, and `natsrc` is the translated address the traffic left through.
@@ -2359,22 +2356,24 @@ pipeline:
               not_translated %{regex("[^|]*"):ocsf.src_endpoint.ip}\|(?:\1|0\.0\.0\.0)?
               translated %{regex("[^|]*"):ocsf.src_endpoint.ip}\|%{regex("[^|]+"):ocsf.src_endpoint.nat_ip}
         # Destination NAT: `natdst` is the host the traffic reached, and `dst` is the address the client targeted.
+        # A translated destination takes `natdport` when it is set, and drops the location of `dst`.
         - type: grok-parser
-          name: Parse `ocsf.dst_endpoint.ip` to `ocsf.dst_endpoint.ip`, `ocsf.dst_endpoint.nat_ip`
+          name: Parse `ocsf.dst_endpoint.ip` to `ocsf.dst_endpoint.ip`, `port`, `nat_ip`, `location`
           enabled: true
           source: ocsf.dst_endpoint.ip
           samples:
-            - "203.0.113.9|10.0.1.20"
-            - "10.0.1.20|0.0.0.0"
-            - "185.64.148.0|185.64.148.0"
-            - "10.0.1.20|"
-            - "|10.0.1.20"
+            - "185.64.148.0|10.0.1.20|8389|FR|FR-IDF|Paris|Europe|48.90654|2.33339"
+            - "185.64.148.0|185.64.148.0|443|FR|FR-IDF|Paris|Europe|48.90654|2.33339"
+            - "10.0.1.20|0.0.0.0|0||||||"
+            - "10.0.1.20|||||||"
+            - "|10.0.1.20|0||||||"
           grok:
-            supportRules: ""
+            supportRules: |-
+              _location (?:%{regex("[^|]+"):ocsf.dst_endpoint.location.country})?\|(?:%{regex("[^|]+"):ocsf.dst_endpoint.location.region})?\|(?:%{regex("[^|]+"):ocsf.dst_endpoint.location.city})?\|(?:%{regex("[^|]+"):ocsf.dst_endpoint.location.continent})?\|(?:%{number:ocsf.dst_endpoint.location.lat})?\|(?:%{number:ocsf.dst_endpoint.location.long})?
             matchRules: |-
-              not_translated %{regex("[^|]*"):ocsf.dst_endpoint.ip}\|(?:\1|0\.0\.0\.0)?
-              translated %{regex("[^|]+"):ocsf.dst_endpoint.nat_ip}\|%{regex("[^|]+"):ocsf.dst_endpoint.ip}
-              no_original \|%{regex("[^|]+"):ocsf.dst_endpoint.ip}
+              not_translated %{regex("[^|]*"):ocsf.dst_endpoint.ip}\|(?:\1|0\.0\.0\.0)?\|[^|]*\|%{_location}
+              translated %{regex("[^|]+"):ocsf.dst_endpoint.nat_ip}\|%{regex("[^|]+"):ocsf.dst_endpoint.ip}\|(?:(?=[1-9])%{integer:ocsf.dst_endpoint.port})?.*
+              no_original \|%{regex("[^|]+"):ocsf.dst_endpoint.ip}\|.*
         - type: array-processor
           name: Move `ocsf.src_endpoint.nat_ip` into `ocsf.src_endpoint.intermediate_ips`
           enabled: true
@@ -2505,8 +2504,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `dport`, `network.destination.port` to `ocsf.dst_endpoint.port`
+              name: Map `ocsf.dst_endpoint.port`, `dport`, `network.destination.port` to `ocsf.dst_endpoint.port`
               sources:
+                - ocsf.dst_endpoint.port
                 - dport
                 - network.destination.port
               target: ocsf.dst_endpoint.port
@@ -2825,44 +2825,44 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `network.destination.geoip.country.iso_code` to `ocsf.dst_endpoint.location.country`
+              name: Map `ocsf.dst_endpoint.location.country` to `ocsf.dst_endpoint.location.country`
               sources:
-                - network.destination.geoip.country.iso_code
+                - ocsf.dst_endpoint.location.country
               target: ocsf.dst_endpoint.location.country
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `network.destination.geoip.subdivision.iso_code` to `ocsf.dst_endpoint.location.region`
+              name: Map `ocsf.dst_endpoint.location.region` to `ocsf.dst_endpoint.location.region`
               sources:
-                - network.destination.geoip.subdivision.iso_code
+                - ocsf.dst_endpoint.location.region
               target: ocsf.dst_endpoint.location.region
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `network.destination.geoip.city.name` to `ocsf.dst_endpoint.location.city`
+              name: Map `ocsf.dst_endpoint.location.city` to `ocsf.dst_endpoint.location.city`
               sources:
-                - network.destination.geoip.city.name
+                - ocsf.dst_endpoint.location.city
               target: ocsf.dst_endpoint.location.city
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `network.destination.geoip.continent.name` to `ocsf.dst_endpoint.location.continent`
+              name: Map `ocsf.dst_endpoint.location.continent` to `ocsf.dst_endpoint.location.continent`
               sources:
-                - network.destination.geoip.continent.name
+                - ocsf.dst_endpoint.location.continent
               target: ocsf.dst_endpoint.location.continent
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `network.destination.geoip.location.latitude` to `ocsf.dst_endpoint.location.lat`
+              name: Map `ocsf.dst_endpoint.location.lat` to `ocsf.dst_endpoint.location.lat`
               sources:
-                - network.destination.geoip.location.latitude
+                - ocsf.dst_endpoint.location.lat
               target: ocsf.dst_endpoint.location.lat
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `network.destination.geoip.location.longitude` to `ocsf.dst_endpoint.location.long`
+              name: Map `ocsf.dst_endpoint.location.long` to `ocsf.dst_endpoint.location.long`
               sources:
-                - network.destination.geoip.location.longitude
+                - ocsf.dst_endpoint.location.long
               target: ocsf.dst_endpoint.location.long
               preserveSource: true
               overrideOnConflict: true
