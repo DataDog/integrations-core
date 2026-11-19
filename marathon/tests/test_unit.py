@@ -91,7 +91,7 @@ def test_get_instance_config(check):
             "new config",
             {},
             {'timeout': 5, 'username': 'foo', 'password': 'bar', 'tls_verify': False},
-            {'timeout': 5, 'auth': ('foo', 'bar'), 'verify': False},
+            {'timeout': (5, 5), 'auth': ('foo', 'bar'), 'verify': False},
         ),
         ("connect_timeout", {'default_timeout': 5}, {'connect_timeout': 2}, {'timeout': (5.0, 2.0)}),
         ("read_timeout", {}, {'timeout': 7, 'read_timeout': 3}, {'timeout': (3.0, 7.0)}),
@@ -99,7 +99,7 @@ def test_get_instance_config(check):
             "legacy config",
             {'default_timeout': 3},
             {'user': 'foo', 'password': 'bar', 'disable_ssl_validation': True},
-            {'timeout': 3, 'auth': ('foo', 'bar'), 'verify': False},
+            {'timeout': (3, 3), 'auth': ('foo', 'bar'), 'verify': False},
         ),
         ("default config", {}, {}, {'verify': True}),
     ],
@@ -131,7 +131,7 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
 @pytest.mark.parametrize(
     'extra_config, expected_timeout',
     [
-        pytest.param({}, 5.0, id="default timeout"),
+        pytest.param({}, 5, id="default timeout"),
         pytest.param({'read_timeout': 3}, 3.0, id="read_timeout"),
     ],
 )

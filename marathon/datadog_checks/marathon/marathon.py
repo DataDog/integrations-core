@@ -54,15 +54,12 @@ class Marathon(AgentCheck):
             or self.init_config.get('default_timeout')
             or self.DEFAULT_TIMEOUT
         )
-        # The timeout handler reports this value. `http.options['timeout']` is an int or a (read, connect) tuple
-        # depending on the config, so it can't be indexed there.
-        self._read_timeout = float(self.instance.get('read_timeout', timeout))
         if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
             # `default_timeout` config option will be removed with Agent 5
-            self.http.options['timeout'] = timeout
+            self.http.options['timeout'] = (timeout, timeout)
         else:
             self.http.options['timeout'] = (
-                self._read_timeout,
+                float(self.instance.get('read_timeout', timeout)),
                 float(self.instance.get('connect_timeout', timeout)),
             )
         self._auth_body = None
@@ -122,7 +119,7 @@ class Marathon(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="{} timed out after {} seconds.".format(url, self._read_timeout),
+                message="{} timed out after {} seconds.".format(url, self.http.options['timeout'][0]),
                 tags=["url:{}".format(url)] + tags,
             )
             raise Exception("Timeout when hitting {}".format(url))
