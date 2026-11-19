@@ -15,6 +15,7 @@ from lxml import etree
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.query_plan_events import (
+    ALL_RETAINED_FILES,
     EVENT_FILE_LAST_BUFFER_QUERY,
     EVENT_FILE_OLDEST_FILE_QUERY,
     EVENT_FILE_READ_FROM_CHECKPOINT_QUERY,
@@ -811,7 +812,7 @@ def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint
         (read_path, current_file)
     }
     if checkpoint_file_removed:
-        assert server.executed(EVENT_FILE_READ_QUERY)[-1] == (1000, read_path)
+        assert server.executed(EVENT_FILE_READ_FROM_START_FILE_QUERY)[-1] == (1000, read_path, ALL_RETAINED_FILES)
 
 
 @pytest.mark.unit
