@@ -4,11 +4,14 @@
 from datadog_checks.base import PDHBaseCheck, is_affirmative
 
 from .check import ActiveDirectoryCheckV2
+from .directory import ActiveDirectoryDirectoryCheck
 from .metrics import DEFAULT_COUNTERS
 
 
 class ActiveDirectoryCheck(PDHBaseCheck):
     def __new__(cls, name, init_config, instances):
+        if is_affirmative(instances[0].get('collect_directory', False)):
+            return ActiveDirectoryDirectoryCheck(name, init_config, instances)
         if not is_affirmative(instances[0].get('use_legacy_check_version', False)):
             return ActiveDirectoryCheckV2(name, init_config, instances)
         else:

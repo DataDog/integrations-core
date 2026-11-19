@@ -20,6 +20,18 @@ init_config:
 instances:
 
   -
+    ## @param collect_directory - boolean - optional - default: false
+    ## Send Active Directory user and computer records to Datadog instead of collecting performance metrics.
+    ##
+    ## Use a dedicated instance for this, and set it on every domain controller. Only the domain controller
+    ## holding the PDC emulator role collects, so each domain is read once. Records are read with the
+    ## Agent's own Windows account.
+    ##
+    ## The whole directory is read every `min_collection_interval` seconds, or every 3600 seconds if
+    ## `min_collection_interval` is not set.
+    #
+    # collect_directory: false
+
     ## @param server - string - optional
     ## The server with which to connect, defaulting to the local machine.
     #

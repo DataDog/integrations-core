@@ -9,6 +9,19 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: collect_directory
+      description: |
+        Send Active Directory user and computer records to Datadog instead of collecting performance metrics.
+
+        Use a dedicated instance for this, and set it on every domain controller. Only the domain controller
+        holding the PDC emulator role collects, so each domain is read once. Records are read with the
+        Agent's own Windows account.
+
+        The whole directory is read every `min_collection_interval` seconds, or every 3600 seconds if
+        `min_collection_interval` is not set.
+      value:
+        type: boolean
+        example: false
     - template: instances/perf_counters
       overrides:
         extra_metrics.value.example:
