@@ -12,6 +12,12 @@
         {
             "available_values": [],
             "default": "*",
+            "name": "dynamo_graph_deployment",
+            "prefix": "dynamo_graph_deployment"
+        },
+        {
+            "available_values": [],
+            "default": "*",
             "name": "dynamo_namespace",
             "prefix": "dynamo_namespace"
         },
@@ -32,6 +38,7 @@
     "widgets": [
         {
             "definition": {
+                "banner_img": "/static/images/logos/dynamo_large.svg",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "",
@@ -153,13 +160,13 @@
                                             "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.time_to_first_token.seconds.sum{$model,$host}.as_count()"
+                                            "query": "sum:dynamo.frontend.time_to_first_token.seconds.sum{$model,$dynamo_graph_deployment,$host}.as_count()"
                                         },
                                         {
                                             "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:dynamo.frontend.time_to_first_token.seconds.count{$model,$host}.as_count()"
+                                            "query": "sum:dynamo.frontend.time_to_first_token.seconds.count{$model,$dynamo_graph_deployment,$host}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -222,7 +229,7 @@
                                             "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.requests.count{$model,$host}.as_count()"
+                                            "query": "sum:dynamo.frontend.requests.count{$model,$dynamo_graph_deployment,$host}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -260,7 +267,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.queued_requests{$model,$host}"
+                                            "query": "sum:dynamo.frontend.queued_requests{$model,$dynamo_graph_deployment,$host}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -344,7 +351,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.requests.count{$model,$host} by {model}.as_rate()"
+                                            "query": "sum:dynamo.frontend.requests.count{$model,$dynamo_graph_deployment,$host} by {model}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -392,7 +399,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.output_tokens.count{$model,$host} by {model}.as_rate()"
+                                            "query": "sum:dynamo.frontend.output_tokens.count{$model,$dynamo_graph_deployment,$host} by {model}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -440,12 +447,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.input_sequence_tokens.sum{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.input_sequence_tokens.sum{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:dynamo.frontend.input_sequence_tokens.count{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.input_sequence_tokens.count{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -532,12 +539,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.time_to_first_token.seconds.sum{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.time_to_first_token.seconds.sum{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:dynamo.frontend.time_to_first_token.seconds.count{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.time_to_first_token.seconds.count{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -585,7 +592,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "p95:dynamo.frontend.time_to_first_token.seconds{$model,$host} by {model}"
+                                            "query": "p95:dynamo.frontend.time_to_first_token.seconds{$model,$dynamo_graph_deployment,$host} by {model}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -633,12 +640,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.request_duration.seconds.sum{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.request_duration.seconds.sum{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:dynamo.frontend.request_duration.seconds.count{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.request_duration.seconds.count{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -686,12 +693,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.inter_token_latency.seconds.sum{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.inter_token_latency.seconds.sum{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:dynamo.frontend.inter_token_latency.seconds.count{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.inter_token_latency.seconds.count{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -739,7 +746,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "p95:dynamo.frontend.inter_token_latency.seconds{$model,$host} by {model}"
+                                            "query": "p95:dynamo.frontend.inter_token_latency.seconds{$model,$dynamo_graph_deployment,$host} by {model}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -787,12 +794,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.component.router.kv_transfer_estimated_latency.seconds.sum{$dynamo_namespace,$dynamo_component,$host} by {dynamo_namespace}.as_count()"
+                                            "query": "sum:dynamo.component.router.kv_transfer_estimated_latency.seconds.sum{$dynamo_namespace,$dynamo_component,$dynamo_graph_deployment,$host} by {dynamo_namespace}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:dynamo.component.router.kv_transfer_estimated_latency.seconds.count{$dynamo_namespace,$dynamo_component,$host} by {dynamo_namespace}.as_count()"
+                                            "query": "sum:dynamo.component.router.kv_transfer_estimated_latency.seconds.count{$dynamo_namespace,$dynamo_component,$dynamo_graph_deployment,$host} by {dynamo_namespace}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -879,7 +886,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.queued_requests{$model,$host} by {model}"
+                                            "query": "sum:dynamo.frontend.queued_requests{$model,$dynamo_graph_deployment,$host} by {model}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -927,7 +934,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.inflight_requests{$model,$host} by {model}"
+                                            "query": "sum:dynamo.frontend.inflight_requests{$model,$dynamo_graph_deployment,$host} by {model}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -975,7 +982,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.component.inflight_requests{$dynamo_namespace,$dynamo_component,$host} by {dynamo_component}"
+                                            "query": "sum:dynamo.component.inflight_requests{$dynamo_namespace,$dynamo_component,$dynamo_graph_deployment,$host} by {dynamo_component}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1063,7 +1070,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:dynamo.component.kv_cache.gpu_cache_usage_percent{$dynamo_namespace,$dynamo_component,$host} by {dynamo_component}"
+                                            "query": "max:dynamo.component.kv_cache.gpu_cache_usage_percent{$dynamo_namespace,$dynamo_component,$dynamo_graph_deployment,$host} by {dynamo_component}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1118,12 +1125,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.component.router.kv_hit_rate.sum{$dynamo_namespace,$dynamo_component,$host} by {dynamo_namespace}.as_count()"
+                                            "query": "sum:dynamo.component.router.kv_hit_rate.sum{$dynamo_namespace,$dynamo_component,$dynamo_graph_deployment,$host} by {dynamo_namespace}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:dynamo.component.router.kv_hit_rate.count{$dynamo_namespace,$dynamo_component,$host} by {dynamo_namespace}.as_count()"
+                                            "query": "sum:dynamo.component.router.kv_hit_rate.count{$dynamo_namespace,$dynamo_component,$dynamo_graph_deployment,$host} by {dynamo_namespace}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1171,12 +1178,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.cached_tokens.sum{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.cached_tokens.sum{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:dynamo.frontend.input_sequence_tokens.sum{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.input_sequence_tokens.sum{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1263,7 +1270,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.component.errors.count{$dynamo_namespace,$dynamo_component,$host} by {dynamo_component}.as_count()"
+                                            "query": "sum:dynamo.component.errors.count{$dynamo_namespace,$dynamo_component,$dynamo_graph_deployment,$host} by {dynamo_component}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1311,7 +1318,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.model.rejection.count{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.model.rejection.count{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1359,7 +1366,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:dynamo.frontend.model.cancellation.count{$model,$host} by {model}.as_count()"
+                                            "query": "sum:dynamo.frontend.model.cancellation.count{$model,$dynamo_graph_deployment,$host} by {model}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
