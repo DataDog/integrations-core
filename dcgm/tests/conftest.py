@@ -4,7 +4,6 @@
 
 import copy
 import os
-from unittest import mock
 
 import pytest
 
@@ -39,29 +38,16 @@ def check(instance):
     return DcgmCheck('dcgm.', {}, [instance])
 
 
-@pytest.fixture()
-def mock_metrics():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def serve_fixture(fake_http_response, name):
+    with open(os.path.join(os.path.dirname(__file__), 'fixtures', name), 'rb') as f:
+        fake_http_response(common.INSTANCE['openmetrics_endpoint'], f.read(), headers={'Content-Type': 'text/plain'})
 
 
 @pytest.fixture()
-def mock_label_remap():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'label_remap.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_metrics(fake_http_response):
+    serve_fixture(fake_http_response, 'metrics.txt')
+
+
+@pytest.fixture()
+def mock_label_remap(fake_http_response):
+    serve_fixture(fake_http_response, 'label_remap.txt')
