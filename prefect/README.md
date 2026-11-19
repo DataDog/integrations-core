@@ -34,6 +34,25 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][7].
 
+#### Authentication
+
+For a self-hosted server using `PREFECT_SERVER_API_AUTH_STRING`, set the
+`prefect_userpass` option to the same `user:password` secret used by Prefect clients
+in `PREFECT_API_AUTH_STRING`. The integration does not read Prefect environment
+variables automatically. For example, reference a secret resolved by the
+[Agent secret management mechanism][14]:
+
+```yaml
+instances:
+  - prefect_url: https://prefect.example/api
+    prefect_userpass: ENC[prefect_api_auth_string]
+```
+
+Passwords may contain colons. Alternatively, keep using the existing separate
+`username` and `password` options. Do not combine them with `prefect_userpass`, and
+use `prefect_userpass` only with basic authentication. Use HTTPS when sending credentials
+to a remote server.
+
 ### Configure the Related Databases dashboard section
 
 The Related Databases section of the Prefect dashboard shows the PostgreSQL database and Redis instance that Prefect server uses. This section requires the Datadog [PostgreSQL][11] and [Redis][12] integrations to monitor those instances. Set the same `service` on the Prefect, PostgreSQL, and Redis instances, then select that value in the `service` template variable to filter the whole dashboard.
@@ -131,3 +150,4 @@ Need help? Contact [Datadog support][10].
 [11]: https://docs.datadoghq.com/integrations/postgres/
 [12]: https://docs.datadoghq.com/integrations/redis/
 [13]: https://docs.prefect.io/v3/advanced/self-hosted
+[14]: https://docs.datadoghq.com/agent/configuration/secrets-management/
