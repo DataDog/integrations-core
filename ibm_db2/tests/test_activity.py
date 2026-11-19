@@ -220,7 +220,7 @@ def test_query_activity_registration(
     instance.update(dbm=dbm, query_metrics={'enabled': False}, query_activity={'enabled': enabled}, service='orders')
     instance['tags'] = ['custom_tag:query-activity']
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    source = Mock(return_value=([activity_row], {'row_limit': 0, 'text_limit': 0, 'text_budget': 0}))
+    source = Mock(return_value=([activity_row], {'row_limit': 0}))
     monkeypatch.setattr(query_samples, 'read_activity', source)
     if dbm:
         monkeypatch.setattr(check._query_samples._connection, 'ensure_connected', Mock())
@@ -237,7 +237,9 @@ def test_query_activity_registration(
         assert event['database_instance'] == check.database_identifier
         assert event['collection_interval'] == 10
         assert event['ibm_db2_activity'][0]['database_name'] == instance['db']
-        assert 'SECRET' not in json.dumps(event)
+        assert 'LITERAL_SECRET' not in json.dumps(event)
+        assert 'RAW_SECRET' not in json.dumps(event)
+        assert event['ibm_db2_activity'][0]['dd_comments'] == ['COMMENT_SECRET']
         owned_handle = object()
         check._query_samples._connection.conn = owned_handle
         with pytest.MonkeyPatch.context() as patch:
@@ -250,8 +252,7 @@ def test_query_activity_registration(
 def test_query_activity_payload_cap(
     instance: dict, aggregator: AggregatorStub, monkeypatch: pytest.MonkeyPatch, activity_row: dict
 ):
-    """The final UTF-8 payload cap keeps an oldest-first prefix and records the cap hit."""
-    from datadog_checks.base.utils.serialization import json as agent_json
+    """The payload estimate keeps an oldest-first prefix and records the cap hit."""
     from datadog_checks.ibm_db2 import IbmDb2Check, query_samples
 
     instance.update(dbm=True, query_activity={'enabled': True})
@@ -259,21 +260,17 @@ def test_query_activity_payload_cap(
     collector = check._query_samples
     monkeypatch.setattr(collector._connection, 'ensure_connected', Mock())
     rows = [activity_row, {**activity_row, 'application_handle': 42}]
-    monkeypatch.setattr(
-        query_samples, 'read_activity', lambda _connection: (rows, {'row_limit': 0, 'text_limit': 0, 'text_budget': 0})
-    )
+    monkeypatch.setattr(query_samples, 'read_activity', lambda _connection: (rows, {'row_limit': 0}))
     collector.run_job()
     event = aggregator.get_event_platform_events('dbm-activity')[0]
     assert len(event['ibm_db2_activity']) == 2
-    one_row = {**event, 'ibm_db2_activity': event['ibm_db2_activity'][:1]}
-    encoded = agent_json.dumps(one_row)
-    limit = len(encoded.encode('utf-8') if isinstance(encoded, str) else encoded) + 16
+    envelope_size = len(str({**event, 'ibm_db2_activity': []}))
+    limit = envelope_size + len(str(event['ibm_db2_activity'][0])) + 16
     monkeypatch.setattr(query_samples, 'ACTIVITY_PAYLOAD_MAX_BYTES', limit)
     aggregator.reset()
     collector.run_job()
     capped = aggregator.get_event_platform_events('dbm-activity')[0]
-    encoded = agent_json.dumps(capped)
-    assert len(encoded.encode('utf-8') if isinstance(encoded, str) else encoded) <= limit
+    assert envelope_size + sum(len(str(row)) for row in capped['ibm_db2_activity']) <= limit
     assert [row['application_handle'] for row in capped['ibm_db2_activity']] == [activity_row['application_handle']]
     aggregator.assert_metric('dd.ibm_db2.query_activity.payload_limit', value=1)
 
@@ -288,9 +285,7 @@ def test_query_activity_failed_read_is_not_idle(
     check = IbmDb2Check('ibm_db2', {}, [instance])
     collector = check._query_samples
     monkeypatch.setattr(collector._connection, 'ensure_connected', Mock())
-    source = Mock(
-        side_effect=[RuntimeError('SQLSTATE=HYT00'), ([], {'row_limit': 0, 'text_limit': 0, 'text_budget': 0})]
-    )
+    source = Mock(side_effect=[RuntimeError('SQLSTATE=HYT00'), ([], {'row_limit': 0})])
     monkeypatch.setattr(query_samples, 'read_activity', source)
     with pytest.raises(RuntimeError, match='SQLSTATE=HYT00'):
         collector.run_job()

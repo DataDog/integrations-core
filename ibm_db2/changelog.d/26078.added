@@ -1,1 +1,1 @@
-Collect opt-in Db2 query activity snapshots with normalized SQL, elapsed time, session context, configured tags, and bounded payloads.
+Collect opt-in Db2 query activity snapshots with normalized SQL, comments, truncation state, native identifiers, elapsed time, session context, configured tags, and estimated payload limits.
