@@ -524,17 +524,12 @@ pipeline:
             matchRules: |
               frac6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.created_time}
               frac0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.created_time}
-        - type: grok-parser
-          name: Parse `event.entity.entity_info.entity_updated` to `ocsf.finding_info.modified_time`
+        - type: arithmetic-processor
+          name: Compute `ocsf.finding_info.modified_time` in milliseconds from `event.security_event.entity_payload.latest_change_time`
           enabled: true
-          source: event.entity.entity_info.entity_updated
-          samples:
-            - '2026-11-06T18:29:08.331334Z'
-          grok:
-            supportRules: ''
-            matchRules: |
-              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.finding_info.modified_time}
-              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.finding_info.modified_time}
+          expression: event.security_event.entity_payload.latest_change_time * 1000
+          target: ocsf.finding_info.modified_time
+          replaceMissing: false
         - type: string-builder-processor
           name: Add risk details
           enabled: true
@@ -1437,6 +1432,7 @@ pipeline:
               sources:
                 - ocsf.finding_info.modified_time
               target: ocsf.finding_info.modified_time
+              targetFormat: integer
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -2038,17 +2034,12 @@ pipeline:
             matchRules: |
               frac6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.created_time}
               frac0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.created_time}
-        - type: grok-parser
-          name: Parse `event.entity.entity_info.entity_updated` to `ocsf.finding_info.modified_time`
+        - type: arithmetic-processor
+          name: Compute `ocsf.finding_info.modified_time` in milliseconds from `event.security_event.entity_payload.latest_change_time`
           enabled: true
-          source: event.entity.entity_info.entity_updated
-          samples:
-            - '2026-11-06T18:29:08.331334Z'
-          grok:
-            supportRules: ''
-            matchRules: |
-              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.finding_info.modified_time}
-              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.finding_info.modified_time}
+          expression: event.security_event.entity_payload.latest_change_time * 1000
+          target: ocsf.finding_info.modified_time
+          replaceMissing: false
         - type: string-builder-processor
           name: Add DLP rule names
           enabled: true
@@ -2551,6 +2542,7 @@ pipeline:
               sources:
                 - ocsf.finding_info.modified_time
               target: ocsf.finding_info.modified_time
+              targetFormat: integer
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper

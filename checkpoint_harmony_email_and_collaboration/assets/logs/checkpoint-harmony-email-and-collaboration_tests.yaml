@@ -629,7 +629,7 @@ tests:
             name: ms_defender_scan
             type: Unknown
           title: Microsoft has detected phishing in an email from dummy@alerting-services.com - 'Verify your recent Dummy Login.' (test.user@example-one.com's mailbox)
-          modified_time: 1743398898788
+          modified_time: 1743398905697
         status_id: 4
         action_id: 2
         confidence_score: 5
@@ -1765,7 +1765,6 @@ tests:
             - alert
           uid_alt: dec2a3e33db6d6496143aea50b2eec75
           title: User user23@org3.example.com reported a phishing email Example email subject 10
-          modified_time: 1793989748331
         status_id: 1
         action_id: 3
         confidence_score: 5
@@ -2279,7 +2278,6 @@ tests:
             - alert
           uid_alt: 6a40a63c2dc300f83714e3d9456fb6a0
           title: User user1@org1.example.com reported a phishing email Example email subject 1
-          modified_time: 1793826024383
         status_id: 1
         action_id: 3
         confidence_score: 5
@@ -3895,7 +3893,6 @@ tests:
             name: avanan_dlp
             type: Rule
           title: "SmartDLP has detected HIPAA leak in 'Re: Example email subject 2' (wren.magna@org3.example.com's mailbox)"
-          modified_time: 1793750552484
         status_id: 1
         action_id: 3
         confidence_score: 5
@@ -5672,7 +5669,7 @@ tests:
             name: avanan_ap_scan
             type: Unknown
           title: Graymail detected in an email from hello@sub21.org32.example.com - 'Example email subject 11' (user42@org3.example.com's mailbox)
-          modified_time: 1794327126527
+          modified_time: 1794327133420
         status_id: 4
         action_id: 4
         confidence_score: 0
@@ -6344,7 +6341,6 @@ tests:
             name: avanan_ap_scan
             type: Unknown
           title: Graymail detected in an email from newsletter@org7.example.com - 'Example email subject 3' (user7@org8.example.com's mailbox)
-          modified_time: 1794326977208
         status_id: 1
         action_id: 3
         confidence_score: 0
@@ -6907,7 +6903,6 @@ tests:
             name: clicktime_protection_scan
             type: Unknown
           title: A user clicked a malicious URL in an email from refreshment@sub24.org35.example.com - 'Example email subject 12' (user44@org21.example.com's mailbox)
-          modified_time: 1794075822386
         status_id: 4
         action_id: 3
         confidence_score: 0
@@ -7578,7 +7573,6 @@ tests:
             name: clicktime_protection_scan
             type: Unknown
           title: A user clicked a malicious URL in an email from no-reply@org15.example.com - 'Example email subject 4' (pat.sample@org16.example.com's mailbox)
-          modified_time: 1794207253344
         status_id: 4
         action_id: 3
         confidence_score: 0
@@ -8285,7 +8279,7 @@ tests:
             name: checkpoint2
             type: Unknown
           title: Check Point Sandblast has detected malicious attachment(s) in 'Example email subject 13' (blair.fixture@org3.example.com's mailbox)
-          modified_time: 1793787131549
+          modified_time: 1793787156663
         status_id: 4
         action_id: 2
         confidence_score: 5
@@ -9169,7 +9163,7 @@ tests:
             name: checkpoint2
             type: Unknown
           title: Check Point Sandblast has detected malicious attachment(s) in 'Example email subject 5' (user12@org8.example.com's mailbox)
-          modified_time: 1794286560269
+          modified_time: 1794286586818
         status_id: 4
         action_id: 2
         confidence_score: 5
@@ -9887,7 +9881,7 @@ tests:
             name: avanan_ap_scan
             type: Unknown
           title: Phishing attempt detected in an email from user15@org20.example.com - 'Example email subject 6' (user16@org21.example.com's mailbox)
-          modified_time: 1794325293528
+          modified_time: 1794325314854
         status_id: 4
         action_id: 2
         confidence_score: 5
@@ -10760,7 +10754,7 @@ tests:
             name: avanan_ap_scan
             type: Unknown
           title: Phishing attempt detected in an email from user50@org40.example.com - 'Example email subject 14' (user51@org24.example.com's mailbox)
-          modified_time: 1794324774955
+          modified_time: 1794324793283
         status_id: 4
         action_id: 2
         confidence_score: 5
@@ -11424,7 +11418,6 @@ tests:
             name: shadow_it_emails_scan
             type: Unknown
           title: Shadow IT - drew.anon@org3.example.com is using atlassian.net (Application Development)
-          modified_time: 1794233392047
         confidence_score: 5
         class_uid: 2004
         time: 1794233396169
@@ -12066,7 +12059,6 @@ tests:
             name: shadow_it_emails_scan
             type: Unknown
           title: Shadow IT - user18@org17.example.com is using ariba.com (Supply Chain Management)
-          modified_time: 1794291753043
         confidence_score: 5
         class_uid: 2004
         time: 1794291758008
@@ -12668,7 +12660,7 @@ tests:
             name: avanan_ap_scan
             type: Unknown
           title: Spam attempt detected in an email from webcasts@gitlab.com - 'Example email subject 8' (morgan.placeholder@org2.example.com's mailbox)
-          modified_time: 1794327088574
+          modified_time: 1794327103069
         status_id: 4
         action_id: 4
         confidence_score: 5
@@ -13408,7 +13400,7 @@ tests:
             name: ms_defender_scan
             type: Unknown
           title: Microsoft has detected spam in an email from donotreply@org41.example.com - 'Example email subject 16' (user54@org24.example.com's mailbox)
-          modified_time: 1794327225443
+          modified_time: 1794327247533
         status_id: 4
         action_id: 2
         confidence_score: 5
@@ -14168,7 +14160,7 @@ tests:
             name: ms_defender_scan
             type: Unknown
           title: Microsoft has detected suspicious_phishing in an email from news@org23.example.com - 'Example email subject 9' (bobbie.ipsum@org24.example.com's mailbox)
-          modified_time: 1794323714671
+          modified_time: 1794323733259
         status_id: 4
         action_id: 2
         confidence_score: 0
@@ -15626,7 +15618,7 @@ tests:
             name: avanan_ap_scan
             type: Unknown
           title: Spam attempt detected in an email from webcasts@gitlab.com - 'Example email subject 8' (morgan.placeholder@org2.example.com's mailbox)
-          modified_time: 1794327088574
+          modified_time: 1794327103069
         status_id: 4
         action_id: 99
         confidence_score: 5
