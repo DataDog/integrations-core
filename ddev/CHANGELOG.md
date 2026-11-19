@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 21.0.0 / 2026-11-17
+
+***Changed***:
+
+* Require explicit `--envs` and `--pytest-args` options for `ddev test` and `ddev env test`. ([#25947](https://github.com/DataDog/integrations-core/pull/25947))
+
+***Security***:
+
+* Ignore AI settings in local `.ddev.toml` overrides to keep credentials and authentication settings under user control. ([#26064](https://github.com/DataDog/integrations-core/pull/26064))
+
+***Fixed***:
+
+* Retry wheel downloads in `ddev size` on dropped connections and gateway errors, fixing recurring failures in the disk-usage measurement CI job. ([#25247](https://github.com/DataDog/integrations-core/pull/25247))
+* Run macOS CI jobs on the `macos-15-large` runner image, replacing the retired `macos-14-large`. ([#25940](https://github.com/DataDog/integrations-core/pull/25940))
+* Export Dispatcher run resolution logs and metrics to Datadog under a distinct component. ([#25961](https://github.com/DataDog/integrations-core/pull/25961))
+
 ## 20.2.0 / 2026-11-03
 
 ***Added***:
