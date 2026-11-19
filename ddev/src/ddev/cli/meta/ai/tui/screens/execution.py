@@ -18,6 +18,7 @@ from textual.widget import Widget
 from textual.widgets import Static
 from textual.worker import Worker
 
+from ddev.ai.agent.types import ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
@@ -59,7 +60,7 @@ from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug, resume_completed_p
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
 from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
 from ddev.cli.meta.ai.tui.screens.phase_error_modal import PhaseErrorModal
-from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogEntry, PhaseLogScreen
+from ddev.cli.meta.ai.tui.screens.phase_log import Activity, PhaseLogEntry, PhaseLogScreen
 from ddev.cli.meta.ai.tui.status import ExecutionStatus, RunStatus
 from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected, PipelineGraph
 
@@ -70,6 +71,12 @@ if TYPE_CHECKING:
 type OrchestratorBuilder = Callable[[Callbacks], OrchestratorLike]
 
 BANNER_ERROR_MAX_CHARS = 200
+
+
+def _tool_activity_text(tool_calls: list[ToolCall]) -> str:
+    names = ", ".join(dict.fromkeys(tool_call.name for tool_call in tool_calls))
+    noun = "tool" if len(tool_calls) == 1 else "tools batch"
+    return f"running {noun} ({names})"
 
 
 class ExecutionScreen(TogoScreen):
@@ -104,7 +111,7 @@ class ExecutionScreen(TogoScreen):
         }
         self._phase_logs: dict[str, list[PhaseLogEntry]] = {entry.phase: [] for entry in flow.flow}
         self._open_phase_log_screens: dict[str, list[PhaseLogScreen]] = {entry.phase: [] for entry in flow.flow}
-        self._active_thinking: dict[str, dict[str, str]] = {entry.phase: {} for entry in flow.flow}
+        self._active_activities: dict[str, dict[str, Activity]] = {entry.phase: {} for entry in flow.flow}
         self._orchestrator: OrchestratorLike | None = None
         self._run_worker: Worker[None] | None = None
         self._phase_errors: dict[str, BaseException] = {}
@@ -289,8 +296,8 @@ class ExecutionScreen(TogoScreen):
 
     def register_phase_log_screen(self, screen: PhaseLogScreen) -> None:
         self._open_phase_log_screens.setdefault(screen.phase_id, []).append(screen)
-        for key, label in self._active_thinking.get(screen.phase_id, {}).items():
-            screen.start_thinking(key, label)
+        for key, activity in self._active_activities.get(screen.phase_id, {}).items():
+            screen.start_activity(key, activity)
 
     def unregister_phase_log_screen(self, screen: PhaseLogScreen) -> None:
         screens = self._open_phase_log_screens.get(screen.phase_id, [])
@@ -306,34 +313,37 @@ class ExecutionScreen(TogoScreen):
             for screen in list(self._open_phase_log_screens.get(phase_id, [])):
                 screen.write(renderable)
 
-    def _thinking_key(self, owner_id: str, role: str, iteration: int) -> str:
+    def _activity_key(self, owner_id: str, role: str, iteration: int) -> str:
         return f"{owner_id}:{role}:{iteration}"
 
-    def _start_thinking(self, phase_id: str | None, key: str, label: str) -> None:
+    def _tool_activity_key(self, owner_id: str, role: str, iteration: int) -> str:
+        return f"{self._activity_key(owner_id, role, iteration)}:tools"
+
+    def _start_activity(self, phase_id: str | None, key: str, activity: Activity) -> None:
         if phase_id is None:
             return
-        self._active_thinking.setdefault(phase_id, {})[key] = label
+        self._active_activities.setdefault(phase_id, {})[key] = activity
         for screen in list(self._open_phase_log_screens.get(phase_id, [])):
-            screen.start_thinking(key, label)
+            screen.start_activity(key, activity)
 
-    def _stop_thinking(self, phase_id: str | None, key: str) -> None:
+    def _stop_activity(self, phase_id: str | None, key: str) -> None:
         if phase_id is None:
             return
-        self._active_thinking.setdefault(phase_id, {}).pop(key, None)
+        self._active_activities.setdefault(phase_id, {}).pop(key, None)
         for screen in list(self._open_phase_log_screens.get(phase_id, [])):
-            screen.stop_thinking(key)
+            screen.stop_activity(key)
 
-    def _stop_agent_thinking(self, phase_id: str | None, owner_id: str, role: str) -> None:
+    def _stop_agent_activities(self, phase_id: str | None, owner_id: str, role: str) -> None:
         if phase_id is None:
             return
         prefix = f"{owner_id}:{role}:"
-        for key in list(self._active_thinking.setdefault(phase_id, {})):
+        for key in list(self._active_activities.setdefault(phase_id, {})):
             if key.startswith(prefix):
-                self._stop_thinking(phase_id, key)
+                self._stop_activity(phase_id, key)
 
-    def _stop_phase_thinking(self, phase_id: str) -> None:
-        for key in list(self._active_thinking.setdefault(phase_id, {})):
-            self._stop_thinking(phase_id, key)
+    def _stop_phase_activities(self, phase_id: str) -> None:
+        for key in list(self._active_activities.setdefault(phase_id, {})):
+            self._stop_activity(phase_id, key)
 
     # ── Bridge message handlers ──────────────────────────────────────────
 
@@ -357,7 +367,7 @@ class ExecutionScreen(TogoScreen):
 
     def on_phase_errored(self, msg: PhaseErrored) -> None:
         self._phase_errors[msg.phase_id] = msg.error
-        self._stop_phase_thinking(msg.phase_id)
+        self._stop_phase_activities(msg.phase_id)
         self._write_output(render_phase_error_line(msg.phase_id, msg.error), phase_id=msg.phase_id)
         if msg.phase_id in self._phase_statuses:
             self._mark_phase_failed(msg.phase_id)
@@ -394,13 +404,13 @@ class ExecutionScreen(TogoScreen):
         phase_id = msg.scope.phase_id
         if msg.prompt != TOOL_RESULTS_SENTINEL:
             self._write_output(render_prompt_panel(msg.scope, msg.prompt, "run artifacts"), phase_id=phase_id)
-        key = self._thinking_key(msg.scope.owner_id, msg.scope.role.value, msg.iteration)
-        self._start_thinking(phase_id, key, f"{msg.scope.owner_id} · {msg.scope.role.value}")
+        key = self._activity_key(msg.scope.owner_id, msg.scope.role.value, msg.iteration)
+        self._start_activity(phase_id, key, Activity(f"thinking · {msg.scope.owner_id} · {msg.scope.role.value}"))
 
     def on_agent_response_received(self, msg: AgentResponseReceived) -> None:
         phase_id = msg.scope.phase_id
-        key = self._thinking_key(msg.scope.owner_id, msg.scope.role.value, msg.iteration)
-        self._stop_thinking(phase_id, key)
+        key = self._activity_key(msg.scope.owner_id, msg.scope.role.value, msg.iteration)
+        self._stop_activity(phase_id, key)
         self._write_output(render_response_header(msg.scope), phase_id=phase_id)
         if msg.response.text.strip():
             self._write_output(render_response_text(msg.response.text), phase_id=phase_id)
@@ -410,8 +420,14 @@ class ExecutionScreen(TogoScreen):
             self._write_output(render_web_search_line(search), phase_id=phase_id)
         for fetch in msg.response.web_activity.fetches:
             self._write_output(render_web_fetch_line(fetch), phase_id=phase_id)
+        if msg.response.tool_calls:
+            tool_key = self._tool_activity_key(msg.scope.owner_id, msg.scope.role.value, msg.iteration)
+            self._start_activity(phase_id, tool_key, Activity(_tool_activity_text(msg.response.tool_calls)))
 
     def on_agent_tool_called(self, msg: AgentToolCalled) -> None:
+        # Every result of a batch arrives together, so the first one ends the batch activity.
+        tool_key = self._tool_activity_key(msg.scope.owner_id, msg.scope.role.value, msg.iteration)
+        self._stop_activity(msg.scope.phase_id, tool_key)
         self._write_output(render_tool_result_line(msg.tool_call, msg.result), phase_id=msg.scope.phase_id)
 
     def on_before_compact(self, msg: BeforeCompact) -> None:
@@ -422,12 +438,12 @@ class ExecutionScreen(TogoScreen):
 
     def on_agent_finished(self, msg: AgentFinished) -> None:
         phase_id = msg.scope.phase_id
-        self._stop_agent_thinking(phase_id, msg.scope.owner_id, msg.scope.role.value)
+        self._stop_agent_activities(phase_id, msg.scope.owner_id, msg.scope.role.value)
         self._write_output(render_agent_finish_line(msg.scope, msg.result), phase_id=phase_id)
 
     def on_agent_errored(self, msg: AgentErrored) -> None:
         phase_id = msg.scope.phase_id
-        self._stop_agent_thinking(phase_id, msg.scope.owner_id, msg.scope.role.value)
+        self._stop_agent_activities(phase_id, msg.scope.owner_id, msg.scope.role.value)
         self._write_output(render_agent_error_line(msg.scope, msg.error), phase_id=phase_id)
         if phase_id is not None:
             self._mark_phase_failed(phase_id)
