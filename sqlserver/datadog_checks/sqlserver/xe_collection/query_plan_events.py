@@ -94,6 +94,9 @@ SELECT TOP 1 file_name, file_offset
 FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
 ORDER BY file_offset DESC
 """
+# The reads and checkpoints rely on `sys.fn_xe_file_target_read_file` returning rows in (file_name, file_offset) order,
+# as it reads the files and their buffers one after the other. The documentation doesn't guarantee it, but
+# `ORDER BY file_name, file_offset` could sort every row after the checkpoint before `TOP` applies.
 EVENT_FILE_READ_QUERY = """\
 SELECT TOP (?) event_data, file_name, file_offset
 FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
