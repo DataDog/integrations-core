@@ -46,6 +46,8 @@ class PHPFPMCheck(AgentCheck):
     See http://www.php.net/manual/de/install.fpm.configuration.php#pm.status-path for more details
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     SERVICE_CHECK_NAME = 'php_fpm.can_ping'
     STATUS_DURATION_NAME = 'php_fpm.status.duration'
 
@@ -71,7 +73,7 @@ class PHPFPMCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(PHPFPMCheck, self).__init__(name, init_config, instances)
         if 'http_host' in self.instance:
-            self.http.options['headers']['Host'] = self.instance['http_host']
+            self.http.set_header('Host', self.instance['http_host'])
 
     def check(self, instance):
         status_url = instance.get('status_url')
