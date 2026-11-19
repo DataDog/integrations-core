@@ -2502,7 +2502,11 @@ tests:
         disposition: "Reset"
         disposition_id: 21
         evidences:
-          - dst_endpoint:
+          - actor:
+              user:
+                domain: "example"
+                name: "user4"
+            dst_endpoint:
               ip: "203.0.113.10"
               port: 443
               zone: "zone-03"
@@ -2569,6 +2573,7 @@ tests:
       status: "warning"
       subcatApp: "artificial-intelligence"
       subtype: "vulnerability"
+      suser: "example\\user4"
       thrcategory: "inline-cloud-exploit"
       threatid: "Inline Cloud Analyzed SQL Injection Traffic Detection(99950)"
       time_generated: "Oct 05 2026 21:09:12 GMT"
@@ -2679,6 +2684,8 @@ tests:
         src_endpoint:
           interface_name: "ae3.1501"
           ip: "10.10.0.5"
+          owner:
+            name: "example\\user1"
           port: 58717
           zone: "inside"
         status: "Unknown"
@@ -2719,6 +2726,7 @@ tests:
       src: "10.10.0.5"
       srczone: "inside"
       subtype: 0
+      suser: "example\\user1"
       time_generated: "Oct 05 2026 21:15:08 GMT"
       time_received: "2026/10/05 16:15:11"
       timestamp: 1791234908000
@@ -2903,6 +2911,8 @@ tests:
         src_endpoint:
           interface_name: "tunnel.2"
           ip: "172.18.10.25"
+          owner:
+            name: "EXAMPLE\\jdoe"
           port: 49542
           zone: "vpn-clients"
         status: "Unknown"
@@ -2947,6 +2957,7 @@ tests:
       start: "2026/11/16 08:07:01"
       subcatapp: "encrypted-tunnel"
       subtype: "start"
+      suser: "EXAMPLE\\jdoe"
       time_generated: "Nov 16 2026 16:07:00 GMT"
       timestamp: 1794845220000
       tunnel: "N/A"
