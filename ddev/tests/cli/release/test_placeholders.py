@@ -5,8 +5,9 @@ from __future__ import annotations
 
 from collections import namedtuple
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import create_autospec
 
+import httpx
 import pytest
 
 from ddev.release.placeholders import (
@@ -18,8 +19,13 @@ from ddev.release.placeholders import (
     resolve_placeholder_name,
     upload_placeholder,
 )
+from ddev.repo.core import IntegrationRegistry, Repository
 
 FakeIntegration = namedtuple('FakeIntegration', ['name', 'path'])
+
+
+def _json_response(payload: dict) -> httpx.Response:
+    return httpx.Response(200, json=payload, request=httpx.Request('GET', 'https://pypi.org'))
 
 
 def _make_integration(tmp_path: Path, name: str, package_name: str | None) -> FakeIntegration:
@@ -31,8 +37,10 @@ def _make_integration(tmp_path: Path, name: str, package_name: str | None) -> Fa
 
 
 def _make_repo(integrations):
-    repo = MagicMock()
-    repo.integrations.iter_packages.return_value = iter(integrations)
+    repo = create_autospec(Repository, instance=True)
+    registry = create_autospec(IntegrationRegistry, instance=True)
+    registry.iter_packages.return_value = iter(integrations)
+    repo.integrations = registry
     return repo
 
 
@@ -81,16 +89,14 @@ class TestResolvePlaceholderName:
 
 class TestNeedsPlaceholder:
     def test_missing_package_needs_placeholder(self, mocker):
-        response = mocker.Mock(status_code=404)
-        mocker.patch('ddev.release.placeholders.httpx.get', return_value=response)
+        mocker.patch('ddev.release.placeholders.httpx.get', autospec=True, return_value=httpx.Response(404))
 
         assert needs_placeholder('datadog-n8n')
 
     @pytest.mark.parametrize(('version', 'expected'), [('0.0.1', True), ('0.0.2', False), ('2.3.0', False)])
     def test_version_decides(self, mocker, version, expected):
-        response = mocker.Mock(status_code=200)
-        response.json.return_value = {'info': {'version': version}}
-        mocker.patch('ddev.release.placeholders.httpx.get', return_value=response)
+        response = _json_response({'info': {'version': version}})
+        mocker.patch('ddev.release.placeholders.httpx.get', autospec=True, return_value=response)
 
         assert needs_placeholder('datadog-n8n') is expected
 
@@ -98,22 +104,22 @@ class TestNeedsPlaceholder:
 class TestGetApiToken:
     def test_reads_environment(self, mocker, monkeypatch):
         monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
-        mocker.patch('ddev.release.placeholders.getpass.getpass')
+        mocker.patch('ddev.release.placeholders.getpass.getpass', autospec=True)
 
         assert get_api_token() == 'pypi-xxx'
 
     def test_prompts_in_a_terminal(self, mocker, monkeypatch):
         monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
-        mocker.patch('ddev.release.placeholders.sys.stdin.isatty', return_value=True)
-        mocker.patch('ddev.release.placeholders.sys.stdout.isatty', return_value=True)
-        mocker.patch('ddev.release.placeholders.getpass.getpass', return_value='pypi-yyy')
+        mocker.patch('ddev.release.placeholders.sys.stdin.isatty', autospec=True, return_value=True)
+        mocker.patch('ddev.release.placeholders.sys.stdout.isatty', autospec=True, return_value=True)
+        mocker.patch('ddev.release.placeholders.getpass.getpass', autospec=True, return_value='pypi-yyy')
 
         assert get_api_token() == 'pypi-yyy'
 
     def test_returns_none_without_terminal_or_environment(self, mocker, monkeypatch):
         monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
-        mocker.patch('ddev.release.placeholders.sys.stdin.isatty', return_value=False)
-        mocker.patch('ddev.release.placeholders.getpass.getpass')
+        mocker.patch('ddev.release.placeholders.sys.stdin.isatty', autospec=True, return_value=False)
+        mocker.patch('ddev.release.placeholders.getpass.getpass', autospec=True)
 
         assert get_api_token() is None
 
@@ -122,12 +128,14 @@ class TestMintOidcToken:
     def test_mints_token_per_exchange(self, mocker, monkeypatch):
         monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_URL', 'https://github/token?api-version=1')
         monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'secret')
-        github_response = mocker.Mock()
-        github_response.json.return_value = {'value': 'oidc-jwt'}
-        mint_response = mocker.Mock(status_code=200)
-        mint_response.json.return_value = {'token': 'pypi-minted'}
-        httpx_get = mocker.patch('ddev.release.placeholders.httpx.get', return_value=github_response)
-        httpx_post = mocker.patch('ddev.release.placeholders.httpx.post', return_value=mint_response)
+        httpx_get = mocker.patch(
+            'ddev.release.placeholders.httpx.get', autospec=True, return_value=_json_response({'value': 'oidc-jwt'})
+        )
+        httpx_post = mocker.patch(
+            'ddev.release.placeholders.httpx.post',
+            autospec=True,
+            return_value=httpx.Response(200, json={'token': 'pypi-minted'}),
+        )
 
         assert mint_oidc_token() == 'pypi-minted'
         assert httpx_get.call_args.kwargs['headers']['Authorization'] == 'bearer secret'
@@ -137,12 +145,14 @@ class TestMintOidcToken:
     def test_mint_failure_raises_the_pypi_error(self, mocker, monkeypatch):
         monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_URL', 'https://github/token?api-version=1')
         monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'secret')
-        github_response = mocker.Mock()
-        github_response.json.return_value = {'value': 'oidc-jwt'}
-        mint_response = mocker.Mock(status_code=400)
-        mint_response.text = 'invalid-publisher'
-        mocker.patch('ddev.release.placeholders.httpx.get', return_value=github_response)
-        mocker.patch('ddev.release.placeholders.httpx.post', return_value=mint_response)
+        mocker.patch(
+            'ddev.release.placeholders.httpx.get', autospec=True, return_value=_json_response({'value': 'oidc-jwt'})
+        )
+        mocker.patch(
+            'ddev.release.placeholders.httpx.post',
+            autospec=True,
+            return_value=httpx.Response(400, text='invalid-publisher'),
+        )
 
         with pytest.raises(RuntimeError, match='invalid-publisher'):
             mint_oidc_token()
@@ -165,7 +175,7 @@ class TestBuildPlaceholder:
         import subprocess
 
         error = subprocess.CalledProcessError(1, ['hatchling', 'build'], stderr=b'invalid metadata')
-        mocker.patch('ddev.release.placeholders.subprocess.run', side_effect=error)
+        mocker.patch('ddev.release.placeholders.subprocess.run', autospec=True, side_effect=error)
 
         with pytest.raises(RuntimeError, match='invalid metadata'):
             build_placeholder('datadog-n8n', tmp_path)
@@ -173,7 +183,7 @@ class TestBuildPlaceholder:
 
 class TestUploadPlaceholder:
     def test_uploads_with_token_auth_and_skip_existing(self, mocker):
-        uploaded = mocker.patch('ddev.release.placeholders.upload')
+        uploaded = mocker.patch('ddev.release.placeholders.upload', autospec=True)
 
         upload_placeholder(Path('dist/x.whl'), 'pypi-xxx')
 
@@ -187,7 +197,7 @@ class TestUploadPlaceholder:
 
 class TestPlaceholdersCommand:
     def test_dry_run_lists_the_selected_names(self, ddev, mocker):
-        mocker.patch('ddev.release.placeholders.needs_placeholder', return_value=True)
+        mocker.patch('ddev.release.placeholders.needs_placeholder', autospec=True, return_value=True)
 
         result = ddev('release', 'placeholders', 'n8n', '--dry-run')
 
@@ -195,7 +205,7 @@ class TestPlaceholdersCommand:
         assert 'datadog-n8n' in result.output
 
     def test_skips_names_that_already_have_a_release(self, ddev, mocker):
-        mocker.patch('ddev.release.placeholders.needs_placeholder', return_value=False)
+        mocker.patch('ddev.release.placeholders.needs_placeholder', autospec=True, return_value=False)
 
         result = ddev('release', 'placeholders', 'n8n', '--dry-run')
 
@@ -210,8 +220,8 @@ class TestPlaceholdersCommand:
         assert 'Unknown integration or package name: not-an-integration' in result.output
 
     def test_aborts_without_a_token_or_trusted_publishing(self, ddev, mocker, monkeypatch):
-        mocker.patch('ddev.release.placeholders.needs_placeholder', return_value=True)
-        mocker.patch('ddev.release.placeholders.getpass.getpass')
+        mocker.patch('ddev.release.placeholders.needs_placeholder', autospec=True, return_value=True)
+        mocker.patch('ddev.release.placeholders.getpass.getpass', autospec=True)
         monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
         monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_URL', raising=False)
         monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', raising=False)
