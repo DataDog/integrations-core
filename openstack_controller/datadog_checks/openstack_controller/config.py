@@ -141,6 +141,11 @@ class OpenstackConfig:
         self.keystone_server_url = self.auth_url.rstrip('/').removesuffix('/v3')
         self.username = auth.get('username')
         self.password = auth.get('password')
+        if not self.username or not self.password:
+            raise ConfigurationError(
+                f"Cloud `{self.openstack_cloud_name}` in `{self.openstack_config_file_path}` "
+                "must define `auth.username` and `auth.password`."
+            )
         self.user_domain = {"name": auth.get('user_domain_name', DEFAULT_DOMAIN_ID)}
         # These instances went through openstacksdk, which picked a microversion for each resource.
         self.negotiate_microversions = True

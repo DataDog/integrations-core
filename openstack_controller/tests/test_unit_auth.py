@@ -104,3 +104,22 @@ def test_clouds_yaml_auth(
         'domain': expected_user_domain,
     }
     aggregator.assert_metric('openstack.controller', tags=['keystone_server:{}'.format(auth['auth_url'])])
+
+
+@pytest.mark.parametrize('missing', ['username', 'password'])
+def test_clouds_yaml_missing_credentials(dd_run_check, openstack_controller_check, tmp_path, missing):
+    """A cloud without credentials fails at configuration instead of as a generic auth error on every run."""
+    auth = {'auth_url': 'http://127.0.0.1:8080/identity', 'username': 'admin', 'password': 'password'}
+    del auth[missing]
+    clouds_yaml = tmp_path / 'clouds.yaml'
+    clouds_yaml.write_text(yaml.safe_dump({'clouds': {'test_cloud': {'auth': auth}}}))
+    check = openstack_controller_check(
+        {
+            'openstack_cloud_name': 'test_cloud',
+            'openstack_config_file_path': str(clouds_yaml),
+            'use_legacy_check_version': False,
+        }
+    )
+
+    with pytest.raises(Exception, match='must define `auth.username` and `auth.password`'):
+        dd_run_check(check)
