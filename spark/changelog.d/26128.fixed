@@ -1,0 +1,1 @@
+Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. Service check messages now say `Request failed` for a URL with a missing or unsupported scheme, and `Request timeout` for a read timeout while receiving the response body. That read timeout is no longer suppressed for pods in a terminal phase.

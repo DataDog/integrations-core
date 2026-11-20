@@ -1,0 +1,1 @@
+Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. A URL with an unsupported scheme now logs a connection failure instead of an unexpected error.
