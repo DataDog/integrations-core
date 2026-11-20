@@ -11,5 +11,7 @@ matrix.version.env-vars = [
   { key = "CEPH_VERSION", value = "v16.2.15-20240529", if = ["pacific"] },
   { key = "CEPH_VERSION", value = "v19.2.7-20261009", if = ["squid"] },
   { key = "CEPH_VERSION", value = "v20.2.5-20261028", if = ["tentacle"] },
+  # Every Umbrella build up to 21.2.0 reports `umbrella (dev)`, because `src/ceph_release` at the v21.2.0 tag says `dev`.
+  # 21.2.1 should be the first build that reports `stable`.
   { key = "CEPH_VERSION", value = "v21.2.0-20261027", if = ["umbrella"] },
 ]
