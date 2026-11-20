@@ -29,7 +29,6 @@ BROKER_TIMESTAMPS_SAVE_INTERVAL = 300
 
 class KafkaCheck(AgentCheck):
     __NAMESPACE__ = 'kafka'
-    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)

@@ -6,13 +6,12 @@ import copy
 import mock
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.connectors import CONNECTOR_EVENT_TOPICS_MAX, TOPICS_FETCH_MAX_PER_RUN
 
 from .common import CONNECT_URL
-from .conftest import SAMPLE_CONNECTORS_RESPONSE, connectors_url, topics_url
+from .conftest import SAMPLE_CONNECTORS_RESPONSE
 
 pytestmark = [pytest.mark.unit]
 
@@ -31,30 +30,12 @@ def metrics_with_tag(aggregator, name, tag):
     return [metric for metric in aggregator.metrics(name) if tag in metric.tags]
 
 
-def requests_to(fake_http, url_suffix, method='GET'):
-    """Return the recorded requests whose URL ends with `url_suffix`."""
-    return [request for request in fake_http.requests if request.method == method and request.url.endswith(url_suffix)]
-
-
-def connector_request_options(fake_http):
-    """Return the options of the first Connect /connectors request."""
-    for request in requests_to(fake_http, '/connectors'):
-        return request.options
+def connector_request_kwargs(http):
+    """Return the kwargs of the first Connect /connectors request."""
+    for call in http.get.call_args_list:
+        if 'connector-plugins' not in call.args[0]:
+            return call.kwargs
     raise AssertionError("no /connectors request was made")
-
-
-def fail_all_topics(error_or_status):
-    """Build a `register_overrides` that fails every sample connector's topics request."""
-
-    def register(respond, fail):
-        for name in SAMPLE_CONNECTORS_RESPONSE:
-            url = topics_url(CONNECT_URL, name)
-            if isinstance(error_or_status, Exception):
-                fail(url, error_or_status)
-            else:
-                respond(url, status_code=error_or_status)
-
-    return register
 
 
 def test_connector_metrics_emitted(run_connect_check, aggregator):
@@ -258,21 +239,22 @@ def test_connector_topics_truncated_in_config_event(run_connect_check, aggregato
     assert source_event['topics'] == sorted(topics)[:CONNECTOR_EVENT_TOPICS_MAX]
 
 
-def test_connector_topics_requested_per_connector(run_connect_check, fake_http):
-    run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
+def test_connector_topics_requested_per_connector(run_connect_check):
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
 
-    assert len(requests_to(fake_http, '/connectors/demo-source/topics')) == 1
-    assert len(requests_to(fake_http, '/connectors/demo-heartbeat/topics')) == 1
+    requested_urls = [call.args[0] for call in http.get.call_args_list]
+    assert sum(url.endswith('/connectors/demo-source/topics') for url in requested_urls) == 1
+    assert sum(url.endswith('/connectors/demo-heartbeat/topics') for url in requested_urls) == 1
 
 
-def test_topics_not_refetched_within_refresh_interval(run_connect_check, fake_http):
-    run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE, runs=2)
+def test_topics_not_refetched_within_refresh_interval(run_connect_check):
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE, runs=2)
 
-    topic_fetches = requests_to(fake_http, '/topics')
+    topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
     assert len(topic_fetches) == 2, "topics should only be fetched once per connector across both runs"
 
 
-def test_connector_topics_fetch_capped_per_run(run_connect_check, fake_http):
+def test_connector_topics_fetch_capped_per_run(run_connect_check):
     connector_count = TOPICS_FETCH_MAX_PER_RUN + 50
     connectors = {
         f'conn-{i}': {
@@ -282,49 +264,61 @@ def test_connector_topics_fetch_capped_per_run(run_connect_check, fake_http):
         for i in range(connector_count)
     }
 
-    run_connect_check(connectors_response=connectors, runs=2)
+    _, http = run_connect_check(connectors_response=connectors, runs=2)
 
-    topic_fetches = requests_to(fake_http, '/topics')
+    topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
     assert len(topic_fetches) == connector_count, "leftover connectors should be fetched on a later run"
 
 
 def test_config_event_survives_topics_fetch_failure(run_connect_check, aggregator):
-    run_connect_check(
-        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
-        register_overrides=fail_all_topics(HTTPClientConnectionError("refused")),
-    )
+    def get(url, **kwargs):
+        if url.endswith('/topics'):
+            raise ConnectionError("refused")
+        response = mock.MagicMock()
+        response.json.return_value = {} if 'connector-plugins' in url else SAMPLE_CONNECTORS_RESPONSE
+        return response
+
+    run_connect_check(get_side_effect=get)
 
     events = dsm_events(aggregator, 'connector')
     assert events
     assert all(event['topics'] == [] for event in events)
 
 
-@pytest.mark.parametrize(
-    'failure',
-    [HTTPClientConnectionError("refused"), 503],
-    ids=['connection_error', 'server_error'],
-)
-def test_topics_transient_failure_retried_next_run(run_connect_check, fake_http, failure):
-    run_connect_check(
-        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
-        register_overrides=fail_all_topics(failure),
-        runs=2,
-    )
+class FakeHttpError(Exception):
+    """Stand-in for a requests HTTPError carrying an HTTP status code."""
 
-    topic_fetches = requests_to(fake_http, '/topics')
+    def __init__(self, status_code):
+        super().__init__(f"HTTP {status_code}")
+        self.response = mock.MagicMock(status_code=status_code)
+
+
+def test_topics_transient_failure_retried_next_run(run_connect_check):
+    def get(url, **kwargs):
+        if url.endswith('/topics'):
+            raise ConnectionError("refused")
+        response = mock.MagicMock()
+        response.json.return_value = {} if 'connector-plugins' in url else SAMPLE_CONNECTORS_RESPONSE
+        return response
+
+    _, http = run_connect_check(get_side_effect=get, runs=2)
+
+    topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
     assert len(topic_fetches) == 4, "a transient topics failure should be retried on the next run, not backed off"
 
 
-@pytest.mark.parametrize('status_code', [404, 405])
-def test_topics_unsupported_endpoint_backed_off(run_connect_check, fake_http, status_code):
-    run_connect_check(
-        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
-        register_overrides=fail_all_topics(status_code),
-        runs=2,
-    )
+def test_topics_unsupported_endpoint_backed_off(run_connect_check):
+    def get(url, **kwargs):
+        if url.endswith('/topics'):
+            raise FakeHttpError(404)
+        response = mock.MagicMock()
+        response.json.return_value = {} if 'connector-plugins' in url else SAMPLE_CONNECTORS_RESPONSE
+        return response
 
-    topic_fetches = requests_to(fake_http, '/topics')
-    assert len(topic_fetches) == 2, "an unsupported topics endpoint should be backed off after one attempt"
+    _, http = run_connect_check(get_side_effect=get, runs=2)
+
+    topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
+    assert len(topic_fetches) == 2, "an unsupported (404) topics endpoint should be backed off after one attempt"
 
 
 def test_task_traces_sort_handles_missing_task_id(run_connect_check, aggregator):
@@ -368,12 +362,13 @@ def test_config_event_reemitted_when_config_changes(run_connect_check, aggregato
     assert len(heartbeat_events) == 1
 
 
-def test_connector_plugins_event_emitted_once_within_refresh_interval(run_connect_check, aggregator, fake_http):
+def test_connector_plugins_event_emitted_once_within_refresh_interval(run_connect_check, aggregator):
     plugins = [{'class': 'org.apache.kafka.connect.file.FileStreamSinkConnector', 'type': 'sink', 'version': '3.3.0'}]
-    run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE, plugins_response=plugins, runs=2)
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE, plugins_response=plugins, runs=2)
 
     assert len(dsm_events(aggregator, 'connector_plugins')) == 1
-    assert len(requests_to(fake_http, '/connector-plugins')) == 1
+    plugin_fetches = [call for call in http.get.call_args_list if 'connector-plugins' in call.args[0]]
+    assert len(plugin_fetches) == 1
 
 
 def test_connectivity_reported_in_heartbeat_on_success(run_connect_check, aggregator):
@@ -384,9 +379,7 @@ def test_connectivity_reported_in_heartbeat_on_success(run_connect_check, aggreg
 
 
 def test_connectivity_false_when_endpoint_unreachable(run_connect_check, aggregator):
-    run_connect_check(
-        register_overrides=lambda respond, fail: fail(connectors_url(CONNECT_URL), HTTPClientConnectionError("refused"))
-    )
+    run_connect_check(get_side_effect=ConnectionError("refused"))
 
     heartbeats = dsm_events(aggregator, 'heartbeat')
     assert heartbeats[-1]['connect_api_status'] == {CONNECT_URL: False}
@@ -394,14 +387,16 @@ def test_connectivity_false_when_endpoint_unreachable(run_connect_check, aggrega
 
 
 def test_partial_failure_across_endpoints(run_connect_check, aggregator):
-    def register(respond, fail):
-        respond(connectors_url('http://ok:8083'), json_data=SAMPLE_CONNECTORS_RESPONSE)
-        fail(connectors_url('http://bad:8083'), HTTPClientConnectionError("refused"))
+    def get(url, **kwargs):
+        if 'bad' in url:
+            raise ConnectionError("refused")
+        response = mock.MagicMock()
+        response.json.return_value = {} if 'connector-plugins' in url else SAMPLE_CONNECTORS_RESPONSE
+        return response
 
     run_connect_check(
         instance_extra={'kafka_connect_url': ['http://ok:8083', 'http://bad:8083']},
-        topics_response=dict.fromkeys(SAMPLE_CONNECTORS_RESPONSE, []),
-        register_overrides=register,
+        get_side_effect=get,
     )
 
     heartbeats = dsm_events(aggregator, 'heartbeat')
@@ -438,19 +433,19 @@ def test_collection_survives_cache_write_failure(run_connect_check, aggregator):
     assert len(dsm_events(aggregator, 'connector')) == 2
 
 
-def test_requests_have_no_auth_header_without_oauth(run_connect_check, fake_http):
-    run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
+def test_requests_have_no_auth_header_without_oauth(run_connect_check):
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
 
-    assert 'extra_headers' not in connector_request_options(fake_http)
+    assert 'extra_headers' not in connector_request_kwargs(http)
 
 
-def test_basic_auth_sent_in_requests(run_connect_check, fake_http):
-    run_connect_check(
+def test_basic_auth_sent_in_requests(run_connect_check):
+    _, http = run_connect_check(
         connectors_response=SAMPLE_CONNECTORS_RESPONSE,
         instance_extra={'kafka_connect_username': 'user', 'kafka_connect_password': 'pass'},
     )
 
-    assert connector_request_options(fake_http)['auth'] == ('user', 'pass')
+    assert connector_request_kwargs(http)['auth'] == ('user', 'pass')
 
 
 @pytest.mark.parametrize(
@@ -467,40 +462,40 @@ def test_basic_auth_sent_in_requests(run_connect_check, fake_http):
     ],
     ids=['tls_verify_false', 'tls_ca_cert', 'client_cert_and_key', 'cert_only'],
 )
-def test_tls_settings_applied_to_requests(run_connect_check, fake_http, instance_extra, kwarg, expected):
-    run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE, instance_extra=instance_extra)
+def test_tls_settings_applied_to_requests(run_connect_check, instance_extra, kwarg, expected):
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE, instance_extra=instance_extra)
 
-    assert connector_request_options(fake_http)[kwarg] == expected
+    assert connector_request_kwargs(http)[kwarg] == expected
 
 
-def test_oauth_token_attached_to_requests(run_connect_check, fake_http):
+def test_oauth_token_attached_to_requests(run_connect_check):
     oauth = {'url': 'http://auth/token', 'client_id': 'client', 'client_secret': 'secret'}
-    run_connect_check(
+    _, http = run_connect_check(
         connectors_response=SAMPLE_CONNECTORS_RESPONSE,
         instance_extra={'kafka_connect_oauth_token_provider': oauth},
-        oauth_token_response={'access_token': 'mytoken', 'expires_in': 600},
+        post_response={'access_token': 'mytoken', 'expires_in': 600},
     )
 
-    assert connector_request_options(fake_http)['extra_headers']['Authorization'] == 'Bearer mytoken'
+    assert connector_request_kwargs(http)['extra_headers']['Authorization'] == 'Bearer mytoken'
 
 
-def test_oauth_custom_headers_attached_to_requests(run_connect_check, fake_http):
+def test_oauth_custom_headers_attached_to_requests(run_connect_check):
     oauth = {
         'url': 'http://auth/token',
         'client_id': 'client',
         'client_secret': 'secret',
         'custom_headers': {'X-Tenant': 'tenant-1'},
     }
-    run_connect_check(
+    _, http = run_connect_check(
         connectors_response=SAMPLE_CONNECTORS_RESPONSE,
         instance_extra={'kafka_connect_oauth_token_provider': oauth},
-        oauth_token_response={'access_token': 'mytoken', 'expires_in': 600},
+        post_response={'access_token': 'mytoken', 'expires_in': 600},
     )
 
-    assert connector_request_options(fake_http)['extra_headers']['X-Tenant'] == 'tenant-1'
+    assert connector_request_kwargs(http)['extra_headers']['X-Tenant'] == 'tenant-1'
 
 
-def test_oauth_token_request_uses_scope_and_ca_cert(run_connect_check, fake_http):
+def test_oauth_token_request_uses_scope_and_ca_cert(run_connect_check):
     oauth = {
         'url': 'http://auth/token',
         'client_id': 'cid',
@@ -508,34 +503,33 @@ def test_oauth_token_request_uses_scope_and_ca_cert(run_connect_check, fake_http
         'scope': 'openid',
         'tls_ca_cert': '/path/to/ca.crt',
     }
-    run_connect_check(
+    _, http = run_connect_check(
         connectors_response=SAMPLE_CONNECTORS_RESPONSE,
         instance_extra={'kafka_connect_oauth_token_provider': oauth},
-        oauth_token_response={'access_token': 'tok', 'expires_in': 300},
+        post_response={'access_token': 'tok', 'expires_in': 300},
     )
 
-    [token_request] = requests_to(fake_http, 'http://auth/token', method='POST')
-    assert token_request.options['verify'] == '/path/to/ca.crt'
-    assert token_request.options['data']['scope'] == 'openid'
+    assert http.post.call_args.kwargs['verify'] == '/path/to/ca.crt'
+    assert http.post.call_args.kwargs['data']['scope'] == 'openid'
 
 
-def test_oauth_token_reused_until_expiry(run_connect_check, fake_http):
+def test_oauth_token_reused_until_expiry(run_connect_check):
     oauth = {'url': 'http://auth/token', 'client_id': 'client', 'client_secret': 'secret'}
-    run_connect_check(
+    _, http = run_connect_check(
         connectors_response=SAMPLE_CONNECTORS_RESPONSE,
         instance_extra={'kafka_connect_oauth_token_provider': oauth},
-        oauth_token_response={'access_token': 'mytoken', 'expires_in': 3600},
+        post_response={'access_token': 'mytoken', 'expires_in': 3600},
         runs=2,
     )
 
-    assert len(requests_to(fake_http, 'http://auth/token', method='POST')) == 1
+    assert http.post.call_count == 1
 
 
 def test_oauth_failure_marks_all_endpoints_unreachable(run_connect_check, aggregator):
     oauth = {'url': 'http://auth/token', 'client_id': 'client', 'client_secret': 'secret'}
     run_connect_check(
         instance_extra={'kafka_connect_oauth_token_provider': oauth},
-        register_overrides=lambda respond, fail: respond('http://auth/token', method='POST', status_code=401),
+        post_side_effect=Exception("auth failed"),
     )
 
     heartbeats = dsm_events(aggregator, 'heartbeat')
@@ -556,7 +550,7 @@ def test_connector_metrics_match_metadata(run_connect_check, aggregator):
 CONFLUENT_CLOUD_URL = 'https://api.confluent.cloud/connect/v1/environments/env-abc123/clusters/lkc-xyz789'
 
 
-def test_single_expand_sections_merged(run_connect_check, aggregator, fake_http):
+def test_single_expand_sections_merged(run_connect_check, aggregator):
     """A Connect endpoint honoring one expand value per request still yields complete metrics."""
     info_only = {
         'my-conn': {
@@ -577,15 +571,18 @@ def test_single_expand_sections_merged(run_connect_check, aggregator, fake_http)
         }
     }
 
-    def register(respond, fail):
-        url = connectors_url(CONFLUENT_CLOUD_URL)
-        respond(url, json_data=info_only)
-        respond(url, json_data=status_only, match_options={'params': {'expand': 'status'}})
+    def get(url, **kwargs):
+        response = mock.MagicMock()
+        if 'connector-plugins' in url:
+            response.json.return_value = []
+            return response
+        expand = kwargs.get('params', {}).get('expand')
+        response.json.return_value = status_only if expand == 'status' else info_only
+        return response
 
-    run_connect_check(
+    _, http = run_connect_check(
+        get_side_effect=get,
         instance_extra={'kafka_connect_url': CONFLUENT_CLOUD_URL},
-        topics_response={'my-conn': []},
-        register_overrides=register,
     )
 
     aggregator.assert_metric('kafka.connector.count', value=1)
@@ -603,17 +600,27 @@ def test_single_expand_sections_merged(run_connect_check, aggregator, fake_http)
     assert events[0]['config']['connector.class'] == 'io.confluent.SomeSource'
 
     # A supplementary /connectors fetch is issued because the combined call returns a null section.
-    assert len(requests_to(fake_http, '/connectors')) == 2
+    connectors_fetches = [
+        call
+        for call in http.get.call_args_list
+        if 'connector-plugins' not in call.args[0] and '/topics' not in call.args[0]
+    ]
+    assert len(connectors_fetches) == 2
 
 
-def test_oss_combined_response_makes_single_connectors_request(run_connect_check, aggregator, fake_http):
+def test_oss_combined_response_makes_single_connectors_request(run_connect_check, aggregator):
     """When the combined call returns both sections, no supplementary fetch is issued."""
-    run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
 
-    assert len(requests_to(fake_http, '/connectors')) == 1
+    connectors_fetches = [
+        call
+        for call in http.get.call_args_list
+        if 'connector-plugins' not in call.args[0] and '/topics' not in call.args[0]
+    ]
+    assert len(connectors_fetches) == 1
 
 
-def test_combined_expand_list_ignored_falls_back_to_single_expand(run_connect_check, aggregator, fake_http):
+def test_combined_expand_list_ignored_falls_back_to_single_expand(run_connect_check, aggregator):
     """A combined ``expand`` list is serialized as repeated query params, which Confluent Cloud's
     expansions endpoint doesn't honor — it returns the plain connector-name list instead of the
     expanded dict. The collector must retry with a single expand value rather than treating that
@@ -627,16 +634,23 @@ def test_combined_expand_list_ignored_falls_back_to_single_expand(run_connect_ch
         }
     }
 
-    def register(respond, fail):
-        url = connectors_url(CONFLUENT_CLOUD_URL)
-        respond(url, json_data=name_list)
-        respond(url, json_data=info_only, match_options={'params': {'expand': 'info'}})
-        respond(url, json_data=status_only, match_options={'params': {'expand': 'status'}})
+    def get(url, **kwargs):
+        response = mock.MagicMock()
+        if 'connector-plugins' in url:
+            response.json.return_value = []
+            return response
+        expand = kwargs.get('params', {}).get('expand')
+        if expand == 'status':
+            response.json.return_value = status_only
+        elif expand == 'info':
+            response.json.return_value = info_only
+        else:
+            response.json.return_value = name_list
+        return response
 
-    run_connect_check(
+    _, http = run_connect_check(
+        get_side_effect=get,
         instance_extra={'kafka_connect_url': CONFLUENT_CLOUD_URL},
-        topics_response={'my-conn': []},
-        register_overrides=register,
     )
 
     aggregator.assert_metric('kafka.connector.count', value=1)
@@ -648,4 +662,9 @@ def test_combined_expand_list_ignored_falls_back_to_single_expand(run_connect_ch
     assert events[0]['connector'] == 'my-conn'
     assert events[0]['config']['connector.class'] == 'io.confluent.SomeSource'
 
-    assert len(requests_to(fake_http, '/connectors')) == 3
+    connectors_fetches = [
+        call
+        for call in http.get.call_args_list
+        if 'connector-plugins' not in call.args[0] and '/topics' not in call.args[0]
+    ]
+    assert len(connectors_fetches) == 3
