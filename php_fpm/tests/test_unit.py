@@ -78,18 +78,6 @@ def test_backoff_success(check, instance, aggregator, payload, fake_http_respons
         ("legacy ssl config True", {'disable_ssl_validation': False}, {'verify': True}),
         ("legacy ssl config False", {'disable_ssl_validation': True}, {'verify': False}),
         ("legacy ssl config unset", {}, {'verify': True}),
-        (
-            "http_host header",
-            {"http_host": "foo"},
-            {
-                'headers': {
-                    'User-Agent': 'Datadog Agent/0.0.0',
-                    'Accept': '*/*',
-                    'Accept-Encoding': 'gzip, deflate',
-                    'Host': 'foo',
-                }
-            },
-        ),
     ],
 )
 def test_config(test_case, extra_config, expected_options):
@@ -100,3 +88,11 @@ def test_config(test_case, extra_config, expected_options):
 
     for option, value in expected_options.items():
         assert check.http.options[option] == value
+
+
+@pytest.mark.parametrize('headers', [{}, {'host': 'bar'}], ids=['no user header', 'user host header'])
+def test_http_host_sets_host_header(headers):
+    instance = {'ping_url': 'http://foo:9001/ping', 'http_host': 'foo', 'headers': headers}
+    check = PHPFPMCheck('php_fpm', {}, instances=[instance])
+
+    assert check.http.get_header('Host') == 'foo'
