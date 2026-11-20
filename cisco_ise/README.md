@@ -2,7 +2,7 @@
 
 [Cisco Identity Services Engine (ISE)][4] is a network access control platform. It decides whether users and devices may join the wired, wireless, or VPN network and with which access (VLAN, downloadable ACL, Security Group Tag), and it authenticates network administrators on switches and routers through TACACS+.
 
-Integrate Cisco ISE with Datadog to search and analyze ISE's syslog messages: RADIUS authentications and failures with the user, endpoint MAC address, network device, port, SSID, and site; RADIUS accounting, which links endpoint IP addresses to users and MAC addresses; TACACS+ logins and commands; ISE administrator logins and configuration changes; profiling; guest and My Devices portal activity. Datadog uses its built-in log pipeline to parse and enrich these logs into Datadog standard attributes and `cisco_ise.*` attributes. The logs can also be used by Cloud SIEM detection rules.
+Integrate Cisco ISE with Datadog to search and analyze ISE's syslog messages: RADIUS authentications and failures with the user, endpoint MAC address, network device, port, SSID, and site; RADIUS accounting, which links endpoint IP addresses to users and MAC addresses; TACACS+ logins and commands; ISE administrator logins and configuration changes; profiling; guest and My Devices portal activity.
 
 **Disclaimer**: Your use of this integration, which may collect data that includes personal information, is subject to your agreements with Datadog. Cisco is not responsible for the privacy, security or integrity of any end-user information, including personal data, transmitted through your use of the integration.
 
@@ -46,7 +46,7 @@ Supported versions: Cisco ISE 3.x (tested on 3.2).
 
 3. [Restart the Agent][3].
 
-**UDP or TCP**: both work with the same pipeline; choose the one that fits your network. Over UDP, ISE never waits for the Agent, but a lost packet loses the event silently, and 8192-byte messages are IP-fragmented, which some firewalls drop. Over TCP, nothing is lost silently, and ISE ends each message with a newline, so the Agent's default `tcp` listener needs no extra settings; don't set an `idle_timeout` on it, because ISE keeps one long-lived and often quiet connection. TLS (ISE's "Secure Syslog" target) is not supported.
+**UDP or TCP**: both are supported; choose the one that fits your network. Over UDP, ISE never waits for the Agent, but a lost packet loses the event silently, and 8192-byte messages are IP-fragmented, which some firewalls drop. Over TCP, nothing is lost silently, and ISE ends each message with a newline, so the Agent's default `tcp` listener needs no extra settings; don't set an `idle_timeout` on it, because ISE keeps one long-lived and often quiet connection. TLS (ISE's "Secure Syslog" target) is not supported.
 
 #### Configure a Remote Logging Target in Cisco ISE
 
@@ -56,7 +56,7 @@ Supported versions: Cisco ISE 3.x (tested on 3.2).
     - **Target Type**: **UDP SysLog** or **TCP SysLog**, matching the Agent's `type`.
     - **Host / IP Address**: the IP address of the Datadog Agent host.
     - **Port**: the `port` set in `cisco_ise.d/conf.yaml`.
-    - **Maximum Length**: **8192**. This is required, over UDP and TCP. With ISE's default of 1024, most events are split into 2 to 5 syslog messages; each one becomes a separate Datadog log and only the first one is parsed, so fields such as the identity group or the endpoint MAC address are missing.
+    - **Maximum Length**: **8192**. This is required, over UDP and TCP. With ISE's default of 1024, most events are split into 2 to 5 syslog messages; each one becomes a separate Datadog log, so the fields of one event, such as the identity group or the endpoint MAC address, are spread over several logs.
     - For **TCP SysLog**, leave **Comply to RFC 3164** off. **Buffer Messages When Server Down** is optional.
 3. Click **Save**.
 
@@ -78,12 +78,12 @@ ISE only sends the categories attached to a target. Go to **Administration** > *
 #### Recommended network device and ISE settings
 
 - **RADIUS accounting, including interim updates, on the switches and wireless controllers.** The endpoint IP address is only reported after DHCP, in accounting messages, so the IP address to user and MAC address mapping depends on it.
-- **Network device Location groups** (**Administration** > **Network Resources** > **Network Device Groups**). The device's location path, such as `All Locations#Spain#Madrid`, is the site in the logs, split into `cisco_ise.site.level1` to `level5` (without the `All Locations` root).
+- **Network device Location groups** (**Administration** > **Network Resources** > **Network Device Groups**). The device's location path, such as `All Locations#Spain#Madrid`, is the site in the logs.
 - Leave ISE's suppression of repeated events on (the default) to avoid most repeated re-authentications.
 
 #### Optional: drop noisy messages in the Agent
 
-ISE logs some messages that rarely matter, such as `52000` configuration changes for `DockerMetrics`, `61025` and `61026` on every EAP-TLS login, and `60188` on every normal SSH logout. The pipeline parses them; to stop sending them, add an `exclude_at_match` rule to the logs configuration, for example:
+ISE logs some messages that rarely matter, such as `52000` configuration changes for `DockerMetrics`, `61025` and `61026` on every EAP-TLS login, and `60188` on every normal SSH logout. To stop sending them, add an `exclude_at_match` rule to the logs configuration, for example:
 
 ```yaml
         log_processing_rules:
@@ -100,41 +100,7 @@ ISE logs some messages that rarely matter, such as `52000` configuration changes
 
 ### Logs
 
-The Cisco ISE integration collects ISE's syslog messages and parses them with the `cisco-ise` log pipeline:
-
-- The syslog header gives the ISE node (`syslog.hostname`, also copied to `cisco_ise.node`), the Logging Category (`cisco_ise.category`), and the message ID and segment numbers.
-- The message body gives the event time with milliseconds, the message code (`cisco_ise.message_code`, for example `5200` for a passed authentication), the severity, and ISE's own fields. The log status is ISE's severity, also on messages split into segments, where it comes from the syslog priority.
-- ISE's fields keep their names under `cisco_ise.attributes.*` (for example `cisco_ise.attributes.NetworkDeviceName`, `cisco_ise.attributes.FailureReason`), and the authorization result `Response={...}` is parsed under `cisco_ise.response.*`.
-- Derived fields: the site levels, the endpoint MAC address normalized to `aa:bb:cc:dd:ee:ff` (`cisco_ise.endpoint.mac`, from whichever MAC field the message has, such as `Calling-Station-ID` or the profiler's `EndpointMacAddress`; ISE's original value is in `cisco_ise.endpoint.mac_raw`), and the TACACS+ command (`cisco_ise.tacacs.command`, `cisco_ise.tacacs.command_name`).
-- Authorization result, from `Response={...}`: the VLAN (`cisco_ise.authorization.vlan`), the downloadable ACL (`cisco_ise.authorization.dacl`), and the Security Group Tag as ISE logs it, in hexadecimal (`cisco_ise.authorization.sgt`, for example `0004-00`).
-- The SSID of wireless logins (`cisco_ise.ssid`), taken from ISE's `SSID` field when it has the form `<access point MAC>:<SSID>`.
-- Profiler messages (`80002`): the endpoint vendor (`cisco_ise.attributes.EndpointOUI`) and ISE's list of endpoint properties as one string (`cisco_ise.endpoint.properties`).
-- Standard attributes: `usr.name`, `network.client.ip` (the endpoint or administrator IP; for guest and My Devices portal messages, the IP of the browser as ISE saw it), and `evt.name` (ISE's message class, for example `Passed-Authentication` or `Failed-Attempt`).
-
-ISE logs unknown users as `INVALID`, so failed logins by non-existing users are grouped under `usr.name:INVALID`. For downloadable ACL requests (`5232`), ISE puts the ACL name (`#ACSACL#-...`) in `UserName`; it is not mapped to `usr.name`.
-
-ISE escapes commas inside some values with a backslash, and the backslash stays in the attribute: for example `cisco_ise.attributes.EndpointOUI` is `Cisco Systems\, Inc`. Search these values with a wildcard, such as `@cisco_ise.attributes.EndpointOUI:Cisco*`.
-
-#### Finding failed logins
-
-ISE has no single success or failure field, so the pipeline keeps the values ISE sends and doesn't classify them. To find failures, use the message class or the Logging Category; they differ:
-
-- `@evt.name:Failed-Attempt`: the individual failed authentications and authorizations (for example `5400`, `5401`, `5402`, `5411`). Use it to count failed logins.
-- `@cisco_ise.category:Failed_Attempts`: everything in ISE's *Failed Attempts* category, which also includes summaries of repeated failures (`5434`, `5449`), failed CoA requests (`5417`), and failed guest logins (`5418`).
-
-The message code (`@cisco_ise.message_code`) selects one message type. Common codes:
-
-| Code | Message |
-|---|---|
-| `5200` / `5400` | RADIUS authentication succeeded / failed |
-| `5411` | Supplicant stopped responding to ISE (for example, a wrong PEAP password) |
-| `5434` / `5449` | Repeated failures of the same endpoint (`cisco_ise.attributes.TotalFailedAttempts`) / endpoint rejected |
-| `5201` / `5401` | TACACS+ authentication succeeded / failed |
-| `5202` / `5402` | TACACS+ command authorization succeeded / failed |
-| `3300` | TACACS+ command accounting (the command typed) |
-| `3000` / `3002` / `3001` | RADIUS accounting start / interim update / stop |
-
-The full list is in Cisco's [Cisco ISE Syslogs][8] guide.
+The Cisco ISE integration collects ISE's syslog messages with `source:cisco-ise`.
 
 #### Sensitive data
 
@@ -151,9 +117,9 @@ The Cisco ISE integration does not include any events.
 
 ## Troubleshooting
 
-**Fields are missing, or many logs have only the header parsed:**
+**Events are split into several logs:**
 
-The Remote Logging Target's **Maximum Length** is lower than 8192. ISE splits longer events into several syslog messages (`@cisco_ise.segment.number:>0`), and only the first one is parsed. Set **Maximum Length** to 8192.
+The Remote Logging Target's **Maximum Length** is lower than 8192. ISE splits longer events into several syslog messages, and each one becomes a separate log. Set **Maximum Length** to 8192.
 
 **Permission denied while port binding:**
 
@@ -182,4 +148,3 @@ Need help? Contact [Datadog support][1].
 [5]: https://github.com/DataDog/integrations-core/blob/master/cisco_ise/datadog_checks/cisco_ise/data/conf.yaml.example
 [6]: https://app.datadoghq.com/logs?query=source%3Acisco-ise
 [7]: https://docs.datadoghq.com/security/sensitive_data_scanner/
-[8]: https://www.cisco.com/c/en/us/td/docs/security/ise/syslog/Cisco_ISE_Syslogs/m_SyslogsList.html
