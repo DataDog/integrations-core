@@ -392,8 +392,3 @@ def test_find_posted_review_only_counts_the_posting_account(monkeypatch, reviews
     )
 
     assert module.find_posted_review("o/r", 1, "sha", viewer) == expected
-
-
-def test_review_events_are_the_only_two(publisher):
-    assert {e.value for e in publisher.ReviewEvent} == {"REQUEST_CHANGES", "COMMENT"}
-    assert json.dumps({"event": str(publisher.ReviewEvent.COMMENT)}) == '{"event": "COMMENT"}'

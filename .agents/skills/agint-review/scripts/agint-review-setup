@@ -646,21 +646,58 @@ def sweep_review_base(
     return deleted, worktrees
 
 
-def setup_worktrees(pr_number: int, head_sha: str, base_ref: str, review_dir: Path) -> tuple[Path, Path]:
+REMOTE_REPO_RE = re.compile(r"[:/]([^/:]+)/([^/]+?)(?:\.git)?/?$")
+
+
+def remote_for_repo(repo: str, remotes_output: str) -> str | None:
+    """The git remote whose URL points at repo (owner/name), from `git remote -v` output.
+
+    `gh` picks the PR's repository from `gh repo set-default`, which doesn't change
+    git's `origin`: in a fork clone, `origin` is the fork and the PR lives on another
+    remote. The host is ignored, so SSH host aliases still match. `origin` wins when
+    several remotes point at repo.
+    """
+    matches = []
+    for line in remotes_output.splitlines():
+        parts = line.split()
+        if len(parts) < 2 or (len(parts) > 2 and parts[2] != "(fetch)"):
+            continue
+        m = REMOTE_REPO_RE.search(parts[1])
+        if m and f"{m.group(1)}/{m.group(2)}".lower() == repo.lower():
+            matches.append(parts[0])
+    if not matches:
+        return None
+    return "origin" if "origin" in matches else matches[0]
+
+
+def setup_worktrees(pr_number: int, head_sha: str, base_ref: str, review_dir: Path, remote: str) -> tuple[Path, Path]:
     review_dir.mkdir(parents=True, exist_ok=True)
 
-    log(f"  fetching pull/{pr_number}/head…")
-    run(["git", "fetch", "origin", f"pull/{pr_number}/head"])
-    log(f"  fetching {base_ref}…")
-    run(["git", "fetch", "origin", base_ref])
+    log(f"  fetching pull/{pr_number}/head from {remote}…")
+    run(["git", "fetch", remote, f"pull/{pr_number}/head"])
+    log(f"  fetching {base_ref} from {remote}…")
+    run(["git", "fetch", remote, base_ref])
 
     head_path = review_dir / "head"
     base_path = review_dir / "base"
 
     _ensure_worktree_at(head_path, head_sha, label="head")
-    _ensure_worktree_at(base_path, f"origin/{base_ref}", label="base")
+    _ensure_worktree_at(base_path, f"{remote}/{base_ref}", label="base")
 
     return head_path, base_path
+
+
+def reset_findings(review_dir: Path) -> Path:
+    """Create an empty findings/ folder for this run, removing a redone round's old findings.
+
+    The challenger reads every file in findings/, so a finding left by a reviewer
+    that this run doesn't select would reach the new review.
+    """
+    findings = review_dir / "findings"
+    if findings.exists():
+        safe_rmtree(findings, review_dir)
+    findings.mkdir(exist_ok=True)
+    return findings
 
 
 def _ensure_worktree_at(path: Path, target_ref: str, label: str):
@@ -671,7 +708,7 @@ def _ensure_worktree_at(path: Path, target_ref: str, label: str):
     otherwise reuse a stale worktree: the diff and context.json reflect the new
     head SHA while reviewers read source from the old checkout. Resolve the
     target ref's SHA and `git checkout --detach` if the worktree is at a
-    different commit. Same logic for the base worktree, since `origin/<base>`
+    different commit. Same logic for the base worktree, since `<remote>/<base>`
     advances when the base branch moves.
     """
     target_sha = run(["git", "rev-parse", target_ref]).stdout.strip()
@@ -1119,11 +1156,15 @@ def main():
     # Rounds never build on earlier ones, so their worktrees are dead weight.
     cleanup_older_rounds(pr_dir, round_number, args.review_dir_base)
 
+    remote = remote_for_repo(current_repo, run(["git", "remote", "-v"]).stdout)
+    if remote is None:
+        fail(f"no git remote points at {current_repo}. Add one (git remote add upstream <url>) and re-run.")
+
     log("setting up worktrees…")
     head_path, base_path = setup_worktrees(
-        pr_number, pr["headRefOid"], pr["baseRefName"], review_dir
+        pr_number, pr["headRefOid"], pr["baseRefName"], review_dir, remote
     )
-    (review_dir / "findings").mkdir(exist_ok=True)
+    reset_findings(review_dir)
     gi_added = ensure_gitignore(root, args.review_dir_base)
 
     all_roots = sorted(find_integration_roots_in_tree(head_path))

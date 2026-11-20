@@ -414,3 +414,34 @@ def test_integrations_checks_metric_types_on_a_repo_without_agents_md(setup_scri
 
 def test_metric_types_stay_with_conventions_when_agents_md_exists(setup_script, tmp_path):
     assert metric_type_rule_given(setup_script, tmp_path, has_agents_md=True) == (False, False)
+
+
+FORK = "git@github.com:someone/integrations-core.git"
+UPSTREAM = "https://github.com/DataDog/integrations-core.git"
+
+
+def remotes(*pairs):
+    return "".join(f"{name}\t{url} (fetch)\n{name}\t{url} (push)\n" for name, url in pairs)
+
+
+@pytest.mark.parametrize(
+    ("output", "expected"),
+    [
+        (remotes(("origin", FORK), ("upstream", UPSTREAM)), "upstream"),
+        (remotes(("upstream", UPSTREAM), ("origin", "git@github.com:DataDog/integrations-core")), "origin"),
+        (remotes(("origin", "git@github.com-ddog:datadog/integrations-core.git")), "origin"),
+        (remotes(("origin", FORK)), None),
+    ],
+)
+def test_fetch_remote_is_the_one_pointing_at_the_pr_repo(setup_script, output, expected):
+    assert setup_script.remote_for_repo("DataDog/integrations-core", output) == expected
+
+
+def test_redoing_a_round_drops_findings_from_its_earlier_run(setup_script, tmp_path):
+    findings = tmp_path / "round-1" / "findings"
+    findings.mkdir(parents=True)
+    (findings / "security.md").write_text("stale")
+
+    setup_script.reset_findings(tmp_path / "round-1")
+
+    assert findings.is_dir() and not any(findings.iterdir())
