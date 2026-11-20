@@ -979,6 +979,8 @@ instances:
         ## is kept. Defaults to 4.
         ##
         ## Use `query_plans.max_plan_size_bytes` to skip plans larger than this size. Defaults to 1000000.
+        ## The plans kept per collection are capped at about 64 MB in total, and further distinct plans are
+        ## skipped until the next collection.
         #
         # query_plans: {}
 

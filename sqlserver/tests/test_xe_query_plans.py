@@ -33,6 +33,7 @@ from datadog_checks.sqlserver.xe_collection.query_plan_events import (
     PROCEDURE_QUERY,
     QUERY_STATS_STATEMENT_QUERY,
     QueryPlanEventsHandler,
+    parse_showplan_xml,
 )
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
 
@@ -101,6 +102,17 @@ def fixture_plan(fixture: str) -> str:
 
 def fixture_plan_handle(fixture: str) -> str:
     return load_event(fixture).find("./action[@name='plan_handle']/value").text
+
+
+def plan_size(event: str) -> int:
+    """The UTF-8 size of an event's plan, as the plans kept are counted."""
+    return len(parse_showplan_xml(etree.fromstring(event).find("./data[@name='showplan_xml']")).encode('utf-8'))
+
+
+def patch_max_kept_plan_bytes(max_kept_plan_bytes: int):
+    return mock.patch(
+        'datadog_checks.sqlserver.xe_collection.query_plan_events.MAX_KEPT_PLAN_BYTES', max_kept_plan_bytes, create=True
+    )
 
 
 def timestamp(second: int) -> str:
@@ -527,6 +539,45 @@ def test_rate_limit_keeps_the_slowest_execution(aggregator, xe_instance):
     run_from_ring_buffer(handler, server, make_event(timestamp=timestamp(5), duration_us=9_000_000))
     assert plan_events(aggregator) == []
     assert_events_metric(aggregator, handler, 'rate_limited', 'query_post_execution_plan_profile', 1)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'extra_budget,expected_duration_ms,memory_limited',
+    [
+        # the slower plan fits alone, but not with the plan it replaces, nor with another plan
+        pytest.param(0, 5000.0, 1, id='replaced_within_budget'),
+        pytest.param(-1, 2000.0, 2, id='kept_over_budget'),
+    ],
+)
+def test_slower_execution_replaces_the_kept_plan_within_the_memory_budget(
+    aggregator, xe_instance, extra_budget, expected_duration_ms, memory_limited
+):
+    """
+    A slower execution's plan replaces the plan kept of its query and plan shape only if the plans kept stay within
+    `MAX_KEPT_PLAN_BYTES`, without the plan replaced. Otherwise the plan kept is sent, and the slower one is memory
+    limited, as is a plan of another query and plan shape that doesn't fit.
+    """
+    server = FakeServer()
+    handler = make_handler(xe_instance, server)
+
+    def pad(plan):
+        return plan.replace('<ShowPlanXML', '<ShowPlanXML Padding="{}"'.format('x' * 1000))
+
+    slower_event = make_event(timestamp=timestamp(2), duration_us=5_000_000, plan_transform=pad)
+    other_shape_event = make_event(timestamp=timestamp(3), query_plan_hash=1, plan_transform=pad)
+
+    with patch_max_kept_plan_bytes(plan_size(slower_event) + extra_budget):
+        run_from_ring_buffer(
+            handler,
+            server,
+            make_event(timestamp=timestamp(1), duration_us=2_000_000),
+            slower_event,
+            other_shape_event,
+        )
+
+    assert [e['sqlserver']['duration_ms'] for e in plan_events(aggregator)] == [expected_duration_ms]
+    assert_events_metric(aggregator, handler, 'memory_limited', 'query_post_execution_plan_profile', memory_limited)
 
 
 @pytest.mark.unit
@@ -1088,6 +1139,29 @@ def test_event_file_events_are_parsed_as_they_are_fetched(aggregator, xe_instanc
     batch = EVENT_FILE_FETCH_BATCH_SIZE
     assert fetched_when_parsed == [min(count, (i // batch + 1) * batch) for i in range(count)]
     assert len(plan_events(aggregator)) == count
+
+
+@pytest.mark.unit
+def test_event_file_plans_over_the_memory_budget_are_memory_limited(aggregator, xe_instance):
+    """
+    A read keeps distinct plans within `MAX_KEPT_PLAN_BYTES` in total, and counts the others as memory limited. Their
+    events are still read, so the next run goes on after them.
+    """
+    server = FakeServer()
+    # no rate limit, so that every plan kept is sent
+    handler = make_handler(xe_instance, server, samples_per_hour_per_query=10**9)
+    handler.run_job()
+    server.event_file.add_buffer(*(distinct_event(second) for second in range(5)))
+
+    with patch_max_kept_plan_bytes(2 * plan_size(distinct_event(0)) + plan_size(distinct_event(0)) // 2):
+        handler.run_job()
+        assert sent_timestamps(aggregator) == [timestamp(0), timestamp(1)]
+        assert_events_metric(aggregator, handler, 'memory_limited', 'query_post_execution_plan_profile', 3)
+
+        aggregator.reset()
+        server.event_file.add_buffer(distinct_event(5))
+        handler.run_job()
+        assert sent_timestamps(aggregator) == [timestamp(5)]
 
 
 @pytest.mark.unit
