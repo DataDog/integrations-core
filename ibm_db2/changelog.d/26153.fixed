@@ -1,0 +1,1 @@
+Fix schema collection configuration validation, qualifying table limits, and SQL/JSON compatibility checks.
