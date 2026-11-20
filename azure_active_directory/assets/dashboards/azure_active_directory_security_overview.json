@@ -346,7 +346,7 @@
                             "precision": 0,
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Acritical&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
@@ -403,7 +403,7 @@
                             "precision": 0,
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Ahigh&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
@@ -469,7 +469,7 @@
                             ],
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Aazure.activedirectory%20%40workflow.rule.name%3A%22{{@workflow.rule.name.value}}%22&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
@@ -535,7 +535,7 @@
                             ],
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Aazure.activedirectory%20%40usr.id%3A%22{{@usr.id.value}}%22&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
@@ -592,7 +592,7 @@
                             "precision": 0,
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Amedium&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
@@ -649,7 +649,7 @@
                             "precision": 0,
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Alow&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
@@ -706,7 +706,7 @@
                             "precision": 0,
                             "custom_links": [
                                 {
-                                    "label": "View related Security Signals",
+                                    "label": "View related security signals",
                                     "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Ainfo&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
                                 }
                             ]
