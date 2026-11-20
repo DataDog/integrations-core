@@ -1375,7 +1375,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @http.url_details.path:(auth\\/*\\/login OR auth\\/*\\/login\\/* OR auth\\/*\\/oidc\\/callback) -@http.url_details.path:(auth\\/*\\/users\\/* OR auth\\/*\\/groups\\/* OR auth\\/*\\/role\\/* OR auth\\/*\\/roles\\/*) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @http.url_details.path:(auth\\/*\\/login OR auth\\/*\\/login\\/* OR auth\\/*\\/oidc\\/callback) -@http.url_details.path:(auth\\/*\\/users\\/login OR auth\\/*\\/users\\/login\\/* OR auth\\/*\\/groups\\/login OR auth\\/*\\/groups\\/login\\/* OR auth\\/*\\/role\\/login OR auth\\/*\\/role\\/login\\/* OR auth\\/*\\/roles\\/login OR auth\\/*\\/roles\\/login\\/*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1486,7 +1486,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @http.url_details.path:(auth\\/*\\/login OR auth\\/*\\/login\\/* OR auth\\/*\\/oidc\\/callback) -@http.url_details.path:(auth\\/*\\/users\\/* OR auth\\/*\\/groups\\/* OR auth\\/*\\/role\\/* OR auth\\/*\\/roles\\/*) (@error:* OR @error.message:*) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @http.url_details.path:(auth\\/*\\/login OR auth\\/*\\/login\\/* OR auth\\/*\\/oidc\\/callback) -@http.url_details.path:(auth\\/*\\/users\\/login OR auth\\/*\\/users\\/login\\/* OR auth\\/*\\/groups\\/login OR auth\\/*\\/groups\\/login\\/* OR auth\\/*\\/role\\/login OR auth\\/*\\/role\\/login\\/* OR auth\\/*\\/roles\\/login OR auth\\/*\\/roles\\/login\\/*) (@error:* OR @error.message:*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
