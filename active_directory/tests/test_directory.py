@@ -69,6 +69,8 @@ def computer_entry(n, name, **attributes):
     entry = {
         'objectGUID': [guid(n)],
         'distinguishedName': [f'CN={name},CN=Computers,{DOMAIN_DN}'],
+        'objectSid': [sid_to_bytes(f'{DOMAIN_SID}-{2000 + n}')],
+        'sAMAccountName': [f'{name}$'],
         'dNSHostName': [f'{name.lower()}.corp.example.com'],
         'userAccountControl': [4096],
     }
@@ -192,7 +194,7 @@ def test_escape_filter_value_escapes_ldap_specials():
 def test_nested_members_filter_escapes_group_dn():
     # Group DNs may contain parentheses; unescaped they change which users are marked privileged.
     assert nested_members_filter('CN=Ops (EU),DC=corp') == (
-        '(&(&(objectCategory=person)(objectClass=user))(memberOf:1.2.840.113556.1.4.1941:=CN=Ops \\28EU\\29,DC=corp))'
+        f'(&{USER_FILTER}(memberOf:1.2.840.113556.1.4.1941:=CN=Ops \\28EU\\29,DC=corp))'
     )
 
 
@@ -217,6 +219,10 @@ def test_build_user_record_full():
         department=['Engineering'],
         title=['SRE'],
         manager=[BOSS_DN],
+        userPrincipalName=['jdoe@corp.example.com'],
+        mail=['john.doe@example.com'],
+        employeeID=['E1234'],
+        objectClass=['top', 'person', 'organizationalPerson', 'user'],
         # Secrets must never reach the payload even if the directory returns them.
         unicodePwd=[b'secret'],
         lastLogon=[134380845000000000],
@@ -227,15 +233,23 @@ def test_build_user_record_full():
         'id': guid_str(1),
         'sid': f'{DOMAIN_SID}-1104',
         'account_name': 'jdoe',
+        'user_principal_name': 'jdoe@corp.example.com',
+        'email': 'john.doe@example.com',
+        'employee_id': 'E1234',
         'domain': 'corp.example.com',
         'ou_path': 'Users/Engineering',
-        'account': {'enabled': True},
+        'account': {
+            'enabled': True,
+            'password_never_expires': False,
+            'password_not_required': False,
+            'preauth_not_required': False,
+        },
         'created_at': '2026-10-30T08:12:44Z',
         'last_logon_at': '2026-11-02T09:15:00Z',
         'password_last_set_at': '2026-10-30T08:12:44Z',
         'groups': {'member_of': [DOMAIN_ADMINS_DN]},
-        'privilege': {'is_privileged': True, 'privileged_groups': ['Domain Admins']},
-        'service_account': {'service_principal_names': ['HTTP/web.corp.example.com']},
+        'privilege': {'is_privileged': True, 'privileged_groups': ['Domain Admins'], 'admin_count': True},
+        'service_account': {'service_principal_names': ['HTTP/web.corp.example.com'], 'managed': False},
         'organization': {'department': 'Engineering', 'title': 'SRE', 'manager_id': guid_str(2)},
     }
 
@@ -244,11 +258,14 @@ def test_build_user_record_minimal_entry():
     # A fresh account has no logon, groups, SPNs or org data; the record must still be complete.
     record = build_user_record(user_entry(1, JDOE_DN), {}, {})
 
+    assert record['user_principal_name'] is None
+    assert record['email'] is None
+    assert record['employee_id'] is None
     assert record['last_logon_at'] is None
     assert record['password_last_set_at'] is None
     assert record['groups'] == {'member_of': []}
-    assert record['privilege'] == {'is_privileged': False, 'privileged_groups': []}
-    assert record['service_account'] == {'service_principal_names': []}
+    assert record['privilege'] == {'is_privileged': False, 'privileged_groups': [], 'admin_count': False}
+    assert record['service_account'] == {'service_principal_names': [], 'managed': False}
     assert record['organization'] == {'department': None, 'title': None, 'manager_id': None}
 
 
@@ -266,28 +283,42 @@ def test_build_user_record_created_at_is_utc(when_created):
 
 
 @pytest.mark.parametrize(
-    'uac, enabled',
+    'uac, expected',
     [
-        pytest.param(512, True, id='normal'),
-        pytest.param(514, False, id='disabled'),
-        pytest.param(66050, False, id='disabled_password_never_expires'),
+        pytest.param(0x200, {}, id='normal'),
+        pytest.param(0x202, {'enabled': False}, id='disabled'),
+        pytest.param(0x10200, {'password_never_expires': True}, id='password_never_expires'),
+        pytest.param(0x220, {'password_not_required': True}, id='password_not_required'),
+        pytest.param(0x400200, {'preauth_not_required': True}, id='preauth_not_required'),
+        pytest.param(0x10202, {'enabled': False, 'password_never_expires': True}, id='combined'),
     ],
 )
-def test_build_user_record_enabled_flag(uac, enabled):
+def test_build_user_record_account_flags(uac, expected):
+    # Each flag is read from its own userAccountControl bit; a wrong mask hides or invents posture risk.
+    defaults = {
+        'enabled': True,
+        'password_never_expires': False,
+        'password_not_required': False,
+        'preauth_not_required': False,
+    }
     record = build_user_record(user_entry(1, JDOE_DN, userAccountControl=[uac]), {}, {})
-    assert record['account'] == {'enabled': enabled}
+    assert record['account'] == {**defaults, **expected}
 
 
 @pytest.mark.parametrize(
     'admin_count, groups, expected',
     [
-        pytest.param(None, set(), {'is_privileged': False, 'privileged_groups': []}, id='regular'),
-        pytest.param([1], set(), {'is_privileged': True, 'privileged_groups': []}, id='admin_count_only'),
-        pytest.param([0], set(), {'is_privileged': False, 'privileged_groups': []}, id='admin_count_cleared'),
+        pytest.param(
+            None, set(), {'is_privileged': False, 'privileged_groups': [], 'admin_count': False}, id='regular'
+        ),
+        # AD never clears adminCount when an account leaves a protected group, so it alone is not privilege.
+        pytest.param(
+            [1], set(), {'is_privileged': False, 'privileged_groups': [], 'admin_count': True}, id='stale_admin_count'
+        ),
         pytest.param(
             None,
             {'Domain Admins', 'Backup Operators'},
-            {'is_privileged': True, 'privileged_groups': ['Backup Operators', 'Domain Admins']},
+            {'is_privileged': True, 'privileged_groups': ['Backup Operators', 'Domain Admins'], 'admin_count': False},
             id='nested_groups_sorted',
         ),
     ],
@@ -296,6 +327,20 @@ def test_build_user_record_privilege(admin_count, groups, expected):
     extra = {'adminCount': admin_count} if admin_count is not None else {}
     record = build_user_record(user_entry(1, JDOE_DN, **extra), {}, {guid_str(1): groups})
     assert record['privilege'] == expected
+
+
+@pytest.mark.parametrize(
+    'object_class, managed',
+    [
+        pytest.param(['top', 'person', 'organizationalPerson', 'user'], False, id='user'),
+        pytest.param(['top', 'user', 'computer', 'msDS-GroupManagedServiceAccount'], True, id='gmsa'),
+        pytest.param(['top', 'user', 'computer', 'msDS-ManagedServiceAccount'], True, id='msa'),
+    ],
+)
+def test_build_user_record_managed_service_account(object_class, managed):
+    # gMSAs and MSAs are non-human identities even when they have no SPN.
+    record = build_user_record(user_entry(1, JDOE_DN, objectClass=object_class), {}, {})
+    assert record['service_account']['managed'] is managed
 
 
 def test_build_user_record_manager_outside_crawl():
@@ -321,6 +366,9 @@ def test_build_computer_record_full():
     )
     assert build_computer_record(entry) == {
         'id': guid_str(3),
+        'sid': f'{DOMAIN_SID}-2003',
+        'account_name': 'WEB1$',
+        'computer_name': 'WEB1',
         'hostname': 'web1.corp.example.com',
         'domain': 'corp.example.com',
         'ou_path': 'Computers',
@@ -397,7 +445,7 @@ def test_pdc_sends_all_users_and_computers(aggregator, dd_run_check, fake_direct
     assert jdoe['account_name'] == 'jdoe'
     assert jdoe['organization']['manager_id'] == guid_str(2)
     assert jdoe['privilege']['is_privileged'] is False
-    assert boss['privilege'] == {'is_privileged': True, 'privileged_groups': ['Domain Admins']}
+    assert boss['privilege'] == {'is_privileged': True, 'privileged_groups': ['Domain Admins'], 'admin_count': False}
 
     tags = instance.get('tags', [])
     aggregator.assert_metric('active_directory.directory.is_pdc_emulator', 1, tags=tags)

@@ -26,7 +26,13 @@ PAGE_SIZE = 1000
 USER_TYPE = 'active_directory_user'
 COMPUTER_TYPE = 'active_directory_computer'
 
-USER_FILTER = '(&(objectCategory=person)(objectClass=user))'
+# People, plus group managed and standalone managed service accounts, which are non-human identities
+# whose objectCategory is not `person`.
+USER_FILTER = (
+    '(|(&(objectCategory=person)(objectClass=user))'
+    '(objectClass=msDS-GroupManagedServiceAccount)(objectClass=msDS-ManagedServiceAccount))'
+)
+MANAGED_SERVICE_ACCOUNT_CLASSES = {'msds-groupmanagedserviceaccount', 'msds-managedserviceaccount'}
 COMPUTER_FILTER = '(objectCategory=computer)'
 
 # Explicit allow-list of attributes read from the directory. Secrets and non-replicated values
@@ -34,7 +40,11 @@ COMPUTER_FILTER = '(objectCategory=computer)'
 USER_ATTRIBUTES = [
     'objectGUID',
     'objectSid',
+    'objectClass',
     'sAMAccountName',
+    'userPrincipalName',
+    'mail',
+    'employeeID',
     'distinguishedName',
     'userAccountControl',
     'whenCreated',
@@ -49,6 +59,8 @@ USER_ATTRIBUTES = [
 ]
 COMPUTER_ATTRIBUTES = [
     'objectGUID',
+    'objectSid',
+    'sAMAccountName',
     'distinguishedName',
     'dNSHostName',
     'userAccountControl',
@@ -60,7 +72,10 @@ COMPUTER_ATTRIBUTES = [
 
 # https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/useraccountcontrol-manipulate-account-properties
 UAC_ACCOUNTDISABLE = 0x2
+UAC_PASSWD_NOTREQD = 0x20
+UAC_DONT_EXPIRE_PASSWORD = 0x10000
 UAC_TRUSTED_FOR_DELEGATION = 0x80000
+UAC_DONT_REQ_PREAUTH = 0x400000
 
 # Well-known privileged groups, identified by SID because group names are localized.
 # Domain Admins, Schema Admins, Enterprise Admins (relative to the domain SID).
@@ -165,19 +180,37 @@ def build_user_record(entry: dict, guid_by_dn: dict[str, str], privileged_groups
     user_id = guid_to_str(_first(entry, 'objectGUID'))
     groups = sorted(privileged_groups.get(user_id, ()))
     manager = _first(entry, 'manager')
+    uac = _first(entry, 'userAccountControl')
+    object_classes = {value.lower() for value in entry.get('objectClass', [])}
     return {
         'id': user_id,
         'sid': sid_to_str(_first(entry, 'objectSid')),
         'account_name': _first(entry, 'sAMAccountName'),
+        'user_principal_name': _first(entry, 'userPrincipalName'),
+        'email': _first(entry, 'mail'),
+        'employee_id': _first(entry, 'employeeID'),
         'domain': domain_from_dn(dn),
         'ou_path': ou_path_from_dn(dn),
-        'account': {'enabled': not _first(entry, 'userAccountControl') & UAC_ACCOUNTDISABLE},
+        'account': {
+            'enabled': not uac & UAC_ACCOUNTDISABLE,
+            'password_never_expires': bool(uac & UAC_DONT_EXPIRE_PASSWORD),
+            'password_not_required': bool(uac & UAC_PASSWD_NOTREQD),
+            'preauth_not_required': bool(uac & UAC_DONT_REQ_PREAUTH),
+        },
         'created_at': datetime_to_iso(_first(entry, 'whenCreated')),
         'last_logon_at': filetime_to_iso(_first(entry, 'lastLogonTimestamp')),
         'password_last_set_at': filetime_to_iso(_first(entry, 'pwdLastSet')),
         'groups': {'member_of': list(entry.get('memberOf', []))},
-        'privilege': {'is_privileged': _first(entry, 'adminCount') == 1 or bool(groups), 'privileged_groups': groups},
-        'service_account': {'service_principal_names': list(entry.get('servicePrincipalName', []))},
+        # adminCount is reported separately: AD never clears it when an account leaves a protected group.
+        'privilege': {
+            'is_privileged': bool(groups),
+            'privileged_groups': groups,
+            'admin_count': _first(entry, 'adminCount') == 1,
+        },
+        'service_account': {
+            'service_principal_names': list(entry.get('servicePrincipalName', [])),
+            'managed': bool(object_classes & MANAGED_SERVICE_ACCOUNT_CLASSES),
+        },
         'organization': {
             'department': _first(entry, 'department'),
             'title': _first(entry, 'title'),
@@ -189,8 +222,14 @@ def build_user_record(entry: dict, guid_by_dn: dict[str, str], privileged_groups
 def build_computer_record(entry: dict) -> dict:
     dn = _first(entry, 'distinguishedName')
     uac = _first(entry, 'userAccountControl')
+    account_name = _first(entry, 'sAMAccountName')
     return {
         'id': guid_to_str(_first(entry, 'objectGUID')),
+        'sid': sid_to_str(_first(entry, 'objectSid')),
+        # `NAME$`, as machine accounts appear in logon events; without `$` it is the NetBIOS name
+        # that logon events report as the source workstation.
+        'account_name': account_name,
+        'computer_name': account_name.removesuffix('$'),
         'hostname': _first(entry, 'dNSHostName'),
         'domain': domain_from_dn(dn),
         'ou_path': ou_path_from_dn(dn),
