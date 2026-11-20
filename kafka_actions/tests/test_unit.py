@@ -238,6 +238,54 @@ class TestUpdateTopicConfigAction:
             assert call_kwargs['configs']['retention.ms'] == '1209600000'
             assert call_kwargs['configs']['max.message.bytes'] == '2097152'
 
+    def test_increases_partition_count(self, aggregator, dd_run_check):
+        """Test increasing a topic's partition count."""
+        instance = {
+            'remote_config_id': 'test-update-topic-partitions-001',
+            'kafka_connect_str': 'localhost:9092',
+            'update_topic_config': {
+                'cluster': 'test-cluster',
+                'topic': 'existing-topic',
+                'num_partitions': 12,
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'create_partitions', return_value=True) as mock_create_partitions,
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+        ):
+            dd_run_check(check)
+
+        mock_create_partitions.assert_called_once_with(topic='existing-topic', num_partitions=12)
+
+    def test_rejected_partition_increase_skips_config_changes(self, aggregator, dd_run_check):
+        """Test that the check aborts before updating configs when the partition increase is rejected."""
+        instance = {
+            'remote_config_id': 'test-update-topic-partitions-002',
+            'kafka_connect_str': 'localhost:9092',
+            'update_topic_config': {
+                'cluster': 'test-cluster',
+                'topic': 'existing-topic',
+                'num_partitions': 1,
+                'configs': {'retention.ms': '1209600000'},
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        error = KafkaException(KafkaError(KafkaError.INVALID_PARTITIONS, 'Topic currently has 3 partitions'))
+        with (
+            patch.object(check.kafka_client, 'create_partitions', side_effect=error),
+            patch.object(check.kafka_client, 'update_topic_config', return_value=True) as mock_update,
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+        ):
+            with pytest.raises(Exception, match='Topic currently has 3 partitions'):
+                dd_run_check(check)
+
+        mock_update.assert_not_called()
+        action_events = [e for e in aggregator.events if 'kafka_action_' in e.get('event_type', '')]
+        assert [e['event_type'] for e in action_events] == ['kafka_action_error']
+
 
 class TestDeleteTopicAction:
     """Test delete_topic action."""

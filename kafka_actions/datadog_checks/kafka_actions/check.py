@@ -677,7 +677,9 @@ class KafkaActionsCheck(AgentCheck):
 
         if num_partitions:
             self.log.debug("Increasing partition count to %d (cannot decrease)", num_partitions)
-            # TODO: Implement partition count increase using AdminClient.create_partitions()
+            success = self.kafka_client.create_partitions(topic=topic, num_partitions=num_partitions)
+            if not success:
+                raise Exception(f"Failed to increase partition count for topic '{topic}'")
 
         if topic_configs:
             success = self.kafka_client.update_topic_config(topic=topic, configs=topic_configs)

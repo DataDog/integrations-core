@@ -21,6 +21,7 @@ from confluent_kafka.admin import (
     AlterConfigOpType,
     ConfigEntry,
     ConfigResource,
+    NewPartitions,
     NewTopic,
     OffsetSpec,
     ResourceType,
@@ -501,6 +502,32 @@ class KafkaActionsClient:
                 return True
             except Exception as e:
                 self.log.error("Failed to delete topic '%s': %s", topic_name, e)
+                raise
+
+    def create_partitions(self, topic: str, num_partitions: int) -> bool:
+        """Increase the partition count of an existing topic.
+
+        Kafka cannot decrease a topic's partition count; the broker rejects a
+        `num_partitions` that is not greater than the current count.
+
+        Args:
+            topic: Topic name
+            num_partitions: New total partition count
+
+        Returns:
+            True if successful
+        """
+        admin = self.get_admin_client()
+
+        futures = admin.create_partitions([NewPartitions(topic, num_partitions)])
+
+        for topic_name, future in futures.items():
+            try:
+                future.result()
+                self.log.debug("Topic '%s' partition count increased to %d", topic_name, num_partitions)
+                return True
+            except Exception as e:
+                self.log.error("Failed to increase partition count for topic '%s': %s", topic_name, e)
                 raise
 
     def update_topic_config(self, topic: str, configs: dict[str, str]) -> bool:
