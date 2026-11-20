@@ -4,11 +4,12 @@
 
 # Environment variables (set via GITHUB_ENV by setup-test-env.sh):
 # INPUT_REPO, INPUT_TARGET, INPUT_PLATFORM, INPUT_PYTEST_ARGS, INPUT_TARGET_ENV, INPUT_IS_FORK
+# INPUT_EXCLUDE_FIPS
 #
 # Step-specific environment variables (passed directly from workflow step):
 # INPUT_SESSION_NAME (optional) - custom session name, defaults to "e2e-tests"
 # INPUT_IS_LATEST (optional) - set to "true" for latest version tests
-# INPUT_TARGET (override) - for latest tests, set to "target:latest"
+# INPUT_TARGET_ENV (override) - for latest tests, set to "latest"
 
 export DD_TEST_SESSION_NAME="${INPUT_SESSION_NAME:-e2e-tests}"
 
@@ -23,48 +24,27 @@ fi
 
 # Set E2E flags based on context and repo
 if [[ "$INPUT_CONTEXT" == test-agent* ]]; then
-  E2E_FLAGS="--new-env"
+  E2E_FLAGS=(--new-env)
 elif [[ "$INPUT_REPO" == 'core' || "$INPUT_IS_LATEST" == 'true' ]]; then
-  E2E_FLAGS="--base --new-env"
+  E2E_FLAGS=(--base --new-env)
 else
-  E2E_FLAGS="--dev"
+  E2E_FLAGS=(--dev)
 fi
 
 # Only core is guaranteed to run a ddev with --ignore-teardown-errors, since it installs ddev from
 # the checkout. Other repos install from PyPI and may pin an older ddev to support older Pythons.
 if [[ "$INPUT_REPO" == 'core' ]]; then
-  E2E_FLAGS="$E2E_FLAGS --ignore-teardown-errors"
+  E2E_FLAGS+=(--ignore-teardown-errors)
 fi
 
-# Build target arguments
-# For latest: INPUT_TARGET already contains "target:latest", no separate env
-# For regular: INPUT_TARGET is just the target, INPUT_TARGET_ENV is the env
-if [[ -n "$INPUT_TARGET_ENV" ]]; then
-  TARGET_ARGS="$INPUT_TARGET $INPUT_TARGET_ENV"
-else
-  TARGET_ARGS="$INPUT_TARGET"
-fi
-
-# Set positional arguments ($@) based on inputs
-# This is done to ensure we handle pytest args correctly.
-# When no target env is provided, "all" must always be the first argument.
-if [[ -z "$INPUT_TARGET_ENV" ]]; then
-  if [[ -n "$INPUT_PYTEST_ARGS" ]]; then
-    # Use eval to correctly parse quoted arguments (e.g. -m "not flaky")
-    eval "set -- all $INPUT_PYTEST_ARGS"
-  else
-    set -- "all"
-  fi
-elif [[ -n "$INPUT_PYTEST_ARGS" ]]; then
-  eval "set -- $INPUT_PYTEST_ARGS"
-else
-  # Clear positional arguments
-  set --
+PYTEST_ARGS="${INPUT_PYTEST_ARGS:-}"
+if [[ "${INPUT_EXCLUDE_FIPS:-true}" == 'true' ]]; then
+  PYTEST_ARGS+=' -k "not fips"'
 fi
 
 set +e
 set -x
-ddev env test $E2E_FLAGS --junit $TARGET_ARGS -- "$@" -k "not fips"
+ddev env test "${E2E_FLAGS[@]}" --junit "$INPUT_TARGET" --envs "${INPUT_TARGET_ENV:-all}" --pytest-args "$PYTEST_ARGS"
 exit_code=$?
 set +x
 

@@ -8,6 +8,7 @@ import marshal
 from collections import defaultdict
 from concurrent.futures import Future
 from contextlib import nullcontext as does_not_raise
+from contextlib import suppress
 
 import mock
 import pytest
@@ -1533,3 +1534,24 @@ def test_list_consumer_group_offsets_given_coordinator_error_returns_offsets_on_
         offsets = client.list_consumer_group_offsets(groups)
 
     assert offsets == [('consumer_group1', [('topic1', 0, 5)])]
+
+
+@pytest.mark.parametrize(
+    'run_check',
+    [
+        pytest.param({'return_value': None}, id='successful run'),
+        pytest.param({'side_effect': KafkaException(KafkaError(KafkaError._ALL_BROKERS_DOWN))}, id='failed run'),
+    ],
+)
+def test_malloc_trim_runs_after_every_run(check, kafka_instance, run_check):
+    # Trimming only after a successful run would leave librdkafka's freed arenas stranded
+    # whenever the brokers are unreachable.
+    with (
+        mock.patch('datadog_checks.kafka_consumer.kafka_consumer.malloc_trim') as trim,
+        mock.patch('datadog_checks.kafka_consumer.KafkaCheck._run_check', **run_check),
+    ):
+        kafka_check = check(kafka_instance)
+        with suppress(KafkaException):
+            kafka_check.check(kafka_instance)
+
+    trim.assert_called_once_with()

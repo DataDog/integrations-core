@@ -14,13 +14,13 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import pattern_filter
+from datadog_checks.base.utils.http import RequestsWrapper
 
 from .config_models import ConfigMixin
 from .metrics import METRICS_SPEC
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
-    from datadog_checks.base.utils.http import RequestsWrapper
 
 
 class PrefectCheck(AgentCheck, ConfigMixin):
@@ -51,6 +51,11 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
     def _parse_config(self):
         url = self.config.prefect_url.rstrip('/')
+
+        if self.config.prefect_userpass is not None:
+            username, _, password = self.config.prefect_userpass.partition(':')
+            http_config = dict(self.instance, username=username, password=password)
+            self._http = RequestsWrapper(http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         self.client = PrefectClient(url, self.http, self.log)
 
@@ -416,9 +421,16 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             start_time = _parse_time(fr.get('start_time', None), self.log)
             end_time = _parse_time(fr.get('end_time', None), self.log)
 
-            if expected_start_time:
+            # expected_start_time is set once, so a retried run is overdue from its retry time instead:
+            # next_scheduled_start_time while it awaits the retry, the Pending state's timestamp once picked up
+            overdue_since = _parse_time(fr.get('next_scheduled_start_time'), self.log)
+            if overdue_since is None and state_type == 'PENDING' and (fr.get('run_count') or 0) > 0:
+                # The retry time isn't on the flow run once it leaves AwaitingRetry, so the age restarts at pickup
+                overdue_since = _parse_time((fr.get('state') or {}).get('timestamp'), self.log)
+            overdue_since = overdue_since or expected_start_time
+            if overdue_since:
                 self._aggregate_queue_backlog_metrics(
-                    state_type, expected_start_time, fr.get('work_pool_name', ''), fr.get('work_queue_name', ''), now
+                    state_type, overdue_since, fr.get('work_pool_name', ''), fr.get('work_queue_name', ''), now
                 )
             self._aggregate_concurrency_in_use_metric(
                 state_type, fr.get('work_pool_name', ''), fr.get('work_queue_name', '')
@@ -700,7 +712,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             )
 
     def _aggregate_queue_backlog_metrics(
-        self, state_type: str, expected_start_time: datetime, pname: str, qname: str, now: datetime
+        self, state_type: str, overdue_since: datetime, pname: str, qname: str, now: datetime
     ):
         queue = self.queues_by_name.get((pname, qname), {})
         if not queue:
@@ -708,15 +720,11 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 "Could not find queue for pool %s and queue %s in cache, skipping queue backlog metrics", pname, qname
             )
             return
-        if (
-            state_type in ['SCHEDULED', 'PENDING']
-            and expected_start_time > self.last_check_time
-            and expected_start_time <= now
-        ):
+        if state_type in ['SCHEDULED', 'PENDING'] and overdue_since <= now:
             queue['backlog_count'] = queue.get('backlog_count', 0) + 1
             backlog_oldest = queue.get("backlog_oldest")
-            if expected_start_time and (backlog_oldest is None or expected_start_time < backlog_oldest):
-                queue["backlog_oldest"] = expected_start_time
+            if backlog_oldest is None or overdue_since < backlog_oldest:
+                queue["backlog_oldest"] = overdue_since
 
     def _aggregate_concurrency_in_use_metric(self, state_type: str, pname: str, qname: str):
         queue = self.queues_by_name.get((pname, qname), {})
