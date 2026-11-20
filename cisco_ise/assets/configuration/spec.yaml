@@ -5,12 +5,11 @@ files:
   options:
   - template: logs
     example:
-    # type: udp or tcp (both supported; ISE ends each TCP message with a newline).
+    # type: udp or tcp (both supported).
     - type: udp
       port: <PORT>
       source: cisco-ise
       # Mask secrets typed in TACACS+ commands before they leave the Agent.
-      # Verified on Agent 7.85.0 with real ISE 3.2 messages (3300, 5202, 5402).
       log_processing_rules:
       - type: mask_sequences
         name: ise_tacacs_cmd_secret
