@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import subprocess
 import zipfile
+from pathlib import Path
+from typing import Callable
 
 import httpx
 import pytest
@@ -16,15 +18,16 @@ from ddev.repo.core import Repository
 GITHUB_TOKEN_URL = 'https://github-actions.example/token'
 INSTALL_DOCS_URL = 'https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install'
 
+REPO_PACKAGES = {
+    'n8n': 'datadog-n8n',
+    'kafka_consumer': 'datadog-kafka-consumer',
+    'ddev': 'ddev',
+    'datadog_checks_base': 'datadog-checks-base',
+}
 
-@pytest.fixture
-def repo(tmp_path):
-    for name, package_name in (
-        ('n8n', 'datadog-n8n'),
-        ('kafka_consumer', 'datadog-kafka-consumer'),
-        ('ddev', 'ddev'),
-        ('datadog_checks_base', 'datadog-checks-base'),
-    ):
+
+def _make_repo(tmp_path: Path) -> Repository:
+    for name, package_name in REPO_PACKAGES.items():
         integration = tmp_path / name
         integration.mkdir()
         (integration / 'pyproject.toml').write_text(f'[project]\nname = "{package_name}"\n')
@@ -39,220 +42,235 @@ def _pypi_version(version: str | None) -> httpx.Response:
     return httpx.Response(200, json={'info': {'version': version}}, request=httpx.Request('GET', 'https://pypi.org'))
 
 
+def _pypi_states(states: dict[str, str | None] | None = None, queries: list[str] | None = None):
+    """A PyPI reporting custom per-package versions, None meaning missing; others report 0.0.1."""
+    states = states or {}
+
+    def http_get(url, **kwargs):
+        if queries is not None:
+            queries.append(url)
+        name = url.rsplit('/', 2)[-2]
+        return _pypi_version(states.get(name, '0.0.1'))
+
+    return http_get
+
+
+def _trusted_publishing(monkeypatch) -> tuple[list[dict], Callable[..., httpx.Response]]:
+    """Configure the GitHub Actions OIDC environment for trusted publishing.
+
+    Returns the list recording the GitHub token requests, and the HTTP fake answering them
+    and the PyPI JSON queries.
+    """
+    monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
+    monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_URL', GITHUB_TOKEN_URL)
+    monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'gh-secret')
+    token_requests = []
+
+    def http_get(url, **kwargs):
+        if url == GITHUB_TOKEN_URL:
+            token_requests.append(kwargs)
+            return httpx.Response(200, json={'value': 'oidc-jwt'}, request=httpx.Request('GET', url))
+        return _pypi_version('0.0.1')
+
+    return token_requests, http_get
+
+
+def _recording_upload(save: Path | None = None):
+    """An upload port recording (wheel name, token) pairs, saving the wheel to `save` when given."""
+    uploads = []
+
+    def upload(wheel, token):
+        if save is not None:
+            (save / wheel.name).write_bytes(wheel.read_bytes())
+        uploads.append((wheel.name, token))
+
+    return upload, uploads
+
+
 def _ports(**overrides) -> tuple[PlaceholderPorts, list[str]]:
     lines: list[str] = []
     return PlaceholderPorts(notify=lines.append, **overrides), lines
 
 
-class TestPublishPlaceholders:
-    def test_dry_run_selects_names_still_at_the_empty_placeholder(self, repo):
-        ports, lines = _ports(http_get=lambda url, **kwargs: _pypi_version('0.0.1'))
+def _failing_hatchling(stderr: bytes):
+    """A build runner where every hatchling invocation fails; other commands run normally."""
+    real_run = subprocess.run
 
-        report = publish_placeholders(repo, ('n8n',), dry_run=True, ports=ports)
+    def run(command, **kwargs):
+        if 'hatchling' not in command:
+            return real_run(command, **kwargs)
+        raise subprocess.CalledProcessError(1, command, stderr=stderr)
 
-        assert report.selected == ['datadog-n8n']
-        assert report.skipped == []
-        assert lines == ['datadog-n8n']
+    return run
 
-    def test_dry_run_skips_names_that_already_have_a_release(self, repo):
-        ports, lines = _ports(http_get=lambda url, **kwargs: _pypi_version('0.0.2'))
 
-        report = publish_placeholders(repo, ('n8n',), dry_run=True, ports=ports)
+def test_dry_run_selects_names_still_at_the_empty_placeholder(tmp_path):
+    ports, lines = _ports(http_get=_pypi_states())
 
-        assert report.selected == []
-        assert report.skipped == ['datadog-n8n']
-        assert lines == ['  skip datadog-n8n (already published)']
+    report = publish_placeholders(_make_repo(tmp_path), ('n8n',), dry_run=True, ports=ports)
 
-    def test_resolves_every_name_spelling_once(self, repo):
-        queries = []
+    assert report.selected == ['datadog-n8n']
+    assert report.skipped == []
+    assert lines == ['datadog-n8n']
 
-        def http_get(url, **kwargs):
-            queries.append(url)
-            return _pypi_version('0.0.1')
 
-        ports, _ = _ports(http_get=http_get)
+def test_dry_run_skips_names_that_already_have_a_release(tmp_path):
+    ports, lines = _ports(http_get=_pypi_states({'datadog-n8n': '0.0.2'}))
 
-        report = publish_placeholders(
-            repo, ('n8n', 'Datadog-N8N', 'kafka-consumer', 'datadog_tokumx'), dry_run=True, ports=ports
-        )
+    report = publish_placeholders(_make_repo(tmp_path), ('n8n',), dry_run=True, ports=ports)
 
-        assert report.selected == ['datadog-kafka-consumer', 'datadog-n8n', 'datadog-tokumx']
-        assert len(queries) == 3
+    assert report.selected == []
+    assert report.skipped == ['datadog-n8n']
+    assert lines == ['  skip datadog-n8n (already published)']
 
-    def test_defaults_to_every_unclaimed_name_including_retired_ones(self, repo):
-        queries = []
 
-        def http_get(url, **kwargs):
-            queries.append(url)
-            name = url.rsplit('/', 2)[-2]
-            state = {'datadog-tokumx': None, 'datadog-kafka-consumer': '0.0.2'}.get(name, '0.0.1')
-            return _pypi_version(state)
+def test_resolves_every_name_spelling_once(tmp_path):
+    queries: list[str] = []
+    ports, _ = _ports(http_get=_pypi_states(queries=queries))
 
-        ports, _ = _ports(http_get=http_get)
+    report = publish_placeholders(
+        _make_repo(tmp_path), ('n8n', 'Datadog-N8N', 'kafka-consumer', 'datadog_tokumx'), dry_run=True, ports=ports
+    )
 
-        report = publish_placeholders(repo, dry_run=True, ports=ports)
+    assert report.selected == ['datadog-kafka-consumer', 'datadog-n8n', 'datadog-tokumx']
+    assert len(queries) == 3
 
-        assert 'datadog-n8n' in report.selected
-        assert 'datadog-tokumx' in report.selected
-        assert 'datadog-oracle' in report.selected
-        assert 'datadog-kafka-consumer' in report.skipped
-        assert 'ddev' not in report.selected
-        assert 'datadog-checks-base' not in report.selected
-        assert len(queries) == 6  # both candidate packages plus the four retired names
 
-    def test_publishes_a_built_placeholder_with_a_plain_token(self, repo, tmp_path, monkeypatch):
-        monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
-        uploaded = []
+def test_defaults_to_every_unclaimed_name_including_retired_ones(tmp_path):
+    queries: list[str] = []
+    ports, _ = _ports(http_get=_pypi_states({'datadog-tokumx': None, 'datadog-kafka-consumer': '0.0.2'}, queries))
 
-        def upload(wheel, token):
-            (tmp_path / wheel.name).write_bytes(wheel.read_bytes())
-            uploaded.append((wheel.name, token))
+    report = publish_placeholders(_make_repo(tmp_path), dry_run=True, ports=ports)
 
-        ports, lines = _ports(http_get=lambda url, **kwargs: _pypi_version('0.0.1'), upload=upload)
+    assert 'datadog-n8n' in report.selected
+    assert 'datadog-tokumx' in report.selected
+    assert 'datadog-oracle' in report.selected
+    assert 'datadog-kafka-consumer' in report.skipped
+    assert 'ddev' not in report.selected
+    assert 'datadog-checks-base' not in report.selected
+    assert len(queries) == 6  # both candidate packages plus the four retired names
 
-        report = publish_placeholders(repo, ('n8n',), ports=ports)
 
-        assert report.published == {'datadog-n8n'}
-        assert report.failed == {}
-        assert lines[0] == '  ok datadog-n8n'
-        assert lines[-1] == 'Published 1, failed 0'
-        ((wheel_name, token),) = uploaded
-        assert token == 'pypi-xxx'
-        assert wheel_name.startswith('datadog_n8n-0.0.2-')
-        assert not twine_check([str(tmp_path / wheel_name)])
-        with zipfile.ZipFile(tmp_path / wheel_name) as archive:
-            names = set(archive.namelist())
-            (metadata_name,) = [name for name in names if name.endswith('METADATA')]
-            metadata = archive.read(metadata_name).decode()
-        assert 'datadog_n8n/__init__.py' in names
-        assert 'Datadog reserves this name' in metadata
-        assert INSTALL_DOCS_URL in metadata
+def test_publishes_a_built_placeholder_with_a_plain_token(tmp_path, monkeypatch):
+    monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
+    upload, uploads = _recording_upload(save=tmp_path)
+    ports, lines = _ports(http_get=_pypi_states(), upload=upload)
 
-    def test_publishes_through_trusted_publishing_minting_one_token_per_package(self, repo, monkeypatch):
-        monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
-        monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_URL', GITHUB_TOKEN_URL)
-        monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'gh-secret')
-        token_requests = []
-        mints = []
-        uploaded = []
+    report = publish_placeholders(_make_repo(tmp_path), ('n8n',), ports=ports)
 
-        def http_get(url, **kwargs):
-            if url == GITHUB_TOKEN_URL:
-                token_requests.append(kwargs)
-                return httpx.Response(200, json={'value': 'oidc-jwt'}, request=httpx.Request('GET', url))
-            return _pypi_version('0.0.1')
+    assert report.published == {'datadog-n8n'}
+    assert report.failed == {}
+    assert lines[0] == '  ok datadog-n8n'
+    assert lines[-1] == 'Published 1, failed 0'
+    ((wheel_name, token),) = uploads
+    assert token == 'pypi-xxx'
+    assert wheel_name.startswith('datadog_n8n-0.0.2-')
+    assert not twine_check([str(tmp_path / wheel_name)])
+    with zipfile.ZipFile(tmp_path / wheel_name) as archive:
+        names = set(archive.namelist())
+        (metadata_name,) = [name for name in names if name.endswith('METADATA')]
+        metadata = archive.read(metadata_name).decode()
+    assert 'datadog_n8n/__init__.py' in names
+    assert 'Datadog reserves this name' in metadata
+    assert INSTALL_DOCS_URL in metadata
 
-        def http_post(url, **kwargs):
-            mints.append(kwargs['json'])
-            return httpx.Response(200, json={'token': 'pypi-minted'})
 
-        def upload(wheel, token):
-            uploaded.append((wheel.name, token))
+def test_publishes_through_trusted_publishing_minting_one_token_per_package(tmp_path, monkeypatch):
+    token_requests, http_get = _trusted_publishing(monkeypatch)
+    mints = []
 
-        ports, lines = _ports(http_get=http_get, http_post=http_post, upload=upload)
+    def http_post(url, **kwargs):
+        mints.append(kwargs['json'])
+        return httpx.Response(200, json={'token': 'pypi-minted'})
 
-        report = publish_placeholders(repo, ('n8n', 'datadog-tokumx'), ports=ports)
+    upload, uploads = _recording_upload()
+    ports, lines = _ports(http_get=http_get, http_post=http_post, upload=upload)
 
-        assert report.published == {'datadog-n8n', 'datadog-tokumx'}
-        assert report.failed == {}
-        assert lines[-1] == 'Published 2, failed 0'
-        assert mints == [{'token': 'oidc-jwt'}, {'token': 'oidc-jwt'}]
-        assert token_requests[0]['headers'] == {'Authorization': 'bearer gh-secret'}
-        assert token_requests[0]['params'] == {'audience': 'pypi'}
-        assert [token for _, token in uploaded] == ['pypi-minted', 'pypi-minted']
+    report = publish_placeholders(_make_repo(tmp_path), ('n8n', 'datadog-tokumx'), ports=ports)
 
-    def test_a_refused_mint_fails_only_its_own_package(self, repo, monkeypatch):
-        monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
-        monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_URL', GITHUB_TOKEN_URL)
-        monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'gh-secret')
-        mint_responses = [
-            httpx.Response(200, json={'token': 'pypi-minted'}),
-            httpx.Response(400, text='invalid-publisher'),
-        ]
-        uploaded = []
+    assert report.published == {'datadog-n8n', 'datadog-tokumx'}
+    assert report.failed == {}
+    assert lines[-1] == 'Published 2, failed 0'
+    assert mints == [{'token': 'oidc-jwt'}, {'token': 'oidc-jwt'}]
+    assert token_requests[0]['headers'] == {'Authorization': 'bearer gh-secret'}
+    assert token_requests[0]['params'] == {'audience': 'pypi'}
+    assert [token for _, token in uploads] == ['pypi-minted', 'pypi-minted']
 
-        def http_get(url, **kwargs):
-            if url == GITHUB_TOKEN_URL:
-                return httpx.Response(200, json={'value': 'oidc-jwt'}, request=httpx.Request('GET', url))
-            return _pypi_version('0.0.1')
 
-        ports, lines = _ports(
-            http_get=http_get,
-            http_post=lambda url, **kwargs: mint_responses.pop(0),
-            upload=lambda wheel, token: uploaded.append(wheel.name),
-        )
+def test_a_refused_mint_fails_only_its_own_package(tmp_path, monkeypatch):
+    _, http_get = _trusted_publishing(monkeypatch)
+    mint_responses = [
+        httpx.Response(200, json={'token': 'pypi-minted'}),
+        httpx.Response(400, text='invalid-publisher'),
+    ]
+    upload, uploads = _recording_upload()
+    ports, lines = _ports(
+        http_get=http_get,
+        http_post=lambda url, **kwargs: mint_responses.pop(0),
+        upload=upload,
+    )
 
-        report = publish_placeholders(repo, ('n8n', 'datadog-tokumx'), ports=ports)
+    report = publish_placeholders(_make_repo(tmp_path), ('n8n', 'datadog-tokumx'), ports=ports)
 
-        assert len(report.published) == 1
-        assert len(report.failed) == 1
-        assert 'PyPI refused to mint an upload token for this workflow: invalid-publisher' in '\n'.join(lines)
-        assert len(uploaded) == 1
-        assert lines[-1] == 'Published 1, failed 1'
+    assert len(report.published) == 1
+    assert len(report.failed) == 1
+    assert 'PyPI refused to mint an upload token for this workflow: invalid-publisher' in '\n'.join(lines)
+    assert len(uploads) == 1
+    assert lines[-1] == 'Published 1, failed 1'
 
-    def test_a_failed_build_reports_the_hatchling_output(self, repo, monkeypatch):
-        monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
-        real_run = subprocess.run
 
-        def fail_only_hatchling(command, **kwargs):
-            if 'hatchling' not in command:
-                return real_run(command, **kwargs)
-            raise subprocess.CalledProcessError(1, command, stderr=b'invalid metadata')
+def test_a_failed_build_reports_the_hatchling_output(tmp_path, monkeypatch):
+    monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
+    ports, lines = _ports(http_get=_pypi_states(), run=_failing_hatchling(b'invalid metadata'))
 
-        ports, lines = _ports(http_get=lambda url, **kwargs: _pypi_version('0.0.1'), run=fail_only_hatchling)
+    report = publish_placeholders(_make_repo(tmp_path), ('n8n',), ports=ports)
 
-        report = publish_placeholders(repo, ('n8n',), ports=ports)
+    assert list(report.failed) == ['datadog-n8n']
+    assert '  FAIL datadog-n8n: hatchling build failed for datadog-n8n: invalid metadata' in lines
 
-        assert list(report.failed) == ['datadog-n8n']
-        assert '  FAIL datadog-n8n: hatchling build failed for datadog-n8n: invalid metadata' in lines
 
-    def test_prompts_for_a_token_in_a_terminal(self, repo, monkeypatch):
-        monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
-        monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_URL', raising=False)
-        monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', raising=False)
-        prompts = []
-        uploaded = []
+def test_prompts_for_a_token_in_a_terminal(tmp_path, monkeypatch):
+    monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
+    prompts = []
 
-        def prompt(text, hide_input):
-            prompts.append((text, hide_input))
-            return 'pypi-yyy'
+    def prompt(text, hide_input):
+        prompts.append((text, hide_input))
+        return 'pypi-yyy'
 
-        ports, _ = _ports(
-            http_get=lambda url, **kwargs: _pypi_version('0.0.1'),
-            upload=lambda wheel, token: uploaded.append(token),
-            interactive=lambda: True,
-            prompt=prompt,
-        )
+    upload, uploads = _recording_upload()
+    ports, _ = _ports(http_get=_pypi_states(), upload=upload, interactive=lambda: True, prompt=prompt)
 
-        publish_placeholders(repo, ('n8n',), ports=ports)
+    publish_placeholders(_make_repo(tmp_path), ('n8n',), ports=ports)
 
-        assert prompts == [('PyPI API token: ', True)]
-        assert uploaded == ['pypi-yyy']
+    assert prompts == [('PyPI API token: ', True)]
+    assert [token for _, token in uploads] == ['pypi-yyy']
 
-    def test_the_environment_token_wins_over_the_prompt(self, repo, monkeypatch):
-        monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
-        uploaded = []
 
-        ports, _ = _ports(
-            http_get=lambda url, **kwargs: _pypi_version('0.0.1'),
-            upload=lambda wheel, token: uploaded.append(token),
-            interactive=lambda: True,
-            prompt=lambda text, hide_input: pytest.fail('should not prompt'),
-        )
+def test_the_environment_token_wins_over_the_prompt(tmp_path, monkeypatch):
+    monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
+    upload, uploads = _recording_upload()
+    ports, _ = _ports(
+        http_get=_pypi_states(),
+        upload=upload,
+        interactive=lambda: True,
+        prompt=lambda text, hide_input: pytest.fail('should not prompt'),
+    )
 
-        publish_placeholders(repo, ('n8n',), ports=ports)
+    publish_placeholders(_make_repo(tmp_path), ('n8n',), ports=ports)
 
-        assert uploaded == ['pypi-xxx']
+    assert [token for _, token in uploads] == ['pypi-xxx']
 
-    def test_aborts_without_a_token_or_trusted_publishing(self, repo, monkeypatch):
-        monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
-        monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_URL', raising=False)
-        monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', raising=False)
-        ports, _ = _ports(http_get=lambda url, **kwargs: _pypi_version('0.0.1'), interactive=lambda: False)
 
-        with pytest.raises(ValueError, match='No PyPI API token available'):
-            publish_placeholders(repo, ('n8n',), ports=ports)
+def test_aborts_without_a_token_or_trusted_publishing(tmp_path, monkeypatch):
+    monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
+    monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_URL', raising=False)
+    monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', raising=False)
+    ports, _ = _ports(http_get=_pypi_states(), interactive=lambda: False)
 
-    def test_unknown_name_aborts(self, repo):
-        with pytest.raises(ValueError, match='Unknown integration or package name: not-an-integration'):
-            publish_placeholders(repo, ('not-an-integration',))
+    with pytest.raises(ValueError, match='No PyPI API token available'):
+        publish_placeholders(_make_repo(tmp_path), ('n8n',), ports=ports)
+
+
+def test_unknown_name_aborts(tmp_path):
+    with pytest.raises(ValueError, match='Unknown integration or package name: not-an-integration'):
+        publish_placeholders(_make_repo(tmp_path), ('not-an-integration',))
