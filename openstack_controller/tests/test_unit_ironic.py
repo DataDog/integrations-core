@@ -572,23 +572,25 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post)
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'instance'),
+    ('mock_http_get', 'instance', 'root_requests'),
     [
         pytest.param(
             {'http_error': {'/baremetal': MockResponse(status_code=500)}},
             configs.REST,
+            2,
             id='api rest',
         ),
         pytest.param(
             {'http_error': {'/baremetal': MockResponse(status_code=500)}},
             configs.SDK,
+            3,
             id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
-def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
+def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get, root_requests):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.ironic.response_time',
@@ -603,27 +605,29 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:6385/baremetal') == 2
+    assert args_list.count('http://127.0.0.1:6385/baremetal') == root_requests
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'instance'),
+    ('mock_http_get', 'instance', 'root_requests'),
     [
         pytest.param(
             {'elapsed_total_seconds': {'/baremetal': 0.30706}},
             configs.REST,
+            1,
             id='api rest',
         ),
         pytest.param(
             {'elapsed_total_seconds': {'/baremetal': 0.30706}},
             configs.SDK,
+            2,
             id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
-def test_response_time(aggregator, check, dd_run_check, mock_http_get):
+def test_response_time(aggregator, check, dd_run_check, mock_http_get, root_requests):
     dd_run_check(check)
     aggregator.assert_service_check(
         'openstack.ironic.api.up',
@@ -649,7 +653,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:6385/baremetal') == 1
+    assert args_list.count('http://127.0.0.1:6385/baremetal') == root_requests
 
 
 @pytest.mark.parametrize(
@@ -693,11 +697,6 @@ def test_nodes_exception(aggregator, check, dd_run_check, mock_http_get):
             configs.REST_IRONIC_MICROVERSION_1_80,
             NODES_METRICS_IRONIC_MICROVERSION_1_80,
             id='api rest microversion 1.80',
-        ),
-        pytest.param(
-            configs.SDK,
-            NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
-            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_IRONIC_MICROVERSION_1_80,
@@ -1127,3 +1126,15 @@ def test_conductors_pagination(
 
     baremetal_url = 'http://127.0.0.1:6385/baremetal/v1/conductors'
     assert args_list.count(baremetal_url) == expected_api_call_count
+
+
+@pytest.mark.parametrize('instance', [configs.SDK])
+@pytest.mark.usefixtures('mock_http_post')
+def test_clouds_yaml_nodes_at_openstacksdk_microversion(aggregator, check, dd_run_check, mock_http_get):
+    """`openstack_config_file_path` instances keep the node data openstacksdk requested at microversion 1.80."""
+    dd_run_check(check)
+
+    nodes_requests = [c for c in mock_http_get.call_args_list if c.args[0].endswith('/baremetal/v1/nodes/detail')]
+    assert nodes_requests
+    assert all(c.kwargs['headers']['X-OpenStack-Ironic-API-Version'] == '1.80' for c in nodes_requests)
+    aggregator.assert_metric_has_tag('openstack.ironic.node.count', 'node_name:node-0')

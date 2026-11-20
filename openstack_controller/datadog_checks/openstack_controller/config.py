@@ -51,6 +51,7 @@ class OpenstackConfig:
         self.paginated_limit = config.paginated_limit
         self.auth_url = None
         self.user_domain = None
+        self.negotiate_microversions = False
         self.validate()
 
     def validate(self):
@@ -141,3 +142,5 @@ class OpenstackConfig:
         self.username = auth.get('username')
         self.password = auth.get('password')
         self.user_domain = {"name": auth.get('user_domain_name', DEFAULT_DOMAIN_ID)}
+        # These instances went through openstacksdk, which picked a microversion for each resource.
+        self.negotiate_microversions = True

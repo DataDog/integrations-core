@@ -131,23 +131,25 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post)
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'instance'),
+    ('mock_http_get', 'instance', 'root_requests'),
     [
         pytest.param(
             {'http_error': {'/volume/v3/': MockResponse(status_code=500)}},
             configs.REST,
+            2,
             id='api rest',
         ),
         pytest.param(
             {'http_error': {'/volume/v3/': MockResponse(status_code=500)}},
             configs.SDK,
+            3,
             id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
-def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
+def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get, root_requests):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.cinder.response_time',
@@ -162,27 +164,29 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == 2
+    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == root_requests
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'instance'),
+    ('mock_http_post', 'instance', 'root_requests'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['volumev3'])}},
             configs.REST,
+            1,
             id='api rest',
         ),
         pytest.param(
             None,
             configs.SDK,
+            2,
             id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_post'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
-def test_response_time_block_storage(aggregator, check, dd_run_check, mock_http_get):
+def test_response_time_block_storage(aggregator, check, dd_run_check, mock_http_get, root_requests):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.cinder.response_time',
@@ -198,27 +202,29 @@ def test_response_time_block_storage(aggregator, check, dd_run_check, mock_http_
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == 1
+    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == root_requests
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'instance'),
+    ('mock_http_post', 'instance', 'root_requests'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['block-storage'])}},
             configs.REST,
+            1,
             id='api rest',
         ),
         pytest.param(
             None,
             configs.SDK,
+            2,
             id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_post'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
-def test_response_time_volumev3(aggregator, check, dd_run_check, mock_http_get):
+def test_response_time_volumev3(aggregator, check, dd_run_check, mock_http_get, root_requests):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.cinder.response_time',
@@ -234,7 +240,7 @@ def test_response_time_volumev3(aggregator, check, dd_run_check, mock_http_get):
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == 1
+    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == root_requests
 
 
 @pytest.mark.parametrize(
