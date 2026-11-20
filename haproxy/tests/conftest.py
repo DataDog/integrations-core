@@ -15,6 +15,7 @@ import requests
 from packaging import version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run, get_e2e_discovery_metadata
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
 
@@ -209,11 +210,6 @@ LEGACY_UNIT_STATS_URL = LEGACY_UNIT_URL + '/;csv;norefresh'
 ENTERPRISE_VERSION_URL = 'http://the_url_does_not_matter/'
 
 
-def _read_fixture(name):
-    with open(os.path.join(HERE, 'fixtures', name), 'rb') as f:
-        return f.read()
-
-
 def _serve_for_legacy_unit_url(fake_http_response, data):
     # The legacy check reads the HTML stats page for its version, then the CSV export for its metrics.
     fake_http_response(LEGACY_UNIT_URL, data)
@@ -222,7 +218,7 @@ def _serve_for_legacy_unit_url(fake_http_response, data):
 
 @pytest.fixture
 def haproxy_mock(fake_http_response):
-    _serve_for_legacy_unit_url(fake_http_response, _read_fixture('mock_data'))
+    _serve_for_legacy_unit_url(fake_http_response, read_file_binary(os.path.join(HERE, 'fixtures', 'mock_data')))
 
 
 @pytest.fixture(scope="module")
@@ -235,12 +231,14 @@ def mock_data():
 
 @pytest.fixture
 def haproxy_mock_evil(fake_http_response):
-    _serve_for_legacy_unit_url(fake_http_response, _read_fixture('mock_data_evil'))
+    _serve_for_legacy_unit_url(fake_http_response, read_file_binary(os.path.join(HERE, 'fixtures', 'mock_data_evil')))
 
 
 @pytest.fixture
 def haproxy_mock_enterprise_version_info(fake_http_response):
-    fake_http_response(ENTERPRISE_VERSION_URL, _read_fixture('enterprise_version_info.html'))
+    fake_http_response(
+        ENTERPRISE_VERSION_URL, read_file_binary(os.path.join(HERE, 'fixtures', 'enterprise_version_info.html'))
+    )
 
 
 @pytest.fixture(scope="session")

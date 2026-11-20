@@ -136,9 +136,8 @@ def mock_http_responses(fake_http_response):
         for url, fixture in {**FIXTURE_RESPONSES, 'http://torchserve:8081/models': all_models_file}.items():
             with open(os.path.join(HERE, 'fixtures', fixture)) as f:
                 content = f.read()
-            # FakeHTTPResponse does not parse its body, so JSON payloads need an explicit parsed result.
             if fixture.endswith('.json'):
-                fake_http_response(url, content, json_result=json.loads(content))
+                fake_http_response(url, json_data=json.loads(content))
             else:
                 fake_http_response(url, content)
 

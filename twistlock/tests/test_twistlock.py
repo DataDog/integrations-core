@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev import get_here
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.twistlock import TwistlockCheck
 
@@ -42,16 +43,14 @@ API_PATHS = [
 ]
 
 
-def read_fixture(*parts):
-    with open(os.path.join(HERE, 'fixtures', *parts), 'rb') as f:
-        return f.read()
-
-
 def register_fixture_group(fake_http_response, instance, fixture_group):
     """Answer each API path with the fixture named after its last segment."""
     for path in API_PATHS:
         name = path.split('/')[-1]
-        fake_http_response(instance['url'] + path, read_fixture(fixture_group, '{}.json'.format(name)))
+        fake_http_response(
+            instance['url'] + path,
+            read_file_binary(os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(name))),
+        )
 
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
@@ -94,7 +93,9 @@ def test_report_image_scan_empty_instances(aggregator, instance, fixture_group, 
 
     register_fixture_group(fake_http_response, instance, fixture_group)
     # The latest registration for a URL wins.
-    fake_http_response(instance['url'] + '/api/v1/images', read_fixture('empty_images.json'))
+    fake_http_response(
+        instance['url'] + '/api/v1/images', read_file_binary(os.path.join(HERE, 'fixtures', 'empty_images.json'))
+    )
     check.check(instance)
     check.check(instance)
 

@@ -7,6 +7,7 @@ from collections import namedtuple
 
 import pytest
 
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kong import Kong
 from datadog_checks.kong.check import KongCheck
@@ -60,13 +61,8 @@ def get_fixture_path(filename):
     return os.path.join(HERE, 'fixtures', filename)
 
 
-def read_fixture(filename):
-    with open(get_fixture_path(filename), 'rb') as f:
-        return f.read()
-
-
 def test_check_v3(aggregator, dd_run_check, fake_http_response):
-    fake_http_response(METRICS_URL, read_fixture('prometheus-v3.txt'))
+    fake_http_response(METRICS_URL, read_file_binary(get_fixture_path('prometheus-v3.txt')))
     instance = {
         'openmetrics_endpoint': METRICS_URL,
         'extra_metrics': [{'kong_memory_workers_lua_vms_bytes': 'memory.workers.lua.vms.bytes'}],
@@ -88,7 +84,7 @@ def test_check_v3(aggregator, dd_run_check, fake_http_response):
 
 
 def test_check(aggregator, dd_run_check, fake_http_response):
-    fake_http_response(METRICS_URL, read_fixture('prometheus.txt'))
+    fake_http_response(METRICS_URL, read_file_binary(get_fixture_path('prometheus.txt')))
     instance = {
         'openmetrics_endpoint': METRICS_URL,
         'extra_metrics': [{'kong_memory_workers_lua_vms_bytes': 'memory.workers.lua.vms.bytes'}],
