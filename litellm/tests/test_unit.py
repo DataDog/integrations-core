@@ -35,7 +35,7 @@ def test_litellm_mock_metrics(dd_run_check, aggregator, fake_http_response):
 def test_litellm_mock_invalid_endpoint(dd_run_check, aggregator, fake_http_response):
     fake_http_response(OM_MOCKED_INSTANCE['openmetrics_endpoint'], status_code=503)
     check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="HTTPClientStatusError"):
         dd_run_check(check)
 
     aggregator.assert_service_check('litellm.openmetrics.health', ServiceCheck.CRITICAL)

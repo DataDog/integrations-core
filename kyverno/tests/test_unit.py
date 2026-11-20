@@ -44,7 +44,7 @@ def test_kyverno_mock_metrics(dd_run_check, aggregator, fake_http_response, fixt
 def test_kyverno_mock_invalid_endpoint(dd_run_check, aggregator, fake_http_response):
     fake_http_response(OM_MOCKED_INSTANCE['openmetrics_endpoint'], status_code=503)
     check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="HTTPClientStatusError"):
         dd_run_check(check)
 
     aggregator.assert_service_check('kyverno.openmetrics.health', ServiceCheck.CRITICAL)

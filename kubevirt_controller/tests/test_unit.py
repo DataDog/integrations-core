@@ -30,7 +30,7 @@ def test_emits_can_connect_zero_when_service_is_down(dd_run_check, aggregator, i
         "GET", instance["kubevirt_controller_healthz_endpoint"], HTTPClientConnectionError("Connection refused")
     )
     check = KubeVirtControllerCheck("kubevirt_controller", {}, [instance])
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="HTTPClientConnectionError"):
         dd_run_check(check)
     aggregator.assert_metric(
         "kubevirt_controller.can_connect", value=0, tags=["endpoint:https://10.244.0.38:443/healthz", *base_tags]

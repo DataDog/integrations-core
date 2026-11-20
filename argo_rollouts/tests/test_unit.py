@@ -31,7 +31,7 @@ def test_check_mock_argo_rollouts_openmetrics(dd_run_check, aggregator, fake_htt
 def test_check_mock_invalid_argo_rollouts_openmetrics(dd_run_check, aggregator, fake_http_response):
     fake_http_response(ENDPOINT, status_code=503)
     check = ArgoRolloutsCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="HTTPClientStatusError"):
         dd_run_check(check)
 
     aggregator.assert_service_check('argo_rollouts.openmetrics.health', ServiceCheck.CRITICAL)
