@@ -20,5 +20,5 @@ Read this when the PR changes `assets/dashboards/`. Scope tags are defined in th
 - The Overview shows at least one error or failure signal when the check sends one, and a monitor summary scoped to the integration when it ships monitors (**Suggestion**, new only).
 - Conditional formatting agrees with the metric's direction: red at the bad end (high for errors and latency, low for success rates), no color on counts with no good or bad direction (**Suggestion**, PR scope).
 - Two metrics with different units on one widget (**Suggestion**, PR scope).
-- Structure: About and Overview groups first, About holding content, not data, and not full width; every widget in a group; timeseries at least 4 columns wide, streams at least 6 and placed last; query values with a timeseries background; the title names the integration and has no hyphen (it builds the URL) (**Suggestion**, new only).
+- Structure: About and Overview groups first, About holding content, not data, and not full width; query values with a timeseries background; the title names the integration and has no hyphen (it builds the URL) (**Suggestion**, new only).
 - Copy: Title Case group titles, sentence case widget titles, no units or integration name in titles, aliased formulas (**Nit**, PR scope).
