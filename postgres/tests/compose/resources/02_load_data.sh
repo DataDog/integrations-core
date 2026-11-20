@@ -44,6 +44,12 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
 EOSQL
 
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
+    CREATE TABLE fk_table_1 (id int PRIMARY KEY, data text UNIQUE NOT NULL);
+    CREATE TABLE fk_table_2 (id int PRIMARY KEY, data text);
+    ALTER TABLE fk_table_2 ADD CONSTRAINT fk_table_2_fk FOREIGN KEY (data) REFERENCES fk_table_1(data) NOT VALID;
+EOSQL
+
 # Create a foreign table
 echo -e "id,name\n1,Alice\n2,Bob" > /tmp/sample.csv
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL

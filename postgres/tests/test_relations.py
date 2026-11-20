@@ -351,6 +351,27 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
+def test_constraint_metrics(aggregator, integration_check, pg_instance):
+    pg_instance["relations"] = ["fk_table_1", "fk_table_2"]
+    pg_instance["dbname"] = "datadog_test"
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tag_fk_invalid = _get_expected_tags(
+        check,
+        pg_instance,
+        db=pg_instance["dbname"],
+        table="fk_table_2",
+        schema="public",
+        contype='f',
+        conname='fk_table_2_fk',
+    )
+    aggregator.assert_metric("postgresql.constraint.invalid", value=1, count=1, tags=expected_tag_fk_invalid)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_index_metrics_exclude_toast_tables(aggregator, integration_check, pg_instance):
     """
     Regression test: ensure index metrics exclude pg_toast tables when using
