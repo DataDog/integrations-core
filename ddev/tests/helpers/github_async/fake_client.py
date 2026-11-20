@@ -33,6 +33,7 @@ from ddev.utils.github_async.models import (
     PullRequestReviewComment,
     WorkflowJobsList,
     WorkflowRun,
+    WorkflowRunsList,
 )
 from ddev.utils.github_async.retry import RetryPolicy
 from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_long_message
@@ -52,6 +53,7 @@ from .factories import (
     make_workflow_dispatch_result,
     make_workflow_jobs_list,
     make_workflow_run,
+    make_workflow_runs_list,
 )
 
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
@@ -137,6 +139,7 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         ),
         # Default to a completed/successful run so happy-path tests don't have to register one.
         'get_workflow_run': lambda: make_response(make_workflow_run()),
+        'list_workflow_runs': lambda: make_response(make_workflow_runs_list()),
         'create_check_run': lambda: make_response(make_check_run(status=CheckRunStatus.IN_PROGRESS)),
         'update_check_run': lambda: make_response(make_check_run()),
         # An empty page; tests that need artifacts register their own ArtifactsList.
@@ -576,6 +579,40 @@ class FakeAsyncGitHubClient:
             output=output,
             timeout=timeout,
         )
+
+    async def list_workflow_runs(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        per_page: int = 30,
+        timeout: float | None = None,
+        *,
+        branch: str | None = None,
+        event: str | None = None,
+        created: str | None = None,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowRunsList]]:
+        kwargs = {
+            'owner': owner,
+            'repo': repo,
+            'workflow_id': workflow_id,
+            'per_page': per_page,
+            'timeout': timeout,
+            'branch': branch,
+            'event': event,
+            'created': created,
+        }
+        self._record('list_workflow_runs', **kwargs)
+        response = self._resolve_response('list_workflow_runs', kwargs)
+        if isinstance(response, BaseException):
+            raise response
+        pages = response if isinstance(response, list) else [response]
+        for page in pages:
+            if isinstance(page, GitHubResponse):
+                yield page
+            else:
+                yield GitHubResponse.model_validate({'data': page, 'headers': {}})
 
     async def list_workflow_run_artifacts(
         self,

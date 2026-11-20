@@ -3,8 +3,8 @@
 # Used to exclude specific actions from the pin check
 version: 3
 
-# pinact requires a version comment next to every SHA pin. These two actions
-# cannot satisfy that check, so they are exempt from it.
+# pinact requires every action to be pinned to a SHA with a version comment.
+# The actions below are exempt, each for the reason given.
 rules:
   # Only publishes the `v1` tag; every other ref is a branch, so the pin tracks
   # a `master` commit and there is no version to name.
@@ -16,3 +16,10 @@ rules:
   - ignore: true
     conditions:
       - expr: ActionRepoFullName == "DataDog/commit-headless"
+  # Dispatcher callers reference `test-dispatch.yml@master` on purpose: a caller
+  # on a release branch or tag must run master's Dispatcher, and its octo-sts
+  # policy only accepts `test-dispatch.yml` from `refs/heads/master`. A SHA pin
+  # would freeze it and fail the token exchange. Only that exact call is exempt.
+  - ignore: true
+    conditions:
+      - expr: ActionName == "DataDog/integrations-core/.github/workflows/test-dispatch.yml" && ActionVersion == "master"
