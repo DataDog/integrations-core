@@ -43,7 +43,13 @@ def parse_expiry(value: str) -> datetime.date | None:
 def parse_licenses(
     root: Element, warn: Callable[..., None], debug: Callable[..., None], today: datetime.date
 ) -> list[Sample]:
-    """A perpetual license (`Never`) or an unparseable date reports `expired` only: no day count is made up."""
+    """Send `license.days_left` and `license.expired` for each licensed feature.
+
+    `days_left` is sent only for a license that has not expired. PAN-OS keeps listing an expired license until its
+    key is deleted or replaced, so a negative count would keep an expiry alert firing indefinitely; `expired` carries
+    that state instead. A license that expires today sends 0. A perpetual license (`Never`) or an unparseable date
+    sends `expired` only: no day count is made up.
+    """
     licenses = root.find('result/licenses')
     if licenses is None:
         warn('Unknown shape of `request license info`: no result/licenses, sending no license metrics')
@@ -55,13 +61,15 @@ def parse_licenses(
         if not feature:
             continue
         tags = (f'feature:{feature_tag(feature)}',)
+        expired = (text(entry, 'expired') or '').lower()
         expires = text(entry, 'expires') or ''
         expiry = parse_expiry(expires)
         if expiry is not None:
-            samples.append(Sample('license.days_left', (expiry - today).days, tags, 'gauge'))
+            days_left = (expiry - today).days
+            if expired != 'yes' and days_left >= 0:
+                samples.append(Sample('license.days_left', days_left, tags, 'gauge'))
         elif expires.lower() != 'never':
             debug('License %s has an unparseable expiry date %r', feature, expires)
-        expired = (text(entry, 'expired') or '').lower()
         if expired in ('yes', 'no'):
             samples.append(Sample('license.expired', int(expired == 'yes'), tags, 'gauge'))
     return samples
