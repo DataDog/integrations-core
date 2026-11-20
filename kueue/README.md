@@ -129,6 +129,8 @@ This annotation targets the container named `manager`, which is the container na
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+Kueue 0.20 and later, or Kueue 0.19 with the `UnadmittedWorkloadsObservability` feature gate enabled, report the workloads that are not admitted in `kueue.unadmitted_workloads` and `kueue.local_queue.unadmitted_workloads`. The `underlying_cause` tag carries the reason of the Workload's `QuotaReserved` condition. To find jobs blocked by Topology Aware Scheduling, filter on `underlying_cause:TopologyPlacementFailed`: the topology requirements of these workloads cannot be satisfied with the current topology usage.
+
 ### Events
 
 By default, the Kueue integration polls the Kueue Workload custom resources and sends Datadog events for lifecycle

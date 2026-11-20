@@ -103,6 +103,40 @@ def test_queue_tagger_tags(dd_run_check, aggregator, instance, mock_http_respons
     tagger.assert_called('kueue_resource_flavor://default-flavor', tagger.ORCHESTRATOR)
 
 
+@pytest.mark.parametrize(
+    'metric, queue_tags',
+    [
+        pytest.param('kueue.unadmitted_workloads', [], id='cluster_queue'),
+        pytest.param(
+            'kueue.local_queue.unadmitted_workloads',
+            ['kueue_local_queue:user-queue', 'namespace:default'],
+            id='local_queue',
+        ),
+    ],
+)
+def test_unadmitted_workloads(metric, queue_tags, dd_run_check, aggregator, instance, mock_http_response):
+    """Workloads blocked by Topology Aware Scheduling are counted per queue under their `underlying_cause`."""
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
+    dd_run_check(check)
+
+    common_tags = [
+        *instance['tags'],
+        f'endpoint:{instance["openmetrics_endpoint"]}',
+        'kueue_cluster_queue:cluster-queue',
+        'reason:NoReservation',
+        'replica_role:leader',
+        *queue_tags,
+    ]
+    aggregator.assert_metric(
+        metric,
+        value=2,
+        tags=[*common_tags, 'underlying_cause:TopologyPlacementFailed'],
+        metric_type=aggregator.GAUGE,
+    )
+
+
 def test_queue_tagger_tags_are_scoped(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
     tagger.set_tags(
