@@ -162,7 +162,7 @@ def run_main(monkeypatch, publisher, review_data, tmp_path, post):
     review_json.write_text(json.dumps(review_data))
     monkeypatch.setattr(publisher.subprocess, "run", lambda *args, **kwargs: SimpleNamespace(returncode=0))
     monkeypatch.setattr(publisher, "get_pr_head_sha", lambda *_: "current-head")
-    monkeypatch.setattr(publisher, "get_diff_lines", lambda *_: {"check.py": [2]})
+    monkeypatch.setattr(publisher, "get_diff_lines", lambda *_: {"check.py": {"RIGHT": [2], "LEFT": []}})
     monkeypatch.setattr(publisher, "post_review", post)
     monkeypatch.setattr(sys, "argv", ["gh-post-review", str(review_json)])
     publisher.main()
@@ -204,7 +204,7 @@ def test_body_only_retry_retains_the_proof_marker(
         lambda *args, **kwargs: SimpleNamespace(returncode=0),
     )
     monkeypatch.setattr(publisher, "get_pr_head_sha", lambda *_: "current-head")
-    monkeypatch.setattr(publisher, "get_diff_lines", lambda *_: {"check.py": [2]})
+    monkeypatch.setattr(publisher, "get_diff_lines", lambda *_: {"check.py": {"RIGHT": [2], "LEFT": []}})
 
     def post_with_inline_failure(*_args):
         payload = _args[-1]
@@ -236,7 +236,7 @@ def test_posted_body_counts_requests_including_body_fallback(
 
     monkeypatch.setattr(publisher.subprocess, "run", lambda *args, **kwargs: SimpleNamespace(returncode=0))
     monkeypatch.setattr(publisher, "get_pr_head_sha", lambda *_: "current-head")
-    monkeypatch.setattr(publisher, "get_diff_lines", lambda *_: {"check.py": [2]})
+    monkeypatch.setattr(publisher, "get_diff_lines", lambda *_: {"check.py": {"RIGHT": [2], "LEFT": []}})
     monkeypatch.setattr(publisher, "post_review", lambda *args: posted_payloads.append(args[-1]) or {})
     monkeypatch.setattr(sys, "argv", ["gh-post-review", str(review_json)])
 
@@ -318,7 +318,7 @@ def test_repost_posts_an_already_posted_commit(monkeypatch, publisher, review_da
     review_json.write_text(json.dumps(review_data))
     monkeypatch.setattr(publisher.subprocess, "run", lambda *args, **kwargs: SimpleNamespace(returncode=0))
     monkeypatch.setattr(publisher, "get_pr_head_sha", lambda *_: "current-head")
-    monkeypatch.setattr(publisher, "get_diff_lines", lambda *_: {"check.py": [2]})
+    monkeypatch.setattr(publisher, "get_diff_lines", lambda *_: {"check.py": {"RIGHT": [2], "LEFT": []}})
     monkeypatch.setattr(publisher, "post_review", lambda *args: posted_payloads.append(args[-1]) or {})
     monkeypatch.setattr(sys, "argv", ["gh-post-review", "--repost", str(review_json)])
 
@@ -392,3 +392,16 @@ def test_find_posted_review_only_counts_the_posting_account(monkeypatch, reviews
     )
 
     assert module.find_posted_review("o/r", 1, "sha", viewer) == expected
+
+
+@pytest.mark.parametrize(
+    ("side", "line", "expected"),
+    [("LEFT", 11, 11), ("RIGHT", 15, 15), ("RIGHT", 11, 14)],
+)
+def test_comments_snap_to_lines_on_their_own_side(publisher, side, line, expected):
+    patch = "@@ -10,3 +14,3 @@\n ctx\n-old\n+new\n ctx"
+    diff_lines = {"check.py": publisher._parse_patch_lines(patch)}
+
+    postable, _ = publisher.prepare_comments([{"path": "check.py", "line": line, "side": side, "body": "b"}], diff_lines)
+
+    assert postable[0]["line"] == expected

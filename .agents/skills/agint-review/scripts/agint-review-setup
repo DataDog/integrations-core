@@ -361,6 +361,16 @@ def touched_integration_roots(files: list[str], integration_roots: list[str]) ->
     return sorted({r for r in integration_roots for f in files if f == r or f.startswith(r + "/")})
 
 
+def changed_integration_roots(files: list[str], head_tree: Path, base_tree: Path) -> list[str]:
+    """The integration roots the PR changes, found in either tree.
+
+    The base tree counts too, so a PR that deletes a whole integration still gets
+    the integration reviewers.
+    """
+    roots = find_integration_roots_in_tree(head_tree) | find_integration_roots_in_tree(base_tree)
+    return touched_integration_roots(files, sorted(roots))
+
+
 def select_agents(
     files: list[str],
     registry: dict[str, Any],
@@ -687,17 +697,24 @@ def setup_worktrees(pr_number: int, head_sha: str, base_ref: str, review_dir: Pa
     return head_path, base_path
 
 
-def reset_findings(review_dir: Path) -> Path:
-    """Create an empty findings/ folder for this run, removing a redone round's old findings.
+ROUND_WORKTREES = ("head", "base")
 
-    The challenger reads every file in findings/, so a finding left by a reviewer
-    that this run doesn't select would reach the new review.
+
+def reset_round_outputs(review_dir: Path):
+    """Delete a redone round's earlier outputs, keeping its worktrees, and create an empty findings/.
+
+    Everything else in the round belongs to the earlier run: the challenger reads
+    every file in findings/, and `post` would publish an old review.json (for
+    example a partial one) under this run's context.json.
     """
-    findings = review_dir / "findings"
-    if findings.exists():
-        safe_rmtree(findings, review_dir)
-    findings.mkdir(exist_ok=True)
-    return findings
+    for entry in review_dir.iterdir():
+        if entry.name in ROUND_WORKTREES:
+            continue
+        if entry.is_dir() and not entry.is_symlink():
+            safe_rmtree(entry, review_dir)
+        else:
+            entry.unlink()
+    (review_dir / "findings").mkdir()
 
 
 def _ensure_worktree_at(path: Path, target_ref: str, label: str):
@@ -1164,11 +1181,10 @@ def main():
     head_path, base_path = setup_worktrees(
         pr_number, pr["headRefOid"], pr["baseRefName"], review_dir, remote
     )
-    reset_findings(review_dir)
+    reset_round_outputs(review_dir)
     gi_added = ensure_gitignore(root, args.review_dir_base)
 
-    all_roots = sorted(find_integration_roots_in_tree(head_path))
-    integration_roots = touched_integration_roots(files, all_roots)
+    integration_roots = changed_integration_roots(files, head_path, base_path)
     selected = select_agents(files, registry, aspects, integration_roots)
     selected, skipped_agents = skip_conventions_without_agents_md(selected, base_path)
     languages = detect_languages(files)

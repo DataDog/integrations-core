@@ -247,11 +247,14 @@ def get_viewer_login() -> str | None:
     return result.stdout.strip() or None
 
 
-def get_diff_lines(repo: str, pr_number: int) -> dict[str, list[int]]:
+DiffLines = dict[str, dict[str, list[int]]]  # {filename: {"RIGHT": [...], "LEFT": [...]}}
+
+
+def get_diff_lines(repo: str, pr_number: int) -> DiffLines:
     """
     Fetch the list of changed files in a PR and parse each file's patch
-    to extract valid RIGHT-side (new file) line numbers.
-    Returns {filename: sorted_list_of_line_numbers}.
+    to extract the line numbers comments can use on each side.
+    Returns {filename: {"RIGHT": new-file lines, "LEFT": old-file lines}}.
     On failure, returns an empty dict so the caller can fall back gracefully.
     """
     try:
@@ -275,33 +278,35 @@ def get_diff_lines(repo: str, pr_number: int) -> dict[str, list[int]]:
     return {f["filename"]: _parse_patch_lines(f.get("patch", "")) for f in files}
 
 
-def _parse_patch_lines(patch: str) -> list[int]:
+def _parse_patch_lines(patch: str) -> dict[str, list[int]]:
     """
-    Parse a unified diff patch and return the RIGHT-side (new file) line numbers
-    that are present in the diff. These are the only lines GitHub will accept for
-    inline review comments on the RIGHT side.
+    Parse a unified diff patch and return the line numbers present in the diff on
+    each side: RIGHT (new file) and LEFT (old file). These are the only lines
+    GitHub accepts for inline review comments on that side.
 
-    Hunk headers (@@ -A,B +C,D @@) reset the new-file line counter to C.
-    Deletions (-) exist only on the LEFT side; new_line does not advance.
-    Additions (+) and context lines ( ) are on the RIGHT side at new_line.
+    Hunk headers (@@ -A,B +C,D @@) reset the old-file counter to A and the
+    new-file counter to C. Deletions (-) are on the LEFT side only, additions (+)
+    on the RIGHT side only, and context lines ( ) on both.
     """
-    if not patch:
-        return []
-    lines: list[int] = []
-    new_line = 0
-    for raw in patch.split("\n"):
-        m = re.match(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@", raw)
+    sides: dict[str, list[int]] = {"RIGHT": [], "LEFT": []}
+    old_line = new_line = 0
+    for raw in (patch or "").split("\n"):
+        m = re.match(r"^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@", raw)
         if m:
-            new_line = int(m.group(1))
+            old_line, new_line = int(m.group(1)), int(m.group(2))
             continue
         if raw.startswith("-"):
-            # Deleted line: LEFT side only; new_line does not advance
-            continue
-        if raw.startswith("+") or raw.startswith(" "):
-            # Added (+) or context ( ): present on the RIGHT side
-            lines.append(new_line)
+            sides["LEFT"].append(old_line)
+            old_line += 1
+        elif raw.startswith("+"):
+            sides["RIGHT"].append(new_line)
             new_line += 1
-    return lines
+        elif raw.startswith(" "):
+            sides["LEFT"].append(old_line)
+            sides["RIGHT"].append(new_line)
+            old_line += 1
+            new_line += 1
+    return sides
 
 
 def _nearest_diff_line(target: int, available: list[int]) -> int | None:
@@ -318,7 +323,7 @@ def _nearest_diff_line(target: int, available: list[int]) -> int | None:
 
 
 def prepare_comments(
-    raw_comments: list[dict], diff_lines: dict[str, list[int]]
+    raw_comments: list[dict], diff_lines: DiffLines
 ) -> tuple[list[dict], list[dict]]:
     """
     Convert raw reviewer comments into GitHub API comment objects, splitting off any
@@ -362,7 +367,7 @@ def prepare_comments(
             body_fallback.append(c)
             continue
 
-        snapped = _nearest_diff_line(line, diff_lines[path])
+        snapped = _nearest_diff_line(line, diff_lines[path].get(side, []))
         if snapped is None:
             # Too far from any diff line to attach inline; route to body.
             body_fallback.append(c)

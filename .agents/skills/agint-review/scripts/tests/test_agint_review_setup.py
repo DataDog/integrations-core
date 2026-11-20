@@ -437,11 +437,27 @@ def test_fetch_remote_is_the_one_pointing_at_the_pr_repo(setup_script, output, e
     assert setup_script.remote_for_repo("DataDog/integrations-core", output) == expected
 
 
-def test_redoing_a_round_drops_findings_from_its_earlier_run(setup_script, tmp_path):
-    findings = tmp_path / "round-1" / "findings"
-    findings.mkdir(parents=True)
-    (findings / "security.md").write_text("stale")
+def test_redoing_a_round_keeps_only_its_worktrees(setup_script, tmp_path):
+    round_dir = tmp_path / "round-1"
+    for d in ("head", "base", "findings", "diffs"):
+        (round_dir / d).mkdir(parents=True)
+    (round_dir / "findings" / "security.md").write_text("stale")
+    (round_dir / "review.json").write_text("{}")
+    (round_dir / "context.json").write_text("{}")
 
-    setup_script.reset_findings(tmp_path / "round-1")
+    setup_script.reset_round_outputs(round_dir)
 
-    assert findings.is_dir() and not any(findings.iterdir())
+    assert sorted(p.name for p in round_dir.iterdir()) == ["base", "findings", "head"]
+    assert not any((round_dir / "findings").iterdir())
+
+
+def test_deleted_integration_is_still_an_integration_root(setup_script, tmp_path):
+    head, base = tmp_path / "head", tmp_path / "base"
+    head.mkdir()
+    (base / "foo").mkdir(parents=True)
+    (base / "foo" / "manifest.json").write_text("{}")
+
+    roots = setup_script.changed_integration_roots(["foo/manifest.json", "foo/datadog_checks/foo/check.py"], head, base)
+
+    assert roots == ["foo"]
+
