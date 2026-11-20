@@ -43,13 +43,7 @@ def parse_expiry(value: str) -> datetime.date | None:
 def parse_licenses(
     root: Element, warn: Callable[..., None], debug: Callable[..., None], today: datetime.date
 ) -> list[Sample]:
-    """Send `license.days_left` and `license.expired` for each licensed feature.
-
-    `days_left` is sent only for a license that has not expired. PAN-OS keeps listing an expired license until its
-    key is deleted or replaced, so a negative count would keep an expiry alert firing indefinitely; `expired` carries
-    that state instead. A license that expires today sends 0. A perpetual license (`Never`) or an unparseable date
-    sends `expired` only: no day count is made up.
-    """
+    """Only unexpired licenses with a parseable date send `days_left`; `expired` is sent whenever PAN-OS reports it."""
     licenses = root.find('result/licenses')
     if licenses is None:
         warn('Unknown shape of `request license info`: no result/licenses, sending no license metrics')
