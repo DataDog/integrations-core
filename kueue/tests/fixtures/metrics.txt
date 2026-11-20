@@ -259,6 +259,11 @@ kueue_replaced_workload_slices_total{replica_role="leader",cluster_queue="cluste
 # TYPE kueue_reserving_active_workloads gauge
 kueue_reserving_active_workloads{replica_role="leader",cluster_queue="cluster-queue"} 1
 
+# HELP kueue_unadmitted_workloads The number of unadmitted workloads, per 'cluster_queue', 'reason', and 'underlying_cause'. This metric is only emitted when UnadmittedWorkloadsObservability feature gate is enabled.
+# TYPE kueue_unadmitted_workloads gauge
+kueue_unadmitted_workloads{cluster_queue="cluster-queue",reason="NoReservation",replica_role="leader",underlying_cause="TopologyPlacementFailed"} 2
+kueue_unadmitted_workloads{cluster_queue="cluster-queue",reason="NoReservation",replica_role="leader",underlying_cause="WaitingForQuota"} 1
+
 # HELP kueue_workload_creation_latency_seconds The time between a job was created until its workload was created, per 'job_kind'. Entries are only recorded for objects with generation 1.
 # TYPE kueue_workload_creation_latency_seconds histogram
 kueue_workload_creation_latency_seconds_bucket{replica_role="leader",job_kind="Job",le="1"} 1
@@ -392,6 +397,10 @@ kueue_local_queue_reserving_active_workloads{replica_role="leader",name="user-qu
 kueue_local_queue_status{replica_role="leader",name="user-queue",namespace="default",active="True"} 1
 kueue_local_queue_status{replica_role="leader",name="user-queue",namespace="default",active="False"} 0
 kueue_local_queue_status{replica_role="leader",name="user-queue",namespace="default",active="Unknown"} 0
+
+# HELP kueue_local_queue_unadmitted_workloads The number of unadmitted workloads, per 'name', 'namespace', 'cluster_queue', 'reason', and 'underlying_cause'. This metric is only emitted when UnadmittedWorkloadsObservability feature gate is enabled.
+# TYPE kueue_local_queue_unadmitted_workloads gauge
+kueue_local_queue_unadmitted_workloads{cluster_queue="cluster-queue",name="user-queue",namespace="default",reason="NoReservation",replica_role="leader",underlying_cause="TopologyPlacementFailed"} 2
 
 # HELP kueue_cluster_queue_borrowing_limit Reports the cluster_queue's resource borrowing limit within all the flavors
 # TYPE kueue_cluster_queue_borrowing_limit gauge
