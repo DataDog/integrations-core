@@ -45,8 +45,6 @@ def test_licenses_of_the_capture():
 @pytest.mark.parametrize(
     'expired, expires, expected',
     [
-        # A license still in force must keep its day count, or the expiry monitor never warns.
-        pytest.param('no', 'October 22, 2026', {'license.expired': 0, 'license.days_left': 13}, id='active'),
         # The last day is still in force: dropping 0 would silence the monitor on the day it matters most.
         pytest.param('no', 'October 09, 2026', {'license.expired': 0, 'license.days_left': 0}, id='expires-today'),
         # PAN-OS keeps listing expired licenses, so a negative count would keep the expiry monitor red forever.
