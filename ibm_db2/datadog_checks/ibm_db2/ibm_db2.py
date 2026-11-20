@@ -29,6 +29,7 @@ from .health import Db2Health
 from .metrics import MetricsCollector
 from .query_metrics import QueryMetricsCollector
 from .query_samples import QuerySamplesCollector
+from .schemas import Db2SchemaCollectionJob
 from .utils import get_version
 
 
@@ -68,6 +69,7 @@ class IbmDb2Check(DatabaseCheck):
             self.health = Db2Health(self)
             self._query_metrics = self.register_async_job(QueryMetricsCollector(self, self._config))
             self._query_samples = self.register_async_job(QuerySamplesCollector(self, self._config))
+            self._schema_collection = self.register_async_job(Db2SchemaCollectionJob(self, self._config))
 
     def debug_stats_kwargs(self, tags: list[str] | None = None) -> dict:
         return {
