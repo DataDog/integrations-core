@@ -107,7 +107,9 @@ def _mint_oidc_token(http_get: Callable[..., httpx.Response], http_post: Callabl
     request_token = os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']
     response = http_get(
         request_url,
-        params={'audience': 'pypi'},
+        # The runner's token URL already carries query parameters; httpx would replace them if
+        # passed through `params`.
+        params={**httpx.URL(request_url).params, 'audience': 'pypi'},
         headers={'Authorization': f'bearer {request_token}'},
         timeout=30,
     )
@@ -322,5 +324,10 @@ def publish_placeholders(
             'or run in GitHub Actions with trusted publishing.'
         )
 
-    PlaceholderOrchestrator(report, PlaceholderProcessor(report, ports, token), ports).run()
+    orchestrator = PlaceholderOrchestrator(report, PlaceholderProcessor(report, ports, token), ports)
+    orchestrator.run()
+    if orchestrator.shutdown_request is not None:
+        # A stopped run misses the success and error hooks of whatever was still in flight, so
+        # its report cannot be trusted as an outcome.
+        raise ValueError(f'Publishing placeholders stopped: {orchestrator.shutdown_request.kind.name.lower()}')
     return report

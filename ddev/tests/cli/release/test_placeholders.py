@@ -3,7 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
+import signal
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 from typing import Callable
@@ -15,7 +18,7 @@ from twine.commands.check import check as twine_check
 from ddev.release.placeholders import PlaceholderPorts, publish_placeholders
 from ddev.repo.core import Repository
 
-GITHUB_TOKEN_URL = 'https://github-actions.example/token'
+GITHUB_TOKEN_URL = 'https://github-actions.example/token?api-version=2.0'
 INSTALL_DOCS_URL = 'https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install'
 
 REPO_PACKAGES = {
@@ -185,7 +188,7 @@ def test_publishes_through_trusted_publishing_minting_one_token_per_package(tmp_
     assert report.published == {'datadog-n8n', 'datadog-tokumx'}
     assert mints == [{'token': 'oidc-jwt'}, {'token': 'oidc-jwt'}]
     assert token_requests[0]['headers'] == {'Authorization': 'bearer gh-secret'}
-    assert token_requests[0]['params'] == {'audience': 'pypi'}
+    assert token_requests[0]['params'] == {'api-version': '2.0', 'audience': 'pypi'}
     assert [token for _, token in uploads] == ['pypi-minted', 'pypi-minted']
 
 
@@ -265,3 +268,16 @@ def test_aborts_without_a_token_or_trusted_publishing(tmp_path, monkeypatch):
 def test_unknown_name_aborts(tmp_path):
     with pytest.raises(ValueError, match='Unknown integration or package name: not-an-integration'):
         publish_placeholders(_make_repo(tmp_path), ('not-an-integration',))
+
+
+@pytest.mark.skipif(sys.platform == 'win32', reason='sends SIGINT to the process')
+def test_a_stopped_run_fails_rather_than_reporting_success(tmp_path, monkeypatch):
+    monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
+
+    def upload(wheel, token):
+        os.kill(os.getpid(), signal.SIGINT)
+
+    ports, _ = _ports(http_get=_pypi_states(), upload=upload)
+
+    with pytest.raises(ValueError, match='Publishing placeholders stopped: cancelled'):
+        publish_placeholders(_make_repo(tmp_path), ('n8n',), ports=ports)
