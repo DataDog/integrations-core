@@ -221,9 +221,9 @@ The integration answers success only after intake has confirmed the finalize. Th
 
 ### ABORT-01 — Abort the upload of a failed run
 
-When a run that passed request validation fails, the integration aborts its upload session (intake ABORT-01), including after the run time limit. The abort is bounded by the abort time limit. An abort failure is logged and never changes the run's answer. The integration never aborts a session after its finalize succeeded.
+When a run that passed request validation fails, the integration aborts its upload session (intake ABORT-01), including after the run time limit. The abort carries the run's failure code and message, the same as its answer to the Agent (OBS-01), as the JSON body `{"error": {"code": "...", "message": "..."}}`. The abort is bounded by the abort time limit. An abort failure is logged and never changes the run's answer. The integration never aborts a session after its finalize succeeded.
 
-Why: The worker learns that a run failed only from its session (its-agent RESULT-01). A failed run whose session stayed open would keep the worker waiting until the job deadline.
+Why: The worker learns that a run failed only from its session (its-agent RESULT-01), and reports the reason intake returns for the aborted session (intake ABORT-01, FINISH-06). A failed run whose session stayed open would keep the worker waiting until the job deadline.
 
 ## Time and cancellation
 
@@ -314,7 +314,7 @@ The integration uses these intake operations:
 | Register descriptor | Register the columns before evaluating the query (DESC-04) |
 | Upload page | Upload each page (UPLOAD-01 to UPLOAD-05, UPLOAD-08) |
 | Finalize | Finish the upload (FINISH-01) |
-| Abort | Stop the upload of a failed run (ABORT-01) |
+| Abort | Stop the upload of a failed run, with its failure code and message (ABORT-01) |
 
 ## Limits
 

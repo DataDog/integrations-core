@@ -435,8 +435,13 @@ class Run:
                 try:
                     if self.intake is None:
                         self.intake = Intake(self.delivery, api_key, hostname, proxy, self.request.get("traceContext"))
+                    if self.cancelled.is_set():
+                        answer = failed("cancelled", "The remote query was cancelled.")
+                    # ABORT-01: the abort carries the failure the run answers the Agent with.
+                    error = json.loads(answer).get("error")
+                    body = encode({"error": error}) if error else b""
                     async with asyncio.timeout(ABORT_TIMEOUT):
-                        await self.intake.request("POST", "/abort")
+                        await self.intake.request("POST", "/abort", body)
                 except (Exception, asyncio.CancelledError):
                     self.log(check, "abort_failed", "upload_failed")
         if self.cancelled.is_set() and not self.finalized:
