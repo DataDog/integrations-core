@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import os
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -43,7 +44,9 @@ API_PATHS = [
 ]
 
 
-def register_fixture_group(fake_http_response, instance, fixture_group):
+def register_fixture_group(
+    fake_http_response: Callable[..., Any], instance: dict[str, Any], fixture_group: str
+) -> None:
     """Answer each API path with the fixture named after its last segment."""
     for path in API_PATHS:
         name = path.split('/')[-1]

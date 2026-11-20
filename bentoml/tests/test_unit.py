@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Callable
+from typing import Any
+
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
@@ -17,7 +20,7 @@ from .common import (
 HEALTH_URLS = ['http://bentoml:3000//livez', 'http://bentoml:3000//readyz']
 
 
-def register_metrics_response(fake_http_response):
+def register_metrics_response(fake_http_response: Callable[..., Any]) -> None:
     with open(get_fixture_path('metrics.txt'), 'rb') as f:
         fake_http_response(OM_MOCKED_INSTANCE['openmetrics_endpoint'], f.read())
 

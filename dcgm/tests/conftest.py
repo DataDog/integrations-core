@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import copy
 import os
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -38,7 +39,7 @@ def check(instance):
     return DcgmCheck('dcgm.', {}, [instance])
 
 
-def serve_fixture(fake_http_response, name):
+def serve_fixture(fake_http_response: Callable[..., Any], name: str) -> None:
     with open(os.path.join(os.path.dirname(__file__), 'fixtures', name), 'rb') as f:
         fake_http_response(common.INSTANCE['openmetrics_endpoint'], f.read(), headers={'Content-Type': 'text/plain'})
 

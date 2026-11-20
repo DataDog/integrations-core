@@ -6,8 +6,10 @@ import logging
 import os
 import re
 import subprocess
+from collections.abc import Callable
 from contextlib import contextmanager
 from copy import deepcopy
+from typing import Any
 
 import mock
 import pytest
@@ -210,7 +212,7 @@ LEGACY_UNIT_STATS_URL = LEGACY_UNIT_URL + '/;csv;norefresh'
 ENTERPRISE_VERSION_URL = 'http://the_url_does_not_matter/'
 
 
-def _serve_for_legacy_unit_url(fake_http_response, data):
+def _serve_for_legacy_unit_url(fake_http_response: Callable[..., Any], data: bytes) -> None:
     # The legacy check reads the HTML stats page for its version, then the CSV export for its metrics.
     fake_http_response(LEGACY_UNIT_URL, data)
     fake_http_response(LEGACY_UNIT_STATS_URL, data)

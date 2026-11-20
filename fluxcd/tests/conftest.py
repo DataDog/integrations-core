@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -110,7 +112,7 @@ def check(instance):
     return FluxcdCheck("fluxcd", {}, [instance])
 
 
-def _register_metrics(fake_http_response, fixture_name, *urls):
+def _register_metrics(fake_http_response: Callable[..., Any], fixture_name: str, *urls: str) -> None:
     with open(os.path.join(os.path.dirname(__file__), "fixtures", fixture_name), "r") as f:
         content = f.read()
 

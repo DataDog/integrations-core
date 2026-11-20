@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import os
+from collections.abc import Callable
+from typing import Any
 
 from datadog_checks.dev import get_docker_hostname, get_here
 
@@ -326,7 +327,7 @@ MOCKED_RESPONSE_FIXTURES = {
 }
 
 
-def register_mocked_responses(fake_http_response):
+def register_mocked_responses(fake_http_response: Callable[..., Any]) -> None:
     for url, metrics_file in MOCKED_RESPONSE_FIXTURES.items():
         with open(os.path.join(HERE, 'fixtures', metrics_file), 'rb') as f:
             fake_http_response(url, f.read())

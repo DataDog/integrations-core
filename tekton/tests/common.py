@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from collections.abc import Callable
+from typing import Any
 
 from datadog_checks.dev import get_here
 from datadog_checks.tekton import TektonCheck
@@ -139,7 +141,7 @@ def check(instance):
     return TektonCheck('tekton', {}, [instance])
 
 
-def register_endpoint_responses(fake_http_response):
+def register_endpoint_responses(fake_http_response: Callable[..., Any]) -> None:
     mapping = {
         'http://tekton-pipelines:9090': 'pipelines.txt',
         'http://tekton-triggers:9000': 'triggers.txt',

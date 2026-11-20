@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -233,7 +235,7 @@ def operator_instance_use_openmetrics():
     }
 
 
-def _register_metrics_fixture(fake_http_response, url, fixture_name):
+def _register_metrics_fixture(fake_http_response: Callable[..., Any], url: str, fixture_name: str) -> None:
     with open(os.path.join(os.path.dirname(__file__), "fixtures", fixture_name), "r") as f:
         text_data = f.read()
     fake_http_response(url, text_data, headers={"Content-Type": "text/plain"})
