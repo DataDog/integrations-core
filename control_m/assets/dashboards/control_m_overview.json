@@ -1214,7 +1214,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:control_m.job.overrun_ms{$control_m_instance,$ctm_server} by {job_name,ctm_server,control_m_instance}"
+                      "query": "avg:control_m.job.overrun_ms{$control_m_instance,$ctm_server} by {job_name,job_id,ctm_server,control_m_instance}"
                     }
                   ],
                   "response_format": "scalar",
