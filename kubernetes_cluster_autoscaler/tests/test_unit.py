@@ -10,25 +10,31 @@ from datadog_checks.kubernetes_cluster_autoscaler import KubernetesClusterAutosc
 
 from .common import METRICS_MOCK, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    assert KubernetesClusterAutoscalerCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check_kubernetes_cluster_autoscaler(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('kubernetes_cluster_autoscaler_metrics.txt'))
-    check = KubernetesClusterAutoscalerCheck('kubernetes_cluster_autoscaler', {}, [instance])
+    mock_http_response(file_path=get_fixture_path("kubernetes_cluster_autoscaler_metrics.txt"))
+    check = KubernetesClusterAutoscalerCheck("kubernetes_cluster_autoscaler", {}, [instance])
     dd_run_check(check)
 
     for metric in METRICS_MOCK:
         aggregator.assert_metric(metric)
-        aggregator.assert_metric_has_tag(metric, 'test:test')
+        aggregator.assert_metric_has_tag(metric, "test:test")
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_service_check('kubernetes_cluster_autoscaler.openmetrics.health', ServiceCheck.OK)
+    aggregator.assert_service_check("kubernetes_cluster_autoscaler.openmetrics.health", ServiceCheck.OK)
 
 
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match='InstanceConfig`:\nopenmetrics_endpoint\n  Field required',
+        match="InstanceConfig`:\nopenmetrics_endpoint\n  Field required",
     ):
-        check = KubernetesClusterAutoscalerCheck('KubernetesClusterAutoscalerCheck', {}, [{}])
+        check = KubernetesClusterAutoscalerCheck("KubernetesClusterAutoscalerCheck", {}, [{}])
         dd_run_check(check)
