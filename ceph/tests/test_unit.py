@@ -10,12 +10,14 @@ import mock
 import pytest
 
 from datadog_checks.ceph import Ceph
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import BASIC_CONFIG, CHECK_NAME, EXPECTED_SERVICE_CHECKS, EXPECTED_SERVICE_TAGS, mock_data
 from .common import EXPECTED_METRICS as ALL_METRICS
 
 EXPECTED_METRICS = [
     'ceph.num_mons',
+    'ceph.num_mons.active',
     'ceph.total_objects',
     'ceph.pgstate.active_clean',
 ]
@@ -229,6 +231,13 @@ def test_modern_release_metrics(aggregator, dd_run_check, fixture, release, vers
     aggregator.assert_metric('ceph.num_in_osds', value=1, count=1, tags=tags)
     aggregator.assert_metric('ceph.num_pools', value=2, count=1, tags=tags)
     aggregator.assert_metric('ceph.num_pgs', value=9, count=1, tags=tags)
+    # `ceph.osd.pct_used` needs a full OSD, and `ceph.total_objects` only exists before Nautilus.
+    metadata = {
+        name: row
+        for name, row in get_metadata_metrics().items()
+        if name not in ('ceph.osd.pct_used', 'ceph.total_objects')
+    }
+    aggregator.assert_metrics_using_metadata(metadata, check_submission_type=True, check_symmetric_inclusion=True)
     aggregator.assert_metric('ceph.pgstate.active_clean', value=9, count=1, tags=tags)
     aggregator.assert_metric('ceph.total_objects', count=0)
 

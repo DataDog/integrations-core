@@ -28,14 +28,7 @@ def test_check(dd_agent_check):
             continue
         aggregator.assert_metric(metric, at_least=1)
 
-    for sc in EXPECTED_SERVICE_CHECKS:
-        aggregator.assert_service_check(sc, status=Ceph.OK, tags=EXPECTED_SERVICE_TAGS)
-    aggregator.assert_service_check('ceph.overall_status', status=Ceph.OK, tags=EXPECTED_SERVICE_TAGS)
-
-
-@pytest.mark.e2e
-def test_mon_status_tag(dd_agent_check):
-    aggregator = dd_agent_check(BASIC_CONFIG, rate=True)
+    aggregator.assert_metric('ceph.num_mons.active', value=3, at_least=1)
 
     # The tag comes from `mon_status`, which Octopus (15) removed.
     if CEPH_MAJOR_VERSION < 15:
@@ -43,9 +36,6 @@ def test_mon_status_tag(dd_agent_check):
     else:
         aggregator.assert_metric_has_tag_prefix('ceph.num_mons', 'ceph_mon_state:', count=0)
 
-
-@pytest.mark.e2e
-def test_num_mons_active(dd_agent_check):
-    aggregator = dd_agent_check(BASIC_CONFIG, rate=True)
-
-    aggregator.assert_metric('ceph.num_mons.active', value=3, at_least=1)
+    for sc in EXPECTED_SERVICE_CHECKS:
+        aggregator.assert_service_check(sc, status=Ceph.OK, tags=EXPECTED_SERVICE_TAGS)
+    aggregator.assert_service_check('ceph.overall_status', status=Ceph.OK, tags=EXPECTED_SERVICE_TAGS)
