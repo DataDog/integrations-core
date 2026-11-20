@@ -56,6 +56,10 @@ REASON_TAG = 'reason'
 SCHEDULER_REASON_TAG = 'scheduler_reason'
 # Every series is per PodGroup, tagged like the PodGroup lifecycle events.
 WORKLOAD_TAG = 'kai_workload'
+# Scheduler tags shared by all batch schedulers, as on the PodGroup events and the pods the Agent tags.
+SCHEDULER_TAG = 'job_scheduler'
+SCHEDULER_QUEUE_TAG = 'job_scheduler_queue'
+SCHEDULER_WORKLOAD_TAG = 'job_scheduler_workload'
 UNKNOWN_REASON = 'unknown'
 KAI_REASONS = {
     'OverLimit': 'quota_exhausted',
@@ -332,12 +336,12 @@ def observe(podgroup: dict, pods: list[dict], owner: OwnerStatus | None = None) 
 
 
 def queue_tags(queue: QueueKey) -> list[str]:
-    tags = [f'kube_scheduler:{SCHEDULER_TAG_VALUE}']
+    tags = [f'{SCHEDULER_TAG}:{SCHEDULER_TAG_VALUE}']
     if queue.namespace:
         tags.append(f'kube_namespace:{queue.namespace}')
     if queue.queue:
         tags.append(f'kai_queue:{queue.queue}')
-        tags.append(f'kube_scheduler_queue:{queue.queue}')
+        tags.append(f'{SCHEDULER_QUEUE_TAG}:{queue.queue}')
     return tags
 
 
@@ -546,7 +550,8 @@ def workload_points(contributions: Iterable[Contribution]) -> list[tuple[str, fl
     """
     points: list[tuple[str, float, list[str]]] = []
     for contribution in contributions:
-        tags = [*queue_tags(contribution.queue), f'{WORKLOAD_TAG}:{workload_name(contribution.name)}']
+        name = workload_name(contribution.name)
+        tags = [*queue_tags(contribution.queue), f'{WORKLOAD_TAG}:{name}', f'{SCHEDULER_WORKLOAD_TAG}:{name}']
         hours = contribution.gpu_seconds / SECONDS_PER_HOUR
         if contribution.category == Category.BADPUT:
             reason = contribution.cause or UNKNOWN_REASON

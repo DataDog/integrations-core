@@ -47,7 +47,8 @@ files:
     - name: collect_scheduling_goodput
       description: |
         Experimental. Submit the scheduling goodput metrics, in GPU-hours since the previous run, as one series per
-        Workload tagged with `kueue_workload` and its queue, so that they can be summed by queue, cluster or reason:
+        Workload tagged with `kueue_workload`, `job_scheduler_workload` and its queue, so that they can be summed by
+        queue, cluster or reason:
 
         - `gpu.scheduling.badput_time`: GPU time that GPU Workloads spent waiting to become fully runnable, tagged with
           the normalized `reason` and, when Kueue reports one, the raw `scheduler_reason`.

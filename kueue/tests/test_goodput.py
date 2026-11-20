@@ -227,14 +227,14 @@ def test_contribution_uses_the_state_at_the_start_of_the_interval():
 
 def test_queue_tags_reuse_existing_tags():
     assert queue_tags(QueueKey('team-a', 'gpu', 'a100-cq')) == [
-        'kube_scheduler:kueue',
+        'job_scheduler:kueue',
         'kube_namespace:team-a',
         'kueue_local_queue:gpu',
         'kueue_cluster_queue:a100-cq',
-        'kube_scheduler_queue:a100-cq',
+        'job_scheduler_queue:a100-cq',
     ]
     assert queue_tags(QueueKey('team-a', 'gpu', None)) == [
-        'kube_scheduler:kueue',
+        'job_scheduler:kueue',
         'kube_namespace:team-a',
         'kueue_local_queue:gpu',
     ]
@@ -330,11 +330,11 @@ def goodput_check(instance, *snapshots, **config):
 
 
 A100_TAGS = [
-    'kube_scheduler:kueue',
+    'job_scheduler:kueue',
     'kube_namespace:team-a',
     'kueue_local_queue:gpu',
     'kueue_cluster_queue:a100-cq',
-    'kube_scheduler_queue:a100-cq',
+    'job_scheduler_queue:a100-cq',
 ]
 
 
@@ -360,8 +360,8 @@ def test_check_submits_one_series_per_workload(dd_run_check, aggregator, instanc
     dd_run_check(check)
     # One series per Workload, in GPU-hours: 4 GPUs waiting and 8 GPUs running over 15 seconds. Each Workload also
     # submits the other metric as 0, so that the goodput of any group is defined.
-    wait_tags = [*A100_TAGS, 'kueue_workload:wait']
-    run_tags = [*A100_TAGS, 'kueue_workload:run']
+    wait_tags = [*A100_TAGS, 'kueue_workload:wait', 'job_scheduler_workload:wait']
+    run_tags = [*A100_TAGS, 'kueue_workload:run', 'job_scheduler_workload:run']
     badput_tags = [*wait_tags, 'reason:quota_exhausted', 'scheduler_reason:WaitingForQuota']
     aggregator.assert_metric(BADPUT_METRIC, value=60 / 3600, tags=badput_tags, metric_type=aggregator.COUNT, count=1)
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=0, tags=wait_tags, count=1)
@@ -506,7 +506,7 @@ def test_check_submits_zero_badput_without_reason(dd_run_check, aggregator, inst
     dd_run_check(check)
     clock.t = 15
     dd_run_check(check)
-    run_tags = [*A100_TAGS, 'kueue_workload:run']
+    run_tags = [*A100_TAGS, 'kueue_workload:run', 'job_scheduler_workload:run']
     aggregator.assert_metric(BADPUT_METRIC, value=0, tags=run_tags, count=1)
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=120 / 3600, tags=run_tags, count=1)
 
@@ -611,6 +611,7 @@ def test_per_workload_series_sum_to_the_right_totals_for_any_grouping():
             assert sum(t.startswith('kueue_workload:') for t in tags) == 1
             tag = dict(t.split(':', 1) for t in tags)
             sums[(metric, 'queue', tag['kueue_cluster_queue'])] += value
+            assert tag['job_scheduler_workload'] == tag['kueue_workload']
             sums[(metric, 'workload', tag['kueue_workload'])] += value
             sums[(metric, 'total', None)] += value
             if 'reason' in tag:
@@ -748,7 +749,9 @@ def test_check_submits_nothing_without_pods_ready(dd_run_check, aggregator, inst
     for t in (30, 45):
         clock.t = t
         dd_run_check(check)
-    aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=30 / 3600, tags=[*A100_TAGS, 'kueue_workload:run'])
+    aggregator.assert_metric(
+        FULLY_ADMITTED_METRIC, value=30 / 3600, tags=[*A100_TAGS, 'kueue_workload:run', 'job_scheduler_workload:run']
+    )
 
 
 def test_check_submits_nothing_for_short_workloads_without_pods_ready(
@@ -795,4 +798,9 @@ def test_check_leaves_instance_tags_off(dd_run_check, aggregator, instance, mock
     dd_run_check(check)
     clock.t = 15
     dd_run_check(check)
-    aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=120 / 3600, tags=[*A100_TAGS, 'kueue_workload:run'], count=1)
+    aggregator.assert_metric(
+        FULLY_ADMITTED_METRIC,
+        value=120 / 3600,
+        tags=[*A100_TAGS, 'kueue_workload:run', 'job_scheduler_workload:run'],
+        count=1,
+    )

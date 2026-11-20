@@ -118,7 +118,7 @@ sum:gpu.scheduling.fully_admitted_time{*} by {kai_queue}.as_count().fill(zero) /
 
 Use `.fill(zero)` so that a group that stops reporting does not repeat its last value. On every run where a PodGroup is counted, it submits both metrics, with a value of 0 for the metric that doesn't apply. This way, a group's goodput is defined even when all its PodGroups are waiting or all are running. The 0 `badput_time` point has no `reason` tag, so grouping badput by `reason` shows an extra group with no reason. A PodGroup name is unique only within a namespace, so group by `kube_namespace` and `kai_workload` to look at a single PodGroup.
 
-**Tags**: Both metrics are tagged with `kai_workload`, `kube_scheduler:kai`, `kube_scheduler_queue`, `kai_queue`, and `kube_namespace`. The check doesn't add instance tags, including the tags that Autodiscovery adds from the scraped pods, so they don't collide with the PodGroup's tags.
+**Tags**: Both metrics are tagged with `kai_workload`, `kai_queue`, `kube_namespace`, and the scheduler tags shared by all batch schedulers: `job_scheduler:kai`, `job_scheduler_queue` (the queue name), and `job_scheduler_workload` (the PodGroup name). The shared tags match the ones on the PodGroup events, so the same queries work for KAI and Kueue. The check doesn't add instance tags, including the tags that Autodiscovery adds from the scraped pods, so they don't collide with the PodGroup's tags.
 
 **Cost**: Each PodGroup active in an hour adds at least two custom metric series, plus one per extra badput reason, so the number of series grows with how many PodGroups are created.
 

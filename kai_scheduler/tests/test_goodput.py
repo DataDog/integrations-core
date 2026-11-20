@@ -273,10 +273,10 @@ def test_non_gpu_podgroups_are_ignored():
 
 def test_queue_tags():
     assert queue_tags(QueueKey('ns', 'team-a')) == [
-        'kube_scheduler:kai',
+        'job_scheduler:kai',
         'kube_namespace:ns',
         'kai_queue:team-a',
-        'kube_scheduler_queue:team-a',
+        'job_scheduler_queue:team-a',
     ]
 
 
@@ -298,11 +298,11 @@ def test_collector_submits_one_series_per_podgroup(aggregator, instance, mocker)
 
     client.list_pods.assert_called_with(field_selector='spec.schedulerName=kai-scheduler')
     tags = [
-        'kube_scheduler:kai',
+        'job_scheduler:kai',
         'kube_namespace:ns',
         'kai_queue:team-a',
-        'kube_scheduler_queue:team-a',
-        'kai_workload:pg',
+        'job_scheduler_queue:team-a',
+        'kai_workload:pg', 'job_scheduler_workload:pg',
     ]
     aggregator.assert_metric(BADPUT_METRIC, value=30 / 3600, tags=[*tags, 'reason:waiting_for_pods'], count=1)
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=0, tags=tags, count=1)
@@ -456,11 +456,11 @@ def test_collector_submits_zero_badput_without_reason(aggregator, instance, mock
     clock.now = 15
     collector.collect()
     tags = [
-        'kube_scheduler:kai',
+        'job_scheduler:kai',
         'kube_namespace:ns',
         'kai_queue:team-a',
-        'kube_scheduler_queue:team-a',
-        'kai_workload:pg',
+        'job_scheduler_queue:team-a',
+        'kai_workload:pg', 'job_scheduler_workload:pg',
     ]
     aggregator.assert_metric(BADPUT_METRIC, value=0, tags=tags, count=1)
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=30 / 3600, tags=tags, count=1)
@@ -529,6 +529,7 @@ def test_per_podgroup_series_sum_to_the_right_totals_for_any_grouping():
             assert sum(tag.startswith('kai_workload:') for tag in tags) == 1
             tag = dict(tag.split(':', 1) for tag in tags)
             sums[(metric, 'queue', tag['kai_queue'])] += value
+            assert tag['job_scheduler_workload'] == tag['kai_workload']
             sums[(metric, 'workload', tag['kai_workload'])] += value
             sums[(metric, 'total', None)] += value
             if 'reason' in tag:

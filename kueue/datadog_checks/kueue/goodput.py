@@ -42,6 +42,10 @@ REASON_TAG = 'reason'
 SCHEDULER_REASON_TAG = 'scheduler_reason'
 # Every series is per workload, tagged like the Workload lifecycle events.
 WORKLOAD_TAG = 'kueue_workload'
+# Scheduler tags shared by all batch schedulers, as on the Workload events and the pods the Agent tags.
+SCHEDULER_TAG = 'job_scheduler'
+SCHEDULER_QUEUE_TAG = 'job_scheduler_queue'
+SCHEDULER_WORKLOAD_TAG = 'job_scheduler_workload'
 UNKNOWN_REASON = 'unknown'
 
 # Structured Kueue reasons. Most `QuotaReserved` ones need the `UnadmittedWorkloadsObservability` feature gate;
@@ -359,14 +363,14 @@ def observe(workload: dict, cluster_queue_resolver: Callable[[str, str], str | N
 
 
 def queue_tags(queue: QueueKey) -> list[str]:
-    tags = [f'kube_scheduler:{SCHEDULER_TAG_VALUE}']
+    tags = [f'{SCHEDULER_TAG}:{SCHEDULER_TAG_VALUE}']
     if queue.namespace:
         tags.append(f'kube_namespace:{queue.namespace}')
     if queue.local_queue:
         tags.append(f'kueue_local_queue:{queue.local_queue}')
     if queue.cluster_queue:
         tags.append(f'kueue_cluster_queue:{queue.cluster_queue}')
-        tags.append(f'kube_scheduler_queue:{queue.cluster_queue}')
+        tags.append(f'{SCHEDULER_QUEUE_TAG}:{queue.cluster_queue}')
     return tags
 
 
@@ -582,7 +586,8 @@ def workload_points(contributions: Iterable[Contribution]) -> list[tuple[str, fl
     """
     points: list[tuple[str, float, list[str]]] = []
     for contribution in contributions:
-        tags = [*queue_tags(contribution.queue), f'{WORKLOAD_TAG}:{workload_name(contribution.name)}']
+        name = workload_name(contribution.name)
+        tags = [*queue_tags(contribution.queue), f'{WORKLOAD_TAG}:{name}', f'{SCHEDULER_WORKLOAD_TAG}:{name}']
         hours = contribution.gpu_seconds / SECONDS_PER_HOUR
         if contribution.category == Category.BADPUT:
             reason = contribution.cause or UNKNOWN_REASON
