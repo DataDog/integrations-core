@@ -2,17 +2,21 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+from typing import Any
+
 import mock
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientReadTimeoutError
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
 from . import common
 
 
-def _register_metadata_outcome(fake_http, instance, outcome):
+def _register_metadata_outcome(
+    fake_http: FakeHTTPClient, instance: dict[str, Any], outcome: FakeHTTPResponse | Exception
+):
     # Version 3 asks the statistics endpoint first and falls back to the v4 API root.
     base = 'http://{}:{}'.format(instance['host'], instance['port'])
     for url in ('{}/servers/localhost/statistics'.format(base), '{}/api'.format(base)):
