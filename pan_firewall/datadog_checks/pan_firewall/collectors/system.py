@@ -32,7 +32,7 @@ MEMORY_LINES = {
 }
 VIRTUAL_FILESYSTEMS = frozenset({'none', 'tmpfs', 'cgroup_root'})
 
-# The boolean fields of `show system environmentals` (`alarm`, `Inserted`).
+# The values of the boolean fields of `show system environmentals` (`alarm`, `Inserted`).
 ALARM_TRUE = frozenset({'true', 'yes'})
 ALARM_FALSE = frozenset({'false', 'no'})
 
@@ -145,10 +145,10 @@ def _alarm(entry: Element) -> bool | None:
 
 
 def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sample]:
-    """Power rails, temperature sensors, fans and power supplies; empty on a VM-Series. The alarms are PAN's own
-    `alarm` field, never a comparison with the thresholds. `power.alarm` is sent whenever that field is readable;
-    `power.alarm.high` and `power.alarm.low` add its direction, and a power alarm whose direction cannot be told is
-    warned about, once per sensor."""
+    """Power rails, temperature sensors, fans, power supplies and fan trays; empty on a VM-Series. The alarms are
+    PAN's own `alarm` field, never a comparison with the thresholds. A power sensor sends `power.alarm` whenever
+    that field is readable, and `power.alarm.high` and `power.alarm.low` add its direction when the voltage tells
+    it; a power alarm whose direction cannot be told is warned about, once per sensor."""
     samples: list[Sample] = []
     for entry, slot, name in _entries(root, 'power'):
         tags = (f'sensor:{name}', f'slot:{slot}')
@@ -210,12 +210,14 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
         if alarm is not None:
             samples.append(Sample('fan.alarm', int(alarm), tags, 'gauge'))
 
-    for entry, slot, name in _entries(root, 'power-supply'):
-        tags = (f'sensor:{name}', f'slot:{slot}')
-        for metric, field in (('power_supply.alarm', 'alarm'), ('power_supply.inserted', 'Inserted')):
-            value = _flag(entry, field)
-            if value is not None:
-                samples.append(Sample(metric, int(value), tags, 'gauge'))
+    # Power supplies and fan trays are pluggable units with the same fields; their `min` is not a threshold.
+    for prefix, section in (('power_supply', 'power-supply'), ('fan_tray', 'fan-tray')):
+        for entry, slot, name in _entries(root, section):
+            tags = (f'sensor:{name}', f'slot:{slot}')
+            for field, metric in (('alarm', 'alarm'), ('Inserted', 'inserted')):
+                value = _flag(entry, field)
+                if value is not None:
+                    samples.append(Sample(f'{prefix}.{metric}', int(value), tags, 'gauge'))
     return samples
 
 

@@ -35,10 +35,12 @@ FANS = [
     ('Fan #1 RPM', 3600.0, 0),
     ('Fan #2 RPM', 0.0, 1),
 ]
-# (sensor, alarm, inserted), all in slot 1.
-POWER_SUPPLIES = [
-    ('Power Supply #1 (left)', 0, 1),
-    ('Power Supply #2 (right)', 1, 0),
+# (metric prefix, sensor, alarm, inserted), all in slot 1.
+PLUGGABLE_UNITS = [
+    ('power_supply', 'Power Supply #1 (left)', 0, 1),
+    ('power_supply', 'Power Supply #2 (right)', 1, 0),
+    ('fan_tray', 'Fan Tray #1 (left)', 0, 1),
+    ('fan_tray', 'Fan Tray #2 (right)', 1, 0),
 ]
 
 
@@ -59,9 +61,9 @@ def test_hardware_sensors():
     for sensor, speed, alarm in FANS:
         for name, value in (('speed', speed), ('speed.min', 2000.0), ('alarm', alarm)):
             expected[f'fan.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
-    for sensor, alarm, inserted in POWER_SUPPLIES:
+    for prefix, sensor, alarm, inserted in PLUGGABLE_UNITS:
         for name, value in (('alarm', alarm), ('inserted', inserted)):
-            expected[f'power_supply.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
+            expected[f'{prefix}.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
 
     assert series(parse_environmentals(load_xml(SYNTHETIC / 'environmentals_hw.xml'), mock.Mock())) == expected
 

@@ -14,12 +14,14 @@
        thermal 1: alarm False
        thermal 2: alarm True
        thermal 3: alarm yes
-     Fans and power supplies follow the checkmk-paloalto-api fixtures of PAN-OS answers: fans carry `RPMs`, `min` and
-     `alarm` (the PA-5410 names the section `fans`), power supplies carry `alarm` and `Inserted`.
+     Fans and power supplies follow the checkmk-paloalto-api fixtures of PAN-OS answers. Fans carry `RPMs`, `min`
+     and `alarm` (the PA-5410 names the section `fans`); power supplies and fan trays carry `alarm` and `Inserted`.
        fan 1: alarm False
        fan 2: alarm True, stopped
        power-supply 1: inserted, alarm False
-       power-supply 2: not inserted, alarm True -->
+       power-supply 2: not inserted, alarm True
+       fan-tray 1: inserted, alarm False
+       fan-tray 2: not inserted, alarm True -->
 <response status="success"><result>
   <power>
     <Slot1>
@@ -53,4 +55,10 @@
       <entry><slot>1</slot><description>Power Supply #2 (right)</description><alarm>True</alarm><Inserted>False</Inserted></entry>
     </Slot1>
   </power-supply>
+  <fan-tray>
+    <Slot1>
+      <entry><slot>1</slot><description>Fan Tray #1 (left)</description><alarm>False</alarm><Inserted>True</Inserted><min>1</min></entry>
+      <entry><slot>1</slot><description>Fan Tray #2 (right)</description><alarm>True</alarm><Inserted>False</Inserted><min>1</min></entry>
+    </Slot1>
+  </fan-tray>
 </result></response>

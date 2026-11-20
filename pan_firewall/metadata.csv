@@ -22,6 +22,8 @@ pan_firewall.dropped_packets,count,,packet,,"Dropped packets by aspect. Known as
 pan_firewall.fan.alarm,gauge,,,,"Whether the fan is in alarm (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,fan alarm,,"sensor,slot"
 pan_firewall.fan.speed,gauge,,,,Current fan speed in RPM.,0,palo_alto_networks_firewall,fan speed,,"sensor,slot"
 pan_firewall.fan.speed.min,gauge,,,,Minimum fan speed threshold in RPM.,0,palo_alto_networks_firewall,fan speed min,,"sensor,slot"
+pan_firewall.fan_tray.alarm,gauge,,,,"Whether the fan tray is in alarm (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,fan tray alarm,,"sensor,slot"
+pan_firewall.fan_tray.inserted,gauge,,,,"Whether the fan tray is inserted (1 = inserted, 0 = not inserted).",1,palo_alto_networks_firewall,fan tray inserted,,"sensor,slot"
 pan_firewall.ha.interface.rx.bytes,count,,byte,,HA link bytes received.,0,palo_alto_networks_firewall,ha interface rx bytes,,ha_link
 pan_firewall.ha.interface.rx.drops,count,,packet,,HA link receive drops.,-1,palo_alto_networks_firewall,ha interface rx drops,,ha_link
 pan_firewall.ha.interface.rx.errors,count,,packet,,HA link receive errors.,-1,palo_alto_networks_firewall,ha interface rx errors,,ha_link
