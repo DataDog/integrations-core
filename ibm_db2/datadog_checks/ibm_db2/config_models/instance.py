@@ -29,15 +29,15 @@ class CollectSchemas(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[float] = None
+    collection_interval: Optional[float] = Field(None, gt=0.0)
     enabled: Optional[bool] = None
     exclude_schemas: Optional[tuple[str, ...]] = None
     exclude_tables: Optional[tuple[str, ...]] = None
     include_schemas: Optional[tuple[str, ...]] = None
     include_tables: Optional[tuple[str, ...]] = None
-    max_columns: Optional[float] = None
-    max_query_duration: Optional[float] = None
-    max_tables: Optional[float] = None
+    max_columns: Optional[int] = Field(None, gt=0)
+    max_query_duration: Optional[int] = Field(None, gt=0)
+    max_tables: Optional[int] = Field(None, gt=0)
 
 
 class CustomQuery(BaseModel):

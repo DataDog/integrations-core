@@ -2,8 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from collections.abc import Callable
+
 import pytest
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.ibm_db2 import IbmDb2Check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
@@ -79,7 +82,6 @@ def test_schema_collection_payload(aggregator, instance, dd_run_check):
         pytest.param({'exclude_tables': ['CH.*']}, {'PARENT', 'EVENTS'}, id='exclude_tables'),
         pytest.param({'include_tables': ['PARENT']}, {'PARENT'}, id='include_tables'),
         pytest.param({'max_tables': 1}, {'CHILD'}, id='max_tables'),
-        pytest.param({'enabled': False}, set(), id='disabled'),
     ],
 )
 def test_schema_collection_filters(aggregator, instance, dd_run_check, collect_schemas_config, expected_tables):
@@ -99,3 +101,38 @@ def test_schema_collection_max_columns(aggregator, instance, dd_run_check):
 
     [table] = [table for schema in schemas for table in schema['tables']]
     assert [column['name'] for column in table['columns']] == ['ID', 'NAME']
+
+
+@pytest.mark.parametrize('include_tables, expected_table', [([], 'CHILD'), (['PARENT'], 'PARENT')])
+def test_schema_collection_table_budget(
+    aggregator: AggregatorStub,
+    instance: dict,
+    dd_run_check: Callable,
+    include_tables: list[str],
+    expected_table: str,
+):
+    """Empty and filtered schemas must not displace qualifying tables from a limited snapshot."""
+    schemas = collect_schemas(
+        aggregator,
+        instance,
+        dd_run_check,
+        {
+            'include_schemas': ['EMPTY_SCHEMA', 'FILTERED_SCHEMA', 'TEST_SCHEMA'],
+            'exclude_tables': ['HIDDEN'],
+            'include_tables': include_tables,
+            'max_tables': 1,
+        },
+    )
+    assert {'name': 'EMPTY_SCHEMA', 'owner': 'DB2INST1', 'tables': []} in schemas
+    assert {'name': 'FILTERED_SCHEMA', 'owner': 'DB2INST1', 'tables': []} in schemas
+    assert [(schema['name'], table['name']) for schema in schemas for table in schema['tables']] == [
+        ('TEST_SCHEMA', expected_table)
+    ]
+
+
+def test_schema_collection_disabled(aggregator: AggregatorStub, instance: dict, dd_run_check: Callable):
+    """Disabling schema collection must suppress even empty metadata snapshots."""
+    collect_schemas(aggregator, instance, dd_run_check, {'enabled': False})
+    assert not any(
+        event['kind'] == 'ibm_db2_databases' for event in aggregator.get_event_platform_events('dbm-metadata')
+    )

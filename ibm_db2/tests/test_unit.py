@@ -5,6 +5,7 @@ import json as stdlib_json
 from datetime import datetime
 from threading import Event
 
+import ibm_db
 import mock
 import pytest
 from cachetools import TTLCache
@@ -663,3 +664,139 @@ def test_query_activity_invalid_interval(instance: dict, interval: object):
     instance['query_activity'] = {'enabled': True, 'collection_interval': interval}
     with pytest.raises(ConfigurationError):
         IbmDb2Check('ibm_db2', {}, [instance])
+
+
+@pytest.mark.parametrize('enabled', [True, False])
+@pytest.mark.parametrize(
+    'field, value',
+    [
+        *[('collection_interval', value) for value in (0, -1, float('nan'), float('inf'))],
+        *[(field, value) for field in ('max_tables', 'max_columns', 'max_query_duration') for value in (0, -1, 0.5)],
+        ('include_schemas', 1),
+        ('exclude_tables', 1),
+    ],
+)
+def test_invalid_schema_settings(instance: dict, enabled: bool, field: str, value: object):
+    """Invalid schema settings must give a field-specific error even when collection is disabled."""
+    instance.update(dbm=True, collect_schemas={'enabled': enabled, field: value})
+    with pytest.raises(ConfigurationError, match=field):
+        IbmDb2Check('ibm_db2', {}, [instance])
+
+
+@pytest.mark.parametrize(
+    'settings, interval, enabled',
+    [
+        ({'collection_interval': 0.5}, 0.5, True),
+        ({'collection_interval': 0.5, 'enabled': False}, 0.5, False),
+        (None, 600, True),
+        (
+            dict.fromkeys(
+                (
+                    'enabled',
+                    'collection_interval',
+                    'max_tables',
+                    'max_columns',
+                    'max_query_duration',
+                    'include_schemas',
+                    'exclude_schemas',
+                    'include_tables',
+                    'exclude_tables',
+                )
+            ),
+            600,
+            True,
+        ),
+    ],
+)
+def test_schema_collection_configuration(
+    instance: dict,
+    aggregator: AggregatorStub,
+    monkeypatch: pytest.MonkeyPatch,
+    settings: dict | None,
+    interval: float,
+    enabled: bool,
+):
+    """Fractional intervals schedule correctly and null settings still produce usable default snapshots."""
+    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
+    instance.update(dbm=True, collect_schemas=settings)
+    job = IbmDb2Check('ibm_db2', {}, [instance])._schema_collection
+    with (
+        mock.patch.object(job._connection, 'ensure_connected'),
+        mock.patch('ibm_db.server_info', return_value=mock.Mock(DBMS_VER='11.01.0404', DB_CODEPAGE=1208)),
+        mock.patch('ibm_db.prepare') as prepare,
+        mock.patch('ibm_db.execute'),
+        mock.patch('ibm_db.free_stmt'),
+        mock.patch('ibm_db.fetch_assoc', return_value=False),
+        mock.patch('datadog_checks.base.utils.db.utils.time.time', return_value=10000) as clock,
+    ):
+        job.run_job_loop([])
+        clock.return_value = 10000 + interval / 2
+        job.run_job_loop([])
+        assert len(aggregator.get_event_platform_events('dbm-metadata')) == int(enabled)
+        clock.return_value = 10000 + interval
+        job.run_job_loop([])
+    events = aggregator.get_event_platform_events('dbm-metadata')
+    assert len(events) == 2 * int(enabled)
+    assert all(event['kind'] == 'ibm_db2_databases' and event['collection_interval'] == interval for event in events)
+    # The null timeout must retain a positive driver limit; building SQL also exercises null filters/limits.
+    if enabled:
+        assert prepare.call_args.args[2] == {ibm_db.SQL_ATTR_QUERY_TIMEOUT: 60}
+        assert query_metrics.classify_statement_text(prepare.call_args.args[1]) is query_metrics.TextKind.EXCLUDED
+    else:
+        prepare.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'version, codepage, supported',
+    [('11.01.0403', 1208, False), ('11.01.0404', 1208, True), ('11.05.0501', 1252, False), ('12.01.0500', 1208, True)],
+)
+def test_schema_collection_compatibility(
+    instance: dict, aggregator: AggregatorStub, version: str, codepage: int, supported: bool
+):
+    """Unsupported databases warn once without running catalog SQL or suppressing ordinary metadata and metrics."""
+    instance['dbm'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    job = check._schema_collection
+    with (
+        mock.patch.object(job._connection, 'ensure_connected'),
+        mock.patch('ibm_db.server_info', return_value=mock.Mock(DBMS_VER=version, DB_CODEPAGE=codepage)) as info,
+        mock.patch('ibm_db.prepare') as prepare,
+        mock.patch('ibm_db.execute'),
+        mock.patch('ibm_db.free_stmt'),
+        mock.patch('ibm_db.fetch_assoc', return_value=False),
+        mock.patch.object(check.log, 'warning') as warning,
+    ):
+        job.run_job()
+        job.run_job()
+    assert info.call_count == 1
+    assert prepare.call_count == 2 * int(supported)
+    assert warning.call_count == int(not supported)
+    if not supported:
+        assert '11.1.4.4+' in warning.call_args.args[0]
+        assert 'UTF-8' in warning.call_args.args[0]
+        assert 'restart the Agent' in warning.call_args.args[0]
+    check._send_database_instance_metadata()
+    with mock.patch.object(check._connection, 'iter_rows', return_value=[{'total_connections': 1}]):
+        check._metrics.query_instance()
+    aggregator.assert_metric('ibm_db2.connection.active', value=1)
+    events = aggregator.get_event_platform_events('dbm-metadata')
+    assert sum(event['kind'] == 'ibm_db2_databases' for event in events) == 2 * int(supported)
+    assert any(event['kind'] != 'ibm_db2_databases' for event in events)
+
+
+def test_schema_connection_retry(instance: dict, aggregator: AggregatorStub):
+    """A failed worker connection skips collection but allows the next run to recover."""
+    instance['dbm'] = True
+    job = IbmDb2Check('ibm_db2', {}, [instance])._schema_collection
+    with (
+        mock.patch.object(job._connection, 'ensure_connected', side_effect=[Db2ConnectionError(), object()]),
+        mock.patch('ibm_db.server_info', return_value=mock.Mock(DBMS_VER='11.05.0501', DB_CODEPAGE=1208)),
+        mock.patch('ibm_db.prepare'),
+        mock.patch('ibm_db.execute'),
+        mock.patch('ibm_db.free_stmt'),
+        mock.patch('ibm_db.fetch_assoc', return_value=False),
+    ):
+        job.run_job()
+        assert not aggregator.get_event_platform_events('dbm-metadata')
+        job.run_job()
+    assert len(aggregator.get_event_platform_events('dbm-metadata')) == 1

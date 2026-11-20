@@ -88,6 +88,9 @@ files:
         description: |
           Enable collection of database schemas for the database set in `db`.
           System schemas (`SYS*`, `NULLID`, and `SQLJ`) are always excluded.
+          Requires Db2 11.1.4.4 or later and a UTF-8 database (code page 1208).
+          Unsupported databases skip schema collection; other monitoring continues.
+          Null settings use the documented defaults; null filter lists are empty.
         options:
           - name: enabled
             fleet_configurable: true
@@ -102,7 +105,8 @@ files:
             description: |
               Maximum amount of tables the Agent collects from the instance.
             value:
-              type: number
+              type: integer
+              exclusiveMinimum: 0
               example: 300
               display_default: 300
           - name: max_query_duration
@@ -110,22 +114,25 @@ files:
             description: |
               Maximum duration of the query to collect schema information in seconds.
             value:
-              type: number
+              type: integer
+              exclusiveMinimum: 0
               display_default: 60
           - name: max_columns
             fleet_configurable: true
             description: |
               Maximum amount of columns the Agent collects per table.
             value:
-              type: number
+              type: integer
+              exclusiveMinimum: 0
               example: 50
               display_default: 50
           - name: collection_interval
             fleet_configurable: true
             description: |
-              The database schema collection interval (in seconds).
+              The database schema collection interval in seconds. Must be finite and greater than zero.
             value:
               type: number
+              exclusiveMinimum: 0
               example: 600
               display_default: 600
           - name: include_schemas
