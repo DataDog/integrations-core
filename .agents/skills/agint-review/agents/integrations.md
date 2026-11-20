@@ -1,6 +1,6 @@
 ---
 name: agint-review-integrations
-description: Reviews Datadog Agent integration PRs, datadog_checks_base and datadog_checks_dev for check implementation, metrics, config spec, customer impact and compatibility, persistent cache and tests. Use as part of the review skill.
+description: Reviews Datadog Agent integration PRs, datadog_checks_base and datadog_checks_dev for check implementation, metrics, config spec, customer impact and compatibility, persistent cache, tests, dashboards and recommended monitors. Use as part of the review skill.
 tools: Read, Grep, Glob, WebSearch, WebFetch, Write
 ---
 
@@ -25,6 +25,8 @@ The rules below cover every integration PR. These references hold the rest; read
 | Tests, test fixtures, `hatch.toml`, `conftest.py`, or a new integration (it must ship tests) | `references/integrations/tests.md` |
 | `datadog_checks_base/` | `references/integrations/datadog-checks-base.md` and `references/integrations/lifecycle.md` |
 | `datadog_checks_dev/` | `references/integrations/datadog-checks-dev.md` |
+| `assets/dashboards/` | `references/integrations/dashboards.md` |
+| `assets/monitors/` (recommended monitors) | `references/integrations/monitors.md` |
 
 When the target branch has no `AGENTS.md` at all, setup also puts `references/integrations/metric-types.md` in your instruction paths: apply it to `metadata.csv`. Without it, the metric type of changed rows is `conventions`'.
 
@@ -69,6 +71,7 @@ An integration lives in a top-level folder named after it (e.g. `krakend/`): `py
 ## Customer impact and compatibility
 
 - Breaking changes have a deprecation path: the spec's option-level `deprecation:` field, renamed options keep the old name; also renamed or removed metrics and tags. No **Request** when the changelog entry is `.changed`/`.removed` (**Request**, existing only).
+- A metric or tag the PR renames or removes isn't still used by the integration's dashboards or monitors (`assets/dashboards/`, `assets/monitors/`): they'd show no data (**Request**, existing only).
 - Safe defaults: **Request** when the default costs the customer money or loads their system, **Suggestion** when it's only noisy.
 - The minimum `datadog_checks_base` pin covers every base API the check uses. The template doesn't pin to the latest release, so don't assume it: read the pin in the integration's `pyproject.toml`, the latest released version in the base tree's `datadog_checks_base/datadog_checks/base/__about__.py`, and the release that added each base API the check uses in `datadog_checks_base/CHANGELOG.md` (**Suggestion**, new only).
 - `check-types = true` kept in `hatch.toml` (the template sets it; when missing, ddev defaults to `false`; 7 of the 16 recent new integrations dropped it) (**Suggestion**, new only).
@@ -83,6 +86,7 @@ An integration lives in a top-level folder named after it (e.g. `krakend/`): `py
 - The wheel growing for avoidable reasons, looser pins (size diff posted by CI; `validate dep`, licenses, dependency review).
 - Standard file layout; shared logic living in `datadog_checks_base` (`validate package`).
 - Required `metadata.csv` columns, valid types and units (CI).
+- Dashboard and monitor JSON shape, required fields and what the monitor API rejects (the datadog-assets app's `validate-dashboards`, `validate-monitors` and `validate-monitor-template-quality` checks). Saved views (`ddev validate saved-views`).
 - Description quality (metrics, spec options, README): the documentation team reviews it.
 - Towncrier formatting rules: changelog entries follow `AGENTS.md`, so they're `conventions`'.
 - Service check tests where service checks already exist: never ask for `assert_service_check`.

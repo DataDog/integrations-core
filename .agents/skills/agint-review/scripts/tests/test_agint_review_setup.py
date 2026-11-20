@@ -145,9 +145,13 @@ def agents_for(setup_script, files, aspects=()):
         (["datadog_checks_downloader/datadog_checks/downloader/cli.py"], {"conventions", "security"}),
         (["datadog_checks_dependency_provider/pyproject.toml"], {"conventions"}),
         (["krakend/assets/logs/krakend.yaml", "krakend/assets/logs/krakend_tests.yaml"], {"conventions", "logs"}),
+        (
+            ["krakend/assets/dashboards/krakend_overview.json", "krakend/assets/monitors/high_error_rate.json"],
+            {"conventions", "integrations", "security"},
+        ),
     ],
     ids=["integration", "base", "dev", "ddev", "repo config", "workflow", "action", "chainguard-only", "other paths", "downloader",
-         "other package", "log pipeline"],
+         "other package", "log pipeline", "dashboards and monitors"],
 )
 def test_each_pr_type_gets_the_agents_in_the_table(setup_script, files, expected):
     assert set(agents_for(setup_script, files)) == expected

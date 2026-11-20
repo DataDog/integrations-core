@@ -80,7 +80,7 @@ matches = "integration_roots"
 globs = ["datadog_checks_base/**", "datadog_checks_dev/**"]
 # The `logs` agent reviews log pipelines.
 exclude_globs = ["**/assets/logs/**"]
-description = "Integration checks, metrics, config spec, compatibility, persistent cache, tests; datadog_checks_base and datadog_checks_dev"
+description = "Integration checks, metrics, config spec, compatibility, persistent cache, tests, dashboards, monitors; datadog_checks_base and datadog_checks_dev"
 
 [[agents]]
 name = "security"
