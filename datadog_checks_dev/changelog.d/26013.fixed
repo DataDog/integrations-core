@@ -1,0 +1,1 @@
+Drop the `Private :: Do Not Upload` classifier from the pyproject template so new integrations can be published to PyPI.

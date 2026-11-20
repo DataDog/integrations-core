@@ -1,14 +1,18 @@
-# This workflow claims package names on PyPI for our integrations by publishing empty packages.
-# The working packages can be found here:
-# https://dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/index.html
-# This is a work-around until PyPI adds support for namespaces and we claim an entire namespace for Datadog.
-name: Build Placeholder PyPI Packages
+# This workflow publishes the real integration packages to PyPI so users who `pip install` an
+# integration get a working package instead of the placeholder wheels that were used to reserve
+# the names. The names were originally claimed by publishing empty packages.
+# Publishing uses PyPI Trusted Publishers: every package must have a publisher entry on PyPI for
+# DataDog/integrations-core, this workflow file and the publish-pypi environment. Packages that
+# are not claimed yet need the entry to be added manually before the first publish.
+# The base check is published separately by release-base.yml and is excluded here.
+name: Publish PyPI Packages
 
 on:
   schedule:
     # At 3AM UTC
-    # Running this every night strikes a good balance between claiming names fast without spamming PyPI with requests.
+    # Running this every night strikes a good balance between publishing new versions fast without spamming PyPI with requests.
     - cron: "0 3 * * *"
+  workflow_dispatch:
 
 env:
   PYTHON_VERSION: "3.13"
@@ -20,7 +24,7 @@ defaults:
 
 jobs:
   find-new-integrations:
-    name: Find unclaimed PyPI packages
+    name: Find packages to publish
     runs-on: ubuntu-latest
 
     permissions:
@@ -38,25 +42,58 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
-    - name: Find unclaimed packages
+    - name: Install packaging
+      run: pip install packaging
+
+    - name: Find new and outdated packages
       id: find
       run: |
-        packages=()
-        shopt -s nullglob
-        for pyproject in */pyproject.toml; do
-          pkg=$(python -c "import tomllib, pathlib; data = tomllib.loads(pathlib.Path('${pyproject}').read_text()); print(data['project']['name'])")
-          status=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/${pkg}/json")
-          if [ "$status" = "404" ]; then
-            packages+=("\"${pkg}\"")
-          elif [ "$status" != "200" ]; then
-            echo "PyPI returned unexpected HTTP status ${status} for package ${pkg}. Please re-run this job." >&2
-            exit 1
-          fi
-        done
-        echo "packages=[$(IFS=,; echo "${packages[*]}")]" >> "$GITHUB_OUTPUT"
+        python - <<'EOF'
+        import ast
+        import json
+        import os
+        import pathlib
+        import sys
+        import tomllib
+        import urllib.error
+        import urllib.request
+        from packaging.version import Version
+
+        excluded = {'datadog_checks_base', 'datadog_checks_dependency_provider', 'datadog_checks_dev', 'datadog_checks_downloader', 'ddev'}
+
+        packages = []
+        for pyproject in sorted(pathlib.Path('.').glob('*/pyproject.toml')):
+            if pyproject.parent.name.startswith('.') or pyproject.parent.name in excluded:
+                continue
+            data = tomllib.loads(pyproject.read_text())
+            name = data['project']['name']
+            version = data['project'].get('version')
+            if version is None:
+                about = pyproject.parent / data['tool']['hatch']['version']['path']
+                for node in ast.parse(about.read_text()).body:
+                    if isinstance(node, ast.Assign) and any(
+                        isinstance(target, ast.Name) and target.id == '__version__' for target in node.targets
+                    ):
+                        version = ast.literal_eval(node.value)
+            try:
+                with urllib.request.urlopen(f'https://pypi.org/pypi/{name}/json', timeout=30) as response:
+                    pypi_version = Version(json.load(response)['info']['version'])
+            except urllib.error.HTTPError as error:
+                if error.code == 404:
+                    pypi_version = None
+                else:
+                    print(f'PyPI returned unexpected HTTP status {error.code} for package {name}. Please re-run this job.', file=sys.stderr)
+                    sys.exit(1)
+            if pypi_version is None or pypi_version < Version(version):
+                packages.append({'name': name, 'dir': pyproject.parent.name})
+
+        print(json.dumps(packages, indent=2))
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+            output.write(f'packages={json.dumps(packages)}\n')
+        EOF
 
   publish:
-    name: Publish ${{ matrix.package }}
+    name: Publish ${{ matrix.package.name }}
     needs: find-new-integrations
     if: needs.find-new-integrations.outputs.packages != '[]'
     runs-on: ubuntu-latest
@@ -72,36 +109,23 @@ jobs:
         package: ${{ fromJson(needs.find-new-integrations.outputs.packages) }}
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
     - name: Set up Python
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
     - name: Install Build Deps
-      run: pip install -U build[virtualenv] hatchling
+      run: pip install -U build
 
     - name: Build Package
-      env:
-        PACKAGE_NAME: ${{ matrix.package }}
-      run: |
-        mkdir -p dist pkg_placeholder
-        cat > pkg_placeholder/pyproject.toml << EOF
-        [build-system]
-        requires = ["hatchling"]
-        build-backend = "hatchling.build"
-        [project]
-        name = "${PACKAGE_NAME}"
-        version = "0.0.1"
-        [tool.hatch.build.targets.wheel]
-        bypass-selection = true
-        EOF
-        python -m build --no-isolation --wheel pkg_placeholder
-        mv pkg_placeholder/dist/* dist/
+      run: python -m build --wheel "${{ matrix.package.dir }}"
 
     - name: Push Python artifacts to PyPI
       uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
       with:
-        # We don't mind invalid metadata, we only want to claim the package name.
-        verify-metadata: false
         verbose: true
         skip-existing: true
+        packages-dir: ${{ matrix.package.dir }}/dist

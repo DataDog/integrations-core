@@ -1,0 +1,1 @@
+Remove the `Private :: Do Not Upload` classifier so the package can be published to PyPI.
