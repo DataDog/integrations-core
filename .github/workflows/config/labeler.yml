@@ -237,7 +237,7 @@ integration/cert_manager:
 - changed-files:
   - any-glob-to-any-file:
     - cert_manager/**/*
-integration/checkpoint_harmony_email_and_collab:
+integration/checkpoint_harmony_email_and_collaboration:
 - changed-files:
   - any-glob-to-any-file:
     - checkpoint_harmony_email_and_collaboration/**/*
