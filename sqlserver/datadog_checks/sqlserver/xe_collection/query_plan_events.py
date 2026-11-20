@@ -44,6 +44,11 @@ PLAN_SOURCES = {
 
 DEFAULT_SAMPLES_PER_HOUR_PER_QUERY = 4
 DEFAULT_MAX_PLAN_SIZE_BYTES = 1_000_000
+# The plans kept in one run, in UTF-8 bytes, until they're sent: at most one per query and plan shape, which can still
+# be `max_events` plans of `max_plan_size_bytes`, about 1 GB by default. The plans beyond it are skipped until the next
+# run. It isn't an option: it guards the Agent's memory rather than tuning the collection, and a budget raised to fit
+# `max_events` large plans would no longer guard it.
+MAX_KEPT_PLAN_BYTES = 64 * 1024 * 1024
 # What an event holds besides its plan: its other fields and actions, and the XML around them.
 PLAN_EVENT_ENVELOPE_BYTES = 64 * 1024
 RATE_LIMITER_MAX_SIZE = 10_000
@@ -206,8 +211,9 @@ class QueryPlanEventsHandler(XESessionBase):
             maxsize=RATE_LIMITER_MAX_SIZE, ttl=60 * 60 / samples_per_hour
         )
         # The event of the slowest execution read per query_hash and query_plan_hash pair, the only one whose plan is
-        # kept, as the others aren't sent.
-        self._slowest_plan_events: dict[tuple, dict] = {}
+        # kept, as the others aren't sent, with its plan's UTF-8 size, and the total size of the plans kept.
+        self._slowest_plan_events: dict[tuple, tuple[dict, int]] = {}
+        self._kept_plan_bytes = 0
         self._statement_text_cache: TTLCache = TTLCache(
             maxsize=STATEMENT_TEXT_CACHE_MAX_SIZE, ttl=STATEMENT_TEXT_CACHE_TTL_SECONDS
         )
@@ -313,11 +319,12 @@ class QueryPlanEventsHandler(XESessionBase):
     def _keep_slowest_plan(self, event_data: dict, plan_data: etree._Element | None, plan: str | None) -> None:
         """
         Keeps the event's plan, as `showplan_xml`, when it's the slowest execution read so far of its query and plan
-        shape and isn't rate limited. The plan is serialized only then, as a read can hold `max_events` plans.
+        shape and isn't rate limited. The plan is serialized only then, as a read can hold `max_events` plans, and kept
+        only while the plans kept total at most `MAX_KEPT_PLAN_BYTES`.
         """
         event_name = event_data.get('event_name')
         key = (event_data.get('query_hash'), event_data.get('query_plan_hash'))
-        slowest = self._slowest_plan_events.get(key)
+        slowest, slowest_plan_bytes = self._slowest_plan_events.get(key, (None, 0))
         if self._is_rate_limited(key) or (
             slowest is not None and (event_data.get('duration_ms') or 0) <= (slowest.get('duration_ms') or 0)
         ):
@@ -328,14 +335,26 @@ class QueryPlanEventsHandler(XESessionBase):
         if not plan or not any(element in plan for element in RUNTIME_ELEMENTS):
             self._statuses[("no_runtime_data", event_name)] += 1
             return
-        if len(plan.encode('utf-8')) > self._max_plan_size_bytes:
+        plan_bytes = len(plan.encode('utf-8'))
+        if plan_bytes > self._max_plan_size_bytes:
             self._statuses[("too_large", event_name)] += 1
+            return
+        # A slower execution replaces the plan kept of its query and plan shape.
+        kept_plan_bytes = self._kept_plan_bytes - slowest_plan_bytes + plan_bytes
+        if kept_plan_bytes > MAX_KEPT_PLAN_BYTES:
+            self._statuses[("memory_limited", event_name)] += 1
             return
         if slowest is not None:
             del slowest['showplan_xml']
             self._statuses[("rate_limited", slowest.get('event_name'))] += 1
         event_data['showplan_xml'] = plan
-        self._slowest_plan_events[key] = event_data
+        self._slowest_plan_events[key] = event_data, plan_bytes
+        self._kept_plan_bytes = kept_plan_bytes
+
+    def _take_kept_plans(self) -> dict[tuple, tuple[dict, int]]:
+        """The events whose plans are kept, with their plans' sizes, which are no longer kept."""
+        kept, self._slowest_plan_events, self._kept_plan_bytes = self._slowest_plan_events, {}, 0
+        return kept
 
     def _is_rate_limited(self, key: tuple) -> bool:
         """Whether a plan of this query and plan shape can't be sent now, so building it would be wasted work."""
@@ -387,7 +406,7 @@ class QueryPlanEventsHandler(XESessionBase):
         if target_name is None:
             return []
         started = time.time()
-        self._slowest_plan_events = {}
+        self._take_kept_plans()
         if target_name == EVENT_FILE_TARGET:
             file_events, self._skip_seen_events = (
                 self._read_event_file(cursor, file_name) if file_name else (iter(()), False)
@@ -401,6 +420,8 @@ class QueryPlanEventsHandler(XESessionBase):
                 events = self._process_event_file_events(file_events)
             except Exception:
                 self._seen_event_keys = seen_event_keys
+                # The next run reads the events again, and keeps their plans then.
+                self._take_kept_plans()
                 raise
             self._submit_read_time(target_name, started)
         else:
@@ -438,8 +459,8 @@ class QueryPlanEventsHandler(XESessionBase):
     def _process_event_file_events(self, file_events: Iterator[EventFileEvent]) -> list[dict]:
         """
         The data of the events of an event_file read, each parsed on its own as it's fetched, so that a read holds one
-        batch of events and the plans kept rather than all its events. Every event is iterated, which moves the read's
-        position past them.
+        batch of events and the plans kept, at most `MAX_KEPT_PLAN_BYTES`, rather than all its events. Every event is
+        iterated, which moves the read's position past them, its plan kept or not.
         """
         events = []
         for file_event in file_events:
@@ -459,8 +480,7 @@ class QueryPlanEventsHandler(XESessionBase):
 
     def _plan_events(self, cursor: Any) -> Iterator[dict]:
         """The plan events, and their raw copies, of the events read, the slowest execution per query and plan."""
-        slowest, self._slowest_plan_events = self._slowest_plan_events, {}
-        for key, event in slowest.items():
+        for key, (event, _plan_bytes) in self._take_kept_plans().items():
             event_name = event.get('event_name')
             # The sampling cache can fill up while this read's plans are sent.
             if self._is_rate_limited(key):
