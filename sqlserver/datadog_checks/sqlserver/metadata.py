@@ -64,12 +64,19 @@ class SqlserverMetadata(DBMAsyncJob):
     def __init__(self, check, config: SQLServerConfig):
         self.log = check.log
         self._config = config
-        self._settings_enabled = is_affirmative(self._config.settings_config.get('enabled', True))
-        column_statistics_enabled = is_affirmative(self._config.column_statistics_config.get('enabled', False))
+        # The job also runs for Data Observability, which only uses schema collection, so settings and column statistics
+        # stay DBM features.
+        self._settings_enabled = self._config.dbm_enabled and is_affirmative(
+            self._config.settings_config.get('enabled', True)
+        )
+        column_statistics_enabled = self._config.dbm_enabled and is_affirmative(
+            self._config.column_statistics_config.get('enabled', False)
+        )
         self.collection_interval = self._config.settings_config.get(
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
         self._schema_config = self._config.schema_config
+        schema_enabled = is_affirmative(self._schema_config.get('enabled', False))
         self._schema_collection_interval = self._schema_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
@@ -79,7 +86,7 @@ class SqlserverMetadata(DBMAsyncJob):
             interval
             for enabled, interval in (
                 (self._settings_enabled, self.collection_interval),
-                (self._schema_config.get('enabled', False), self._schema_collection_interval),
+                (schema_enabled, self._schema_collection_interval),
                 (
                     column_statistics_enabled,
                     self._config.column_statistics_config.get('collection_interval', COLUMN_STATISTICS_INTERVAL),
@@ -91,7 +98,7 @@ class SqlserverMetadata(DBMAsyncJob):
         super(SqlserverMetadata, self).__init__(
             check,
             run_sync=is_affirmative(self._config.settings_config.get('run_sync', False)),
-            enabled=self._settings_enabled or column_statistics_enabled,
+            enabled=self._settings_enabled or schema_enabled or column_statistics_enabled,
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms=check.dbms,
