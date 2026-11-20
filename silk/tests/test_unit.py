@@ -4,12 +4,14 @@
 import logging
 from copy import deepcopy
 from itertools import chain
+from urllib.parse import urljoin
 
 import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.silk import SilkCheck
+from datadog_checks.silk.constants import EVENT_PATH, SERVERS_ENDPOINT, STATE_ENDPOINT
 from datadog_checks.silk.metrics import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS, Metric
 
 from .common import HOST, mock_get_data
@@ -206,6 +208,26 @@ def test_unreachable_endpoint(dd_run_check, aggregator):
     with pytest.raises(Exception):
         dd_run_check(check)
     aggregator.assert_service_check('silk.can_connect', SilkCheck.CRITICAL)
+
+
+def test_error_msg_response(dd_run_check, aggregator, instance, fake_http_response):
+    error_response = {"error_msg": "Statistics data is unavailable while system is OFFLINE"}
+    # Freeze the clock so the events query URL is known in advance.
+    with mock.patch('datadog_checks.silk.check.get_timestamp', return_value=0):
+        check = SilkCheck('silk', {}, [instance])
+        paths = [
+            STATE_ENDPOINT,
+            SERVERS_ENDPOINT,
+            EVENT_PATH.format(start_time=0, end_time=0),
+            *check.metrics_to_collect,
+        ]
+        for path in paths:
+            fake_http_response(urljoin(check.url, path), json_data=error_response)
+        dd_run_check(check)
+
+    aggregator.assert_service_check(
+        'silk.can_connect', SilkCheck.WARNING, message="Received error message: " + error_response["error_msg"]
+    )
 
 
 def test_incorrect_config(dd_run_check):

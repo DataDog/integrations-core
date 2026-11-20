@@ -11,6 +11,7 @@ from .metrics import METRIC_MAP
 
 class BoundaryCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'boundary'
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     SERVICE_CHECK_CONTROLLER_HEALTH = 'controller.health'

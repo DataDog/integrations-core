@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kyverno import KyvernoCheck
 
@@ -26,8 +27,10 @@ from .common import (
         ('reports', REPORTS_METRICS),
     ],
 )
-def test_kyverno_mock_metrics(dd_run_check, aggregator, mock_http_response, fixture_name, expected_metrics):
-    mock_http_response(file_path=get_fixture_path(f'{fixture_name}_controller.txt'))
+def test_kyverno_mock_metrics(dd_run_check, aggregator, fake_http_response, fixture_name, expected_metrics):
+    fake_http_response(
+        OM_MOCKED_INSTANCE['openmetrics_endpoint'], read_file_binary(get_fixture_path(f'{fixture_name}_controller.txt'))
+    )
     check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
@@ -38,17 +41,19 @@ def test_kyverno_mock_metrics(dd_run_check, aggregator, mock_http_response, fixt
     aggregator.assert_service_check('kyverno.openmetrics.health', ServiceCheck.OK)
 
 
-def test_kyverno_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(status_code=503)
+def test_kyverno_mock_invalid_endpoint(dd_run_check, aggregator, fake_http_response):
+    fake_http_response(OM_MOCKED_INSTANCE['openmetrics_endpoint'], status_code=503)
     check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="HTTPClientStatusError"):
         dd_run_check(check)
 
     aggregator.assert_service_check('kyverno.openmetrics.health', ServiceCheck.CRITICAL)
 
 
-def test_kyverno_label_remap(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('remap_labels.txt'))
+def test_kyverno_label_remap(dd_run_check, aggregator, fake_http_response):
+    fake_http_response(
+        OM_MOCKED_INSTANCE['openmetrics_endpoint'], read_file_binary(get_fixture_path('remap_labels.txt'))
+    )
     check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
     relabeled_tags = ['kyverno_namespace:foo', 'kyverno_name:baz', 'go_version:go1.21.10']
     dd_run_check(check)

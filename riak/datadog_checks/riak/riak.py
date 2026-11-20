@@ -14,6 +14,7 @@ from .keys import KEYS, SEARCH_LATENCY_KEYS, STAT_KEYS, VNODEQ_KEYS
 
 class Riak(AgentCheck):
     SERVICE_CHECK_NAME = 'riak.can_connect'
+    AGNOSTIC_HTTP_CLIENT = True
 
     HTTP_CONFIG_REMAPPER = {
         'cacert': {'name': 'tls_ca_cert'},

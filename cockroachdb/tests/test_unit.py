@@ -6,6 +6,7 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.cockroachdb import CockroachdbCheck
 from datadog_checks.cockroachdb.metrics import METRIC_MAP, OMV2_METRIC_MAP
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 from .common import (
@@ -37,8 +38,10 @@ from .common import (
         'unstable',
     ],
 )
-def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response, fixture):
-    mock_http_response(file_path=get_fixture_path('{}_metrics.txt'.format(fixture)))
+def test_fixture_metrics(aggregator, instance, dd_run_check, fake_http_response, fixture):
+    fake_http_response(
+        instance['openmetrics_endpoint'], read_file_binary(get_fixture_path('{}_metrics.txt'.format(fixture)))
+    )
 
     check = CockroachdbCheck('cockroachdb', {}, [instance])
     dd_run_check(check)
@@ -64,8 +67,8 @@ def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response,
         pytest.param('sql_metrics.txt', SQL_METRICS, id='sql'),
     ],
 )
-def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, metrics):
-    mock_http_response(file_path=get_fixture_path(file))
+def test_metrics(aggregator, instance, dd_run_check, fake_http_response, file, metrics):
+    fake_http_response(instance['openmetrics_endpoint'], read_file_binary(get_fixture_path(file)))
     dd_run_check(CockroachdbCheck('cockroachdb', {}, [instance]))
 
     tags = ['cluster:cockroachdb-cluster', 'endpoint:http://localhost:8080/_status/vars', 'node:1', 'node_id:1']

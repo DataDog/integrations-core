@@ -20,10 +20,9 @@ from .test_metrics import (
 
 
 @pytest.fixture()
-def setup_kuma_check(dd_run_check, instance, mock_http_response):
-    mock_http_response(
-        file_path=Path(__file__).parent.absolute() / "fixtures" / "metrics" / "control_plane" / "metrics.txt"
-    )
+def setup_kuma_check(dd_run_check, instance, fake_http_response):
+    fixture = Path(__file__).parent.absolute() / "fixtures" / "metrics" / "control_plane" / "metrics.txt"
+    fake_http_response(instance['openmetrics_endpoint'], fixture.read_bytes())
     check = KumaCheck('kuma', {}, [instance])
 
     dd_run_check(check)

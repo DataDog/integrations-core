@@ -10,9 +10,10 @@ from .common import HEALTH_ENDPOINT, METRIC_ENDPOINT
 pytestmark = [pytest.mark.unit]
 
 
-def test_without_extra_tags(aggregator, dd_run_check, get_check, instance, mock_http_response):
+def test_without_extra_tags(aggregator, dd_run_check, get_check, instance, fake_http_response):
     instance = instance.copy()
-    mock_http_response(status_code=200)
+    fake_http_response(HEALTH_ENDPOINT, status_code=200)
+    fake_http_response(METRIC_ENDPOINT, status_code=200)
     instance.pop('tags')
 
     check = get_check(instance)
@@ -24,8 +25,9 @@ def test_without_extra_tags(aggregator, dd_run_check, get_check, instance, mock_
     )
 
 
-def test_health_error(aggregator, dd_run_check, get_check, instance, mock_http_response):
-    mock_http_response(status_code=404)
+def test_health_error(aggregator, dd_run_check, get_check, instance, fake_http_response):
+    fake_http_response(HEALTH_ENDPOINT, status_code=404)
+    fake_http_response(METRIC_ENDPOINT, status_code=404)
 
     check = get_check(instance)
     with pytest.raises(Exception):
@@ -39,8 +41,9 @@ def test_health_error(aggregator, dd_run_check, get_check, instance, mock_http_r
     )
 
 
-def test_health_warning(aggregator, dd_run_check, get_check, instance, mock_http_response):
-    mock_http_response(status_code=503)
+def test_health_warning(aggregator, dd_run_check, get_check, instance, fake_http_response):
+    fake_http_response(HEALTH_ENDPOINT, status_code=503)
+    fake_http_response(METRIC_ENDPOINT, status_code=503)
 
     check = get_check(instance)
     with pytest.raises(Exception):

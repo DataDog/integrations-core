@@ -2,13 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from typing import Callable
+from typing import Any, Callable
 
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.types import InstanceType
 from datadog_checks.datadog_agent import DatadogAgentCheck
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.dev.utils import get_metadata_metrics
 
 pytestmark = pytest.mark.unit
@@ -20,9 +21,9 @@ def test_check(
     dd_run_check: Callable[..., None],
     aggregator: AggregatorStub,
     instance: InstanceType,
-    mock_http_response: Callable[..., None],
+    fake_http_response: Callable[..., Any],
 ):
-    mock_http_response(file_path=FIXTURE_PATH)
+    fake_http_response(instance['openmetrics_endpoint'], read_file_binary(FIXTURE_PATH))
 
     check = DatadogAgentCheck('datadog_agent', {}, [instance])
     dd_run_check(check)
