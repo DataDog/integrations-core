@@ -34,6 +34,10 @@ def _make_repo(tmp_path: Path) -> Repository:
         integration = tmp_path / name
         integration.mkdir()
         (integration / 'pyproject.toml').write_text(f'[project]\nname = "{package_name}"\n')
+    (tmp_path / '.ddev').mkdir()
+    (tmp_path / '.ddev' / 'config.toml').write_text(
+        '[overrides.is-integration]\nddev = false\ndatadog_checks_base = false\n'
+    )
     subprocess.run(['git', 'init', str(tmp_path)], check=True, capture_output=True)
     return Repository('local', str(tmp_path))
 
@@ -92,7 +96,7 @@ def _recording_upload(save: Path | None = None):
 
 def _ports(**overrides) -> tuple[PlaceholderPorts, list[str]]:
     lines: list[str] = []
-    return PlaceholderPorts(notify=lines.append, **overrides), lines
+    return PlaceholderPorts(notify=lambda level, text: lines.append(text), **overrides), lines
 
 
 def _failing_hatchling(stderr: bytes):
@@ -113,7 +117,6 @@ def test_dry_run_selects_names_still_at_the_empty_placeholder(tmp_path):
     report = publish_placeholders(_make_repo(tmp_path), ('n8n',), dry_run=True, ports=ports)
 
     assert report.selected == ['datadog-n8n']
-    assert lines == ['datadog-n8n']
 
 
 def test_dry_run_skips_names_that_already_have_a_release(tmp_path):
@@ -122,7 +125,7 @@ def test_dry_run_skips_names_that_already_have_a_release(tmp_path):
     report = publish_placeholders(_make_repo(tmp_path), ('n8n',), dry_run=True, ports=ports)
 
     assert report.skipped == ['datadog-n8n']
-    assert lines == ['  skip datadog-n8n (already published)']
+    assert lines == ['Checking 1 names on PyPI...', '  skip datadog-n8n (already published)']
 
 
 def test_resolves_every_name_spelling_once(tmp_path):
@@ -145,10 +148,11 @@ def test_defaults_to_every_unclaimed_name_including_retired_ones(tmp_path):
 
     assert 'datadog-n8n' in report.selected
     assert 'datadog-tokumx' in report.selected
+    assert 'datadog-datadog_checks_dependency_provider' in report.selected
     assert 'datadog-kafka-consumer' in report.skipped
     assert 'ddev' not in report.selected
     assert 'datadog-checks-base' not in report.selected
-    assert len(queries) == 6  # both candidate packages plus the four retired names
+    assert len(queries) == 7  # both candidate packages plus the five kept names
 
 
 def test_publishes_a_built_placeholder_with_a_plain_token(tmp_path, monkeypatch):
@@ -159,7 +163,7 @@ def test_publishes_a_built_placeholder_with_a_plain_token(tmp_path, monkeypatch)
     report = publish_placeholders(_make_repo(tmp_path), ('n8n',), ports=ports)
 
     assert report.published == {'datadog-n8n'}
-    assert lines == ['  ok datadog-n8n', 'Published 1, failed 0']
+    assert lines == ['Checking 1 names on PyPI...', '  ok datadog-n8n', 'Published 1, failed 0']
     ((wheel_name, token),) = uploads
     assert token == 'pypi-xxx'
     assert wheel_name.startswith('datadog_n8n-0.0.2-')
@@ -255,19 +259,52 @@ def test_the_environment_token_wins_over_the_prompt(tmp_path, monkeypatch):
     assert [token for _, token in uploads] == ['pypi-xxx']
 
 
-def test_aborts_without_a_token_or_trusted_publishing(tmp_path, monkeypatch):
+def test_command_aborts_on_unknown_names(ddev):
+    result = ddev('release', 'placeholders', 'not-an-integration')
+
+    assert result.exit_code == 1
+    assert 'Unknown integration or package name: not-an-integration' in result.output
+
+
+def test_command_aborts_without_a_token_or_trusted_publishing(ddev, mocker, monkeypatch):
+    mocker.patch('httpx.get', autospec=True, return_value=_pypi_version('0.0.1'))
     monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
     monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_URL', raising=False)
     monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', raising=False)
-    ports, _ = _ports(http_get=_pypi_states(), interactive=lambda: False)
 
-    with pytest.raises(ValueError, match='No PyPI API token available'):
-        publish_placeholders(_make_repo(tmp_path), ('n8n',), ports=ports)
+    result = ddev('--no-interactive', 'release', 'placeholders', 'n8n')
+
+    assert result.exit_code == 1
+    assert 'No PyPI API token available' in result.output
 
 
-def test_unknown_name_aborts(tmp_path):
-    with pytest.raises(ValueError, match='Unknown integration or package name: not-an-integration'):
-        publish_placeholders(_make_repo(tmp_path), ('not-an-integration',))
+def test_command_lists_selected_names_on_dry_run(ddev, mocker):
+    mocker.patch('httpx.get', autospec=True, return_value=_pypi_version('0.0.1'))
+
+    result = ddev('release', 'placeholders', 'n8n', '--dry-run')
+
+    assert result.exit_code == 0
+    assert 'datadog-n8n' in result.stdout
+    assert 'Nothing to publish.' not in result.output
+
+
+def test_command_reports_nothing_to_publish(ddev, mocker):
+    mocker.patch('httpx.get', autospec=True, return_value=_pypi_version('0.0.2'))
+
+    result = ddev('release', 'placeholders', 'n8n', '--dry-run')
+
+    assert result.exit_code == 0
+    assert 'Nothing to publish.' in result.output
+
+
+def test_command_fails_when_the_pypi_check_errors(ddev, mocker):
+    mocker.patch('httpx.get', autospec=True, side_effect=httpx.ConnectError('connection refused'))
+
+    result = ddev('--no-interactive', 'release', 'placeholders', 'n8n')
+
+    assert result.exit_code == 1
+    assert 'FAIL datadog-n8n: PyPI check failed' in result.output
+    assert 'Nothing to publish.' not in result.output
 
 
 @pytest.mark.skipif(sys.platform == 'win32', reason='sends SIGINT to the process')

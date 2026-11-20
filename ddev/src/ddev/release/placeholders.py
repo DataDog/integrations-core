@@ -8,7 +8,6 @@ import os
 import subprocess
 import sys
 import tempfile
-import tomllib
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -25,13 +24,15 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncP
 if TYPE_CHECKING:
     from ddev.repo.core import Repository
 
-# Names claimed on PyPI for integrations that were later removed from this repository. They are kept
-# published as placeholders so the names cannot be re-registered by anyone else.
-RETIRED_PLACEHOLDER_NAMES = (
+# Names claimed on PyPI that must stay published as placeholders even though the command cannot
+# select them from the repository: integrations that were later removed, and the build-time
+# dependency provider, which the repository marks as not an integration.
+KEPT_PLACEHOLDER_NAMES = (
     'datadog-datadog-csi-driver',
     'datadog-oracle',
     'datadog-snowflake',
     'datadog-tokumx',
+    'datadog-datadog_checks_dependency_provider',
 )
 
 logger = logging.getLogger(__name__)
@@ -40,20 +41,13 @@ logger = logging.getLogger(__name__)
 def _placeholder_package_names(repo: Repository) -> dict[str, str]:
     """Map each integration name to the PyPI package name it claims as a placeholder.
 
-    Real packages shipped from this repository are excluded: only `datadog-*` integration names
-    are claimed.
+    Only integrations are claimed; the repository configuration marks non-integration packages
+    (`ddev`, `datadog-checks-*`, the dependency provider) accordingly.
     """
-    # Real packages maintained in this repository. They are published through their own release
-    # process and must never be overwritten with a placeholder.
-    excluded = ('ddev', 'datadog-checks-base', 'datadog-checks-dev', 'datadog-checks-downloader')
     names: dict[str, str] = {}
     for integration in repo.integrations.iter_packages(['all']):
-        path = integration.path / 'pyproject.toml'
-        if not path.is_file():
-            continue
-        package_name = tomllib.loads(path.read_text())['project']['name']
-        if package_name not in excluded:
-            names[integration.name] = package_name
+        if integration.is_integration:
+            names[integration.name] = integration.project_metadata['project']['name']
     return names
 
 
@@ -68,7 +62,7 @@ def _resolve_placeholder_name(requested: str, package_names: dict[str, str]) -> 
     for integration_name, package_name in package_names.items():
         if normalized in (integration_name.replace('_', '-'), package_name.replace('_', '-').lower()):
             return package_name
-    for retired_name in RETIRED_PLACEHOLDER_NAMES:
+    for retired_name in KEPT_PLACEHOLDER_NAMES:
         if normalized == retired_name.replace('_', '-').lower():
             return retired_name
     return None
@@ -205,13 +199,13 @@ class PlaceholderPorts:
     The defaults run against real PyPI, GitHub Actions, hatchling, and twine.
     """
 
-    http_get: Callable[..., httpx.Response] = httpx.get
-    http_post: Callable[..., httpx.Response] = httpx.post
-    run: Callable[..., Any] = subprocess.run
+    http_get: Callable[..., httpx.Response] = field(default_factory=lambda: httpx.get)
+    http_post: Callable[..., httpx.Response] = field(default_factory=lambda: httpx.post)
+    run: Callable[..., Any] = field(default_factory=lambda: subprocess.run)
     upload: Callable[[Path, str], None] = _upload_placeholder
     prompt: Callable[..., str] = click.prompt
     interactive: Callable[[], bool] = lambda: sys.stdin.isatty() and sys.stdout.isatty()
-    notify: Callable[[str], None] = print
+    notify: Callable[[str, str], None] = lambda level, text: print(text)
 
 
 @dataclass
@@ -240,11 +234,11 @@ class PlaceholderProcessor(SyncProcessor[PlaceholderMessage]):
 
     async def on_success(self, message: PlaceholderMessage) -> None:
         self._report.published.add(message.id)
-        self._ports.notify(f'  ok {message.id}')
+        self._ports.notify('success', f'  ok {message.id}')
 
     async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
         self._report.failed[error.message.id] = error.original_exception
-        self._ports.notify(f'  FAIL {error.message.id}: {error.original_exception}')
+        self._ports.notify('error', f'  FAIL {error.message.id}: {error.original_exception}')
 
 
 class PlaceholderOrchestrator(EventBusOrchestrator):
@@ -268,8 +262,8 @@ class PlaceholderOrchestrator(EventBusOrchestrator):
 
     async def on_finalize(self, exception: Exception | None) -> None:
         if exception is not None:
-            self._ports.notify(f'Error publishing placeholders: {exception}')
-        self._ports.notify(f'Published {len(self._report.published)}, failed {len(self._report.failed)}')
+            self._ports.notify('error', f'Error publishing placeholders: {exception}')
+        self._ports.notify('info', f'Published {len(self._report.published)}, failed {len(self._report.failed)}')
 
 
 def publish_placeholders(
@@ -283,7 +277,8 @@ def publish_placeholders(
     With NAMES, publish only those integrations; each name may be an integration name (n8n) or a
     package name (datadog-n8n), and packages whose PyPI release is newer than the empty 0.0.1
     placeholder are skipped. Without NAMES, publish every package whose PyPI release is missing
-    or still the empty 0.0.1 placeholder, including the names of retired placeholders.
+    or still the empty 0.0.1 placeholder, including the names that no longer belong to an
+    integration (retired names and the build-time dependency provider).
 
     Authentication: a plain token comes from the DDEV_PYPI_TOKEN environment variable or `prompt`;
     without one, each package mints its own short-lived token through GitHub trusted publishing,
@@ -302,18 +297,24 @@ def publish_placeholders(
             resolved_names.append(resolved)
         resolved_names = sorted(set(resolved_names))
     else:
-        resolved_names = sorted(set(package_names.values()) | set(RETIRED_PLACEHOLDER_NAMES))
+        resolved_names = sorted(set(package_names.values()) | set(KEPT_PLACEHOLDER_NAMES))
 
-    selected = [name for name in resolved_names if _needs_placeholder(name, ports.http_get)]
-    skipped = sorted(set(resolved_names) - set(selected))
+    report = PlaceholderReport(selected=[], skipped=[])
+    ports.notify('info', f'Checking {len(resolved_names)} names on PyPI...')
+    for name in resolved_names:
+        try:
+            if _needs_placeholder(name, ports.http_get):
+                report.selected.append(name)
+            else:
+                report.skipped.append(name)
+        except httpx.HTTPError as error:
+            report.failed[name] = error
+            ports.notify('error', f'  FAIL {name}: PyPI check failed: {error}')
     if names:
-        for name in skipped:
-            ports.notify(f'  skip {name} (already published)')
+        for name in report.skipped:
+            ports.notify('info', f'  skip {name} (already published)')
 
-    report = PlaceholderReport(selected=selected, skipped=skipped)
-    if not selected or dry_run:
-        for name in selected:
-            ports.notify(name)
+    if not report.selected or dry_run:
         return report
 
     token = _api_token(ports.prompt, ports.interactive)

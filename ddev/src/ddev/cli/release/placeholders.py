@@ -29,20 +29,28 @@ def placeholders(app: Application, names: tuple[str, ...], dry_run: bool) -> Non
     """
     from ddev.release.placeholders import PlaceholderPorts, publish_placeholders
 
-    def notify(text: str) -> None:
-        if text.lstrip().startswith('FAIL'):
-            app.display_error(text)
-        elif text.lstrip().startswith('ok'):
-            app.display_success(text)
+    if app.repo.name != 'core':
+        app.abort('This command can only be run against the core repository.')
+
+    def notify(level: str, text: str) -> None:
+        if level == 'error':
+            app.display_error(text, markup=False)
+        elif level == 'success':
+            app.display_success(text, markup=False)
         else:
-            app.display_info(text)
+            app.display_info(text, markup=False)
+
+    ports = PlaceholderPorts(notify=notify, prompt=app.prompt, interactive=lambda: app.interactive)
 
     try:
-        report = publish_placeholders(app.repo, names, dry_run, ports=PlaceholderPorts(notify=notify))
+        report = publish_placeholders(app.repo, names, dry_run, ports=ports)
     except ValueError as error:
         app.abort(str(error))
 
+    if dry_run:
+        for name in report.selected:
+            app.display(name)
+    if report.failed:
+        app.abort()
     if not report.selected:
         app.display_success('Nothing to publish.')
-    elif report.failed:
-        app.abort()
