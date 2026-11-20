@@ -37,7 +37,7 @@ RETIRED_PLACEHOLDER_NAMES = (
 logger = logging.getLogger(__name__)
 
 
-def placeholder_package_names(repo: Repository) -> dict[str, str]:
+def _placeholder_package_names(repo: Repository) -> dict[str, str]:
     """Map each integration name to the PyPI package name it claims as a placeholder.
 
     Real packages shipped from this repository are excluded: only `datadog-*` integration names
@@ -57,7 +57,7 @@ def placeholder_package_names(repo: Repository) -> dict[str, str]:
     return names
 
 
-def resolve_placeholder_name(requested: str, package_names: dict[str, str]) -> str | None:
+def _resolve_placeholder_name(requested: str, package_names: dict[str, str]) -> str | None:
     """Resolve a user-requested name to its PyPI package name.
 
     Accepts an integration name (`n8n`), its dashed variant, or the package name itself
@@ -74,7 +74,7 @@ def resolve_placeholder_name(requested: str, package_names: dict[str, str]) -> s
     return None
 
 
-def needs_placeholder(name: str, http_get: Callable[..., httpx.Response]) -> bool:
+def _needs_placeholder(name: str, http_get: Callable[..., httpx.Response]) -> bool:
     """Return whether `name` is missing on PyPI or still at the empty 0.0.1 placeholder."""
     response = http_get(f'https://pypi.org/pypi/{name}/json', timeout=30)
     if response.status_code == 404:
@@ -83,7 +83,7 @@ def needs_placeholder(name: str, http_get: Callable[..., httpx.Response]) -> boo
     return response.json()['info']['version'] == '0.0.1'
 
 
-def api_token(prompt: Callable[..., str], interactive: Callable[[], bool]) -> str | None:
+def _api_token(prompt: Callable[..., str], interactive: Callable[[], bool]) -> str | None:
     """Read a plain PyPI API token from the environment, or prompt for one in a terminal.
 
     The token is deliberately never a command-line flag so it cannot leak through shell history.
@@ -96,7 +96,7 @@ def api_token(prompt: Callable[..., str], interactive: Callable[[], bool]) -> st
     return None
 
 
-def mint_oidc_token(http_get: Callable[..., httpx.Response], http_post: Callable[..., httpx.Response]) -> str:
+def _mint_oidc_token(http_get: Callable[..., httpx.Response], http_post: Callable[..., httpx.Response]) -> str:
     """Exchange a fresh GitHub Actions OIDC token for a short-lived PyPI upload token.
 
     Trusted publishing: each exchange turns at most one pending publisher into a project and the
@@ -120,7 +120,7 @@ def mint_oidc_token(http_get: Callable[..., httpx.Response], http_post: Callable
     return response.json()['token']
 
 
-def build_placeholder(name: str, workdir: Path, run: Callable[..., Any]) -> Path:
+def _build_placeholder(name: str, workdir: Path, run: Callable[..., Any]) -> Path:
     """Build the placeholder wheel for `name` in `workdir` and return its path."""
     module = name.replace('-', '_')
     project_dir = workdir / name
@@ -168,7 +168,7 @@ only-include = ["{module}"]
     return wheel
 
 
-def upload_placeholder(wheel: Path, token: str) -> None:
+def _upload_placeholder(wheel: Path, token: str) -> None:
     """Upload `wheel` to PyPI with `token`.
 
     Placeholders publish without provenance attestations: they are not consumed as dependencies,
@@ -206,7 +206,7 @@ class PlaceholderPorts:
     http_get: Callable[..., httpx.Response] = httpx.get
     http_post: Callable[..., httpx.Response] = httpx.post
     run: Callable[..., Any] = subprocess.run
-    upload: Callable[[Path, str], None] = upload_placeholder
+    upload: Callable[[Path, str], None] = _upload_placeholder
     prompt: Callable[..., str] = click.prompt
     interactive: Callable[[], bool] = lambda: sys.stdin.isatty() and sys.stdout.isatty()
     notify: Callable[[str], None] = print
@@ -228,9 +228,11 @@ class PlaceholderProcessor(SyncProcessor[PlaceholderMessage]):
 
     def process_message(self, message: PlaceholderMessage) -> None:
         with tempfile.TemporaryDirectory(prefix=message.id) as workdir:
-            wheel = build_placeholder(message.id, Path(workdir), self._ports.run)
+            wheel = _build_placeholder(message.id, Path(workdir), self._ports.run)
             token = (
-                self._token if self._token is not None else mint_oidc_token(self._ports.http_get, self._ports.http_post)
+                self._token
+                if self._token is not None
+                else _mint_oidc_token(self._ports.http_get, self._ports.http_post)
             )
             self._ports.upload(wheel, token)
 
@@ -288,11 +290,11 @@ def publish_placeholders(
     With dry_run, report what would be published without building or uploading anything.
     """
     ports = ports or PlaceholderPorts()
-    package_names = placeholder_package_names(repo)
+    package_names = _placeholder_package_names(repo)
     if names:
         resolved_names = []
         for requested in names:
-            resolved = resolve_placeholder_name(requested, package_names)
+            resolved = _resolve_placeholder_name(requested, package_names)
             if resolved is None:
                 raise ValueError(f'Unknown integration or package name: {requested}')
             resolved_names.append(resolved)
@@ -300,7 +302,7 @@ def publish_placeholders(
     else:
         resolved_names = sorted(set(package_names.values()) | set(RETIRED_PLACEHOLDER_NAMES))
 
-    selected = [name for name in resolved_names if needs_placeholder(name, ports.http_get)]
+    selected = [name for name in resolved_names if _needs_placeholder(name, ports.http_get)]
     skipped = sorted(set(resolved_names) - set(selected))
     if names:
         for name in skipped:
@@ -312,7 +314,7 @@ def publish_placeholders(
             ports.notify(name)
         return report
 
-    token = api_token(ports.prompt, ports.interactive)
+    token = _api_token(ports.prompt, ports.interactive)
     oidc_publishing = 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ and 'ACTIONS_ID_TOKEN_REQUEST_TOKEN' in os.environ
     if token is None and not oidc_publishing:
         raise ValueError(
