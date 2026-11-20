@@ -12,7 +12,13 @@
        power 6: alarm True, Volts below min
        thermal 1: alarm False
        thermal 2: alarm True
-       thermal 3: alarm yes -->
+       thermal 3: alarm yes
+     Fans and power supplies follow the checkmk-paloalto-api fixtures of PAN-OS answers: fans carry `RPMs`, `min` and
+     `alarm` (the PA-5410 names the section `fans`), power supplies carry `alarm` and `Inserted`.
+       fan 1: alarm False
+       fan 2: alarm True, stopped
+       power-supply 1: inserted, alarm False
+       power-supply 2: not inserted, alarm True -->
 <response status="success"><result>
   <power>
     <Slot1>
@@ -33,4 +39,16 @@
       <entry><slot>1</slot><description>Temperature at Exhaust</description><alarm>yes</alarm><DegreesC>82.0</DegreesC><min>0.0</min><max>80.0</max></entry>
     </Slot1>
   </thermal>
+  <fan>
+    <Slot1>
+      <entry><slot>1</slot><description>Fan #1 RPM</description><alarm>False</alarm><RPMs>3600</RPMs><min>2000</min></entry>
+      <entry><slot>1</slot><description>Fan #2 RPM</description><alarm>True</alarm><RPMs>0</RPMs><min>2000</min></entry>
+    </Slot1>
+  </fan>
+  <power-supply>
+    <Slot1>
+      <entry><slot>1</slot><description>Power Supply #1 (left)</description><alarm>False</alarm><Inserted>True</Inserted></entry>
+      <entry><slot>1</slot><description>Power Supply #2 (right)</description><alarm>True</alarm><Inserted>False</Inserted></entry>
+    </Slot1>
+  </power-supply>
 </result></response>
