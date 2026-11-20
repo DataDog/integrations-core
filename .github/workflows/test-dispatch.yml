@@ -12,6 +12,12 @@ on:
     types:
       - completed
 
+  # The nightly full run, one hour before the legacy nightly so the two don't compete for runners.
+  # A called run sees its caller's event, which may also be `schedule`, so the nightly is recognized
+  # by `schedule` with no `inputs.context`.
+  schedule:
+    - cron: "0 1 * * *"
+
   # Callers reference this file at `@master`, so a caller on a release branch or tag runs master's
   # Dispatcher against its own commit. Caller and callee must not share a concurrency group string, or
   # the run cancels itself.
@@ -94,6 +100,7 @@ jobs:
     concurrency:
       group: test-dispatch-${{
         inputs.context != '' && format('{0}-{1}', inputs.context, github.run_id) ||
+        github.event_name == 'schedule' && format('nightly-{0}', github.run_id) ||
         github.event_name == 'workflow_run' && format('pr-{0}/{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) ||
         format('master-{0}', github.run_id) }}
       cancel-in-progress: false
@@ -101,12 +108,15 @@ jobs:
     env:
       OCTO_STS_SCOPE: DataDog/integrations-core
       OCTO_STS_POLICY: self.test-dispatch
-      CALLED: ${{ inputs.context != '' }}
+      # The nightly takes the called-run path with fixed inputs: master's commit, every target.
+      NIGHTLY: ${{ github.event_name == 'schedule' && inputs.context == '' }}
+      CALLED: ${{ inputs.context != '' || github.event_name == 'schedule' }}
+      CHECKOUT_SHA: ${{ inputs.checkout_sha || github.event_name == 'schedule' && inputs.context == '' && github.sha || '' }}
       # The PR status keeps one stable name because it becomes a required check at takeover. Other runs
       # are named by context, so runs on one commit do not overwrite each other's status.
       STATUS_CONTEXT: ${{
         inputs.context == '' && github.event_name == 'workflow_run' && 'Dispatcher / tests (beta, non-blocking)' ||
-        format('Dispatcher ({0}) / tests (beta, non-blocking)', inputs.context || 'master') }}
+        format('Dispatcher ({0}) / tests (beta, non-blocking)', inputs.context || github.event_name == 'schedule' && 'nightly' || 'master') }}
       # For a tag run this starts as the caller's `github.sha`; the step that checks the tag out
       # replaces it with the tag's commit through `GITHUB_ENV`, which the status steps then read.
       HEAD_SHA: ${{
@@ -120,6 +130,7 @@ jobs:
       && (
         inputs.context != ''
         || (github.event_name == 'push' && github.ref == 'refs/heads/master')
+        || github.event_name == 'schedule'
         || (
           github.event_name == 'workflow_run'
           && github.event.workflow_run.conclusion == 'success'
@@ -141,8 +152,6 @@ jobs:
 
       - name: Check the tested revision inputs
         if: env.CALLED == 'true'
-        env:
-          CHECKOUT_SHA: ${{ inputs.checkout_sha }}
         run: |
           if [[ -n "$TAG" && -n "$CHECKOUT_SHA" ]] || [[ -z "$TAG" && -z "$CHECKOUT_SHA" ]]; then
             echo "::error::Pass exactly one of checkout_sha and head-tag."
@@ -157,7 +166,7 @@ jobs:
         with:
           # A tag run names the tag; `ddev` derives the same commit from the API, and
           # `validate_checkout` fails the run if the two disagree because the tag moved.
-          ref: ${{ inputs.head-tag || inputs.checkout_sha }}
+          ref: ${{ inputs.head-tag || env.CHECKOUT_SHA }}
           path: dispatcher-planning-repo
           fetch-depth: 2
           persist-credentials: false
@@ -182,7 +191,7 @@ jobs:
       - name: Check the tested revision can run batches
         if: env.CALLED == 'true'
         env:
-          TESTED_REF: ${{ inputs.head-tag || inputs.checkout_sha }}
+          TESTED_REF: ${{ inputs.head-tag || env.CHECKOUT_SHA }}
         run: |
           set -euo pipefail
           if [[ ! -f dispatcher-planning-repo/.github/actions/run-test-job/action.yml ]]; then
@@ -260,11 +269,11 @@ jobs:
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           PUSH_SHA: ${{ github.sha }}
-          COMMIT: ${{ inputs.checkout_sha }}
-          ALL_TARGETS: ${{ inputs.all }}
+          COMMIT: ${{ env.CHECKOUT_SHA }}
+          ALL_TARGETS: ${{ inputs.all || env.NIGHTLY == 'true' }}
           TARGETS: ${{ inputs.targets }}
           EXCLUDE_TARGETS: ${{ inputs.exclude-targets }}
-          RUN_CONTEXT: ${{ inputs.context }}
+          RUN_CONTEXT: ${{ env.NIGHTLY == 'true' && 'nightly' || inputs.context }}
         run: |
           set -euo pipefail
           args=(
@@ -406,7 +415,8 @@ jobs:
           cd "$planning_repo"
           ddev config override
 
-          if [[ "$CALLED" != true ]]; then
+          # The nightly must be a clean full run; flaky tests have their own run.
+          if [[ "$CALLED" != true || "$NIGHTLY" == true ]]; then
             PYTEST_ARGS='-m "not flaky"'
           fi
           args=(
