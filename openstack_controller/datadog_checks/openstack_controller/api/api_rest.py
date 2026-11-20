@@ -506,6 +506,10 @@ class ApiRest(Api):
             resources = response_json if resource_name is None else response_json.get(resource_name, [])
             if len(resources) > 0:
                 last_item = resources[-1]
+                if marker is not None and last_item.get(marker_name) == marker:
+                    # The server ignored `marker` and returned the same page again; stop instead of looping forever.
+                    self.log.warning("Stopping pagination of `%s`: the server ignored marker `%s`", url, marker)
+                    break
                 item_list.extend(resources)
 
                 if next_signifier == f'{resource_name}_links':

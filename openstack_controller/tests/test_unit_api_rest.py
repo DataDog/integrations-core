@@ -44,6 +44,22 @@ def test_paginated_request_without_limit_follows_next_pages(resource_name, next_
     assert all('limit' not in call.kwargs['params'] for call in http.get.call_args_list)
 
 
+def test_paginated_request_stops_when_marker_does_not_advance():
+    """A server that ignores `marker` keeps returning the same page; the check must not loop forever."""
+    page = {'images': [{'id': 'a'}], 'next': '/v2/images?marker=a'}
+    http = mock.MagicMock()
+    http.get.side_effect = lambda url, params, **kwargs: MockResponse(json_data=page)
+    config = mock.MagicMock(
+        paginated_limit=None, nova_microversion=None, ironic_microversion=None, cinder_microversion=None
+    )
+    api = ApiRest(config, mock.MagicMock(), http)
+
+    items = api.make_paginated_request('http://service/images', 'images', 'id', next_signifier='next')
+
+    assert [item['id'] for item in items] == ['a']
+    assert http.get.call_count == 2
+
+
 COMPUTE_ROOT = 'http://127.0.0.1:8774/compute/v2.1'
 BAREMETAL_ROOT = 'http://127.0.0.1:6385/baremetal'
 VOLUME_ROOT = 'http://127.0.0.1:8776/volume/v3/'
