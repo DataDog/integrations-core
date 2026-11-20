@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 """Steady DNS workload for the coredns-full fixture (stdlib only).
 
 Sends UDP DNS queries at fixed per-second rates, without waiting for answers,
@@ -5,6 +8,7 @@ so a slow or dead upstream never changes the send rate. Mid-run it changes
 state once per state-like metric (see ../README.md, workload plan), and logs
 the epoch time of each change so it can be matched against a scrape window.
 """
+
 import os
 import random
 import select
@@ -37,6 +41,11 @@ MISS_SET = 30
 
 def log(msg):
     print(f"workload: {msg}", flush=True)
+
+
+def log_change(t, message):
+    """Logs a state change with its epoch time, to match it against a scrape window."""
+    log(f"t={t:.0f}s epoch={time.time():.0f} {message}")
 
 
 def query(name, qtype=1):
@@ -87,22 +96,22 @@ def main():
         tick = time.monotonic()
         t = tick - start
 
-        def change(key, message):
-            done.add(key)
-            log(f"t={t:.0f}s epoch={time.time():.0f} {message}")
-
         if t >= T_HOT and "hot" not in done:
             hot = 40
-            change("hot", "hot set 10 -> 40 names")
+            done.add("hot")
+            log_change(t, "hot set 10 -> 40 names")
         if t >= T_BROKEN and "broken" not in done:
             write(os.path.join(CONF, "Corefile"), read("Corefile.broken"))
-            change("broken", "wrote an invalid Corefile (reload fails once)")
+            done.add("broken")
+            log_change(t, "wrote an invalid Corefile (reload fails once)")
         if t >= T_RELOAD and "reload" not in done:
             write(os.path.join(CONF, "Corefile"), read("Corefile.extra"))
-            change("reload", "wrote a valid Corefile with one more server block (reload succeeds)")
+            done.add("reload")
+            log_change(t, "wrote a valid Corefile with one more server block (reload succeeds)")
         if t >= T_HOSTS and "hosts" not in done:
             write(os.path.join(CONF, "hosts"), read("hosts.grown"))
-            change("hosts", "hosts file 3 -> 6 entries")
+            done.add("hosts")
+            log_change(t, "hosts file 3 -> 6 entries")
 
         msgs = []
         msgs += [query(f"h{(i * HOT_RATE + k) % hot}.hot.example.test") for k in range(HOT_RATE)]
