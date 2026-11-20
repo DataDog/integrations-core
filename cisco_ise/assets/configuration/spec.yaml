@@ -9,7 +9,7 @@ files:
     - type: udp
       port: <PORT>
       source: cisco-ise
-      # RFC Q1 (proposed answer): mask secrets typed in TACACS+ commands before they leave the Agent.
+      # Mask secrets typed in TACACS+ commands before they leave the Agent.
       # Verified on Agent 7.85.0 with real ISE 3.2 messages (3300, 5202, 5402).
       log_processing_rules:
       - type: mask_sequences

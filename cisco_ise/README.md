@@ -24,8 +24,6 @@ Supported versions: Cisco ISE 3.x (tested on 3.2).
 
 2. Add this configuration block to your `cisco_ise.d/conf.yaml` file to start collecting your Cisco ISE logs:
 
-    <!-- RFC Q1 (proposed answer): mask secrets typed in TACACS+ commands in the Agent. -->
-
     ```yaml
     logs:
       - type: udp # or tcp
@@ -106,7 +104,6 @@ The Cisco ISE integration collects ISE's syslog messages and parses them with th
 
 - The syslog header gives the ISE node (`syslog.hostname`, also copied to `cisco_ise.node`), the Logging Category (`cisco_ise.category`), and the message ID and segment numbers.
 - The message body gives the event time with milliseconds, the message code (`cisco_ise.message_code`, for example `5200` for a passed authentication), the severity, and ISE's own fields. The log status is ISE's severity, also on messages split into segments, where it comes from the syslog priority.
-<!-- RFC Q2 (proposed answer): ISE key names kept under cisco_ise.attributes.*, site split into cisco_ise.site.level1..5 (RFC v11). -->
 - ISE's fields keep their names under `cisco_ise.attributes.*` (for example `cisco_ise.attributes.NetworkDeviceName`, `cisco_ise.attributes.FailureReason`), and the authorization result `Response={...}` is parsed under `cisco_ise.response.*`.
 - Derived fields: the site levels, the endpoint MAC address normalized to `aa:bb:cc:dd:ee:ff` (`cisco_ise.endpoint.mac`, from whichever MAC field the message has, such as `Calling-Station-ID` or the profiler's `EndpointMacAddress`; ISE's original value is in `cisco_ise.endpoint.mac_raw`), and the TACACS+ command (`cisco_ise.tacacs.command`, `cisco_ise.tacacs.command_name`).
 - Authorization result, from `Response={...}`: the VLAN (`cisco_ise.authorization.vlan`), the downloadable ACL (`cisco_ise.authorization.dacl`), and the Security Group Tag as ISE logs it, in hexadecimal (`cisco_ise.authorization.sgt`, for example `0004-00`).
@@ -119,8 +116,6 @@ ISE logs unknown users as `INVALID`, so failed logins by non-existing users are 
 ISE escapes commas inside some values with a backslash, and the backslash stays in the attribute: for example `cisco_ise.attributes.EndpointOUI` is `Cisco Systems\, Inc`. Search these values with a wildcard, such as `@cisco_ise.attributes.EndpointOUI:Cisco*`.
 
 #### Finding failed logins
-
-<!-- RFC Q5 (proposed answer): no evt.outcome; the pipeline keeps ISE code, category, and class as sent. -->
 
 ISE has no single success or failure field, so the pipeline keeps the values ISE sends and doesn't classify them. To find failures, use the message class or the Logging Category; they differ:
 
@@ -142,8 +137,6 @@ The message code (`@cisco_ise.message_code`) selects one message type. Common co
 The full list is in Cisco's [Cisco ISE Syslogs][8] guide.
 
 #### Sensitive data
-
-<!-- RFC Q1 (proposed answer): mask TACACS+ secrets in the Agent, keep guest data, mention Sensitive Data Scanner. -->
 
 - **TACACS+ commands** are logged as typed, including secrets, for example `username admin secret 0 <password>`. The two `mask_sequences` rules in the configuration above replace the value after `secret`, `password`, `key`, `key-string`, `community`, and `pre-shared-key` with `********` in the Agent, before the logs leave your network. They only cover these keywords; to mask other values, add rules or use [Sensitive Data Scanner][7].
 - **Guest portal messages** (Guest category, and guest logins) contain visitors' personal data: name, email address, phone number, company, and the person visited. Don't attach the Guest category if you don't need it, or use [Sensitive Data Scanner][7] to redact these fields.
