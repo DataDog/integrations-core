@@ -568,10 +568,12 @@ class ApiRest(Api):
         nodes = self.make_paginated_request(
             url, 'nodes', 'uuid', params=params, extra_headers=self._microversion_headers('baremetal', 'nodes')
         )
-        for node in nodes:
-            # Before microversion 1.2, Ironic reports the `available` provision state as null.
-            if node.get('provision_state') is None:
-                node['provision_state'] = 'available'
+        if self.config.negotiate_microversions:
+            for node in nodes:
+                # Before microversion 1.2, Ironic reports the `available` provision state as null; openstacksdk
+                # reported it as `available`, which `openstack_config_file_path` instances keep.
+                if node.get('provision_state') is None:
+                    node['provision_state'] = 'available'
         return nodes
 
     def get_baremetal_portgroups(self, node_id):

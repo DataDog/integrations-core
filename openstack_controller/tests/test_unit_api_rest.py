@@ -205,3 +205,26 @@ def test_microversion_not_negotiated(negotiate, microversions):
 
     assert headers_sent(http, COMPUTE_ROOT + '/servers/detail') is None
     assert all(c.args[0] != COMPUTE_ROOT for c in http.get.call_args_list)
+
+
+@pytest.mark.parametrize(
+    ('negotiate', 'expected'),
+    [
+        pytest.param(True, 'available', id='clouds.yaml instance'),
+        pytest.param(False, None, id='keystone_server_url instance'),
+    ],
+)
+def test_null_provision_state(negotiate, expected):
+    """openstacksdk reported Ironic's pre-1.2 null state as `available`; REST instances report the state as returned."""
+    api, http = make_api({}, negotiate=negotiate)
+    nodes_url = BAREMETAL_ROOT + '/v1/nodes/detail'
+    default_get = http.get.side_effect
+    http.get.side_effect = lambda url, **kwargs: (
+        MockResponse(json_data={'nodes': [{'uuid': 'n', 'provision_state': None}]})
+        if url == nodes_url
+        else default_get(url, **kwargs)
+    )
+
+    (node,) = api.get_baremetal_nodes()
+
+    assert node['provision_state'] == expected
