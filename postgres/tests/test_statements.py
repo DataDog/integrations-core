@@ -82,6 +82,7 @@ def test_activity_server_byte_length(integration_check, dbm_instance):
         finally:
             if check is not None:
                 check._close_db_pool()
+                check._close_db()
             admin.execute(f'DROP DATABASE {dbname}')
 
 
