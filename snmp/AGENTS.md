@@ -13,8 +13,10 @@ same directory.
   profiles there.
 - `tests/compose/data/<name>.snmprec`: simulator data. The simulated device answers on the
   community string that matches the file name.
-- `tests/test_e2e_core_profiles/test_profile_<name>.py`: one end-to-end test per profile. A
-  profile whose name starts with `_` gets a `test_profile__<name>.py` file.
+- `tests/test_e2e_core_profiles/test_profile_<name>.py`: one end-to-end test per profile, with
+  hyphens in the profile name turned into underscores (`f5-big-ip` is `test_profile_f5_big_ip.py`,
+  function `test_e2e_profile_f5_big_ip`). A profile whose name starts with `_` gets a
+  `test_profile__<name>.py` file.
 
 ## A profile edit needs a changelog entry
 
@@ -34,6 +36,8 @@ ddev env start --dev snmp py3.13-core
 ddev env test --dev snmp --envs py3.13-core --pytest-args='-k test_e2e_profile_<name>'
 ddev env stop snmp py3.13-core
 ```
+
+`<name>` is the test function's suffix, with underscores for the profile name's hyphens.
 
 Under `ddev test` the same tests report as skipped, not failed, so a green run there says nothing
 about profiles. `ddev test` takes `--envs <env>`, not `snmp:<env>`; the colon selector is rejected.
@@ -61,8 +65,10 @@ about profiles. `ddev test` takes `--envs <env>`, not `snmp:<env>`; the colon se
 - **A table added directly to a profile must be fully simulated.** Profile tests call
   `assert_all_profile_metrics_and_tags_covered` (`tests/test_e2e_core_profiles/utils.py`): every
   symbol needs simulator rows carrying every tag column the profile declares, and the test must
-  assert each metric so `assert_all_metrics_covered` passes. Tables pulled in through `extends:`
-  are covered by the base profile's own test.
+  assert each metric so `assert_all_metrics_covered` passes. The coverage check reads only the
+  profile's own file and doesn't follow `extends:`, and most `_` base profiles have no test of their
+  own, so when you change an inherited table, find a test that loads it and add the simulator data
+  and assertions there.
 - **Counter columns arrive as rates.** A `Counter32` or `Counter64` symbol without an explicit
   `metric_type` is submitted as a rate, which is `gauge` in `metadata.csv`. Don't change it to
   `count`.
