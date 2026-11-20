@@ -45,8 +45,15 @@ USER_ATTRIBUTES = [
     'userPrincipalName',
     'mail',
     'employeeID',
+    'givenName',
+    'sn',
+    'displayName',
+    'physicalDeliveryOfficeName',
     'distinguishedName',
     'userAccountControl',
+    # Computed on request, so it is only returned when listed explicitly.
+    'msDS-User-Account-Control-Computed',
+    'accountExpires',
     'whenCreated',
     'lastLogonTimestamp',
     'pwdLastSet',
@@ -61,9 +68,11 @@ COMPUTER_ATTRIBUTES = [
     'objectGUID',
     'objectSid',
     'sAMAccountName',
+    'name',
     'distinguishedName',
     'dNSHostName',
     'userAccountControl',
+    'whenCreated',
     'operatingSystem',
     'operatingSystemVersion',
     'lastLogonTimestamp',
@@ -76,6 +85,10 @@ UAC_PASSWD_NOTREQD = 0x20
 UAC_DONT_EXPIRE_PASSWORD = 0x10000
 UAC_TRUSTED_FOR_DELEGATION = 0x80000
 UAC_DONT_REQ_PREAUTH = 0x400000
+UAC_SERVER_TRUST_ACCOUNT = 0x2000  # domain controller
+UAC_PARTIAL_SECRETS_ACCOUNT = 0x4000000  # read-only domain controller
+# Bit of msDS-User-Account-Control-Computed: lockoutTime stays set after a lockout expires, this does not.
+UAC_COMPUTED_LOCKOUT = 0x10
 
 # Well-known privileged groups, identified by SID because group names are localized.
 # Domain Admins, Schema Admins, Enterprise Admins (relative to the domain SID).
@@ -165,6 +178,11 @@ def nested_members_filter(group_dn: str) -> str:
     return f'(&{USER_FILTER}(memberOf:{IN_CHAIN_RULE}:={escape_filter_value(group_dn)}))'
 
 
+def crossref_filter(domain_dn: str) -> str:
+    """Match the domain's entry under `CN=Partitions`, which holds its NetBIOS name."""
+    return f'(&(objectClass=crossRef)(nCName={escape_filter_value(domain_dn)}))'
+
+
 def column_values(values: list[tuple[object, int]]) -> list:
     """Unwrap ADSI `(value, type)` pairs, converting binary buffers to bytes."""
     return [bytes(value) if isinstance(value, memoryview) else value for value, _ in values]
@@ -175,7 +193,12 @@ def _first(entry: dict, attribute: str):
     return values[0] if values else None
 
 
-def build_user_record(entry: dict, guid_by_dn: dict[str, str], privileged_groups: dict[str, set[str]]) -> dict:
+def build_user_record(
+    entry: dict,
+    guid_by_dn: dict[str, str],
+    privileged_groups: dict[str, set[str]],
+    domain_netbios_name: str | None = None,
+) -> dict:
     dn = _first(entry, 'distinguishedName')
     user_id = guid_to_str(_first(entry, 'objectGUID'))
     groups = sorted(privileged_groups.get(user_id, ()))
@@ -189,10 +212,16 @@ def build_user_record(entry: dict, guid_by_dn: dict[str, str], privileged_groups
         'user_principal_name': _first(entry, 'userPrincipalName'),
         'email': _first(entry, 'mail'),
         'employee_id': _first(entry, 'employeeID'),
+        'given_name': _first(entry, 'givenName'),
+        'surname': _first(entry, 'sn'),
+        'display_name': _first(entry, 'displayName'),
         'domain': domain_from_dn(dn),
+        'domain_netbios_name': domain_netbios_name,
         'ou_path': ou_path_from_dn(dn),
         'account': {
             'enabled': not uac & UAC_ACCOUNTDISABLE,
+            'locked': bool((_first(entry, 'msDS-User-Account-Control-Computed') or 0) & UAC_COMPUTED_LOCKOUT),
+            'expires_at': filetime_to_iso(_first(entry, 'accountExpires')),
             'password_never_expires': bool(uac & UAC_DONT_EXPIRE_PASSWORD),
             'password_not_required': bool(uac & UAC_PASSWD_NOTREQD),
             'preauth_not_required': bool(uac & UAC_DONT_REQ_PREAUTH),
@@ -214,25 +243,34 @@ def build_user_record(entry: dict, guid_by_dn: dict[str, str], privileged_groups
         'organization': {
             'department': _first(entry, 'department'),
             'title': _first(entry, 'title'),
+            'office': _first(entry, 'physicalDeliveryOfficeName'),
             'manager_id': guid_by_dn.get(manager.lower()) if manager else None,
         },
     }
 
 
-def build_computer_record(entry: dict) -> dict:
+def build_computer_record(entry: dict, domain_netbios_name: str | None = None) -> dict:
     dn = _first(entry, 'distinguishedName')
     uac = _first(entry, 'userAccountControl')
-    account_name = _first(entry, 'sAMAccountName')
+    if uac & UAC_SERVER_TRUST_ACCOUNT:
+        role = 'domain_controller'
+    elif uac & UAC_PARTIAL_SECRETS_ACCOUNT:
+        role = 'read_only_domain_controller'
+    else:
+        role = 'member'
     return {
         'id': guid_to_str(_first(entry, 'objectGUID')),
         'sid': sid_to_str(_first(entry, 'objectSid')),
-        # `NAME$`, as machine accounts appear in logon events; without `$` it is the NetBIOS name
-        # that logon events report as the source workstation.
-        'account_name': account_name,
-        'computer_name': account_name.removesuffix('$'),
+        # `NAME$`, as machine accounts appear in logon events.
+        'account_name': _first(entry, 'sAMAccountName'),
+        # Always set, unlike dNSHostName, which stays empty until a machine joins the domain.
+        'computer_name': _first(entry, 'name'),
         'hostname': _first(entry, 'dNSHostName'),
         'domain': domain_from_dn(dn),
+        'domain_netbios_name': domain_netbios_name,
         'ou_path': ou_path_from_dn(dn),
+        'role': role,
+        'created_at': datetime_to_iso(_first(entry, 'whenCreated')),
         'enabled': not uac & UAC_ACCOUNTDISABLE,
         'os': {'name': _first(entry, 'operatingSystem'), 'version': _first(entry, 'operatingSystemVersion')},
         'last_logon_at': filetime_to_iso(_first(entry, 'lastLogonTimestamp')),
@@ -342,6 +380,9 @@ class ActiveDirectoryDirectoryCheck(AgentCheck):
 
         expire_at = now + EXPIRY_INTERVALS * self._interval
         domain_sid = sid_to_str(_first(domain, 'objectSid'))
+        config_dn = directory.read_root_dse('configurationNamingContext')
+        crossref = next(directory.search(f'CN=Partitions,{config_dn}', crossref_filter(domain_dn), ['nETBIOSName']), {})
+        netbios_name = _first(crossref, 'nETBIOSName')
 
         privileged_groups = defaultdict(set)
         groups = directory.search(
@@ -357,11 +398,13 @@ class ActiveDirectoryDirectoryCheck(AgentCheck):
         users = list(directory.search(domain_dn, USER_FILTER, USER_ATTRIBUTES))
         guid_by_dn = {_first(u, 'distinguishedName').lower(): guid_to_str(_first(u, 'objectGUID')) for u in users}
         for entry in users:
-            self._submit(USER_TYPE, build_user_record(entry, guid_by_dn, privileged_groups), now, expire_at)
+            self._submit(
+                USER_TYPE, build_user_record(entry, guid_by_dn, privileged_groups, netbios_name), now, expire_at
+            )
 
         computers = 0
         for entry in directory.search(domain_dn, COMPUTER_FILTER, COMPUTER_ATTRIBUTES):
-            self._submit(COMPUTER_TYPE, build_computer_record(entry), now, expire_at)
+            self._submit(COMPUTER_TYPE, build_computer_record(entry, netbios_name), now, expire_at)
             computers += 1
 
         self.gauge('directory.records', len(users), tags=self._tags + [f'record_type:{USER_TYPE}'])

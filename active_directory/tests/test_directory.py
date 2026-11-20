@@ -14,6 +14,7 @@ from datadog_checks.active_directory.directory import (
     build_computer_record,
     build_user_record,
     column_values,
+    crossref_filter,
     domain_from_dn,
     escape_filter_value,
     filetime_to_iso,
@@ -29,6 +30,8 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 DOMAIN_DN = 'DC=corp,DC=example,DC=com'
 DOMAIN_SID = 'S-1-5-21-1377283216-344919071-3415362939'
+CONFIG_DN = f'CN=Configuration,{DOMAIN_DN}'
+NETBIOS_NAME = 'ACME'
 DC1_SERVICE = f'CN=NTDS Settings,CN=DC1,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,{DOMAIN_DN}'
 DC2_SERVICE = f'CN=NTDS Settings,CN=DC2,CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration,{DOMAIN_DN}'
 
@@ -71,6 +74,8 @@ def computer_entry(n, name, **attributes):
         'distinguishedName': [f'CN={name},CN=Computers,{DOMAIN_DN}'],
         'objectSid': [sid_to_bytes(f'{DOMAIN_SID}-{2000 + n}')],
         'sAMAccountName': [f'{name}$'],
+        'name': [name],
+        'whenCreated': [datetime(2026, 10, 30, 8, 12, 44, tzinfo=UTC)],
         'dNSHostName': [f'{name.lower()}.corp.example.com'],
         'userAccountControl': [4096],
     }
@@ -81,8 +86,19 @@ def computer_entry(n, name, **attributes):
 class FakeDirectory:
     """Stands in for ADSI. Answers only the queries the crawl is expected to make."""
 
-    def __init__(self, *, server=DC1_SERVICE, pdc=DC1_SERVICE, users=(), computers=(), groups=(), nested=None):
+    def __init__(
+        self,
+        *,
+        server=DC1_SERVICE,
+        pdc=DC1_SERVICE,
+        users=(),
+        computers=(),
+        groups=(),
+        nested=None,
+        netbios=NETBIOS_NAME,
+    ):
         self.server = server
+        self.netbios = netbios
         self.pdc = pdc
         self.users = list(users)
         self.computers = list(computers)
@@ -91,15 +107,22 @@ class FakeDirectory:
         self.searches = []
 
     def read_root_dse(self, attribute):
-        return {'defaultNamingContext': DOMAIN_DN, 'dsServiceName': self.server}[attribute]
+        return {
+            'defaultNamingContext': DOMAIN_DN,
+            'configurationNamingContext': CONFIG_DN,
+            'dsServiceName': self.server,
+        }[attribute]
 
     def read_object(self, dn, attributes):
         assert dn == DOMAIN_DN
         return {'fSMORoleOwner': [self.pdc], 'objectSid': [sid_to_bytes(DOMAIN_SID)]}
 
     def search(self, base_dn, ldap_filter, attributes):
-        assert base_dn == DOMAIN_DN
         self.searches.append(ldap_filter)
+        if base_dn == f'CN=Partitions,{CONFIG_DN}':
+            assert ldap_filter == crossref_filter(DOMAIN_DN)
+            return iter([{'nETBIOSName': [self.netbios]}] if self.netbios else [])
+        assert base_dn == DOMAIN_DN
         if ldap_filter == USER_FILTER:
             return iter(self.users)
         if ldap_filter == COMPUTER_FILTER:
@@ -222,12 +245,19 @@ def test_build_user_record_full():
         userPrincipalName=['jdoe@corp.example.com'],
         mail=['john.doe@example.com'],
         employeeID=['E1234'],
+        givenName=['John'],
+        sn=['Doe'],
+        displayName=['John Doe'],
+        physicalDeliveryOfficeName=['Paris'],
+        accountExpires=[134380845000000000],
         objectClass=['top', 'person', 'organizationalPerson', 'user'],
         # Secrets must never reach the payload even if the directory returns them.
         unicodePwd=[b'secret'],
         lastLogon=[134380845000000000],
     )
-    record = build_user_record(entry, {BOSS_DN.lower(): guid_str(2)}, {guid_str(1): {'Domain Admins'}})
+    record = build_user_record(
+        entry, {BOSS_DN.lower(): guid_str(2)}, {guid_str(1): {'Domain Admins'}}, domain_netbios_name=NETBIOS_NAME
+    )
 
     assert record == {
         'id': guid_str(1),
@@ -236,10 +266,16 @@ def test_build_user_record_full():
         'user_principal_name': 'jdoe@corp.example.com',
         'email': 'john.doe@example.com',
         'employee_id': 'E1234',
+        'given_name': 'John',
+        'surname': 'Doe',
+        'display_name': 'John Doe',
         'domain': 'corp.example.com',
+        'domain_netbios_name': NETBIOS_NAME,
         'ou_path': 'Users/Engineering',
         'account': {
             'enabled': True,
+            'locked': False,
+            'expires_at': '2026-11-02T09:15:00Z',
             'password_never_expires': False,
             'password_not_required': False,
             'preauth_not_required': False,
@@ -250,7 +286,7 @@ def test_build_user_record_full():
         'groups': {'member_of': [DOMAIN_ADMINS_DN]},
         'privilege': {'is_privileged': True, 'privileged_groups': ['Domain Admins'], 'admin_count': True},
         'service_account': {'service_principal_names': ['HTTP/web.corp.example.com'], 'managed': False},
-        'organization': {'department': 'Engineering', 'title': 'SRE', 'manager_id': guid_str(2)},
+        'organization': {'department': 'Engineering', 'title': 'SRE', 'office': 'Paris', 'manager_id': guid_str(2)},
     }
 
 
@@ -261,12 +297,17 @@ def test_build_user_record_minimal_entry():
     assert record['user_principal_name'] is None
     assert record['email'] is None
     assert record['employee_id'] is None
+    assert record['given_name'] is None
+    assert record['surname'] is None
+    assert record['display_name'] is None
+    assert record['domain_netbios_name'] is None
+    assert record['account']['expires_at'] is None
     assert record['last_logon_at'] is None
     assert record['password_last_set_at'] is None
     assert record['groups'] == {'member_of': []}
     assert record['privilege'] == {'is_privileged': False, 'privileged_groups': [], 'admin_count': False}
     assert record['service_account'] == {'service_principal_names': [], 'managed': False}
-    assert record['organization'] == {'department': None, 'title': None, 'manager_id': None}
+    assert record['organization'] == {'department': None, 'title': None, 'office': None, 'manager_id': None}
 
 
 @pytest.mark.parametrize(
@@ -297,6 +338,8 @@ def test_build_user_record_account_flags(uac, expected):
     # Each flag is read from its own userAccountControl bit; a wrong mask hides or invents posture risk.
     defaults = {
         'enabled': True,
+        'locked': False,
+        'expires_at': None,
         'password_never_expires': False,
         'password_not_required': False,
         'preauth_not_required': False,
@@ -327,6 +370,23 @@ def test_build_user_record_privilege(admin_count, groups, expected):
     extra = {'adminCount': admin_count} if admin_count is not None else {}
     record = build_user_record(user_entry(1, JDOE_DN, **extra), {}, {guid_str(1): groups})
     assert record['privilege'] == expected
+
+
+@pytest.mark.parametrize(
+    'computed_uac, locked',
+    [
+        pytest.param(None, False, id='attribute_missing'),
+        pytest.param([0], False, id='not_locked'),
+        pytest.param([0x10], True, id='locked'),
+        pytest.param([0x800010], True, id='locked_and_password_expired'),
+        pytest.param([0x800000], False, id='password_expired_only'),
+    ],
+)
+def test_build_user_record_locked(computed_uac, locked):
+    # Lockout lives in the computed attribute, not in userAccountControl; reading the wrong bit hides lockouts.
+    extra = {'msDS-User-Account-Control-Computed': computed_uac} if computed_uac is not None else {}
+    record = build_user_record(user_entry(1, JDOE_DN, **extra), {}, {})
+    assert record['account']['locked'] is locked
 
 
 @pytest.mark.parametrize(
@@ -364,14 +424,17 @@ def test_build_computer_record_full():
         userAccountControl=[4096 | 0x80000],
         **{'msDS-AllowedToDelegateTo': ['cifs/fs1.corp.example.com']},
     )
-    assert build_computer_record(entry) == {
+    assert build_computer_record(entry, domain_netbios_name=NETBIOS_NAME) == {
         'id': guid_str(3),
         'sid': f'{DOMAIN_SID}-2003',
         'account_name': 'WEB1$',
         'computer_name': 'WEB1',
         'hostname': 'web1.corp.example.com',
         'domain': 'corp.example.com',
+        'domain_netbios_name': NETBIOS_NAME,
         'ou_path': 'Computers',
+        'role': 'member',
+        'created_at': '2026-10-30T08:12:44Z',
         'enabled': True,
         'os': {'name': 'Windows Server 2022 Datacenter', 'version': '10.0 (20348)'},
         'last_logon_at': '2026-11-02T09:15:00Z',
@@ -386,10 +449,25 @@ def test_build_computer_record_prestaged_account():
     record = build_computer_record(entry)
 
     assert record['hostname'] is None
+    assert record['computer_name'] == 'NEW1'
     assert record['enabled'] is False
     assert record['os'] == {'name': None, 'version': None}
     assert record['last_logon_at'] is None
     assert record['delegation'] == {'unconstrained': False, 'allowed_targets': []}
+
+
+@pytest.mark.parametrize(
+    'uac, role',
+    [
+        pytest.param(0x1000, 'member', id='workstation_or_server'),
+        pytest.param(0x82000, 'domain_controller', id='domain_controller'),
+        pytest.param(0x5001000, 'read_only_domain_controller', id='read_only_domain_controller'),
+    ],
+)
+def test_build_computer_record_role(uac, role):
+    # DCs always have unconstrained delegation; without the role they look like the riskiest machines.
+    record = build_computer_record(computer_entry(3, 'DC1', userAccountControl=[uac]))
+    assert record['role'] == role
 
 
 # --- check -------------------------------------------------------------------------------------
@@ -442,6 +520,8 @@ def test_pdc_sends_all_users_and_computers(aggregator, dd_run_check, fake_direct
 
     jdoe = json.loads(resources[guid_str(1)].fields_json)
     boss = json.loads(resources[guid_str(2)].fields_json)
+    web1 = json.loads(resources[guid_str(3)].fields_json)
+    assert jdoe['domain_netbios_name'] == web1['domain_netbios_name'] == NETBIOS_NAME
     assert jdoe['account_name'] == 'jdoe'
     assert jdoe['organization']['manager_id'] == guid_str(2)
     assert jdoe['privilege']['is_privileged'] is False
