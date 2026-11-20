@@ -1,0 +1,1 @@
+Add an option to prevent Kafka actions from running against a monitored cluster.
