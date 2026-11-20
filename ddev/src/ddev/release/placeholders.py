@@ -3,17 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import getpass
+import logging
 import os
 import subprocess
 import sys
 import tempfile
 import tomllib
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable
 
+import click
 import httpx
 from twine.commands.upload import upload
 from twine.settings import Settings
@@ -22,7 +23,6 @@ from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, SyncProcessor
 
 if TYPE_CHECKING:
-    from ddev.cli.application import Application
     from ddev.repo.core import Repository
 
 # Names claimed on PyPI for integrations that were later removed from this repository. They are kept
@@ -33,6 +33,8 @@ RETIRED_PLACEHOLDER_NAMES = (
     'datadog-snowflake',
     'datadog-tokumx',
 )
+
+logger = logging.getLogger(__name__)
 
 
 def placeholder_package_names(repo: Repository) -> dict[str, str]:
@@ -72,16 +74,16 @@ def resolve_placeholder_name(requested: str, package_names: dict[str, str]) -> s
     return None
 
 
-def needs_placeholder(name: str) -> bool:
+def needs_placeholder(name: str, http_get: Callable[..., httpx.Response]) -> bool:
     """Return whether `name` is missing on PyPI or still at the empty 0.0.1 placeholder."""
-    response = httpx.get(f'https://pypi.org/pypi/{name}/json', timeout=30)
+    response = http_get(f'https://pypi.org/pypi/{name}/json', timeout=30)
     if response.status_code == 404:
         return True
     response.raise_for_status()
     return response.json()['info']['version'] == '0.0.1'
 
 
-def get_api_token() -> str | None:
+def api_token(prompt: Callable[..., str], interactive: Callable[[], bool]) -> str | None:
     """Read a plain PyPI API token from the environment, or prompt for one in a terminal.
 
     The token is deliberately never a command-line flag so it cannot leak through shell history.
@@ -89,12 +91,12 @@ def get_api_token() -> str | None:
     token = os.environ.get('DDEV_PYPI_TOKEN')
     if token:
         return token
-    if sys.stdin.isatty() and sys.stdout.isatty():
-        return getpass.getpass('PyPI API token: ')
+    if interactive():
+        return prompt('PyPI API token: ', hide_input=True)
     return None
 
 
-def mint_oidc_token() -> str:
+def mint_oidc_token(http_get: Callable[..., httpx.Response], http_post: Callable[..., httpx.Response]) -> str:
     """Exchange a fresh GitHub Actions OIDC token for a short-lived PyPI upload token.
 
     Trusted publishing: each exchange turns at most one pending publisher into a project and the
@@ -103,14 +105,14 @@ def mint_oidc_token() -> str:
     """
     request_url = os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']
     request_token = os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']
-    response = httpx.get(
+    response = http_get(
         request_url,
         params={'audience': 'pypi'},
         headers={'Authorization': f'bearer {request_token}'},
         timeout=30,
     )
     response.raise_for_status()
-    response = httpx.post(
+    response = http_post(
         'https://pypi.org/_/oidc/github/mint-token', json={'token': response.json()['value']}, timeout=30
     )
     if response.status_code != 200:
@@ -118,7 +120,7 @@ def mint_oidc_token() -> str:
     return response.json()['token']
 
 
-def build_placeholder(name: str, workdir: Path) -> Path:
+def build_placeholder(name: str, workdir: Path, run: Callable[..., Any]) -> Path:
     """Build the placeholder wheel for `name` in `workdir` and return its path."""
     module = name.replace('-', '_')
     project_dir = workdir / name
@@ -154,7 +156,7 @@ only-include = ["{module}"]
     (project_dir / module / '__init__.py').write_text(module_source)
     (project_dir / 'pyproject.toml').write_text(pyproject)
     try:
-        subprocess.run(
+        run(
             [sys.executable, '-m', 'hatchling', 'build', '-t', 'wheel', '-d', 'dist'],
             cwd=project_dir,
             check=True,
@@ -185,48 +187,76 @@ def upload_placeholder(wheel: Path, token: str) -> None:
 
 
 @dataclass
+class PlaceholderReport:
+    """What a `publish_placeholders` run selected, skipped, published, and failed at."""
+
+    selected: list[str]
+    skipped: list[str]
+    published: set[str] = field(default_factory=set)
+    failed: dict[str, Exception] = field(default_factory=dict)
+
+
+@dataclass
+class PlaceholderPorts:
+    """The external dependencies of `publish_placeholders`, injectable for tests.
+
+    The defaults run against real PyPI, GitHub Actions, hatchling, and twine.
+    """
+
+    http_get: Callable[..., httpx.Response] = httpx.get
+    http_post: Callable[..., httpx.Response] = httpx.post
+    run: Callable[..., Any] = subprocess.run
+    upload: Callable[[Path, str], None] = upload_placeholder
+    prompt: Callable[..., str] = click.prompt
+    interactive: Callable[[], bool] = lambda: sys.stdin.isatty() and sys.stdout.isatty()
+    notify: Callable[[str], None] = print
+
+
+@dataclass
 class PlaceholderMessage(BaseMessage):
     """The `id` is the PyPI project name."""
 
 
 class PlaceholderProcessor(SyncProcessor[PlaceholderMessage]):
-    def __init__(self, app: Application, token: str | None):
+    def __init__(self, report: PlaceholderReport, ports: PlaceholderPorts, token: str | None):
         super().__init__('placeholder-processor')
-        self._app = app
+        self._report = report
+        self._ports = ports
         # A plain token uploads every package; without one, each package mints its own
         # short-lived token through trusted publishing.
         self._token = token
-        self.published: set[str] = set()
-        self.failed: dict[str, Exception] = {}
 
     def process_message(self, message: PlaceholderMessage) -> None:
         with tempfile.TemporaryDirectory(prefix=message.id) as workdir:
-            wheel = build_placeholder(message.id, Path(workdir))
-            upload_placeholder(wheel, self._token or mint_oidc_token())
+            wheel = build_placeholder(message.id, Path(workdir), self._ports.run)
+            token = (
+                self._token if self._token is not None else mint_oidc_token(self._ports.http_get, self._ports.http_post)
+            )
+            self._ports.upload(wheel, token)
 
     async def on_success(self, message: PlaceholderMessage) -> None:
-        self.published.add(message.id)
-        self._app.display_success(f'  ok {message.id}')
+        self._report.published.add(message.id)
+        self._ports.notify(f'  ok {message.id}')
 
     async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
-        self.failed[error.message.id] = error.original_exception
-        self._app.display_error(f'  FAIL {error.message.id}: {error.original_exception}')
+        self._report.failed[error.message.id] = error.original_exception
+        self._ports.notify(f'  FAIL {error.message.id}: {error.original_exception}')
 
 
 class PlaceholderOrchestrator(EventBusOrchestrator):
-    def __init__(self, app: Application, names: list[str], token: str | None):
+    def __init__(self, report: PlaceholderReport, processor: PlaceholderProcessor, ports: PlaceholderPorts):
         super().__init__(
-            logger=app.logger,
+            logger=logger,
             max_timeout=3600.0,
             executor=ThreadPoolExecutor(max_workers=4),
         )
-        self._app = app
-        self._names = names
-        self._processor = PlaceholderProcessor(app, token)
-        self.register_processor(self._processor, [PlaceholderMessage])
+        self._report = report
+        self._processor = processor
+        self._ports = ports
+        self.register_processor(processor, [PlaceholderMessage])
 
     async def on_initialize(self) -> None:
-        for name in self._names:
+        for name in self._report.selected:
             self.submit_message(PlaceholderMessage(id=name))
 
     async def on_message_received(self, message: BaseMessage) -> None:
@@ -234,9 +264,61 @@ class PlaceholderOrchestrator(EventBusOrchestrator):
 
     async def on_finalize(self, exception: Exception | None) -> None:
         if exception is not None:
-            self._app.display_error(f'Error publishing placeholders: {exception}')
-        self._app.display_info(f'Published {len(self._processor.published)}, failed {len(self._processor.failed)}')
+            self._ports.notify(f'Error publishing placeholders: {exception}')
+        self._ports.notify(f'Published {len(self._report.published)}, failed {len(self._report.failed)}')
 
-    @property
-    def had_failures(self) -> bool:
-        return bool(self._processor.failed)
+
+def publish_placeholders(
+    repo: Repository,
+    names: tuple[str, ...] = (),
+    dry_run: bool = False,
+    ports: PlaceholderPorts | None = None,
+) -> PlaceholderReport:
+    """Publish placeholder packages to PyPI.
+
+    With NAMES, publish only those integrations; each name may be an integration name (n8n) or a
+    package name (datadog-n8n), and packages whose PyPI release is newer than the empty 0.0.1
+    placeholder are skipped. Without NAMES, publish every package whose PyPI release is missing
+    or still the empty 0.0.1 placeholder, including the names of retired placeholders.
+
+    Authentication: a plain token comes from the DDEV_PYPI_TOKEN environment variable or `prompt`;
+    without one, each package mints its own short-lived token through GitHub trusted publishing,
+    raising ValueError when neither is available.
+
+    With dry_run, report what would be published without building or uploading anything.
+    """
+    ports = ports or PlaceholderPorts()
+    package_names = placeholder_package_names(repo)
+    if names:
+        resolved_names = []
+        for requested in names:
+            resolved = resolve_placeholder_name(requested, package_names)
+            if resolved is None:
+                raise ValueError(f'Unknown integration or package name: {requested}')
+            resolved_names.append(resolved)
+        resolved_names = sorted(set(resolved_names))
+    else:
+        resolved_names = sorted(set(package_names.values()) | set(RETIRED_PLACEHOLDER_NAMES))
+
+    selected = [name for name in resolved_names if needs_placeholder(name, ports.http_get)]
+    skipped = sorted(set(resolved_names) - set(selected))
+    if names:
+        for name in skipped:
+            ports.notify(f'  skip {name} (already published)')
+
+    report = PlaceholderReport(selected=selected, skipped=skipped)
+    if not selected or dry_run:
+        for name in selected:
+            ports.notify(name)
+        return report
+
+    token = api_token(ports.prompt, ports.interactive)
+    oidc_publishing = 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ and 'ACTIONS_ID_TOKEN_REQUEST_TOKEN' in os.environ
+    if token is None and not oidc_publishing:
+        raise ValueError(
+            'No PyPI API token available: set DDEV_PYPI_TOKEN, enter one at the prompt, '
+            'or run in GitHub Actions with trusted publishing.'
+        )
+
+    PlaceholderOrchestrator(report, PlaceholderProcessor(report, ports, token), ports).run()
+    return report

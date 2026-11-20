@@ -7,12 +7,29 @@ import subprocess
 import zipfile
 
 import httpx
-import requests
-import twine.repository
+import pytest
+from twine.commands.check import check as twine_check
+
+from ddev.release.placeholders import PlaceholderPorts, publish_placeholders
+from ddev.repo.core import Repository
 
 GITHUB_TOKEN_URL = 'https://github-actions.example/token'
-PYPI_JSON_URL = 'https://pypi.org/pypi/{name}/json'
 INSTALL_DOCS_URL = 'https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install'
+
+
+@pytest.fixture
+def repo(tmp_path):
+    for name, package_name in (
+        ('n8n', 'datadog-n8n'),
+        ('kafka_consumer', 'datadog-kafka-consumer'),
+        ('ddev', 'ddev'),
+        ('datadog_checks_base', 'datadog-checks-base'),
+    ):
+        integration = tmp_path / name
+        integration.mkdir()
+        (integration / 'pyproject.toml').write_text(f'[project]\nname = "{package_name}"\n')
+    subprocess.run(['git', 'init', str(tmp_path)], check=True, capture_output=True)
+    return Repository('local', str(tmp_path))
 
 
 def _pypi_version(version: str | None) -> httpx.Response:
@@ -22,156 +39,159 @@ def _pypi_version(version: str | None) -> httpx.Response:
     return httpx.Response(200, json={'info': {'version': version}}, request=httpx.Request('GET', 'https://pypi.org'))
 
 
-def _stub_pypi_uploads(mocker):
-    """Stop twine at the index boundary and record what would be uploaded.
-
-    The index says nothing is uploaded yet, reports no release URLs, and answers every
-    upload with success after recording the wheel it was given.
-    """
-    wheels = []
-
-    def upload(self, package):
-        with zipfile.ZipFile(package.filename) as archive:
-            names = set(archive.namelist())
-            (metadata_name,) = [name for name in names if name.endswith('METADATA')]
-            wheels.append((names, archive.read(metadata_name).decode()))
-        response = requests.Response()
-        response.status_code = 200
-        response.reason = 'OK'
-        response.url = 'https://upload.pypi.org/legacy/'
-        return response
-
-    mocker.patch.object(twine.repository.Repository, 'package_is_uploaded', autospec=True, return_value=False)
-    uploaded = mocker.patch.object(twine.repository.Repository, 'upload', autospec=True, side_effect=upload)
-    mocker.patch.object(twine.repository.Repository, 'release_urls', autospec=True, return_value=[])
-    return uploaded, wheels
+def _ports(**overrides) -> tuple[PlaceholderPorts, list[str]]:
+    lines: list[str] = []
+    return PlaceholderPorts(notify=lines.append, **overrides), lines
 
 
-class TestPlaceholdersCommand:
-    def test_dry_run_lists_names_still_at_the_empty_placeholder(self, ddev, mocker):
-        mocker.patch('httpx.get', autospec=True, return_value=_pypi_version('0.0.1'))
+class TestPublishPlaceholders:
+    def test_dry_run_selects_names_still_at_the_empty_placeholder(self, repo):
+        ports, lines = _ports(http_get=lambda url, **kwargs: _pypi_version('0.0.1'))
 
-        result = ddev('release', 'placeholders', 'n8n', '--dry-run')
+        report = publish_placeholders(repo, ('n8n',), dry_run=True, ports=ports)
 
-        assert result.exit_code == 0, result.output
-        assert 'datadog-n8n' in result.output
+        assert report.selected == ['datadog-n8n']
+        assert report.skipped == []
+        assert lines == ['datadog-n8n']
 
-    def test_dry_run_skips_names_that_already_have_a_release(self, ddev, mocker):
-        mocker.patch('httpx.get', autospec=True, return_value=_pypi_version('0.0.2'))
+    def test_dry_run_skips_names_that_already_have_a_release(self, repo):
+        ports, lines = _ports(http_get=lambda url, **kwargs: _pypi_version('0.0.2'))
 
-        result = ddev('release', 'placeholders', 'n8n', '--dry-run')
+        report = publish_placeholders(repo, ('n8n',), dry_run=True, ports=ports)
 
-        assert result.exit_code == 0, result.output
-        assert 'skip datadog-n8n (already published)' in result.output
-        assert 'Nothing to publish.' in result.output
+        assert report.selected == []
+        assert report.skipped == ['datadog-n8n']
+        assert lines == ['  skip datadog-n8n (already published)']
 
-    def test_resolves_every_name_spelling_once(self, ddev, mocker):
-        httpx_get = mocker.patch('httpx.get', autospec=True, return_value=_pypi_version('0.0.1'))
+    def test_resolves_every_name_spelling_once(self, repo):
+        queries = []
 
-        result = ddev('release', 'placeholders', 'n8n', 'Datadog-N8N', 'kafka-consumer', 'datadog_tokumx', '--dry-run')
+        def http_get(url, **kwargs):
+            queries.append(url)
+            return _pypi_version('0.0.1')
 
-        assert result.exit_code == 0, result.output
-        assert httpx_get.call_count == 3
-        for name in ('datadog-n8n', 'datadog-kafka-consumer', 'datadog-tokumx'):
-            assert name in result.output
+        ports, _ = _ports(http_get=http_get)
 
-    def test_defaults_to_every_unclaimed_name_including_retired_ones(self, ddev, mocker):
-        def pypi_json(url, **kwargs):
+        report = publish_placeholders(
+            repo, ('n8n', 'Datadog-N8N', 'kafka-consumer', 'datadog_tokumx'), dry_run=True, ports=ports
+        )
+
+        assert report.selected == ['datadog-kafka-consumer', 'datadog-n8n', 'datadog-tokumx']
+        assert len(queries) == 3
+
+    def test_defaults_to_every_unclaimed_name_including_retired_ones(self, repo):
+        queries = []
+
+        def http_get(url, **kwargs):
+            queries.append(url)
             name = url.rsplit('/', 2)[-2]
-            state = {'datadog-tokumx': None, 'datadog-active-directory': '0.0.2'}.get(name, '0.0.1')
+            state = {'datadog-tokumx': None, 'datadog-kafka-consumer': '0.0.2'}.get(name, '0.0.1')
             return _pypi_version(state)
 
-        httpx_get = mocker.patch('httpx.get', autospec=True, side_effect=pypi_json)
+        ports, _ = _ports(http_get=http_get)
 
-        result = ddev('release', 'placeholders', '--dry-run')
+        report = publish_placeholders(repo, dry_run=True, ports=ports)
 
-        assert result.exit_code == 0, result.output
-        assert 'datadog-n8n' in result.output
-        assert 'datadog-tokumx' in result.output
-        assert 'datadog-active-directory' not in result.output
-        assert 'datadog-checks-base' not in result.output
-        assert httpx_get.call_count > 200
+        assert 'datadog-n8n' in report.selected
+        assert 'datadog-tokumx' in report.selected
+        assert 'datadog-oracle' in report.selected
+        assert 'datadog-kafka-consumer' in report.skipped
+        assert 'ddev' not in report.selected
+        assert 'datadog-checks-base' not in report.selected
+        assert len(queries) == 6  # both candidate packages plus the four retired names
 
-    def test_publishes_a_built_placeholder_with_a_plain_token(self, ddev, mocker, monkeypatch):
+    def test_publishes_a_built_placeholder_with_a_plain_token(self, repo, tmp_path, monkeypatch):
         monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
-        mocker.patch('httpx.get', autospec=True, return_value=_pypi_version('0.0.1'))
-        uploaded, wheels = _stub_pypi_uploads(mocker)
+        uploaded = []
 
-        result = ddev('release', 'placeholders', 'n8n')
+        def upload(wheel, token):
+            (tmp_path / wheel.name).write_bytes(wheel.read_bytes())
+            uploaded.append((wheel.name, token))
 
-        assert result.exit_code == 0, result.output
-        assert 'ok datadog-n8n' in result.output
-        assert 'Published 1, failed 0' in result.output
-        repository, package = uploaded.call_args.args
-        assert repository.url == 'https://upload.pypi.org/legacy/'
-        assert repository.session.auth == ('__token__', 'pypi-xxx')
-        assert package.basefilename.startswith('datadog_n8n-0.0.2-')
-        (names, metadata) = wheels[0]
+        ports, lines = _ports(http_get=lambda url, **kwargs: _pypi_version('0.0.1'), upload=upload)
+
+        report = publish_placeholders(repo, ('n8n',), ports=ports)
+
+        assert report.published == {'datadog-n8n'}
+        assert report.failed == {}
+        assert lines[0] == '  ok datadog-n8n'
+        assert lines[-1] == 'Published 1, failed 0'
+        ((wheel_name, token),) = uploaded
+        assert token == 'pypi-xxx'
+        assert wheel_name.startswith('datadog_n8n-0.0.2-')
+        assert not twine_check([str(tmp_path / wheel_name)])
+        with zipfile.ZipFile(tmp_path / wheel_name) as archive:
+            names = set(archive.namelist())
+            (metadata_name,) = [name for name in names if name.endswith('METADATA')]
+            metadata = archive.read(metadata_name).decode()
         assert 'datadog_n8n/__init__.py' in names
         assert 'Datadog reserves this name' in metadata
         assert INSTALL_DOCS_URL in metadata
 
-    def test_publishes_through_trusted_publishing_minting_one_token_per_package(self, ddev, mocker, monkeypatch):
+    def test_publishes_through_trusted_publishing_minting_one_token_per_package(self, repo, monkeypatch):
         monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
         monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_URL', GITHUB_TOKEN_URL)
         monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'gh-secret')
+        token_requests = []
+        mints = []
+        uploaded = []
 
-        def get(url, **kwargs):
+        def http_get(url, **kwargs):
             if url == GITHUB_TOKEN_URL:
+                token_requests.append(kwargs)
                 return httpx.Response(200, json={'value': 'oidc-jwt'}, request=httpx.Request('GET', url))
             return _pypi_version('0.0.1')
 
-        httpx_get = mocker.patch('httpx.get', autospec=True, side_effect=get)
-        httpx_post = mocker.patch(
-            'httpx.post', autospec=True, return_value=httpx.Response(200, json={'token': 'pypi-minted'})
-        )
-        uploaded, _ = _stub_pypi_uploads(mocker)
+        def http_post(url, **kwargs):
+            mints.append(kwargs['json'])
+            return httpx.Response(200, json={'token': 'pypi-minted'})
 
-        result = ddev('release', 'placeholders', 'n8n', 'datadog-tokumx')
+        def upload(wheel, token):
+            uploaded.append((wheel.name, token))
 
-        assert result.exit_code == 0, result.output
-        assert 'Published 2, failed 0' in result.output
-        assert httpx_post.call_count == 2
-        assert [call.kwargs['json'] for call in httpx_post.call_args_list] == [
-            {'token': 'oidc-jwt'},
-            {'token': 'oidc-jwt'},
-        ]
-        token_requests = [call for call in httpx_get.call_args_list if call.args[0] == GITHUB_TOKEN_URL]
-        assert len(token_requests) == 2
-        assert token_requests[0].kwargs['headers'] == {'Authorization': 'bearer gh-secret'}
-        assert token_requests[0].kwargs['params'] == {'audience': 'pypi'}
-        assert uploaded.call_count == 2
-        assert all(call.args[0].session.auth == ('__token__', 'pypi-minted') for call in uploaded.call_args_list)
+        ports, lines = _ports(http_get=http_get, http_post=http_post, upload=upload)
 
-    def test_a_refused_mint_fails_only_its_own_package(self, ddev, mocker, monkeypatch):
+        report = publish_placeholders(repo, ('n8n', 'datadog-tokumx'), ports=ports)
+
+        assert report.published == {'datadog-n8n', 'datadog-tokumx'}
+        assert report.failed == {}
+        assert lines[-1] == 'Published 2, failed 0'
+        assert mints == [{'token': 'oidc-jwt'}, {'token': 'oidc-jwt'}]
+        assert token_requests[0]['headers'] == {'Authorization': 'bearer gh-secret'}
+        assert token_requests[0]['params'] == {'audience': 'pypi'}
+        assert [token for _, token in uploaded] == ['pypi-minted', 'pypi-minted']
+
+    def test_a_refused_mint_fails_only_its_own_package(self, repo, monkeypatch):
         monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
         monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_URL', GITHUB_TOKEN_URL)
         monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'gh-secret')
-
-        def get(url, **kwargs):
-            if url == GITHUB_TOKEN_URL:
-                return httpx.Response(200, json={'value': 'oidc-jwt'}, request=httpx.Request('GET', url))
-            return _pypi_version('0.0.1')
-
         mint_responses = [
             httpx.Response(200, json={'token': 'pypi-minted'}),
             httpx.Response(400, text='invalid-publisher'),
         ]
-        mocker.patch('httpx.get', autospec=True, side_effect=get)
-        mocker.patch('httpx.post', autospec=True, side_effect=lambda url, **kwargs: mint_responses.pop(0))
-        uploaded, _ = _stub_pypi_uploads(mocker)
+        uploaded = []
 
-        result = ddev('release', 'placeholders', 'n8n', 'datadog-tokumx')
+        def http_get(url, **kwargs):
+            if url == GITHUB_TOKEN_URL:
+                return httpx.Response(200, json={'value': 'oidc-jwt'}, request=httpx.Request('GET', url))
+            return _pypi_version('0.0.1')
 
-        assert result.exit_code == 1
-        assert 'Published 1, failed 1' in result.output
-        assert 'ok ' in result.output
-        assert 'PyPI refused to mint an upload token for this workflow: invalid-publisher' in result.output
-        assert uploaded.call_count == 1
+        ports, lines = _ports(
+            http_get=http_get,
+            http_post=lambda url, **kwargs: mint_responses.pop(0),
+            upload=lambda wheel, token: uploaded.append(wheel.name),
+        )
 
-    def test_a_failed_build_reports_the_hatchling_output(self, ddev, mocker, monkeypatch):
+        report = publish_placeholders(repo, ('n8n', 'datadog-tokumx'), ports=ports)
+
+        assert len(report.published) == 1
+        assert len(report.failed) == 1
+        assert 'PyPI refused to mint an upload token for this workflow: invalid-publisher' in '\n'.join(lines)
+        assert len(uploaded) == 1
+        assert lines[-1] == 'Published 1, failed 1'
+
+    def test_a_failed_build_reports_the_hatchling_output(self, repo, monkeypatch):
         monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
-        mocker.patch('httpx.get', autospec=True, return_value=_pypi_version('0.0.1'))
         real_run = subprocess.run
 
         def fail_only_hatchling(command, **kwargs):
@@ -179,27 +199,60 @@ class TestPlaceholdersCommand:
                 return real_run(command, **kwargs)
             raise subprocess.CalledProcessError(1, command, stderr=b'invalid metadata')
 
-        mocker.patch('subprocess.run', autospec=True, side_effect=fail_only_hatchling)
+        ports, lines = _ports(http_get=lambda url, **kwargs: _pypi_version('0.0.1'), run=fail_only_hatchling)
 
-        result = ddev('release', 'placeholders', 'n8n')
+        report = publish_placeholders(repo, ('n8n',), ports=ports)
 
-        assert result.exit_code == 1
-        assert 'FAIL datadog-n8n: hatchling build failed for datadog-n8n: invalid metadata' in result.output
-        assert 'Published 0, failed 1' in result.output
+        assert list(report.failed) == ['datadog-n8n']
+        assert '  FAIL datadog-n8n: hatchling build failed for datadog-n8n: invalid metadata' in lines
 
-    def test_aborts_without_a_token_or_trusted_publishing(self, ddev, mocker, monkeypatch):
-        mocker.patch('httpx.get', autospec=True, return_value=_pypi_version('0.0.1'))
+    def test_prompts_for_a_token_in_a_terminal(self, repo, monkeypatch):
         monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
         monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_URL', raising=False)
         monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', raising=False)
+        prompts = []
+        uploaded = []
 
-        result = ddev('release', 'placeholders', 'n8n')
+        def prompt(text, hide_input):
+            prompts.append((text, hide_input))
+            return 'pypi-yyy'
 
-        assert result.exit_code == 1
-        assert 'No PyPI API token available' in result.output
+        ports, _ = _ports(
+            http_get=lambda url, **kwargs: _pypi_version('0.0.1'),
+            upload=lambda wheel, token: uploaded.append(token),
+            interactive=lambda: True,
+            prompt=prompt,
+        )
 
-    def test_unknown_name_aborts(self, ddev):
-        result = ddev('release', 'placeholders', 'not-an-integration', '--dry-run')
+        publish_placeholders(repo, ('n8n',), ports=ports)
 
-        assert result.exit_code == 1
-        assert 'Unknown integration or package name: not-an-integration' in result.output
+        assert prompts == [('PyPI API token: ', True)]
+        assert uploaded == ['pypi-yyy']
+
+    def test_the_environment_token_wins_over_the_prompt(self, repo, monkeypatch):
+        monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
+        uploaded = []
+
+        ports, _ = _ports(
+            http_get=lambda url, **kwargs: _pypi_version('0.0.1'),
+            upload=lambda wheel, token: uploaded.append(token),
+            interactive=lambda: True,
+            prompt=lambda text, hide_input: pytest.fail('should not prompt'),
+        )
+
+        publish_placeholders(repo, ('n8n',), ports=ports)
+
+        assert uploaded == ['pypi-xxx']
+
+    def test_aborts_without_a_token_or_trusted_publishing(self, repo, monkeypatch):
+        monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
+        monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_URL', raising=False)
+        monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', raising=False)
+        ports, _ = _ports(http_get=lambda url, **kwargs: _pypi_version('0.0.1'), interactive=lambda: False)
+
+        with pytest.raises(ValueError, match='No PyPI API token available'):
+            publish_placeholders(repo, ('n8n',), ports=ports)
+
+    def test_unknown_name_aborts(self, repo):
+        with pytest.raises(ValueError, match='Unknown integration or package name: not-an-integration'):
+            publish_placeholders(repo, ('not-an-integration',))

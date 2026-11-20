@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import os
 from typing import TYPE_CHECKING
 
 import click
@@ -28,50 +27,22 @@ def placeholders(app: Application, names: tuple[str, ...], dry_run: bool) -> Non
     token through trusted publishing. Anywhere else, set DDEV_PYPI_TOKEN or enter a token at the
     prompt; the token is never accepted as a command-line flag so it cannot leak through history.
     """
-    from ddev.release.placeholders import (
-        RETIRED_PLACEHOLDER_NAMES,
-        PlaceholderOrchestrator,
-        get_api_token,
-        needs_placeholder,
-        placeholder_package_names,
-        resolve_placeholder_name,
-    )
+    from ddev.release.placeholders import PlaceholderPorts, publish_placeholders
 
-    package_names = placeholder_package_names(app.repo)
-    if names:
-        resolved_names = []
-        for requested in names:
-            resolved = resolve_placeholder_name(requested, package_names)
-            if resolved is None:
-                app.abort(f'Unknown integration or package name: {requested}')
-            resolved_names.append(resolved)
-        resolved_names = sorted(set(resolved_names))
-        selected = [name for name in resolved_names if needs_placeholder(name)]
-        for name in set(resolved_names) - set(selected):
-            app.display_info(f'  skip {name} (already published)')
-    else:
-        candidates = sorted(set(package_names.values()) | set(RETIRED_PLACEHOLDER_NAMES))
-        selected = [name for name in candidates if needs_placeholder(name)]
+    def notify(text: str) -> None:
+        if text.lstrip().startswith('FAIL'):
+            app.display_error(text)
+        elif text.lstrip().startswith('ok'):
+            app.display_success(text)
+        else:
+            app.display_info(text)
 
-    if not selected:
+    try:
+        report = publish_placeholders(app.repo, names, dry_run, ports=PlaceholderPorts(notify=notify))
+    except ValueError as error:
+        app.abort(str(error))
+
+    if not report.selected:
         app.display_success('Nothing to publish.')
-        return
-
-    if dry_run:
-        for name in selected:
-            app.display_info(name)
-        return
-
-    token = get_api_token()
-    oidc_publishing = 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ and 'ACTIONS_ID_TOKEN_REQUEST_TOKEN' in os.environ
-    if token is None and not oidc_publishing:
-        app.abort(
-            'No PyPI API token available: set DDEV_PYPI_TOKEN, enter one at the prompt, '
-            'or run in GitHub Actions with trusted publishing.'
-        )
-
-    orchestrator = PlaceholderOrchestrator(app, selected, token)
-    orchestrator.run()
-
-    if orchestrator.had_failures:
+    elif report.failed:
         app.abort()
