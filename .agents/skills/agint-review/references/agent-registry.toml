@@ -15,6 +15,7 @@
 #   datadog_checks_downloader                             conventions, security
 #   ddev/, .ddev/                                         conventions, ddev
 #   .github/workflows/, .github/actions/, .github/chainguard/ conventions, github-actions
+#   <integration>/assets/logs/                            conventions, logs
 #   anything else (.builders/, docs/, root files)         conventions
 #
 # How an agent matches files
@@ -42,6 +43,12 @@
 #        Matches files against the globs (`**` is any number of path
 #        components, `*` is one component). Combined with
 #        `matches = "integration_roots"`, a file matching either is matched.
+#
+#   exclude_globs = [...]
+#        Optional. Same glob syntax as `globs`. A file matching any of them is
+#        never the agent's, whatever `matches` and `globs` say. Used to hand a
+#        path to a more specific agent: `integrations` and `security` exclude
+#        `**/assets/logs/**`, which `logs` reviews.
 #
 # An agent runs when it matches at least one changed file, and reviews only
 # the files it matched: setup writes its filtered diff to
@@ -71,6 +78,8 @@ name = "integrations"
 aspect = "integrations"
 matches = "integration_roots"
 globs = ["datadog_checks_base/**", "datadog_checks_dev/**"]
+# The `logs` agent reviews log pipelines.
+exclude_globs = ["**/assets/logs/**"]
 description = "Integration checks, metrics, config spec, compatibility, persistent cache, tests; datadog_checks_base and datadog_checks_dev"
 
 [[agents]]
@@ -80,6 +89,8 @@ matches = "integration_roots"
 # datadog_checks_downloader ships with the Agent and does the TUF and in-toto
 # verification of integration wheels.
 globs = ["datadog_checks_base/**", "datadog_checks_dev/**", "datadog_checks_downloader/**"]
+# The `logs` agent reviews log pipelines.
+exclude_globs = ["**/assets/logs/**"]
 description = "Untrusted product data, credentials, TLS, commands, parsing, files and queries"
 
 [[agents]]
@@ -99,3 +110,10 @@ aspect = "github-actions"
 # alone can widen who gets a write token.
 globs = [".github/workflows/**", ".github/actions/**", ".github/chainguard/**"]
 description = "GitHub workflows, local actions and octo-sts trust policies, including callers in other repos"
+
+[[agents]]
+name = "logs"
+aspect = "logs"
+# The log pipeline `<app_id>.yaml` and its tests `<app_id>_tests.yaml`.
+globs = ["**/assets/logs/**"]
+description = "Log pipelines and their tests against the Logs Backend review guide; the config's and README's log source"

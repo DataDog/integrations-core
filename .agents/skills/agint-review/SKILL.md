@@ -1,6 +1,6 @@
 ---
 name: agint-review
-description: "Review a Datadog Agent integrations PR (integrations-core, integrations-extras, marketplace, integrations-internal) with specialized agents: the repo's AGENTS.md conventions on every PR, plus integration, security, ddev or GitHub Actions reviewers depending on what it touches. Use when the user wants a code review of a Datadog Agent integrations PR."
+description: "Review a Datadog Agent integrations PR (integrations-core, integrations-extras, marketplace, integrations-internal) with specialized agents: the repo's AGENTS.md conventions on every PR, plus integration, security, ddev, GitHub Actions or log pipeline reviewers depending on what it touches. Use when the user wants a code review of a Datadog Agent integrations PR."
 argument-hint: "<PR-URL> [aspect1 aspect2 ...] [--round N]"
 disable-model-invocation: true
 allowed-tools: Glob, Read, Write(.agint-review/*), WebSearch, mcp__atlassian__getJiraIssue
@@ -50,15 +50,17 @@ The setup script in [Step 1](#step-1-setup) picks the agents for this PR and wri
 | `datadog_checks_downloader` | `conventions`, `security` |
 | `ddev/`, `.ddev/` | `conventions`, `ddev` |
 | `.github/workflows/`, `.github/actions/` or `.github/chainguard/` | `conventions`, `github-actions` |
+| `<integration>/assets/logs/` | `conventions`, `logs` |
 | Anything else (`.builders/`, `docs/`, root files) | `conventions` |
 
 - **Scout** (`scout`) — runs first, alone. Reads the PR end-to-end and produces a shared context block (intent, surface area, blast radius, whether each integration is new, product context, description-vs-diff consistency, pre-existing issues). Reviewers consume this so they don't re-derive the same context.
 - **Reviewers** — each reviews only the files it matched:
   - `conventions` — every PR. Reviews only against the repository's `AGENTS.md` files as they are on the target branch, even when the PR edits one (setup passes the ones on the changed paths) and cites file and section for each finding. Nothing else in the review restates `AGENTS.md`.
-  - `integrations` — integration folders, `datadog_checks_base`, `datadog_checks_dev`: check implementation, metrics, config spec, customer impact and compatibility, persistent cache, tests. Reads extra references under `references/integrations/` by what the PR touches.
-  - `security` — the same files, plus `datadog_checks_downloader` (it ships with the Agent and verifies integration wheels): untrusted product data, credentials, TLS, commands, parsing, files and queries.
+  - `integrations` — integration folders, `datadog_checks_base`, `datadog_checks_dev`: check implementation, metrics, config spec, customer impact and compatibility, persistent cache, tests. Reads extra references under `references/integrations/` by what the PR touches. It doesn't review `assets/logs/`.
+  - `security` — the same files, plus `datadog_checks_downloader` (it ships with the Agent and verifies integration wheels), minus `assets/logs/`: untrusted product data, credentials, TLS, commands, parsing, files and queries.
   - `ddev` — `ddev/` and the repo config in `.ddev/`: imports, output, commands, validations, CLI compatibility, repo config, tests (references under `references/ddev/`).
   - `github-actions` — workflows, local actions and octo-sts trust policies. On integrations-core, setup also downloads the workflow files of other repos that call its workflows `@master`.
+  - `logs` — log pipelines and their tests under `assets/logs/`, against the Logs Backend review guide read live from Confluence (with a bundled fallback in `references/logs/`), plus the log source in the integration's config and README.
 - **Challenger** (`challenger`) — runs after reviewers. Checks every finding against the tenets, the output contract and any `AGENTS.md` section it cites, and issues `keep`/`demote`/`drop`/`merge`/`contest` verdicts. `contest` means the challenger couldn't decide; you arbitrate it during synthesis.
 
 Every reviewer and the challenger get `references/tenets.md` (how to review), `references/common-agent-instructions.md` (the output contract) and `references/comment-style.md` (wording and comment types) in their instruction paths. Files no specialist matches are reviewed by `conventions` only; setup lists them in `context.json.conventions_only_files`. When the target branch has no `AGENTS.md` at all (integrations-extras, marketplace and integrations-internal have none today), setup skips `conventions` and records it in `context.json.skipped_agents`. The `metadata.csv` metric-type rule then goes to `integrations` instead (setup adds `references/integrations/metric-types.md` to its instructions); the other `AGENTS.md` rules don't apply on a repo that has none.
@@ -69,7 +71,7 @@ Aspect keywords map to agents and let the user run a subset:
 
 | Keyword | Behavior |
 |---------|----------|
-| `conventions`, `integrations`, `security`, `ddev`, `github-actions` | Run only the named reviewers (when they match the PR's files) |
+| `conventions`, `integrations`, `security`, `ddev`, `github-actions`, `logs` | Run only the named reviewers (when they match the PR's files) |
 | `post` | Post the latest round's saved `review.json` (or the round set by `--round N`) without reviewing again, e.g. after a failed post. Runs only setup and Step 7. |
 | `all` (default) | Run everything |
 
