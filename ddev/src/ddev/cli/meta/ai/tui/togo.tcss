@@ -485,6 +485,11 @@ MarkdownH3 {
     margin: 0 0 1 0;
 }
 
+#execution-route {
+    height: auto;
+    margin: 0 0 1 0;
+}
+
 #pipeline {
     layers: connectors nodes;
     width: 1fr;

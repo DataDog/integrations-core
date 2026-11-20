@@ -65,6 +65,7 @@ from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected, PipelineG
 
 if TYPE_CHECKING:
     from ddev.ai.runtime.orchestrator import PhaseOrchestrator
+    from ddev.ai.runtime.resources import RunRoute
 
 
 type OrchestratorBuilder = Callable[[Callbacks], OrchestratorLike]
@@ -117,6 +118,9 @@ class ExecutionScreen(TogoScreen):
         error = Static("", id="execution-error")
         error.display = False
         yield error
+        route = Static("", id="execution-route", markup=False)
+        route.display = False
+        yield route
         pipeline = PipelineGraph(self.flow, self._phase_statuses, id="pipeline")
         pipeline.border_title = "Pipeline"
         yield pipeline
@@ -206,12 +210,16 @@ class ExecutionScreen(TogoScreen):
         if not run_root.resolve().is_relative_to(write_root.resolve()):
             raise ValueError(f"Refusing to use AI run directory outside repository: {run_root}")
         run_dir = run_root / flow_slug(self.flow)
-        if not self.resume:
-            if run_dir.is_symlink():
-                run_dir.unlink()
-            elif run_dir.exists():
-                shutil.rmtree(run_dir)
-        run_dir.mkdir(parents=True, exist_ok=True)
+
+        def prepare_run_directory() -> None:
+            if not run_root.resolve().is_relative_to(write_root.resolve()):
+                raise ValueError(f"Refusing to use AI run directory outside repository: {run_root}")
+            if not self.resume:
+                if run_dir.is_symlink():
+                    run_dir.unlink()
+                elif run_dir.exists():
+                    shutil.rmtree(run_dir)
+            run_dir.mkdir(parents=True, exist_ok=True)
 
         runtime_variables = self.runtime_variables or {}
         integration = runtime_variables.get("integration")
@@ -229,7 +237,14 @@ class ExecutionScreen(TogoScreen):
             file_access_policy=FileAccessPolicy(write_root=write_root, integration_name=integration),
             callbacks=callbacks,
             resume=self.resume,
+            report_route=self._show_route,
+            prepare_run_directory=prepare_run_directory,
         )
+
+    def _show_route(self, route: RunRoute) -> None:
+        widget = self.query_one("#execution-route", Static)
+        widget.update(route.describe())
+        widget.display = True
 
     # ── Display helpers ──────────────────────────────────────────────────
 

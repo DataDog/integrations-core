@@ -35,6 +35,7 @@ dependencies = [
     "defusedxml==0.7.1",
     "hatch>=1.13.0",
     "httpx",
+    "httpx2",
     "jsonpointer",
     "pluggy",
     "rich>=12.5.1",

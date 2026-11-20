@@ -194,11 +194,17 @@ class ModelResolver:
         aliases = {alias for alias, target in self._aliases.items() if target in owned}
         return frozenset(owned | aliases)
 
-    def resolve(self, name: str, *, route: Route, provider: str | None = None) -> ResolvedModel:
+    def model_spec(self, name: str, *, provider: str | None = None) -> tuple[str, ModelConfig]:
+        """Find the canonical model and its limits without choosing a route binding."""
         canonical = self._canonical(name)
         spec = self._models[canonical]
         if provider is not None and spec.provider != provider:
             raise ValueError(f"Model {canonical!r} belongs to provider {spec.provider!r}, not {provider!r}")
+        return canonical, spec
+
+    def resolve(self, name: str, *, route: Route, provider: str | None = None) -> ResolvedModel:
+        """Require a binding for the model on the given route."""
+        canonical, spec = self.model_spec(name, provider=provider)
         binding = spec.bindings.get(route)
         if binding is None:
             available = ", ".join(sorted(available.value for available in spec.bindings))
