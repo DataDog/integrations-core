@@ -2089,3 +2089,6 @@ def test_clouds_yaml_servers_at_openstacksdk_microversion(aggregator, check, dd_
     assert servers_requests
     assert all(c.kwargs['headers']['X-OpenStack-Nova-API-Version'] == '2.93' for c in servers_requests)
     aggregator.assert_metric_has_tag('openstack.nova.server.count', 'instance_hostname:demo-2')
+    # From 2.47 the server embeds its flavor by name only; openstacksdk reported that name as both tags.
+    aggregator.assert_metric_has_tag('openstack.nova.server.flavor.vcpus', 'flavor_name:cirros256')
+    aggregator.assert_metric_has_tag('openstack.nova.server.flavor.vcpus', 'flavor_id:cirros256')
