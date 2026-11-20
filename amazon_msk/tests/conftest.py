@@ -27,7 +27,7 @@ def dd_environment():
 @pytest.fixture
 def mock_data(fake_http_response):
     # The check scrapes both exporter ports of every broker endpoint that `list_nodes` reports.
-    # `test_custom_metric_path` scrapes `/` instead of the default `/metrics`.
+    # The custom metric path test scrapes `/` instead of the default `/metrics`.
     exporter_bodies = {
         port: read_file(common.get_metrics_fixture_path(exporter_type))
         for port, exporter_type in ((common.JMX_PORT, 'jmx'), (common.NODE_PORT, 'node'))

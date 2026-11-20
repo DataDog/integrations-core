@@ -130,7 +130,7 @@ def mock_metrics_v2(fake_http_response):
 
 @pytest.fixture()
 def mock_metrics_ksm(fake_http_response):
-    # The legacy patch answered every endpoint with this payload, so both scrapers receive it.
+    # The KSM test configures both the OpenMetrics and the kube-state-metrics endpoints, so both serve this payload.
     _register_metrics(
         fake_http_response, "metrics-ksm.txt", "http://localhost:3000/metrics", "http://localhost:3001/metrics"
     )
