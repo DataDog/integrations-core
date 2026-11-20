@@ -58,12 +58,14 @@ def get_truncation_state(statement):
 
 
 # The field of `EXTRACT(field FROM ...)` that the obfuscator replaces with a placeholder even though it is no
-# literal value, as listed by go-sqllexer (`extractFieldKeywords`)
+# literal value, as listed by go-sqllexer (`extractFieldKeywords`). Comments may precede the field.
 EXTRACT_FIELD_PATTERN = re.compile(
-    r'(\bEXTRACT\s*\(\s*)(?:CENTURY|DAY|DECADE|DOW|DOY|EPOCH|HOUR|ISODOW|ISOYEAR|JULIAN|MICROSECONDS|MILLENNIUM'
-    r'|MILLISECONDS|MINUTE|MONTH|QUARTER|SECOND|TIMEZONE|TIMEZONE_HOUR|TIMEZONE_MINUTE|WEEK|YEAR)\b',
-    re.IGNORECASE,
+    r'(\bEXTRACT\s*\((?:\s|/\*.*?\*/)*)(?:CENTURY|DAY|DECADE|DOW|DOY|EPOCH|HOUR|ISODOW|ISOYEAR|JULIAN|MICROSECONDS'
+    r'|MILLENNIUM|MILLISECONDS|MINUTE|MONTH|QUARTER|SECOND|TIMEZONE|TIMEZONE_HOUR|TIMEZONE_MINUTE|WEEK|YEAR)\b',
+    re.IGNORECASE | re.DOTALL,
 )
+# A quoted user variable name such as `@'id'`, whose name the obfuscator replaces like a string literal
+QUOTED_USER_VARIABLE_PATTERN = re.compile(r"@(?:'(?:[^'\\]|\\.|'')*'|\"(?:[^\"\\]|\\.|\"\")*\")")
 
 
 def get_obfuscate_only_options(obfuscator_options: dict) -> str:
@@ -93,9 +95,10 @@ def has_literal_values(raw_statement: str, obfuscate_only_options: str, log: log
     Statement texts holding only `?` placeholders, such as prepared statement texts, carry no values.
     Comparing the raw text with its regular obfuscated form is unreliable because normalization also
     rewrites it (whitespace, comments, grouped placeholders). With the options of `get_obfuscate_only_options`,
-    the obfuscator only replaces literal tokens and the `EXTRACT` fields, keeping every other token as is.
-    So once its `EXTRACT` fields are replaced the same way, the raw text has literal values exactly when
-    that obfuscation changes it.
+    the obfuscator only replaces literal tokens, the `EXTRACT` fields and quoted user variable names, keeping
+    every other token as is. So once the `EXTRACT` fields and quoted user variable names of both texts are
+    replaced the same way, the raw text has literal values exactly when that obfuscation changes it.
+    Replacing them in both texts also leaves alike any text that only looks like them, such as a comment.
 
     Returns True when the obfuscation fails, since raw statement collection is explicitly enabled.
     """
@@ -105,8 +108,14 @@ def has_literal_values(raw_statement: str, obfuscate_only_options: str, log: log
         log.debug("Failed to obfuscate raw statement to detect literal values | err=[%s]", e)
         return True
     # obfuscate_sql_with_metadata removes null characters and the obfuscator trims surrounding whitespace
-    expected_without_literals = EXTRACT_FIELD_PATTERN.sub(r'\1?', raw_statement.replace('\x00', '').strip())
-    return obfuscated != expected_without_literals
+    raw_statement = raw_statement.replace('\x00', '').strip()
+    return _replace_nonliteral_placeholders(obfuscated) != _replace_nonliteral_placeholders(raw_statement)
+
+
+def _replace_nonliteral_placeholders(statement: str) -> str:
+    """Replace the tokens that the obfuscator turns into placeholders although they carry no values."""
+    statement = EXTRACT_FIELD_PATTERN.sub(r'\1?', statement)
+    return QUOTED_USER_VARIABLE_PATTERN.sub('@?', statement)
 
 
 def supports_explain_json_format_version(version):
