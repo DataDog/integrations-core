@@ -507,7 +507,7 @@ pipeline:
         - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end"
       grok:
         matchRules: |
-          serial %{data}(?<![\w.])serial=%{regex("[^,\\s\"]+"):serial}%{greedyData}
+          serial %{data}(?<![\w.])serial=%{regex("[^,\\s\"]*"):serial}%{greedyData}
         supportRules: ''
     - type: grok-parser
       name: Copy `device_name` to a lowercase `device_hostname`
@@ -702,6 +702,7 @@ pipeline:
           samples:
             - "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, type=THREAT, subtype=url, evt.name=block-url, misc=http://malware.example.com/payload.bin?id=42&ref=mail, threatid=Suspicious URL"
             - "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, type=THREAT, subtype=url, evt.name=block-url, misc=\"http://malware.example.com/payload.bin\", threatid=\"Suspicious URL\""
+            - "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, type=THREAT, subtype=url, evt.name=block-url, misc=\"\"http://malware.example.com/payload.bin?id=42,43\"\", threatid=\"Suspicious URL\""
           grok:
             supportRules: ""
             matchRules: |-
