@@ -54,7 +54,7 @@ Status: Image is up to date for registry.datadoghq.com/agent-dev:master-py3
 registry.datadoghq.com/agent-dev:master-py3
 
 Stop environment -> ddev env stop postgres py3.9-14.0
-Execute tests -> ddev env test postgres py3.9-14.0
+Execute tests -> ddev env test postgres --envs py3.9-14.0
 Check status -> ddev env agent postgres py3.9-14.0 status
 Trigger run -> ddev env agent postgres py3.9-14.0 check
 Reload config -> ddev env reload postgres py3.9-14.0
@@ -97,6 +97,18 @@ If you modify the [base package](base/about.md) then you will need to mount that
 
 To run tests against the live Agent, use the `ddev env test` command. It is similar to the [test command](testing.md#usage) except
 it is capable of running tests [marked as E2E](ddev/plugins.md#agent-check-runner), and only runs such tests.
+
+```shell
+ddev env test postgres --envs all --pytest-args='-m "not flaky"'
+```
+
+Use one comma-separated `--envs` value for names or matrix aliases. The standalone selections `all` and
+`active` cannot be combined with other names. Without `--envs`, active environments are tested; when none
+are active, or in CI, all eligible environments are tested. Active environments remain running afterward.
+Other selected environments are started and stopped automatically.
+
+Every user `-m` expression is parenthesized and intersected with `e2e`. For example, `-m "unit or slow"`
+becomes `(unit or slow) and e2e`. The pytest `--markers` listing flag passes through unchanged.
 
 ## Agent invocation
 

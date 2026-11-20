@@ -1,0 +1,138 @@
+# Captured from the llm-d-router v1.0.0 P/D sidecar (--metrics-port) in front of a decode vLLM v0.31.0, with the
+# EPP and prefill vLLM described in llm_d_router_metrics.txt. Only llm_d_disagg_sidecar_* families are kept; Go
+# runtime, process, controller-runtime, and moriio_dns_* families are dropped. Samples are unchanged.
+# HELP llm_d_disagg_sidecar_decode_duration_seconds [ALPHA] Decode stage latency in seconds. Not sampled when prefill returns an error status, since decode is then not run or its output is discarded.
+# TYPE llm_d_disagg_sidecar_decode_duration_seconds histogram
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="0.005"} 0
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="0.025"} 0
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="0.05"} 2
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="0.1"} 40
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="0.2"} 113
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="0.4"} 240
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="0.6"} 344
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="0.8"} 447
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="1"} 487
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="1.25"} 544
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="1.5"} 560
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="2"} 592
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="3"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="4"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="5"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="6"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="8"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="10"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="15"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="20"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="30"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="45"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="60"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="120"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="180"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="240"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="300"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="360"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="480"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="600"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="900"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="1200"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="1800"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="2700"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="3600"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_bucket{le="+Inf"} 599
+llm_d_disagg_sidecar_decode_duration_seconds_sum 363.30781654500004
+llm_d_disagg_sidecar_decode_duration_seconds_count 599
+# HELP llm_d_disagg_sidecar_disagg_requests_total [ALPHA] Total requests routed through disaggregation, by disaggregation type.
+# TYPE llm_d_disagg_sidecar_disagg_requests_total counter
+llm_d_disagg_sidecar_disagg_requests_total{disagg_type="prefill-decode"} 601
+# HELP llm_d_disagg_sidecar_encode_duration_seconds [ALPHA] Encode stage latency in seconds.
+# TYPE llm_d_disagg_sidecar_encode_duration_seconds histogram
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="0.005"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="0.025"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="0.05"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="0.1"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="0.2"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="0.4"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="0.6"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="0.8"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="1"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="1.25"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="1.5"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="2"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="3"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="4"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="5"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="6"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="8"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="10"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="15"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="20"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="30"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="45"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="60"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="120"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="180"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="240"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="300"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="360"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="480"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="600"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="900"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="1200"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="1800"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="2700"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="3600"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_bucket{le="+Inf"} 0
+llm_d_disagg_sidecar_encode_duration_seconds_sum 0
+llm_d_disagg_sidecar_encode_duration_seconds_count 0
+# HELP llm_d_disagg_sidecar_prefill_duration_seconds [ALPHA] Prefill stage latency in seconds.
+# TYPE llm_d_disagg_sidecar_prefill_duration_seconds histogram
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="0.005"} 0
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="0.025"} 501
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="0.05"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="0.1"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="0.2"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="0.4"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="0.6"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="0.8"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="1"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="1.25"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="1.5"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="2"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="3"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="4"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="5"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="6"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="8"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="10"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="15"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="20"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="30"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="45"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="60"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="120"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="180"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="240"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="300"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="360"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="480"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="600"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="900"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="1200"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="1800"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="2700"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="3600"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_bucket{le="+Inf"} 601
+llm_d_disagg_sidecar_prefill_duration_seconds_sum 11.827504620000013
+llm_d_disagg_sidecar_prefill_duration_seconds_count 601
+# HELP llm_d_disagg_sidecar_requests_total [ALPHA] Requests on the intercepted inference API paths, by API type.
+# TYPE llm_d_disagg_sidecar_requests_total counter
+llm_d_disagg_sidecar_requests_total{api_type="chat_completions"} 601
+
+# Synthesized, NOT captured, from llm-d-router source (pkg/sidecar/metrics/metrics.go). request_errors_total is
+# in v1.0.0 but only exported once a request fails. info is newer than v1.0.0 (main @ 7bdf81e1).
+# HELP llm_d_disagg_sidecar_request_errors_total [ALPHA] Total encode/prefill/decode stage errors, by stage.
+# TYPE llm_d_disagg_sidecar_request_errors_total counter
+llm_d_disagg_sidecar_request_errors_total{stage="prefill"} 1
+# HELP llm_d_disagg_sidecar_info [ALPHA] General information of the current build of the disaggregation sidecar.
+# TYPE llm_d_disagg_sidecar_info gauge
+llm_d_disagg_sidecar_info{build_ref="main",commit="7bdf81e1b121f730926824d66eee59e6f826a593"} 1

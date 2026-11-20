@@ -151,25 +151,29 @@
                       "name": "query1",
                       "data_source": "metrics",
                       "query": "sum:rabbitmq.queues.created.count{$node_name} by {rabbitmq_node}.as_count()",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
                       "query": "sum:rabbitmq.queues.deleted.count{$node_name} by {rabbitmq_node}.as_count()",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
                       "query": "sum:rabbitmq.queues.declared.count{$node_name} by {rabbitmq_node}.as_count()",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query4",
                       "data_source": "metrics",
                       "query": "sum:rabbitmq.queues{$node_name} by {rabbitmq_node}",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": { "palette": "datadog16" },
@@ -210,12 +214,14 @@
                     {
                       "query": "avg:rabbitmq.process.resident_memory_bytes{$node_name} by {rabbitmq_node}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:rabbitmq.resident_memory_limit_bytes{$node_name} by {rabbitmq_node}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "timeseries",
@@ -248,7 +254,8 @@
                     {
                       "query": "avg:rabbitmq.global.consumers{$node_name} by {rabbitmq_node}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "timeseries",
@@ -281,12 +288,14 @@
                     {
                       "query": "avg:rabbitmq.connections.opened.count{$node_name} by {rabbitmq_node}.as_count()",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:rabbitmq.connections.closed.count{$node_name} by {rabbitmq_node}.as_count()",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "timeseries",
@@ -335,7 +344,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.disk_space.available_bytes{$node_name} by {rabbitmq_node}"
+                      "query": "avg:rabbitmq.disk_space.available_bytes{$node_name} by {rabbitmq_node}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -378,12 +388,14 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.erlang.vm.process_count{$node_name} by {rabbitmq_node}"
+                      "query": "avg:rabbitmq.erlang.vm.process_count{$node_name} by {rabbitmq_node}",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.erlang.vm.process_limit{$node_name} by {rabbitmq_node}"
+                      "query": "avg:rabbitmq.erlang.vm.process_limit{$node_name} by {rabbitmq_node}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "timeseries",
@@ -426,12 +438,14 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.erlang.vm.port_count{$node_name} by {rabbitmq_node}"
+                      "query": "avg:rabbitmq.erlang.vm.port_count{$node_name} by {rabbitmq_node}",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.erlang.vm.port_limit{$node_name} by {rabbitmq_node}"
+                      "query": "avg:rabbitmq.erlang.vm.port_limit{$node_name} by {rabbitmq_node}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "timeseries",
@@ -462,7 +476,8 @@
                       "query": "avg:rabbitmq.channels{$node_name}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "avg"
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "scalar"
@@ -499,12 +514,14 @@
                     {
                       "query": "avg:rabbitmq.process.open_tcp_sockets{$node_name} by {rabbitmq_node}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:rabbitmq.process.max_tcp_sockets{$node_name} by {rabbitmq_node}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "timeseries",
@@ -547,12 +564,14 @@
                     {
                       "query": "avg:rabbitmq.process.open_fds{$node_name} by {rabbitmq_node}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:rabbitmq.process.max_fds{$node_name} by {rabbitmq_node}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "timeseries",
@@ -620,27 +639,32 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:rabbitmq.queue.messages.ready{$queue}"
+                      "query": "sum:rabbitmq.queue.messages.ready{$queue}",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:rabbitmq.queue.messages.paged_out{$queue}"
+                      "query": "sum:rabbitmq.queue.messages.paged_out{$queue}",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:rabbitmq.queue.messages.persistent{$queue}"
+                      "query": "sum:rabbitmq.queue.messages.persistent{$queue}",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query4",
                       "data_source": "metrics",
-                      "query": "sum:rabbitmq.queue.messages.published.count{$queue}.as_count()"
+                      "query": "sum:rabbitmq.queue.messages.published.count{$queue}.as_count()",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query5",
                       "data_source": "metrics",
-                      "query": "sum:rabbitmq.queue.messages.unacked{$queue}"
+                      "query": "sum:rabbitmq.queue.messages.unacked{$queue}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "timeseries",
@@ -669,7 +693,8 @@
                       "query": "sum:rabbitmq.queue.messages{*} by {rabbitmq_queue,rabbitmq_node}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": { "palette": "datadog16" },
@@ -709,27 +734,32 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:rabbitmq.channel.messages.delivered.ack.count{*}.as_count()"
+                      "query": "sum:rabbitmq.channel.messages.delivered.ack.count{*}.as_count()",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "sum:rabbitmq.channel.messages.delivered.count{*}.as_count()"
+                      "query": "sum:rabbitmq.channel.messages.delivered.count{*}.as_count()",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "sum:rabbitmq.channel.messages.published.count{*}.as_count()"
+                      "query": "sum:rabbitmq.channel.messages.published.count{*}.as_count()",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query4",
                       "data_source": "metrics",
-                      "query": "sum:rabbitmq.channel.messages.unroutable.dropped.count{*}.as_count()"
+                      "query": "sum:rabbitmq.channel.messages.unroutable.dropped.count{*}.as_count()",
+                      "semantic_mode": "combined"
                     },
                     {
                       "name": "query5",
                       "data_source": "metrics",
-                      "query": "sum:rabbitmq.channel.messages.unacked{*}"
+                      "query": "sum:rabbitmq.channel.messages.unacked{*}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "timeseries",
@@ -758,19 +788,22 @@
                       "query": "sum:rabbitmq.connection.incoming_packets.count{$rabbitmq_conn_state}.as_count()",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:rabbitmq.connection.outgoing_packets.count{$rabbitmq_conn_state}.as_count()",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:rabbitmq.connection.pending_packets{$rabbitmq_conn_state}",
                       "data_source": "metrics",
                       "name": "query3",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": { "palette": "datadog16" },
@@ -824,7 +857,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.queue.messages{$queue} by {queue}"
+                      "query": "avg:rabbitmq.queue.messages{$queue} by {queue}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -863,7 +897,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.queue.messages.ready{$queue} by {queue}"
+                      "query": "avg:rabbitmq.queue.messages.ready{$queue} by {queue}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -902,7 +937,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.queue.messages.published.count{$queue} by {queue}"
+                      "query": "avg:rabbitmq.queue.messages.published.count{$queue} by {queue}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -941,7 +977,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.queue.messages.delivered.count{$queue} by {queue}"
+                      "query": "avg:rabbitmq.queue.messages.delivered.count{$queue} by {queue}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -980,7 +1017,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.queue.messages.redelivered.count{$queue} by {queue}"
+                      "query": "avg:rabbitmq.queue.messages.redelivered.count{$queue} by {queue}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -1019,7 +1057,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.queue.messages.acked.count{$queue} by {queue}"
+                      "query": "avg:rabbitmq.queue.messages.acked.count{$queue} by {queue}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -1058,7 +1097,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.queue.messages.unacked{$queue} by {queue}"
+                      "query": "avg:rabbitmq.queue.messages.unacked{$queue} by {queue}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -1097,7 +1137,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.queue.consumers{$queue} by {queue}"
+                      "query": "avg:rabbitmq.queue.consumers{$queue} by {queue}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -1136,7 +1177,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:rabbitmq.queue.consumer_utilisation{$queue} by {queue}"
+                      "query": "avg:rabbitmq.queue.consumer_utilisation{$queue} by {queue}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [{ "formula": "query1" }],
@@ -1212,7 +1254,8 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:data_streams.latency{type:rabbitmq AND pathway_type:edge AND direction:in AND (topic:$queue.value )} by {topic,env}"
+                      "query": "max:data_streams.latency{type:rabbitmq AND pathway_type:edge AND direction:in AND (topic:$queue.value )} by {topic,env}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [
@@ -1256,7 +1299,8 @@
                     {
                       "data_source": "metrics",
                       "name": "upstream_services_throughput",
-                      "query": "count(v: v>=0):data_streams.latency{type:rabbitmq AND direction:in AND pathway_type:edge AND (topic:$queue.value )} by {start,env}.as_rate()"
+                      "query": "count(v: v>=0):data_streams.latency{type:rabbitmq AND direction:in AND pathway_type:edge AND (topic:$queue.value )} by {start,env}.as_rate()",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [
@@ -1306,7 +1350,8 @@
                     {
                       "data_source": "metrics",
                       "name": "downstream_services_throughput_by_queues",
-                      "query": "count(v: v>=0):data_streams.latency{type:rabbitmq AND direction:in AND pathway_type:full AND (topic:$queue.value )} by {service,env}.as_rate().rollup(10)"
+                      "query": "count(v: v>=0):data_streams.latency{type:rabbitmq AND direction:in AND pathway_type:full AND (topic:$queue.value )} by {service,env}.as_rate().rollup(10)",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "formulas": [
@@ -1358,7 +1403,8 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "p95:data_streams.payload_size{type:rabbitmq,topic:$queue.value} by {topic,env}"
+                      "query": "p95:data_streams.payload_size{type:rabbitmq,topic:$queue.value} by {topic,env}",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1419,7 +1465,8 @@
                     "data_source": "metrics",
                     "name": "query1",
                     "aggregator": "avg",
-                    "query": "avg:data_streams.payload_size{type:rabbitmq,topic:*}"
+                    "query": "avg:data_streams.payload_size{type:rabbitmq,topic:*}",
+                    "semantic_mode": "combined"
                   }
                 }
               ]

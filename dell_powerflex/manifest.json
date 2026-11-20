@@ -1,0 +1,98 @@
+{
+  "app_id": "dell-powerflex",
+  "app_uuid": "019e2762-a227-7fe9-b984-b06a448433dc",
+  "manifest_version": "2.0.0",
+  "display_on_public_website": true,
+  "tile": {
+    "title": "Dell Powerflex",
+    "description": "Monitor the health and performance of your Dell PowerFlex storage infrastructure.",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Dell PowerFlex dashboard",
+        "image_url": "images/dell1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Dell PowerFlex dashboard",
+        "image_url": "images/dell2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Dell PowerFlex dashboard",
+        "image_url": "images/dell3.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Event Management",
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Category::OS & System",
+      "Category::Data Stores",
+      "Offering::Integration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Events",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "oauth": {},
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.dell.com/en-us/shop/powerflex/sf/powerflex",
+    "sales_email": "info@datadoghq.com",
+    "vendor_id": "datadog"
+  },
+  "assets": {
+    "dashboards": {
+      "Dell PowerFlex Overview": "assets/dashboards/dell_powerflex_overview.json"
+    },
+    "monitors": {
+      "Failed capacity detected in protection domain ": "assets/monitors/failed_capacity_detected_in_protection_domain_.json",
+      "Storage pool is running low on capacity": "assets/monitors/storage_pool_is_running_low_on_capacity.json",
+      "Saturation risk on storage pool": "assets/monitors/saturation_risk_on_storage_pool.json",
+      "High read latency on storage pool": "assets/monitors/high_read_latency_on_storage_pool.json",
+      "High write latency on storage pool": "assets/monitors/high_write_latency_on_storage_pool.json"
+    },
+    "saved_views": {
+      "Dell PowerFlex SDS logs": "assets/saved_views/dell_powerflex_sds_logs.json",
+      "Dell PowerFlex MDM logs": "assets/saved_views/dell_powerflex_mdm_logs.json",
+      "Dell Powerflex gateway logs": "assets/saved_views/dell_powerflex_gateway_logs.json",
+      "Dell PowerFlex errors and warnings": "assets/saved_views/dell_powerflex_errors_and_warnings.json",
+      "Dell PowerFlex overview": "assets/saved_views/dell_powerflex_overview.json"
+    },
+    "logs": {
+      "source": "dell-powerflex"
+    },
+    "integration": {
+      "source_type_name": "dell-powerflex",
+      "auto_install": true,
+      "configuration": {},
+      "process_signatures": [],
+      "metrics": {
+        "prefix": "dell_powerflex",
+        "check": [
+          "dell_powerflex.api.can_connect"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 79810802,
+      "supports_ddr_coordinated_failover": false
+    }
+  },
+  "owner": "agent-integrations"
+}

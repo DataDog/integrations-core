@@ -1,0 +1,89 @@
+{
+  "app_id": "n8n",
+  "app_uuid": "019bfadd-2620-7676-bb28-31146ce37ab6",
+  "manifest_version": "2.0.0",
+  "display_on_public_website": true,
+  "tile": {
+    "title": "n8n",
+    "description": "Monitor the health and performance of n8n.",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "n8n dashboard",
+        "image_url": "images/n8n3.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "n8n dashboard",
+        "image_url": "images/n8n2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "n8n dashboard",
+        "image_url": "images/n8n1.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "oauth": {},
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com",
+    "vendor_id": "datadog"
+  },
+  "assets": {
+    "dashboards": {
+      "n8n Overview": "assets/dashboards/n8n_overview.json"
+    },
+    "monitors": {
+      "Workflow Execution Failures Anomaly": "assets/monitors/workflow_execution_failures_anomaly.json",
+      "High Job Failure Rate (Queue Jobs)": "assets/monitors/high_job_failure_rate__queue_jobs_.json",
+      "Workflow Duration Exceeds SLO (p95)": "assets/monitors/workflow_duration_exceeds_slo__p95_.json",
+      "High Queue Backlog Size": "assets/monitors/high_queue_backlog_size.json",
+      "Worker Heartbeat Stale (No Recent Activity)": "assets/monitors/worker_heartbeat_stale__no_recent_activity_.json",
+      "High Workflow Failure Rate": "assets/monitors/high_workflow_failure_rate.json"
+    },
+    "logs": {
+      "source": "n8n"
+    },
+    "integration": {
+      "source_type_name": "n8n",
+      "auto_install": true,
+      "configuration": {},
+      "process_signatures": [],
+      "metrics": {
+        "prefix": "n8n",
+        "check": [
+          "n8n.process.uptime.seconds"
+        ],
+        "metadata_path": "metadata.csv",
+        "disable_no_data_detection": true
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 69440304,
+      "supports_ddr_coordinated_failover": false
+    }
+  },
+  "owner": "agent-integrations"
+}

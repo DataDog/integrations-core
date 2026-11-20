@@ -111,6 +111,20 @@ instances:
         #
         # query_timeout: 10
 
+    ## Configure opt-in DBM in-flight query activity snapshots.
+    #
+    # query_activity:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable query activity snapshots. Disabled by default. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 10
+        ## The interval between activity snapshots in seconds. Defaults to 10 and must be at least 1.
+        #
+        # collection_interval: 10
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.

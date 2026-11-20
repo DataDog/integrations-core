@@ -1,0 +1,1 @@
+Add ``fgHwSensorValue`` and ``fgHwSensorAlarmStatus`` metrics from the FortiGate hardware sensor table.

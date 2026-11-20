@@ -37,8 +37,8 @@ class Appliance:
         self.software_version: str = data.get('softwareVersion', '')
         self.state: int = data.get('state', 0)
         self.site: str | None = data.get('site')
-        self.username: str = ''
-        self.password: str = ''
+        self.username: str | None = None
+        self.password: str | None = None
 
     @property
     def is_reachable(self) -> bool:
@@ -115,8 +115,8 @@ class Appliances:
 
     def resolve_credentials(
         self,
-        default_username: str,
-        default_password: str,
+        default_username: str | None,
+        default_password: str | None,
         overrides: Iterable[ApplianceCredentialsOverride] | None = None,
     ) -> None:
         overrides = list(overrides or [])

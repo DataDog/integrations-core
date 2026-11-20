@@ -47,6 +47,7 @@ from .models import (
     FileCommit,
     FileContent,
     GitReference,
+    GitTag,
     IssueComment,
     Label,
     PullRequest,
@@ -56,6 +57,7 @@ from .models import (
     WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
+    WorkflowRunsList,
 )
 from .observer import RequestAttempt, RequestFailure, RequestObserver
 from .retry import (
@@ -686,6 +688,55 @@ class AsyncGitHubClient:
         if return_run_details:
             return self._parse_response(response, WorkflowDispatchResult)
         return GitHubResponse[None].model_validate({"data": None, "headers": dict(response.headers)})
+
+    async def list_workflow_runs(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        per_page: int = 30,
+        timeout: float | None = None,
+        *,
+        branch: str | None = None,
+        event: str | None = None,
+        created: str | None = None,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowRunsList]]:
+        """List runs for one workflow, following pagination.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/actions/workflow-runs#list-workflow-runs-for-a-workflow
+
+        Args:
+            owner: Repository owner.
+            repo: Repository name.
+            workflow_id: Workflow file name or numeric ID.
+            per_page: Results per page, at most 100.
+            timeout: Per-request timeout, defaulting to the client's timeout.
+            branch: Restrict runs to this branch.
+            event: Restrict runs to this event, such as workflow_dispatch.
+            created: Creation date or range in GitHub search syntax.
+            retry: Replayable request policy, applied per page.
+
+        Returns:
+            Pages with a total count and validated runs. Filtered searches return at most 1,000 runs.
+
+        Raises:
+            ValueError: If per_page is outside 1..100.
+        """
+        _ensure_per_page_valid(per_page)
+        params: dict[str, str | int] = {"per_page": per_page}
+        for key, value in (("branch", branch), ("event", event), ("created", created)):
+            if value is not None:
+                params[key] = value
+        async for response in self._paginated_request(
+            "GET",
+            f"/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs",
+            timeout=timeout,
+            retry=retry,
+            params=params,
+        ):
+            yield self._parse_response(response, WorkflowRunsList)
 
     async def get_workflow_run(
         self,
@@ -1421,6 +1472,38 @@ class AsyncGitHubClient:
         """
         response = await self._request("GET", f"/repos/{owner}/{repo}/git/ref/{ref}", timeout=timeout, retry=retry)
         return self._parse_response(response, GitReference)
+
+    async def get_tag(
+        self,
+        owner: str,
+        repo: str,
+        tag_sha: str,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[GitTag]:
+        """
+        Calls the GitHub API to get an annotated tag object.
+
+        A tag reference points at this object rather than at a commit when the tag is annotated, so
+        resolving such a tag to its commit means reading `object.sha` from here.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/git/tags#get-a-tag
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            tag_sha: SHA of the tag object itself, not of the commit it points at.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Defaults to the replayable policy, which does not retry a 404.
+
+        Returns:
+            GitHubResponse[GitTag]: The validated tag object (its `object` is what the tag wraps)
+            and headers.
+        """
+        response = await self._request("GET", f"/repos/{owner}/{repo}/git/tags/{tag_sha}", timeout=timeout, retry=retry)
+        return self._parse_response(response, GitTag)
 
     async def create_ref(
         self,
