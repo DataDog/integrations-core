@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import io
 import tarfile
-import time
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
@@ -13,8 +12,9 @@ import httpx
 import pytest
 
 from ddev.cli.validate import licenses_utils
-from ddev.cli.validate.licenses import DOWNLOAD_RETRIES, scrape_copyright_data
+from ddev.cli.validate.licenses import scrape_copyright_data
 from ddev.utils.fs import Path
+from ddev.utils.network import REQUEST_ATTEMPTS
 from ddev.utils.toml import dump_toml_data, load_toml_file
 
 if TYPE_CHECKING:
@@ -220,7 +220,6 @@ def test_scrape_recovers_from_transient_connection_failure(
         return tarball_response()
 
     mock_http.side_effect = respond
-    monkeypatch.setattr(time, 'sleep', lambda _: None)
 
     assert scrape_copyright_data(TARBALL_URL) == COPYRIGHT
     assert len(attempts) == 2
@@ -232,16 +231,15 @@ def test_scrape_persistent_connection_failure_raises(monkeypatch: pytest.MonkeyP
     def respond(request: httpx.Request) -> httpx.Response:
         assert (request.method, str(request.url)) == ('GET', TARBALL_URL)
         attempts.append(request)
-        assert len(attempts) <= DOWNLOAD_RETRIES + 1, f'unbounded retries: {len(attempts)} attempts'
+        assert len(attempts) <= REQUEST_ATTEMPTS, f'unbounded retries: {len(attempts)} attempts'
         raise httpx.ConnectError('[WinError 10054] connection reset')
 
     mock_http.side_effect = respond
-    monkeypatch.setattr(time, 'sleep', lambda _: None)
 
     with pytest.raises(httpx.ConnectError):
         scrape_copyright_data(TARBALL_URL)
 
-    assert len(attempts) == DOWNLOAD_RETRIES + 1
+    assert len(attempts) == REQUEST_ATTEMPTS
 
 
 @pytest.mark.parametrize(
@@ -270,7 +268,6 @@ def test_scrape_recovers_from_interruption_during_response(
         return tarball_response()
 
     mock_http.side_effect = respond
-    monkeypatch.setattr(time, 'sleep', lambda _: None)
 
     assert scrape_copyright_data(TARBALL_URL) == COPYRIGHT
     assert len(attempts) == 2
@@ -282,16 +279,15 @@ def test_scrape_persistent_interruption_during_response_raises(monkeypatch: pyte
     def respond(request: httpx.Request) -> httpx.Response:
         assert (request.method, str(request.url)) == ('GET', TARBALL_URL)
         attempts.append(request)
-        assert len(attempts) <= DOWNLOAD_RETRIES + 1, f'unbounded retries: {len(attempts)} attempts'
+        assert len(attempts) <= REQUEST_ATTEMPTS, f'unbounded retries: {len(attempts)} attempts'
         return interrupted_response(httpx.ReadError('read error'))
 
     mock_http.side_effect = respond
-    monkeypatch.setattr(time, 'sleep', lambda _: None)
 
     with pytest.raises(httpx.ReadError):
         scrape_copyright_data(TARBALL_URL)
 
-    assert len(attempts) == DOWNLOAD_RETRIES + 1
+    assert len(attempts) == REQUEST_ATTEMPTS
 
 
 def test_scrape_http_status_error_is_actionable(mock_http: MagicMock):
