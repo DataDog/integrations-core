@@ -1,0 +1,1 @@
+Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. A read timeout while receiving the response body is now handled like other read timeouts for pshard, index, cat allocation and cat shards stats.
