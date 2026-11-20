@@ -196,11 +196,6 @@ facets:
     source: log
   - groups:
       - PAN Firewall
-    name: Protocol
-    path: proto
-    source: log
-  - groups:
-      - PAN Firewall
     name: Session End Reason
     path: session_end_reason
     source: log
@@ -710,7 +705,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              misc_url_quoted %{data}misc="+%{regex("[^\"]+"):ocsf.evidence.url.url_string}"+%{greedyData}
+              misc_url_quoted %{data}misc="+%{regex("[^\"]+"):ocsf.evidence.url.url_string}"+(?=[,\s]|$)%{greedyData}
               misc_url %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.url.url_string}%{greedyData}
     - type: pipeline
       name: misc field filename extraction
@@ -730,7 +725,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              misc_file_quoted %{data}misc="+%{regex("[^\"]+"):ocsf.evidence.file.name}"+%{greedyData}
+              misc_file_quoted %{data}misc="+%{regex("[^\"]+"):ocsf.evidence.file.name}"+(?=[,\s]|$)%{greedyData}
               misc_file %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.file.name}%{greedyData}
         - type: string-builder-processor
           name: Add type_id
