@@ -1590,31 +1590,42 @@ def test_plan_lookup_failure_during_cancellation_propagates(dbm_instance):
         list(check.statement_metrics._collect_plans([_plan_row('cancelled')], mock.Mock(), float('inf')))
 
 
-def _query_stats_row(query_plan_hash: str, execution_count: int, total_physical_reads: int) -> dict[str, object]:
+def _query_stats_row(
+    query_plan_hash: str, procedure_name: str | None, execution_count: int, total_physical_reads: int
+) -> dict[str, object]:
     return {
         'database_name': 'master',
         'query_signature': 'sig',
         'query_hash': 'query-hash',
         'query_plan_hash': query_plan_hash,
-        'procedure_name': None,
+        'procedure_name': procedure_name,
         'execution_count': execution_count,
         'total_physical_reads': total_physical_reads,
     }
 
 
 @pytest.mark.unit
-def test_query_metrics_do_not_report_lifetime_counters_of_returning_plan(instance_docker):
-    """A statement with plans A and B, where idle B leaves the collection and then comes back.
+@pytest.mark.parametrize(
+    'a, b, expected_both_ran',
+    [
+        # SDBM-3132: one statement with two plans is reported as one row.
+        pytest.param(('A', None), ('B', None), [(None, 13, 130)], id='two-plans'),
+        # SDBM-1143: the same statement and plan in two procedures is reported per procedure.
+        pytest.param(('P', 'dbo.p1'), ('P', 'dbo.p2'), [('dbo.p1', 10, 100), ('dbo.p2', 3, 30)], id='two-procedures'),
+    ],
+)
+def test_query_metrics_do_not_report_lifetime_counters_of_returning_row(instance_docker, a, b, expected_both_ran):
+    """Two query stats groups of one statement, where idle B leaves the collection and then comes back.
 
-    Regression test for SDBM-3132: B's whole lifetime counter was reported as one interval.
+    Regression test for SDBM-3132 and SDBM-1143: B's whole lifetime counter was reported as one interval.
     """
     instance_docker['dbm'] = True
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     collections = [
-        [_query_stats_row('A', 100, 1_000), _query_stats_row('B', 50_000, 700_000)],
-        [_query_stats_row('A', 110, 1_100), _query_stats_row('B', 50_003, 700_030)],
-        [_query_stats_row('A', 120, 1_200)],
-        [_query_stats_row('A', 130, 1_300), _query_stats_row('B', 50_008, 700_080)],
+        [_query_stats_row(*a, 100, 1_000), _query_stats_row(*b, 50_000, 700_000)],
+        [_query_stats_row(*a, 110, 1_100), _query_stats_row(*b, 50_003, 700_030)],
+        [_query_stats_row(*a, 120, 1_200)],
+        [_query_stats_row(*a, 130, 1_300), _query_stats_row(*b, 50_008, 700_080)],
     ]
     reported = []
     for rows in collections:
@@ -1623,13 +1634,12 @@ def test_query_metrics_do_not_report_lifetime_counters_of_returning_plan(instanc
             mock.patch.object(check.statement_metrics, '_normalize_queries', side_effect=lambda r: r),
         ):
             result = check.statement_metrics._collect_metrics_rows(mock.Mock())
-        reported.append([(r['query_signature'], r['execution_count'], r['total_physical_reads']) for r in result])
+        reported.append(sorted((r['procedure_name'], r['execution_count'], r['total_physical_reads']) for r in result))
 
     assert reported == [
         [],
-        # Both plans ran: one row per statement, with the sum of both plans' deltas.
-        [('sig', 13, 130)],
-        [('sig', 10, 100)],
+        expected_both_ran,
+        [(a[1], 10, 100)],
         # B lost its baseline while absent, so only A's delta can be computed.
-        [('sig', 10, 100)],
+        [(a[1], 10, 100)],
     ]
