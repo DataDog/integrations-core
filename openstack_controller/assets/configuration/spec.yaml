@@ -157,7 +157,9 @@ files:
             type: integer
         - name: openstack_config_file_path
           description: |
-            Absolute path of the configuration file for the connection to openstack with openstacksdk.
+            Absolute path of a clouds.yaml file describing the cloud to connect to.
+            Only auth_url, username, password and user_domain_name are read from the cloud's auth section.
+            Use endpoint_region_id, endpoint_interface and the tls_* options for endpoint selection and TLS settings.
           fleet_configurable: true
           value:
             example: <PATH_TO_YAML_FILE>
@@ -190,6 +192,9 @@ files:
 
            View this page for more about Ironic microvoersion compatibility:
               https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
+
+           When unset on an instance configured with openstack_config_file_path, each resource is requested at the
+           highest microversion supported by both openstacksdk 4.18 and the server.
           fleet_configurable: true
           enabled: true
           value:
@@ -204,6 +209,9 @@ files:
               https://docs.openstack.org/nova/latest/reference/api-microversion-history.html
            View this page for more information about microversions in Openstack:
               https://docs.openstack.org/api-guide/compute/microversions.html
+
+           When unset on an instance configured with openstack_config_file_path, each resource is requested at the
+           highest microversion supported by both openstacksdk 4.18 and the server.
           fleet_configurable: true
           enabled: true
           value:
@@ -217,6 +225,9 @@ files:
 
            View this page for more about microvoersion compatibility:
               https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html
+
+           When unset on an instance configured with openstack_config_file_path, each resource is requested at the
+           highest microversion supported by both openstacksdk 4.18 and the server.
           fleet_configurable: true
           enabled: true
           value:
