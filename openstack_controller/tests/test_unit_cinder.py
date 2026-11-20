@@ -177,7 +177,7 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get,
             id='api rest',
         ),
         pytest.param(
-            None,
+            {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['volumev3'])}},
             configs.SDK,
             2,
             id='clouds.yaml',
@@ -215,7 +215,7 @@ def test_response_time_block_storage(aggregator, check, dd_run_check, mock_http_
             id='api rest',
         ),
         pytest.param(
-            None,
+            {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['block-storage'])}},
             configs.SDK,
             2,
             id='clouds.yaml',
