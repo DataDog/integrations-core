@@ -21,9 +21,10 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION
 from datadog_checks.sqlserver.health import SqlServerHealthEvent
 from datadog_checks.sqlserver.statements import build_plan_events
-from datadog_checks.sqlserver.utils import raise_if_cancelled
+from datadog_checks.sqlserver.utils import is_azure_database, is_azure_sql_database, raise_if_cancelled
 
 from .base import EVENT_FILE_TARGET, XESessionBase, agent_check_getter, is_target_read_denied
 from .event_file_reader import EventFileEvent, EventFileReader
@@ -67,18 +68,12 @@ PLAN_QUERY_HASH_PATTERN = re.compile(r'\bQueryHash="0x([0-9A-Fa-f]+)"')
 PLAN_QUERY_PLAN_HASH_PATTERN = re.compile(r'\bQueryPlanHash="0x([0-9A-Fa-f]+)"')
 
 QUERY_PLANS_DOCS_URL = "https://docs.datadoghq.com/database_monitoring/guide/sql_real_execution_plans/"
-QUERY_PLANS_SESSION_SQL = """\
-CREATE EVENT SESSION datadog_query_plans ON SERVER
-ADD EVENT sqlserver.query_post_execution_plan_profile (
-    ACTION (sqlserver.database_name, sqlserver.session_id, sqlserver.request_id, sqlserver.username,
-            sqlserver.client_app_name, sqlserver.client_hostname, sqlserver.query_hash, sqlserver.query_plan_hash,
-            sqlserver.plan_handle, sqlserver.tsql_frame)
-    WHERE duration > 1000000 AND sqlserver.username <> N'datadog'
-)
-ADD TARGET package0.event_file (SET filename = N'datadog_query_plans', max_file_size = 64, max_rollover_files = 4)
-WITH (MAX_MEMORY = 8192 KB, EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS, MAX_DISPATCH_LATENCY = 30 SECONDS,
-      TRACK_CAUSALITY = ON, STARTUP_STATE = ON);
-ALTER EVENT SESSION datadog_query_plans ON SERVER STATE = START;"""
+# The guide's platform tabs, by title, and their `tab` parameter: the title in lowercase without spaces and punctuation.
+QUERY_PLANS_SETUP_DOCS_TABS = {
+    "Self-hosted": "selfhosted",
+    "Azure SQL Database": "azuresqldatabase",
+    "Azure SQL Managed Instance": "azuresqlmanagedinstance",
+}
 
 # The statement of a tsql_frame action, extracted as query metrics extract it from sys.dm_exec_query_stats, so they
 # compute the same query signature.
@@ -168,6 +163,17 @@ def event_key(event: etree._Element) -> tuple:
     return (event.get('timestamp'), duration, *(actions.get(name) for name in EVENT_KEY_ACTIONS))
 
 
+def query_plans_setup_docs_url(engine_edition: int | None) -> str:
+    """The guide's section on creating the session, on the tab of the server's platform."""
+    if is_azure_sql_database(engine_edition):
+        platform = "Azure SQL Database"
+    elif is_azure_database(engine_edition):
+        platform = "Azure SQL Managed Instance"
+    else:
+        platform = "Self-hosted"
+    return "{}?tab={}#create-the-session".format(QUERY_PLANS_DOCS_URL, QUERY_PLANS_SETUP_DOCS_TABS[platform])
+
+
 def hash_to_hex(value: str | None) -> str | None:
     """
     The query_hash and query_plan_hash actions are unsigned 64-bit integers. They're sent as hex, as query metrics send
@@ -195,7 +201,6 @@ class QueryPlanEventsHandler(XESessionBase):
     TARGET_READ_DENIED_HEALTH_EVENT = SqlServerHealthEvent.QUERY_PLANS_XE_TARGET_READ_DENIED
     COLLECTED_DATA_NAME = "real execution plans"
     SESSION_DOCS_URL = QUERY_PLANS_DOCS_URL
-    SESSION_SQL = QUERY_PLANS_SESSION_SQL
 
     def __init__(self, check: SQLServer, config: SQLServerConfig):
         super().__init__(check, config, SESSION_NAME)
@@ -233,6 +238,9 @@ class QueryPlanEventsHandler(XESessionBase):
 
         self.register_event_handler(PLAN_PROFILE_EVENT, self._parse_plan_event)
         self.register_event_handler(SHOWPLAN_EVENT, self._parse_plan_event)
+
+    def _session_setup_docs_url(self) -> str:
+        return query_plans_setup_docs_url(self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION))
 
     def _positive_int_option(self, query_plans_config: dict, name: str, default: int) -> int:
         """A `collect_xe.query_plans` option that must be at least 1, or its default when it's unset or invalid."""

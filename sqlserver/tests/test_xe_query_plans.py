@@ -14,6 +14,12 @@ from lxml import etree
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.const import (
+    ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
+    ENGINE_EDITION_ENTERPRISE,
+    ENGINE_EDITION_SQL_DATABASE,
+    STATIC_INFO_ENGINE_EDITION,
+)
 from datadog_checks.sqlserver.utils import construct_use_statement
 from datadog_checks.sqlserver.xe_collection.base import SESSION_TARGETS_QUERY
 from datadog_checks.sqlserver.xe_collection.event_file_reader import (
@@ -1199,7 +1205,6 @@ def test_session_health_events(aggregator, xe_instance, caplog):
     warnings = [r.getMessage() for r in caplog.records if 'datadog_query_plans' in r.getMessage()]
     assert len(warnings) == 1
     assert "doesn't exist or isn't running" in warnings[0]
-    assert 'CREATE EVENT SESSION datadog_query_plans' in warnings[0]
 
     server.targets = [('histogram', None)]
     handler.run_job()
@@ -1213,6 +1218,32 @@ def test_session_health_events(aggregator, xe_instance, caplog):
         ('query_plans_xe_target_unsupported', 'warning'),
         ('query_plans_xe_target_unsupported', 'ok'),
     ]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'engine_edition,tab',
+    [
+        pytest.param(ENGINE_EDITION_ENTERPRISE, 'selfhosted', id='self_hosted'),
+        pytest.param(None, 'selfhosted', id='unknown_edition'),
+        pytest.param(ENGINE_EDITION_SQL_DATABASE, 'azuresqldatabase', id='azure_sql_database'),
+        pytest.param(ENGINE_EDITION_AZURE_MANAGED_INSTANCE, 'azuresqlmanagedinstance', id='azure_sql_managed_instance'),
+    ],
+)
+def test_session_missing_warning_links_to_the_platform_setup(xe_instance, caplog, engine_edition, tab):
+    """The warning of a missing session links to the guide's setup of the server's platform, rather than a script."""
+    server = FakeServer(targets=[])
+    handler = make_handler(xe_instance, server)
+    handler._check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
+    caplog.set_level(logging.WARNING)
+
+    handler.run_job()
+
+    [warning] = [r.getMessage() for r in caplog.records if 'datadog_query_plans' in r.getMessage()]
+    assert warning == (
+        "The datadog_query_plans XE session doesn't exist or isn't running, so no real execution plans are collected. "
+        "See https://docs.datadoghq.com/database_monitoring/guide/sql_real_execution_plans/?tab={}#create-the-session"
+    ).format(tab)
 
 
 # A read the login isn't allowed, as SQL Server 2022 reports it.

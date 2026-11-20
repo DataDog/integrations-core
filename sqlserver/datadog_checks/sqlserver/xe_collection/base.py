@@ -144,12 +144,12 @@ class XESessionBase(DBMAsyncJob):
     TEXT_FIELDS = ["result"]
 
     # Set by the handlers that find their target with `_session_target`: the health events of the session's setup
-    # problems, what the warnings say isn't collected without the session, and how to create it.
+    # problems, what the warnings say isn't collected without the session, and their docs. `_session_setup_docs_url`
+    # is the docs on creating the session.
     SESSION_MISSING_HEALTH_EVENT: SqlServerHealthEvent
     TARGET_UNSUPPORTED_HEALTH_EVENT: SqlServerHealthEvent
     COLLECTED_DATA_NAME: str
     SESSION_DOCS_URL: str
-    SESSION_SQL: str
     TARGET_READ_DENIED_HEALTH_EVENT: SqlServerHealthEvent
 
     def __init__(self, check, config, session_name):
@@ -344,11 +344,14 @@ class XESessionBase(DBMAsyncJob):
             name=problem, status=HealthStatus.WARNING, data={"session_name": self.session_name}
         )
         self._log.warning(
-            "%s Create and start it as described in %s:\n%s",
+            "%s See %s",
             message.format(session=self.session_name, data=self.COLLECTED_DATA_NAME),
-            self.SESSION_DOCS_URL,
-            self.SESSION_SQL,
+            self._session_setup_docs_url(),
         )
+
+    def _session_setup_docs_url(self) -> str:
+        """The docs on creating the session, for the handlers that find their target with `_session_target`."""
+        raise NotImplementedError
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_ring_buffer(self):
