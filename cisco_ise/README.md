@@ -24,7 +24,6 @@ Supported versions: Cisco ISE 3.x (tested on 3.2).
 
 2. Add this configuration block to your `cisco_ise.d/conf.yaml` file to start collecting your Cisco ISE logs:
 
-    <!-- RFC Q3 (proposed answer): UDP by default, TCP across firewalls or a WAN. -->
     <!-- RFC Q1 (proposed answer): mask secrets typed in TACACS+ commands in the Agent. -->
 
     ```yaml
@@ -32,7 +31,6 @@ Supported versions: Cisco ISE 3.x (tested on 3.2).
       - type: udp # or tcp
         port: <PORT>
         source: cisco-ise
-        service: cisco-ise
         log_processing_rules:
           - type: mask_sequences
             name: ise_tacacs_cmd_secret
@@ -50,7 +48,7 @@ Supported versions: Cisco ISE 3.x (tested on 3.2).
 
 3. [Restart the Agent][3].
 
-**UDP or TCP**: both work with the same pipeline. UDP is the simplest, and ISE never waits for the Agent, but a lost packet loses the event silently, and 8192-byte messages are IP-fragmented, which some firewalls drop. Use TCP when firewalls or a WAN sit between ISE and the Agent. Over TCP, ISE ends each message with a newline, so the Agent's default `tcp` listener needs no extra settings; don't set an `idle_timeout` on it, because ISE keeps one long-lived and often quiet connection. TLS (ISE's "Secure Syslog" target) is not supported.
+**UDP or TCP**: both work with the same pipeline; choose the one that fits your network. Over UDP, ISE never waits for the Agent, but a lost packet loses the event silently, and 8192-byte messages are IP-fragmented, which some firewalls drop. Over TCP, nothing is lost silently, and ISE ends each message with a newline, so the Agent's default `tcp` listener needs no extra settings; don't set an `idle_timeout` on it, because ISE keeps one long-lived and often quiet connection. TLS (ISE's "Secure Syslog" target) is not supported.
 
 #### Configure a Remote Logging Target in Cisco ISE
 

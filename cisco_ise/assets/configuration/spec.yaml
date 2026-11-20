@@ -5,11 +5,10 @@ files:
   options:
   - template: logs
     example:
-    # RFC Q3 (proposed answer): UDP by default; `type: tcp` is also supported (newline framing).
+    # type: udp or tcp (both supported; ISE ends each TCP message with a newline).
     - type: udp
       port: <PORT>
       source: cisco-ise
-      service: cisco-ise
       # RFC Q1 (proposed answer): mask secrets typed in TACACS+ commands before they leave the Agent.
       # Verified on Agent 7.85.0 with real ISE 3.2 messages (3300, 5202, 5402).
       log_processing_rules:
