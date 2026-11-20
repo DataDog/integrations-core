@@ -74,6 +74,7 @@ PARAMETERIZED_EXPLAIN_ERRORS_TO_CACHE = frozenset(
 pg_stat_activity_sample_exclude_keys = {
     # we process & obfuscate this separately
     'query',
+    'query_length',
     # stored separately
     'application_name',
     'datname',
@@ -109,6 +110,8 @@ PG_STAT_ACTIVITY_COLS = [
 
 # PG_STAT_ACTIVITY_COLS_MAPPING applies additional data type casting to the columns
 PG_STAT_ACTIVITY_COLS_MAPPING = {
+    # Measure before client-encoding conversion, in the activity buffer's original bytes.
+    'query': 'query, octet_length(query) AS query_length',
     # use the bytea type to avoid unicode decode errors on Azure PostgreSQL
     'backend_type': 'backend_type::bytea as backend_type',
 }
@@ -591,7 +594,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             # 1. Removing all null key/value pairs and the original query
             # 2. if row['statement'] is none, replace with ERROR: failed to obfuscate so we can still collect activity
             row['query_truncated'] = self._get_truncation_state(
-                track_activity_query_size, row['query'], row['query_signature']
+                track_activity_query_size, row['query'], row['query_signature'], row.get('query_length')
             ).value
             if row['statement'] is None:
                 row['statement'] = "ERROR: failed to obfuscate"
@@ -766,9 +769,11 @@ class PostgresStatementSamples(DBMAsyncJob):
                 return result[0][0]
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
+    def _run_and_track_explain(
+        self, dbname, statement, obfuscated_statement, query_signature, query_length: int | None = None
+    ):
         plan_dict, explain_err_code, err_msg = self._run_explain_safe(
-            dbname, statement, obfuscated_statement, query_signature
+            dbname, statement, obfuscated_statement, query_signature, query_length
         )
         if explain_err_code and explain_err_code != DBExplainError.explained_with_prepared_statement:
             err_tag = "error:explain-{}".format(explain_err_code.value if explain_err_code else None)
@@ -784,8 +789,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         return plan_dict, explain_err_code, err_msg
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
-        # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
+    def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature, query_length=None):
+        # type: (str, str, str, str, int | None) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
 
         orig_statement = statement
 
@@ -800,7 +805,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         track_activity_query_size = self._get_track_activity_query_size()
 
         # truncation check is on the original query, not the trimmed version
-        stmt_trunc = self._get_truncation_state(track_activity_query_size, orig_statement, query_signature)
+        stmt_trunc = self._get_truncation_state(
+            track_activity_query_size, orig_statement, query_signature, query_length
+        )
         if stmt_trunc == StatementTruncationState.truncated:
             return (
                 None,
@@ -896,7 +903,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
         plan_dict, explain_err_code, err_msg = self._run_and_track_explain(
-            row['datname'], row['query'], row['statement'], row['query_signature']
+            row['datname'], row['query'], row['statement'], row['query_signature'], row.get('query_length')
         )
         collection_errors = None
         if explain_err_code:
@@ -955,7 +962,10 @@ class PostgresStatementSamples(DBMAsyncJob):
                         "comments": row['dd_comments'],
                     },
                     "query_truncated": self._get_truncation_state(
-                        self._get_track_activity_query_size(), row['query'], row['query_signature']
+                        self._get_track_activity_query_size(),
+                        row['query'],
+                        row['query_signature'],
+                        row.get('query_length'),
                     ).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
@@ -1012,7 +1022,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         for row in self._create_active_sessions(rows):
             if self._collect_raw_query_statement:
                 self._row_to_raw_statement_event(row)
-            row = {key: val for key, val in row.items() if val is not None and key != 'query'}
+            row = {key: val for key, val in row.items() if val is not None and key not in ('query', 'query_length')}
             active_sessions.append(row)
         event = {
             "host": self._check.reported_hostname,
@@ -1054,7 +1064,9 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_track_activity_query_size(self):
         return int(self._check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
 
-    def _get_truncation_state(self, track_activity_query_size, statement, query_signature):
+    def _get_truncation_state(
+        self, track_activity_query_size: int, statement: str, query_signature: str, query_length: int | None = None
+    ) -> StatementTruncationState:
         # Only check is a statement is truncated if the value of track_activity_query_size was loaded correctly
         # to avoid confusingly reporting a wrong indicator by using a default that might be wrong for the database
         if track_activity_query_size == TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE:
@@ -1066,8 +1078,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         # multi-byte characters that fall on the limit are left out. One caveat is that if a statement's length
         # happens to be greater or equal to the threshold below but isn't actually truncated, this
         # would falsely report it as a truncated statement
-        statement_bytes = bytes(statement, "utf-8")
-        truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
+        if query_length is None:
+            query_length = len(statement.encode("utf-8"))
+        truncated = query_length >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
         if truncated:
             if track_activity_query_size < TRACK_ACTIVITY_QUERY_SIZE_SUGGESTED_VALUE:
                 self._log.warning(
@@ -1075,7 +1088,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     "See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting%s "
                     "for more details on how to increase the track_activity_query_size setting.",
                     query_signature,
-                    len(statement_bytes),
+                    query_length,
                     track_activity_query_size,
                     "#query-samples-are-truncated",
                 )
@@ -1083,7 +1096,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._log.debug(
                     "Statement with query_signature=%s was truncated. Query size: %d, track_activity_query_size: %d",
                     query_signature,
-                    len(statement_bytes),
+                    query_length,
                     track_activity_query_size,
                 )
             return StatementTruncationState.truncated

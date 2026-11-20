@@ -632,3 +632,25 @@ def test_autodiscovery_group_failure_does_not_skip_later_groups(pg_instance):
     )
 
     assert collected == ['db1']
+
+
+@pytest.mark.parametrize(
+    'statement, encoding, expected',
+    [
+        ('SELECT 1', 'utf-8', 'not_truncated'),
+        ('SELECT 1 /* ' + 'é' * 600 + ' */', 'latin1', 'not_truncated'),
+        ('SELECT 1 /* ' + 'é' * 1011, 'latin1', 'truncated'),
+        ('SELECT 1 /* ' + '漢' * 333, 'utf-8', 'not_truncated'),
+        ('SELECT 1 /* ' + '漢' * 336, 'utf-8', 'truncated'),
+        ('x' * 1016, 'ascii', 'not_truncated'),
+        ('x' * 1017, 'ascii', 'truncated'),
+    ],
+)
+def test_statement_truncation_uses_server_byte_length(integration_check, pg_instance, statement, encoding, expected):
+    """Client UTF-8 expansion must not mark complete server-encoded statements as truncated."""
+    pg_instance['dbm'] = True
+    check = integration_check(pg_instance)
+    result = check.statement_samples._get_truncation_state(
+        1024, statement, 'signature', len(statement.encode(encoding))
+    )
+    assert result.value == expected
