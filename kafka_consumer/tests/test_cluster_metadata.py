@@ -12,6 +12,7 @@ from unittest import mock
 import pytest
 from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
 
+from datadog_checks.base.stubs.http import RecordedRequest
 from datadog_checks.kafka_consumer.cache import EVENT_CACHE_TTL
 from datadog_checks.kafka_consumer.client import KafkaClient
 
@@ -1267,7 +1268,7 @@ def test_fetch_earliest_offsets_persistent_failure_keeps_cache_for_healthy_parti
     assert second_request == {('test-topic', 1)}
 
 
-def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
+def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator, fake_http, fake_http_response):
     """Test that OIDC OAuth token is fetched and passed as Bearer header for Schema Registry."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
@@ -1292,31 +1293,19 @@ def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
     kafka_consumer_check.write_persistent_cache = mock.Mock()
     kafka_consumer_check.event_platform_event = mock.Mock()
 
-    # Mock the OIDC token request
-    mock_response = mock.Mock()
-    mock_response.json.return_value = {
-        'access_token': 'oidc-test-token-123',
-        'token_type': 'Bearer',
-        'expires_in': 3600,
-    }
-    mock_response.raise_for_status = mock.Mock()
-
-    collector = kafka_consumer_check.metadata_collector
-    original_get = collector.http.get
-    mock_http = mock.MagicMock(wraps=collector.http)
-    mock_http.post.return_value = mock_response
-    mock_http.get.side_effect = original_get
-    mock_http.options = collector.http.options
-    collector.http = mock_http
+    fake_http_response(
+        'https://idp.example.com/oauth/token',
+        method='POST',
+        json_data={'access_token': 'oidc-test-token-123', 'token_type': 'Bearer', 'expires_in': 3600},
+    )
 
     dd_run_check(kafka_consumer_check)
 
     # Verify token was requested with correct params
-    mock_http.post.assert_called_once()
-    call_args = mock_http.post.call_args
-    assert call_args[0][0] == 'https://idp.example.com/oauth/token'
-    assert call_args[1]['data'] == {'grant_type': 'client_credentials', 'scope': 'schema-registry'}
-    assert call_args[1]['auth'] == ('my-client-id', 'my-client-secret')
+    [token_request] = [request for request in fake_http.requests if request.method == 'POST']
+    assert token_request.url == 'https://idp.example.com/oauth/token'
+    assert token_request.options['data'] == {'grant_type': 'client_credentials', 'scope': 'schema-registry'}
+    assert token_request.options['auth'] == ('my-client-id', 'my-client-secret')
 
     # Verify Bearer token is stored and included in per-request kwargs
     assert kafka_consumer_check.metadata_collector._schema_registry_oauth_token == 'oidc-test-token-123'
@@ -1327,7 +1316,7 @@ def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
     aggregator.assert_metric('kafka.schema_registry.subjects', value=1)
 
 
-def test_schema_registry_oauth_token_refresh_on_expiry(check, dd_run_check, aggregator):
+def test_schema_registry_oauth_token_refresh_on_expiry(check, dd_run_check, aggregator, fake_http, fake_http_response):
     """Test that expired OIDC token is refreshed on next check run."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
@@ -1357,30 +1346,21 @@ def test_schema_registry_oauth_token_refresh_on_expiry(check, dd_run_check, aggr
     collector._schema_registry_oauth_token = 'old-expired-token'
     collector._schema_registry_oauth_token_expiry = time.time() - 100  # expired
 
-    mock_response = mock.Mock()
-    mock_response.json.return_value = {
-        'access_token': 'new-refreshed-token',
-        'token_type': 'Bearer',
-        'expires_in': 3600,
-    }
-    mock_response.raise_for_status = mock.Mock()
-
-    original_get = collector.http.get
-    mock_http = mock.MagicMock(wraps=collector.http)
-    mock_http.post.return_value = mock_response
-    mock_http.get.side_effect = original_get
-    mock_http.options = collector.http.options
-    collector.http = mock_http
+    fake_http_response(
+        'https://idp.example.com/oauth/token',
+        method='POST',
+        json_data={'access_token': 'new-refreshed-token', 'token_type': 'Bearer', 'expires_in': 3600},
+    )
 
     dd_run_check(kafka_consumer_check)
-    mock_http.post.assert_called_once()
+    assert len([request for request in fake_http.requests if request.method == 'POST']) == 1
 
     assert collector._schema_registry_oauth_token == 'new-refreshed-token'
     request_kwargs = collector._get_schema_registry_request_kwargs()
     assert request_kwargs.get('extra_headers', {}).get('Authorization') == 'Bearer new-refreshed-token'
 
 
-def test_schema_registry_oauth_token_not_refreshed_when_valid(check):
+def test_schema_registry_oauth_token_not_refreshed_when_valid(check, fake_http):
     """Test that a valid (non-expired) token is not re-fetched."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
@@ -1401,12 +1381,8 @@ def test_schema_registry_oauth_token_not_refreshed_when_valid(check):
     collector._schema_registry_oauth_token = 'still-valid-token'
     collector._schema_registry_oauth_token_expiry = time.time() + 3600
 
-    mock_http = mock.MagicMock(wraps=collector.http)
-    mock_http.options = collector.http.options
-    collector.http = mock_http
-
     collector._refresh_schema_registry_oauth_token()
-    mock_http.post.assert_not_called()
+    assert fake_http.requests == []
 
     assert collector._schema_registry_oauth_token == 'still-valid-token'
 
@@ -1485,7 +1461,7 @@ def test_cluster_metadata_with_cluster_id_override(check, dd_run_check, aggregat
             assert payload['original_kafka_cluster_id'] == 'auto-detected-id'
 
 
-def test_schema_registry_url_encodes_subject_names(check):
+def test_schema_registry_url_encodes_subject_names(check, fake_http, fake_http_response):
     """Subjects with slashes (e.g. Protobuf references) must be URL-encoded in API calls."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
@@ -1494,32 +1470,23 @@ def test_schema_registry_url_encodes_subject_names(check):
     kafka_check = check(instance)
     collector = kafka_check.metadata_collector
 
-    mock_response = mock.MagicMock()
-    mock_response.json.return_value = [1]
-    mock_response.raise_for_status.return_value = None
-    collector.http = mock.MagicMock()
-    collector.http.get.return_value = mock_response
+    versions_url = 'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions'
+    config_url = 'http://localhost:8081/config/google%2Fprotobuf%2Ftimestamp.proto'
+    fake_http_response(versions_url, json_data=[1])
+    fake_http_response(f'{versions_url}/latest', json_data={'version': 1})
+    fake_http_response(config_url, json_data={'compatibilityLevel': 'BACKWARD'})
 
     subject = 'google/protobuf/timestamp.proto'
-
     collector._get_schema_registry_versions(subject)
-    collector.http.get.assert_called_with(
-        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions', verify=True
-    )
-
-    collector.http.get.reset_mock()
     collector._get_schema_registry_latest_version(subject)
-    collector.http.get.assert_called_with(
-        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest', verify=True
-    )
-
-    collector.http.get.reset_mock()
-    mock_response.json.return_value = {'compatibilityLevel': 'BACKWARD'}
     collector._get_schema_registry_subject_compatibility(subject)
-    collector.http.get.assert_called_with(
-        'http://localhost:8081/config/google%2Fprotobuf%2Ftimestamp.proto',
-        params={'defaultToGlobal': 'true'},
-        verify=True,
+
+    fake_http.assert_requests(
+        [
+            RecordedRequest('GET', versions_url, {'verify': True}),
+            RecordedRequest('GET', f'{versions_url}/latest', {'verify': True}),
+            RecordedRequest('GET', config_url, {'params': {'defaultToGlobal': 'true'}, 'verify': True}),
+        ]
     )
 
 

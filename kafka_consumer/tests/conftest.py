@@ -4,6 +4,9 @@
 import copy
 import os
 import time
+from collections.abc import Callable
+from typing import Any
+from urllib.parse import quote
 
 import mock
 import pytest
@@ -69,66 +72,98 @@ SAMPLE_CONNECTORS_RESPONSE = {
 }
 
 
-@pytest.fixture
-def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent):
-    """Run a full KafkaCheck cycle with Kafka Connect monitoring enabled.
+def connectors_url(connect_url: str) -> str:
+    return f'{connect_url.rstrip("/")}/connectors'
 
-    Returns the check instance and the mocked Connect HTTP client so tests can assert on
-    emitted metrics/events (through the aggregator) and on the outbound Connect requests.
-    Depends on ``datadog_agent`` so the persistent cache is reset between tests.
+
+def plugins_url(connect_url: str) -> str:
+    return f'{connect_url.rstrip("/")}/connector-plugins'
+
+
+def topics_url(connect_url: str, connector: str) -> str:
+    return f'{connectors_url(connect_url)}/{quote(connector, safe="")}/topics'
+
+
+@pytest.fixture
+def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent, fake_http, fake_http_response):
+    """Run full KafkaCheck cycles with Kafka Connect monitoring enabled, served by `fake_http`.
+
+    On every configured Connect URL, serves `connectors_response` (or the entry of `connectors_per_run` for
+    each run), the plugin list and each connector's topics, plus the OAuth token when a token provider is
+    configured. `register_overrides(respond, fail)` then runs, so a test can replace any of these: the latest
+    registration for a request wins. `respond(url, **kwargs)` takes the `fake_http_response` arguments and
+    `fail(url, error, method='GET')` makes the request raise `error`.
+
+    The check catches errors around each Connect request, so a request to an unregistered URL would fail
+    silently. The harness fails the test instead.
+
+    Returns the check; requests are recorded in `fake_http.requests`. Depends on `datadog_agent` so the
+    persistent cache is reset between tests.
     """
 
     def _run(
-        connectors_response=None,
-        connectors_per_run=None,
-        plugins_response=None,
-        topics_response=None,
-        instance_extra=None,
-        get_side_effect=None,
-        post_response=None,
-        post_side_effect=None,
-        runs=1,
-    ):
-        kafka_instance['kafka_connect_url'] = 'http://localhost:8083'
+        connectors_response: Any = None,
+        connectors_per_run: list[Any] | None = None,
+        plugins_response: list[dict[str, Any]] | None = None,
+        topics_response: dict[str, list[str]] | None = None,
+        instance_extra: dict[str, Any] | None = None,
+        oauth_token_response: dict[str, Any] | None = None,
+        register_overrides: Callable[[Callable[..., Any], Callable[..., None]], None] | None = None,
+        runs: int = 1,
+    ) -> KafkaCheck:
+        kafka_instance['kafka_connect_url'] = common.CONNECT_URL
         kafka_instance['enable_kafka_console'] = True
         if instance_extra:
             kafka_instance.update(instance_extra)
 
+        connect_urls = kafka_instance['kafka_connect_url']
+        if isinstance(connect_urls, str):
+            connect_urls = [connect_urls]
+        responses = connectors_per_run if connectors_per_run is not None else [connectors_response]
+        connector_names = set(topics_response or {})
+        for response in responses:
+            if isinstance(response, dict):
+                connector_names.update(response)
+
+        registered_urls: set[str] = set()
+
+        # Every registration repeats: the topics fetch runs in worker threads, and FakeHTTPClient is only
+        # safe for concurrent requests when no registration uses `once=True`.
+        def respond(url: str, **kwargs: Any) -> Any:
+            registered_urls.add(url)
+            return fake_http_response(url, **kwargs)
+
+        def fail(url: str, error: Exception, method: str = 'GET') -> None:
+            registered_urls.add(url)
+            fake_http.register_response(method, url, error)
+
+        for url in connect_urls:
+            respond(plugins_url(url), json_data=plugins_response or [])
+            for name in connector_names:
+                respond(topics_url(url, name), json_data={name: {'topics': (topics_response or {}).get(name, [])}})
+
+        oauth_provider = kafka_instance.get('kafka_connect_oauth_token_provider')
+        if oauth_token_response is not None:
+            respond(oauth_provider['url'], method='POST', json_data=oauth_token_response)
+
+        if register_overrides is not None:
+            register_overrides(respond, fail)
+
         kafka_consumer_check = check(kafka_instance)
         kafka_consumer_check.client = seed_mock_kafka_client()
 
-        responses = connectors_per_run if connectors_per_run is not None else [connectors_response]
-        state = {'run': 0}
-
-        def default_get(url, **kwargs):
-            response = mock.MagicMock()
-            if 'connector-plugins' in url:
-                response.json.return_value = [] if plugins_response is None else plugins_response
-            elif '/topics' in url:
-                name = url.rstrip('/').rsplit('/', 2)[-2]
-                topics = (topics_response or {}).get(name, [])
-                response.json.return_value = {name: {'topics': topics}}
-            else:
-                current = responses[min(state['run'], len(responses) - 1)]
-                response.json.return_value = {} if current is None else current
-            return response
-
-        http = mock.MagicMock()
-        http.get.side_effect = get_side_effect or default_get
-        if post_side_effect is not None:
-            http.post.side_effect = post_side_effect
-        elif post_response is not None:
-            post = mock.MagicMock()
-            post.json.return_value = post_response
-            http.post.return_value = post
-        kafka_consumer_check._connector_collector.http = http
-
         with mock.patch.object(kafka_consumer_check.metadata_collector, 'collect_all_metadata'):
-            for i in range(runs):
-                state['run'] = i
+            for run in range(runs):
+                current = responses[min(run, len(responses) - 1)]
+                if current is not None:
+                    for url in connect_urls:
+                        respond(connectors_url(url), json_data=current)
                 dd_run_check(kafka_consumer_check)
 
-        return kafka_consumer_check, http
+        unregistered = sorted({request.url for request in fake_http.requests} - registered_urls)
+        assert not unregistered, f'Requests sent to URLs without a registered response: {unregistered}'
+
+        return kafka_consumer_check
 
     return _run
 
