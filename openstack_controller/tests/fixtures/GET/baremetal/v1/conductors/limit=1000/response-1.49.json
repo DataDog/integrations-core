@@ -1,0 +1,34 @@
+{
+    "conductors": [
+        {
+            "hostname": "agent-integrations-openstack-ironic-to-next",
+            "conductor_group": "",
+            "links": [
+                {
+                    "href": "http://127.0.0.1/baremetal/v1/conductors/agent-integrations-openstack-ironic-to-next?limit=1",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/baremetal/conductors/agent-integrations-openstack-ironic-to-next?limit=1",
+                    "rel": "bookmark"
+                }
+            ],
+            "alive": true
+        },
+        {
+            "hostname": "agent-integrations-openstack-ironic",
+            "conductor_group": "",
+            "links": [
+                {
+                    "href": "http://127.0.0.1/baremetal/v1/conductors/agent-integrations-openstack-ironic?limit=1000",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/baremetal/conductors/agent-integrations-openstack-ironic?limit=1000",
+                    "rel": "bookmark"
+                }
+            ],
+            "alive": true
+        }
+    ]
+}

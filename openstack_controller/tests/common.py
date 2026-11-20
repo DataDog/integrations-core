@@ -10,3 +10,13 @@ def remove_service_from_catalog(d, services):
         if service['type'] not in services:
             new_catalog.append(service)
     return {**d, **{'token': {**d['token'], 'catalog': new_catalog}}}
+
+
+def version_identity_endpoints(d):
+    catalog = []
+    for service in d.get('token', {}).get('catalog', []):
+        if service['type'] == 'identity':
+            endpoints = [{**endpoint, 'url': endpoint['url'] + '/v3'} for endpoint in service['endpoints']]
+            service = {**service, 'endpoints': endpoints}
+        catalog.append(service)
+    return {**d, **{'token': {**d['token'], 'catalog': catalog}}}

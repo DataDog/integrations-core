@@ -2,9 +2,79 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from typing import Any, Literal
+
+import requests
+
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
 from datadog_checks.openstack_controller.components.component import Component
+
+Microversion = tuple[int, int]
+MicroversionRange = tuple[Microversion, Microversion]
+MicroversionService = Literal['compute', 'baremetal', 'volume']
+
+# Highest microversion openstacksdk 4.18 requests for each resource (its `_max_microversion`). Instances configured with
+# `openstack_config_file_path` went through openstacksdk, which sent this value capped by the server's maximum, so
+# they keep doing so for each service whose `<service>_microversion` option is unset. Resources missing here,
+# such as compute limits, were requested without a microversion.
+OPENSTACKSDK_MICROVERSIONS: dict[MicroversionService, dict[str, Microversion]] = {
+    'compute': {
+        'servers': (2, 100),
+        'server_diagnostics': (2, 48),
+        'hypervisors': (2, 88),
+        'quota_sets': (2, 56),
+        'services': (2, 69),
+        'flavors': (2, 61),
+        'aggregates': (2, 81),
+    },
+    'baremetal': {
+        'nodes': (1, 109),
+        'portgroups': (1, 26),
+        'ports': (1, 101),
+        'conductors': (1, 49),
+        'volume_connectors': (1, 32),
+        'volume_targets': (1, 32),
+        'drivers': (1, 86),
+        'allocations': (1, 60),
+    },
+    'volume': {
+        'volumes': (3, 71),
+        'snapshots': (3, 65),
+        'transfers': (3, 55),
+        'clusters': (3, 26),
+    },
+}
+
+
+def parse_microversion(version: Any) -> Microversion | None:
+    try:
+        major, minor = version.split('.')
+        return int(major), int(minor)
+    except (AttributeError, ValueError):
+        return None
+
+
+def format_microversion(version: Microversion) -> str:
+    return f'{version[0]}.{version[1]}'
+
+
+def microversion_range(document: Any) -> MicroversionRange | None:
+    """(min, max) microversion from a service version document, or None when it has none or an unexpected shape."""
+    if not isinstance(document, dict):
+        return None
+    # Nova answers with `version`, Ironic with `default_version`, Cinder with a `versions` list.
+    version = document.get('version') or document.get('default_version')
+    if not isinstance(version, dict):
+        versions = document.get('versions')
+        if not isinstance(versions, list):
+            return None
+        versions = [v for v in versions if isinstance(v, dict)]
+        version = next((v for v in versions if v.get('status') == 'CURRENT'), versions[0] if versions else {})
+    server_min, server_max = parse_microversion(version.get('min_version')), parse_microversion(version.get('version'))
+    if server_min is None or server_max is None:
+        return None
+    return server_min, server_max
 
 
 class ApiRest(Api):
@@ -19,9 +89,10 @@ class ApiRest(Api):
         self._region_id = self.config.endpoint_region_id
         self._catalog = None
         self._current_project_id = None
+        self._server_microversions = {}
 
     def auth_url(self):
-        return self.config.keystone_server_url
+        return self.config.auth_url
 
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
@@ -55,7 +126,7 @@ class ApiRest(Api):
                         "user": {
                             "name": self.config.username,
                             "password": self.config.password,
-                            "domain": {"id": self.config.domain_id},
+                            "domain": self.config.user_domain,
                         }
                     },
                 },
@@ -65,6 +136,8 @@ class ApiRest(Api):
         self.http.options['headers']['X-Auth-Type'] = "unscoped"
         self._authorize_data(data)
         self._current_project_id = None
+        # Each check run starts here; discover the server microversions again in case the cloud was upgraded.
+        self._server_microversions = {}
 
     def authorize_system(self):
         data = {
@@ -75,7 +148,7 @@ class ApiRest(Api):
                         "user": {
                             "name": self.config.username,
                             "password": self.config.password,
-                            "domain": {"id": self.config.domain_id},
+                            "domain": self.config.user_domain,
                         }
                     },
                 },
@@ -96,7 +169,7 @@ class ApiRest(Api):
                         "user": {
                             "name": self.config.username,
                             "password": self.config.password,
-                            "domain": {"id": self.config.domain_id},
+                            "domain": self.config.user_domain,
                         }
                     },
                 },
@@ -134,66 +207,113 @@ class ApiRest(Api):
             self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
             self.http.options['headers']['OpenStack-API-Version'] = self.config.cinder_microversion
 
-    def get_identity_regions(self):
-        response = self.http.get(
-            '{}/v3/regions'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
+    def _microversion_headers(self, service: MicroversionService, resource: str) -> dict[str, str] | None:
+        """Headers requesting `resource` at the microversion openstacksdk would have used, or None."""
+        configured = {
+            'compute': self.config.nova_microversion,
+            'baremetal': self.config.ironic_microversion,
+            'volume': self.config.cinder_microversion,
+        }[service]
+        sdk_max = OPENSTACKSDK_MICROVERSIONS[service].get(resource)
+        if not self.config.negotiate_microversions or configured or sdk_max is None:
+            return None
+        server_range = self._server_microversion_range(service)
+        if server_range is None:
+            return None
+        server_min, server_max = server_range
+        version = min(sdk_max, server_max)
+        if version < server_min:
+            return None
+        version = format_microversion(version)
+        headers = {'OpenStack-API-Version': f'{service} {version}'}
+        if service == 'compute':
+            headers['X-OpenStack-Nova-API-Version'] = version
+        elif service == 'baremetal':
+            headers['X-OpenStack-Ironic-API-Version'] = version
+        return headers
+
+    def _server_microversion_range(self, service: MicroversionService) -> MicroversionRange | None:
+        """(min, max) microversion of the service, from its version document; None when it cannot be read."""
+        if service not in self._server_microversions:
+            self._server_microversions[service] = self._discover_microversion_range(service)
+        return self._server_microversions[service]
+
+    def _discover_microversion_range(self, service: MicroversionService) -> MicroversionRange | None:
+        endpoint_types = {
+            'compute': Component.Types.COMPUTE.value,
+            'baremetal': Component.Types.BAREMETAL.value,
+            'volume': Component.Types.BLOCK_STORAGE.value,
+        }[service]
+        endpoint = self._catalog.get_endpoint_by_type(endpoint_types)
+        if self._current_project_id:
+            # Cinder and some Nova catalogs end the endpoint with the project ID; the version document is at the root.
+            endpoint = endpoint.replace(self._current_project_id, '')
+        try:
+            response = self.http.get(endpoint)
+            response.raise_for_status()
+            document = response.json()
+        except (requests.exceptions.RequestException, ValueError) as e:
+            # Without a microversion the server answers at its minimum, which changes the emitted tags and metrics.
+            self.log.warning(
+                "Cannot read the %s version document at `%s`, sending no microversion: %s", service, endpoint, e
+            )
+            return None
+        server_range = microversion_range(document)
+        if server_range is None:
+            self.log.debug("No microversion range in the %s version document at `%s`: %s", service, endpoint, document)
+            return None
+        server_min, server_max = server_range
+        self.log.debug(
+            "%s supports microversions %s to %s", service, *map(format_microversion, (server_min, server_max))
         )
+        return server_min, server_max
+
+    def _identity_endpoint(self):
+        # Catalogs often register Keystone with its `/v3` suffix, which the identity request paths already include.
+        return self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value).rstrip('/').removesuffix('/v3')
+
+    def get_identity_regions(self):
+        response = self.http.get('{}/v3/regions'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('regions', [])
 
     def get_identity_domains(self):
-        response = self.http.get(
-            '{}/v3/domains'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/domains'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('domains', [])
 
     def get_identity_projects(self):
-        response = self.http.get(
-            '{}/v3/projects'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/projects'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('projects', [])
 
     def get_identity_users(self):
-        response = self.http.get(
-            '{}/v3/users'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/users'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('users', [])
 
     def get_identity_groups(self):
-        response = self.http.get(
-            '{}/v3/groups'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/groups'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('groups', [])
 
     def get_identity_group_users(self, group_id):
-        response = self.http.get(
-            '{}/v3/groups/{}/users'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value), group_id)
-        )
+        response = self.http.get('{}/v3/groups/{}/users'.format(self._identity_endpoint(), group_id))
         response.raise_for_status()
         return response.json().get('users', [])
 
     def get_identity_services(self):
-        response = self.http.get(
-            '{}/v3/services'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/services'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('services', [])
 
     def get_identity_registered_limits(self):
-        response = self.http.get(
-            '{}/v3/registered_limits'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/registered_limits'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('registered_limits', [])
 
     def get_identity_limits(self):
-        response = self.http.get(
-            '{}/v3/limits'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
-        )
+        response = self.http.get('{}/v3/limits'.format(self._identity_endpoint()))
         response.raise_for_status()
         return response.json().get('limits', [])
 
@@ -203,13 +323,15 @@ class ApiRest(Api):
             'volumes',
             'id',
             next_signifier='volumes_links',
+            extra_headers=self._microversion_headers('volume', 'volumes'),
         )
 
     def get_block_storage_transfers(self, project_id):
         response = self.http.get(
             '{}/os-volume-transfer/detail'.format(
                 self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)
-            )
+            ),
+            extra_headers=self._microversion_headers('volume', 'transfers'),
         )
         response.raise_for_status()
         return response.json().get('transfers', {})
@@ -220,6 +342,7 @@ class ApiRest(Api):
             'snapshots',
             'id',
             next_signifier='snapshots_links',
+            extra_headers=self._microversion_headers('volume', 'snapshots'),
         )
 
     def get_block_storage_pools(self, project_id):
@@ -233,7 +356,8 @@ class ApiRest(Api):
 
     def get_block_storage_clusters(self, project_id):
         response = self.http.get(
-            '{}/clusters/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value))
+            '{}/clusters/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
+            extra_headers=self._microversion_headers('volume', 'clusters'),
         )
         response.raise_for_status()
         return response.json().get('clusters', {})
@@ -248,14 +372,16 @@ class ApiRest(Api):
 
     def get_compute_aggregates(self):
         response = self.http.get(
-            '{}/os-aggregates'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
+            '{}/os-aggregates'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)),
+            extra_headers=self._microversion_headers('compute', 'aggregates'),
         )
         response.raise_for_status()
         return response.json().get('aggregates', [])
 
     def get_compute_quota_sets(self, project_id):
         response = self.http.get(
-            '{}/os-quota-sets/{}'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value), project_id)
+            '{}/os-quota-sets/{}'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value), project_id),
+            extra_headers=self._microversion_headers('compute', 'quota_sets'),
         )
         response.raise_for_status()
         return response.json().get('quota_set', {})
@@ -268,6 +394,7 @@ class ApiRest(Api):
             'id',
             next_signifier='servers_links',
             params=params,
+            extra_headers=self._microversion_headers('compute', 'servers'),
         )
 
     def get_compute_servers(self, project_id):
@@ -278,41 +405,47 @@ class ApiRest(Api):
             'id',
             next_signifier='servers_links',
             params=params,
+            extra_headers=self._microversion_headers('compute', 'servers'),
         )
 
     def get_compute_server_diagnostics(self, server_id):
         response = self.http.get(
             '{}/servers/{}/diagnostics'.format(
                 self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value), server_id
-            )
+            ),
+            extra_headers=self._microversion_headers('compute', 'server_diagnostics'),
         )
         response.raise_for_status()
         return response.json()
 
     def get_compute_flavor(self, flavor_id):
         response = self.http.get(
-            '{}/flavors/{}'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value), flavor_id)
+            '{}/flavors/{}'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value), flavor_id),
+            extra_headers=self._microversion_headers('compute', 'flavors'),
         )
         response.raise_for_status()
         return response.json().get('flavor', {})
 
     def get_compute_services(self):
         response = self.http.get(
-            '{}/os-services'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
+            '{}/os-services'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)),
+            extra_headers=self._microversion_headers('compute', 'services'),
         )
         response.raise_for_status()
         return response.json().get('services', [])
 
     def get_compute_flavors(self):
         response = self.http.get(
-            '{}/flavors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
+            '{}/flavors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)),
+            extra_headers=self._microversion_headers('compute', 'flavors'),
         )
         response.raise_for_status()
         return response.json().get('flavors', [])
 
     def get_compute_hypervisors(self):
         response = self.http.get(
-            '{}/os-hypervisors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
+            '{}/os-hypervisors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)),
+            extra_headers=self._microversion_headers('compute', 'hypervisors'),
         )
         response.raise_for_status()
         return response.json().get('hypervisors', [])
@@ -350,9 +483,11 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('quota', [])
 
-    def make_paginated_request(self, url, resource_name, marker_name, next_signifier='next', params=None):
+    def make_paginated_request(
+        self, url, resource_name, marker_name, next_signifier='next', params=None, extra_headers=None
+    ):
         def make_request(url, params):
-            resp = self.http.get(url, params=params)
+            resp = self.http.get(url, params=params, extra_headers=extra_headers)
             resp.raise_for_status()
             response_json = resp.json()
             return response_json
@@ -361,11 +496,9 @@ class ApiRest(Api):
         item_list = []
         params = {} if params is None else params
 
-        if self.config.paginated_limit is None:
-            response_json = make_request(url, params)
-            return response_json if resource_name is None else response_json.get(resource_name, [])
-
-        params['limit'] = self.config.paginated_limit
+        # Without `paginated_limit`, servers still split long collections into pages of their default size.
+        if self.config.paginated_limit is not None:
+            params['limit'] = self.config.paginated_limit
         while True:
             self.log.debug(
                 "making paginated request [limit=%s, marker=%s]",
@@ -379,6 +512,10 @@ class ApiRest(Api):
             resources = response_json if resource_name is None else response_json.get(resource_name, [])
             if len(resources) > 0:
                 last_item = resources[-1]
+                if marker is not None and last_item.get(marker_name) == marker:
+                    # The server ignored `marker` and returned the same page again; stop instead of looping forever.
+                    self.log.warning("Stopping pagination of `%s`: the server ignored marker `%s`", url, marker)
+                    break
                 item_list.extend(resources)
 
                 if next_signifier == f'{resource_name}_links':
@@ -434,7 +571,16 @@ class ApiRest(Api):
             params = {'detail': True}
             url = '{}/v1/nodes'.format(ironic_endpoint)
 
-        return self.make_paginated_request(url, 'nodes', 'uuid', params=params)
+        nodes = self.make_paginated_request(
+            url, 'nodes', 'uuid', params=params, extra_headers=self._microversion_headers('baremetal', 'nodes')
+        )
+        if self.config.negotiate_microversions:
+            for node in nodes:
+                # Before microversion 1.2, Ironic reports the `available` provision state as null; openstacksdk
+                # reported it as `available`, which `openstack_config_file_path` instances keep.
+                if node.get('provision_state') is None:
+                    node['provision_state'] = 'available'
+        return nodes
 
     def get_baremetal_portgroups(self, node_id):
         return self.make_paginated_request(
@@ -443,6 +589,7 @@ class ApiRest(Api):
             ),
             'portgroups',
             'uuid',
+            extra_headers=self._microversion_headers('baremetal', 'portgroups'),
         )
 
     def get_baremetal_ports(self):
@@ -450,6 +597,7 @@ class ApiRest(Api):
             '{}/v1/ports/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
             'ports',
             'uuid',
+            extra_headers=self._microversion_headers('baremetal', 'ports'),
         )
 
     def get_baremetal_conductors(self):
@@ -457,13 +605,20 @@ class ApiRest(Api):
 
         url = '{}/v1/conductors'.format(ironic_endpoint)
 
-        return self.make_paginated_request(url, 'conductors', 'hostname', params={})
+        return self.make_paginated_request(
+            url,
+            'conductors',
+            'hostname',
+            params={},
+            extra_headers=self._microversion_headers('baremetal', 'conductors'),
+        )
 
     def get_baremetal_volume_connectors(self):
         return self.make_paginated_request(
             '{}/v1/volume/connectors'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
             'connectors',
             'uuid',
+            extra_headers=self._microversion_headers('baremetal', 'volume_connectors'),
         )
 
     def get_baremetal_volume_targets(self):
@@ -471,11 +626,13 @@ class ApiRest(Api):
             '{}/v1/volume/targets'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
             'targets',
             'uuid',
+            extra_headers=self._microversion_headers('baremetal', 'volume_targets'),
         )
 
     def get_baremetal_drivers(self):
         response = self.http.get(
-            '{}/v1/drivers'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+            '{}/v1/drivers'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
+            extra_headers=self._microversion_headers('baremetal', 'drivers'),
         )
         response.raise_for_status()
         return response.json().get('drivers', [])
@@ -485,6 +642,7 @@ class ApiRest(Api):
             '{}/v1/allocations'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
             'allocations',
             'uuid',
+            extra_headers=self._microversion_headers('baremetal', 'allocations'),
         )
 
     def get_load_balancer_loadbalancers(self, project_id):

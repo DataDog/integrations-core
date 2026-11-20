@@ -319,6 +319,10 @@ class Compute(Component):
             flavor_metrics = self.check.api.get_compute_flavor(flavor_id)
         else:
             flavor_metrics = server.get('flavor')
+            if flavor_original_name is not None:
+                # From microversion 2.47 the server embeds its flavor by name only, without `id` or `name`.
+                # openstacksdk reported that name as both tags, so keep doing so.
+                flavor_metrics = {'id': flavor_original_name, 'name': flavor_original_name, **flavor_metrics}
         self.check.log.debug("flavor_metrics: %s", flavor_metrics)
         flavor_metrics_and_tags = get_metrics_and_tags(
             flavor_metrics,
