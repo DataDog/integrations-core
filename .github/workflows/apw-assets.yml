@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: '3.13'
       - name: Install test dependencies
-        run: pip install pytest==9.1.1 PyYAML==6.0.3
+        run: pip install pytest==9.2.0 PyYAML==6.0.3
       - name: Test shared packaging and release handling
         working-directory: .github/actions/apw-assets
         run: pytest tests/ -v
