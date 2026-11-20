@@ -58,11 +58,13 @@ def get_truncation_state(statement):
 
 
 # The field of `EXTRACT(field FROM ...)` that the obfuscator replaces with a placeholder even though it is no
-# literal value, as listed by go-sqllexer (`extractFieldKeywords`). Comments may precede the field.
+# literal value, as listed by go-sqllexer (`extractFieldKeywords`). Comments may precede the field; each one ends at
+# its first `*/`, which also keeps the matching linear.
 EXTRACT_FIELD_PATTERN = re.compile(
-    r'(\bEXTRACT\s*\((?:\s|/\*.*?\*/)*)(?:CENTURY|DAY|DECADE|DOW|DOY|EPOCH|HOUR|ISODOW|ISOYEAR|JULIAN|MICROSECONDS'
-    r'|MILLENNIUM|MILLISECONDS|MINUTE|MONTH|QUARTER|SECOND|TIMEZONE|TIMEZONE_HOUR|TIMEZONE_MINUTE|WEEK|YEAR)\b',
-    re.IGNORECASE | re.DOTALL,
+    r'(\bEXTRACT\s*\((?:\s|/\*(?:[^*]|\*(?!/))*\*/)*)(?:CENTURY|DAY|DECADE|DOW|DOY|EPOCH|HOUR|ISODOW|ISOYEAR'
+    r'|JULIAN|MICROSECONDS|MILLENNIUM|MILLISECONDS|MINUTE|MONTH|QUARTER|SECOND|TIMEZONE|TIMEZONE_HOUR'
+    r'|TIMEZONE_MINUTE|WEEK|YEAR)\b',
+    re.IGNORECASE,
 )
 # A quoted user variable name such as `@'id'`, whose name the obfuscator replaces like a string literal
 QUOTED_USER_VARIABLE_PATTERN = re.compile(r"@(?:'(?:[^'\\]|\\.|'')*'|\"(?:[^\"\\]|\\.|\"\")*\")")
