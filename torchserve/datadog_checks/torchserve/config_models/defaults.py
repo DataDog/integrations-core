@@ -69,7 +69,7 @@ def instance_ignore_connection_errors():
 
 
 def instance_inference_api_url():
-    return 'http://localhost:8080'
+    return None
 
 
 def instance_kerberos_auth():
@@ -93,7 +93,7 @@ def instance_log_requests():
 
 
 def instance_management_api_url():
-    return 'http://localhost:8081'
+    return None
 
 
 def instance_min_collection_interval():
@@ -105,7 +105,7 @@ def instance_non_cumulative_histogram_buckets():
 
 
 def instance_openmetrics_endpoint():
-    return 'http://localhost:8082/metrics'
+    return None
 
 
 def instance_persist_connections():

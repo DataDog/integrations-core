@@ -1,0 +1,1 @@
+Fix `_get_instance_option_names` to correctly resolve field names for specs that combine `multiple_instances_defined` with a `discovery` stanza.
