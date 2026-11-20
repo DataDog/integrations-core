@@ -1608,9 +1608,7 @@ def _query_stats_row(
 @pytest.mark.parametrize(
     'a, b, expected_both_ran',
     [
-        # SDBM-3132: one statement with two plans is reported as one row.
         pytest.param(('A', None), ('B', None), [(None, 13, 130)], id='two-plans'),
-        # SDBM-1143: the same statement and plan in two procedures is reported per procedure.
         pytest.param(('P', 'dbo.p1'), ('P', 'dbo.p2'), [('dbo.p1', 10, 100), ('dbo.p2', 3, 30)], id='two-procedures'),
     ],
 )
@@ -1640,6 +1638,5 @@ def test_query_metrics_do_not_report_lifetime_counters_of_returning_row(instance
         [],
         expected_both_ran,
         [(a[1], 10, 100)],
-        # B lost its baseline while absent, so only A's delta can be computed.
         [(a[1], 10, 100)],
     ]

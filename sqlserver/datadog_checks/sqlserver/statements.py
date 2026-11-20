@@ -226,7 +226,6 @@ def _sum_rows_by_row_key(rows, metric_columns):
     for row in rows:
         key = _row_key(row)
         if key not in rows_by_key:
-            # Rows are fresh dicts from compute_derivative_rows, so the first one can absorb the others.
             rows_by_key[key] = row
             continue
         merged = rows_by_key[key]
