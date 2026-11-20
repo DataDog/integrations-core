@@ -1074,6 +1074,40 @@ def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(d
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    'collect_comments,expected_comments',
+    [
+        pytest.param(True, ["/* service='datadog-agent' */"], id='collected'),
+        pytest.param(False, [], id='collect_comments_disabled'),
+    ],
+)
+def test_sanitize_activity_row_recovers_agent_service_comment(
+    dbm_instance, datadog_agent, collect_comments, expected_comments
+):
+    comment = "/* service='datadog-agent' */"
+    statement_text = "SELECT * FROM orders WHERE customer_id = @P1"
+    row = {
+        'statement_text': statement_text,
+        'text': f"(@P1 int){comment} {statement_text}",
+        'procedure_name': None,
+        'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
+        'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+    }
+
+    def _obfuscate_sql(sql_query, options=None):
+        comments = [comment] if comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    check = SQLServer(CHECK_NAME, {}, [dict(dbm_instance, obfuscator_options={'collect_comments': collect_comments})])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        row = check.activity._obfuscate_and_sanitize_row(row)
+
+    assert row['dd_comments'] == expected_comments
+    assert mock_agent.call_count == 1
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     'obfuscator_options,expect_comments',
     [
         pytest.param({}, True, id='defaults'),

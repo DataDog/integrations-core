@@ -97,6 +97,8 @@ class WorkflowRun(BaseModel):
     status: str | None
     conclusion: str | None = None
     html_url: str
+    # The API exposes `run-name` here, not in `name` (which names the workflow).
+    display_title: str
     created_at: str | None = None
     updated_at: str | None = None
     # Start of the latest attempt, reset on rerun (see the workflow-run schema linked above).
@@ -119,6 +121,19 @@ class WorkflowRun(BaseModel):
         if not self.is_completed:
             return None
         return _elapsed_seconds(self.run_started_at, self.updated_at)
+
+
+class WorkflowRunsList(BaseModel):
+    """A page from the workflow run listing.
+
+    Reference:
+    https://docs.github.com/en/rest/actions/workflow-runs#list-workflow-runs-for-a-workflow
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    total_count: int
+    workflow_runs: list[WorkflowRun]
 
 
 class WorkflowDispatchResult(BaseModel):
