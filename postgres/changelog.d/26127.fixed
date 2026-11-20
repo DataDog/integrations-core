@@ -1,0 +1,1 @@
+Use server-encoded query byte lengths when detecting PostgreSQL activity truncation and deciding explain eligibility.

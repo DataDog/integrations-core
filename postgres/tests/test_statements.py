@@ -19,6 +19,8 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.statement_samples import (
+    PG_STAT_ACTIVITY_COLS,
+    PG_STAT_ACTIVITY_COLS_MAPPING,
     DBExplainError,
     StatementTruncationState,
 )
@@ -49,6 +51,46 @@ from .utils import WaitGroup, _get_conn, _get_superconn, requires_over_10, requi
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
+
+
+def test_activity_server_byte_length(integration_check, dbm_instance):
+    """An intact LATIN1 statement must remain eligible for activity and explain collection after UTF-8 conversion."""
+    dbname = 'activity_encoding_latin1'
+    with _get_superconn(dbm_instance) as admin:
+        admin.execute(f"CREATE DATABASE {dbname} TEMPLATE template0 ENCODING 'LATIN1' LC_COLLATE 'C' LC_CTYPE 'C'")
+        check = None
+        try:
+            dbm_instance.update(
+                dbname=dbname,
+                username=USER_ADMIN,
+                password=PASSWORD_ADMIN,
+                dbstrict=True,
+                dbm=True,
+                pg_stat_activity_view="pg_stat_activity",
+            )
+            check = integration_check(dbm_instance)
+            check.load_version()
+            collector = check.statement_samples
+            collector.tags = []
+            with _get_superconn(dbm_instance, application_name='encoding_regression') as worker:
+                worker.execute('SET client_encoding = UTF8')
+                query = 'SELECT 1 /* ' + 'é' * 600 + ' */'
+                worker.execute(query)
+                columns = collector._get_pg_stat_activity_cols_cached(PG_STAT_ACTIVITY_COLS)
+                rows = collector._get_new_pg_stat_activity(columns, PG_STAT_ACTIVITY_COLS_MAPPING, True)
+                row = next(row for row in rows if row['application_name'] == 'encoding_regression')
+                assert row['query'] == query
+                assert row['query_length'] == len(query.encode('latin1'))
+                assert len(query.encode('utf-8')) > 1024
+                assert (
+                    collector._get_truncation_state(1024, row['query'], 'signature', row['query_length'])
+                    == StatementTruncationState.not_truncated
+                )
+        finally:
+            if check is not None:
+                check._close_db_pool()
+                check._close_db()
+            admin.execute(f'DROP DATABASE {dbname}')
 
 
 @pytest.fixture(autouse=True)
