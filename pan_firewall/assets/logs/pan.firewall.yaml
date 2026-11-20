@@ -706,7 +706,7 @@ pipeline:
             supportRules: ""
             matchRules: |-
               misc_url_quoted %{data}misc="(?!")%{regex("[^\"]+"):ocsf.evidence.url.url_string}"(?=[,\s]|$)%{greedyData}
-              misc_url_double_quoted %{data}misc=""(?!")(?![,\s]+[\w.]+=""(?:[,\s]|$))%{regex("[^\"]+"):ocsf.evidence.url.url_string}""(?=[,\s]|$)%{greedyData}
+              misc_url_double_quoted %{data}misc=""(?!"|[,\s]+[\w.]+=|$)%{regex("[^\"]+"):ocsf.evidence.url.url_string}""(?=[,\s]|$)%{greedyData}
               misc_url %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.url.url_string}%{greedyData}
     - type: pipeline
       name: misc field filename extraction
@@ -727,7 +727,7 @@ pipeline:
             supportRules: ""
             matchRules: |-
               misc_file_quoted %{data}misc="(?!")%{regex("[^\"]+"):ocsf.evidence.file.name}"(?=[,\s]|$)%{greedyData}
-              misc_file_double_quoted %{data}misc=""(?!")(?![,\s]+[\w.]+=""(?:[,\s]|$))%{regex("[^\"]+"):ocsf.evidence.file.name}""(?=[,\s]|$)%{greedyData}
+              misc_file_double_quoted %{data}misc=""(?!"|[,\s]+[\w.]+=|$)%{regex("[^\"]+"):ocsf.evidence.file.name}""(?=[,\s]|$)%{greedyData}
               misc_file %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.file.name}%{greedyData}
         - type: string-builder-processor
           name: Add type_id
