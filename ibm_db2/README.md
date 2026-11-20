@@ -182,6 +182,20 @@ Database Monitoring (`dbm: true`) collects query execution counts, elapsed time,
 rows read and returned, lock waits, and obfuscated SQL from each database's package cache.
 Configure each database you want to monitor separately.
 
+#### Schema collection
+
+With `dbm: true`, schema collection is enabled by default. It requires **Db2 11.1.4.4
+or later** and a **UTF-8 database (code page 1208)** for the built-in
+[SQL/JSON functions][20]. On unsupported databases, the Agent logs the detected version
+and code page once and skips schema collection. Metrics and other DBM features continue.
+After upgrading Db2 or configuring a UTF-8 database, restart the Agent to retry.
+Set `collect_schemas.enabled: false` to disable schema collection explicitly.
+
+Schema collection intervals must be finite and positive; fractional seconds are supported.
+Table limits, column limits, and query timeouts must be positive integers. Null schema
+settings use their documented defaults, and null filter lists are treated as empty lists.
+See the [sample configuration][5] for these options.
+
 #### Connect to a fixed server
 
 Configure exactly one check instance for each database on each monitored server. The Agent
@@ -419,3 +433,5 @@ Additional helpful documentation, links, and articles:
 
 [18]: https://www.ibm.com/docs/en/db2/12.1.x?topic=njcshacd-configuration-db2-automatic-client-reroute-support-applications-other-than-java
 [19]: https://www.ibm.com/docs/en/db2/12.1.x?topic=file-data-server-driver-configuration-location
+
+[20]: https://www.ibm.com/docs/en/db2/11.5.x?topic=json-sql-access-documents

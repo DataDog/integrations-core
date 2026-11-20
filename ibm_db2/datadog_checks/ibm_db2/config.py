@@ -61,10 +61,14 @@ def build_config(check: IbmDb2Check) -> InstanceConfig:
     # default", so mark it as configured to keep the model from filling it in.
     args.setdefault('connection_timeout', None)
 
-    args['collect_schemas'] = {
-        **dict_defaults.instance_collect_schemas().model_dump(),
-        **(instance.get('collect_schemas') or {}),
-    }
+    collect_schemas = instance.get('collect_schemas')
+    if collect_schemas is None:
+        collect_schemas = {}
+    if isinstance(collect_schemas, Mapping):
+        args['collect_schemas'] = {
+            **dict_defaults.instance_collect_schemas().model_dump(),
+            **{key: value for key, value in collect_schemas.items() if value is not None},
+        }
 
     config = check.load_configuration_model(
         CONFIG_MODELS_PACKAGE, 'InstanceConfig', args, check._get_config_model_context(args)

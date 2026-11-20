@@ -12,7 +12,7 @@ from datadog_checks.base.utils.db.schemas import DatabaseInfo, SchemaCollector, 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 
-from .connection import Db2Connection
+from .connection import Db2Connection, Db2ConnectionError
 
 if TYPE_CHECKING:
     from .config_models import InstanceConfig
@@ -30,7 +30,7 @@ SYSTEM_SCHEMAS_FILTER = "s.SCHEMANAME NOT LIKE 'SYS%' AND s.SCHEMANAME NOT IN ('
 # empty. The placeholder row yields a NULL element, which JSON_ARRAY drops (ABSENT ON NULL).
 #
 # Referential rule codes: https://www.ibm.com/docs/en/db2/11.5?topic=views-syscatreferences
-SCHEMA_TABLES_QUERY = """
+SCHEMA_TABLES_QUERY = """/* DDIGNORE */
 WITH schemas AS (
     SELECT s.SCHEMANAME AS schema_name, s.OWNER AS schema_owner
     FROM SYSCAT.SCHEMATA s
@@ -39,7 +39,10 @@ WITH schemas AS (
 tables AS (
     SELECT t.TABSCHEMA, t.TABNAME, t.OWNER, t.TYPE, t.CARD
     FROM SYSCAT.TABLES t
+    INNER JOIN schemas ON schemas.schema_name = t.TABSCHEMA
     WHERE t.TYPE IN ('T', 'N'){table_filters}
+    ORDER BY t.TABSCHEMA, t.TABNAME
+    FETCH FIRST {max_tables} ROWS ONLY
 ),
 schema_tables AS (
     SELECT schemas.schema_name, schemas.schema_owner,
@@ -47,8 +50,6 @@ schema_tables AS (
            tables.TYPE AS table_type, tables.CARD AS row_count
     FROM schemas
     LEFT JOIN tables ON tables.TABSCHEMA = schemas.schema_name
-    ORDER BY schemas.schema_name, tables.TABNAME
-    FETCH FIRST {max_tables} ROWS ONLY
 )
 SELECT schema_tables.schema_name, schema_tables.schema_owner,
        schema_tables.table_name, schema_tables.table_owner, schema_tables.table_type, schema_tables.row_count,
@@ -154,10 +155,10 @@ class Db2SchemaCollectorConfig(SchemaCollectorConfig):
     def __init__(self, config: CollectSchemas):
         super().__init__()
         self.enabled = config.enabled
-        self.collection_interval = int(config.collection_interval)
-        self.max_tables = int(config.max_tables)
-        self.max_columns = int(config.max_columns)
-        self.max_query_duration = int(config.max_query_duration)
+        self.collection_interval = config.collection_interval
+        self.max_tables = config.max_tables
+        self.max_columns = config.max_columns
+        self.max_query_duration = config.max_query_duration
         self.include_schemas = config.include_schemas
         self.exclude_schemas = config.exclude_schemas
         self.include_tables = config.include_tables
@@ -251,13 +252,33 @@ class Db2SchemaCollectionJob(DBMAsyncJob):
         # The job runs on its own thread, so it can't share the check's connection.
         self._connection = Db2Connection(check, config)
         self._collector = Db2SchemaCollector(check, config.db, collector_config, self._connection)
+        self._schemas_supported: bool | None = None
 
-    def run_job(self):
-        if self._connection.conn is not None and not ibm_db.active(self._connection.conn):
-            self._connection.close()
-        if self._connection.conn is None:
-            self._connection.connect()
-            if self._connection.conn is None:
+    def run_job(self) -> None:
+        if self._schemas_supported is False:
+            return
+        try:
+            conn = self._connection.ensure_connected()
+        except Db2ConnectionError:
+            return
+        if self._schemas_supported is None:
+            info = ibm_db.server_info(conn)
+            if not info:
+                # A failed capability lookup is transient, unlike a known unsupported database.
+                return
+            # CLI encodes modification/fix pack together: 11.1.4.4 is reported as 11.01.0404.
+            version = tuple(int(part) for part in info.DBMS_VER.split('.'))
+            self._schemas_supported = version >= (11, 1, 404) and info.DB_CODEPAGE == 1208
+            if not self._schemas_supported:
+                self._check.log.warning(
+                    'Schema collection requires Db2 11.1.4.4+ and a UTF-8 database (code page 1208); '
+                    'found version %s, code page %s. Schema collection is disabled for this check instance. '
+                    'Upgrade Db2/use a UTF-8 database and restart the Agent to retry, or set '
+                    'collect_schemas.enabled: false. Other monitoring continues.',
+                    info.DBMS_VER,
+                    info.DB_CODEPAGE,
+                )
+                self._connection.close()
                 return
         self._collector.collect_schemas()
 
