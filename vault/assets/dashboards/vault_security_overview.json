@@ -48,7 +48,7 @@
                         "id": 6806324622707781,
                         "definition": {
                             "type": "note",
-                            "content": "Use this dashboard to monitor HashiCorp Vault audit logs, including:\n\n- Secret reads, deletes, and exports, and the identities that perform them\n- Root token use\n- Changes to policies, identity groups, and configuration\n- Authentication activity and access denials\n\nAudit logs come from a Vault [audit device](https://developer.hashicorp.com/vault/docs/audit) and are tagged with `source:vault`. Vault writes a request entry and a response entry for every call. This dashboard counts only responses.\n\nKey-value (KV) secret reads exclude KV v2 metadata, configuration, and subkeys requests. Audit logs don't record the KV version, so the dashboard can also exclude a KV v1 secret read if its path ends in `metadata`, `config`, or `subkeys` and the secret has a field named `current_version`, `max_versions`, or `subkeys`.\n\nFor further reading, see:\n\n- [Vault integration documentation](https://docs.datadoghq.com/integrations/vault/)\n- [Vault audit devices](https://developer.hashicorp.com/vault/docs/audit)\n- [Datadog Cloud SIEM](https://docs.datadoghq.com/security/cloud_siem/)",
+                            "content": "Use this dashboard to monitor HashiCorp Vault audit logs, including:\n\n- Who reads, deletes, and exports secrets\n- Root token use\n- Changes to policies, identity groups, and configuration\n- How identities authenticate and when they are denied access\n\nAudit logs come from a Vault [audit device](https://developer.hashicorp.com/vault/docs/audit) and are collected with `source:vault`. Vault writes a request entry and a response entry for every call. This dashboard counts only responses.\n\nKV secret reads leave out KV v2 metadata, configuration, and subkeys requests. Audit logs don't record the KV version, so a KV v1 secret at a path ending in metadata, config, or subkeys can be left out too if it has a field named current_version, max_versions, or subkeys.\n\nFor further reading, see:\n\n- [Vault integration documentation](https://docs.datadoghq.com/integrations/vault/)\n\n- [Vault audit devices](https://developer.hashicorp.com/vault/docs/audit)\n\n- [Datadog Cloud SIEM](https://docs.datadoghq.com/security/cloud_siem/)",
                             "background_color": "transparent",
                             "font_size": "14",
                             "text_align": "left",
@@ -481,7 +481,7 @@
                             "custom_links": [
                                 {
                                     "label": "View related security signals",
-                                    "link": "/security/signals?query=source%3Avault%20{{$user}}%20%40workflow.rule.name%3A{{@workflow.rule.name.value}}"
+                                    "link": "/security/signals?query=source%3Avault%20{{$user}}%20%40workflow.rule.name%3A%22{{@workflow.rule.name.value}}%22"
                                 }
                             ]
                         },
@@ -1095,7 +1095,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response ((@request.mount_type:kv (@request.operation:delete OR (@http.url_details.path:(*\\/destroy\\/* OR *\\/delete\\/*) @request.operation:(create OR update) @request.data.versions:*))) OR (@request.mount_type:transit @http.url_details.path:*\\/export\\/*)) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response ((@request.mount_type:kv (@request.operation:delete OR (@http.url_details.path:(*\\/destroy\\/* OR *\\/delete\\/*) @request.operation:(create OR update) @request.data.versions:*))) OR (@request.mount_type:transit @request.operation:read @http.url_details.path:*\\/export\\/*)) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1151,7 +1151,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:vault @type:response (((@auth.policies:root OR @http.url_details.path:sys\\/generate-root*)) OR (@http.url_details.path:(sys\\/policy\\/* OR sys\\/policies\\/* OR identity\\/group*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/audit* OR sys\\/auth\\/* OR sys\\/mounts\\/*) @request.operation:(create OR update OR delete))) $user $client_ip $mount_type $operation $path",
+                                        "query_string": "source:vault @type:response (((@auth.policies:root OR @http.url_details.path:sys\\/generate-root*)) OR (@http.url_details.path:(sys\\/policy\\/* OR sys\\/policies\\/* OR identity\\/group*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/audit\\/* OR sys\\/auth\\/* OR sys\\/mounts\\/*) @request.operation:(create OR update OR delete))) $user $client_ip $mount_type $operation $path",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1226,7 +1226,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response (((@auth.policies:root OR @http.url_details.path:sys\\/generate-root*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/policy\\/* OR sys\\/policies\\/* OR identity\\/group*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/audit* OR sys\\/auth\\/* OR sys\\/mounts\\/*) @request.operation:(create OR update OR delete))) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response (((@auth.policies:root OR @http.url_details.path:sys\\/generate-root*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/policy\\/* OR sys\\/policies\\/* OR identity\\/group*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/audit\\/* OR sys\\/auth\\/* OR sys\\/mounts\\/*) @request.operation:(create OR update OR delete))) -(@error:* OR @error.message:*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1297,7 +1297,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response (((@auth.policies:root OR @http.url_details.path:sys\\/generate-root*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/policy\\/* OR sys\\/policies\\/* OR identity\\/group*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/audit* OR sys\\/auth\\/* OR sys\\/mounts\\/*) @request.operation:(create OR update OR delete))) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response (((@auth.policies:root OR @http.url_details.path:sys\\/generate-root*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/policy\\/* OR sys\\/policies\\/* OR identity\\/group*) @request.operation:(create OR update OR delete)) OR (@http.url_details.path:(sys\\/audit\\/* OR sys\\/auth\\/* OR sys\\/mounts\\/*) @request.operation:(create OR update OR delete))) -(@error:* OR @error.message:*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1375,7 +1375,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @http.url_details.path:(auth\\/*\\/login* OR auth\\/*\\/oidc\\/callback*) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @http.url_details.path:(auth\\/*\\/login OR auth\\/*\\/login\\/* OR auth\\/*\\/oidc\\/callback) -@http.url_details.path:(auth\\/*\\/users\\/* OR auth\\/*\\/groups\\/* OR auth\\/*\\/role\\/* OR auth\\/*\\/roles\\/*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1423,7 +1423,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@error.message",
+                                                    "facet": "@error",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1432,7 +1432,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response (@error:* OR @error.message:*) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @error:* $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
@@ -1486,7 +1486,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:vault @type:response @http.url_details.path:(auth\\/*\\/login* OR auth\\/*\\/oidc\\/callback*) (@error:* OR @error.message:*) $user $client_ip $mount_type $operation $path"
+                                                "query": "source:vault @type:response @http.url_details.path:(auth\\/*\\/login OR auth\\/*\\/login\\/* OR auth\\/*\\/oidc\\/callback) -@http.url_details.path:(auth\\/*\\/users\\/* OR auth\\/*\\/groups\\/* OR auth\\/*\\/role\\/* OR auth\\/*\\/roles\\/*) (@error:* OR @error.message:*) $user $client_ip $mount_type $operation $path"
                                             },
                                             "storage": "hot"
                                         }
