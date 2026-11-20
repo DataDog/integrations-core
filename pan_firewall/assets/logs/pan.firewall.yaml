@@ -507,7 +507,7 @@ pipeline:
         - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end"
       grok:
         matchRules: |
-          serial %{data}(?<![\w.])serial=%{regex("[^,\\s\"]*"):serial}%{greedyData}
+          serial %{data}(?<=,[ \t]{0,3})serial=%{regex("[^,\\s\"]*"):serial}%{greedyData}
         supportRules: ''
     - type: grok-parser
       name: Copy `device_name` to a lowercase `device_hostname`
@@ -706,9 +706,9 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              misc_url_quoted %{data}misc="(?!")%{regex("[^\"]+"):ocsf.evidence.url.url_string}"(?=[,\s]|$)%{greedyData}
-              misc_url_double_quoted %{data}misc=""(?!"|[,\s]+[\w.]+=|$)%{regex("[^\"]+"):ocsf.evidence.url.url_string}""(?=[,\s]|$)%{greedyData}
-              misc_url %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.url.url_string}%{greedyData}
+              misc_url_quoted %{data}(?<=,[ \t]{0,3})misc="(?!")%{regex("[^\"]+"):ocsf.evidence.url.url_string}"(?=[,\s]|$)%{greedyData}
+              misc_url_double_quoted %{data}(?<=,[ \t]{0,3})misc=""(?!"|[,\s]+[\w.]+=|$)%{regex("[^\"]+"):ocsf.evidence.url.url_string}""(?=[,\s]|$)%{greedyData}
+              misc_url %{data}(?<=,[ \t]{0,3})misc=%{regex("[^,\"]+"):ocsf.evidence.url.url_string}%{greedyData}
     - type: pipeline
       name: misc field filename extraction
       enabled: true
@@ -727,9 +727,9 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |-
-              misc_file_quoted %{data}misc="(?!")%{regex("[^\"]+"):ocsf.evidence.file.name}"(?=[,\s]|$)%{greedyData}
-              misc_file_double_quoted %{data}misc=""(?!"|[,\s]+[\w.]+=|$)%{regex("[^\"]+"):ocsf.evidence.file.name}""(?=[,\s]|$)%{greedyData}
-              misc_file %{data}misc=%{regex("[^,\"]+"):ocsf.evidence.file.name}%{greedyData}
+              misc_file_quoted %{data}(?<=,[ \t]{0,3})misc="(?!")%{regex("[^\"]+"):ocsf.evidence.file.name}"(?=[,\s]|$)%{greedyData}
+              misc_file_double_quoted %{data}(?<=,[ \t]{0,3})misc=""(?!"|[,\s]+[\w.]+=|$)%{regex("[^\"]+"):ocsf.evidence.file.name}""(?=[,\s]|$)%{greedyData}
+              misc_file %{data}(?<=,[ \t]{0,3})misc=%{regex("[^,\"]+"):ocsf.evidence.file.name}%{greedyData}
         - type: string-builder-processor
           name: Add type_id
           enabled: true
