@@ -2,46 +2,52 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from typing import Any, Literal
+
 import requests
 
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
 from datadog_checks.openstack_controller.components.component import Component
 
+Microversion = tuple[int, int]
+MicroversionRange = tuple[Microversion, Microversion]
+MicroversionService = Literal['compute', 'baremetal', 'volume']
+
 # Highest microversion openstacksdk 4.18 requests for each resource (its `_max_microversion`). Instances configured with
 # `openstack_config_file_path` went through openstacksdk, which sent this value capped by the server's maximum, so
 # they keep doing so for each service whose `<service>_microversion` option is unset. Resources missing here,
 # such as compute limits, were requested without a microversion.
-OPENSTACKSDK_MICROVERSIONS = {
+OPENSTACKSDK_MICROVERSIONS: dict[MicroversionService, dict[str, Microversion]] = {
     'compute': {
-        'servers': '2.100',
-        'server_diagnostics': '2.48',
-        'hypervisors': '2.88',
-        'quota_sets': '2.56',
-        'services': '2.69',
-        'flavors': '2.61',
-        'aggregates': '2.81',
+        'servers': (2, 100),
+        'server_diagnostics': (2, 48),
+        'hypervisors': (2, 88),
+        'quota_sets': (2, 56),
+        'services': (2, 69),
+        'flavors': (2, 61),
+        'aggregates': (2, 81),
     },
     'baremetal': {
-        'nodes': '1.109',
-        'portgroups': '1.26',
-        'ports': '1.101',
-        'conductors': '1.49',
-        'volume_connectors': '1.32',
-        'volume_targets': '1.32',
-        'drivers': '1.86',
-        'allocations': '1.60',
+        'nodes': (1, 109),
+        'portgroups': (1, 26),
+        'ports': (1, 101),
+        'conductors': (1, 49),
+        'volume_connectors': (1, 32),
+        'volume_targets': (1, 32),
+        'drivers': (1, 86),
+        'allocations': (1, 60),
     },
     'volume': {
-        'volumes': '3.71',
-        'snapshots': '3.65',
-        'transfers': '3.55',
-        'clusters': '3.26',
+        'volumes': (3, 71),
+        'snapshots': (3, 65),
+        'transfers': (3, 55),
+        'clusters': (3, 26),
     },
 }
 
 
-def parse_microversion(version):
+def parse_microversion(version: Any) -> Microversion | None:
     try:
         major, minor = version.split('.')
         return int(major), int(minor)
@@ -49,11 +55,11 @@ def parse_microversion(version):
         return None
 
 
-def format_microversion(version):
-    return '{}.{}'.format(*version)
+def format_microversion(version: Microversion) -> str:
+    return f'{version[0]}.{version[1]}'
 
 
-def microversion_range(document):
+def microversion_range(document: Any) -> MicroversionRange | None:
     """(min, max) microversion from a service version document, or None when it has none or an unexpected shape."""
     if not isinstance(document, dict):
         return None
@@ -201,7 +207,7 @@ class ApiRest(Api):
             self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
             self.http.options['headers']['OpenStack-API-Version'] = self.config.cinder_microversion
 
-    def _microversion_headers(self, service, resource):
+    def _microversion_headers(self, service: MicroversionService, resource: str) -> dict[str, str] | None:
         """Headers requesting `resource` at the microversion openstacksdk would have used, or None."""
         configured = {
             'compute': self.config.nova_microversion,
@@ -215,24 +221,24 @@ class ApiRest(Api):
         if server_range is None:
             return None
         server_min, server_max = server_range
-        version = min(parse_microversion(sdk_max), server_max)
+        version = min(sdk_max, server_max)
         if version < server_min:
             return None
         version = format_microversion(version)
-        headers = {'OpenStack-API-Version': '{} {}'.format(service, version)}
+        headers = {'OpenStack-API-Version': f'{service} {version}'}
         if service == 'compute':
             headers['X-OpenStack-Nova-API-Version'] = version
         elif service == 'baremetal':
             headers['X-OpenStack-Ironic-API-Version'] = version
         return headers
 
-    def _server_microversion_range(self, service):
+    def _server_microversion_range(self, service: MicroversionService) -> MicroversionRange | None:
         """(min, max) microversion of the service, from its version document; None when it cannot be read."""
         if service not in self._server_microversions:
             self._server_microversions[service] = self._discover_microversion_range(service)
         return self._server_microversions[service]
 
-    def _discover_microversion_range(self, service):
+    def _discover_microversion_range(self, service: MicroversionService) -> MicroversionRange | None:
         endpoint_types = {
             'compute': Component.Types.COMPUTE.value,
             'baremetal': Component.Types.BAREMETAL.value,
