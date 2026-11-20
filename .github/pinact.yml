@@ -16,10 +16,10 @@ rules:
   - ignore: true
     conditions:
       - expr: ActionRepoFullName == "DataDog/commit-headless"
-  # Dispatcher callers reference this repository's `test-dispatch.yml` at
-  # `@master` on purpose: a caller on a release branch or tag must run master's
-  # Dispatcher, and its octo-sts policy only accepts `test-dispatch.yml` from
-  # `refs/heads/master`. A SHA pin would freeze it and fail the token exchange.
+  # Dispatcher callers reference `test-dispatch.yml@master` on purpose: a caller
+  # on a release branch or tag must run master's Dispatcher, and its octo-sts
+  # policy only accepts `test-dispatch.yml` from `refs/heads/master`. A SHA pin
+  # would freeze it and fail the token exchange. Only that exact call is exempt.
   - ignore: true
     conditions:
-      - expr: ActionRepoFullName == "DataDog/integrations-core"
+      - expr: ActionName == "DataDog/integrations-core/.github/workflows/test-dispatch.yml" && ActionVersion == "master"
