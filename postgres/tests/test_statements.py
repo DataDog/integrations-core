@@ -60,7 +60,14 @@ def test_activity_server_byte_length(integration_check, dbm_instance):
         admin.execute(f"CREATE DATABASE {dbname} TEMPLATE template0 ENCODING 'LATIN1' LC_COLLATE 'C' LC_CTYPE 'C'")
         check = None
         try:
-            dbm_instance.update(dbname=dbname, username=USER_ADMIN, password=PASSWORD_ADMIN, dbstrict=True, dbm=True)
+            dbm_instance.update(
+                dbname=dbname,
+                username=USER_ADMIN,
+                password=PASSWORD_ADMIN,
+                dbstrict=True,
+                dbm=True,
+                pg_stat_activity_view="pg_stat_activity",
+            )
             check = integration_check(dbm_instance)
             check.load_version()
             collector = check.statement_samples
