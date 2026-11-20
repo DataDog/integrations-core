@@ -25,6 +25,7 @@ from psycopg.pq.abc import PGcancel
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.config_models.instance import DatabaseAutodiscovery, RemoteQueries
+from datadog_checks.postgres.remote_queries import RemoteQueryError, parse_request
 
 from .common import PASSWORD_ADMIN, USER_ADMIN
 from .remote_query_helpers import StubIntake, StubProxy, call, request
@@ -437,7 +438,7 @@ def test_time01_run_deadline(rq_check: PostgreSql, intake: StubIntake, monkeypat
         release.set()
 
 
-@pytest.mark.parametrize("mode", ["run", "unschedule", "duplicate", "stalled_cancel"])
+@pytest.mark.parametrize("mode", ["unschedule", "duplicate", "stalled_cancel"])
 def test_cancel01_02_03_blocked_first_record(
     rq_check: PostgreSql,
     intake: StubIntake,
@@ -484,9 +485,7 @@ def test_cancel01_02_03_blocked_first_record(
                 release.set()
                 cancellation.result(5)
             else:
-                rq_check.cancel_remote_query(payload["resultDelivery"]["crawlId"])
-                assert time.monotonic() - start < 0.5
-                rq_check.cancel_remote_query("unknown")
+                rq_check.cancel()
             answers = [future.result(8) for future in futures]
             assert time.monotonic() - start < 6.5
             if mode == "stalled_cancel":
@@ -498,6 +497,38 @@ def test_cancel01_02_03_blocked_first_record(
     assert sum(r["path"] == "/abort" for r in intake.records) == count
     if mode == "unschedule":
         assert json.loads(rq_check.remote_query("not JSON"))["error"]["code"] == "cancelled"
+
+
+def test_abort01_unscheduled_after_validation(
+    rq_check: PostgreSql, intake: StubIntake, monkeypatch: pytest.MonkeyPatch
+):
+    # The check is unscheduled after the request was validated, so the run owns an upload session.
+    def unschedule_after_parse(raw: str) -> dict:
+        parsed = parse_request(raw)
+        rq_check._remote_query_unscheduled = True
+        return parsed
+
+    monkeypatch.setattr("datadog_checks.postgres.postgres.parse_request", unschedule_after_parse)
+    answer = call(rq_check, request(rq_check, intake.address))
+    assert answer["error"]["code"] == "cancelled"
+    assert [r["path"] for r in intake.records] == ["/abort"]
+
+
+def test_abort01_cancel_signalled_before_failure_does_not_interrupt_abort(
+    rq_check: PostgreSql, intake: StubIntake, monkeypatch: pytest.MonkeyPatch
+):
+    # A cancel signalled just before the run fails must not cancel the abort request.
+    payload = request(rq_check, intake.address)
+
+    def cancel_then_fail(check: PostgreSql, target: dict) -> str:
+        for run in list(check._remote_query_runs):
+            run.cancel()
+        raise RemoteQueryError("target_not_found", "No Postgres instance matches the target.")
+
+    monkeypatch.setattr("datadog_checks.postgres.remote_queries.match", cancel_then_fail)
+    answer = call(rq_check, payload)
+    assert answer["error"]["code"] == "cancelled"
+    assert [r["path"] for r in intake.records] == ["/abort"]
 
 
 @pytest.mark.parametrize("separate_checks", [False, True])

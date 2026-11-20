@@ -516,13 +516,16 @@ class PostgreSql(DatabaseCheck):
         try:
             parsed = parse_request(request)
             with self._remote_query_condition:
-                if self._remote_query_unscheduled:
-                    return failed("cancelled", "The check was unscheduled.")
                 if parsed["operation"] == "resolve":
+                    if self._remote_query_unscheduled:
+                        return failed("cancelled", "The check was unscheduled.")
                     match(self, parsed["target"])
                     return '{"status":"MATCHED"}'
                 run = Run(parsed, received)
                 self._remote_query_runs.add(run)
+                if self._remote_query_unscheduled:
+                    # The run fails as cancelled and aborts its upload session.
+                    run.cancel()
         except RemoteQueryError as error:
             return failed(error.code, error.message)
         except Exception:
@@ -548,13 +551,6 @@ class PostgreSql(DatabaseCheck):
             with self._remote_query_condition:
                 self._remote_query_runs.discard(run)
                 self._remote_query_condition.notify_all()
-
-    def cancel_remote_query(self, crawl_id: str) -> None:
-        """Signal every active call for this crawl ID without waiting for its abort."""
-        with self._remote_query_condition:
-            for run in self._remote_query_runs:
-                if run.delivery["crawlId"] == crawl_id:
-                    run.cancel()
 
     def cancel(self) -> None:
         with self._remote_query_condition:

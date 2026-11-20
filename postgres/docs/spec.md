@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The Postgres Agent integration runs Remote Queries for its loaded checks. When the Agent asks, a check says whether it serves the requested database. When the Agent hands it a query, the check runs the query in a read-only transaction on that database, and uploads the database's own COPY CSV output, split into pages, to `its-agent-intake`, which converts the pages into JSON result files. The check then finalizes the upload and answers the Agent with success or an error.
+The Postgres Agent integration runs Remote Queries for its loaded checks. When the Agent asks, a check says whether it serves the requested database. When the Agent hands it a query, the check runs the query in a read-only transaction on that database, and uploads the database's own COPY CSV output, split into pages, to `its-agent-intake`, which converts the pages into JSON result files. The check then finalizes the upload, or aborts it when the run fails, and answers the Agent with success or an error.
 
 The integration does not choose which Agent or check runs a query (the [Agent](https://dd-quick.us1.staging.dog/datadog-agent-spec/) and the `its-agent` worker do), validate SQL (ITS does), write result files or scan for sensitive data (intake does), or report run status to ITS (the worker does). Its only caller is the core Agent.
 
@@ -217,11 +217,13 @@ After the last page, the integration finalizes the session with the number of pa
 
 ### FINISH-02 — Report success only after finalizing
 
-The integration answers success only after intake has confirmed the finalize. The answer carries no upload ID, counts, or totals (Agent OUT-02).
+The integration answers success only after intake has confirmed the finalize. The answer carries no upload ID, counts, or totals (its-agent RESULT-01).
 
 ### ABORT-01 — Abort the upload of a failed run
 
 When a run that passed request validation fails, the integration aborts its upload session (intake ABORT-01), including after the run time limit. The abort is bounded by the abort time limit. An abort failure is logged and never changes the run's answer. The integration never aborts a session after its finalize succeeded.
+
+Why: The worker learns that a run failed only from its session (its-agent RESULT-01). A failed run whose session stayed open would keep the worker waiting until the job deadline.
 
 ## Time and cancellation
 
@@ -231,7 +233,7 @@ The run time limit starts when the integration receives the query request. It co
 
 ### CANCEL-01 — Stop a cancelled run
 
-When the Agent cancels a run (Agent RUN-04) or unschedules its check (Agent RUN-03), the integration:
+When the Agent unschedules a run's check (Agent RUN-03), the integration:
 
 - asks the database to cancel the run's statement, bounded by the cancel request time limit, which also stops a statement that has not yet returned its first record; and
 - stops reading and uploading.
@@ -344,7 +346,7 @@ Each item is checked at one layer. Performance and resource-use items are checke
 
 ## Open questions
 
-1. QUERY-01: should a check bound its concurrent runs, to protect the customer database? If so, what limit, and do extra runs wait or fail?
+1. QUERY-01: should a check bound its concurrent runs, to protect the customer database? If so, what limit, and do extra runs wait or fail? The Agent runner's task concurrency does not limit runs (Agent RUN-04).
 2. QUERY-06: is the SQLSTATE enough for users, or may messages of some error classes, such as syntax errors, be included?
 3. OBS-02: besides passing the trace context, should the integration emit its own spans for its phases, and to which trace intake?
 
@@ -381,5 +383,5 @@ The logical type of each column (DESC-02), by its column type:
 | `result_too_large` | The result exceeds the page count or total result size limit (SIZE-06) |
 | `upload_failed` | Intake rejected a request, or retries ran out (UPLOAD-04, UPLOAD-06) |
 | `timeout` | The run time limit or the statement timeout passed (QUERY-06, TIME-01) |
-| `cancelled` | The Agent cancelled the run or unscheduled the check (CANCEL-01, CANCEL-02) |
+| `cancelled` | The Agent unscheduled the check (CANCEL-01, CANCEL-02) |
 | `internal_error` | Any other failure (OBS-01) |
