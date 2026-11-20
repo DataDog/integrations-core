@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import gc
 import inspect
+import json
 import logging
 import subprocess
 import weakref
@@ -984,6 +985,42 @@ def test_has_literal_values(datadog_agent, raw_statement, expected):
         {'dbms': 'mysql', 'obfuscation_mode': 'obfuscate_and_normalize', 'replace_digits': True, 'keep_null': False}
     )
     with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate_sql_literals):
+        assert has_literal_values(raw_statement, options, logging.getLogger(__name__)) is expected
+
+
+@pytest.mark.parametrize(
+    'raw_statement, obfuscated_statement, expected',
+    [
+        pytest.param(
+            "SELECT /* EXTRACT(YEAR FROM created_at) */ * FROM users WHERE id = ?",
+            "SELECT /* EXTRACT(YEAR FROM created_at) */ * FROM users WHERE id = ?",
+            False,
+            id='extract_in_comment',
+        ),
+        pytest.param(
+            "SELECT EXTRACT( /* field */ YEAR FROM created_at) FROM users WHERE id = ?",
+            "SELECT EXTRACT( /* field */ ? FROM created_at) FROM users WHERE id = ?",
+            False,
+            id='comment_before_extract_field',
+        ),
+        pytest.param("EXECUTE stmt USING @'id'", "EXECUTE stmt USING @?", False, id='quoted_user_variable'),
+        pytest.param(
+            "SELECT * FROM users WHERE email = 'EXTRACT(YEAR FROM x)'",
+            "SELECT * FROM users WHERE email = ?",
+            True,
+            id='literal_looking_like_extract',
+        ),
+        pytest.param("SET @'id' = 5", "SET @? = ?", True, id='quoted_user_variable_and_literal'),
+    ],
+)
+def test_has_literal_values_go_sqllexer_output(datadog_agent, raw_statement, obfuscated_statement, expected):
+    """
+    Tokens that the obfuscator replaces although they carry no values are told apart from literals, using the
+    output of the agent obfuscator (go-sqllexer v0.2.6) in `obfuscate_only` mode with the detection options.
+    """
+    options = get_obfuscate_only_options({'dbms': 'mysql'})
+    obfuscated = json.dumps({'query': obfuscated_statement, 'metadata': {}})
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', return_value=obfuscated):
         assert has_literal_values(raw_statement, options, logging.getLogger(__name__)) is expected
 
 
