@@ -12,6 +12,7 @@ import json
 import re
 from unittest import mock
 
+import psycopg
 import pytest
 from psycopg.adapt import Transformer
 from semver import VersionInfo
@@ -27,6 +28,7 @@ from datadog_checks.postgres.statements_v2 import (
     DEFAULT_PGSS_MAX,
     LIGHTWEIGHT_DESIRED_COLUMNS,
     QUERY_TEXT_FETCH,
+    QUERY_TEXT_FETCH_MAX_BACKOFF,
     PostgresStatementMetricsV2,
     classify_query_text,
 )
@@ -154,6 +156,91 @@ class TestPostgresStatementMetricsV2:
             v2._fetch_query_texts(keys)
         literals = tuple(Transformer().as_literal(param).decode() for param in execute.call_args.kwargs['params'])
         return re.sub(r"'\{[^}]*\}'", '?', QUERY_TEXT_FETCH % literals)
+
+    # --- text fetch backoff ---
+
+    TIMEOUT = psycopg.errors.QueryCanceled('canceling statement due to statement timeout')
+
+    @staticmethod
+    def _run_collections(v2: PostgresStatementMetricsV2, outcomes, collections: int) -> tuple[list[int], list[int]]:
+        """Resolve one never-cached key per collection, for *collections* collections.
+
+        *outcomes* yields what each text fetch that reaches Postgres does: an exception to raise or the
+        rows to return. Returns the collections in which a fetch reached Postgres, and those in which
+        a check warning was raised.
+        """
+        current = [0]
+        executed, warned = [], []
+
+        def execute(*_args, **_kwargs):
+            executed.append(current[0])
+            outcome = next(outcomes)
+            if isinstance(outcome, Exception):
+                raise outcome
+            return outcome, None
+
+        with mock.patch.object(v2, '_execute_query', side_effect=execute):
+            for current[0] in range(collections):
+                warnings_before = v2._check.warning.call_count
+                key = {(current[0], 1, 1)}
+                v2._resolve_obfuscations(key, key)
+                if v2._check.warning.call_count > warnings_before:
+                    warned.append(current[0])
+        return executed, warned
+
+    def test_text_fetch_failures_double_the_wait_up_to_the_cap(self):
+        """A fetch that keeps failing is retried with a doubling wait, never more than an hour apart.
+
+        Without this the fetch, which loads the whole pg_stat_statements text file however few keys it
+        asks for, is repeated every collection for as long as it fails (SDBM-3143).
+        """
+        v2 = self._make()
+        cap = int(QUERY_TEXT_FETCH_MAX_BACKOFF // v2._metrics_collection_interval)
+        always_fails = iter(lambda: self.TIMEOUT, None)
+        executed, _ = self._run_collections(v2, always_fails, collections=4 * cap)
+
+        gaps = [later - earlier for earlier, later in zip(executed, executed[1:])]
+        doubling = [2**n for n in range(len(gaps)) if 2**n < cap]
+        capped = [cap] * (len(gaps) - len(doubling))
+        assert capped
+        assert gaps == doubling + capped
+
+    def test_text_fetch_success_resets_the_backoff(self):
+        """After a fetch succeeds, the next failure waits one collection again rather than the last wait."""
+        v2 = self._make()
+        success = [{'queryid': 1, 'dbid': 1, 'userid': 1, 'query': 'SELECT 1'}]
+        outcomes = iter([self.TIMEOUT, self.TIMEOUT, self.TIMEOUT, success, self.TIMEOUT, success])
+        executed, _ = self._run_collections(v2, outcomes, collections=10)
+
+        # Failures in collections 0, 1 and 3 and a success in 7; the failure in 8 is retried in 9.
+        assert executed == [0, 1, 3, 7, 8, 9]
+
+    def test_text_fetch_with_only_null_texts_counts_as_a_failure(self):
+        """pg_stat_statements returns NULL for every text instead of raising when it cannot load its text
+        file, so that outcome must back off like an error does.
+        """
+        v2 = self._make()
+        null_texts = [{'queryid': 1, 'dbid': 1, 'userid': 1, 'query': None}]
+        executed, _ = self._run_collections(v2, iter([null_texts, null_texts]), collections=3)
+
+        # The second NULL result doubles the wait, so collection 2 skips the fetch.
+        assert executed == [0, 1]
+
+    def test_text_fetch_failure_warns_in_agent_status_while_repeated(self):
+        """Repeated failures raise a check warning on every collection until a fetch succeeds.
+
+        Check warnings only show in the Agent status page for the run that raised them, so the warning
+        must outlast the failure that started it; a single failure is common and harmless and stays a
+        log line.
+        """
+        v2 = self._make()
+        success = [{'queryid': 1, 'dbid': 1, 'userid': 1, 'query': 'SELECT 1'}]
+        outcomes = iter([self.TIMEOUT, self.TIMEOUT, success, success])
+        executed, warned = self._run_collections(v2, outcomes, collections=5)
+
+        # Failures in 0 and 1, then a two-collection wait before the successes in 3 and 4.
+        assert executed == [0, 1, 3, 4]
+        assert warned == [1, 2]
 
     # --- execute query cancel event ---
 
