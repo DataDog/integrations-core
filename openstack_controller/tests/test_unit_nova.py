@@ -30,6 +30,10 @@ pytestmark = [
             configs.REST,
             id='api rest',
         ),
+        pytest.param(
+            configs.SDK,
+            id='clouds.yaml',
+        ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
@@ -843,6 +847,11 @@ def test_services_exception(aggregator, check, dd_run_check, mock_http_get):
             id='api rest microversion 2.93',
         ),
         pytest.param(
+            configs.SDK,
+            metrics.COMPUTE_SERVICES_NOVA_MICROVERSION_2_93,
+            id='clouds.yaml no microversion',
+        ),
+        pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
             metrics.COMPUTE_SERVICES_NOVA_MICROVERSION_2_93,
             id='clouds.yaml microversion 2.93',
@@ -896,6 +905,10 @@ def test_flavors_exception(aggregator, check, dd_run_check, mock_http_get):
         pytest.param(
             configs.REST_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
@@ -1288,6 +1301,11 @@ def test_disable_all_hypervisors_uptime_metrics(aggregator, dd_run_check, instan
             id='api rest microversion 2.93',
         ),
         pytest.param(
+            configs.SDK,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93,
+            id='clouds.yaml no microversion',
+        ),
+        pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
             metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93,
             id='clouds.yaml microversion 2.93',
@@ -1508,6 +1526,11 @@ def test_quota_sets_exception(aggregator, check, dd_run_check, mock_http_get):
             id='api rest microversion 2.93',
         ),
         pytest.param(
+            configs.SDK,
+            metrics.COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_56,
+            id='clouds.yaml no microversion',
+        ),
+        pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
             metrics.COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_93,
             id='clouds.yaml microversion 2.93',
@@ -1538,6 +1561,11 @@ def test_quota_sets_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT,
             metrics.COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK_EXCLUDING_DEMO_PROJECT,
+            metrics.COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_56,
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT,
@@ -1666,6 +1694,11 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get):
             configs.REST_NOVA_MICROVERSION_2_93,
             metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
@@ -1842,6 +1875,11 @@ def test_pagination_invalid_no_exception(aggregator, openstack_controller_check,
             id='api rest microversion 2.93',
         ),
         pytest.param(
+            configs.SDK_EXCLUDING_DEMO_PROJECT,
+            metrics.COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93,
+            id='clouds.yaml no microversion',
+        ),
+        pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEMO_PROJECT,
             metrics.COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93,
             id='clouds.yaml microversion 2.93',
@@ -1873,6 +1911,11 @@ def test_servers_metrics_excluding_demo_project(aggregator, check, dd_run_check,
             configs.REST_NOVA_MICROVERSION_2_93_EXCLUDING_DEV_SERVERS,
             metrics.COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93,
             id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK_EXCLUDING_DEV_SERVERS,
+            metrics.COMPUTE_SERVERS_EXCLUDING_DEV_SERVERS_NOVA_MICROVERSION_2_93,
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93_EXCLUDING_DEV_SERVERS,

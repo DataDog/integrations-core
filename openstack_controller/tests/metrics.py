@@ -5139,3 +5139,17 @@ CONTAINERS_METRICS_SWIFT = [
         ],
     },
 ]
+
+# Microversion 2.56 (what `clouds.yaml` instances request for quota sets) still returns the `injected_file*` quotas,
+# which 2.57 removed.
+COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_56 = COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_93 + [
+    metric for metric in COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_DEFAULT if '.injected_file' in metric['name']
+]
+COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_56 = (
+    COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93
+    + [
+        metric
+        for metric in COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT
+        if '.injected_file' in metric['name']
+    ]
+)

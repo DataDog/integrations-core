@@ -699,6 +699,11 @@ def test_nodes_exception(aggregator, check, dd_run_check, mock_http_get):
             id='api rest microversion 1.80',
         ),
         pytest.param(
+            configs.SDK,
+            NODES_METRICS_IRONIC_MICROVERSION_1_80,
+            id='clouds.yaml no microversion',
+        ),
+        pytest.param(
             configs.SDK_IRONIC_MICROVERSION_1_80,
             NODES_METRICS_IRONIC_MICROVERSION_1_80,
             id='clouds.yaml microversion 1.80',
@@ -1042,7 +1047,7 @@ def test_conductors_exception(aggregator, check, dd_run_check, mock_http_get):
         ),
         pytest.param(
             configs.SDK,
-            CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
             id='clouds.yaml no microversion',
         ),
         pytest.param(
