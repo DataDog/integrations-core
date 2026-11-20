@@ -25,42 +25,6 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
     from ddev.repo.core import Repository
 
-PLACEHOLDER_VERSION = '0.0.2'
-INSTALL_DOCS_URL = 'https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install'
-PYPI_JSON_URL = 'https://pypi.org/pypi/{name}/json'
-PYPI_MINT_TOKEN_URL = 'https://pypi.org/_/oidc/github/mint-token'
-PYPI_UPLOAD_URL = 'https://upload.pypi.org/legacy/'
-TOKEN_ENV_VAR = 'DDEV_PYPI_TOKEN'
-
-# PyPI deletes empty placeholder packages under its name-retention policy, so the placeholders carry a
-# README and an import-time pointer instead of being empty wheels. The version must stay above 0.0.1:
-# PyPI rejects re-uploading an already-published 0.0.1 wheel.
-README_TEMPLATE = (
-    'Datadog reserves this name to protect users from typosquatting and dependency confusion. '
-    'It is not a Datadog integration.\n'
-    '\n'
-    'Datadog integrations are installed and managed with the Datadog Agent, not with pip:\n'
-    f'{INSTALL_DOCS_URL}'
-)
-
-MODULE_TEMPLATE = (
-    f'print("This package only reserves its name on PyPI. It is not a Datadog integration. Datadog '
-    f'integrations are installed with the Datadog Agent: {INSTALL_DOCS_URL}")\n'
-)
-
-PYPROJECT_TEMPLATE = '''[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project]
-name = "{name}"
-version = "{version}"
-readme = "README.md"
-
-[tool.hatch.build.targets.wheel]
-only-include = ["{module}"]
-'''
-
 # Names claimed on PyPI for integrations that were later removed from this repository. They are kept
 # published as placeholders so the names cannot be re-registered by anyone else.
 RETIRED_PLACEHOLDER_NAMES = (
@@ -70,15 +34,6 @@ RETIRED_PLACEHOLDER_NAMES = (
     'datadog-tokumx',
 )
 
-# Real packages maintained in this repository. They are published through their own release process
-# and must never be overwritten with a placeholder.
-EXCLUDED_PACKAGE_NAMES = (
-    'ddev',
-    'datadog-checks-base',
-    'datadog-checks-dev',
-    'datadog-checks-downloader',
-)
-
 
 def placeholder_package_names(repo: Repository) -> dict[str, str]:
     """Map each integration name to the PyPI package name it claims as a placeholder.
@@ -86,13 +41,16 @@ def placeholder_package_names(repo: Repository) -> dict[str, str]:
     Real packages shipped from this repository are excluded: only `datadog-*` integration names
     are claimed.
     """
+    # Real packages maintained in this repository. They are published through their own release
+    # process and must never be overwritten with a placeholder.
+    excluded = ('ddev', 'datadog-checks-base', 'datadog-checks-dev', 'datadog-checks-downloader')
     names: dict[str, str] = {}
     for integration in repo.integrations.iter_packages(['all']):
         path = integration.path / 'pyproject.toml'
         if not path.is_file():
             continue
         package_name = tomllib.loads(path.read_text())['project']['name']
-        if package_name not in EXCLUDED_PACKAGE_NAMES:
+        if package_name not in excluded:
             names[integration.name] = package_name
     return names
 
@@ -116,7 +74,7 @@ def resolve_placeholder_name(requested: str, package_names: dict[str, str]) -> s
 
 def needs_placeholder(name: str) -> bool:
     """Return whether `name` is missing on PyPI or still at the empty 0.0.1 placeholder."""
-    response = httpx.get(PYPI_JSON_URL.format(name=name), timeout=30)
+    response = httpx.get(f'https://pypi.org/pypi/{name}/json', timeout=30)
     if response.status_code == 404:
         return True
     response.raise_for_status()
@@ -128,17 +86,12 @@ def get_api_token() -> str | None:
 
     The token is deliberately never a command-line flag so it cannot leak through shell history.
     """
-    token = os.environ.get(TOKEN_ENV_VAR)
+    token = os.environ.get('DDEV_PYPI_TOKEN')
     if token:
         return token
     if sys.stdin.isatty() and sys.stdout.isatty():
         return getpass.getpass('PyPI API token: ')
     return None
-
-
-def oidc_publishing_available() -> bool:
-    """Return whether this process runs in GitHub Actions with an OIDC token to exchange."""
-    return 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ and 'ACTIONS_ID_TOKEN_REQUEST_TOKEN' in os.environ
 
 
 def mint_oidc_token() -> str:
@@ -157,7 +110,9 @@ def mint_oidc_token() -> str:
         timeout=30,
     )
     response.raise_for_status()
-    response = httpx.post(PYPI_MINT_TOKEN_URL, json={'token': response.json()['value']}, timeout=30)
+    response = httpx.post(
+        'https://pypi.org/_/oidc/github/mint-token', json={'token': response.json()['value']}, timeout=30
+    )
     if response.status_code != 200:
         raise RuntimeError(f'PyPI refused to mint an upload token for this workflow: {response.text}')
     return response.json()['token']
@@ -167,12 +122,37 @@ def build_placeholder(name: str, workdir: Path) -> Path:
     """Build the placeholder wheel for `name` in `workdir` and return its path."""
     module = name.replace('-', '_')
     project_dir = workdir / name
-    (project_dir / module).mkdir(parents=True)
-    (project_dir / 'README.md').write_text(README_TEMPLATE)
-    (project_dir / module / '__init__.py').write_text(MODULE_TEMPLATE)
-    (project_dir / 'pyproject.toml').write_text(
-        PYPROJECT_TEMPLATE.format(name=name, module=module, version=PLACEHOLDER_VERSION)
+    docs_url = 'https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install'
+    # PyPI deletes empty placeholder packages under its name-retention policy, so the placeholders
+    # carry a README and an import-time pointer instead of being empty wheels.
+    readme = (
+        'Datadog reserves this name to protect users from typosquatting and dependency confusion. '
+        'It is not a Datadog integration.\n'
+        '\n'
+        'Datadog integrations are installed and managed with the Datadog Agent, not with pip:\n'
+        f'{docs_url}'
     )
+    module_source = (
+        f'print("This package only reserves its name on PyPI. It is not a Datadog integration. Datadog '
+        f'integrations are installed with the Datadog Agent: {docs_url}")\n'
+    )
+    # The version must stay above 0.0.1: PyPI rejects re-uploading an already-published 0.0.1 wheel.
+    pyproject = f'''[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "{name}"
+version = "0.0.2"
+readme = "README.md"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["{module}"]
+'''
+    (project_dir / module).mkdir(parents=True)
+    (project_dir / 'README.md').write_text(readme)
+    (project_dir / module / '__init__.py').write_text(module_source)
+    (project_dir / 'pyproject.toml').write_text(pyproject)
     try:
         subprocess.run(
             [sys.executable, '-m', 'hatchling', 'build', '-t', 'wheel', '-d', 'dist'],
@@ -194,7 +174,7 @@ def upload_placeholder(wheel: Path, token: str) -> None:
     """
     upload(
         Settings(
-            repository_url=PYPI_UPLOAD_URL,
+            repository_url='https://upload.pypi.org/legacy/',
             username='__token__',
             password=token,
             skip_existing=True,

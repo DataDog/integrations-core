@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 import click
@@ -32,7 +33,6 @@ def placeholders(app: Application, names: tuple[str, ...], dry_run: bool) -> Non
         PlaceholderOrchestrator,
         get_api_token,
         needs_placeholder,
-        oidc_publishing_available,
         placeholder_package_names,
         resolve_placeholder_name,
     )
@@ -63,7 +63,8 @@ def placeholders(app: Application, names: tuple[str, ...], dry_run: bool) -> Non
         return
 
     token = get_api_token()
-    if token is None and not oidc_publishing_available():
+    oidc_publishing = 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ and 'ACTIONS_ID_TOKEN_REQUEST_TOKEN' in os.environ
+    if token is None and not oidc_publishing:
         app.abort(
             'No PyPI API token available: set DDEV_PYPI_TOKEN, enter one at the prompt, '
             'or run in GitHub Actions with trusted publishing.'

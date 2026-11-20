@@ -10,13 +10,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from ddev.release.placeholders import (
-    PYPI_UPLOAD_URL,
-    TOKEN_ENV_VAR,
     build_placeholder,
     get_api_token,
     mint_oidc_token,
     needs_placeholder,
-    oidc_publishing_available,
     placeholder_package_names,
     resolve_placeholder_name,
     upload_placeholder,
@@ -100,13 +97,13 @@ class TestNeedsPlaceholder:
 
 class TestGetApiToken:
     def test_reads_environment(self, mocker, monkeypatch):
-        monkeypatch.setenv(TOKEN_ENV_VAR, 'pypi-xxx')
+        monkeypatch.setenv('DDEV_PYPI_TOKEN', 'pypi-xxx')
         mocker.patch('ddev.release.placeholders.getpass.getpass')
 
         assert get_api_token() == 'pypi-xxx'
 
     def test_prompts_in_a_terminal(self, mocker, monkeypatch):
-        monkeypatch.delenv(TOKEN_ENV_VAR, raising=False)
+        monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
         mocker.patch('ddev.release.placeholders.sys.stdin.isatty', return_value=True)
         mocker.patch('ddev.release.placeholders.sys.stdout.isatty', return_value=True)
         mocker.patch('ddev.release.placeholders.getpass.getpass', return_value='pypi-yyy')
@@ -114,23 +111,14 @@ class TestGetApiToken:
         assert get_api_token() == 'pypi-yyy'
 
     def test_returns_none_without_terminal_or_environment(self, mocker, monkeypatch):
-        monkeypatch.delenv(TOKEN_ENV_VAR, raising=False)
+        monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
         mocker.patch('ddev.release.placeholders.sys.stdin.isatty', return_value=False)
         mocker.patch('ddev.release.placeholders.getpass.getpass')
 
         assert get_api_token() is None
 
 
-class TestOidcPublishing:
-    def test_available_only_with_github_actions_oidc(self, monkeypatch):
-        monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_URL', raising=False)
-        monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', raising=False)
-        assert not oidc_publishing_available()
-
-        monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_URL', 'https://github/token')
-        monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'secret')
-        assert oidc_publishing_available()
-
+class TestMintOidcToken:
     def test_mints_token_per_exchange(self, mocker, monkeypatch):
         monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_URL', 'https://github/token?api-version=1')
         monkeypatch.setenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'secret')
@@ -191,7 +179,7 @@ class TestUploadPlaceholder:
 
         settings, dists = uploaded.call_args.args
         assert Path(dists[0]) == Path('dist/x.whl')
-        assert settings.repository_config['repository'] == PYPI_UPLOAD_URL
+        assert settings.repository_config['repository'] == 'https://upload.pypi.org/legacy/'
         assert settings.username == '__token__'
         assert settings.password == 'pypi-xxx'
         assert settings.skip_existing is True
@@ -220,3 +208,15 @@ class TestPlaceholdersCommand:
 
         assert result.exit_code == 1
         assert 'Unknown integration or package name: not-an-integration' in result.output
+
+    def test_aborts_without_a_token_or_trusted_publishing(self, ddev, mocker, monkeypatch):
+        mocker.patch('ddev.release.placeholders.needs_placeholder', return_value=True)
+        mocker.patch('ddev.release.placeholders.getpass.getpass')
+        monkeypatch.delenv('DDEV_PYPI_TOKEN', raising=False)
+        monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_URL', raising=False)
+        monkeypatch.delenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', raising=False)
+
+        result = ddev('release', 'placeholders', 'n8n')
+
+        assert result.exit_code == 1
+        assert 'No PyPI API token available' in result.output
