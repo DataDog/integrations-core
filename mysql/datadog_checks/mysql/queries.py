@@ -108,6 +108,15 @@ SELECT {hint} table_name as `name`,
        WHERE TABLE_SCHEMA = %s AND TABLE_TYPE='BASE TABLE'
 """
 
+SQL_VIEWS = """\
+SELECT {hint} table_name as `name`,
+       view_definition as `definition`
+       FROM information_schema.VIEWS
+       WHERE TABLE_SCHEMA = %s
+       ORDER BY table_name
+       LIMIT %s
+"""
+
 SQL_COLUMNS = """\
 SELECT {hint} table_name as `table_name`,
        column_name as `name`,
