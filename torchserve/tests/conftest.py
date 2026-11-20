@@ -129,10 +129,10 @@ FIXTURE_RESPONSES = {
 
 
 @pytest.fixture
-def mock_http_responses(fake_http_response):
+def mock_http_responses(fake_http, fake_http_response):
     """Serve every fixture endpoint, optionally replacing the payload of the model list."""
 
-    def register(all_models_file='management/models.json'):
+    def register(all_models_file: str = 'management/models.json'):
         for url, fixture in {**FIXTURE_RESPONSES, 'http://torchserve:8081/models': all_models_file}.items():
             with open(os.path.join(HERE, 'fixtures', fixture)) as f:
                 content = f.read()
@@ -141,7 +141,11 @@ def mock_http_responses(fake_http_response):
             else:
                 fake_http_response(url, content)
 
-    return register
+    yield register
+
+    # The checks catch `Exception` around each request, so the fake's error for an unregistered URL is swallowed.
+    unregistered = sorted({request.url for request in fake_http.requests} - FIXTURE_RESPONSES.keys())
+    assert not unregistered, f'Requests sent to URLs without a fixture: {unregistered}'
 
 
 @contextmanager
