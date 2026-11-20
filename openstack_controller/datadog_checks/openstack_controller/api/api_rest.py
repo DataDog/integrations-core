@@ -53,6 +53,24 @@ def format_microversion(version):
     return '{}.{}'.format(*version)
 
 
+def microversion_range(document):
+    """(min, max) microversion from a service version document, or None when it has none or an unexpected shape."""
+    if not isinstance(document, dict):
+        return None
+    # Nova answers with `version`, Ironic with `default_version`, Cinder with a `versions` list.
+    version = document.get('version') or document.get('default_version')
+    if not isinstance(version, dict):
+        versions = document.get('versions')
+        if not isinstance(versions, list):
+            return None
+        versions = [v for v in versions if isinstance(v, dict)]
+        version = next((v for v in versions if v.get('status') == 'CURRENT'), versions[0] if versions else {})
+    server_min, server_max = parse_microversion(version.get('min_version')), parse_microversion(version.get('version'))
+    if server_min is None or server_max is None:
+        return None
+    return server_min, server_max
+
+
 class ApiRest(Api):
     def __init__(self, config, logger, http):
         super(ApiRest, self).__init__()
@@ -229,22 +247,16 @@ class ApiRest(Api):
             response.raise_for_status()
             document = response.json()
         except (requests.exceptions.RequestException, ValueError) as e:
-            self.log.debug(
+            # Without a microversion the server answers at its minimum, which changes the emitted tags and metrics.
+            self.log.warning(
                 "Cannot read the %s version document at `%s`, sending no microversion: %s", service, endpoint, e
             )
             return None
-        # Nova answers with `version`, Ironic with `default_version`, Cinder with a `versions` list.
-        version = document.get('version') or document.get('default_version')
-        if not isinstance(version, dict):
-            versions = document.get('versions') or [{}]
-            version = next((v for v in versions if v.get('status') == 'CURRENT'), versions[0])
-        server_min, server_max = (
-            parse_microversion(version.get('min_version')),
-            parse_microversion(version.get('version')),
-        )
-        if server_min is None or server_max is None:
+        server_range = microversion_range(document)
+        if server_range is None:
             self.log.debug("No microversion range in the %s version document at `%s`: %s", service, endpoint, document)
             return None
+        server_min, server_max = server_range
         self.log.debug(
             "%s supports microversions %s to %s", service, *map(format_microversion, (server_min, server_max))
         )

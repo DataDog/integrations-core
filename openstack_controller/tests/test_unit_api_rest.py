@@ -136,6 +136,34 @@ def headers_sent(http, url):
             None,
             id='version discovery fails',
         ),
+        pytest.param(
+            lambda api: api.get_compute_servers('project'),
+            COMPUTE_ROOT + '/servers/detail',
+            {COMPUTE_ROOT: nova_root('', '')},
+            None,
+            id='service without microversions',
+        ),
+        pytest.param(
+            lambda api: api.get_block_storage_volumes('project'),
+            VOLUME_ROOT + 'project/volumes/detail',
+            {
+                VOLUME_ROOT: {
+                    'versions': [
+                        {'id': 'v2.0', 'status': 'DEPRECATED', 'min_version': '', 'version': ''},
+                        {'id': 'v3.0', 'status': 'CURRENT', 'min_version': '3.0', 'version': '3.70'},
+                    ]
+                }
+            },
+            {'OpenStack-API-Version': 'volume 3.70'},
+            id='cinder current version among several',
+        ),
+        pytest.param(
+            lambda api: api.get_compute_servers('project'),
+            COMPUTE_ROOT + '/servers/detail',
+            {COMPUTE_ROOT: [{'id': 'v2.1'}]},
+            None,
+            id='unexpected version document',
+        ),
     ],
 )
 def test_clouds_yaml_instance_sends_openstacksdk_microversion(request_resource, url, roots, expected):
