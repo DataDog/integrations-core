@@ -367,7 +367,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         """Read statement text for *keys*, backing off while reads keep failing.
 
         Postgres loads the entire query text file to answer this, so its cost tracks the total text
-        size on the server rather than ``len(keys)``. Keys left unanswered stay misses and come back
+        size on the server rather than `len(keys)`. Keys left unanswered stay misses and come back
         next collection, so without a backoff a fetch that fails because of that size is repeated,
         at full cost, every collection.
         """

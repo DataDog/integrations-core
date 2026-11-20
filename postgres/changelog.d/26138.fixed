@@ -1,1 +1,1 @@
-Back off query text fetches from ``pg_stat_statements`` while they keep failing, instead of repeating a full read of the stored query text every collection.
+Back off query text fetches from `pg_stat_statements` while they keep failing, instead of repeating a full read of the stored query text every collection.
