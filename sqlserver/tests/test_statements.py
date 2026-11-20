@@ -501,7 +501,8 @@ def test_statement_metrics_and_plans(
         raw_plan_events = [s for s in matching_samples if s['dbm_type'] == "rqp"]
         # raw plan events should be one to one with the plan events
         assert len(raw_plan_events) == 1, "should have collected exactly one raw plan event"
-        for event in plan_events:
+        plan_event = plan_events[0]
+        for event in raw_plan_events:
             if is_encrypted:
                 assert not event['db']['plan']['definition']
                 assert event['sqlserver']['is_plan_encrypted']
@@ -513,6 +514,12 @@ def test_statement_metrics_and_plans(
             else:
                 assert event['db']['plan']['definition'], "event plan definition missing"
                 assert event['db']['plan']['raw_signature'], "event plan raw signature missing"
+                assert event['db']['plan']['raw_signature'] == plan_event['db']['plan']['raw_signature'], (
+                    "raw plan event and plan event should share the raw signature"
+                )
+                assert event['db']['plan']['raw_signature'] != event['sqlserver']['query_plan_hash'], (
+                    "raw signature should hash the raw plan, not identify the plan shape"
+                )
                 parsed_plan = ET.fromstring(event['db']['plan']['definition'])
                 assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
                 assert not event['sqlserver']['is_plan_encrypted']
@@ -589,7 +596,8 @@ def test_statement_metrics_limit(
         ),
         (
             {'tables_csv': '', 'commands': None, 'comments': []},
-            {'tables': None, 'commands': None, 'comments': []},
+            # The batch text contains the Agent comment, so recovery adds it when the obfuscator omits it.
+            {'tables': None, 'commands': None, 'comments': ["/* service='datadog-agent' */"]},
         ),
     ],
 )
@@ -897,6 +905,8 @@ def _mock_sql_obfuscate(sql_string, options=None):
     [
         ("test1_raw.xml", "test1_obfuscated.xml"),
         ("test2_raw.xml", "test2_obfuscated.xml"),
+        # actual plan: ParameterRuntimeValue holds the parameter value of the captured execution
+        ("test3_raw.xml", "test3_obfuscated.xml"),
     ],
 )
 def test_obfuscate_xml_plan(test_file, obfuscated_file, datadog_agent):
@@ -1273,6 +1283,37 @@ def test_normalize_queries_recovers_leading_comment_for_non_proc_statement(insta
 
 
 @pytest.mark.unit
+def test_normalize_queries_recovers_agent_service_comment(instance_docker, datadog_agent):
+    instance_docker['dbm'] = True
+    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    comment = "/* service='datadog-agent' */"
+    statement_text = "SELECT * FROM orders WHERE customer_id = @P1"
+    row = {
+        'statement_text': statement_text,
+        'text': f"(@P1 int){comment} {statement_text}",
+        'procedure_name': None,
+        'schema_name': None,
+        'sproc_object_id': None,
+        'query_hash': b'\x01\x02\x03\x04',
+        'query_plan_hash': b'\x05\x06\x07\x08',
+        'plan_handle': b'\x09\x0a\x0b\x0c',
+    }
+
+    def _obfuscate_sql(sql_query, options=None):
+        comments = [comment] if comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        result = check.statement_metrics._normalize_queries([row])
+
+    assert result[0]['dd_comments'] == [comment]
+    assert mock_agent.call_count == 1
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'text,statement_text,expected_comments',
     [
@@ -1493,6 +1534,44 @@ def test_plan_lookup_failure_allows_later_rows_and_retry(aggregator, dbm_instanc
         value=1,
         tags=check.debug_tags() + ["error:load-plan-<class 'RuntimeError'>"],
     )
+
+
+@pytest.mark.unit
+def test_collect_plans_raw_signature_hashes_raw_plan(dbm_instance):
+    """Plans of the same shape get distinct raw signatures, shared by each plan event and its raw copy."""
+    dbm_instance['collect_raw_query_statement'] = {'enabled': True}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    first_row = _plan_row('first')
+    second_row = _plan_row('second')
+    encrypted_row = _plan_row('encrypted')
+    for row in (first_row, second_row, encrypted_row):
+        row['query_plan_hash'] = 'shared-plan-hash'
+    plans = [
+        ('<ShowPlanXML><QueryPlan CompileTime="1"/></ShowPlanXML>', False),
+        ('<ShowPlanXML><QueryPlan CompileTime="2"/></ShowPlanXML>', False),
+        (None, True),
+    ]
+
+    with mock.patch.object(check.statement_metrics, '_load_plan', side_effect=plans):
+        events = list(
+            check.statement_metrics._collect_plans([first_row, second_row, encrypted_row], mock.Mock(), float('inf'))
+        )
+
+    raw_signatures = {
+        (event['db']['query_signature'], event['dbm_type']): event['db']['plan'].get('raw_signature')
+        for event in events
+    }
+    assert len(raw_signatures) == 6
+    first_signature = raw_signatures[('first', 'plan')]
+    second_signature = raw_signatures[('second', 'plan')]
+    assert first_signature and second_signature
+    assert raw_signatures[('first', 'rqp')] == first_signature
+    assert raw_signatures[('second', 'rqp')] == second_signature
+    assert first_signature != second_signature
+    assert 'shared-plan-hash' not in (first_signature, second_signature)
+    # no raw plan to look up, so no raw signature
+    assert raw_signatures[('encrypted', 'plan')] is None
+    assert raw_signatures[('encrypted', 'rqp')] is None
 
 
 @pytest.mark.unit

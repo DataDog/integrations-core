@@ -52,6 +52,15 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class QueryActivity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, ge=1.0)
+    enabled: Optional[bool] = None
+
+
 class QueryMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -82,6 +91,7 @@ class InstanceConfig(BaseModel):
     only_custom_queries: Optional[bool] = None
     password: str
     port: Optional[int] = None
+    query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     security: Optional[Literal['none', 'ssl']] = None
     service: Optional[str] = None

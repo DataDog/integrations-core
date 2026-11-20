@@ -20,6 +20,7 @@ def artifact(idx: int, expired: bool = False, **extra: Any) -> dict[str, Any]:
 def workflow_run_payload(
     id: int = 42,
     name: str = "CI",
+    display_title: str = "CI run",
     status: str | None = "completed",
     conclusion: str | None = "success",
     html_url: str = "https://github.com/owner/repo/actions/runs/42",
@@ -33,6 +34,7 @@ def workflow_run_payload(
         "status": status,
         "conclusion": conclusion,
         "html_url": html_url,
+        "display_title": display_title,
         "created_at": created_at,
         "updated_at": updated_at,
         **extra,
