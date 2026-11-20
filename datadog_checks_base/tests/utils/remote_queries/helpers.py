@@ -100,6 +100,7 @@ class Uploads:
         self.finalize_calls = 0
         self.finalize_expected_counts = []
         self.abort_calls = 0
+        self.abort_reasons = []
 
     def register_descriptor(self, creds, body):
         self.descriptor_bodies.append(body)
@@ -119,8 +120,9 @@ class Uploads:
         self.finalize_calls += 1
         self.finalize_expected_counts.append(expected_page_count)
 
-    def abort(self, creds):
+    def abort(self, creds, code=None, message=None):
         self.abort_calls += 1
+        self.abort_reasons.append((code, message))
 
 
 def bounded_delivery(delivery, **limits):

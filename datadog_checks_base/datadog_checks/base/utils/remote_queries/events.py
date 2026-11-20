@@ -174,11 +174,17 @@ def validate_request(request: Any) -> RemoteQueryRequest:
         raise RemoteQueryFailure('invalid_request', validation_message(error)) from None
 
 
+def sanitized_failure(error: Exception) -> RemoteQueryFailure:
+    """The failure safe to report outside the Agent: the error itself, or a fixed `query_failed`."""
+    if isinstance(error, RemoteQueryFailure):
+        return error
+    # Driver/transport exceptions can contain credentials, SQL or result values.
+    LOGGER.error('Remote query execution failed')
+    return RemoteQueryFailure('query_failed', 'Remote query execution failed.')
+
+
 def query_failure_event(error: Exception, started_at: float, stats: RemoteQueryRunStats | None) -> RemoteQueryEvent:
-    if not isinstance(error, RemoteQueryFailure):
-        # Driver/transport exceptions can contain credentials, SQL or result values.
-        LOGGER.error('Remote query execution failed')
-        error = RemoteQueryFailure('query_failed', 'Remote query execution failed.')
+    error = sanitized_failure(error)
     return failed_event(
         error.code,
         error.message,

@@ -529,9 +529,17 @@ class PostgresRemoteQueryHandler:
                         'target_unavailable', 'Matched Postgres check connection pool is unavailable.'
                     ) from None
             except BaseException as error:
+                # The abort reports the same code and message the failure answers the Agent
+                # with; a terminated stream has no answer, so its abort carries no reason.
+                failure = rq_events.sanitized_failure(error) if isinstance(error, Exception) else None
                 if client is not None:
                     with tracing.abort_span():
-                        rq_upload.safe_abort(client, creds)
+                        rq_upload.safe_abort(
+                            client,
+                            creds,
+                            failure.code if failure is not None else None,
+                            failure.message if failure is not None else None,
+                        )
                 # The root span's counters mirror the stats the failure event carries; the
                 # failure classification rides the same closed event error-code vocabulary, and
                 # an admission failure before the run's stats exist carries all-zero counters.
@@ -545,7 +553,7 @@ class PostgresRemoteQueryHandler:
                 tracing.fail(
                     error.code if isinstance(error, rq_contract.RemoteQueryFailure) else 'query_failed', terminal_stats
                 )
-                yield rq_events.query_failure_event(error, started_at, stats)
+                yield rq_events.query_failure_event(failure, started_at, stats)
                 return
             tracing.succeed(stats)
             yield rq_contract.RemoteQueryEvent('final', rq_events.succeeded_metadata())
