@@ -123,8 +123,7 @@ def test_schema_collection_table_budget(
             'max_tables': 1,
         },
     )
-    assert {'name': 'EMPTY_SCHEMA', 'owner': 'DB2INST1', 'tables': []} in schemas
-    assert {'name': 'FILTERED_SCHEMA', 'owner': 'DB2INST1', 'tables': []} in schemas
+    assert {schema['name'] for schema in schemas if not schema['tables']} == {'EMPTY_SCHEMA', 'FILTERED_SCHEMA'}
     assert [(schema['name'], table['name']) for schema in schemas for table in schema['tables']] == [
         ('TEST_SCHEMA', expected_table)
     ]
