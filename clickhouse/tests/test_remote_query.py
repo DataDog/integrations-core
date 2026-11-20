@@ -183,6 +183,8 @@ def test_stream_aborts_upload_session_on_admission_failure(monkeypatch, case):
 
     assert_failed_event(events, code)
     assert fake.abort_calls == 1
+    # The abort reports the same code and message the failure answered the Agent with.
+    assert fake.abort_reasons == [(code, event_metadata(events[-1])['error']['message'])]
 
 
 def test_stream_credentials_unavailable_without_agent_api_key(monkeypatch):
@@ -757,6 +759,8 @@ def test_process_termination_aborts_upload_and_closes_stream(monkeypatch):
     with pytest.raises(SystemExit):
         collect_events(valid_request(), make_check(), upload_client=uploads, clickhouse_client=client)
     assert uploads.abort_calls == 1
+    # A terminated stream has no failure answer to repeat, so its abort carries no reason.
+    assert uploads.abort_reasons == [(None, None)]
     assert client.closed
     assert client.stream.closed
 
@@ -777,6 +781,8 @@ def test_stream_maps_server_error_to_query_failed(monkeypatch, caplog):
     assert 'SECRET_DO_NOT_LOG' not in str(events)
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
     assert fake.abort_calls == 1
+    # The reason is the fixed answer, never the exception's text.
+    assert fake.abort_reasons == [('query_failed', 'Remote query execution failed.')]
 
 
 def test_stream_maps_mid_stream_connection_drop_to_retryable_timeout(monkeypatch, caplog):

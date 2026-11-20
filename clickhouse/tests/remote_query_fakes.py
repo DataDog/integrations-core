@@ -143,6 +143,7 @@ class FakeUploadClient:
         self.run_finalize_calls = 0
         self.finalize_expected_page_counts = []
         self.abort_calls = 0
+        self.abort_reasons = []
         self.put_log = put_log
 
     def register_descriptor(self, creds, body):
@@ -166,8 +167,9 @@ class FakeUploadClient:
         self.run_finalize_calls += 1
         self.finalize_expected_page_counts.append(expected_page_count)
 
-    def abort(self, creds):
+    def abort(self, creds, code=None, message=None):
         self.abort_calls += 1
+        self.abort_reasons.append((code, message))
 
 
 def make_check(

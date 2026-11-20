@@ -662,6 +662,47 @@ def test_retry_exhausted_upload_failure_reports_only_safe_diagnostics(monkeypatc
     assert 'SECRET_DO_NOT_LOG' not in caplog.text
 
 
+def test_abort_body_carries_the_failure_reason_only_when_there_is_a_code(monkeypatch, creds):
+    import requests
+
+    bodies = []
+
+    def request(method, url, headers, data, timeout):
+        bodies.append(data)
+        return SimpleNamespace(status_code=204, content=b'')
+
+    monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
+    client = rq_upload.RequestsUploadClient()
+
+    client.abort(creds, 'query_failed', 'Remote query execution failed.')
+    client.abort(creds, 'timeout')
+    client.abort(creds, None, 'a message without a code')
+    client.abort(creds)
+
+    assert [json.loads(body) for body in bodies] == [
+        {'error': {'code': 'query_failed', 'message': 'Remote query execution failed.'}},
+        {'error': {'code': 'timeout'}},
+        {},
+        {},
+    ]
+
+
+def test_safe_abort_forwards_the_failure_reason_only_when_there_is_a_code(creds):
+    class RecordingClient:
+        def __init__(self):
+            self.calls = []
+
+        def abort(self, creds, *reason):
+            self.calls.append(reason)
+
+    client = RecordingClient()
+
+    rq_upload.safe_abort(client, creds, 'upload_failed', 'its-agent-intake page upload answered HTTP 400.')
+    rq_upload.safe_abort(client, creds)
+
+    assert client.calls == [('upload_failed', 'its-agent-intake page upload answered HTTP 400.'), ()]
+
+
 def test_abort_failures_log_fixed_text_only(monkeypatch, creds, caplog):
     """Both best-effort abort paths log fixed diagnostic text: the caught exception can
     quote the URL, the request body, or credentials embedded in its message."""

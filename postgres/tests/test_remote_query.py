@@ -241,6 +241,8 @@ def test_stream_aborts_upload_session_on_admission_failure(monkeypatch, case):
 
     assert_failed_event(events, code)
     assert fake.abort_calls == 1
+    # The abort reports the same code and message the failure answered the Agent with.
+    assert fake.abort_reasons == [(code, event_metadata(events[-1])['error']['message'])]
 
 
 def test_entry_dispatches_resolve_target_by_operation(runtime_check):
@@ -486,6 +488,7 @@ def test_instance_timeout_larger_than_delivery_cannot_lengthen_the_wall(monkeypa
     assert executed[:2] == ['BEGIN READ ONLY', 'SET LOCAL statement_timeout = 1000']
     assert executed[-1] == 'ROLLBACK'
     assert fake.abort_calls == 1
+    assert fake.abort_reasons == [('timeout', event_metadata(events[-1])['error']['message'])]
 
 
 def test_statement_timeout_is_the_smaller_of_instance_override_and_remaining_wall(monkeypatch):
@@ -837,6 +840,8 @@ def test_process_termination_aborts_upload_and_rolls_back(monkeypatch):
     with pytest.raises(SystemExit):
         collect_events(valid_request(), make_check(pool=pool), client=uploads)
     assert uploads.abort_calls == 1
+    # A terminated stream has no failure answer to repeat, so its abort carries no reason.
+    assert uploads.abort_reasons == [(None, None)]
     assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
 
 
@@ -882,6 +887,8 @@ def test_stream_maps_unexpected_execution_failure_to_fixed_query_failed(monkeypa
     assert_failed_event(events, 'query_failed', 'Remote query execution failed')
     assert event_metadata(events[-1])['error']['retryable'] is False
     assert fake.abort_calls == 1
+    # The reason is the fixed answer, never the exception's text.
+    assert fake.abort_reasons == [('query_failed', 'Remote query execution failed.')]
     assert pool.cursors[0].executed[-1][0] == 'ROLLBACK'
     assert 'SECRET_DO_NOT_LOG' not in str(events)
     assert 'SECRET_DO_NOT_LOG' not in caplog.text

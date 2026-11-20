@@ -158,7 +158,7 @@ class UploadClient(Protocol):
 
     def finalize_run(self, creds: UploadCredentials, expected_page_count: int) -> None: ...
 
-    def abort(self, creds: UploadCredentials) -> None: ...
+    def abort(self, creds: UploadCredentials, code: str | None = None, message: str | None = None) -> None: ...
 
 
 class UploadAttemptExpired(Exception):
@@ -385,7 +385,8 @@ class RequestsUploadClient:
         )
         verify_no_content_response(status, 'run finalize')
 
-    def abort(self, creds: UploadCredentials) -> None:
+    def abort(self, creds: UploadCredentials, code: str | None = None, message: str | None = None) -> None:
+        """Abort the session, optionally reporting why; intake validates and bounds the reason."""
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/abort'.format(creds.base_url.rstrip('/'), creds.upload_id)
         try:
@@ -393,10 +394,29 @@ class RequestsUploadClient:
             # exactly when it runs), so it carries no deadline. Its requests carry the
             # abort span's context when the run's producer tracing is active.
             upload_with_retry(
-                'POST', url, headers, b'{}', self._timeout, tracing=self._tracing, write_timeout=self._write_timeout
+                'POST',
+                url,
+                headers,
+                abort_body(code, message),
+                self._timeout,
+                tracing=self._tracing,
+                write_timeout=self._write_timeout,
             )
         except RemoteQueryFailure:
             LOGGER.debug('Remote query upload abort failed (best-effort)')
+
+
+def abort_body(code: str | None, message: str | None) -> bytes:
+    """The abort request body: the failure reason when there is a code, else an empty object.
+
+    The code and message are sent as given; intake owns their validation and size bounds.
+    """
+    if not code:
+        return b'{}'
+    error = {'code': code}
+    if message:
+        error['message'] = message
+    return canonical_json_bytes({'error': error})
 
 
 def compress_page(data: bytes) -> bytes | None:
@@ -656,12 +676,21 @@ def resolve_upload_credentials(
     )
 
 
-def safe_abort(client: UploadClient, creds: UploadCredentials) -> None:
-    """Abort the upload session best-effort; an Agent without an API key cannot authenticate the abort."""
+def safe_abort(
+    client: UploadClient, creds: UploadCredentials, code: str | None = None, message: str | None = None
+) -> None:
+    """Abort the upload session best-effort; an Agent without an API key cannot authenticate the abort.
+
+    `code` and `message` report why the run failed, and must be as safe as the failure answer
+    they repeat: no query text, values, credentials, or driver exception text.
+    """
     if not creds.base_url or not creds.upload_id or not creds.api_key:
         return
     try:
-        client.abort(creds)
+        if code:
+            client.abort(creds, code, message)
+        else:
+            client.abort(creds)
     except Exception:
         # Fixed text only: the caught exception can quote the URL, the request body, or
         # credentials embedded in a transport error string.

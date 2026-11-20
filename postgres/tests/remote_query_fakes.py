@@ -32,6 +32,7 @@ class FakeUploadClient:
         self.run_finalize_calls = 0
         self.finalize_expected_page_counts = []
         self.abort_calls = 0
+        self.abort_reasons = []
         self.reject_first_page_too_large = reject_first_page_too_large
         self.put_log = put_log
 
@@ -61,8 +62,9 @@ class FakeUploadClient:
         self.run_finalize_calls += 1
         self.finalize_expected_page_counts.append(expected_page_count)
 
-    def abort(self, creds):
+    def abort(self, creds, code=None, message=None):
         self.abort_calls += 1
+        self.abort_reasons.append((code, message))
 
     def pages(self):
         """Each completed page's exact uploaded source bytes, keyed by batch index."""
