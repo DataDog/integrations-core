@@ -152,6 +152,10 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
     samples: list[Sample] = []
     for entry, slot, name in _entries(root, 'power'):
         tags = (f'sensor:{name}', f'slot:{slot}')
+        # PAN's alarm does not depend on a voltage reading: a sensor in alarm without one is still reported.
+        alarm = _alarm(entry)
+        if alarm is not None:
+            samples.append(Sample('power.alarm', int(alarm), tags, 'gauge'))
         volts = num(entry, 'Volts')
         if volts is None:
             continue
@@ -162,10 +166,8 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
             samples.append(Sample('power.voltage.min', low, tags, 'gauge'))
         if high is not None:
             samples.append(Sample('power.voltage.max', high, tags, 'gauge'))
-        alarm = _alarm(entry)
         if alarm is None:
             continue
-        samples.append(Sample('power.alarm', int(alarm), tags, 'gauge'))
         if not alarm:
             direction = (0, 0)
         elif high is not None and volts >= high:

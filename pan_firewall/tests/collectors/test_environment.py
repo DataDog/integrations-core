@@ -22,6 +22,7 @@ POWER = [
     ('Power Supply 4', 1, 13.9, 10.8, 13.2, 0, 0, 0),
     ('Power Supply 5', 1, 12.0, None, None, 1, None, None),
     ('Power Supply 6', 2, 10.2, 10.8, 13.2, 1, 0, 1),
+    ('Power Supply 7', 2, None, None, None, 1, None, None),
 ]
 # (sensor, current, alarm), all in slot 1 with min 0 and max 80.
 THERMAL = [
