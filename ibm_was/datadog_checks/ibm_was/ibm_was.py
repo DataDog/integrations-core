@@ -1,17 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import requests
 from lxml import etree
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
-from datadog_checks.base.utils.http_exceptions import HTTPClientError
 from datadog_checks.base.utils.native_memory import malloc_trim
 
 from . import metrics, validation
 
 
 class IbmWasCheck(AgentCheck):
-    AGNOSTIC_HTTP_CLIENT = True
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
     METRIC_PREFIX = 'ibm_was'
 
@@ -130,8 +129,8 @@ class IbmWasCheck(AgentCheck):
         try:
             resp = self.http.get(self.url)
             resp.raise_for_status()
-        except HTTPClientError as e:
-            # Broad by design: timeouts, redirect loops and error statuses must all report CRITICAL.
+        except requests.RequestException as e:
+            # Broad by design: ReadTimeout descends from Timeout, not ConnectionError.
             self.warning("Request to %s failed: %s", self.url, e)
             self.submit_service_checks(AgentCheck.CRITICAL)
             raise e

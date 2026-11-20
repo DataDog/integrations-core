@@ -10,21 +10,17 @@ from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlparse
 
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import pattern_filter
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientInvalidURLError,
-    HTTPClientStatusError,
-    HTTPClientTimeoutError,
-)
+from datadog_checks.base.utils.http import RequestsWrapper
 
 from .config_models import ConfigMixin
 from .metrics import METRICS_SPEC
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
-    from datadog_checks.base.utils.http_protocol import HTTPClient
 
 
 class PrefectCheck(AgentCheck, ConfigMixin):
@@ -33,8 +29,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
     """
 
     __NAMESPACE__ = 'prefect.server'
-
-    AGNOSTIC_HTTP_CLIENT = True
 
     LAST_CHECK_TIME_CACHE_KEY = f'{__NAMESPACE__}.last_check_time'
 
@@ -61,7 +55,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         if self.config.prefect_userpass is not None:
             username, _, password = self.config.prefect_userpass.partition(':')
             http_config = dict(self.instance, username=username, password=password)
-            self._http = self.create_http_client(http_config)
+            self._http = RequestsWrapper(http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         self.client = PrefectClient(url, self.http, self.log)
 
@@ -748,14 +742,8 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 class PrefectClient:
     """HTTP client wrapping GET/POST requests and pagination for the Prefect API."""
 
-    def __init__(self, url: str, http: HTTPClient, log: CheckLoggingAdapter):
-        self.http_exceptions = (
-            HTTPClientStatusError,
-            HTTPClientInvalidURLError,
-            HTTPClientConnectionError,
-            HTTPClientTimeoutError,
-            JSONDecodeError,
-        )
+    def __init__(self, url: str, http: RequestsWrapper, log: CheckLoggingAdapter):
+        self.http_exceptions = (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError)
         self.url = url
         parsed_url = urlparse(url)
         self.base_url_scheme = parsed_url.scheme
@@ -785,7 +773,7 @@ class PrefectClient:
     def check_pagination_url(self, next_page: str):
         parsed_next_page = urlparse(next_page)
         if parsed_next_page.scheme != self.base_url_scheme or parsed_next_page.netloc != self.base_url_netloc:
-            raise HTTPClientInvalidURLError(f'Invalid next_page URL with unexpected host: {next_page}')
+            raise InvalidURL(f'Invalid next_page URL with unexpected host: {next_page}')
 
     def paginate_filter(self, endpoint: str, payload: dict | None = None) -> list[dict]:
         """Implements pagination for /filter endpoints using limit/offset loop."""

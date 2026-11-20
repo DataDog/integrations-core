@@ -9,13 +9,13 @@ Collects metrics from mesos master node, only the leader is sending metrics.
 
 from urllib.parse import urlparse
 
+import requests
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.http_exceptions import HTTPClientTimeoutError
 
 
 class MesosMaster(AgentCheck):
-    AGNOSTIC_HTTP_CLIENT = True
     GAUGE = AgentCheck.gauge
     MONOTONIC_COUNT = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = "mesos_master.can_connect"
@@ -183,7 +183,7 @@ class MesosMaster(AgentCheck):
             else:
                 status = AgentCheck.OK
                 msg = "Mesos master instance detected at {} ".format(url)
-        except HTTPClientTimeoutError:
+        except requests.exceptions.Timeout:
             # If there's a timeout
             msg = "{} seconds timeout when hitting {}".format(self.http.options['timeout'], url)
             status = AgentCheck.CRITICAL
@@ -213,8 +213,7 @@ class MesosMaster(AgentCheck):
     def _master_state_found_307(self, resp1, resp2):
         history = []
         if resp1 is not None:
-            # `history` is only guaranteed to be a sequence, so copy it before extending.
-            history = list(resp1.history)
+            history = resp1.history
         if resp2 is not None:
             history += resp2.history
 

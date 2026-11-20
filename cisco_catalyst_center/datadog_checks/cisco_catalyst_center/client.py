@@ -21,8 +21,7 @@ import random
 import time
 from typing import Any, Callable, TypeGuard
 
-from datadog_checks.base.utils.http_exceptions import HTTPClientError
-from datadog_checks.base.utils.http_protocol import HTTPClient
+import requests
 
 from .constants import (
     AUTH_ENDPOINT,
@@ -51,7 +50,7 @@ class CatalystCenterClient:
     def __init__(
         self,
         instance: dict[str, Any],
-        http: HTTPClient,
+        http: Any,
         log: logging.Logger | None = None,
     ) -> None:
         self.base_url = self._normalize_host(instance['catalyst_center_host'])
@@ -152,11 +151,11 @@ class CatalystCenterClient:
         """Issue one request, reporting a transport failure as a `CatalystApiError`.
 
         Collectors skip a failed device family group, device or site only on a `CatalystApiError`.
-        A raw HTTP client exception would bypass that and fail the whole collector.
+        A raw `requests` exception would bypass that and fail the whole collector.
         """
         try:
             return send()
-        except HTTPClientError as exc:
+        except requests.RequestException as exc:
             raise CatalystApiError(f'Catalyst Center request to {path} failed: {exc}') from exc
 
     @staticmethod

@@ -7,13 +7,13 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from datadog_checks.base.errors import ConfigurationError
-from datadog_checks.base.utils.http_exceptions import HTTPClientError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from requests import Response
+
     from datadog_checks.base import AgentCheck
-    from datadog_checks.base.utils.http_protocol import HTTPResponse
 
 
 class ControlMClient:
@@ -86,8 +86,7 @@ class ControlMClient:
 
         try:
             response = self._http.post(url, json=payload)
-        # OSError also covers failures outside the HTTP layer, such as an unreadable `auth_token` file.
-        except (HTTPClientError, OSError):
+        except OSError:
             self._log.error("Could not reach Control-M API at %s", url)
             raise
 
@@ -117,7 +116,7 @@ class ControlMClient:
         self._log.info("Refreshing Control-M API token")
         self.login()
 
-    def request(self, method: str, url: str, **kwargs: Any) -> HTTPResponse:
+    def request(self, method: str, url: str, **kwargs: Any) -> Response:
         # Route the request through static token or session login, with 401 fallback.
         request_fn = getattr(self._http, method)
 
@@ -142,7 +141,7 @@ class ControlMClient:
         self._static_token_retry_after = time.monotonic() + self._static_token_retry_interval
         return self._session_request(request_fn, url, **kwargs)
 
-    def _session_request(self, request_fn: Callable[..., HTTPResponse], url: str, **kwargs: Any) -> HTTPResponse:
+    def _session_request(self, request_fn: Callable[..., Response], url: str, **kwargs: Any) -> Response:
         # Used in session login mode only. Make a request to the API using the session token.
         self.ensure_token()
         extra = {"Authorization": f"Bearer {self._token}"}

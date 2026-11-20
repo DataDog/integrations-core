@@ -6,13 +6,6 @@ from copy import deepcopy
 import mock
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientConnectTimeoutError,
-    HTTPClientReadTimeoutError,
-    HTTPClientSSLError,
-)
 from datadog_checks.marathon import Marathon
 
 from .common import INSTANCE_INTEGRATION
@@ -114,45 +107,20 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Marathon('marathon', init_config, instances=[instance])
 
-    for option, value in expected_http_kwargs.items():
-        assert check.http.options[option] == value
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.return_value = mock.MagicMock(status_code=200)
 
+        check.check(instance)
 
-@pytest.mark.parametrize(
-    'outcome, error',
-    [
-        pytest.param(HTTPClientConnectionError('refused'), 'Connection refused when hitting', id='connection error'),
-        pytest.param(HTTPClientSSLError('bad certificate'), 'Connection refused when hitting', id='tls error'),
-        pytest.param(HTTPClientConnectTimeoutError('connect timed out'), 'Timeout when hitting', id='connect timeout'),
-        pytest.param(HTTPClientReadTimeoutError('read timed out'), 'Timeout when hitting', id='read timeout'),
-        pytest.param(FakeHTTPResponse(status_code=500), 'Got 500 when hitting', id='error status'),
-    ],
-)
-def test_get_json_failure_reports_critical(aggregator, fake_http, outcome, error):
-    instance = deepcopy(INSTANCE_INTEGRATION)
-    # A timeout pair keeps the timeout message formattable; the scalar default raises TypeError (AI-7492).
-    instance.update({'connect_timeout': 5, 'read_timeout': 5})
-    check = Marathon('marathon', {}, [instance])
-    url = instance['url'] + '/v2/apps'
-    fake_http.register_response('GET', url, outcome)
-
-    with pytest.raises(Exception, match=error):
-        check.get_json(url, None)
-
-    aggregator.assert_service_check('marathon.can_connect', Marathon.CRITICAL, tags=['url:{}'.format(url)], count=1)
-
-
-def test_get_json_authenticates_with_acs_token(fake_http, fake_http_response):
-    check = Marathon('marathon', {}, [INSTANCE_INTEGRATION])
-    acs_url = 'http://acs.example/'
-    url = INSTANCE_INTEGRATION['url'] + '/v2/apps'
-    fake_http_response(acs_url + 'acs/api/v1/auth/login', method='POST', json_data={'token': 'abc'})
-    fake_http_response(url, json_data={'apps': []})
-
-    assert check.get_json(url, acs_url) == {'apps': []}
-
-    assert check.http.get_header('authorization') == 'token=abc'
-    assert [(request.method, request.url, request.options.get('verify')) for request in fake_http.requests] == [
-        ('POST', acs_url + 'acs/api/v1/auth/login', False),
-        ('GET', url, None),
-    ]
+        http_wargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
+        http_wargs.update(expected_http_kwargs)
+        r.get.assert_called_with('http://localhost:8080/v2/queue', **http_wargs)

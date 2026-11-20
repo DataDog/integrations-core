@@ -5,13 +5,9 @@ from copy import copy
 from typing import Any  # noqa: F401
 from urllib.parse import urljoin
 
+import requests
+
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientConnectTimeoutError,
-    HTTPClientStatusError,
-    HTTPClientTimeoutError,
-)
 from datadog_checks.traefik_mesh.config_models import ConfigMixin
 from datadog_checks.traefik_mesh.metrics import METRIC_MAP, RENAME_LABELS
 
@@ -23,7 +19,6 @@ CONTROLLER_READINESS = '/api/status/readiness'
 class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'traefik_mesh'
-    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
@@ -117,11 +112,10 @@ class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             resp = self.http.get(url)
             resp.raise_for_status()
             return resp.json()
-        # A connect timeout means the address is unreachable, so it gets the connection warning.
-        except (HTTPClientStatusError, HTTPClientConnectionError, HTTPClientConnectTimeoutError) as e:
+        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
             )
-        except HTTPClientTimeoutError as e:
+        except requests.exceptions.Timeout as e:
             self.warning("Connection timeout when connecting to %s: %s", url, e)
         return None

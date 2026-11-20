@@ -6,10 +6,9 @@ from typing import Callable, NamedTuple
 from unittest.mock import Mock
 
 import pytest
+from requests.exceptions import InvalidURL
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
-from datadog_checks.base.utils.http_exceptions import HTTPClientInvalidURLError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.prefect import PrefectCheck
 from datadog_checks.prefect.check import PrefectClient
@@ -705,12 +704,24 @@ class EventCase(NamedTuple):
 pytestmark = [pytest.mark.usefixtures("mock_prefect_client"), pytest.mark.unit]
 
 
+class MockResponse:
+    def __init__(self, payload: dict):
+        self.payload = payload
+
+    def raise_for_status(self):
+        return None
+
+    def json(self) -> dict:
+        return self.payload
+
+
 def test_paginate_events_rejects_external_next_page():
-    http = FakeHTTPClient()
-    http.register_response(
-        'POST',
-        'http://prefect.local/api/events/filter',
-        FakeHTTPResponse(json_result={"events": [{"id": "event-1"}], "next_page": "http://attacker.example/evil"}),
+    http = Mock()
+    http.post.return_value = MockResponse(
+        {
+            "events": [{"id": "event-1"}],
+            "next_page": "http://attacker.example/evil",
+        }
     )
     log = Mock()
     client = PrefectClient("http://prefect.local/api", http, log)
@@ -718,27 +729,27 @@ def test_paginate_events_rejects_external_next_page():
     events = client.paginate_events("/events/filter", {})
 
     assert events == [{"id": "event-1"}]
-    assert [request.method for request in http.requests] == ['POST']
+    http.get.assert_not_called()
     log.error.assert_called_once()
     args = log.error.call_args[0]
     assert args[0] == "Could not collect next page of events: %s, data is incomplete"
-    assert isinstance(args[1], HTTPClientInvalidURLError)
+    assert isinstance(args[1], InvalidURL)
     assert str(args[1]) == "Invalid next_page URL with unexpected host: http://attacker.example/evil"
 
 
 def test_paginate_events_allows_same_host_absolute_next_page():
-    http = FakeHTTPClient()
-    http.register_response(
-        'POST',
-        'http://prefect.local/api/events/filter',
-        FakeHTTPResponse(
-            json_result={"events": [{"id": "event-1"}], "next_page": "http://prefect.local/api/events/filter?page=2"}
-        ),
+    http = Mock()
+    http.post.return_value = MockResponse(
+        {
+            "events": [{"id": "event-1"}],
+            "next_page": "http://prefect.local/api/events/filter?page=2",
+        }
     )
-    http.register_response(
-        'GET',
-        'http://prefect.local/api/events/filter?page=2',
-        FakeHTTPResponse(json_result={"events": [{"id": "event-2"}], "next_page": None}),
+    http.get.return_value = MockResponse(
+        {
+            "events": [{"id": "event-2"}],
+            "next_page": None,
+        }
     )
     log = Mock()
     client = PrefectClient("http://prefect.local/api", http, log)
@@ -746,7 +757,7 @@ def test_paginate_events_allows_same_host_absolute_next_page():
     events = client.paginate_events("/events/filter", {})
 
     assert events == [{"id": "event-1"}, {"id": "event-2"}]
-    http.assert_has_request(RecordedRequest('GET', 'http://prefect.local/api/events/filter?page=2'))
+    http.get.assert_called_once_with("http://prefect.local/api/events/filter?page=2")
 
 
 @pytest.fixture()

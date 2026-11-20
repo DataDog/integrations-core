@@ -5,7 +5,7 @@ from time import time
 from typing import Any
 
 from datadog_checks.base.log import CheckLoggingAdapter
-from datadog_checks.base.utils.http_protocol import HTTPClient
+from datadog_checks.base.utils.http import RequestsWrapper
 
 TOKEN_PATH = '/auth/realms/powerflex/protocol/openid-connect/token'
 
@@ -13,7 +13,7 @@ TOKEN_PATH = '/auth/realms/powerflex/protocol/openid-connect/token'
 class PowerFlexAPI:
     def __init__(
         self,
-        http: HTTPClient,
+        http: RequestsWrapper,
         gateway_url: str,
         logger: CheckLoggingAdapter,
         username: str | None = None,
@@ -57,7 +57,7 @@ class PowerFlexAPI:
             raise ValueError(f"Auth response missing access_token: {data}")
         expires_in = data.get('expires_in', 300)
         self._token_expiry = time() + expires_in
-        self._http.set_header('Authorization', f'Bearer {self._token}')
+        self._http.options['headers']['Authorization'] = f'Bearer {self._token}'
         self._log.debug('Refreshed PowerFlex auth token, expires in %ds', expires_in)
 
     def _get(self, path: str) -> Any:

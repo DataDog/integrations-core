@@ -1,16 +1,12 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from json import JSONDecodeError
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
+from simplejson import JSONDecodeError
+
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientInvalidURLError,
-    HTTPClientStatusError,
-    HTTPClientTimeoutError,
-)
 from datadog_checks.mapreduce.metrics import (
     HISTOGRAM,
     INCREMENT,
@@ -22,7 +18,6 @@ from datadog_checks.mapreduce.metrics import (
 
 
 class MapReduceCheck(AgentCheck):
-    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
     # Default Settings
@@ -416,11 +411,11 @@ class MapReduceCheck(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
 
-        except HTTPClientTimeoutError as e:
+        except Timeout as e:
             self._critical_service(service_name, service_check_tags, "Request timeout: {}, {}".format(url, e))
             raise
 
-        except (HTTPClientStatusError, HTTPClientInvalidURLError, HTTPClientConnectionError) as e:
+        except (HTTPError, InvalidURL, ConnectionError) as e:
             self._critical_service(service_name, service_check_tags, "Request failed: {}, {}".format(url, e))
             raise
 

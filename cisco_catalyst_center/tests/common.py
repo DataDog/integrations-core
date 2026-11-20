@@ -105,7 +105,7 @@ AUTH_PATH = '/dna/system/api/v1/auth/token'
 
 
 class _Response:
-    """Minimal stand-in for an `HTTPResponse`."""
+    """Minimal stand-in for a `requests.Response`."""
 
     def __init__(self, payload: Any, status_code: int = 200, headers: dict[str, str] | None = None) -> None:
         self._payload = payload

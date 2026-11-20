@@ -5,24 +5,34 @@
 import json
 from pathlib import Path
 from typing import Any
+from unittest.mock import Mock
 
-from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
+from pytest import MonkeyPatch
+from requests.exceptions import HTTPError
+
 from datadog_checks.control_m import ControlMCheck
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 BASE_TAGS = ["control_m_instance:https://example.com/automation-api"]
 
 
-def _respond(data: Any, status_code: int = 200) -> FakeHTTPResponse:
-    if 200 <= status_code < 300:
-        body = data if isinstance(data, str) else json.dumps(data)
-        return FakeHTTPResponse(status_code=status_code, content=body.encode(), json_result=data)
-    return FakeHTTPResponse(status_code=status_code, content=f"Error {status_code}".encode())
+def _respond(data: Any, status_code: int = 200) -> Mock:
+    resp = Mock()
+    resp.status_code = status_code
+    resp.ok = 200 <= status_code < 300
+    if resp.ok:
+        resp.json = Mock(return_value=data)
+        resp.text = json.dumps(data) if not isinstance(data, str) else data
+        resp.raise_for_status = Mock()
+    else:
+        resp.text = f"Error {status_code}"
+        resp.raise_for_status = Mock(side_effect=HTTPError(f"{status_code} Server Error", response=resp))
+    return resp
 
 
 def _mock_api(
     check: ControlMCheck,
-    fake_http: FakeHTTPClient,
+    monkeypatch: MonkeyPatch,
     *,
     servers: list[dict[str, Any]] | None = None,
     jobs: list[dict[str, Any]] | None = None,
@@ -32,23 +42,36 @@ def _mock_api(
     login_token: str = "test-session-token",
     login_status: int = 200,
     reject_first_server_call: bool = False,
-) -> None:
-    """Register the Control-M API responses; calling it again replaces them."""
-    endpoint = check.instance["control_m_api_endpoint"].rstrip("/")
-    servers_url = f"{endpoint}/config/servers"
+) -> dict[str, Any]:
+    state: dict[str, Any] = {
+        "servers": servers if servers is not None else [],
+        "jobs": jobs if jobs is not None else [],
+        "jobs_total": jobs_total,
+    }
+    server_call_count = 0
 
-    if reject_first_server_call:
-        fake_http.register_response("GET", servers_url, _respond(None, 401), once=True)
-    fake_http.register_response("GET", servers_url, _respond(servers if servers is not None else [], server_status))
+    def handle_get(_self: Any, url: str, **kw: Any) -> Mock:
+        nonlocal server_call_count
+        if "/config/servers" in url:
+            server_call_count += 1
+            if reject_first_server_call and server_call_count == 1:
+                return _respond(None, 401)
+            return _respond(state["servers"], server_status)
+        if "/run/jobs/status" in url:
+            payload: dict[str, Any] = {"statuses": state["jobs"]}
+            if state["jobs_total"] is not None:
+                payload["total"] = state["jobs_total"]
+            return _respond(payload, jobs_status)
+        return _respond(None, 404)
 
-    payload: dict[str, Any] = {"statuses": jobs if jobs is not None else []}
-    if jobs_total is not None:
-        payload["total"] = jobs_total
-    # The default `job_status_limit` and `job_name_filter`, URL-encoded into the query string.
-    jobs_url = f"{endpoint}/run/jobs/status?limit=10000&jobname=%2A"
-    fake_http.register_response("GET", jobs_url, _respond(payload, jobs_status))
+    def handle_post(_self: Any, url: str, **kw: Any) -> Mock:
+        if "/session/login" in url:
+            return _respond({"token": login_token}, login_status)
+        return _respond(None, 404)
 
-    fake_http.register_response("POST", f"{endpoint}/session/login", _respond({"token": login_token}, login_status))
+    monkeypatch.setattr(type(check.http), "get", handle_get)
+    monkeypatch.setattr(type(check.http), "post", handle_post)
+    return state
 
 
 def _load_job(fixture: str, **overrides: Any) -> dict[str, Any]:

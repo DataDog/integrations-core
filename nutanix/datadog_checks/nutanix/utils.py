@@ -8,7 +8,7 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any
 
-from datadog_checks.base.utils.http_protocol import HTTPResponse
+from requests import Response
 
 
 def get_nested(obj: dict, path: str, default: Any = None) -> Any:
@@ -21,11 +21,11 @@ def get_nested(obj: dict, path: str, default: Any = None) -> Any:
     return current
 
 
-def retry_on_rate_limit(method: Callable[..., HTTPResponse]) -> Callable[..., HTTPResponse]:
+def retry_on_rate_limit(method: Callable[..., Response]) -> Callable[..., Response]:
     """Retry on HTTP 429 with exponential backoff and jitter."""
 
     @wraps(method)
-    def wrapper(self, *args, **kwargs) -> HTTPResponse:
+    def wrapper(self, *args, **kwargs) -> Response:
         max_retries: int = max(1, self.config.pc_max_retries)
         base_backoff: int = self.config.pc_base_backoff_seconds
         max_backoff: int = self.config.pc_max_backoff_seconds

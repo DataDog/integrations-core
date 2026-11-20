@@ -3,14 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
 import pytest
+import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientConnectTimeoutError,
-    HTTPClientReadTimeoutError,
-)
 from datadog_checks.druid import DruidCheck
 
 pytestmark = pytest.mark.unit
@@ -23,12 +19,17 @@ def test_missing_url_config(aggregator):
         check.check({})
 
 
-def test_service_check_can_connect_success(aggregator, instance, fake_http_response):
+def test_service_check_can_connect_success(aggregator, instance):
     check = DruidCheck('druid', {}, [instance])
-    fake_http_response('http://hello-world.com:8899/status/properties', json_data={'abc': '123'})
 
-    resp = check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
-    assert resp == {'abc': '123'}
+    req = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
+        mock_resp = mock.MagicMock(status_code=200)
+        mock_resp.json.return_value = {'abc': '123'}
+        req.get.return_value = mock_resp
+
+        resp = check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
+        assert resp == {'abc': '123'}
 
     aggregator.assert_service_check(
         'druid.service.can_connect',
@@ -37,31 +38,18 @@ def test_service_check_can_connect_success(aggregator, instance, fake_http_respo
     )
 
 
-@pytest.mark.parametrize(
-    "error, expected_warning",
-    [
-        pytest.param(HTTPClientConnectionError('connection refused'), "Couldn't connect", id='connection error'),
-        # A connect timeout must keep the connection warning it got when requests reported it as a connection error.
-        pytest.param(HTTPClientConnectTimeoutError('connect timed out'), "Couldn't connect", id='connect timeout'),
-        pytest.param(HTTPClientReadTimeoutError('read timed out'), 'Connection timeout', id='read timeout'),
-        pytest.param(None, "Couldn't connect", id='error status'),
-    ],
-)
-def test_service_check_can_connect_failure(
-    aggregator, instance, fake_http, fake_http_response, error, expected_warning
-):
+@pytest.mark.parametrize("exception_class", [requests.exceptions.ConnectionError, requests.exceptions.Timeout])
+def test_service_check_can_connect_failure(aggregator, instance, exception_class):
     check = DruidCheck('druid', {}, [instance])
-    url = 'http://hello-world.com:8899/status/properties'
-    if error is None:
-        fake_http_response(url, status_code=500)
-    else:
-        fake_http.register_response('GET', url, error)
 
-    with pytest.raises(CheckException):
-        check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
+    req = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
+        attrs = {'raise_for_status.side_effect': exception_class}
+        req.get.side_effect = [mock.MagicMock(status_code=500, **attrs)]
 
-    assert len(check.warnings) == 1
-    assert check.warnings[0].startswith(expected_warning)
+        with pytest.raises(CheckException):
+            properties = check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
+            assert properties is None
 
     aggregator.assert_service_check(
         'druid.service.can_connect',

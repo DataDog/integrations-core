@@ -11,10 +11,11 @@ from multiprocessing.pool import ThreadPool
 from time import time as timestamp
 from urllib.parse import urljoin
 
+import requests
 from cachetools import TTLCache
+from requests import HTTPError
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError, HTTPClientTimeoutError
 from datadog_checks.base.utils.serialization import json
 
 from .common import (
@@ -45,7 +46,6 @@ NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_
 
 
 class ConsulCheck(OpenMetricsBaseCheck):
-    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
@@ -139,7 +139,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         }
 
         if 'acl_token' in self.instance:
-            self.http.set_header('X-Consul-Token', self.instance['acl_token'])
+            self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
 
         cache_size = self.instance.get(
             'health_checks_cache_size',
@@ -168,7 +168,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
             resp.raise_for_status()
 
-        except HTTPClientTimeoutError as e:
+        except requests.exceptions.Timeout as e:
             msg = 'Consul request to {} timed out'.format(url)
             self.log.exception(msg)
             self.service_check(
@@ -723,7 +723,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",
                 str(e),
             )
-        except HTTPClientStatusError as e:
+        except HTTPError as e:
             if e.response.status_code == 404:
                 self.log.warning(
                     "This Consul version (< 1.1.0) does not support the prometheus endpoint. "

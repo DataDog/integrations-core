@@ -1,1 +1,0 @@
-Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. A configured `authorization` header is now replaced by the session token instead of being sent alongside it.

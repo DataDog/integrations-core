@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from requests import HTTPError
+
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 
 from .api import HarborAPI
 from .common import HEALTHY
@@ -13,8 +14,6 @@ STATUS = 'harbor.status'
 
 
 class HarborCheck(AgentCheck):
-    AGNOSTIC_HTTP_CLIENT = True
-
     def _check_health(self, api, base_tags):
         """Submits service checks for Harbor individual components."""
         health = api.health()
@@ -30,7 +29,7 @@ class HarborCheck(AgentCheck):
         try:
             registries = api.registries()
             self.log.debug("Found %d registries", len(registries))
-        except HTTPClientStatusError as e:
+        except HTTPError as e:
             if e.response.status_code in (401, 403):
                 # Forbidden, user is not admin
                 self.log.info(
@@ -50,7 +49,7 @@ class HarborCheck(AgentCheck):
                 try:
                     api.registry_health(registry['id'])
                     self.service_check(REGISTRY_STATUS, AgentCheck.OK, tags=tags)
-                except HTTPClientStatusError as e:
+                except HTTPError as e:
                     self.log.debug(e, exc_info=True)
                     self.service_check(REGISTRY_STATUS, AgentCheck.CRITICAL, tags=tags)
 
@@ -62,7 +61,7 @@ class HarborCheck(AgentCheck):
     def _submit_disk_metrics(self, api, base_tags):
         try:
             volume_info = api.volume_info()
-        except HTTPClientStatusError as e:
+        except HTTPError as e:
             if e.response.status_code in (401, 403):
                 # Forbidden, user is not admin
                 self.log.warning(

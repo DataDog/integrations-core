@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+import mock
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.consul.common import MAX_SERVICES
 
@@ -155,24 +155,25 @@ def test_get_nodes_with_service_critical(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
-def test_consul_request(aggregator, instance, fake_http, fake_http_response):
+def test_consul_request(aggregator, instance, mocker):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
-    url = "{}/{}".format(instance["url"], "foo")
-    fake_http_response(url, json_data={})
-    consul_check.consul_request("foo")
-    aggregator.assert_service_check("consul.can_connect", ConsulCheck.OK, tags=["url:{}".format(url)], count=1)
-
-    aggregator.reset()
-    fake_http.register_response('GET', url, HTTPClientConnectionError("message"))
-    with pytest.raises(HTTPClientConnectionError):
+    mocker.patch("datadog_checks.base.utils.serialization.json.loads")
+    with mock.patch("datadog_checks.consul.consul.requests.Session.get") as mock_requests_get:
         consul_check.consul_request("foo")
-    aggregator.assert_service_check(
-        "consul.can_connect",
-        ConsulCheck.CRITICAL,
-        tags=["url:{}".format(url)],
-        count=1,
-        message="Consul request to {} failed: message".format(url),
-    )
+        url = "{}/{}".format(instance["url"], "foo")
+        aggregator.assert_service_check("consul.can_connect", ConsulCheck.OK, tags=["url:{}".format(url)], count=1)
+
+        aggregator.reset()
+        mock_requests_get.side_effect = Exception("message")
+        with pytest.raises(Exception):
+            consul_check.consul_request("foo")
+        aggregator.assert_service_check(
+            "consul.can_connect",
+            ConsulCheck.CRITICAL,
+            tags=["url:{}".format(url)],
+            count=1,
+            message="Consul request to {} failed: message".format(url),
+        )
 
 
 def test_service_checks(aggregator):
@@ -680,13 +681,29 @@ def test_network_latency_node_name(
         ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs):
+def test_config(test_case, extra_config, expected_http_kwargs, mocker):
     instance = extra_config
-    # Created without fake_http so the real client resolves the instance and HTTP_CONFIG_REMAPPER.
     check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
+    mocker.patch("datadog_checks.base.utils.serialization.json.loads")
 
-    for option, expected in expected_http_kwargs.items():
-        assert check.http.options[option] == expected, option
+    with mock.patch('datadog_checks.base.utils.http.requests.Session') as session:
+        mock_session = mock.MagicMock()
+        session.return_value = mock_session
+        mock_session.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(None)
+
+        http_wargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
+        http_wargs.update(expected_http_kwargs)
+        mock_session.get.assert_called_with('/v1/status/leader', **http_wargs)
 
 
 def test_health_checks_cache_defaults():

@@ -6,15 +6,9 @@ from contextlib import suppress
 
 import mock
 import pytest
+import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientConnectTimeoutError,
-    HTTPClientReadTimeoutError,
-    HTTPClientRequestError,
-    HTTPClientStatusError,
-)
 from datadog_checks.ibm_was import IbmWasCheck
 
 from . import common
@@ -93,7 +87,7 @@ def test_critical_service_check(instance, check, aggregator):
     instance['servlet_url'] = 'http://localhost:5678/wasPerfTool/servlet/perfservlet'
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
 
-    with pytest.raises(HTTPClientConnectionError):
+    with pytest.raises(requests.ConnectionError):
         check = check(instance)
         check.check(instance)
 
@@ -103,20 +97,19 @@ def test_critical_service_check(instance, check, aggregator):
 @pytest.mark.parametrize(
     'exception',
     [
-        pytest.param(HTTPClientReadTimeoutError, id='read timeout'),
-        pytest.param(HTTPClientConnectTimeoutError, id='connect timeout'),
-        # The layer has no dedicated type for a redirect loop and raises the generic request error.
-        pytest.param(HTTPClientRequestError, id='too many redirects'),
+        pytest.param(requests.ReadTimeout, id='read timeout'),
+        pytest.param(requests.ConnectTimeout, id='connect timeout'),
+        pytest.param(requests.TooManyRedirects, id='too many redirects'),
     ],
 )
-def test_request_failure_reports_critical(instance, check, aggregator, caplog, fake_http, exception):
+def test_request_failure_reports_critical(instance, check, aggregator, caplog, exception):
     # An escaping exception submits no service check at all, so a monitor sees a gap, not a CRITICAL.
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
-    fake_http.register_response('GET', instance['servlet_url'], exception('request failed'))
 
-    check = check(instance)
-    with pytest.raises(exception):
-        check.check(instance)
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', side_effect=exception):
+        check = check(instance)
+        with pytest.raises(exception):
+            check.check(instance)
 
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
     aggregator.assert_metric('ibm_was.can_connect', value=0, tags=tags, count=1)
@@ -129,7 +122,7 @@ def test_request_failure_reports_critical(instance, check, aggregator, caplog, f
     'request_result',
     [
         pytest.param({'return_value': mock_data('server.xml')}, id='successful run'),
-        pytest.param({'side_effect': HTTPClientConnectionError('connection refused')}, id='failed run'),
+        pytest.param({'side_effect': requests.ConnectionError}, id='failed run'),
     ],
 )
 def test_malloc_trim_runs_after_every_run(instance, check, request_result):
@@ -140,32 +133,36 @@ def test_malloc_trim_runs_after_every_run(instance, check, request_result):
         mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', **request_result),
     ):
         check = check(instance)
-        with suppress(HTTPClientConnectionError):
+        with suppress(requests.ConnectionError):
             check.check(instance)
 
     trim.assert_called_once_with()
 
 
-def test_error_status_reports_critical(instance, check, aggregator, fake_http_response):
+def test_error_status_reports_critical(instance, check, aggregator):
     # A non-2xx body never reaches the parser, so raise_for_status is the only thing turning it
     # into CRITICAL. Without it this payload parses cleanly and the run reports OK instead.
-    fake_http_response(instance['servlet_url'], b'<html>502 Bad Gateway</html>', status_code=502)
+    response = mock.MagicMock(content=b'<html>502 Bad Gateway</html>')
+    response.raise_for_status.side_effect = requests.HTTPError('502 Server Error')
 
-    check = check(instance)
-    with pytest.raises(HTTPClientStatusError):
-        check.check(instance)
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', return_value=response):
+        check = check(instance)
+        with pytest.raises(requests.HTTPError):
+            check.check(instance)
 
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.OK, count=0)
 
 
-def test_malformed_xml_reports_critical(instance, check, aggregator, caplog, fake_http_response):
+def test_malformed_xml_reports_critical(instance, check, aggregator, caplog):
     # Goes through the real make_request so a 2xx body that fails to parse reports CRITICAL alone.
-    fake_http_response(instance['servlet_url'], b'<Nodes><Node')
+    response = mock.MagicMock(content=b'<Nodes><Node')
+    response.raise_for_status.return_value = None
 
-    check = check(instance)
-    check.check(instance)
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', return_value=response):
+        check = check(instance)
+        check.check(instance)
 
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
@@ -174,12 +171,14 @@ def test_malformed_xml_reports_critical(instance, check, aggregator, caplog, fak
     assert 'Unable to parse the XML response' in caplog.text
 
 
-def test_parsed_but_empty_document_reports_ok_without_metrics(instance, check, aggregator, fake_http_response):
+def test_parsed_but_empty_document_reports_ok_without_metrics(instance, check, aggregator):
     # Pins the contract in assets/service_checks.json: OK means fetched and parsed, nothing more.
-    fake_http_response(instance['servlet_url'], b'<Nodes/>')
+    response = mock.MagicMock(content=b'<Nodes/>')
+    response.raise_for_status.return_value = None
 
-    check = check(instance)
-    check.check(instance)
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', return_value=response):
+        check = check(instance)
+        check.check(instance)
 
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.OK, tags=tags, count=1)

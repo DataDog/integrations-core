@@ -1,18 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from json import JSONDecodeError
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
+from simplejson import JSONDecodeError
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientInvalidURLError,
-    HTTPClientStatusError,
-    HTTPClientTimeoutError,
-)
 
 from .constants import (
     APPLICATION_STATES,
@@ -53,7 +48,6 @@ from .constants import (
 
 
 class SparkCheck(AgentCheck):
-    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
         'ssl_cert': {'name': 'tls_cert'},
@@ -448,7 +442,7 @@ class SparkCheck(AgentCheck):
                 )
                 if response is None:
                     continue
-            except HTTPClientStatusError:
+            except HTTPError:
                 self.log.debug("Got an error collecting %s", property, exc_info=True)
                 continue
             try:
@@ -589,7 +583,7 @@ class SparkCheck(AgentCheck):
                             )
 
                     self._set_metric(metric_name, submission_type, value, tags=tags)
-            except HTTPClientStatusError as e:
+            except HTTPError as e:
                 self.log.debug("No structured streaming metrics to collect from app %s. %s", app_name, e, exc_info=True)
                 pass
 
@@ -672,7 +666,7 @@ class SparkCheck(AgentCheck):
                 response = self.http.get(proxy_redirect_url, cookies=self.proxy_redirect_cookies)
                 response.raise_for_status()
 
-        except HTTPClientTimeoutError as e:
+        except Timeout as e:
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,
@@ -681,8 +675,8 @@ class SparkCheck(AgentCheck):
             )
             raise
 
-        except (HTTPClientStatusError, HTTPClientInvalidURLError, HTTPClientConnectionError) as e:
-            if isinstance(e, HTTPClientConnectionError) and self._should_suppress_connection_error(e, tags):
+        except (HTTPError, InvalidURL, ConnectionError) as e:
+            if isinstance(e, ConnectionError) and self._should_suppress_connection_error(e, tags):
                 return None
 
             self.service_check(

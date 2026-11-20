@@ -7,11 +7,6 @@ from mock import MagicMock
 from datadog_checks.ambari import AmbariCheck
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientConnectTimeoutError,
-    HTTPClientReadTimeoutError,
-)
 
 from . import responses
 
@@ -77,25 +72,6 @@ def test_cant_connect(init_config, instance, aggregator):
     aggregator.assert_service_check(
         name="ambari.can_connect", status=AgentCheck.CRITICAL, tags=['foo:bar', 'url:localhost']
     )
-
-
-@pytest.mark.parametrize(
-    'error, expected_warning',
-    [
-        pytest.param(HTTPClientConnectionError('Connection refused'), "Couldn't connect to URL", id='connection'),
-        pytest.param(
-            HTTPClientConnectTimeoutError('Connect timed out'), "Couldn't connect to URL", id='connect-timeout'
-        ),
-        pytest.param(HTTPClientReadTimeoutError('Read timed out'), 'Connection timeout', id='read-timeout'),
-    ],
-)
-def test_make_request_warns_on_http_failure(init_config, instance, fake_http, error, expected_warning):
-    fake_http.register_response('GET', 'localhost/api/v1/clusters', error)
-    ambari = AmbariCheck('Ambari', init_config, [instance])
-
-    assert ambari._make_request('localhost/api/v1/clusters') is None
-    assert len(ambari.warnings) == 1
-    assert ambari.warnings[0].startswith(expected_warning)
 
 
 def test_get_clusters(init_config, instance, aggregator):

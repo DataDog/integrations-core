@@ -5,12 +5,16 @@
 import json
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
+import mock
 import pytest
+import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
+from datadog_checks.dev.http import MockResponse
 
 from .common import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_FLY_LAB
 
@@ -41,33 +45,87 @@ def get_json_value_from_file(file_path):
         return json.load(file)
 
 
-@pytest.fixture
-def mock_http_get(request, fake_http, fake_http_response, instance):
-    """Serve the fixture tree under `fixtures/machines-api` and the OpenMetrics payload through fake_http.
+def get_url_path(url):
+    parsed_url = urlparse(url)
+    return parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
 
-    The fixture tree encodes query parameters as a `key=value` directory, for example `GET/v1/apps/org_slug=test`.
-    `http_error` maps request paths to a response that replaces the fixture.
-    """
+
+@pytest.fixture
+def mock_responses():
+    responses_map = {}
+
+    def process_files(dir, response_parent):
+        for file in dir.rglob('*'):
+            if file.is_file() and file.stem != ".slash":
+                relative_dir_path = (
+                    "/"
+                    + (str(file.parent.relative_to(dir)) if str(file.parent.relative_to(dir)) != "." else "")
+                    + ("/" if (file.parent / ".slash").is_file() else "")
+                )
+                if relative_dir_path not in response_parent:
+                    response_parent[relative_dir_path] = {}
+                json_data = get_json_value_from_file(file)
+                response_parent[relative_dir_path][file.stem] = json_data
+
+    def process_dir(dir, response_parent):
+        response_parent[dir.name] = {}
+        process_files(dir, response_parent[dir.name])
+
+    def create_responses_tree():
+        root_dir_path = os.path.join(get_here(), 'fixtures', 'machines-api')
+        method_subdirs = [d for d in Path(root_dir_path).iterdir() if d.is_dir() and d.name == 'GET']
+        for method_subdir in method_subdirs:
+            process_dir(method_subdir, responses_map)
+
+    def method(method, url, file='response', headers=None, params=None):
+        filename = file
+        request_path = url
+        request_path = request_path.replace('?', '/')
+        if params:
+            param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
+            request_path = f'{url}/{param_string}'
+
+        response = responses_map.get(method, {}).get(request_path, {}).get(filename)
+        return response
+
+    create_responses_tree()
+    yield method
+
+
+@pytest.fixture
+def mock_http_call(mock_responses):
+    def call(method, url, file='response', headers=None, params=None):
+        response = mock_responses(method, url, file=file, headers=headers, params=params)
+        if response is not None:
+            return response
+        http_response = requests.models.Response()
+        http_response.status_code = 404
+        http_response.reason = "Not Found"
+        http_response.url = url
+        raise requests.exceptions.HTTPError(response=http_response)
+
+    yield call
+
+
+@pytest.fixture
+def mock_http_get(request, monkeypatch, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.pop('http_error', {})
 
-    with open(os.path.join(get_here(), 'fixtures', 'output.txt'), 'rb') as f:
-        fake_http_response(instance['openmetrics_endpoint'], f.read())
+    def get(url, *args, **kwargs):
+        method = 'GET'
+        url = get_url_path(url)
+        if http_error and url in http_error:
+            return http_error[url]
+        mock_status_code = mock.MagicMock(return_value=200)
+        if "/metrics" in url:
+            filepath = os.path.join(get_here(), 'fixtures', 'output.txt')
+            return MockResponse(file_path=filepath)
+        headers = kwargs.get('headers')
+        params = kwargs.get('params')
+        mock_json = mock.MagicMock(return_value=mock_http_call(method, url, headers=headers, params=params))
+        return mock.MagicMock(json=mock_json, status_code=mock_status_code)
 
-    root_dir = Path(get_here()) / 'fixtures' / 'machines-api' / 'GET'
-    for file in root_dir.rglob('response.json'):
-        relative_dir = file.parent.relative_to(root_dir)
-        parts = list(relative_dir.parts)
-        params = None
-        if parts and '=' in parts[-1]:
-            key, value = parts.pop().split('=', 1)
-            params = {key: value}
-        url = '{}/{}'.format(instance['machines_api_endpoint'], '/'.join(parts))
-        match_options = {'params': params} if params else None
-        fake_http_response(url, json_data=get_json_value_from_file(file), match_options=match_options)
-
-    # Registered last so they take precedence over the fixture tree.
-    for path, response in http_error.items():
-        fake_http.register_response('GET', instance['machines_api_endpoint'] + path, response)
-
-    return fake_http
+    mock_get = mock.MagicMock(side_effect=get)
+    monkeypatch.setattr('requests.Session.get', mock_get)
+    return mock_get

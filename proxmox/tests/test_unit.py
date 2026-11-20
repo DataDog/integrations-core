@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 import mock
 import pytest
 
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.proxmox import ProxmoxCheck
 
@@ -17,7 +18,6 @@ from .common import (
     ALL_METRICS,
     BASE_TAGS,
     CONTAINER_PERF_METRICS,
-    INSTANCE,
     NO_CONTAINER_EVENTS,
     NODE_PERF_METRICS,
     NODE_RESOURCE_METRICS,
@@ -29,7 +29,6 @@ from .common import (
     VM_PERF_METRICS,
     cluster_resources_with_offline_node,
     cluster_resources_with_vm_maxcpu,
-    fake_response,
 )
 
 
@@ -59,30 +58,23 @@ def test_no_tags(dd_run_check, aggregator, instance):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'error'),
+    ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/api2/json/version': fake_response(status_code=500)}},
-            'HTTPClientStatusError',
+            {'http_error': {'/api2/json/version': MockResponse(status_code=500)}},
             id='500',
         ),
         pytest.param(
-            {'http_error': {'/api2/json/version': fake_response(status_code=404)}},
-            'HTTPClientStatusError',
+            {'http_error': {'/api2/json/version': MockResponse(status_code=404)}},
             id='404',
-        ),
-        pytest.param(
-            {'http_error': {'/api2/json/version': fake_response(status_code=200, content='<html>')}},
-            'JSONDecodeError',
-            id='invalid-json',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_api_down(dd_run_check, aggregator, instance, error):
+def test_api_down(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
-    with pytest.raises(Exception, match=error):
+    with pytest.raises(Exception, match=r'requests.exceptions.HTTPError'):
         dd_run_check(check)
 
     aggregator.assert_metric(
@@ -281,7 +273,7 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': fake_response(status_code=500)
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(status_code=500)
                 }
             },
             id='500',
@@ -289,7 +281,7 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': fake_response(status_code=404)
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(status_code=404)
                 }
             },
             id='404',
@@ -297,7 +289,7 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': fake_response(
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(
                         status_code=200, json_data={"data": None, "message": "No QEMU guest agent configured\n"}
                     )
                 }
@@ -495,7 +487,7 @@ def test_cpu_count_metrics_skip_powered_off_vm(dd_run_check, aggregator, instanc
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': fake_response(
+                    '/api2/json/cluster/resources': MockResponse(
                         status_code=200,
                         json_data=cluster_resources_with_offline_node(),
                     )
@@ -520,7 +512,7 @@ def test_cpu_count_metrics_skip_offline_node(dd_run_check, aggregator, instance)
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': fake_response(
+                    '/api2/json/cluster/resources': MockResponse(
                         status_code=200,
                         json_data=cluster_resources_with_vm_maxcpu(None),
                     )
@@ -533,7 +525,7 @@ def test_cpu_count_metrics_skip_offline_node(dd_run_check, aggregator, instance)
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': fake_response(
+                    '/api2/json/cluster/resources': MockResponse(
                         status_code=200,
                         json_data=cluster_resources_with_vm_maxcpu(0),
                     )
@@ -646,7 +638,7 @@ def test_perf_metrics(dd_run_check, aggregator, instance):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/api2/json/cluster/metrics/export': fake_response(status_code=501)}},
+            {'http_error': {'/api2/json/cluster/metrics/export': MockResponse(status_code=501)}},
             id='501',
         ),
     ],
@@ -687,7 +679,7 @@ def test_ha_metrics(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/ha/status/current': fake_response(
+                    '/api2/json/cluster/ha/status/current': MockResponse(
                         status_code=200,
                         json_data={'data': None},
                     )
@@ -713,7 +705,7 @@ def test_ha_metrics_null_data(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/metrics/export': fake_response(
+                    '/api2/json/cluster/metrics/export': MockResponse(
                         status_code=200,
                         json_data={'data': {'data': None}},
                     )
@@ -743,8 +735,8 @@ TWO_NODE_RESOURCES = {
 }
 
 
-def task_requests(fake_http):
-    return [request for request in fake_http.requests if request.url.endswith('/tasks')]
+def task_calls(mock_http_get):
+    return [call for call in mock_http_get.call_args_list if call.args[0].endswith('/tasks')]
 
 
 @pytest.mark.parametrize(
@@ -753,19 +745,19 @@ def task_requests(fake_http):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': fake_response(status_code=403, json_data=PERMISSION_DENIED_RESPONSE)
+                    '/api2/json/cluster/resources': MockResponse(status_code=403, json_data=PERMISSION_DENIED_RESPONSE)
                 }
             },
             r'HTTP 403 for .*/cluster/resources: Permission check failed \(/ , Sys.Audit\)',
             id='with-message',
         ),
         pytest.param(
-            {'http_error': {'/api2/json/cluster/resources': fake_response(status_code=403, json_data={'data': None})}},
+            {'http_error': {'/api2/json/cluster/resources': MockResponse(status_code=403, json_data={'data': None})}},
             r'HTTP 403 for .*/cluster/resources',
             id='without-message',
         ),
         pytest.param(
-            {'http_error': {'/api2/json/cluster/resources': fake_response(status_code=502, content='Bad Gateway')}},
+            {'http_error': {'/api2/json/cluster/resources': MockResponse(status_code=502, content='Bad Gateway')}},
             r'HTTP 502 for .*/cluster/resources',
             id='non-json-body',
         ),
@@ -786,7 +778,7 @@ def test_resources_api_error_response(dd_run_check, instance, expected_error):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/metrics/export': fake_response(
+                    '/api2/json/cluster/metrics/export': MockResponse(
                         status_code=403, json_data=PERMISSION_DENIED_RESPONSE
                     )
                 }
@@ -799,7 +791,7 @@ def test_resources_api_error_response(dd_run_check, instance, expected_error):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/ha/status/current': fake_response(
+                    '/api2/json/cluster/ha/status/current': MockResponse(
                         status_code=403, json_data=PERMISSION_DENIED_RESPONSE
                     )
                 }
@@ -842,7 +834,7 @@ def test_optional_collection_error_does_not_block_other_collectors(
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': fake_response(
+                    '/api2/json/cluster/resources': MockResponse(
                         status_code=200,
                         json_data={'data': None},
                     )
@@ -867,7 +859,7 @@ def test_required_null_data(dd_run_check, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/tasks': fake_response(
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
                         status_code=200,
                         json_data={'data': None},
                     )
@@ -894,7 +886,7 @@ def test_tasks_null_data(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/tasks': fake_response(
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
                         status_code=403,
                         json_data=PERMISSION_DENIED_RESPONSE,
                     )
@@ -926,7 +918,7 @@ def test_tasks_api_error_response(dd_run_check, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': fake_response(status_code=200, json_data=TWO_NODE_RESOURCES)
+                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES)
                 }
             },
             id='two-nodes',
@@ -942,20 +934,27 @@ def test_failed_node_retries_from_last_successful_collection(
     monkeypatch.setattr('datadog_checks.proxmox.check.get_current_datetime', mock.MagicMock(side_effect=collect_times))
 
     def tasks_response(endtime):
-        return fake_response(status_code=200, json_data={'data': [{'type': 'aptupdate', 'endtime': endtime}]})
+        return MockResponse(status_code=200, json_data={'data': [{'type': 'aptupdate', 'endtime': endtime}]})
 
     # node-1 is unavailable on the first run while it runs a task, then recovers; node-2 always succeeds.
     task_responses = {
-        '/nodes/node-1/tasks': [
-            fake_response(status_code=500, json_data={'data': None, 'message': 'node unavailable'}),
-            tasks_response(150),
-        ],
-        '/nodes/node-2/tasks': [tasks_response(150), tasks_response(350)],
+        '/nodes/node-1/tasks': iter(
+            [
+                MockResponse(status_code=500, json_data={'data': None, 'message': 'node unavailable'}),
+                tasks_response(150),
+            ]
+        ),
+        '/nodes/node-2/tasks': iter([tasks_response(150), tasks_response(350)]),
     }
-    for path, responses in task_responses.items():
-        for response in responses:
-            mock_http_get.register_response('GET', f'{INSTANCE["proxmox_server"]}{path}', response, once=True)
+    default_get = mock_http_get.side_effect
 
+    def get(url, *args, **kwargs):
+        for suffix, responses in task_responses.items():
+            if url.endswith(suffix):
+                return next(responses)
+        return default_get(url, *args, **kwargs)
+
+    mock_http_get.side_effect = get
     new_instance = copy.deepcopy(instance)
     new_instance['collect_tasks'] = True
     check = ProxmoxCheck('proxmox', {}, [new_instance])
@@ -965,9 +964,7 @@ def test_failed_node_retries_from_last_successful_collection(
     assert [(event['host'], event['timestamp']) for event in aggregator.events] == [('node-2', 150)]
 
     dd_run_check(check)
-    assert [
-        (request.url.split('/')[-2], request.options['params']['since']) for request in task_requests(mock_http_get)
-    ] == [
+    assert [(call.args[0].split('/')[-2], call.kwargs['params']['since']) for call in task_calls(mock_http_get)] == [
         ('node-1', 100),
         ('node-2', 100),
         # node-1 retries from its last successful collection; node-2 moves on.
@@ -988,11 +985,11 @@ def test_failed_node_retries_from_last_successful_collection(
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': fake_response(status_code=200, json_data=TWO_NODE_RESOURCES),
-                    '/api2/json/nodes/node-1/tasks': fake_response(
+                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES),
+                    '/api2/json/nodes/node-1/tasks': MockResponse(
                         status_code=200, json_data={'data': [{'type': 'vzstart'}, {'type': 'vzstop'}]}
                     ),
-                    '/api2/json/nodes/node-2/tasks': fake_response(
+                    '/api2/json/nodes/node-2/tasks': MockResponse(
                         status_code=200, json_data={'data': [{'type': 'vzstart'}]}
                     ),
                 }
@@ -1011,7 +1008,7 @@ def test_tasks_warn_when_limit_reached(dd_run_check, instance, mock_http_get, mo
 
     dd_run_check(check)
 
-    assert [request.options['params']['limit'] for request in task_requests(mock_http_get)] == [2, 2]
+    assert [call.kwargs['params']['limit'] for call in task_calls(mock_http_get)] == [2, 2]
     assert "Node node-1 returned 2 tasks since" in caplog.text
     assert "Node node-2 returned" not in caplog.text
 

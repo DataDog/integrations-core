@@ -22,7 +22,6 @@ LABELS_REMAPPER = {'type': 'avi_type', 'tenant': 'avi_tenant'}
 
 class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = "avi_vantage"
-    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 
@@ -73,8 +72,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     @contextmanager
     def login(self):
-        # Start each login from a fresh session so no cookie from the previous run is sent.
-        self.http.close()
+        self.http._session = None
         login_url = self.base_url + "/login"
         logout_url = self.base_url + "/logout"
         try:
@@ -89,7 +87,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.service_check("can_connect", AgentCheck.OK, tags=self.config.tags)
 
         yield
-        csrf_token = self.http.get_cookie('csrftoken')
+        csrf_token = self.http.session.cookies.get('csrftoken')
         if csrf_token:
             logout_resp = self.http.post(
                 logout_url, extra_headers={'X-CSRFToken': csrf_token, 'Referer': self.base_url}

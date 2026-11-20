@@ -9,7 +9,7 @@ from contextlib import nullcontext as does_not_raise
 import mock
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
@@ -33,7 +33,7 @@ from .constants import (
         pytest.param(
             {
                 'http_error': {
-                    '/api/spaces': FakeHTTPResponse(status_code=500),
+                    '/api/spaces': MockResponse(status_code=500),
                 }
             },
             pytest.raises(Exception, match=r'Could not connect to octopus API.*'),
@@ -1038,10 +1038,10 @@ def test_empty_include(get_current_datetime, dd_run_check, aggregator):
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/tasks': FakeHTTPResponse(status_code=500),
+                    '/api/Spaces-1/tasks': MockResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/tasks: 500 Server Error',
+            'Failed to access endpoint: api/Spaces-1/tasks: 500 Server Error: None for url: None',
             id='http error',
         ),
     ],
@@ -1101,10 +1101,10 @@ def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator, ins
         pytest.param(
             {
                 'http_error': {
-                    '/api/octopusservernodes': FakeHTTPResponse(status_code=500),
+                    '/api/octopusservernodes': MockResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/octopusservernodes: 500 Server Error',
+            'Failed to access endpoint: api/octopusservernodes: 500 Server Error: None for url: None',
             id='http error',
         ),
     ],
@@ -1545,10 +1545,10 @@ def test_environments_discovery_include_invalid(get_current_datetime, dd_run_che
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/environments': FakeHTTPResponse(status_code=500),
+                    '/api/Spaces-1/environments': MockResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/environments: 500 Server Error',
+            'Failed to access endpoint: api/Spaces-1/environments: 500 Server Error: None for url: None',
             id='http error',
         ),
     ],
@@ -1651,10 +1651,10 @@ def test_environments_metrics_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/releases/Releases-3': FakeHTTPResponse(status_code=500),
+                    '/api/Spaces-1/releases/Releases-3': MockResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/releases/Releases-3: 500 Server Error',
+            'Failed to access endpoint: api/Spaces-1/releases/Releases-3: 500 Server Error: None for url: None',
             id='http error',
         ),
     ],
@@ -1879,11 +1879,11 @@ def test_deployment_metrics_releases_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/deployments': FakeHTTPResponse(status_code=500),
-                    '/api/Spaces-1/deployments/Deployments-18': FakeHTTPResponse(status_code=500),
+                    '/api/Spaces-1/deployments': MockResponse(status_code=500),
+                    '/api/Spaces-1/deployments/Deployments-18': MockResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/deployments/Deployments-18: 500 Server Error',
+            'Failed to access endpoint: api/Spaces-1/deployments/Deployments-18: 500 Server Error: None for url: None',
             id='http error',
         ),
     ],
@@ -2112,10 +2112,10 @@ def test_deployment_metrics_deployments_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/environments': FakeHTTPResponse(status_code=500),
+                    '/api/Spaces-1/environments': MockResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/environments: 500 Server Error',
+            'Failed to access endpoint: api/Spaces-1/environments: 500 Server Error: None for url: None',
             id='http error',
         ),
     ],
@@ -2808,14 +2808,14 @@ def test_unified_service_tagging(
     ('mock_http_get', 'projects_config', 'expected_exception', 'can_connect'),
     [
         pytest.param(
-            {'http_error': {'/api/Spaces-1/projects': FakeHTTPResponse(status_code=500)}},
+            {'http_error': {'/api/Spaces-1/projects': MockResponse(status_code=500)}},
             {'include': ['.*']},
             pytest.raises(Exception, match=r'Could not connect to octopus API.*'),
             0,
             id='projects discovery reports the failure',
         ),
         pytest.param(
-            {'http_error': {'/api/Spaces-1/projects': FakeHTTPResponse(status_code=500)}},
+            {'http_error': {'/api/Spaces-1/projects': MockResponse(status_code=500)}},
             None,
             does_not_raise(),
             1,
@@ -2907,31 +2907,38 @@ def test_bulk_lookup_bounded_when_ids_filter_is_ignored(
         pytest.param({}, 1.0, id='no retry-after header'),
     ],
 )
-def test_throttled_request_waits_then_succeeds(instance, fake_http, fake_http_response, retry_after, expected_wait):
-    url = f"{instance['octopus_endpoint']}/api/spaces"
-    fake_http_response(url, status_code=429, headers=retry_after, once=True)
-    fake_http_response(url, json_data={'Items': ['a space']}, once=True)
+def test_throttled_request_waits_then_succeeds(instance, retry_after, expected_wait):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     check.load_configuration_models()
+    responses = [
+        MockResponse(status_code=429, headers=retry_after),
+        MockResponse(json_data={'Items': ['a space']}, status_code=200),
+    ]
 
-    with mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep:
+    with (
+        mock.patch('requests.Session.get', side_effect=responses) as http_get,
+        mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep,
+    ):
         assert check._process_endpoint('api/spaces') == {'Items': ['a space']}
 
-    assert len(fake_http.requests) == 2
-    fake_http.assert_all_responses_consumed()
+    assert http_get.call_count == 2
     sleep.assert_called_once_with(expected_wait)
 
 
-def test_throttled_request_gives_up_after_bounded_retries(instance, fake_http, fake_http_response, caplog):
-    fake_http_response(f"{instance['octopus_endpoint']}/api/spaces", status_code=429, headers={'Retry-After': '1'})
+def test_throttled_request_gives_up_after_bounded_retries(instance, caplog):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     check.load_configuration_models()
     caplog.set_level(logging.WARNING)
 
-    with mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep:
+    with (
+        mock.patch(
+            'requests.Session.get', return_value=MockResponse(status_code=429, headers={'Retry-After': '1'})
+        ) as http_get,
+        mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep,
+    ):
         assert check._process_endpoint('api/spaces') == {}
 
     # Three retries after the initial attempt, then the throttled response is surfaced instead of retrying forever.
-    assert len(fake_http.requests) == 4
+    assert http_get.call_count == 4
     assert sleep.call_count == 3
     assert 'Failed to access endpoint: api/spaces' in caplog.text

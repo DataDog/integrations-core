@@ -310,8 +310,6 @@ BWC_SUFFIXES = ['num_seconds', 'total_weight_in_kb', 'num_occured']
 
 
 DEFAULT_GATEWAY_URL = 'https://localhost:443'
-TOKEN_URL = f'{DEFAULT_GATEWAY_URL}/auth/realms/powerflex/protocol/openid-connect/token'
-VERSION_URL = f'{DEFAULT_GATEWAY_URL}/api/version'
 BASE_TAGS = [f'powerflex_gateway_url:{DEFAULT_GATEWAY_URL}']
 
 # E2E expected metric points (excludes the dynamic powerflex_gateway_url tag).

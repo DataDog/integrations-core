@@ -6,9 +6,8 @@ import json
 
 import mock
 import pytest
+import requests
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 from datadog_checks.rabbitmq.rabbitmq import (
@@ -25,27 +24,17 @@ from . import common, metrics
 pytestmark = [pytest.mark.unit, common.requires_management]
 
 
-@pytest.mark.parametrize(
-    'outcome, message',
-    [
-        pytest.param(HTTPClientConnectionError('connection refused'), 'Cannot open RabbitMQ API url', id='request'),
-        pytest.param(FakeHTTPResponse(status_code=500), 'Cannot open RabbitMQ API url', id='status'),
-        pytest.param(
-            FakeHTTPResponse(json_error=json.JSONDecodeError('Expecting value', '', 0)),
-            'Cannot open RabbitMQ API url',
-            id='invalid json',
-        ),
-        pytest.param(FakeHTTPResponse(json_error=ValueError('bad value')), 'Cannot parse JSON response', id='value'),
-    ],
-)
-def test__get_data(check, fake_http, outcome, message):
-    fake_http.register_response('GET', '', outcome)
-    with pytest.raises(RabbitMQException, match=message):
-        check._get_data('')
+def test__get_data(check):
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
+        with pytest.raises(RabbitMQException):
+            check._get_data('')
+        with pytest.raises(RabbitMQException):
+            check._get_data('')
 
 
-def test_status_check(check, aggregator, fake_http):
-    fake_http.register_response('GET', 'http://example.com/vhosts', HTTPClientConnectionError('connection refused'))
+def test_status_check(check, aggregator):
     check.check({"rabbitmq_api_url": "http://example.com"})
     assert len(aggregator._service_checks) == 1
     scs = aggregator.service_checks('rabbitmq.status')
@@ -142,14 +131,29 @@ def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggre
         ("legacy ssl config False", {'ssl_verify': False}, {'verify': False}),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs):
+def test_config(check, test_case, extra_config, expected_http_kwargs):
     config = {'rabbitmq_api_url': common.URL, 'queues': ['test1'], 'tags': ["tag1:1", "tag2"], 'exchanges': ['test1']}
     config.update(extra_config)
     check = RabbitMQ('rabbitmq', {}, instances=[config])
 
-    # Creating the client resolves the remapped settings without sending a request.
-    for option, expected in expected_http_kwargs.items():
-        assert check.http.options[option] == expected
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(config)
+
+        http_wargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
+        http_wargs.update(expected_http_kwargs)
+
+        r.get.assert_called_with('http://localhost:15672/api/connections', **http_wargs)
 
 
 def test_nodes(aggregator, check):

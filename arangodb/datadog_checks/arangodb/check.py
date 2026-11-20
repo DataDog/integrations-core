@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urlparse
 
+from requests import HTTPError
+
 from datadog_checks.base import OpenMetricsBaseCheckV2
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 
 from .config_models import ConfigMixin
 from .metrics import METRIC_MAP
@@ -12,7 +13,6 @@ from .metrics import METRIC_MAP
 
 class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'arangodb'
-    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 
@@ -56,7 +56,7 @@ class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
             return 'server_{}:{}'.format(tag_name, response.json()[tag_name])
 
-        except HTTPClientStatusError:
+        except HTTPError:
             self.log.debug("Unable to get server %s, skipping `server_%s` tag.", tag_name, tag_name)
         except Exception as e:
             self.log.debug(

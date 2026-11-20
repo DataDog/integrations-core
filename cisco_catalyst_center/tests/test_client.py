@@ -11,11 +11,9 @@ it without raising and records nothing. That failure is silent and survives code
 
 from __future__ import annotations
 
-import json
-
 import pytest
+import requests
 
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientReadTimeoutError
 from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
 
@@ -145,17 +143,17 @@ def test_get_list_given_http_500_without_a_body_still_raises(client, respond_seq
 @pytest.mark.parametrize(
     'failure',
     [
-        pytest.param(HTTPClientReadTimeoutError('Read timed out. (read timeout=10)'), id='read-timeout'),
-        pytest.param(HTTPClientConnectionError('Connection reset by peer'), id='connection-reset'),
+        pytest.param(requests.exceptions.ReadTimeout('Read timed out. (read timeout=10)'), id='read-timeout'),
+        pytest.param(requests.exceptions.ConnectionError('Connection reset by peer'), id='connection-reset'),
         pytest.param(
-            {'status_code': 200, 'json': json.JSONDecodeError('Expecting value', '<html>', 0)},
+            {'status_code': 200, 'json': requests.exceptions.JSONDecodeError('Expecting value', '<html>', 0)},
             id='body-that-is-not-json',
         ),
     ],
 )
 def test_get_list_given_a_transport_failure_raises_catalyst_api_error(client, respond_sequence, failure):
     # Collectors skip a failed device family group, device or site only when the failure is a
-    # `CatalystApiError`. A raw HTTP client exception would bypass that and fail the whole collector;
+    # `CatalystApiError`. A raw `requests` exception would bypass that and fail the whole collector;
     # for assurance events that leaves the window unadvanced, so the next cycle re-submits every
     # group that had already succeeded.
     respond_sequence([failure])

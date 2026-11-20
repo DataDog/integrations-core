@@ -4,7 +4,7 @@
 
 import re
 
-from datadog_checks.base.utils.http_exceptions import HTTPClientTimeoutError
+import requests
 
 LEGACY_VERSION_RE = re.compile(r'/(\d\.\d\.\d)/')
 
@@ -77,7 +77,7 @@ def _get_server_info(server_info_url, log, http):
                 log.debug('Version not matched.')
                 return
 
-    except HTTPClientTimeoutError:
+    except requests.exceptions.Timeout:
         log.warning('Envoy endpoint `%s` timed out after %s seconds', server_info_url, http.options['timeout'])
         return None
     except Exception as e:

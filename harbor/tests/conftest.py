@@ -5,15 +5,17 @@ import os
 
 import pytest
 import requests
+from mock import patch
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.harbor import HarborCheck
 from datadog_checks.harbor.api import HarborAPI
 from datadog_checks.harbor.common import (
-    API_VERSION_URL,
     CHARTREPO_HEALTH_URL,
     HEALTH_URL,
+    LOGIN_URL,
     PING_URL,
     PROJECTS_URL,
     REGISTRIES_PING_URL,
@@ -104,31 +106,48 @@ def harbor_check(admin_instance):
 
 
 @pytest.fixture
-def harbor_api(harbor_check, admin_instance, harbor_responses):
+def harbor_api(harbor_check, admin_instance, patch_requests):
     yield HarborAPI(URL, harbor_check.http)
 
 
 @pytest.fixture
-def harbor_responses(fake_http_response):
-    def register(url_template, **response):
-        fake_http_response(url_template.format(base_url=URL), **response)
-
-    # The version endpoint only exists from Harbor 2.0. A 404 keeps the legacy, unversioned API paths.
-    register(API_VERSION_URL, status_code=404)
-    register(HEALTH_URL, json_data=HEALTH_FIXTURE)
-    register(PING_URL, content='Pong')
-    register(CHARTREPO_HEALTH_URL, json_data=CHARTREPO_HEALTH_FIXTURE)
-    register(PROJECTS_URL, json_data=PROJECTS_FIXTURE)
-    register(REGISTRIES_URL, json_data=REGISTRIES_FIXTURE)
-    register(REGISTRIES_PING_URL, method='POST')
-    register(
-        VOLUME_INFO_URL,
-        json_data=VOLUME_INFO_PRE_2_2_FIXTURE if HARBOR_VERSION < VERSION_2_2 else VOLUME_INFO_FIXTURE,
-    )
-    register(SYSTEM_INFO_URL, json_data=SYSTEM_INFO_FIXTURE)
+def patch_requests():
+    with patch("requests.Session.request", side_effect=mocked_requests):
+        yield
 
 
 def get_docker_compose_file():
     harbor_version = os.environ['HARBOR_VERSION']
     harbor_folder = 'harbor-{}'.format(harbor_version)
     return os.path.join(HERE, 'compose', harbor_folder, 'docker-compose.yml')
+
+
+def mocked_requests(_, url, **kwargs):
+    def match(url, *candidates_url):
+        for c in candidates_url:
+            if url == c.format(base_url=URL):
+                return True
+        return False
+
+    if match(url, LOGIN_URL):
+        return MockResponse()
+    elif match(url, HEALTH_URL):
+        return MockResponse(json_data=HEALTH_FIXTURE)
+    elif match(url, PING_URL):
+        return MockResponse('Pong')
+    elif match(url, CHARTREPO_HEALTH_URL):
+        return MockResponse(json_data=CHARTREPO_HEALTH_FIXTURE)
+    elif match(url, PROJECTS_URL):
+        return MockResponse(json_data=PROJECTS_FIXTURE)
+    elif match(url, REGISTRIES_URL):
+        return MockResponse(json_data=REGISTRIES_FIXTURE)
+    elif match(url, REGISTRIES_PING_URL):
+        return MockResponse()
+    elif match(url, VOLUME_INFO_URL):
+        if HARBOR_VERSION < VERSION_2_2:
+            return MockResponse(json_data=VOLUME_INFO_PRE_2_2_FIXTURE)
+        return MockResponse(json_data=VOLUME_INFO_FIXTURE)
+    elif match(url, SYSTEM_INFO_URL):
+        return MockResponse(json_data=SYSTEM_INFO_FIXTURE)
+
+    return MockResponse(status_code=404)

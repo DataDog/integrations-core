@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
+import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import HTTPClientTimeoutError
 from datadog_checks.mesos_master import MesosMaster
 
 
@@ -84,42 +84,42 @@ def test_instance_timeout(check, instance):
     [
         (
             'OK case for /state endpoint',
-            [FakeHTTPResponse(status_code=200, content=b'{}', json_result={})],
+            [mock.MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state'],
             False,
         ),
         (
             'OK case with failing /state due to bad status and fallback on /state.json',
-            [FakeHTTPResponse(status_code=500), FakeHTTPResponse(status_code=200, content=b'{}', json_result={})],
+            [mock.MagicMock(status_code=500), mock.MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
             False,
         ),
         (
             'OK case with failing /state due to Timeout and fallback on /state.json',
-            [HTTPClientTimeoutError('timeout'), FakeHTTPResponse(status_code=200, content=b'{}', json_result={})],
+            [requests.exceptions.Timeout, mock.MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
             False,
         ),
         (
             'OK case with failing /state due to Exception and fallback on /state.json',
-            [Exception('error'), FakeHTTPResponse(status_code=200, content=b'{}', json_result={})],
+            [Exception, mock.MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
             False,
         ),
         (
             'NOK case with failing /state and /state.json due to timeout',
-            [HTTPClientTimeoutError('timeout'), HTTPClientTimeoutError('timeout')],
+            [requests.exceptions.Timeout, requests.exceptions.Timeout],
             AgentCheck.CRITICAL,
             ['my:tag', 'url:http://hello.com/state.json'],
             True,
         ),
         (
             'NOK case with failing /state and /state.json with bad status',
-            [FakeHTTPResponse(status_code=500), FakeHTTPResponse(status_code=500)],
+            [mock.MagicMock(status_code=500), mock.MagicMock(status_code=500)],
             AgentCheck.CRITICAL,
             ['my:tag', 'url:http://hello.com/state.json'],
             True,
@@ -127,8 +127,8 @@ def test_instance_timeout(check, instance):
         (
             'OK case with non-leader master on /state',
             [
-                FakeHTTPResponse(status_code=401, history=[FakeHTTPResponse(status_code=307)]),
-                FakeHTTPResponse(content=b'{}', json_result={}, history=[], status_code=500),
+                mock.MagicMock(status_code=401, history=[mock.MagicMock(status_code=307)]),
+                mock.MagicMock(content='{}', history=[], status_code=500),
             ],
             AgentCheck.UNKNOWN,
             ['my:tag', 'url:http://hello.com/state.json'],
@@ -137,10 +137,8 @@ def test_instance_timeout(check, instance):
         (
             'OK case with non-leader master on /state.json',
             [
-                FakeHTTPResponse(status_code=500, history=[]),
-                FakeHTTPResponse(
-                    content=b'{}', json_result={}, history=[FakeHTTPResponse(status_code=307)], status_code=401
-                ),
+                mock.MagicMock(status_code=500, history=[]),
+                mock.MagicMock(content='{}', history=[mock.MagicMock(status_code=307)], status_code=401),
             ],
             AgentCheck.UNKNOWN,
             ['my:tag', 'url:http://hello.com/state.json'],
@@ -150,28 +148,20 @@ def test_instance_timeout(check, instance):
 )
 @pytest.mark.integration
 def test_can_connect_service_check(
-    instance,
-    aggregator,
-    fake_http,
-    test_case_name,
-    request_mock_side_effects,
-    expected_status,
-    expected_tags,
-    expect_exception,
+    instance, aggregator, test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception
 ):
     check = MesosMaster('mesos_master', {}, [instance])
 
-    # The check queries /state first and falls back on /state.json.
-    for url, outcome in zip(('http://hello.com/state', 'http://hello.com/state.json'), request_mock_side_effects):
-        fake_http.register_response('GET', url, outcome, once=True)
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
+        r.get.side_effect = request_mock_side_effects
 
-    try:
-        check._get_master_state('http://hello.com', ['my:tag'])
-        exception_raised = False
-    except CheckException:
-        exception_raised = True
+        try:
+            check._get_master_state('http://hello.com', ['my:tag'])
+            exception_raised = False
+        except CheckException:
+            exception_raised = True
 
-    assert expect_exception == exception_raised
-    fake_http.assert_all_responses_consumed()
+        assert expect_exception == exception_raised
 
     aggregator.assert_service_check('mesos_master.can_connect', count=1, status=expected_status, tags=expected_tags)

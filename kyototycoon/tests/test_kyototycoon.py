@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.kyototycoon import KyotoTycoonCheck
 
 from .common import DEFAULT_INSTANCE, TAGS
@@ -25,19 +24,6 @@ def test_check(aggregator, dd_environment):
     kt.check(deepcopy(DEFAULT_INSTANCE))
 
     _assert_check(aggregator)
-
-
-@pytest.mark.unit
-def test_error_status_reports_critical(aggregator, fake_http_response):
-    fake_http_response(DEFAULT_INSTANCE['report_url'], status_code=503)
-    kt = KyotoTycoonCheck('kyototycoon', {}, {})
-
-    with pytest.raises(HTTPClientStatusError):
-        kt.check(deepcopy(DEFAULT_INSTANCE))
-
-    aggregator.assert_service_check(
-        KyotoTycoonCheck.SERVICE_CHECK_NAME, status=KyotoTycoonCheck.CRITICAL, tags=TAGS, message='503 Server Error'
-    )
 
 
 @pytest.mark.e2e

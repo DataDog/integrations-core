@@ -49,7 +49,6 @@ NDM_METADATA_EVENT_TYPE = 'network-devices-metadata'
 
 class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'cisco_catalyst_center'
-    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name: str, init_config: InitConfigType, instances: list[InstanceType]) -> None:
         super().__init__(name, init_config, instances)

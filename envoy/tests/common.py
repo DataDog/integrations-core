@@ -19,7 +19,6 @@ PORT = '8001'
 
 URL = 'http://{}:{}'.format(HOST, PORT)
 DEFAULT_INSTANCE = {'openmetrics_endpoint': '{}/stats/prometheus'.format(URL)}
-SERVER_INFO_URL = '{}/server_info'.format(URL)
 requires_new_environment = pytest.mark.skipif(FLAVOR == 'api_v2', reason='Requires prometheus environment')
 
 PROMETHEUS_METRICS = [

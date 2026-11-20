@@ -1,20 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-import re
-
 import mock
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientConnectTimeoutError,
-    HTTPClientInvalidURLError,
-    HTTPClientReadTimeoutError,
-    HTTPClientSSLError,
-)
 from datadog_checks.hdfs_namenode import HDFSNameNode
 
 from .common import (
@@ -26,9 +15,6 @@ from .common import (
     HDFS_NAMESYSTEM_MUTUAL_METRICS_VALUES,
     HDFS_NAMESYSTEM_STATE_METRICS_VALUES,
     HDFS_RAW_VERSION,
-    NAME_SYSTEM_STATE_URL,
-    TEST_PASSWORD,
-    TEST_USERNAME,
 )
 
 pytestmark = pytest.mark.unit
@@ -86,42 +72,13 @@ def test_metadata(aggregator, dd_run_check, mocked_request, datadog_agent):
     datadog_agent.assert_metadata_count(6)
 
 
-def test_auth():
+def test_auth(aggregator, dd_run_check, mocked_auth_request):
     instance = HDFS_NAMENODE_AUTH_CONFIG['instances'][0]
     hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 
-    assert hdfs_namenode.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)
-
-
-@pytest.mark.parametrize(
-    'outcome, message_prefix',
-    [
-        pytest.param(HTTPClientReadTimeoutError('read timed out'), 'Request timeout', id='read timeout'),
-        pytest.param(HTTPClientConnectTimeoutError('connect timed out'), 'Request timeout', id='connect timeout'),
-        pytest.param(HTTPClientConnectionError('connection refused'), 'Request failed', id='connection error'),
-        pytest.param(HTTPClientSSLError('certificate verify failed'), 'Request failed', id='ssl error'),
-        pytest.param(HTTPClientInvalidURLError('invalid url'), 'Request failed', id='invalid url'),
-        pytest.param(FakeHTTPResponse(status_code=500), 'Request failed', id='error status'),
-        pytest.param(
-            FakeHTTPResponse(json_error=json.JSONDecodeError('Expecting value', '', 0)),
-            'JSON Parse failed',
-            id='invalid json',
-        ),
-    ],
-)
-def test_request_failure_reports_critical(aggregator, fake_http, outcome, message_prefix):
-    instance = HDFS_NAMENODE_CONFIG['instances'][0]
-    hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
-    fake_http.register_response('GET', NAME_SYSTEM_STATE_URL, outcome)
-
-    with pytest.raises(Exception) as excinfo:
-        hdfs_namenode.check(instance)
+    # Run the check once
+    dd_run_check(hdfs_namenode)
 
     aggregator.assert_service_check(
-        HDFSNameNode.JMX_SERVICE_CHECK,
-        status=HDFSNameNode.CRITICAL,
-        tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS,
-        # The stub matches messages as regular expressions, and the URL contains `?`.
-        message=re.escape('{}: {}, {}'.format(message_prefix, NAME_SYSTEM_STATE_URL, excinfo.value)),
-        count=1,
+        HDFSNameNode.JMX_SERVICE_CHECK, HDFSNameNode.OK, tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS, count=1
     )

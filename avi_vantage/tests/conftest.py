@@ -3,11 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+from typing import Any, AnyStr
+from urllib.parse import urlparse
 
+import mock
 import pytest
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
 
@@ -52,24 +56,33 @@ def get_expected_metrics():
     return _get_metrics
 
 
-UNIT_CONTROLLER_URL = 'https://34.123.32.255'
-ENTITIES = ('controller', 'pool', 'serviceengine', 'virtualservice')
-TENANT_QUERY_FOLDERS = {
-    '': NO_TENANT_METRICS_FOLDER,
-    '/?tenant=admin': ADMIN_TENANT_METRICS_FOLDER,
-    '/?tenant=admin%2Ctenant_a%2Ctenant_b': MULTIPLE_TENANTS_METRICS_FOLDER,
-}
-
-
 @pytest.fixture
-def mock_client(fake_http_response):
-    fake_http_response(f'{UNIT_CONTROLLER_URL}/login', method='POST', json_data={'results': []})
-    # The unit fixtures carry no version payload, so the check runs without version metadata.
-    fake_http_response(f'{UNIT_CONTROLLER_URL}/api/cluster/version', status_code=404)
-    for query, folder in TENANT_QUERY_FOLDERS.items():
-        for entity in ENTITIES:
-            with open(os.path.join(HERE, 'compose', 'fixtures', folder, f'{entity}_metrics'), 'rb') as f:
-                fake_http_response(f'{UNIT_CONTROLLER_URL}/api/analytics/prometheus-metrics/{entity}{query}', f.read())
+def mock_client():
+    def mock_get(url: AnyStr, *__: Any, **___: Any):
+        parsed = urlparse(url)
+        resource = [part for part in parsed.path.split('/') if len(part) > 0][-1]
+        query_params = parsed.query
+
+        path = {}
+
+        path['tenant=admin'] = ADMIN_TENANT_METRICS_FOLDER
+        path['tenant=admin%2Ctenant_a%2Ctenant_b'] = MULTIPLE_TENANTS_METRICS_FOLDER
+
+        if query_params:
+            return MockResponse(
+                file_path=os.path.join(HERE, 'compose', 'fixtures', path[query_params], f'{resource}_metrics')
+            )
+
+        return MockResponse(
+            file_path=os.path.join(HERE, 'compose', 'fixtures', NO_TENANT_METRICS_FOLDER, f'{resource}_metrics')
+        )
+
+    def mock_post(url: AnyStr, *__: Any, **___: Any):
+        return mock.MagicMock(status_code=200, content=b'{"results": []}')
+
+    with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.get', side_effect=mock_get):
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.post', new=mock_post):
+            yield
 
 
 @pytest.fixture(scope='session')

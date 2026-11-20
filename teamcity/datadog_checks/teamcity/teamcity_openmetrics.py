@@ -12,7 +12,6 @@ from .metrics import METRIC_MAP
 class TeamCityOpenMetrics(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'teamcity'
     DEFAULT_METRIC_LIMIT = 0
-    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRICS_URL = "/app/metrics"
     EXPERIMENTAL_METRICS_URL = "/app/metrics?experimental=true"

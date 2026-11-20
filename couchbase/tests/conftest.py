@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
 import os
 import subprocess
 import time
@@ -14,6 +13,7 @@ import requests
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.http import MockResponse
 
 from .common import (
     BUCKET_NAME,
@@ -311,17 +311,19 @@ def bucket_stats():
     return stats['op']['lastTStamp'] != 0
 
 
-MOCKED_RESPONSES = {
-    'http://localhost:8091/pools/default': 'pools/default/default.json',
-    'http://localhost:8091/pools/default/buckets?v=62866031&uuid=f66f28b255e70b6f2618c15228238797': 'pools/default/buckets.json',  # noqa
-    'http://localhost:8091/pools/default/buckets/cb_bucket/stats': 'pools/default/buckets/cb_buckets/stats.json',
-    'http://localhost:8091/pools/default/tasks': 'pools/default/tasks.json',
-    'http://localhost:8093/admin/vitals': 'admin/vitals.json',
-}
+def mock_http_responses(url, **_params):
+    mapping = {
+        'http://localhost:8091/pools/default': 'pools/default/default.json',
+        'http://localhost:8091/pools/default/buckets?v=62866031&uuid=f66f28b255e70b6f2618c15228238797': 'pools/default/buckets.json',  # noqa
+        'http://localhost:8091/pools/default/buckets/cb_bucket/stats': 'pools/default/buckets/cb_buckets/stats.json',
+        'http://localhost:8091/pools/default/tasks': 'pools/default/tasks.json',
+        'http://localhost:8093/admin/vitals': 'admin/vitals.json',
+    }
 
+    metrics_file = mapping.get(url)
 
-@pytest.fixture
-def couchbase_api_responses(fake_http_response):
-    for url, metrics_file in MOCKED_RESPONSES.items():
-        with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-            fake_http_response(url, json_data=json.load(f))
+    if not metrics_file:
+        pytest.fail("url `{url}` not registered".format(url=url))
+
+    with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
+        return MockResponse(content=f.read())

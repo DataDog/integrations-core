@@ -6,6 +6,7 @@ from urllib.parse import parse_qs, urlparse
 
 import pytest
 
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.teamcity.common import filter_build_configs, filter_items, filter_projects, normalize_server_url
 
 from .common import (
@@ -352,9 +353,7 @@ def test_filter_build_configs(
     assert filtered == expected_result
 
 
-def test_collects_build_config_without_default_branch_builds(
-    dd_run_check, aggregator, fake_http_response, teamcity_rest_check
-):
+def test_collects_build_config_without_default_branch_builds(dd_run_check, aggregator, mocker, teamcity_rest_check):
     """
     TeamCity's default build filter hides builds outside the default branch, as well as personal, canceled,
     and failed-to-start builds. A build configuration whose builds all fall in that set, such as one that
@@ -375,7 +374,7 @@ def test_collects_build_config_without_default_branch_builds(
         for build_id, state in ((101, 'running'), (100, 'finished'))
     ]
 
-    def teamcity_api(url):
+    def teamcity_api(url, **kwargs):
         parsed_url = urlparse(url)
         if parsed_url.path.endswith('/app/rest/builds/'):
             locator = parse_qs(parsed_url.query)['locator'][0]
@@ -388,42 +387,22 @@ def test_collects_build_config_without_default_branch_builds(
                 matching = [build for build in matching if build['id'] > since_build]
             if 'count:1' in locator:
                 matching = matching[:1]
-            return {'count': len(matching), 'build': matching}
+            return MockResponse(json_data={'count': len(matching), 'build': matching})
         if parsed_url.path.endswith('/statistics'):
             build_id = int(parsed_url.path.split('buildId:')[1].split('/')[0])
             build_duration = {'name': 'BuildDuration', 'value': build_id * 1000}
-            return {'count': 1, 'property': [build_duration]}
+            return MockResponse(json_data={'count': 1, 'property': [build_duration]})
         if parsed_url.path.endswith('/app/rest/buildTypes/id:{}'.format(build_config)):
-            return {'id': build_config, 'projectId': 'SampleProject'}
-        return {'count': 0}
+            return MockResponse(json_data={'id': build_config, 'projectId': 'SampleProject'})
+        return MockResponse(json_data={'count': 0})
 
+    mocker.patch('requests.Session.get', side_effect=teamcity_api)
     instance = dict(LEGACY_REST_INSTANCE, tests_health_check=False, build_problem_health_check=False)
     check = teamcity_rest_check(instance)
-    # The fake matches exact URLs and cannot compute a response per request, so the requests the check is
-    # expected to send are listed here and re-registered whenever the simulated server state changes.
-    api_paths = [
-        '/app/rest/buildTypes/id:{}'.format(build_config),
-        '/app/rest/buildTypes/id:{}/settings'.format(build_config),
-        '/app/rest/server',
-        '/app/rest/builds/?locator=buildType:{},project:SampleProject,state:finished,defaultFilter:false,count:1'.format(
-            build_config
-        ),
-        '/app/rest/builds/?locator=buildType:{},sinceBuild:id:100,state:finished,defaultFilter:false'.format(
-            build_config
-        ),
-        '/app/rest/builds/buildId:101/statistics',
-    ]
 
-    def serve_api():
-        for path in api_paths:
-            url = check.base_url + path
-            fake_http_response(url, json_data=teamcity_api(url))
-
-    serve_api()
     dd_run_check(check)
     aggregator.assert_metric('teamcity.build_duration', count=0)
     builds[0]['state'] = 'finished'
-    serve_api()
     dd_run_check(check)
 
     aggregator.assert_metric('teamcity.build_duration', value=101000, count=1)

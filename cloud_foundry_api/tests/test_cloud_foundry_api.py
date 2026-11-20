@@ -2,22 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
-
 import mock
 import pytest
+from requests.exceptions import HTTPError, RequestException
 
 from datadog_checks.base.errors import CheckException, ConfigurationError
-from datadog_checks.base.stubs.http import RecordedRequest
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.cloud_foundry_api import CloudFoundryApiCheck
 
 from .constants import FREEZE_TIME
-
-API_URL = "https://api.sys.domain.com"
-OAUTH_TOKEN_URL = "https://uaa.sys.domain.com/oauth/token"
-# FakeHTTPResponse.json() does not parse `content`, so an invalid body needs its decoding error spelled out.
-INVALID_JSON_ERROR = json.JSONDecodeError("Expecting value", "not json", 0)
 
 
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
@@ -144,23 +136,26 @@ def test_get_events(_, __, ___, instance, dd_events):
 @mock.patch.object(
     CloudFoundryApiCheck, "get_spaces", return_value={"fe712d4e-91a9-46f2-b82c-fa26da40dc53": "space_name"}
 )
-def test_scroll_events(
-    _, __, ___, ____, aggregator, instance, events_v3_p0, events_v3_p1, events_v3_p2, fake_http, fake_http_response
-):
-    fake_http_response("url", json_data=events_v3_p1, once=True)
-    fake_http_response("url", json_data=events_v3_p2, once=True)
+@mock.patch.object(CloudFoundryApiCheck, "http")
+def test_scroll_events(http_mock, _, __, ___, ____, aggregator, instance, events_v3_p0, events_v3_p1, events_v3_p2):
+    events_res_p0 = mock.MagicMock()
+    events_res_p1 = mock.MagicMock()
+    events_res_p2 = mock.MagicMock()
+    events_res_p0.json.return_value = events_v3_p0
+    events_res_p1.json.return_value = events_v3_p1
+    events_res_p2.json.return_value = events_v3_p2
+    http_mock.get.side_effect = (events_res_p1, events_res_p2)
 
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
 
     with mock.patch.object(check, "log") as log_mock:
         dd_events = check.scroll_events("url", {"param": "foo"}, {"header": "bar"})
 
-    fake_http.assert_requests(
-        [
-            RecordedRequest("GET", "url", {"params": {"param": "foo", "page": 1}, "headers": {"header": "bar"}}),
-            RecordedRequest("GET", "url", {"params": {"param": "foo", "page": 2}, "headers": {"header": "bar"}}),
-        ]
-    )
+    expected_calls = [
+        (("url",), ({"params": {"param": "foo", "page": 1}, "headers": {"header": "bar"}})),
+        (("url",), ({"params": {"param": "foo", "page": 2}, "headers": {"header": "bar"}})),
+    ]
+    assert http_mock.get.call_args_list == expected_calls
     # Only 3 events collected, the fourth one is too old
     assert len(dd_events) == 3
     # The bad event is skipped
@@ -168,14 +163,13 @@ def test_scroll_events(
     assert "Could not parse event" in log_mock.exception.call_args[0][0]
 
     # On second call, we collect only new events from page 0, and don't go to the second page
-    fake_http.requests.clear()
-    fake_http_response("url", json_data=events_v3_p0, once=True)
-    fake_http_response("url", json_data=events_v3_p1, once=True)
+    http_mock.reset_mock()
+    # reset_mock doesn't reset side_effect or return_value, so manually reassign it
+    http_mock.get.side_effect = (events_res_p0, events_res_p1)
     dd_events = check.scroll_events("url", {"param": "foo"}, {"header": "bar"})
 
-    fake_http.assert_requests(
-        [RecordedRequest("GET", "url", {"params": {"param": "foo", "page": 1}, "headers": {"header": "bar"}})]
-    )
+    expected_calls = [(("url",), ({"params": {"param": "foo", "page": 1}, "headers": {"header": "bar"}}))]
+    assert http_mock.get.call_args_list == expected_calls
     assert len(dd_events) == 1
 
     aggregator.assert_service_check(
@@ -192,74 +186,74 @@ def test_scroll_events(
     CloudFoundryApiCheck, "get_spaces", return_value={"fe712d4e-91a9-46f2-b82c-fa26da40dc53": "space_name"}
 )
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
-def test_scroll_events_errors(_, __, ___, ____, aggregator, instance, events_v3_p1, fake_http, fake_http_response):
+def test_scroll_events_errors(_, __, ___, ____, aggregator, instance, events_v3_p1):
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
+    check._http = None  # initialize the _http attribute for mocking
 
-    fake_http.register_response("GET", "", HTTPClientConnectionError("connection refused"))
-    check.scroll_events("", {}, {})
-    aggregator.assert_service_check(
-        name="cloud_foundry_api.api.can_connect",
-        status=CloudFoundryApiCheck.CRITICAL,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-        count=1,
-    )
-    aggregator.reset()
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.side_effect = RequestException()
+        check.scroll_events("", {}, {})
+        aggregator.assert_service_check(
+            name="cloud_foundry_api.api.can_connect",
+            status=CloudFoundryApiCheck.CRITICAL,
+            tags=["api_url:api.sys.domain.com", "foo:bar"],
+            count=1,
+        )
+        aggregator.reset()
 
-    fake_http_response("", status_code=500)
-    check.scroll_events("", {}, {})
-    aggregator.assert_service_check(
-        name="cloud_foundry_api.api.can_connect",
-        status=CloudFoundryApiCheck.CRITICAL,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-        count=1,
-    )
-    aggregator.reset()
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.return_value = mock.MagicMock(raise_for_status=mock.MagicMock(side_effect=HTTPError()))
+        check.scroll_events("", {}, {})
+        aggregator.assert_service_check(
+            name="cloud_foundry_api.api.can_connect",
+            status=CloudFoundryApiCheck.CRITICAL,
+            tags=["api_url:api.sys.domain.com", "foo:bar"],
+            count=1,
+        )
+        aggregator.reset()
 
-    fake_http_response("", "not json", json_error=INVALID_JSON_ERROR)
-    check.scroll_events("", {}, {})
-    aggregator.assert_service_check(
-        name="cloud_foundry_api.api.can_connect",
-        status=CloudFoundryApiCheck.CRITICAL,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-        count=1,
-    )
-    aggregator.reset()
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(side_effect=ValueError()))
+        check.scroll_events("", {}, {})
+        aggregator.assert_service_check(
+            name="cloud_foundry_api.api.can_connect",
+            status=CloudFoundryApiCheck.CRITICAL,
+            tags=["api_url:api.sys.domain.com", "foo:bar"],
+            count=1,
+        )
+        aggregator.reset()
 
     # Getting an error in the middle of pagination still sends a critical service check,
     # but returns the events already gathered
-    fake_http_response("", json_data=events_v3_p1, once=True)
-    fake_http.register_response("GET", "", HTTPClientConnectionError("connection refused"), once=True)
-    dd_events = check.scroll_events("", {}, {})
-    aggregator.assert_service_check(
-        name="cloud_foundry_api.api.can_connect",
-        status=CloudFoundryApiCheck.CRITICAL,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-        count=1,
-    )
-    assert len(dd_events) == 2
+    with mock.patch.object(check, "_http") as http_mock:
+        events_res_p1 = mock.MagicMock()
+        events_res_p1.json.return_value = events_v3_p1
+        http_mock.get.side_effect = (events_res_p1, RequestException())
+        dd_events = check.scroll_events("", {}, {})
+        aggregator.assert_service_check(
+            name="cloud_foundry_api.api.can_connect",
+            status=CloudFoundryApiCheck.CRITICAL,
+            tags=["api_url:api.sys.domain.com", "foo:bar"],
+            count=1,
+        )
+        assert len(dd_events) == 2
 
 
 @mock.patch("datadog_checks.cloud_foundry_api.cloud_foundry_api.time.time", return_value=FREEZE_TIME)
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "https://uaa.sys.domain.com"))
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={})
-def test_get_oauth_token(_, __, ___, ____, aggregator, instance, oauth_token, fake_http, fake_http_response):
+@mock.patch.object(CloudFoundryApiCheck, "http")
+def test_get_oauth_token(http_mock, _, __, ___, ____, aggregator, instance, oauth_token):
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
-    fake_http_response(OAUTH_TOKEN_URL, json_data=oauth_token)
+    oauth_res = mock.MagicMock()
+    oauth_res.json.return_value = oauth_token
+    http_mock.get.return_value = oauth_res
 
     # Token gets fetched properly
     check.get_oauth_token()
     assert check._oauth_token == "token"
     assert check._token_expiration == FREEZE_TIME + 1000
-    fake_http.assert_requests(
-        [
-            RecordedRequest(
-                "GET",
-                OAUTH_TOKEN_URL,
-                {"auth": ("client_id", "client_secret"), "params": {"grant_type": "client_credentials"}},
-            )
-        ]
-    )
     aggregator.assert_service_check(
         name="cloud_foundry_api.uaa.can_authenticate",
         status=CloudFoundryApiCheck.OK,
@@ -285,87 +279,95 @@ def test_get_oauth_token(_, __, ___, ____, aggregator, instance, oauth_token, fa
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "https://uaa.sys.domain.com"))
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={})
-def test_get_oauth_token_errors(_, __, ___, aggregator, instance, fake_http, fake_http_response):
+def test_get_oauth_token_errors(_, __, ___, aggregator, instance):
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
+    check._http = None  # initialize the _http attribute for mocking
 
-    fake_http.register_response("GET", OAUTH_TOKEN_URL, HTTPClientConnectionError("connection refused"))
-    with pytest.raises(HTTPClientConnectionError):
-        check.get_oauth_token()
-    aggregator.assert_service_check(
-        name="cloud_foundry_api.uaa.can_authenticate",
-        status=CloudFoundryApiCheck.CRITICAL,
-        tags=["uaa_url:uaa.sys.domain.com", "foo:bar", "api_url:api.sys.domain.com"],
-        count=1,
-    )
-    aggregator.reset()
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.side_effect = RequestException()
+        with pytest.raises(RequestException):
+            check.get_oauth_token()
+        aggregator.assert_service_check(
+            name="cloud_foundry_api.uaa.can_authenticate",
+            status=CloudFoundryApiCheck.CRITICAL,
+            tags=["uaa_url:uaa.sys.domain.com", "foo:bar", "api_url:api.sys.domain.com"],
+            count=1,
+        )
+        aggregator.reset()
 
-    fake_http_response(OAUTH_TOKEN_URL, status_code=401)
-    with pytest.raises(HTTPClientStatusError):
-        check.get_oauth_token()
-    aggregator.assert_service_check(
-        name="cloud_foundry_api.uaa.can_authenticate",
-        status=CloudFoundryApiCheck.CRITICAL,
-        tags=["uaa_url:uaa.sys.domain.com", "foo:bar", "api_url:api.sys.domain.com"],
-        count=1,
-    )
-    aggregator.reset()
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.return_value = mock.MagicMock(raise_for_status=mock.MagicMock(side_effect=HTTPError()))
+        with pytest.raises(HTTPError):
+            check.get_oauth_token()
+        aggregator.assert_service_check(
+            name="cloud_foundry_api.uaa.can_authenticate",
+            status=CloudFoundryApiCheck.CRITICAL,
+            tags=["uaa_url:uaa.sys.domain.com", "foo:bar", "api_url:api.sys.domain.com"],
+            count=1,
+        )
+        aggregator.reset()
 
-    fake_http_response(OAUTH_TOKEN_URL, "not json", json_error=INVALID_JSON_ERROR)
-    with pytest.raises(ValueError):
-        check.get_oauth_token()
-    aggregator.assert_service_check(
-        name="cloud_foundry_api.uaa.can_authenticate",
-        status=CloudFoundryApiCheck.CRITICAL,
-        tags=["uaa_url:uaa.sys.domain.com", "foo:bar", "api_url:api.sys.domain.com"],
-        count=1,
-    )
-    aggregator.reset()
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(side_effect=ValueError()))
+        with pytest.raises(ValueError):
+            check.get_oauth_token()
+        aggregator.assert_service_check(
+            name="cloud_foundry_api.uaa.can_authenticate",
+            status=CloudFoundryApiCheck.CRITICAL,
+            tags=["uaa_url:uaa.sys.domain.com", "foo:bar", "api_url:api.sys.domain.com"],
+            count=1,
+        )
+        aggregator.reset()
 
 
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={})
-def test_discover_api(_, __, api_info_v3, api_info_v2, instance, fake_http_response):
+def test_discover_api(_, __, api_info_v3, api_info_v2, instance):
     # Mock for creating the instance only
     with mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url")):
         check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
+    check._http = None  # initialize the _http attribute for mocking
 
     # v2
-    fake_http_response(API_URL, json_data=api_info_v2)
-    api_version, uaa_url = check.discover_api()
-    assert api_version == "v2"
-    assert uaa_url == "https://uaa.sys.domain.com"
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(return_value=api_info_v2))
+        api_version, uaa_url = check.discover_api()
+        assert api_version == "v2"
+        assert uaa_url == "https://uaa.sys.domain.com"
     # v3
-    fake_http_response(API_URL, json_data=api_info_v3)
-    api_version, uaa_url = check.discover_api()
-    assert api_version == "v3"
-    assert uaa_url == "https://uaa.sys.domain.com"
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(return_value=api_info_v3))
+        api_version, uaa_url = check.discover_api()
+        assert api_version == "v3"
+        assert uaa_url == "https://uaa.sys.domain.com"
 
 
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={})
-def test_discover_api_errors(_, __, instance, fake_http, fake_http_response):
+def test_discover_api_errors(_, __, instance):
     # Mock for creating the instance only
     with mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url")):
         check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
+    check._http = None  # initialize the _http attribute for mocking
 
-    fake_http.register_response("GET", API_URL, HTTPClientConnectionError("connection refused"))
-    with pytest.raises(HTTPClientConnectionError):
+    with mock.patch.object(check, "_http") as http_mock, pytest.raises(RequestException):
+        http_mock.get.side_effect = RequestException()
         check.discover_api()
 
-    fake_http_response(API_URL, status_code=500)
-    with pytest.raises(HTTPClientStatusError):
+    with mock.patch.object(check, "_http") as http_mock, pytest.raises(HTTPError):
+        http_mock.get.return_value = mock.MagicMock(raise_for_status=mock.MagicMock(side_effect=HTTPError()))
         check.discover_api()
 
-    fake_http_response(API_URL, "not json", json_error=INVALID_JSON_ERROR)
-    with pytest.raises(ValueError):
+    with mock.patch.object(check, "_http") as http_mock, pytest.raises(ValueError):
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(side_effect=ValueError()))
         check.discover_api()
 
-    fake_http_response(API_URL, json_data={"no_links": None})
-    with pytest.raises(CheckException):
+    with mock.patch.object(check, "_http") as http_mock, pytest.raises(CheckException):
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(return_value={"no_links": None}))
         check.discover_api()
 
-    fake_http_response(API_URL, json_data={"links": {"no_uaa": None}})
-    with pytest.raises(CheckException):
+    with mock.patch.object(check, "_http") as http_mock, pytest.raises(CheckException):
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(return_value={"links": {"no_uaa": None}}))
         check.discover_api()
 
 
@@ -511,32 +513,30 @@ def test_build_dd_event(_, __, ___, instance):
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"org_guid": "org_name"})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_guid": "space_name"})
 @mock.patch("datadog_checks.cloud_foundry_api.cloud_foundry_api.get_next_url", side_effect=["next", ""])
-def test_scroll_api_pages(get_next_url_mock, __, ___, ____, aggregator, instance, fake_http, fake_http_response):
+@mock.patch.object(CloudFoundryApiCheck, "http")
+def test_scroll_api_pages(http_mock, get_next_url_mock, __, ___, ____, aggregator, instance):
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
-    fake_http_response("api_url", json_data={})
 
     # When exhausting all pages
     for _ in check.scroll_api_pages("api_url", {}, {}):
         pass
 
-    fake_http.assert_requests(
-        [
-            RecordedRequest("GET", "api_url", {"params": {"page": 1}, "headers": {}}),
-            RecordedRequest("GET", "api_url", {"params": {"page": 2}, "headers": {}}),
-        ]
-    )
+    assert http_mock.get.call_args_list == [
+        mock.call("api_url", params={"page": 1}, headers={}),
+        mock.call("api_url", params={"page": 2}, headers={}),
+    ]
     aggregator.assert_service_check(
         "cloud_foundry_api.api.can_connect", count=1, tags=["api_url:api.sys.domain.com", "foo:bar"]
     )
 
     # When breaking in the middle of pagination
-    fake_http.requests.clear()
+    http_mock.get.reset_mock()
     aggregator.reset()
     get_next_url_mock.side_effect = ["next", ""]
     for _ in check.scroll_api_pages("api_url", {}, {}):
         break
 
-    fake_http.assert_requests([RecordedRequest("GET", "api_url", {"params": {"page": 1}, "headers": {}})])
+    assert http_mock.get.call_args_list == [mock.call("api_url", params={"page": 1}, headers={})]
     aggregator.assert_service_check(
         "cloud_foundry_api.api.can_connect",
         status=CloudFoundryApiCheck.OK,
@@ -548,59 +548,63 @@ def test_scroll_api_pages(get_next_url_mock, __, ___, ____, aggregator, instance
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"org_guid": "org_name"})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_guid": "space_name"})
-def test_scroll_api_pages_errors(_, __, ___, aggregator, instance, fake_http, fake_http_response):
+def test_scroll_api_pages_errors(_, __, ___, aggregator, instance):
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
+    check._http = None
 
-    fake_http.register_response("GET", "", HTTPClientConnectionError("connection refused"))
-    for _ in check.scroll_api_pages("", {}, {}):
-        pass
-    aggregator.assert_service_check(
-        name="cloud_foundry_api.api.can_connect",
-        status=CloudFoundryApiCheck.CRITICAL,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        "cloud_foundry_api.api.can_connect",
-        status=CloudFoundryApiCheck.OK,
-        count=0,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-    )
-    aggregator.reset()
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.side_effect = RequestException()
+        for _ in check.scroll_api_pages("", {}, {}):
+            pass
+        aggregator.assert_service_check(
+            name="cloud_foundry_api.api.can_connect",
+            status=CloudFoundryApiCheck.CRITICAL,
+            tags=["api_url:api.sys.domain.com", "foo:bar"],
+            count=1,
+        )
+        aggregator.assert_service_check(
+            "cloud_foundry_api.api.can_connect",
+            status=CloudFoundryApiCheck.OK,
+            count=0,
+            tags=["api_url:api.sys.domain.com", "foo:bar"],
+        )
+        aggregator.reset()
 
-    fake_http_response("", status_code=500)
-    for _ in check.scroll_api_pages("", {}, {}):
-        pass
-    aggregator.assert_service_check(
-        name="cloud_foundry_api.api.can_connect",
-        status=CloudFoundryApiCheck.CRITICAL,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        "cloud_foundry_api.api.can_connect",
-        status=CloudFoundryApiCheck.OK,
-        count=0,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-    )
-    aggregator.reset()
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.return_value = mock.MagicMock(raise_for_status=mock.MagicMock(side_effect=HTTPError()))
+        for _ in check.scroll_api_pages("", {}, {}):
+            pass
+        aggregator.assert_service_check(
+            name="cloud_foundry_api.api.can_connect",
+            status=CloudFoundryApiCheck.CRITICAL,
+            tags=["api_url:api.sys.domain.com", "foo:bar"],
+            count=1,
+        )
+        aggregator.assert_service_check(
+            "cloud_foundry_api.api.can_connect",
+            status=CloudFoundryApiCheck.OK,
+            count=0,
+            tags=["api_url:api.sys.domain.com", "foo:bar"],
+        )
+        aggregator.reset()
 
-    fake_http_response("", "not json", json_error=INVALID_JSON_ERROR)
-    for _ in check.scroll_api_pages("", {}, {}):
-        pass
-    aggregator.assert_service_check(
-        name="cloud_foundry_api.api.can_connect",
-        status=CloudFoundryApiCheck.CRITICAL,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-        count=1,
-    )
-    aggregator.assert_service_check(
-        "cloud_foundry_api.api.can_connect",
-        status=CloudFoundryApiCheck.OK,
-        count=0,
-        tags=["api_url:api.sys.domain.com", "foo:bar"],
-    )
-    aggregator.reset()
+    with mock.patch.object(check, "_http") as http_mock:
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(side_effect=ValueError()))
+        for _ in check.scroll_api_pages("", {}, {}):
+            pass
+        aggregator.assert_service_check(
+            name="cloud_foundry_api.api.can_connect",
+            status=CloudFoundryApiCheck.CRITICAL,
+            tags=["api_url:api.sys.domain.com", "foo:bar"],
+            count=1,
+        )
+        aggregator.assert_service_check(
+            "cloud_foundry_api.api.can_connect",
+            status=CloudFoundryApiCheck.OK,
+            count=0,
+            tags=["api_url:api.sys.domain.com", "foo:bar"],
+        )
+        aggregator.reset()
 
 
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
@@ -662,48 +666,37 @@ def test_get_spaces(_, __, instance, spaces_v2_p1, spaces_v2_p2, spaces_v3_p1, s
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"org_guid": "org_name"})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_guid": "space_name"})
-def test_get_org_name(_, __, ___, instance, org_v2, org_v3, fake_http, fake_http_response):
+@mock.patch.object(CloudFoundryApiCheck, "http")
+def test_get_org_name(http_mock, _, __, ___, instance, org_v2, org_v3):
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
     with mock.patch.object(check, "get_oauth_token"), mock.patch.object(check, "log") as log_mock:
         # Cache access
         assert check._orgs["org_guid"] == "org_name"
         assert check.get_org_name("org_guid") == "org_name"
-        fake_http.assert_requests([])
+        http_mock.get.assert_not_called()
 
         # Cache miss
         # v2
-        fake_http_response("https://api.sys.domain.com/v2/organizations/new_id", json_data=org_v2)
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(return_value=org_v2))
         check._api_version = "v2"
         assert check.get_org_name("new_id") == "org_1"
         assert check._orgs["new_id"] == "org_1"
-        fake_http.assert_requests(
-            [
-                RecordedRequest(
-                    "GET",
-                    "https://api.sys.domain.com/v2/organizations/new_id",
-                    {"headers": {"Authorization": "Bearer {}".format(check._oauth_token)}},
-                )
-            ]
+        http_mock.get.assert_called_once_with(
+            "https://api.sys.domain.com/v2/organizations/new_id",
+            headers={"Authorization": "Bearer {}".format(check._oauth_token)},
         )
         # v3
-        fake_http.requests.clear()
-        fake_http_response("https://api.sys.domain.com/v3/organizations/new_id_2", json_data=org_v3)
+        http_mock.get.reset_mock()
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(return_value=org_v3))
         check._api_version = "v3"
         assert check.get_org_name("new_id_2") == "org_1"
         assert check._orgs["new_id_2"] == "org_1"
-        fake_http.assert_requests(
-            [
-                RecordedRequest(
-                    "GET",
-                    "https://api.sys.domain.com/v3/organizations/new_id_2",
-                    {"headers": {"Authorization": "Bearer {}".format(check._oauth_token)}},
-                )
-            ]
+        http_mock.get.assert_called_once_with(
+            "https://api.sys.domain.com/v3/organizations/new_id_2",
+            headers={"Authorization": "Bearer {}".format(check._oauth_token)},
         )
         # Error
-        fake_http.register_response(
-            "GET", "https://api.sys.domain.com/v3/organizations/id_error", HTTPClientConnectionError("refused")
-        )
+        http_mock.get.side_effect = RequestException
         assert check.get_org_name("id_error") is None
         log_mock.exception.assert_called_once()
 
@@ -711,48 +704,37 @@ def test_get_org_name(_, __, ___, instance, org_v2, org_v3, fake_http, fake_http
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
 @mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"org_guid": "org_name"})
 @mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_guid": "space_name"})
-def test_get_space_name(_, __, ___, instance, space_v2, space_v3, fake_http, fake_http_response):
+@mock.patch.object(CloudFoundryApiCheck, "http")
+def test_get_space_name(http_mock, _, __, ___, instance, space_v2, space_v3):
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
     with mock.patch.object(check, "get_oauth_token"), mock.patch.object(check, "log") as log_mock:
         # Cache access
         assert check._spaces["space_guid"] == "space_name"
         assert check.get_space_name("space_guid") == "space_name"
-        fake_http.assert_requests([])
+        http_mock.get.assert_not_called()
 
         # Cache miss
         # v2
-        fake_http_response("https://api.sys.domain.com/v2/spaces/new_id", json_data=space_v2)
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(return_value=space_v2))
         check._api_version = "v2"
         assert check.get_space_name("new_id") == "space_1"
         assert check._spaces["new_id"] == "space_1"
-        fake_http.assert_requests(
-            [
-                RecordedRequest(
-                    "GET",
-                    "https://api.sys.domain.com/v2/spaces/new_id",
-                    {"headers": {"Authorization": "Bearer {}".format(check._oauth_token)}},
-                )
-            ]
+        http_mock.get.assert_called_once_with(
+            "https://api.sys.domain.com/v2/spaces/new_id",
+            headers={"Authorization": "Bearer {}".format(check._oauth_token)},
         )
         # v3
-        fake_http.requests.clear()
-        fake_http_response("https://api.sys.domain.com/v3/spaces/new_id_2", json_data=space_v3)
+        http_mock.get.reset_mock()
+        http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(return_value=space_v3))
         check._api_version = "v3"
         assert check.get_space_name("new_id_2") == "space_1"
         assert check._spaces["new_id_2"] == "space_1"
-        fake_http.assert_requests(
-            [
-                RecordedRequest(
-                    "GET",
-                    "https://api.sys.domain.com/v3/spaces/new_id_2",
-                    {"headers": {"Authorization": "Bearer {}".format(check._oauth_token)}},
-                )
-            ]
+        http_mock.get.assert_called_once_with(
+            "https://api.sys.domain.com/v3/spaces/new_id_2",
+            headers={"Authorization": "Bearer {}".format(check._oauth_token)},
         )
         # Error
-        fake_http.register_response(
-            "GET", "https://api.sys.domain.com/v3/spaces/id_error", HTTPClientConnectionError("refused")
-        )
+        http_mock.get.side_effect = RequestException
         assert check.get_space_name("id_error") is None
         log_mock.exception.assert_called_once()
 

@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
+from requests.exceptions import ConnectionError
 
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.gitlab import GitlabCheck
 
 from .common import (
@@ -48,7 +49,7 @@ def test_check_gitaly(dd_run_check, aggregator, gitlab_check, get_config):
 def test_connection_failure(aggregator, gitlab_check, get_bad_config):
     check = gitlab_check(get_bad_config(False))
 
-    with pytest.raises(HTTPClientConnectionError):
+    with pytest.raises(ConnectionError):
         check.check(None)
 
     # We should get only one extra failed service check, the first (readiness)
@@ -70,7 +71,7 @@ def test_connection_failure(aggregator, gitlab_check, get_bad_config):
 def test_connection_failure_openmetrics(dd_run_check, aggregator, gitlab_check, get_bad_config):
     check = gitlab_check(get_bad_config(True))
 
-    with pytest.raises(Exception, match="HTTPClientConnectionError"):
+    with pytest.raises(Exception, match="requests.exceptions.ConnectionError"):
         dd_run_check(check)
 
     aggregator.assert_service_check(
@@ -88,3 +89,62 @@ def test_connection_failure_openmetrics(dd_run_check, aggregator, gitlab_check, 
             status=GitlabCheck.CRITICAL,
             count=1,
         )
+
+
+@pytest.mark.parametrize(
+    'raw_version, version_metadata',
+    [
+        pytest.param(
+            '12.7.6',
+            {
+                'version.scheme': 'semver',
+                'version.major': '12',
+                'version.minor': '7',
+                'version.patch': '6',
+                'version.raw': '12.7.6',
+            },
+            id="12.7.9",
+        ),
+        pytest.param(
+            '1.4.5',
+            {
+                'version.scheme': 'semver',
+                'version.major': '1',
+                'version.minor': '4',
+                'version.patch': '5',
+                'version.raw': '1.4.5',
+            },
+            id="1.4.5",
+        ),
+    ],
+)
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
+@pytest.mark.parametrize('enable_metadata_collection', [True, False])
+def test_check_submit_metadata(
+    dd_run_check,
+    aggregator,
+    datadog_agent,
+    raw_version,
+    version_metadata,
+    gitlab_check,
+    get_auth_config,
+    enable_metadata_collection,
+    use_openmetrics,
+):
+    with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
+        # mock the api call so that it returns the given version
+        g.return_value = {"version": raw_version}
+
+        datadog_agent.reset()
+        datadog_agent._config["enable_metadata_collection"] = enable_metadata_collection
+
+        dd_run_check(gitlab_check(get_auth_config(use_openmetrics)))
+
+        # With use_openmetrics, we also have a request to get the service checks.
+        if enable_metadata_collection:
+            assert g.call_count == (2 if use_openmetrics else 1)
+            datadog_agent.assert_metadata('test:123', version_metadata)
+            datadog_agent.assert_metadata_count(5)
+        else:
+            assert g.call_count == (1 if use_openmetrics else 0)
+            datadog_agent.assert_metadata_count(0)

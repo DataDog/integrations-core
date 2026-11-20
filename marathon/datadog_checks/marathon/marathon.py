@@ -4,16 +4,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urljoin
 
+import requests
+
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientStatusError,
-    HTTPClientTimeoutError,
-)
 
 
 class Marathon(AgentCheck):
-    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_TIMEOUT = 5
     SERVICE_CHECK_NAME = 'marathon.can_connect'
     ACS_TOKEN = None
@@ -92,7 +88,7 @@ class Marathon(AgentCheck):
             token = r.json()['token']
             self.ACS_TOKEN = token
             return token
-        except HTTPClientStatusError:
+        except requests.exceptions.HTTPError:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -109,7 +105,7 @@ class Marathon(AgentCheck):
             # If the ACS token has not been set, go get it
             if not self.ACS_TOKEN:
                 self.refresh_acs_token(acs_url, tags)
-            self.http.set_header('authorization', 'token={}'.format(self.ACS_TOKEN))
+            self.http.options['headers']['authorization'] = 'token={}'.format(self.ACS_TOKEN)
 
         try:
             r = self.http.get(url)
@@ -118,7 +114,7 @@ class Marathon(AgentCheck):
                 self.refresh_acs_token(acs_url, tags)
                 r = self.http.get(url)
             r.raise_for_status()
-        except HTTPClientTimeoutError:
+        except requests.exceptions.Timeout:
             # If there's a timeout
             self.service_check(
                 self.SERVICE_CHECK_NAME,
@@ -128,7 +124,7 @@ class Marathon(AgentCheck):
             )
             raise Exception("Timeout when hitting {}".format(url))
 
-        except HTTPClientStatusError:
+        except requests.exceptions.HTTPError:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -137,8 +133,7 @@ class Marathon(AgentCheck):
             )
             raise Exception("Got {} when hitting {}".format(r.status_code, url))
 
-        # Connect timeouts are not connection errors here: the timeout clause above reports them.
-        except HTTPClientConnectionError:
+        except requests.exceptions.ConnectionError:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
