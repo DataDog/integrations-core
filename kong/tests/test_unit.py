@@ -127,12 +127,12 @@ def test_check(aggregator, dd_run_check, fake_http_response):
 
 
 def test_v2_default_metric_limit_is_zero():
-    # Kills the core/NumberReplacer mutant at check.py:12 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    # 0 removes the 2000-metric limit that OpenMetrics V2 checks default to, so large scrapes are not truncated.
     assert KongCheck.DEFAULT_METRIC_LIMIT == 0
 
 
 def test_v2_transformer_only_processes_sample_with_value_exactly_one(aggregator):
-    # Kills the core/ReplaceComparisonOperator_NotEq_Lt mutant at check.py:28 (sample.value != 1 -> < 1).
+    # Only a sample with value 1 marks the current state; any other value, including above 1, is ignored.
     check = KongCheck('kong', {}, [{'openmetrics_endpoint': METRICS_URL}])
     service_check = check.configure_transformer_upstream_target_health()
 
@@ -143,7 +143,7 @@ def test_v2_transformer_only_processes_sample_with_value_exactly_one(aggregator)
 
 
 def test_v2_transformer_processes_samples_after_skipping_one(aggregator):
-    # Kills the core/ReplaceContinueWithBreak mutant at check.py:29 (continue -> break drops later samples).
+    # Skipping an ignored sample must not stop the samples after it from being reported.
     check = KongCheck('kong', {}, [{'openmetrics_endpoint': METRICS_URL}])
     service_check = check.configure_transformer_upstream_target_health()
 
@@ -159,13 +159,13 @@ def test_v2_transformer_processes_samples_after_skipping_one(aggregator):
 
 
 def test_legacy_new_uses_first_instance_to_choose_check_class():
-    # Kills the core/NumberReplacer mutant at kong.py:26 (instances[0] -> instances[-1]).
+    # The first instance decides between the OpenMetrics check and the legacy status-page check.
     check = Kong('kong', {}, [{'openmetrics_endpoint': METRICS_URL}, {'kong_status_url': STATUS_URL}])
     assert isinstance(check, KongCheck)
 
 
 def test_legacy_fetch_data_raises_when_status_url_missing():
-    # Kills the core/AddNot mutant at kong.py:43 (double negation flips the missing-config check).
+    # A legacy instance without `kong_status_url` fails with a clear configuration error.
     check = Kong('kong', {}, [{'tags': []}])
     with pytest.raises(Exception, match='missing "kong_status_url" value'):
         check._fetch_data()
@@ -174,9 +174,7 @@ def test_legacy_fetch_data_raises_when_status_url_missing():
 def test_legacy_fetch_data_can_connect_tags_use_default_port_and_appended_tags(
     aggregator, dd_run_check, fake_http_response
 ):
-    # Kills the core/NumberReplacer and ReplaceOrWithAnd mutants at kong.py:50 (default port 80 -> 79/81 or "or"->"and")
-    # and the ReplaceBinaryOperator_Add_* / ReplaceBinaryOperator_Mod_* mutants at kong.py:52
-    # (tag list "+" and the "%" string formatting inside it).
+    # A status URL without a port is tagged with port 80, and the instance tags follow the host and port tags.
     fake_http_response(LEGACY_STATUS_URL, json_data={'server': {}})
     instance = {'kong_status_url': LEGACY_STATUS_URL, 'tags': ['env:test']}
     check = Kong('kong', {}, [instance])
@@ -188,8 +186,7 @@ def test_legacy_fetch_data_can_connect_tags_use_default_port_and_appended_tags(
 
 
 def test_legacy_parse_json_defaults_tags_and_prefixes_metric_names():
-    # Kills the core/ReplaceComparisonOperator_Is_IsNot and AddNot mutants at kong.py:71 (tags is None check),
-    # the ZeroIterationForLoop mutant at kong.py:77, and the ReplaceBinaryOperator_Add_* mutants at kong.py:78.
+    # Without tags, every `server` stat becomes a `kong.`-prefixed metric with an empty tag list.
     check = Kong('kong', {}, [{'kong_status_url': 'http://myhost/status/'}])
     raw = json.dumps({'server': {'total_requests': 42}}).encode('utf-8')
 
@@ -199,8 +196,7 @@ def test_legacy_parse_json_defaults_tags_and_prefixes_metric_names():
 
 
 def test_legacy_check_continues_after_metric_submission_error(aggregator, dd_run_check, fake_http_response):
-    # Kills the core/ZeroIterationForLoop mutant at kong.py:35 and the ExceptionReplacer mutant at kong.py:39
-    # (a bad metric value must not stop later metrics in the loop from being submitted).
+    # A value that can't be submitted is logged and skipped; the metrics after it are still submitted.
     fake_http_response(LEGACY_STATUS_URL, json_data={'server': {'bad_metric': 'oops', 'good_metric': 5}})
     instance = {'kong_status_url': LEGACY_STATUS_URL, 'tags': []}
     check = Kong('kong', {}, [instance])
@@ -211,7 +207,7 @@ def test_legacy_check_continues_after_metric_submission_error(aggregator, dd_run
 
 
 def test_legacy_check_submits_critical_service_check_on_http_error(aggregator, fake_http_response):
-    # Kills the core/ExceptionReplacer mutant at kong.py:59 (except Exception -> except CosmicRayTestingException).
+    # Any HTTP failure reports `kong.can_connect` as CRITICAL before the error propagates.
     fake_http_response(LEGACY_STATUS_URL, status_code=500)
     instance = {'kong_status_url': LEGACY_STATUS_URL, 'tags': []}
     check = Kong('kong', {}, [instance])
@@ -223,7 +219,7 @@ def test_legacy_check_submits_critical_service_check_on_http_error(aggregator, f
 
 
 def test_legacy_check_treats_status_code_below_200_as_critical(aggregator, fake_http_response):
-    # Kills the core/ReplaceComparisonOperator_Eq_LtE mutant at kong.py:63 (status_code == 200 -> <= 200).
+    # Only status 200 counts as reachable; a non-error status below 200 is CRITICAL.
     fake_http_response(LEGACY_STATUS_URL, status_code=100, json_data={'server': {}})
     instance = {'kong_status_url': LEGACY_STATUS_URL, 'tags': []}
     check = Kong('kong', {}, [instance])
@@ -233,7 +229,7 @@ def test_legacy_check_treats_status_code_below_200_as_critical(aggregator, fake_
 
 
 def test_legacy_check_treats_status_code_above_200_as_critical(aggregator, fake_http_response):
-    # Kills the core/ReplaceComparisonOperator_Eq_GtE mutant at kong.py:63 (status_code == 200 -> >= 200).
+    # Only status 200 counts as reachable; a non-error status above 200, such as 204, is CRITICAL.
     fake_http_response(LEGACY_STATUS_URL, status_code=204, json_data={'server': {}})
     instance = {'kong_status_url': LEGACY_STATUS_URL, 'tags': []}
     check = Kong('kong', {}, [instance])
