@@ -31,7 +31,6 @@ Use these when the live guide can't be read. They are a summary, not a replaceme
 | No duplication between grok rules; shared parts go in `supportRules` | Yes, with justification | `# bypass-global-grok-parser-rules-checks` |
 | Minimal `%{data:}` and wildcards in `matchRules` | Yes, with justification | `# bypass-global-grok-parser-rules-checks` |
 | A sample for every sub-pipeline and every `matchRule` | No | |
-| Replacing, migrating or removing a shipped pipeline | Needs the Logs Pipelines team | |
 
 Bypass annotations go at the top of the pipeline file and need a written justification. The reviewers assess each one; not every rule has a bypass, and other annotations exist beyond these three (page 2405999869 lists them).
 
