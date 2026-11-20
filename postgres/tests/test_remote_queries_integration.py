@@ -149,7 +149,14 @@ def test_query04_06_database_conditions(
     assert answer["error"]["code"] == code
     assert condition in answer["error"]["message"]
     assert query not in answer["error"]["message"]
-    assert intake.records[-1]["path"] == "/abort"
+    assert_abort_carries_answer(answer, intake)
+
+
+def assert_abort_carries_answer(answer: dict, intake: StubIntake) -> None:
+    # ABORT-01: the abort body is the failure the run answers the Agent with (OBS-01).
+    abort = intake.records[-1]
+    assert abort["path"] == "/abort"
+    assert json.loads(abort["body"]) == {"error": answer["error"]}
 
 
 @pytest.mark.parametrize(
@@ -430,7 +437,7 @@ def test_time01_run_deadline(rq_check: PostgreSql, intake: StubIntake, monkeypat
         assert answer["error"]["code"] == "timeout"
         assert time.monotonic() - start < 2
         if phase == "capacity":
-            assert intake.records[-1]["path"] == "/abort"
+            assert_abort_carries_answer(answer, intake)
         else:
             assert resolving.is_set() and not release.is_set()
             assert not intake.records
@@ -512,6 +519,7 @@ def test_abort01_unscheduled_after_validation(
     answer = call(rq_check, request(rq_check, intake.address))
     assert answer["error"]["code"] == "cancelled"
     assert [r["path"] for r in intake.records] == ["/abort"]
+    assert_abort_carries_answer(answer, intake)
 
 
 def test_abort01_cancel_signalled_before_failure_does_not_interrupt_abort(
@@ -529,6 +537,7 @@ def test_abort01_cancel_signalled_before_failure_does_not_interrupt_abort(
     answer = call(rq_check, payload)
     assert answer["error"]["code"] == "cancelled"
     assert [r["path"] for r in intake.records] == ["/abort"]
+    assert_abort_carries_answer(answer, intake)
 
 
 @pytest.mark.parametrize("separate_checks", [False, True])
