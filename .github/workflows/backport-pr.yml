@@ -94,7 +94,8 @@ jobs:
           DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           DD_GITHUB_USER: dd-agent-integrations-bot
+        # The source PR's QA label replaces `qa/skip-qa`; it only applies when the source PR has none.
         run: |
           ddev --no-interactive release port-commit --from-pr "${{ github.event.pull_request.number }}" \
             --branch-prefix backport \
-            --pr-labels backport,bot
+            --pr-labels backport,bot,qa/skip-qa
