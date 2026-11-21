@@ -24,6 +24,7 @@ from .util import (
     DatabaseConfigurationError,
     build_description,
     build_remediation,
+    column_statistics_function,
     parse_shared_preload_libraries,
 )
 from .version_utils import V9_6, VersionUtils
@@ -128,7 +129,7 @@ class PostgresDiagnose:
         return config.dbm and config.query_samples.enabled
 
     def _needs_column_statistics_probing(self):
-        """True when column-statistics will read `datadog.column_statistics()` per database."""
+        """True when column-statistics will read the column statistics function per database."""
         config = self._check._config
         return config.dbm and config.collect_column_statistics.enabled
 
@@ -172,7 +173,7 @@ class PostgresDiagnose:
                     _safe_close(probe_conn)
 
     def _run_column_statistics_probes(self, main_conn):
-        """Validate `datadog.column_statistics()` in every database the collector scans."""
+        """Validate the column statistics function in every database the collector scans."""
         dbnames = self._get_autodiscovered_probe_databases()
         if dbnames is None:
             dbnames = [self._check._config.dbname]
@@ -721,24 +722,26 @@ class PostgresDiagnose:
         priv_code = DatabaseConfigurationError.column_statistics_function_insufficient_privilege
         dbname = dbname or self._check._config.dbname
         failed = self._failed if failed is None else failed
-        if not _schema_exists(conn, "datadog"):
+        function = column_statistics_function(self._check._config)
+        schema, _ = _split_function(function)
+        if schema == "datadog" and not _schema_exists(conn, schema):
             if DatabaseConfigurationError.missing_datadog_schema.value not in failed:
                 self._diagnose_datadog_schema(conn, dbname, failed)
             return
-        if _schema_usage_failed_key("datadog") in failed:
+        if schema and _schema_usage_failed_key(schema) in failed:
             return
 
         try:
             with conn.cursor() as cursor:
-                cursor.execute('SELECT 1 FROM "datadog"."column_statistics"() LIMIT 1')
+                cursor.execute("SELECT 1 FROM {}() LIMIT 1".format(_safe_identifier(function)))
                 cursor.fetchone()
         except psycopg.errors.UndefinedFunction as e:
             self._fail(
                 exists_code,
-                diagnosis="datadog.column_statistics() does not exist in {}: {}".format(dbname, e),
+                diagnosis="{}() does not exist in {}: {}".format(function, dbname, e),
                 category=self._category,
-                description=DIAGNOSTIC_METADATA[exists_code]["description"],
-                remediation=build_remediation(exists_code),
+                description=build_description(exists_code, column_statistics_function=function),
+                remediation=build_remediation(exists_code, column_statistics_function=function),
                 rawerror=str(e),
                 failed_codes=failed,
             )
@@ -746,26 +749,26 @@ class PostgresDiagnose:
         except psycopg.errors.InsufficientPrivilege as e:
             self._check.diagnosis.success(
                 name=exists_code.value,
-                diagnosis="datadog.column_statistics() exists in {}.".format(dbname),
+                diagnosis="{}() exists in {}.".format(function, dbname),
                 category=self._category,
             )
             self._fail(
                 priv_code,
-                diagnosis="datadog user lacks EXECUTE on datadog.column_statistics() in {}: {}".format(dbname, e),
+                diagnosis="datadog user lacks EXECUTE on {}() in {}: {}".format(function, dbname, e),
                 category=self._category,
-                description=DIAGNOSTIC_METADATA[priv_code]["description"],
-                remediation=build_remediation(priv_code),
+                description=build_description(priv_code, column_statistics_function=function),
+                remediation=build_remediation(priv_code, column_statistics_function=function),
                 rawerror=str(e),
                 failed_codes=failed,
             )
             return
-        except psycopg.Error as e:
+        except (ValueError, psycopg.Error) as e:
             self._fail(
                 exists_code,
-                diagnosis="datadog.column_statistics() in {} returned an error: {}".format(dbname, e),
+                diagnosis="{}() in {} returned an error: {}".format(function, dbname, e),
                 category=self._category,
-                description=DIAGNOSTIC_METADATA[exists_code]["description"],
-                remediation=build_remediation(exists_code),
+                description=build_description(exists_code, column_statistics_function=function),
+                remediation=build_remediation(exists_code, column_statistics_function=function),
                 rawerror=str(e),
                 failed_codes=failed,
             )
@@ -773,12 +776,12 @@ class PostgresDiagnose:
 
         self._check.diagnosis.success(
             name=exists_code.value,
-            diagnosis="datadog.column_statistics() exists in {}.".format(dbname),
+            diagnosis="{}() exists in {}.".format(function, dbname),
             category=self._category,
         )
         self._check.diagnosis.success(
             name=priv_code.value,
-            diagnosis="datadog user can execute datadog.column_statistics() in {}.".format(dbname),
+            diagnosis="datadog user can execute {}() in {}.".format(function, dbname),
             category=self._category,
         )
 

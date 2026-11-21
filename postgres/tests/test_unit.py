@@ -543,6 +543,54 @@ def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
     assert after > before
 
 
+def test_collect_column_statistics_skips_database_without_function(pg_instance):
+    pg_instance['dbm'] = True
+    check = PostgreSql('postgres', {}, [pg_instance])
+    collector = check.metadata_samples._column_statistics_collector
+    check.health = mock.MagicMock()
+
+    executed = []
+    cursor = mock.MagicMock()
+    cursor.execute.side_effect = lambda query, *args: executed.append((query, args[0] if args else None))
+    cursor.fetchone.return_value = {'present': False}
+    connection = mock.MagicMock()
+    connection.__enter__.return_value.cursor.return_value.__enter__.return_value = cursor
+    check.db_pool = mock.MagicMock()
+    check.db_pool.get_connection.return_value = connection
+
+    collector._collect_for_database('app', [])
+    collector._collect_for_database('app', [])
+
+    assert executed == [
+        ("SELECT to_regprocedure(%s) IS NOT NULL AS present", ('"datadog"."column_statistics"()',)),
+        ("SELECT to_regprocedure(%s) IS NOT NULL AS present", ('"datadog"."column_statistics"()',)),
+    ]
+    assert check.health.submit_health_event.call_count == 1
+    assert collector._function_not_found_dbs == {'app'}
+
+
+def test_collect_column_statistics_uses_configured_function(pg_instance):
+    pg_instance['dbm'] = True
+    pg_instance['collect_column_statistics'] = {'function': 'monitoring.col_stats()'}
+    check = PostgreSql('postgres', {}, [pg_instance])
+    collector = check.metadata_samples._column_statistics_collector
+
+    executed = []
+    cursor = mock.MagicMock()
+    cursor.execute.side_effect = lambda query, *args: executed.append((query, args[0] if args else None))
+    cursor.fetchone.side_effect = [{'present': True}, None]
+    connection = mock.MagicMock()
+    connection.__enter__.return_value.cursor.return_value.__enter__.return_value = cursor
+    check.db_pool = mock.MagicMock()
+    check.db_pool.get_connection.return_value = connection
+
+    collector._collect_for_database('app', [])
+
+    assert executed[0] == ("SELECT to_regprocedure(%s) IS NOT NULL AS present", ('"monitoring"."col_stats"()',))
+    assert any('FROM "monitoring"."col_stats"() s' in query for query, _ in executed)
+    assert not any('datadog' in query for query, _ in executed)
+
+
 def _autodiscovery_check(pg_instance, databases):
     """Build a check whose per-database connections record each `(dbname, query)` in `check.executed`."""
     pg_instance['reported_hostname'] = 'stubbed-host'
