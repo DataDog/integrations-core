@@ -100,7 +100,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     exclude_labels: Optional[tuple[str, ...]] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
-    gitlab_url: str
+    gitlab_url: Optional[str] = None
     headers: Optional[MappingProxyType[str, Any]] = None
     health_service_check: Optional[bool] = None
     ignore_metrics: Optional[tuple[str, ...]] = None
@@ -127,7 +127,7 @@ class InstanceConfig(BaseModel):
     persist_connections: Optional[bool] = None
     prometheus_endpoint: str
     prometheus_metrics_prefix: Optional[str] = None
-    prometheus_url: str
+    prometheus_url: Optional[str] = None
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
