@@ -68,5 +68,9 @@ def instance_propagate_agent_tags():
     return False
 
 
+def instance_read_timeout():
+    return 10
+
+
 def instance_use_global_custom_queries():
     return 'true'
