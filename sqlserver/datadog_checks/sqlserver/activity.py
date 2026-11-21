@@ -22,6 +22,7 @@ from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_IN
 from datadog_checks.sqlserver.utils import (
     append_agent_service_comment,
     extract_trailing_dbm_comments,
+    has_dbm_comment_marker,
     is_statement_proc,
     needs_comment_recovery,
     raise_if_cancelled,
@@ -204,6 +205,7 @@ class SqlserverActivity(DBMAsyncJob):
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
+        self._input_buffer_available = None
 
         self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
         self._raw_statement_text_cache = RateLimitingTTLCache(
@@ -349,13 +351,18 @@ class SqlserverActivity(DBMAsyncJob):
         self._exec_requests_cols_cached = self._get_available_requests_columns(cursor, expected_cols)
         return self._exec_requests_cols_cached
 
-    def _get_input_buffer_columns_and_join(self):
+    def _get_input_buffer_columns_and_join(self, cursor):
         input_buffer_columns = ""
         input_buffer_join = ""
 
-        if self._collect_raw_query_statement:
-            input_buffer_columns = ", ".join(INPUT_BUFFER_COLUMNS) + ","
-            input_buffer_join = INPUT_BUFFER_JOIN
+        if self._collect_raw_query_statement or self._collect_comments:
+            # Older supported SQL Server versions do not expose this function.
+            if self._input_buffer_available is None:
+                cursor.execute("SELECT OBJECT_ID('sys.dm_exec_input_buffer')")
+                self._input_buffer_available = cursor.fetchone()[0] is not None
+            if self._input_buffer_available:
+                input_buffer_columns = ", ".join(INPUT_BUFFER_COLUMNS) + ","
+                input_buffer_join = INPUT_BUFFER_JOIN
 
         return input_buffer_columns, input_buffer_join
 
@@ -375,6 +382,9 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _obfuscate_and_sanitize_row(self, row):
         row = self._remove_null_vals(row)
+        input_buffer = row.get('raw_statement')
+        if not self._collect_raw_query_statement:
+            row.pop('raw_statement', None)
         if 'statement_text' not in row:
             return self._sanitize_row(row)
         try:
@@ -407,6 +417,15 @@ class SqlserverActivity(DBMAsyncJob):
                         self.log.warning("Failed to obfuscate query text=[%s] | err=[%s]", repr(row['text']), e)
                     else:
                         self.log.debug("Failed to obfuscate query text | err=[%s]", e)
+            if self._collect_comments and has_proc_context and has_dbm_comment_marker(input_buffer):
+                # Procedure text omits comments on the caller's EXEC invocation.
+                try:
+                    invocation = obfuscate_sql_with_metadata(
+                        input_buffer, self._config.obfuscator_options, replace_null_character=True
+                    )
+                    comments = self._merge_comments(comments, invocation['metadata'])
+                except Exception as e:
+                    self.log.debug("Failed to extract procedure invocation comments | err=%s", e)
             if self._collect_comments and row.get('tail_text'):
                 # tail_text is cut at a fixed length and can start inside a string literal, which hides
                 # the trailing comments from the obfuscator, so read them directly from the end instead.
@@ -496,7 +515,7 @@ class SqlserverActivity(DBMAsyncJob):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 connections = self._get_active_connections(cursor)
                 request_cols = self._get_exec_requests_cols_cached(cursor, DM_EXEC_REQUESTS_COLS)
-                input_buffer_columns, input_buffer_join = self._get_input_buffer_columns_and_join()
+                input_buffer_columns, input_buffer_join = self._get_input_buffer_columns_and_join(cursor)
                 rows = self._get_activity(cursor, request_cols, input_buffer_columns, input_buffer_join)
                 normalized_rows = self._normalize_queries_and_filter_rows(rows, MAX_PAYLOAD_BYTES)
                 if self._collect_raw_query_statement:

@@ -6,10 +6,6 @@ USER root
 
 EXPOSE 1433
 
-RUN apt-get update && apt-get install -y  \
-	curl \
-	apt-transport-https
-
 RUN mkdir -p /var/opt/mssql/backup
 WORKDIR /var/opt/mssql/backup
 

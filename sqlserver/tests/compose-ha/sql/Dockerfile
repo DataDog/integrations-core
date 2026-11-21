@@ -8,10 +8,6 @@ EXPOSE 1433
 EXPOSE 2500
 EXPOSE 2600
 
-RUN apt-get update && apt-get install -y  \
-	curl \
-	apt-transport-https
-
 WORKDIR /
 COPY compose-ha/sql/db-init.sh /
 COPY compose-ha/sql/entrypoint.sh /
