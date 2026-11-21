@@ -59,6 +59,16 @@ instances:
     #
     # dbname: <DBNAME>
 
+    ## Settings for remote queries requested by the Agent.
+    #
+    # remote_queries:
+
+        ## @param timeout_ms - integer - optional
+        ## Maximum statement time for a remote query, in milliseconds. When unset, the run's
+        ## remaining time applies. This setting can shorten, but never extend, that time.
+        #
+        # timeout_ms: 5000
+
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` to enable Database Monitoring.
     #
