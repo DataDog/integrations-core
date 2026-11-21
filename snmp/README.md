@@ -15,6 +15,12 @@ A MIB (Management Information Base) acts as a translator between OIDs and human 
 
 ## Setup
 
+The recommended SNMP implementation is the Go core check built into the Datadog Agent. The Python implementation in this repository is legacy.
+
+When `loader` is omitted from both `init_config` and the instance configuration, the Agent tries implementations in priority order. Core is tried first by default for SNMP starting in Agent 7.67. On Agent 7.69+, the global `prioritize_go_check_loader` setting in `datadog.yaml` controls that order: `true` (the default) tries core first, while `false` tries Python first. If the first implementation cannot load or configure the instance, the Agent tries the other. Legacy SNMP profiles or metrics can trigger fallback from core to Python.
+
+To explicitly select an implementation, set `loader: core` or `loader: python` under `init_config` in `snmp.d/conf.yaml`, or on an individual instance to override that choice. With an explicit loader, only that implementation is tried, with no fallback.
+
 To install and configure the SNMP integration, see the [Network Device Monitoring][1] documentation.
 
 ## Data Collected
