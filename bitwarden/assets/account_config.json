@@ -1,0 +1,71 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and Secret",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "help": "Client ID of the organization API key, from the Bitwarden Admin Console under Settings > Organization info > API Key.",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_secret",
+          "label": "Client secret",
+          "help": "Client secret of the organization API key, from the Bitwarden Admin Console under Settings > Organization info > API Key.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "Self-hosted instance URL",
+      "configureable": {
+        "base_url_setting": {
+          "key": "self_hosted_instance_url",
+          "label": "Self-hosted instance URL",
+          "help": "The domain of your self-hosted Bitwarden instance, required only for self-hosted Bitwarden setups. The instance must be publicly accessible via HTTPS. Example: vault.example.com, 123.123.123.123:8443.",
+          "editable": true,
+          "required": false,
+          "text": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "instance_type",
+      "label": "Instance type",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "cloud", "label": "Cloud" },
+          { "value": "self_hosted", "label": "Self-hosted" }
+        ]
+      }
+    },
+    {
+      "key": "cloud_region",
+      "label": "Cloud Region",
+      "help": "Only used when instance type is Cloud.",
+      "editable": true,
+      "required": false,
+      "dropdown": {
+        "options": [
+          { "value": "eu", "label": "European Union" },
+          { "value": "com", "label": "United States" }
+        ],
+        "default": "com"
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "bitwarden-logs" }
+  ]
+}
