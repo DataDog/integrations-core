@@ -1,0 +1,74 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and password",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_password",
+          "label": "Client password",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "Cisco Secure Email Threat Defense API",
+      "regional": {
+        "region_setting": {
+          "key": "host_name",
+          "label": "Host name",
+          "editable": true,
+          "required": true,
+          "dropdown": {
+            "options": [
+              { "value": "api.us.etd.cisco.com", "label": "api.us.etd.cisco.com" },
+              { "value": "api.au.etd.cisco.com", "label": "api.au.etd.cisco.com" },
+              { "value": "api.de.etd.cisco.com", "label": "api.de.etd.cisco.com" },
+              { "value": "api.in.etd.cisco.com", "label": "api.in.etd.cisco.com" }
+            ]
+          }
+        },
+        "region_base_urls": {
+          "api.us.etd.cisco.com": "https://api.us.etd.cisco.com",
+          "api.au.etd.cisco.com": "https://api.au.etd.cisco.com",
+          "api.de.etd.cisco.com": "https://api.de.etd.cisco.com",
+          "api.in.etd.cisco.com": "https://api.in.etd.cisco.com"
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "api_key",
+      "label": "API key",
+      "editable": true,
+      "required": true,
+      "password": {}
+    },
+    {
+      "key": "verdict_delay",
+      "label": "Verdict delay",
+      "help": "Provide a delay (in minutes) for fetching data to allow verdicts to be updated. Default is 30 minutes.",
+      "editable": true,
+      "required": false,
+      "integer": {
+        "min": 0,
+        "max": 720,
+        "default": 30
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "cisco-secure-email-threat-defense-logs" }
+  ]
+}
