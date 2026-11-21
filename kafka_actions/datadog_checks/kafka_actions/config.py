@@ -6,6 +6,8 @@ from typing import Any
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
+from .schema_helpers import SCHEMA_FORMATS, VALID_FORMATS
+
 
 class KafkaActionsConfig:
     """Configuration validator for Kafka Actions integration."""
@@ -169,6 +171,62 @@ class KafkaActionsConfig:
                     f"Invalid method '{method}' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'"
                 )
 
+    def _validate_message_format(self, format_type: str, field_name: str):
+        """Validate that a value_format/key_format is one of the supported message formats."""
+        if format_type not in VALID_FORMATS:
+            raise ConfigurationError(
+                f"Invalid {field_name}: {format_type}. Supported formats: {', '.join(sorted(VALID_FORMATS))}"
+            )
+
+    def _require_schema_registry_url(self, side: str, schema_registry_url: str | None):
+        """Raise if {side}_uses_schema_registry=true but no schema_registry_url is configured."""
+        if not schema_registry_url:
+            raise ConfigurationError(
+                f"{side}_uses_schema_registry=true requires 'schema_registry_url' to be configured"
+            )
+
+    def _validate_read_schema_requirement(
+        self,
+        config: dict[str, Any],
+        side: str,
+        format_type: str,
+        schema_registry_url: str | None,
+    ):
+        """Validate that avro/protobuf formats have a schema.
+
+        MessageDeserializer tolerates uses_schema_registry without a configured registry for non-schema
+        formats (it just strips the wire-format header) - so it's not enforced here for those formats.
+        'raw' never touches the Schema Registry at all.
+        """
+        if format_type not in SCHEMA_FORMATS:
+            return
+
+        if config.get(f'{side}_uses_schema_registry'):
+            self._require_schema_registry_url(side, schema_registry_url)
+        elif not config.get(f'{side}_schema'):
+            raise ConfigurationError(
+                f"{side}_format='{format_type}' requires either '{side}_uses_schema_registry=true' "
+                f"or '{side}_schema' to be specified"
+            )
+
+    def _validate_produce_schema_requirement(
+        self,
+        config: dict[str, Any],
+        side: str,
+        schema_registry_url: str | None,
+    ):
+        """Validate that a schema registry is configured when {side}_uses_schema_registry is set.
+
+        MessageSerializer resolves the latest schema registered for the topic's subject
+        (Confluent TopicNameStrategy) and derives the wire format from it at produce time,
+        so nothing else needs validating here. Without a registry, the value/key is always
+        base64-decoded raw bytes.
+        """
+        if not config.get(f'{side}_uses_schema_registry'):
+            return
+
+        self._require_schema_registry_url(side, schema_registry_url)
+
     def _validate_read_messages(self):
         """Validate read_messages action configuration."""
         config = self.read_messages
@@ -182,16 +240,10 @@ class KafkaActionsConfig:
         # Note: n_messages_retrieved and max_scanned_messages are validated in the Datadog backend
 
         value_format = config.get('value_format', 'json')
-        if value_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
-            raise ConfigurationError(
-                f"Invalid value_format: {value_format}. Supported formats: json, bson, string, protobuf, avro, raw"
-            )
+        self._validate_message_format(value_format, 'value_format')
 
         key_format = config.get('key_format', 'json')
-        if key_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
-            raise ConfigurationError(
-                f"Invalid key_format: {key_format}. Supported formats: json, bson, string, protobuf, avro, raw"
-            )
+        self._validate_message_format(key_format, 'key_format')
 
         start_timestamp = config.get('start_timestamp')
         if start_timestamp is not None:
@@ -200,31 +252,8 @@ class KafkaActionsConfig:
 
         schema_registry_url = self.instance.get('schema_registry_url')
 
-        if value_format in ['protobuf', 'avro']:
-            if config.get('value_uses_schema_registry'):
-                if not schema_registry_url:
-                    raise ConfigurationError(
-                        f"value_format='{value_format}' with 'value_uses_schema_registry=true' "
-                        f"requires 'schema_registry_url' to be configured"
-                    )
-            elif not config.get('value_schema'):
-                raise ConfigurationError(
-                    f"value_format='{value_format}' requires either 'value_uses_schema_registry=true' "
-                    f"or 'value_schema' to be specified"
-                )
-
-        if key_format in ['protobuf', 'avro']:
-            if config.get('key_uses_schema_registry'):
-                if not schema_registry_url:
-                    raise ConfigurationError(
-                        f"key_format='{key_format}' with 'key_uses_schema_registry=true' "
-                        f"requires 'schema_registry_url' to be configured"
-                    )
-            elif not config.get('key_schema'):
-                raise ConfigurationError(
-                    f"key_format='{key_format}' requires either 'key_uses_schema_registry=true' "
-                    f"or 'key_schema' to be specified"
-                )
+        self._validate_read_schema_requirement(config, 'value', value_format, schema_registry_url)
+        self._validate_read_schema_requirement(config, 'key', key_format, schema_registry_url)
 
     def _validate_create_topic(self):
         """Validate create_topic action configuration."""
@@ -359,3 +388,8 @@ class KafkaActionsConfig:
 
         if not config.get('value'):
             raise ConfigurationError("produce_message action requires 'value' parameter")
+
+        schema_registry_url = self.instance.get('schema_registry_url')
+
+        self._validate_produce_schema_requirement(config, 'value', schema_registry_url)
+        self._validate_produce_schema_requirement(config, 'key', schema_registry_url)
