@@ -45,15 +45,13 @@
       },
       "events": {
         "creates_events": false
-      },
-      "metrics": {
-        "prefix": "checkpoint_harmony_endpoint.",
-        "check": "",
-        "metadata_path": "metadata.csv"
       }
     },
     "dashboards": {
-        "Checkpoint Harmony Endpoint Overview": "assets/dashboards/checkpoint_harmony_endpoint_overview.json"
+      "Checkpoint Harmony Endpoint Overview": "assets/dashboards/checkpoint_harmony_endpoint_overview.json"
+    },
+    "logs": {
+      "source": "checkpoint_harmony_endpoint"
     }
   },
   "author": {
