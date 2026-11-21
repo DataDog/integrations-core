@@ -1588,3 +1588,53 @@ def test_plan_lookup_failure_during_cancellation_propagates(dbm_instance):
         pytest.raises(Exception, match='Job loop cancelled'),
     ):
         list(check.statement_metrics._collect_plans([_plan_row('cancelled')], mock.Mock(), float('inf')))
+
+
+def test_query_metrics_do_not_report_a_plans_lifetime_when_it_returns_from_idle():
+    """Regression test for inflated sqlserver.queries.* values.
+
+    Counters in sys.dm_exec_query_stats accumulate per cached plan, and STATEMENT_METRICS_QUERY
+    returns only plans that executed recently. Differencing a sum taken over a changing set of
+    plans is not a rate: an idle plan dropping out makes the sum fall, and the same plan coming
+    back makes it jump by its entire lifetime value, which was then reported as one interval.
+    """
+    from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
+    from datadog_checks.sqlserver.statements import _merge_plan_rows, _plan_row_key
+
+    metric_columns = ['execution_count']
+
+    def row(handle, executions):
+        return {
+            'database_name': 'db',
+            'query_signature': 'sig',
+            'query_hash': 'hash',
+            'query_plan_hash': 'planhash',
+            'plan_handle': handle,
+            'statement_start_offset': 0,
+            'statement_end_offset': -1,
+            'procedure_name': None,
+            'execution_count': executions,
+        }
+
+    state = StatementMetrics(retain_absent_keys=60, max_size=1000, emit_new_keys=True)
+
+    def collect(rows):
+        derived = state.compute_derivative_rows(rows, metric_columns, key=_plan_row_key)
+        return _merge_plan_rows(derived, metric_columns)
+
+    # both plans active: establishes baselines
+    assert [] == collect([row('busy', 1000), row('idle', 5000)])
+    # the idle plan stops executing and drops out of the collection
+    assert collect([row('busy', 1010)])[0]['execution_count'] == 10
+    assert collect([row('busy', 1020)])[0]['execution_count'] == 10
+
+    # it returns having run 200 more times while it was absent. The reported value is those
+    # 200 plus the busy plan's 10, not the idle plan's 5200 lifetime total.
+    result = collect([row('busy', 1030), row('idle', 5200)])
+    assert len(result) == 1
+    assert result[0]['execution_count'] == 210
+
+    # a plan compiled during this interval is new to the check, and since the collection only
+    # returns plans active recently it cannot have run before: its counter is all new work
+    result = collect([row('busy', 1040), row('idle', 5210), row('fresh', 7)])
+    assert result[0]['execution_count'] == 10 + 10 + 7
