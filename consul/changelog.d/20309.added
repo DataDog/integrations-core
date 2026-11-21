@@ -1,0 +1,1 @@
+Add a new feature to remove Consul service name from service check tag keys sent to Datadog.
