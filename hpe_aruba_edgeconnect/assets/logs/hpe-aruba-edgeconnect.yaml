@@ -78,7 +78,7 @@ pipeline:
 
           mgmtdRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
 
-          mgmtdRule2 %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+          mgmtdRule2 %{date("MMM  d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
 
           fallbackRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name} %{data:message}
 
