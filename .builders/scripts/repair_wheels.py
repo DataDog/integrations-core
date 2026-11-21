@@ -9,7 +9,7 @@ import shutil
 import sys
 import tempfile
 from fnmatch import fnmatch
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import NamedTuple
 from zipfile import ZipFile
 
@@ -17,6 +17,16 @@ from utils import iter_wheels, wheel_supports_macos
 
 
 MACOS_DDTRACE_LIBDDWAF_PATTERN = 'ddtrace/appsec/_ddwaf/libddwaf/*/lib/libddwaf.dylib'
+
+# The Agent ships OpenSSL in `embedded/lib`. Linux wheels load that copy instead of each bundling their own,
+# which would add ~7.5 MiB per wheel that uses OpenSSL.
+AGENT_OPENSSL_SONAMES = frozenset({'libssl.so.3', 'libcrypto.so.3'})
+# Major and minor version of the OpenSSL the Agent ships (the `openssl` archive in datadog-agent's
+# `deps/repos.MODULE.bazel`). Wheels requiring newer OpenSSL symbols would fail to load in the Agent.
+AGENT_OPENSSL_VERSION = (3, 5)
+# The Agent installs wheels in `embedded/lib/pythonX.Y/site-packages`, two directories below `embedded/lib`.
+AGENT_LIB_DIR_FROM_SITE_PACKAGES = '../..'
+OPENSSL_SYMBOL_VERSION_PATTERN = re.compile(r'OPENSSL_(\d+)\.(\d+)\.\d+')
 
 
 def find_patterns_in_wheel(wheel: Path, patterns: list[str]) -> list[str]:
@@ -113,6 +123,85 @@ def check_unacceptable_files(
         sys.exit(1)
 
 
+def agent_lib_dir_rpath(path_in_wheel: str) -> str:
+    """Return an `$ORIGIN`-relative RPATH entry that points from `path_in_wheel` to the Agent's `embedded/lib`."""
+    depth = len(PurePosixPath(path_in_wheel).parent.parts)
+    return '/'.join(['$ORIGIN', *['..'] * depth, AGENT_LIB_DIR_FROM_SITE_PACKAGES])
+
+
+def find_agent_openssl_dependents(wheel: Path) -> list[str]:
+    """
+    Return the ELF files in `wheel` that depend on the Agent's OpenSSL.
+
+    Raises `RuntimeError` if any of them requires OpenSSL symbols newer than the Agent's OpenSSL provides.
+    """
+    from elftools.elf.dynamic import DynamicSection
+    from elftools.elf.elffile import ELFFile
+    from elftools.elf.gnuversions import GNUVerNeedSection
+
+    dependents = []
+    too_new = []
+    with ZipFile(wheel) as zf:
+        for name in zf.namelist():
+            with zf.open(name) as f:
+                if f.read(4) != b'\x7fELF':
+                    continue
+
+            elf = ELFFile(io.BytesIO(zf.read(name)))
+            dynamic = elf.get_section_by_name('.dynamic')
+            if not isinstance(dynamic, DynamicSection):
+                continue
+            # pyelftools sets `needed` dynamically on DT_NEEDED tags
+            needed = {tag.needed for tag in dynamic.iter_tags('DT_NEEDED')}  # type: ignore[attr-defined]
+            if AGENT_OPENSSL_SONAMES.isdisjoint(needed):
+                continue
+
+            dependents.append(name)
+            version_requirements = elf.get_section_by_name('.gnu.version_r')
+            if not isinstance(version_requirements, GNUVerNeedSection):
+                continue
+
+            for verneed, vernaux_iter in version_requirements.iter_versions():
+                if verneed.name not in AGENT_OPENSSL_SONAMES:
+                    continue
+                for vernaux in vernaux_iter:
+                    match = OPENSSL_SYMBOL_VERSION_PATTERN.fullmatch(vernaux.name)
+                    if match and tuple(map(int, match.groups())) > AGENT_OPENSSL_VERSION:
+                        too_new.append(f'{name}: {vernaux.name}')
+
+    if too_new:
+        raise RuntimeError(
+            f"{wheel.name} requires OpenSSL symbols newer than the Agent's OpenSSL "
+            f'{".".join(map(str, AGENT_OPENSSL_VERSION))}:\n' + '\n'.join(too_new)
+        )
+
+    return dependents
+
+
+def link_agent_openssl(wheel: Path, patcher) -> list[str]:
+    """
+    Make every ELF file in `wheel` that depends on OpenSSL find the Agent's copy, by appending an RPATH entry that
+    points at the Agent's `embedded/lib`. auditwheel must have been told not to graft OpenSSL into the wheel.
+
+    Returns the in-wheel paths of the patched files.
+    """
+    from auditwheel.wheeltools import InWheelCtx
+
+    dependents = find_agent_openssl_dependents(wheel)
+    if not dependents:
+        return []
+
+    with InWheelCtx(str(wheel), str(wheel)) as ctx:
+        for name in dependents:
+            path = os.path.join(ctx.path, name)
+            rpaths = [entry for entry in patcher.get_rpath(path).split(':') if entry]
+            agent_rpath = agent_lib_dir_rpath(name)
+            if agent_rpath not in rpaths:
+                patcher.set_rpath(path, ':'.join([*rpaths, agent_rpath]))
+
+    return dependents
+
+
 def repair_linux(source_built_dir: str, source_external_dir: str, built_dir: str, external_dir: str) -> None:
     from auditwheel.patcher import Patchelf
     from auditwheel.policy import WheelPolicies
@@ -123,6 +212,8 @@ def repair_linux(source_built_dir: str, source_external_dir: str, built_dir: str
         {
             # pymqi
             'libmqic_r.so',
+            # Loaded from the Agent's `embedded/lib`, see `link_agent_openssl`
+            *AGENT_OPENSSL_SONAMES,
         }
     )
 
@@ -152,17 +243,18 @@ def repair_linux(source_built_dir: str, source_external_dir: str, built_dir: str
         shutil.move(wheel, external_dir)
         continue
 
+    patcher = Patchelf()
     for wheel in iter_wheels(source_built_dir):
         print(f'--> {wheel.name}')
         try:
-            repair_wheel(
+            repaired_wheel = repair_wheel(
                 policies,
                 str(wheel),
                 abis=abis,
                 lib_sdir='.libs',
                 out_dir=built_dir,
                 update_tags=True,
-                patcher=Patchelf(),
+                patcher=patcher,
                 exclude=exclusions,
             )
         except NonPlatformWheel:
@@ -173,6 +265,10 @@ def repair_linux(source_built_dir: str, source_external_dir: str, built_dir: str
             continue
         else:
             print('Repaired wheel')
+
+        if repaired_wheel and (linked := link_agent_openssl(Path(repaired_wheel), patcher)):
+            print("Linked to the Agent's OpenSSL:")
+            print('\n'.join(linked))
 
 
 def repair_windows(source_built_dir: str, source_external_dir: str, built_dir: str, external_dir: str) -> None:

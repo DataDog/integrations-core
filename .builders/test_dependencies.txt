@@ -2,3 +2,5 @@
 
 pytest==8.0.2
 mypy==1.13.0
+# Patches the ELF files built by the repair_wheels tests
+patchelf==0.19.3.0; sys_platform == 'linux'
