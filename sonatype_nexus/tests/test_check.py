@@ -43,8 +43,8 @@ def test_successful_metrics_collection(dd_run_check, mock_http_response_per_endp
 
 
 def test_server_url_trailing_slash(dd_run_check, mock_http_response_per_endpoint, aggregator):
-    # Regression test for https://github.com/DataDog/integrations-core/issues/25827: a trailing slash in
-    # `server_url` produced `//service/...` request paths, which Nexus answers with a 404.
+    # Regression test for https://github.com/DataDog/integrations-core/issues/25827: a trailing
+    # slash in `server_url` produced `//service/...` request paths, which Nexus answers with a 404.
     status_response_data = {key: {"healthy": True} for key in constants.STATUS_METRICS_MAP.keys()}
     analytics_response_data = {
         "gauges": {
