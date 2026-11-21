@@ -1,0 +1,15 @@
+# File-based CDS for the envoy-full fixture. The workload bumps version_info to
+# re-publish it; see front-envoy.yaml.
+version_info: "0"
+resources:
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: file_eds
+  type: EDS
+  connect_timeout: 0.25s
+  # Deprecated in favor of typed_extension_protocol_options, on purpose: each
+  # CDS reload counts one runtime.deprecated_feature_use.
+  http2_protocol_options: {}
+  eds_cluster_config:
+    eds_config:
+      resource_api_version: V3
+      path_config_source: {path: /etc/envoy-full/eds.yaml}
