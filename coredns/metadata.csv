@@ -44,6 +44,7 @@ coredns.go.gc_duration_seconds.sum,count,,second,,[OpenMetrics V1 and V2] Sum of
 coredns.go.goroutines,gauge,,thread,,[OpenMetrics V1 and V2] Number of goroutines that currently exist.,0,coredns,,
 coredns.go.info,gauge,,,,[OpenMetrics V1 and V2] Information about the Go environment.,0,coredns,,
 coredns.go.memstats.alloc_bytes,gauge,,byte,,[OpenMetrics V1 and V2] Number of bytes allocated and still in use.,0,coredns,,
+coredns.go.memstats.alloc_bytes.count,count,,byte,,[OpenMetrics V2] Total number of bytes allocated even if freed.,0,coredns,,
 coredns.go.memstats.alloc_bytes_total,count,,byte,,[OpenMetrics V1] Total number of bytes allocated even if freed.,0,coredns,,
 coredns.go.memstats.buck_hash_sys_bytes,gauge,,byte,,[OpenMetrics V1 and V2] Number of bytes used by the profiling bucket hash table.,0,coredns,bytes used by profiling,
 coredns.go.memstats.frees_total,count,,,,[OpenMetrics V1] Total number of frees.,0,coredns,,
