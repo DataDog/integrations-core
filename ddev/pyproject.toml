@@ -34,6 +34,8 @@ dependencies = [
     "datadog-checks-dev[cli]>=40.0,<42",
     "defusedxml==0.7.1",
     "hatch>=1.13.0",
+    # `ddev release placeholders` invokes hatchling directly; declare it rather than rely on hatch pulling it in.
+    "hatchling>=1.26",
     "httpx",
     "jsonpointer",
     "pluggy",
@@ -44,6 +46,7 @@ dependencies = [
     "tomli-w",
     "tomlkit",
     "tqdm",
+    "twine>=6.1",
     "requests==2.34.2",
     "matplotlib",
     "squarify",

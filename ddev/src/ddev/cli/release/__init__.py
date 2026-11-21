@@ -11,6 +11,7 @@ from ddev.cli.release.agent import agent
 from ddev.cli.release.branch import branch
 from ddev.cli.release.changelog import changelog
 from ddev.cli.release.list_versions import list_versions
+from ddev.cli.release.placeholders import placeholders
 from ddev.cli.release.port_commit import port_commit
 from ddev.cli.release.show import show
 from ddev.cli.release.stats import stats
@@ -30,6 +31,7 @@ release.add_command(build)
 release.add_command(changelog)
 release.add_command(list_versions)
 release.add_command(make)
+release.add_command(placeholders)
 release.add_command(port_commit)
 release.add_command(show)
 release.add_command(stats)
