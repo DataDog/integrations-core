@@ -63,7 +63,7 @@ class ManagedAuthentication1(BaseModel):
     )
     client_id: Optional[str] = Field(
         None,
-        description='The client ID of the managed identity or application registration.\nRequired for `managed_identity` auth. Optional for `workload_identity`,\nwhere it defaults to the `AZURE_CLIENT_ID` environment variable.\n',
+        description="The managed identity's Client ID (also called the Application (client) ID in the\nAzure Portal). This is different from the Object (principal) ID.\nRequired for `managed_identity` auth. Optional for `workload_identity`,\nwhere it defaults to the `AZURE_CLIENT_ID` environment variable.\n",
     )
     enabled: Optional[bool] = Field(None, examples=[False])
     identity_scope: Optional[str] = Field(
