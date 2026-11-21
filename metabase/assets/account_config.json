@@ -1,0 +1,61 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "help": "API key created in Metabase under Admin settings > Settings > Authentication > API Keys, assigned to the Administrators group.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "Self-hosted instance domain",
+      "configureable": {
+        "base_url_setting": {
+          "key": "self_hosted_instance_domain",
+          "label": "Self-hosted instance domain",
+          "help": "Required for self-hosted instances only. Must be publicly accessible via HTTPS only (e.g., example.com).",
+          "editable": true,
+          "required": false,
+          "text": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "instance_type",
+      "label": "Instance type",
+      "help": "Default is 'Cloud'.",
+      "editable": true,
+      "required": false,
+      "dropdown": {
+        "options": [
+          { "value": "cloud", "label": "Cloud" },
+          { "value": "self_hosted", "label": "Self-hosted" }
+        ],
+        "default": "cloud"
+      }
+    },
+    {
+      "key": "dns_alias",
+      "label": "DNS alias",
+      "help": "Required for cloud instances only. At least three characters: lowercase letters, numbers, and dashes.",
+      "editable": true,
+      "required": false,
+      "text": {
+        "pattern": "^([a-z0-9-]{3,})?$"
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "metabase-logs" }
+  ]
+}
