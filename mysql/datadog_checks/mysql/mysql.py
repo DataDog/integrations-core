@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
 from cachetools import TTLCache
+from pymysql.constants import CR
 
 from datadog_checks.base import AgentCheck, DatabaseCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
@@ -101,6 +102,9 @@ try:
     import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
+
+# Seconds the server waits on each blocked write of the SHOW BINARY LOGS result before it drops the connection.
+BINARY_LOGS_NET_WRITE_TIMEOUT = 2
 
 
 class MySql(DatabaseCheck):
@@ -454,6 +458,9 @@ class MySql(DatabaseCheck):
                 # Custom queries
                 self._query_manager.execute(extra_tags=tags)
 
+                if not self._config.only_custom_queries:
+                    self._collect_binary_log_metrics(db, tags)
+
         except Exception as e:
             self.log.exception("error!")
             raise e
@@ -622,13 +629,6 @@ class MySql(DatabaseCheck):
                     results.update(self.innodb_stats.get_stats_from_innodb_status(db))
             self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
-        # Binary log statistics
-        if self.global_variables.log_bin_enabled and is_affirmative(
-            self._config.options.get('binlog_size_metrics', True)
-        ):
-            with tracked_query(self, operation="binary_log_metrics"):
-                results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
-
         # Compute key cache utilization metric
         key_blocks_unused = collect_scalar('Key_blocks_unused', results)
         key_cache_block_size = self.global_variables.key_cache_block_size
@@ -650,7 +650,6 @@ class MySql(DatabaseCheck):
 
         metrics.update(VARIABLES_VARS)
         metrics.update(INNODB_VARS)
-        metrics.update(BINLOG_VARS)
 
         if is_affirmative(self._config.options.get('extra_status_metrics', self._config.dbm_enabled)):
             self.log.debug("Collecting Extra Status Metrics")
@@ -1142,20 +1141,39 @@ class MySql(DatabaseCheck):
 
             return results
 
-    def _get_binary_log_stats(self, db):
+    def _collect_binary_log_metrics(self, db: pymysql.connections.Connection, tags: list[str]) -> None:
+        if not self.global_variables.log_bin_enabled or not is_affirmative(
+            self._config.options.get('binlog_size_metrics', True)
+        ):
+            return
+        with tracked_query(self, operation="binary_log_metrics"):
+            binary_log_space = self._get_binary_log_stats(db)
+        if binary_log_space is not None:
+            self._submit_metrics(BINLOG_VARS, {'Binlog_space_usage_bytes': binary_log_space}, tags)
+
+    def _get_binary_log_stats(self, db: pymysql.connections.Connection) -> int | None:
+        """
+        SHOW BINARY LOGS holds the binary log index lock while it sends one row per file. Another SHOW BINARY LOGS
+        or a log rotation then waits for that lock while holding the binary log lock, which every commit needs. If
+        the agent reads slowly, commits stall until the server's net_write_timeout (60s by default) fires.
+
+        Run the query with a short timeout as the last work on the check's connection: the server drops the
+        connection when the timeout fires, so nothing can run on it afterward.
+        """
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
+                cursor.execute("SET SESSION net_write_timeout = {}".format(BINARY_LOGS_NET_WRITE_TIMEOUT))
                 cursor.execute("SHOW BINARY LOGS;")
-                cursor_results = cursor.fetchall()
-                master_logs = {result[0]: result[1] for result in cursor_results}
-
-                binary_log_space = 0
-                for value in master_logs.values():
-                    binary_log_space += value
-
-                return binary_log_space
+                return sum(result[1] for result in cursor.fetchall())
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error accessing the BINARY LOGS (must grant REPLICATION CLIENT): %s", e)
+            if e.args and e.args[0] in (CR.CR_SERVER_LOST, CR.CR_SERVER_GONE_ERROR):
+                self.warning(
+                    "Connection lost while reading BINARY LOGS, possibly after net_write_timeout of %ss: %s",
+                    BINARY_LOGS_NET_WRITE_TIMEOUT,
+                    e,
+                )
+            else:
+                self.warning("Privileges error accessing the BINARY LOGS (must grant REPLICATION CLIENT): %s", e)
             return None
 
     def _check_innodb_engine_enabled(self, db):
