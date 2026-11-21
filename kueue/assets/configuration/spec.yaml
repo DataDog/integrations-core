@@ -44,6 +44,33 @@ files:
         type: boolean
         example: true
         default: true
+    - name: collect_scheduling_goodput
+      description: |
+        Experimental. Submit the scheduling goodput metrics, in GPU-hours since the previous run, as one series per
+        Workload tagged with `kueue_workload` and its queue, so that they can be summed by queue, cluster or reason:
+
+        - `gpu.scheduling.badput_time`: GPU time that GPU Workloads spent waiting to become fully runnable, tagged with
+          the normalized `reason` and, when Kueue reports one, the raw `scheduler_reason`.
+        - `gpu.scheduling.fully_admitted_time`: GPU time that GPU Workloads spent admitted with all their pods ready.
+
+        Goodput is `fully_admitted_time / (fully_admitted_time + badput_time)`. The metrics have no `kueue.` prefix so
+        that every scheduler integration submits the same metrics. The ClusterQueue of a Workload that is not admitted
+        yet comes from the Agent tagger, which needs Kueue metadata in the Cluster Agent.
+
+        Each GPU Workload active in an hour adds at least two custom metric series, plus one per extra badput reason.
+
+        A Workload is fully admitted once Kueue reports it `Admitted` with `PodsReady`, which Kueue only maintains when
+        `waitForPodsReady` is enabled. Without it, no goodput metric is submitted.
+
+        This option polls Workloads the same way `collect_workload_events` does. It needs `get` and `list` on
+        `workloads.kueue.x-k8s.io` even when `collect_workload_events` is disabled, and it only counts Workloads in
+        `workload_events_namespaces` when that option is set. A GPU Workload requests `nvidia.com/gpu` or
+        `amd.com/gpu`. Only the instance that scraped the Kueue leader submits the metrics, so that one instance per
+        replica does not count the same interval several times, except possibly once while the leader changes.
+      value:
+        type: boolean
+        example: false
+        default: false
     - name: kube_config_dict
       description: |
         Optional kubeconfig dictionary used to configure the Kubernetes API client.
@@ -60,7 +87,7 @@ files:
     - name: workload_events_namespaces
       description: |
         Optional list of namespaces to collect Workload events from. If unset, Workloads are collected from all
-        namespaces.
+        namespaces. It also limits which Workloads `collect_scheduling_goodput` counts.
       value:
         type: array
         items:

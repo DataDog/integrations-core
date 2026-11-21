@@ -52,6 +52,10 @@ def instance_collect_histograms_as_distributions():
     return False
 
 
+def instance_collect_scheduling_goodput():
+    return False
+
+
 def instance_collect_workload_events():
     return True
 

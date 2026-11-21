@@ -1,0 +1,1 @@
+Add experimental scheduling goodput metrics, `gpu.scheduling.badput_time` and `gpu.scheduling.fully_admitted_time`, behind the `collect_scheduling_goodput` option.

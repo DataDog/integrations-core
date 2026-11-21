@@ -15,6 +15,7 @@ from datadog_checks.base.errors import SkipInstanceError
 
 from .config_models import ConfigMixin
 from .evictions import EVICTED_PODS_METRIC, EvictedPodsTransformer
+from .goodput import GoodputCollector
 from .metrics import (
     BYTES_PER_GB,
     CONTROLLER_RUNTIME_METRICS,
@@ -34,6 +35,9 @@ DEFAULT_RENAME_LABELS = {
     'OnSession': 'session_phase',
     'version': 'go_version',
 }
+
+# Pods are listed by scheduler name, so the scheduling goodput only covers pods that KAI schedules.
+KAI_SCHEDULER_NAME = 'kai-scheduler'
 
 # `queue_name` holds the display name on the scheduler but `metadata.name` on the queue-controller, so it cannot join
 # their metrics; `queue_metadata_name` can.
@@ -69,7 +73,10 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.check_initializations.appendleft(self.parse_config)
         self.check_initializations.append(self.configure_scheduler_transformers)
         self.check_initializations.append(self.configure_podgroup_events)
+        self.check_initializations.append(self.configure_scheduling_goodput)
         self.podgroup_events: PodGroupEventCollector | None = None
+        self.goodput: GoodputCollector | None = None
+        self.goodput_failing = False
 
     def check(self, instance):
         try:
@@ -82,6 +89,15 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                     self.podgroup_events.collect()
                 except Exception as e:
                     self.log.warning('Cannot collect KAI PodGroup events: %s', e, exc_info=True)
+            if self.goodput:
+                try:
+                    self.goodput.collect()
+                    self.goodput_failing = False
+                except Exception as e:
+                    self.goodput.tracker.reset()
+                    # Only the first failure of a streak carries the traceback, instead of one every run.
+                    self.log.warning('Cannot collect KAI scheduling goodput: %s', e, exc_info=not self.goodput_failing)
+                    self.goodput_failing = True
 
     def get_default_config(self):
         return {
@@ -139,6 +155,10 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def configure_podgroup_events(self):
         if self.config.collect_podgroup_events:
             self.podgroup_events = PodGroupEventCollector(self, self.config.kube_config_dict)
+
+    def configure_scheduling_goodput(self):
+        if self.config.collect_scheduling_goodput:
+            self.goodput = GoodputCollector(self, self.config.kube_config_dict, KAI_SCHEDULER_NAME)
 
 
 class KaiOpenMetricsScraper(OpenMetricsScraper):

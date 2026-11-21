@@ -52,6 +52,10 @@ def instance_collect_podgroup_events():
     return True
 
 
+def instance_collect_scheduling_goodput():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 
