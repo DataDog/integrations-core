@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
+import hashlib
 import io
 import os
 import re
 import shutil
+import struct
 import sys
 import tempfile
 from fnmatch import fnmatch
@@ -17,6 +20,20 @@ from utils import iter_wheels, wheel_supports_macos
 
 
 MACOS_DDTRACE_LIBDDWAF_PATTERN = 'ddtrace/appsec/_ddwaf/libddwaf/*/lib/libddwaf.dylib'
+
+# Universal (fat) Mach-O magic, read big-endian, to the layout of an architecture table entry (`fat_arch` or
+# `fat_arch_64`): cputype, cpusubtype, offset, size, align[, reserved]
+FAT_ARCH_FORMATS = {0xCAFEBABE: '>IIIII', 0xCAFEBABF: '>IIQQII'}
+# Java class files share the 0xCAFEBABE magic, but their version number, in place of the architecture count,
+# is at least 45
+MAX_FAT_ARCH_COUNT = 20
+# `os.uname().machine` to the (cputype, cpusubtype) of the slice `lipo -thin` keeps for it
+MACHO_ARCHS = {
+    'arm64': (0x0100000C, 0),  # CPU_TYPE_ARM64, CPU_SUBTYPE_ARM64_ALL
+    'x86_64': (0x01000007, 3),  # CPU_TYPE_X86_64, CPU_SUBTYPE_X86_64_ALL
+}
+# The high byte of a cpusubtype holds capability flags, such as CPU_SUBTYPE_LIB64, rather than the subtype
+CPU_SUBTYPE_MASK = 0xFF000000
 
 
 def find_patterns_in_wheel(wheel: Path, patterns: list[str]) -> list[str]:
@@ -224,6 +241,92 @@ def repair_windows(source_built_dir: str, source_external_dir: str, built_dir: s
             sys.exit(process.returncode)
 
 
+def _thin_universal_binary(contents: bytes, arch: str) -> bytes | None:
+    """
+    Return the `arch` slice of a universal Mach-O binary, or None if `contents` isn't one.
+
+    The slice is returned unchanged, as `lipo -thin` writes it. It is a complete Mach-O file whose code signature
+    covers only its own bytes, so it stays validly signed.
+    """
+    if len(contents) < 8:
+        return None
+
+    magic, arch_count = struct.unpack_from('>II', contents)
+    arch_format = FAT_ARCH_FORMATS.get(magic)
+    if arch_format is None or not 0 < arch_count < MAX_FAT_ARCH_COUNT:
+        return None
+
+    entry_size = struct.calcsize(arch_format)
+    for i in range(arch_count):
+        cputype, cpusubtype, offset, size, *_ = struct.unpack_from(arch_format, contents, 8 + i * entry_size)
+        if (cputype, cpusubtype & ~CPU_SUBTYPE_MASK) == MACHO_ARCHS[arch]:
+            return contents[offset : offset + size]
+
+    raise ValueError(f'universal binary has no {arch} slice')
+
+
+def _retag_wheel_metadata(contents: bytes, platform_tag: str) -> bytes:
+    """Replace the platform of every `Tag` in a WHEEL file, keeping one tag per interpreter and ABI."""
+    lines = contents.decode('utf-8').splitlines(keepends=True)
+    tag_lines = [line for line in lines if line.startswith('Tag:')]
+    # `cp313-cp313` for `Tag: cp313-cp313-macosx_10_13_universal2`
+    interpreter_abis = dict.fromkeys(line.split(':', 1)[1].strip().rsplit('-', 1)[0] for line in tag_lines)
+    first_tag_index = lines.index(tag_lines[0])
+    lines = [line for line in lines if not line.startswith('Tag:')]
+    lines[first_tag_index:first_tag_index] = [
+        f'Tag: {interpreter_abi}-{platform_tag}\n' for interpreter_abi in interpreter_abis
+    ]
+    return ''.join(lines).encode('utf-8')
+
+
+def _thin_universal_binaries(wheel: Path, thinned_wheel: Path, arch: str) -> list[str]:
+    """
+    Write `wheel` to `thinned_wheel` with its universal Mach-O binaries reduced to their `arch` slice.
+
+    Returns the files that were thinned. If there are none, `thinned_wheel` isn't written. Otherwise its WHEEL tags
+    take the platform tag of its name, and RECORD is updated for every file that changed.
+    """
+    with ZipFile(wheel) as source:
+        members = [(info, source.read(info)) for info in source.infolist()]
+
+    updated: dict[str, bytes] = {}
+    for info, contents in members:
+        try:
+            thinned_contents = _thin_universal_binary(contents, arch)
+        except ValueError as e:
+            raise RuntimeError(f'Cannot thin {info.filename} in {wheel.name}: {e}') from None
+        if thinned_contents is not None:
+            updated[info.filename] = thinned_contents
+
+    thinned = list(updated)
+    if not thinned:
+        return []
+
+    platform_tag = WheelName.parse(thinned_wheel.name).platform_tag
+    for info, contents in members:
+        directory, _, filename = info.filename.partition('/')
+        if directory.endswith('.dist-info') and filename == 'WHEEL':
+            updated[info.filename] = _retag_wheel_metadata(contents, platform_tag)
+
+    with ZipFile(thinned_wheel, 'w') as destination:
+        for info, contents in members:
+            directory, _, filename = info.filename.partition('/')
+            if directory.endswith('.dist-info') and filename == 'RECORD':
+                rows = list(csv.reader(io.StringIO(contents.decode('utf-8'), newline='')))
+                for row in rows:
+                    if row and row[0] in updated:
+                        data = updated[row[0]]
+                        digest = base64.urlsafe_b64encode(hashlib.sha256(data).digest()).rstrip(b'=').decode('ascii')
+                        row[1:] = [f'sha256={digest}', str(len(data))]
+                record = io.StringIO(newline='')
+                csv.writer(record, lineterminator='\n').writerows(rows)
+                contents = record.getvalue().encode('utf-8')
+
+            destination.writestr(info, updated.get(info.filename, contents))
+
+    return thinned
+
+
 def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: str, external_dir: str) -> None:
     from delocate import delocate_wheel
     from packaging.version import Version
@@ -283,6 +386,18 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
                 'of the same release that does could be downloaded; build it from source by adding it to '
                 '`always_build` in images/macos/extra_build.sh'
             )
+        # A universal2 wheel ships every binary for both architectures, while this target only loads its own.
+        # Tag the thinned wheel the way delocate tags the wheels rebuilt below. It no longer matches PyPI's, so
+        # like the external wheels build_wheels.py modifies, it goes with the built wheels: the external index
+        # that pip resolves against only holds PyPI's wheels.
+        thinned_wheel = Path(built_dir) / str(
+            wheel_name._replace(platform_tag=f'macosx_{min_macos_version.major}_{min_macos_version.minor}_{arch}')
+        )
+        thinned = _thin_universal_binaries(wheel, thinned_wheel, arch)
+        if thinned:
+            print(f'Thinned universal binaries to {arch} in {thinned_wheel.name}:')
+            print('\n'.join(thinned))
+            continue
         print('Using existing wheel')
         shutil.move(wheel, external_dir)
 
