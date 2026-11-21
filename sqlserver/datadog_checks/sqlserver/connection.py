@@ -65,19 +65,22 @@ def split_sqlserver_host_port(host):
 # we're only including the bare minimum set of special characters required to parse the connection string while
 # supporting escaping using braces, letting the client library or the database ultimately decide what's valid
 CONNECTION_STRING_SPECIAL_CHARACTERS = set('=;{}')
+SENSITIVE_CONNECTION_STRING_KEYS = frozenset({'clientkey', 'extendedproperties', 'providerstring', 'pwd'})
+SENSITIVE_CONNECTION_STRING_KEY_PARTS = ('connectionstring', 'credential', 'password', 'secret', 'token')
 
 
 def parse_connection_string_properties(cs):
     """
     Parses the properties portion of a SQL Server connection string (i.e. "key1=value1;key2=value2;...") into a map of
     {key -> value}. The string must contain *properties only*, meaning the subprotocol, serverName, instanceName and
-    portNumber are not included in the string.
+    portNumber are not included in the string. Values may use ODBC brace escaping or ADO double-quote escaping.
     See https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url
     """
     cs = cs.strip()
     params = {}
     i = 0
     escaping = False
+    quoting = False
     key, parsed, key_done = "", "", False
     while i < len(cs):
         if escaping:
@@ -92,8 +95,24 @@ def parse_connection_string_properties(cs):
             parsed += cs[i]
             i += 1
             continue
+        if quoting:
+            if cs[i : i + 2] == '""':
+                parsed += '"'
+                i += 2
+                continue
+            if cs[i] == '"':
+                quoting = False
+                i += 1
+                continue
+            parsed += cs[i]
+            i += 1
+            continue
         if cs[i] == '{':
             escaping = True
+            i += 1
+            continue
+        if key_done and not parsed and cs[i] == '"':
+            quoting = True
             i += 1
             continue
         # ignore leading whitespace, i.e. between two keys "A=B;  C=D"
@@ -128,6 +147,10 @@ def parse_connection_string_properties(cs):
         raise ConfigurationError(
             "Invalid connection string: did not find expected matching closing brace '}}': {}".format(cs)
         )
+    if quoting:
+        raise ConfigurationError(
+            "Invalid connection string: did not find expected matching closing quote '\"': {}".format(cs)
+        )
     if key:
         if not parsed:
             raise ConfigurationError(
@@ -148,6 +171,42 @@ def _escape_odbc_connection_string_value(value: str) -> str:
     # Sources: https://learn.microsoft.com/en-us/sql/relational-databases/security/strong-passwords
     # https://sqlprotocoldoc.z19.web.core.windows.net/MS-ODBCSTR/%5BMS-ODBCSTR%5D-100604.pdf
     return '{{{}}}'.format(value.replace('}', '}}'))
+
+
+def sanitize_connection_string(connection_string: str) -> str:
+    """Redact credential-bearing properties while preserving diagnostic connection properties."""
+    try:
+        properties = parse_connection_string_properties(connection_string)
+    except ConfigurationError:
+        return '***'
+
+    if (not properties and connection_string.strip()) or any(not key.strip() for key in properties):
+        return '***'
+
+    sensitive_keys = set()
+    for key in properties:
+        normalized_key = ''.join(character for character in key.casefold() if character.isalnum())
+        if (
+            normalized_key in SENSITIVE_CONNECTION_STRING_KEYS
+            or normalized_key.startswith('pwd')
+            or normalized_key.endswith('key')
+            or any(part in normalized_key for part in SENSITIVE_CONNECTION_STRING_KEY_PARTS)
+        ):
+            sensitive_keys.add(key)
+
+    if not sensitive_keys:
+        return connection_string
+
+    sanitized_properties = []
+    for key, value in properties.items():
+        if key in sensitive_keys:
+            value = '***'
+        elif value != value.strip() or any(character in CONNECTION_STRING_SPECIAL_CHARACTERS for character in value):
+            value = _escape_odbc_connection_string_value(value)
+        sanitized_properties.append('{}={}'.format(key, value))
+
+    trailing_delimiter = ';' if connection_string.rstrip().endswith(';') else ''
+    return ';'.join(sanitized_properties) + trailing_delimiter
 
 
 def _escape_legacy_freetds_odbc_connection_string_value(value: str) -> str:
