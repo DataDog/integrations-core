@@ -62,6 +62,7 @@ from tests.helpers.github_async import (
     make_artifact,
     make_artifacts_list,
     make_response,
+    make_workflow_dispatch_result,
     make_workflow_job,
     make_workflow_jobs_list,
     make_workflow_run,
@@ -392,7 +393,34 @@ async def test_a_workflow_run_not_yet_visible_after_dispatch_is_retried(
     assert failed_by_operation(sink) == {"fetch_workflow": 0, "refresh_jobs": 0}
 
 
-@pytest.mark.parametrize("status_code, attempts", [(404, 3), (403, 1)], ids=["not-found", "forbidden"])
+async def test_a_batch_finishes_when_its_dispatched_run_is_slow_to_become_visible(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    batch = make_batch()
+    jobs = make_workflow_jobs_list([make_workflow_job(name=batch.job_list[0].name)]).model_dump(mode="json")
+    responses = [
+        httpx.Response(200, json=make_workflow_dispatch_result().model_dump(mode="json")),
+        *(httpx.Response(404) for _ in range(4)),
+        httpx.Response(200, json=make_workflow_run().model_dump(mode="json")),
+        httpx.Response(200, json=jobs),
+        httpx.Response(200, json=make_artifacts_list([]).model_dump(mode="json")),
+        httpx.Response(200, json=jobs),
+    ]
+    client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
+    runner = make_runner(client, tmp_path)  # type: ignore[arg-type]
+
+    try:
+        await runner.process_message(batch)
+    finally:
+        await client.aclose()
+
+    [finished] = finished_messages(runner)
+    assert finished.batch_id == batch.batch_id
+    assert finished.status is Status.SUCCESS
+
+
+@pytest.mark.parametrize("status_code, attempts", [(404, 8), (403, 1)], ids=["not-found", "forbidden"])
 async def test_a_workflow_run_read_failure_stops_after_its_retry_budget(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, status_code: int, attempts: int
 ):

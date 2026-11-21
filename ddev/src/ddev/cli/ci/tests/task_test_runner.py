@@ -56,6 +56,10 @@ WORKFLOW_JOBS_PER_PAGE = 50
 # GitHub can answer 404 while a resource is becoming visible after a successful mutation.
 SAFE_RETRY_WITH_404 = SAFE_RETRY.also_on(on_status(404))
 
+# A failed run read aborts the batch, so give it time to become visible after dispatch (AI-7574).
+# A failed job listing only skips one poll, so it keeps the shorter budget.
+WORKFLOW_RUN_RETRY = SAFE_RETRY_WITH_404.replace(attempts=8)
+
 DISPATCH_LOOKUP_DELAYS = (10, 30, 60)
 DISPATCH_CLOCK_SKEW_SECONDS = 60
 # Filtered workflow searches return at most 1,000 results, even with pagination.
@@ -513,7 +517,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             with self._metrics.operation(Operation.FETCH_WORKFLOW) as op:
                 try:
                     run = await self._client.get_workflow_run(
-                        self._options.owner, self._options.repo, run_id, retry=SAFE_RETRY_WITH_404
+                        self._options.owner, self._options.repo, run_id, retry=WORKFLOW_RUN_RETRY
                     )
                 except ValidationError as error:
                     raise self._response_failure(
