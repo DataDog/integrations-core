@@ -278,3 +278,145 @@ vllm:nixl_num_kv_expired_reqs_total{engine="0",model_name="facebook/opt-125m"} 1
 # HELP vllm:nixl_num_notifications_after_expiry_total Number of completion notifications received after the request's KV lease expired.
 # TYPE vllm:nixl_num_notifications_after_expiry_total counter
 vllm:nixl_num_notifications_after_expiry_total{engine="0",model_name="facebook/opt-125m"} 1
+# HELP vllm:admission_rejections_total Number of admission attempts rejected by a queue limit, by reason.
+# TYPE vllm:admission_rejections_total counter
+vllm:admission_rejections_total{model_name="facebook/opt-125m",reason="max_num_queued_reqs"} 0.0
+vllm:admission_rejections_total{model_name="facebook/opt-125m",reason="max_num_queued_tokens"} 0.0
+# HELP vllm:engine_sleep_state Engine sleep state; awake = 0 means engine is sleeping; awake = 1 means engine is awake; weights_offloaded = 1 means sleep level 1; discard_all = 1 means sleep level 2.
+# TYPE vllm:engine_sleep_state gauge
+vllm:engine_sleep_state{engine="0",model_name="facebook/opt-125m",sleep_state="awake"} 1.0
+vllm:engine_sleep_state{engine="0",model_name="facebook/opt-125m",sleep_state="weights_offloaded"} 0.0
+vllm:engine_sleep_state{engine="0",model_name="facebook/opt-125m",sleep_state="discard_all"} 0.0
+# HELP vllm:estimated_read_bytes_per_gpu_total Estimated number of bytes read from memory per GPU (for Model Flops Utilization calculations).
+# TYPE vllm:estimated_read_bytes_per_gpu_total counter
+vllm:estimated_read_bytes_per_gpu_total{engine="0",model_name="facebook/opt-125m"} 0.0
+# HELP vllm:estimated_write_bytes_per_gpu_total Estimated number of bytes written to memory per GPU (for Model Flops Utilization calculations).
+# TYPE vllm:estimated_write_bytes_per_gpu_total counter
+vllm:estimated_write_bytes_per_gpu_total{engine="0",model_name="facebook/opt-125m"} 0.0
+# HELP vllm:iteration_tokens_total Histogram of number of tokens per engine_step.
+# TYPE vllm:iteration_tokens_total histogram
+vllm:iteration_tokens_total_bucket{engine="0",le="1.0",model_name="facebook/opt-125m"} 105.0
+vllm:iteration_tokens_total_bucket{engine="0",le="8.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="16.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="32.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="64.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="128.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="256.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="512.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="1024.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="2048.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="4096.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="8192.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="16384.0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_bucket{engine="0",le="+Inf",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_count{engine="0",model_name="facebook/opt-125m"} 110.0
+vllm:iteration_tokens_total_sum{engine="0",model_name="facebook/opt-125m"} 140.0
+# HELP vllm:mm_cache_hits_total Multi-modal cache hits, in terms of number of cached items.
+# TYPE vllm:mm_cache_hits_total counter
+vllm:mm_cache_hits_total{engine="0",model_name="facebook/opt-125m"} 0.0
+# HELP vllm:mm_cache_queries_total Multi-modal cache queries, in terms of number of queried items.
+# TYPE vllm:mm_cache_queries_total counter
+vllm:mm_cache_queries_total{engine="0",model_name="facebook/opt-125m"} 0.0
+# HELP vllm:num_requests_waiting_by_reason Number of waiting requests by reason. Reason labels: 'capacity' = waiting for scheduling capacity; 'deferred' = deferred by transient constraints (LoRA budget, KV transfer, blocked status). Sum of all reasons equals vllm:num_requests_waiting.
+# TYPE vllm:num_requests_waiting_by_reason gauge
+vllm:num_requests_waiting_by_reason{engine="0",model_name="facebook/opt-125m",reason="capacity"} 0.0
+vllm:num_requests_waiting_by_reason{engine="0",model_name="facebook/opt-125m",reason="deferred"} 0.0
+# HELP vllm:prompt_tokens_by_source_total Number of prompt tokens by source.
+# TYPE vllm:prompt_tokens_by_source_total counter
+vllm:prompt_tokens_by_source_total{engine="0",model_name="facebook/opt-125m",source="local_compute"} 30.0
+vllm:prompt_tokens_by_source_total{engine="0",model_name="facebook/opt-125m",source="local_cache_hit"} 0.0
+vllm:prompt_tokens_by_source_total{engine="0",model_name="facebook/opt-125m",source="external_kv_transfer"} 0.0
+# HELP vllm:prompt_tokens_cached_by_source_total Prefix-cache hit tokens by the cache tier that supplied them: device (local HBM), host (offloaded to DRAM), disk, p2p (transferred from another vLLM instance) or external_unspecified. Counted at admission; sums to vllm:prefix_cache_hits + vllm:external_prefix_cache_hits.
+# TYPE vllm:prompt_tokens_cached_by_source_total counter
+vllm:prompt_tokens_cached_by_source_total{engine="0",model_name="facebook/opt-125m",source="device"} 0.0
+vllm:prompt_tokens_cached_by_source_total{engine="0",model_name="facebook/opt-125m",source="host"} 0.0
+vllm:prompt_tokens_cached_by_source_total{engine="0",model_name="facebook/opt-125m",source="p2p"} 0.0
+vllm:prompt_tokens_cached_by_source_total{engine="0",model_name="facebook/opt-125m",source="disk"} 0.0
+vllm:prompt_tokens_cached_by_source_total{engine="0",model_name="facebook/opt-125m",source="external_unspecified"} 0.0
+# HELP vllm:request_inference_time_seconds Histogram of time spent in RUNNING phase for request.
+# TYPE vllm:request_inference_time_seconds histogram
+vllm:request_inference_time_seconds_bucket{engine="0",le="0.3",model_name="facebook/opt-125m"} 1.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="0.5",model_name="facebook/opt-125m"} 2.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="0.8",model_name="facebook/opt-125m"} 4.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="1.0",model_name="facebook/opt-125m"} 4.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="1.5",model_name="facebook/opt-125m"} 4.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="2.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="2.5",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="5.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="10.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="15.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="20.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="30.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="40.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="50.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="60.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="120.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="240.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="480.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="960.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="1920.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="7680.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_bucket{engine="0",le="+Inf",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_count{engine="0",model_name="facebook/opt-125m"} 5.0
+vllm:request_inference_time_seconds_sum{engine="0",model_name="facebook/opt-125m"} 3.327595119000023
+# HELP vllm:request_max_num_generation_tokens Histogram of maximum number of requested generation tokens.
+# TYPE vllm:request_max_num_generation_tokens histogram
+vllm:request_max_num_generation_tokens_bucket{engine="0",le="1.0",model_name="facebook/opt-125m"} 0.0
+vllm:request_max_num_generation_tokens_bucket{engine="0",le="2.0",model_name="facebook/opt-125m"} 0.0
+vllm:request_max_num_generation_tokens_bucket{engine="0",le="5.0",model_name="facebook/opt-125m"} 0.0
+vllm:request_max_num_generation_tokens_bucket{engine="0",le="10.0",model_name="facebook/opt-125m"} 0.0
+vllm:request_max_num_generation_tokens_bucket{engine="0",le="20.0",model_name="facebook/opt-125m"} 1.0
+vllm:request_max_num_generation_tokens_bucket{engine="0",le="50.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_max_num_generation_tokens_bucket{engine="0",le="100.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_max_num_generation_tokens_bucket{engine="0",le="200.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_max_num_generation_tokens_bucket{engine="0",le="500.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_max_num_generation_tokens_bucket{engine="0",le="+Inf",model_name="facebook/opt-125m"} 5.0
+vllm:request_max_num_generation_tokens_count{engine="0",model_name="facebook/opt-125m"} 5.0
+vllm:request_max_num_generation_tokens_sum{engine="0",model_name="facebook/opt-125m"} 110.0
+# HELP vllm:request_num_preemptions Histogram of the number of times a request was preempted.
+# TYPE vllm:request_num_preemptions histogram
+vllm:request_num_preemptions_bucket{engine="0",le="1.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_num_preemptions_bucket{engine="0",le="2.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_num_preemptions_bucket{engine="0",le="3.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_num_preemptions_bucket{engine="0",le="4.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_num_preemptions_bucket{engine="0",le="5.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_num_preemptions_bucket{engine="0",le="10.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_num_preemptions_bucket{engine="0",le="20.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_num_preemptions_bucket{engine="0",le="+Inf",model_name="facebook/opt-125m"} 5.0
+vllm:request_num_preemptions_count{engine="0",model_name="facebook/opt-125m"} 5.0
+vllm:request_num_preemptions_sum{engine="0",model_name="facebook/opt-125m"} 0.0
+# HELP vllm:request_params_max_tokens Histogram of the max_tokens request parameter.
+# TYPE vllm:request_params_max_tokens histogram
+vllm:request_params_max_tokens_bucket{engine="0",le="1.0",model_name="facebook/opt-125m"} 0.0
+vllm:request_params_max_tokens_bucket{engine="0",le="2.0",model_name="facebook/opt-125m"} 0.0
+vllm:request_params_max_tokens_bucket{engine="0",le="5.0",model_name="facebook/opt-125m"} 0.0
+vllm:request_params_max_tokens_bucket{engine="0",le="10.0",model_name="facebook/opt-125m"} 0.0
+vllm:request_params_max_tokens_bucket{engine="0",le="20.0",model_name="facebook/opt-125m"} 0.0
+vllm:request_params_max_tokens_bucket{engine="0",le="50.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_params_max_tokens_bucket{engine="0",le="100.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_params_max_tokens_bucket{engine="0",le="200.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_params_max_tokens_bucket{engine="0",le="500.0",model_name="facebook/opt-125m"} 5.0
+vllm:request_params_max_tokens_bucket{engine="0",le="+Inf",model_name="facebook/opt-125m"} 5.0
+vllm:request_params_max_tokens_count{engine="0",model_name="facebook/opt-125m"} 5.0
+vllm:request_params_max_tokens_sum{engine="0",model_name="facebook/opt-125m"} 120.0
+# HELP vllm:request_render_duration_seconds Time spent rendering a request, including chat templating, tokenization, and multimodal preprocessing.
+# TYPE vllm:request_render_duration_seconds histogram
+vllm:request_render_duration_seconds_bucket{le="0.0001",model_name="facebook/opt-125m",request_type="completion"} 0.0
+vllm:request_render_duration_seconds_bucket{le="0.00025",model_name="facebook/opt-125m",request_type="completion"} 0.0
+vllm:request_render_duration_seconds_bucket{le="0.0005",model_name="facebook/opt-125m",request_type="completion"} 2.0
+vllm:request_render_duration_seconds_bucket{le="0.001",model_name="facebook/opt-125m",request_type="completion"} 4.0
+vllm:request_render_duration_seconds_bucket{le="0.0025",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="0.005",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="0.01",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="0.025",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="0.05",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="0.1",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="0.25",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="0.5",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="1.0",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="2.5",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="5.0",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="10.0",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_bucket{le="+Inf",model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_count{model_name="facebook/opt-125m",request_type="completion"} 5.0
+vllm:request_render_duration_seconds_sum{model_name="facebook/opt-125m",request_type="completion"} 0.003117712000062056
