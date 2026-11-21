@@ -42,6 +42,46 @@ def test_custom_queries(aggregator, pg_instance, dd_run_check, integration_check
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'query, expected_value',
+    [
+        pytest.param("SET LOCAL statement_timeout = '15s'; SELECT 1", 1, id='set-local-before-select'),
+        pytest.param(
+            "CREATE TEMP TABLE multi_statement (v int) ON COMMIT DROP; "
+            "INSERT INTO multi_statement VALUES (2); "
+            "SELECT v FROM multi_statement",
+            2,
+            id='ddl-and-dml-before-select',
+        ),
+        pytest.param("SELECT 3 WHERE false; SELECT 4", None, id='empty-select-is-not-skipped'),
+    ],
+)
+def test_multi_statement_custom_query(aggregator, pg_instance, dd_run_check, integration_check, query, expected_value):
+    # Regression test for https://github.com/DataDog/integrations-core/issues/25954: the metric comes from the first
+    # statement that returns a result set, even when earlier statements return none.
+    pg_instance.update(
+        {
+            'custom_queries': [
+                {
+                    'metric_prefix': 'custom',
+                    'query': query,
+                    'columns': [{'name': 'value', 'type': 'gauge'}],
+                },
+            ]
+        }
+    )
+    postgres_check = integration_check(pg_instance)
+    dd_run_check(postgres_check)
+    tags = _get_expected_tags(postgres_check, pg_instance, with_db=True)
+
+    if expected_value is None:
+        aggregator.assert_metric('custom.value', count=0)
+    else:
+        aggregator.assert_metric('custom.value', value=expected_value, tags=tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_both_global_and_instance_custom_queries(aggregator, pg_instance, dd_run_check, integration_check):
     pg_instance.update(
         {
