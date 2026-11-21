@@ -150,7 +150,7 @@ def find_copy_command(calls: list[list[str]], source: str, destination: str) -> 
 
 def test_restart_waits_for_agent_before_and_after_restart(agent, mocker):
     operations = mocker.Mock()
-    execute = mocker.patch.object(agent, '_exec')
+    execute = mocker.patch.object(agent, '_exec', return_value=subprocess.CompletedProcess([], 0))
     wait_for_agent = mocker.patch.object(agent, '_wait_for_agent')
     operations.attach_mock(execute, 'execute')
     operations.attach_mock(wait_for_agent, 'wait_for_agent')
@@ -159,7 +159,7 @@ def test_restart_waits_for_agent_before_and_after_restart(agent, mocker):
 
     assert operations.mock_calls == [
         mocker.call.wait_for_agent(),
-        mocker.call.execute(mocker.ANY),
+        mocker.call.execute(mocker.ANY, check=False),
         mocker.call.wait_for_agent(),
     ]
 
