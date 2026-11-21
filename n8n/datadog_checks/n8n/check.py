@@ -6,9 +6,8 @@ from functools import cached_property
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
-from requests.exceptions import RequestException
-
 from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 from datadog_checks.n8n.metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 from .config_models import ConfigMixin
@@ -18,6 +17,7 @@ DEFAULT_READY_PATH = '/healthz/readiness'
 
 class N8nCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'n8n'
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     def get_default_config(self) -> dict[str, Any]:
@@ -39,7 +39,7 @@ class N8nCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         try:
             response = self.http.get(endpoint)
-        except RequestException as e:
+        except HTTPClientError as e:
             self.log.warning("Could not reach n8n readiness endpoint %s: %s", endpoint, e)
             self.gauge('readiness.check', 0, tags=tags + ['status_code:none'])
             return

@@ -14,6 +14,7 @@ from .metrics import METRIC_MAP, ROUTE_METRICS_TO_TRANSFORM, construct_metrics_c
 
 class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'vault'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
     CHECK_NAME = 'vault'
@@ -43,7 +44,7 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         self.scraper_configs.clear()
 
         # https://www.vaultproject.io/api-docs#the-x-vault-request-header
-        self.http.options['headers']['X-Vault-Request'] = 'true'
+        self.http.set_header('X-Vault-Request', 'true')
 
         # Before scrapers are configured
         self.check_initializations.insert(-1, self.parse_config)

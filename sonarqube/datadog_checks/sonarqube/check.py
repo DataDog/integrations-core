@@ -2,16 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-
-from requests.exceptions import RequestException
+from json import JSONDecodeError
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 
 from .constants import CATEGORIES, MAX_PAGES, NUMERIC_TYPES
 
 
 class SonarqubeCheck(AgentCheck):
     __NAMESPACE__ = 'sonarqube'
+    AGNOSTIC_HTTP_CLIENT = True
     SERVICE_CHECK_CONNECT = 'api_access'
     _DEFAULT_COMPONENTS_DISCOVERY_LIMIT = 10
 
@@ -31,7 +32,8 @@ class SonarqubeCheck(AgentCheck):
         try:
             self.collect_metadata()
             self.collect_metrics()
-        except RequestException as e:
+        # requests counted invalid JSON as a RequestException; keep reporting it as an API access failure.
+        except (HTTPClientError, JSONDecodeError) as e:
             self.log.error('RequestException: %s', e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags, message=str(e))
         else:

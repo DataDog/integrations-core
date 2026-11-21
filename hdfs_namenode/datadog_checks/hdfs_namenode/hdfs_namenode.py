@@ -3,16 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+from json import JSONDecodeError
 from urllib.parse import urljoin
-
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-from simplejson import JSONDecodeError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import compute_percent
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientInvalidURLError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 
 
 class HDFSNameNode(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'default': False, 'invert': True}}
 
     # Service check names
@@ -156,13 +161,13 @@ class HDFSNameNode(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
 
-        except Timeout as e:
+        except HTTPClientTimeoutError as e:
             self.service_check(
                 self.JMX_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags, message="Request timeout: {}, {}".format(url, e)
             )
             raise
 
-        except (HTTPError, InvalidURL, ConnectionError) as e:
+        except (HTTPClientStatusError, HTTPClientInvalidURLError, HTTPClientConnectionError) as e:
             self.service_check(
                 self.JMX_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags, message="Request failed: {}, {}".format(url, e)
             )

@@ -1,7 +1,19 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+import re
 
+import pytest
+
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientInvalidURLError,
+    HTTPClientReadTimeoutError,
+    HTTPClientSSLError,
+)
 from datadog_checks.mapreduce import MapReduceCheck
 
 from .common import (
@@ -21,6 +33,9 @@ from .common import (
     MR_AUTH_CONFIG,
     MR_CONFIG,
     RM_URI,
+    TEST_PASSWORD,
+    TEST_USERNAME,
+    YARN_APPS_URL,
 )
 
 
@@ -90,25 +105,46 @@ def test_check(aggregator, dd_run_check, mocked_request):
     aggregator.assert_all_metrics_covered()
 
 
-def test_auth(aggregator, dd_run_check, mocked_auth_request):
+def test_auth():
     """
-    Test that we get all the metrics we're supposed to get
+    Test that the configured credentials are sent with every request
     """
-    instance = MR_AUTH_CONFIG['instances'][0]
+    mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [MR_AUTH_CONFIG['instances'][0]])
 
-    # Instantiate the check
+    assert mapreduce.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)
+
+
+@pytest.mark.parametrize(
+    'outcome, message_prefix',
+    [
+        pytest.param(HTTPClientReadTimeoutError('read timed out'), 'Request timeout', id='read timeout'),
+        pytest.param(HTTPClientConnectTimeoutError('connect timed out'), 'Request timeout', id='connect timeout'),
+        pytest.param(HTTPClientConnectionError('connection refused'), 'Request failed', id='connection error'),
+        pytest.param(HTTPClientSSLError('certificate verify failed'), 'Request failed', id='ssl error'),
+        pytest.param(HTTPClientInvalidURLError('invalid url'), 'Request failed', id='invalid url'),
+        pytest.param(FakeHTTPResponse(status_code=500), 'Request failed', id='error status'),
+        pytest.param(
+            FakeHTTPResponse(json_error=json.JSONDecodeError('Expecting value', '', 0)),
+            'JSON Parse failed',
+            id='invalid json',
+        ),
+    ],
+)
+def test_request_failure_reports_critical(aggregator, fake_http, outcome, message_prefix):
+    instance = MR_CONFIG['instances'][0]
     mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
+    fake_http.register_response('GET', YARN_APPS_URL, outcome)
 
-    # Run the check once
-    dd_run_check(mapreduce)
+    with pytest.raises(Exception) as excinfo:
+        mapreduce.check(instance)
 
-    # Check the service tests
-    service_check_tags = ["url:{}".format(RM_URI)] + CUSTOM_TAGS
     aggregator.assert_service_check(
-        MapReduceCheck.YARN_SERVICE_CHECK, status=MapReduceCheck.OK, tags=service_check_tags, count=1
-    )
-    aggregator.assert_service_check(
-        MapReduceCheck.MAPREDUCE_SERVICE_CHECK, status=MapReduceCheck.OK, tags=service_check_tags, count=1
+        MapReduceCheck.YARN_SERVICE_CHECK,
+        status=MapReduceCheck.CRITICAL,
+        tags=['url:{}'.format(RM_URI)],
+        # The stub matches messages as regular expressions, and the URL contains `?`.
+        message=re.escape('{}: {}, {}'.format(message_prefix, YARN_APPS_URL, excinfo.value)),
+        count=1,
     )
 
 

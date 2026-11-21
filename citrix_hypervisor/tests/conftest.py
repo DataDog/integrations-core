@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 import ssl
 import subprocess
@@ -8,11 +9,10 @@ import tempfile
 import threading
 from xmlrpc.server import SimpleXMLRPCServer
 
-import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import find_free_port
 
 from . import common
@@ -39,25 +39,34 @@ def instance(request):
     return request.param
 
 
-def mock_requests_get(url, *args, **kwargs):
-    url_parts = url.split('/')
-    print(url_parts)
+# The fake matches exact URLs, so every base URL a unit test configures is registered up front.
+MOCKED_BASE_URLS = [*common.MOCKED_INSTANCE_IDS, 'mocked', 'wrong']
 
-    if url_parts[0] == 'wrong':
-        return MockResponse(status_code=404)
 
-    json_file = f"rrd_updates_{url_parts[0]}.json" if url_parts[1] == "rrd_updates" else f"{url_parts[1]}.json"
+def fixture_response(base_url, endpoint):
+    if base_url == 'wrong':
+        return FakeHTTPResponse(status_code=404)
+
+    json_file = f"rrd_updates_{base_url}.json" if endpoint == "rrd_updates" else f"{endpoint}.json"
     path = os.path.join(common.HERE, 'fixtures', 'standalone', json_file)
     if not os.path.exists(path):
-        return MockResponse(status_code=404)
+        return FakeHTTPResponse(status_code=404)
 
-    return MockResponse(file_path=path)
+    with open(path, 'rb') as f:
+        content = f.read()
+
+    # The fake does not parse its body, so mirror what a real response's json() returns or raises for this payload.
+    try:
+        return FakeHTTPResponse(content=content, json_result=json.loads(content))
+    except json.JSONDecodeError as e:
+        return FakeHTTPResponse(content=content, json_error=e)
 
 
 @pytest.fixture
-def mock_responses():
-    with mock.patch('requests.Session.get', side_effect=mock_requests_get):
-        yield
+def mock_responses(fake_http):
+    for base_url in MOCKED_BASE_URLS:
+        for endpoint in ('host_rrd', 'rrd_updates'):
+            fake_http.register_response('GET', f'{base_url}/{endpoint}', fixture_response(base_url, endpoint))
 
 
 @pytest.fixture

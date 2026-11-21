@@ -2,14 +2,14 @@
 # (C) Brett Langdon <brett@blangdon.com> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import re
 import time
 from collections import defaultdict
 from urllib.parse import quote_plus, urljoin, urlparse
 
-from requests.exceptions import RequestException
-
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 
 from .const import (
     ALERT_THRESHOLD,
@@ -35,6 +35,8 @@ class RabbitMQManagement(AgentCheck):
     """This check is for gathering statistics from the RabbitMQ
     Management Plugin (http://www.rabbitmq.com/management.html)
     """
+
+    AGNOSTIC_HTTP_CLIENT = True
 
     HTTP_CONFIG_REMAPPER = {
         'rabbitmq_user': {'name': 'username'},
@@ -187,7 +189,8 @@ class RabbitMQManagement(AgentCheck):
             r = self.http.get(url)
             r.raise_for_status()
             return r.json()
-        except RequestException as e:
+        # Invalid JSON keeps the API error message it had when requests' decode error, a RequestException, matched here.
+        except (HTTPClientError, json.JSONDecodeError) as e:
             raise RabbitMQException('Cannot open RabbitMQ API url: {} {}'.format(url, str(e)))
         except ValueError as e:
             raise RabbitMQException('Cannot parse JSON response from API url: {} {}'.format(url, str(e)))

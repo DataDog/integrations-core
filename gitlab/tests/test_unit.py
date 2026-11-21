@@ -1,10 +1,18 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import pytest
 from mock.mock import MagicMock
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+)
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
 
@@ -12,8 +20,10 @@ from .common import (
     CUSTOM_TAGS,
     GITALY_METRICS,
     GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+    GITLAB_PROMETHEUS_ENDPOINT,
     GITLAB_SIDEKIQ_PROMETHEUS_ENDPOINT,
     GITLAB_TAGS,
+    GITLAB_URL,
     GITLAB_WORKHORSE_PROMETHEUS_ENDPOINT,
     SIDEKIQ_EXPORTER_METRICS,
     V1_METRICS,
@@ -84,19 +94,29 @@ def test_check_workhorse_and_sidekiq_given_endpoints_configured_collects_their_m
     ],
 )
 def test_get_gitlab_version(raw_version):
-    http = MagicMock()
-    http.get.return_value.json.return_value = {"version": raw_version}
+    http = FakeHTTPClient()
+    http.register_response(
+        'GET', 'http://localhost/api/v4/version', FakeHTTPResponse(json_result={"version": raw_version})
+    )
 
     version = get_gitlab_version(http, MagicMock(), "http://localhost", "my-token")
 
-    http.get.assert_called_with("http://localhost/api/v4/version", params={'access_token': "my-token"})
+    http.assert_requests(
+        [
+            RecordedRequest(
+                method='GET',
+                url='http://localhost/api/v4/version',
+                options={'params': {'access_token': "my-token"}},
+            )
+        ]
+    )
     assert version == raw_version
 
 
 def test_get_gitlab_version_without_token():
-    http = MagicMock()
+    http = FakeHTTPClient()
     version = get_gitlab_version(http, MagicMock(), "http://localhost", None)
-    http.get.assert_not_called()
+    http.assert_requests([])
     assert version is None
 
 
@@ -115,11 +135,9 @@ def test_parse_readiness_service_checks_with_invalid_payload(
     # Manually init the check
     check.parse_config()
 
-    mocked_response = MagicMock()
-    mocked_response.json.raiseError.side_effect = Exception()
+    response = FakeHTTPResponse(content=b'not json', json_error=json.JSONDecodeError('Expecting value', 'not json', 0))
 
-    check.parse_readiness_service_checks(mocked_response)
-    mocked_response.json.assert_called_once()
+    check.parse_readiness_service_checks(response)
 
     for service_check in check.READINESS_SERVICE_CHECKS.values():
         aggregator.assert_service_check(
@@ -176,10 +194,7 @@ def test_parse_readiness_service_checks(
     # Manually init the check
     check.parse_config()
 
-    mocked_response = MagicMock()
-    mocked_response.json.return_value = service_check
-
-    check.parse_readiness_service_checks(mocked_response)
+    check.parse_readiness_service_checks(FakeHTTPResponse(json_result=service_check))
 
     aggregator.assert_service_check(
         'gitlab.readiness.redis',
@@ -195,3 +210,82 @@ def test_parse_readiness_service_checks(
         )
 
     assert len(aggregator.service_check_names) == 13
+
+
+@pytest.mark.parametrize(
+    'raw_version, version_metadata',
+    [
+        pytest.param(
+            '12.7.6',
+            {
+                'version.scheme': 'semver',
+                'version.major': '12',
+                'version.minor': '7',
+                'version.patch': '6',
+                'version.raw': '12.7.6',
+            },
+            id="12.7.9",
+        ),
+        pytest.param(
+            '1.4.5',
+            {
+                'version.scheme': 'semver',
+                'version.major': '1',
+                'version.minor': '4',
+                'version.patch': '5',
+                'version.raw': '1.4.5',
+            },
+            id="1.4.5",
+        ),
+    ],
+)
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
+@pytest.mark.parametrize('enable_metadata_collection', [True, False])
+def test_check_submit_metadata(
+    dd_run_check,
+    datadog_agent,
+    fake_http,
+    fake_http_response,
+    mock_data,
+    raw_version,
+    version_metadata,
+    gitlab_check,
+    get_config,
+    enable_metadata_collection,
+    use_openmetrics,
+):
+    version_url = '{}/api/v4/version'.format(GITLAB_URL)
+    fake_http_response(version_url, json_data={'version': raw_version})
+    config = get_config(use_openmetrics)
+    config['instances'][0]['api_token'] = 'token'
+    datadog_agent._config['enable_metadata_collection'] = enable_metadata_collection
+
+    dd_run_check(gitlab_check(config))
+
+    version_requests = [request for request in fake_http.requests if request.url == version_url]
+    if enable_metadata_collection:
+        assert len(version_requests) == 1
+        datadog_agent.assert_metadata('test:123', version_metadata)
+        datadog_agent.assert_metadata_count(5)
+    else:
+        assert version_requests == []
+        datadog_agent.assert_metadata_count(0)
+
+
+@pytest.mark.parametrize(
+    'error',
+    [
+        pytest.param(HTTPClientConnectionError('connection refused'), id='connection'),
+        pytest.param(HTTPClientConnectTimeoutError('connect timed out'), id='connect-timeout'),
+        pytest.param(HTTPClientReadTimeoutError('read timed out'), id='read-timeout'),
+    ],
+)
+def test_legacy_scrape_failure_reports_critical(
+    dd_run_check, aggregator, mock_data, fake_http, gitlab_check, get_config, error
+):
+    fake_http.register_response('GET', GITLAB_PROMETHEUS_ENDPOINT, error)
+    check = gitlab_check(get_config(False))
+
+    dd_run_check(check)
+
+    aggregator.assert_service_check('gitlab.prometheus_endpoint_up', status=AgentCheck.CRITICAL)

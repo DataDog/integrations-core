@@ -1,0 +1,1 @@
+Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. A read timeout on the Prometheus endpoint now reports `gitlab_runner.prometheus_endpoint_up` as CRITICAL instead of failing the check run.

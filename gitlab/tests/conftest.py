@@ -7,7 +7,6 @@ import os
 from contextlib import contextmanager
 from time import sleep
 
-import mock
 import pytest
 import requests
 
@@ -125,82 +124,29 @@ def dd_environment():
 
 
 @pytest.fixture()
-def mock_data():
-    with mock.patch(
-        'requests.Session.get',
-        side_effect=mocked_requests_get,
+def mock_data(fake_http_response):
+    fixtures = os.path.join(os.path.dirname(__file__), 'fixtures')
+
+    with open(os.path.join(fixtures, 'readiness_check.json')) as f:
+        readiness = json.load(f)
+    # The legacy check queries the readiness endpoint without parameters, the OpenMetrics V2 check with `?all=1`.
+    for url in (GITLAB_READINESS_ENDPOINT, '{}?all=1'.format(GITLAB_READINESS_ENDPOINT)):
+        fake_http_response(url, json_data=readiness)
+
+    fake_http_response(GITLAB_LIVENESS_ENDPOINT)
+    fake_http_response(GITLAB_HEALTH_ENDPOINT)
+
+    for url, fixture in (
+        (GITLAB_PROMETHEUS_ENDPOINT, 'metrics.txt'),
+        (GITLAB_GITALY_PROMETHEUS_ENDPOINT, 'gitaly.txt'),
+        (GITLAB_WORKHORSE_PROMETHEUS_ENDPOINT, 'workhorse.txt'),
+        (GITLAB_SIDEKIQ_PROMETHEUS_ENDPOINT, 'sidekiq.txt'),
     ):
-        yield
+        with open(os.path.join(fixtures, fixture), 'rb') as f:
+            fake_http_response(url, f.read(), headers={'Content-Type': 'text/plain'})
 
-
-def mocked_requests_get(*args, **kwargs):
-    url = args[0]
-
-    if url.startswith("http://{}:{}/-/readiness".format(HOST, GITLAB_LOCAL_PORT)):
-        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'readiness_check.json')
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            response = mock.MagicMock()
-            response.status_code = 200
-            response.json.return_value = json.loads(text_data)
-            return response
-
-    elif url == "http://{}:{}/-/liveness".format(HOST, GITLAB_LOCAL_PORT) or url == "http://{}:{}/-/health".format(
-        HOST, GITLAB_LOCAL_PORT
-    ):
-        response = mock.MagicMock()
-        response.status_code = 200
-        return response
-    elif url == "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT):
-        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            return mock.MagicMock(
-                status_code=200,
-                iter_lines=lambda **kwargs: text_data.split("\n"),
-                headers={'Content-Type': "text/plain"},
-            )
-    elif url == "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_GITALY_PROMETHEUS_PORT):
-        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'gitaly.txt')
-
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            return mock.MagicMock(
-                status_code=200,
-                iter_lines=lambda **kwargs: text_data.split("\n"),
-                headers={'Content-Type': "text/plain"},
-            )
-    elif url == "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_WORKHORSE_PROMETHEUS_PORT):
-        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'workhorse.txt')
-
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            return mock.MagicMock(
-                status_code=200,
-                iter_lines=lambda **kwargs: text_data.split("\n"),
-                headers={'Content-Type': "text/plain"},
-            )
-    elif url == "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_SIDEKIQ_PROMETHEUS_PORT):
-        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'sidekiq.txt')
-
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            return mock.MagicMock(
-                status_code=200,
-                iter_lines=lambda **kwargs: text_data.split("\n"),
-                headers={'Content-Type': "text/plain"},
-            )
-    elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT):
-        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'version.json')
-        with open(f_name, 'r') as f:
-            text_data = f.read()
-            response = mock.MagicMock()
-            response.status_code = 200
-            response.json.return_value = json.loads(text_data)
-            return response
-
-    pytest.fail("url `{}` not registered".format(args[0]))
+    with open(os.path.join(fixtures, 'version.json')) as f:
+        fake_http_response('{}/api/v4/version'.format(GITLAB_URL), json_data=json.load(f))
 
 
 @pytest.fixture()

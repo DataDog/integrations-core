@@ -5,12 +5,13 @@ from copy import deepcopy
 
 import mock
 import pytest
-import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientRequestError, HTTPClientTimeoutError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
+from ..common import SERVER_INFO_URL
 from .common import (
     ADAPTIVE_CONCURRENCY_METRIC_VALUES,
     ADAPTIVE_CONCURRENCY_METRICS,
@@ -22,7 +23,6 @@ from .common import (
     EXT_PROC_METRICS,
     FLAVOR,
     GLOBAL_RATE_LIMIT_METRICS,
-    HOST,
     INSTANCES,
     LOCAL_RATE_LIMIT_METRICS,
     RATE_LIMIT_STAT_PREFIX_TAG,
@@ -35,18 +35,18 @@ CHECK_NAME = 'envoy'
 pytestmark = [pytest.mark.unit]
 
 
-def test_success_fixture(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+def test_success_fixture(aggregator, fixture_path, serve_fixture_file, check, dd_run_check):
     instance = INSTANCES['main']
     c = check(instance)
 
-    response = mock_http_response(file_path=fixture_path('./legacy/multiple_services')).return_value
+    content = serve_fixture_file(fixture_path('./legacy/multiple_services'), instance['stats_url'], SERVER_INFO_URL)
     dd_run_check(c)
 
     metrics_collected = 0
     for metric in METRICS:
         metrics_collected += len(aggregator.metrics(METRIC_PREFIX + metric))
 
-    num_metrics = len(response.content.decode().splitlines())
+    num_metrics = len(content.decode().splitlines())
     num_metrics -= sum(c.unknown_metrics.values()) + sum(c.unknown_tags.values())
     assert 4481 <= metrics_collected == num_metrics
 
@@ -73,22 +73,22 @@ def test_retrocompatible_config2(check):
     assert c1.config_excluded_metrics == c2.config_excluded_metrics
 
 
-def test_success_fixture_included_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+def test_success_fixture_included_metrics(aggregator, fixture_path, serve_fixture_file, check, dd_run_check):
     instance = INSTANCES['included_metrics']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('./legacy/multiple_services'))
+    serve_fixture_file(fixture_path('./legacy/multiple_services'), instance['stats_url'], SERVER_INFO_URL)
     dd_run_check(c)
 
     for metric in aggregator.metric_names:
         assert metric.startswith('envoy.cluster.')
 
 
-def test_success_fixture_excluded_metrics(aggregator, fixture_path, mock_http_response, dd_run_check, check):
+def test_success_fixture_excluded_metrics(aggregator, fixture_path, serve_fixture_file, dd_run_check, check):
     instance = INSTANCES['excluded_metrics']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('./legacy/multiple_services'))
+    serve_fixture_file(fixture_path('./legacy/multiple_services'), instance['stats_url'], SERVER_INFO_URL)
     dd_run_check(c)
 
     for metric in aggregator.metric_names:
@@ -96,33 +96,33 @@ def test_success_fixture_excluded_metrics(aggregator, fixture_path, mock_http_re
 
 
 def test_success_fixture_inclued_and_excluded_metrics(
-    aggregator, fixture_path, mock_http_response, dd_run_check, check
+    aggregator, fixture_path, serve_fixture_file, dd_run_check, check
 ):
     instance = INSTANCES['included_excluded_metrics']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('./legacy/multiple_services'))
+    serve_fixture_file(fixture_path('./legacy/multiple_services'), instance['stats_url'], SERVER_INFO_URL)
     dd_run_check(c)
 
     for metric in aggregator.metric_names:
         assert metric.startswith("envoy.cluster.") and not metric.startswith("envoy.cluster.out.")
 
 
-def test_service_check(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+def test_service_check(aggregator, fixture_path, serve_fixture_file, check, dd_run_check):
     instance = INSTANCES['main']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('./legacy/multiple_services'))
+    serve_fixture_file(fixture_path('./legacy/multiple_services'), instance['stats_url'], SERVER_INFO_URL)
     dd_run_check(c)
 
     assert aggregator.service_checks(Envoy.SERVICE_CHECK_NAME)[0].status == Envoy.OK
 
 
-def test_unknown(fixture_path, mock_http_response, dd_run_check, check):
+def test_unknown(fixture_path, serve_fixture_file, dd_run_check, check):
     instance = INSTANCES['main']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('./legacy/unknown_metrics'))
+    serve_fixture_file(fixture_path('./legacy/unknown_metrics'), instance['stats_url'], SERVER_INFO_URL)
     dd_run_check(c)
 
     assert sum(c.unknown_metrics.values()) == 5
@@ -139,35 +139,20 @@ def test_unknown(fixture_path, mock_http_response, dd_run_check, check):
         pytest.param({}, {'verify': True}, id="legacy ssl config unset"),
     ],
 )
-def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
+def test_config(extra_config, expected_http_kwargs, check):
     instance = deepcopy(INSTANCES['main'])
     instance.update(extra_config)
     check = check(instance)
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        dd_run_check(check)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
+    for option, value in expected_http_kwargs.items():
+        assert check.http.options[option] == value
 
 
 @pytest.mark.parametrize(
     'exception, log_call_parameters',
     [
         pytest.param(
-            requests.exceptions.Timeout(),
+            HTTPClientTimeoutError('Read timed out'),
             ('Envoy endpoint `%s` timed out after %s seconds', 'http://localhost:8001/server_info', (10.0, 10.0)),
             id="timeout",
         ),
@@ -177,7 +162,7 @@ def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
             id="index error",
         ),
         pytest.param(
-            requests.exceptions.RequestException('Req Exception'),
+            HTTPClientRequestError('Req Exception'),
             (
                 'Error collecting Envoy version with url=`%s`. Error: %s',
                 'http://localhost:8001/server_info',
@@ -187,18 +172,16 @@ def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
         ),
     ],
 )
-def test_metadata_with_exception(
-    datadog_agent, fixture_path, mock_http_response, check, exception, log_call_parameters
-):
+def test_metadata_with_exception(datadog_agent, fake_http, check, exception, log_call_parameters):
     instance = INSTANCES['main']
     check = check(instance)
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
+    fake_http.register_response('GET', SERVER_INFO_URL, exception)
 
-    with mock.patch('requests.Session.get', side_effect=exception):
-        check._collect_metadata()
-        datadog_agent.assert_metadata_count(0)
-        check.log.warning.assert_called_with(*log_call_parameters)
+    check._collect_metadata()
+    datadog_agent.assert_metadata_count(0)
+    check.log.warning.assert_called_with(*log_call_parameters)
 
 
 @pytest.mark.parametrize(
@@ -214,13 +197,13 @@ def test_metadata_with_exception(
         ),
     ],
 )
-def test_metadata(datadog_agent, fixture_path, mock_http_response, check, fixture_file, expected_version):
+def test_metadata(datadog_agent, fixture_path, serve_fixture_file, check, fixture_file, expected_version):
     instance = INSTANCES['main']
     check = check(instance)
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    mock_http_response(file_path=fixture_path('./legacy/{}'.format(fixture_file)))
+    serve_fixture_file(fixture_path('./legacy/{}'.format(fixture_file)), SERVER_INFO_URL)
 
     check._collect_metadata()
 
@@ -237,13 +220,13 @@ def test_metadata(datadog_agent, fixture_path, mock_http_response, check, fixtur
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
-def test_metadata_invalid(datadog_agent, fixture_path, mock_http_response, check):
+def test_metadata_invalid(datadog_agent, fixture_path, serve_fixture_file, check):
     instance = INSTANCES['main']
     check = check(instance)
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    mock_http_response(file_path=fixture_path('./legacy/server_info_invalid'))
+    serve_fixture_file(fixture_path('./legacy/server_info_invalid'), SERVER_INFO_URL)
     check._collect_metadata()
 
     datadog_agent.assert_metadata('test:123', {})
@@ -307,7 +290,7 @@ def test_metadata_not_collected(datadog_agent, check):
 def test_stats_prefix_optional_tags(
     aggregator,
     fixture_path,
-    mock_http_response,
+    serve_fixture_file,
     check,
     dd_run_check,
     fixture_file,
@@ -318,7 +301,7 @@ def test_stats_prefix_optional_tags(
     instance = INSTANCES['main']
     standard_tags.append('endpoint:{}'.format(instance["stats_url"]))
     c = check(instance)
-    mock_http_response(file_path=fixture_path(fixture_file))
+    serve_fixture_file(fixture_path(fixture_file), instance['stats_url'], SERVER_INFO_URL)
     dd_run_check(c)
 
     # To test the absence and presence of the optional tags, both the value and the tags are asserted.
@@ -336,11 +319,11 @@ def test_stats_prefix_optional_tags(
             )
 
 
-def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+def test_local_rate_limit_metrics(aggregator, fixture_path, serve_fixture_file, check, dd_run_check):
     instance = INSTANCES['main']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('./legacy/local_rate_limit.txt'))
+    serve_fixture_file(fixture_path('./legacy/local_rate_limit.txt'), instance['stats_url'], SERVER_INFO_URL)
     dd_run_check(c)
 
     for metric in LOCAL_RATE_LIMIT_METRICS:
@@ -351,11 +334,11 @@ def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_connection_limit_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+def test_connection_limit_metrics(aggregator, fixture_path, serve_fixture_file, check, dd_run_check):
     instance = INSTANCES['main']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('./legacy/connection_limit.txt'))
+    serve_fixture_file(fixture_path('./legacy/connection_limit.txt'), instance['stats_url'], SERVER_INFO_URL)
     dd_run_check(c)
     for metric in CONNECTION_LIMIT_METRICS:
         for tag in CONNECTION_LIMIT_STAT_PREFIX_TAG:
@@ -364,11 +347,11 @@ def test_connection_limit_metrics(aggregator, fixture_path, mock_http_response, 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_adaptive_concurrency_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+def test_adaptive_concurrency_metrics(aggregator, fixture_path, serve_fixture_file, check, dd_run_check):
     instance = INSTANCES['main']
     c = check(instance)
 
-    mock_http_response(file_path=fixture_path('./legacy/adaptive_concurrency.txt'))
+    serve_fixture_file(fixture_path('./legacy/adaptive_concurrency.txt'), instance['stats_url'], SERVER_INFO_URL)
     dd_run_check(c)
 
     # Pin the fixture values so a wrong mapping or metric type would be caught, not just a wrong name.
