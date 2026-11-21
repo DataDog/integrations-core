@@ -605,6 +605,10 @@ integration/ibm_db2:
 - changed-files:
   - any-glob-to-any-file:
     - ibm_db2/**/*
+integration/ibm_hmc:
+- changed-files:
+  - any-glob-to-any-file:
+    - ibm_hmc/**/*
 integration/ibm_i:
 - changed-files:
   - any-glob-to-any-file:
