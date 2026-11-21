@@ -127,7 +127,7 @@ def test_check(aggregator, dd_run_check, fake_http_response):
 
 
 def test_v2_default_metric_limit_is_zero():
-    # 0 removes the 2000-metric limit that OpenMetrics V2 checks default to, so large scrapes are not truncated.
+    # Guards against the default metric limit changing from 0 (unlimited).
     assert KongCheck.DEFAULT_METRIC_LIMIT == 0
 
 
