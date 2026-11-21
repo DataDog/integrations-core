@@ -69,6 +69,20 @@
     "saved_views": {
       "High Severity Issues": "assets/saved_views/all_high_severity_issues.json",
       "Authentication Protocol": "assets/saved_views/top_ips_flagged_in_high_severity_threats.json"
+    },
+    "monitors": {
+      "BGP peer is not established": "assets/monitors/pa_bgp_peer_down.json",
+      "File system is nearly full": "assets/monitors/pa_disk_full.json",
+      "Firewall is unreachable": "assets/monitors/pa_firewall_unreachable.json",
+      "Management-plane memory usage is high": "assets/monitors/pa_high_memory.json",
+      "License is about to expire": "assets/monitors/pa_license_expiring.json",
+      "Power sensor is in alarm": "assets/monitors/pa_power_alarm.json",
+      "Temperature sensor is in alarm": "assets/monitors/pa_temperature_alarm.json",
+      "HA state changed": "assets/monitors/pa_ha_state_change.json",
+      "Management-plane CPU utilization is high": "assets/monitors/pa_high_cpu.json",
+      "Critical threat detected but not blocked": "assets/monitors/pa_threat_critical.json",
+      "IPsec tunnel is down": "assets/monitors/pa_ipsec_tunnel_down.json",
+      "Firewall rejects the integration's credentials": "assets/monitors/pa_api_auth_rejected.json"
     }
   }
 }
