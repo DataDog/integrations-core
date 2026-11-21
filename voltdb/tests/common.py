@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from concurrent.futures import Future
 from typing import List, Set, Tuple  # noqa: F401
 
 from datadog_checks.base import is_affirmative
@@ -207,3 +208,14 @@ else:
         'password': 'doggopass',
         'tags': ['test:voltdb'],
     }  # type: Instance
+
+
+def completed_future(fn, *args):
+    """Run `fn(*args)` now and wrap its outcome in a resolved Future, standing in
+    for `Client.call_procedure_async` in tests."""
+    future = Future()
+    try:
+        future.set_result(fn(*args))
+    except Exception as exc:
+        future.set_exception(exc)
+    return future

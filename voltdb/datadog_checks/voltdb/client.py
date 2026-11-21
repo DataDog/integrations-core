@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import threading
+from concurrent.futures import Future
 from typing import List, Optional, Tuple
 
 import voltdbclient
+from voltclient import VoltClient, VoltConnectionError, VoltNoConnectionsError
 
 
 class VoltDBError(Exception):
@@ -17,17 +20,17 @@ class VoltDBError(Exception):
 
 class Client(object):
     """
-    A wrapper around the VoltDB native Python client.
+    Wrapper around the topology-aware `voltclient.VoltClient`.
 
-    Accepts one or more `(host, port)` endpoints. On a connect failure the
-    client transparently tries the next endpoint, so the Agent can keep
-    collecting metrics as long as at least one cluster member is reachable.
+    The configured endpoints are seeds: the client discovers the full cluster
+    membership at connect time, keeps a connection to every node, and routes
+    each call to the node that executes it. Node failures, rejoins, and elastic
+    expansions are picked up in the background without reconnecting.
 
     See: https://pypi.org/project/voltdbclient/
     """
 
     # ClientResponse status code for success.
-    # See: voltdbclient.VoltResponse.status
     SUCCESS = 1
 
     def __init__(
@@ -48,11 +51,23 @@ class Client(object):
         self._password = password or ''
         self._use_ssl = use_ssl
         self._ssl_config_file = ssl_config_file
-        self._connect_timeout = connect_timeout
-        self._procedure_timeout = procedure_timeout
-        self._fser: Optional[voltdbclient.FastSerializer] = None
-        self._active: Optional[Tuple[str, int]] = None
+        self._connect_timeout = connect_timeout or 8
+        # VoltClient enforces a deadline on every call, so "no timeout" becomes the
+        # largest wait the threading primitives accept.
+        self._procedure_timeout = procedure_timeout if procedure_timeout is not None else threading.TIMEOUT_MAX
         self._log = log
+        self._client: Optional[VoltClient] = None
+
+        # VoltClient takes a single port shared by all seeds.
+        self._hosts = [host for host, _ in self._endpoints]
+        self._port = self._endpoints[0][1]
+        ports = sorted({port for _, port in self._endpoints})
+        if len(ports) > 1:
+            self._log_warning(
+                'VoltDB endpoints declare different ports %s; the client connects to every seed on port %d.',
+                ports,
+                self._port,
+            )
 
     def _log_debug(self, *args) -> None:
         if self._log is not None:
@@ -62,85 +77,61 @@ class Client(object):
         if self._log is not None:
             self._log.warning(*args)
 
-    def _open(self, host: str, port: int) -> voltdbclient.FastSerializer:
-        return voltdbclient.FastSerializer(
-            host=host,
-            port=port,
-            usessl=self._use_ssl,
-            ssl_config_file=self._ssl_config_file,
-            username=self._username,
-            password=self._password,
-            connect_timeout=self._connect_timeout,
-            procedure_timeout=self._procedure_timeout,
-            default_cacerts=False,
-        )
-
-    def _connect_any(self) -> voltdbclient.FastSerializer:
-        """Try each configured endpoint until one connects. Raises the last
-        exception if every endpoint fails."""
-        last_exc: Optional[BaseException] = None
-        for host, port in self._endpoints:
-            try:
-                fser = self._open(host, port)
-            except Exception as exc:  # noqa: BLE001
-                self._log_warning('VoltDB endpoint %s:%d unreachable (%s); trying the next one.', host, port, exc)
-                last_exc = exc
-                continue
-            self._active = (host, port)
-            self._log_debug('VoltDB connected to %s:%d', host, port)
-            return fser
-        # Exhausted all endpoints.
-        assert last_exc is not None
-        raise last_exc
-
-    def _get_connection(self) -> voltdbclient.FastSerializer:
-        if self._fser is None:
-            self._fser = self._connect_any()
-        return self._fser
+    def _get_client(self) -> VoltClient:
+        if self._client is None:
+            self._client = VoltClient(
+                hosts=self._hosts,
+                port=self._port,
+                username=self._username,
+                password=self._password,
+                usessl=self._use_ssl,
+                ssl_config_file=self._ssl_config_file,
+                connect_timeout=self._connect_timeout,
+                procedure_timeout=self._procedure_timeout,
+                default_cacerts=False,
+            )
+            self._log_debug('VoltDB client connected via seeds %s on port %d', self._hosts, self._port)
+        return self._client
 
     def close(self) -> None:
-        if self._fser is not None:
+        if self._client is not None:
             try:
-                self._fser.close()
+                self._client.close()
             except Exception:
                 pass
-            self._fser = None
-            self._active = None
+            self._client = None
 
     @property
     def endpoints(self) -> List[Tuple[str, int]]:
         return list(self._endpoints)
 
-    @property
-    def active_endpoint(self) -> Optional[Tuple[str, int]]:
-        return self._active
-
-    def call_procedure(self, procedure: str, params: Optional[list] = None) -> voltdbclient.VoltResponse:
+    def call_procedure_async(self, procedure: str, params: Optional[list] = None) -> Future:
+        """Send a procedure call without waiting; returns a Future for its VoltResponse."""
         params = list(params) if params else []
         param_types = [_infer_volt_type(p) for p in params]
-        # If we already have a connection, try it first. If it errors, close
-        # and retry once against the full endpoint list. This handles the
-        # common case where the active node went down between check runs.
-        had_connection = self._fser is not None
+        had_client = self._client is not None
         try:
-            fser = self._get_connection()
-            proc = voltdbclient.VoltProcedure(fser, procedure, param_types)
-            return proc.call(params)
-        except Exception:
+            return self._get_client().call_async(procedure, param_types, params)
+        except VoltNoConnectionsError:
+            # Every pooled connection is gone. Rebuild from the configured seeds, whose
+            # addresses may have changed (e.g. a full cluster restart), and send once more.
             self.close()
-            if not had_connection:
-                # First attempt already iterated every endpoint via _connect_any.
+            if not had_client:
                 raise
+            self._log_debug('VoltDB pool has no live connections; reconnecting from the seeds.')
+            return self._get_client().call_async(procedure, param_types, params)
 
-        # Second attempt: reconnect to any endpoint and retry the call once.
-        self._log_debug('VoltDB call to %s failed; reconnecting and retrying once.', procedure)
-        fser = self._get_connection()
+    def result(self, future: Future, procedure: str, params: Optional[list] = None) -> voltdbclient.VoltResponse:
+        """Wait for a call sent with call_procedure_async. If its connection was lost while it
+        was in flight, send it once more: monitoring calls only read data, so a resend is safe."""
         try:
-            proc = voltdbclient.VoltProcedure(fser, procedure, param_types)
-            return proc.call(params)
-        except Exception:
-            self.close()
-            raise
+            return future.result()
+        except VoltConnectionError as exc:
+            self._log_debug('VoltDB call to %s lost its connection (%s); sending it once more.', procedure, exc)
+            return self.call_procedure_async(procedure, params).result()
+
+    def call_procedure(self, procedure: str, params: Optional[list] = None) -> voltdbclient.VoltResponse:
+        return self.result(self.call_procedure_async(procedure, params), procedure, params)
 
     def raise_for_status(self, response: voltdbclient.VoltResponse) -> None:
         if response.status != self.SUCCESS:
