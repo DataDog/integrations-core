@@ -112,8 +112,9 @@ def _merge_summary_stats(acc: dict, row: dict, acc_weight: float, row_weight: fl
 
 
 def classify_query_text(text: str) -> TextKind:
-    if text.startswith(DDIGNORE_COMMENT):
-        # Queries the Agent tags for itself; monitoring artifacts rather than application traffic.
+    if DDIGNORE_COMMENT in text:
+        # Queries the Agent tags for itself; monitoring artifacts rather than application traffic. The marker
+        # leads the text before Postgres 18 and trails it from 18, which strips leading comments.
         return TextKind.EXCLUDED
     if text == INSUFFICIENT_PRIVILEGE:
         # Describes our role rather than the statement, and the grant may arrive later, so this must

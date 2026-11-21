@@ -35,7 +35,8 @@ from datadog_checks.postgres.statements_v2 import (
 @pytest.mark.parametrize(
     "text, expected_kind",
     [
-        pytest.param('/* DDIGNORE */ SELECT secret', TextKind.EXCLUDED, id='ddignore'),
+        pytest.param('/* DDIGNORE */ SELECT secret', TextKind.EXCLUDED, id='ddignore_leading'),
+        pytest.param('SELECT secret /* DDIGNORE */', TextKind.EXCLUDED, id='ddignore_trailing'),
         pytest.param('<insufficient privilege>', TextKind.UNAVAILABLE, id='insufficient_privilege'),
         pytest.param('SELECT city FROM persons', TextKind.STATEMENT, id='ordinary_statement'),
     ],
