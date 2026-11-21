@@ -114,6 +114,7 @@ class Disk(AgentCheck):
         if self._tag_by_label and Platform.is_linux():
             self.devices_label = self._get_devices_label()
 
+        included_devices = set()
         for part in psutil.disk_partitions(all=self._include_all_devices):
             self.log.debug('Checking device %s', part.device)
             # we check all exclude conditions
@@ -149,6 +150,7 @@ class Disk(AgentCheck):
                 continue
 
             self.log.debug('Passed: %s', part.device)
+            included_devices.add(_base_device_name(part.device))
 
             tags = self._get_tags(part)
             for metric_name, metric_value in self._collect_part_metrics(part, disk_usage).items():
@@ -164,7 +166,10 @@ class Disk(AgentCheck):
                 else:
                     self.service_check('disk.read_write', AgentCheck.UNKNOWN, tags=tags)
 
-        self.collect_latency_metrics()
+        # Only pass the allowed set when a device filter is active; otherwise preserve
+        # the original behaviour of emitting latency metrics for all IO counter devices.
+        device_filter_active = self._device_include is not None or self._device_exclude is not None
+        self.collect_latency_metrics(included_devices if device_filter_active else None)
 
     def _get_tags(self, part):
         device_name = part.mountpoint if self._use_mount else part.device
@@ -323,9 +328,16 @@ class Disk(AgentCheck):
 
         return metrics
 
-    def collect_latency_metrics(self):
+    def collect_latency_metrics(self, included_devices=None):
         for disk_name, disk in psutil.disk_io_counters(perdisk=True).items():
             self.log.debug('IO Counters: %s -> %s', disk_name, disk)
+            # included_devices is a set of _base_device_name values derived from the partitions
+            # that passed exclude_disk() in check(). Using base names avoids mismatches between
+            # the full paths returned by disk_partitions (e.g. /dev/sda1) and the bare names
+            # returned by disk_io_counters on Linux (e.g. sda1).
+            if included_devices is not None and _base_device_name(disk_name) not in included_devices:
+                self.log.debug('Excluding IO counters for device %s', disk_name)
+                continue
             try:
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
 
