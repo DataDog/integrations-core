@@ -13,7 +13,9 @@ from .common import (
     MOCK_DEVICE_METADATA,
     MOCK_GID_ATTRS,
     MOCK_IB_COUNTER_DATA,
+    MOCK_PCI_DEVICE_PATH,
     MOCK_PORT,
+    MOCK_PORT_DATA,
     MOCK_RATE_DATA,
     MOCK_RDMA_COUNTER_DATA,
     MOCK_STATUS_DATA,
@@ -76,6 +78,8 @@ def _get_file_content(filename):
         return MOCK_GID_ATTRS[counter]['netdev']
     elif parent == 'types' and counter in MOCK_GID_ATTRS:
         return MOCK_GID_ATTRS[counter]['type']
+    elif parent == 'gids' and counter == '0':
+        return MOCK_PORT_DATA['gid0']
     if counter in MOCK_IB_COUNTER_DATA:
         return MOCK_IB_COUNTER_DATA[counter]
     elif counter in MOCK_RDMA_COUNTER_DATA:
@@ -85,7 +89,7 @@ def _get_file_content(filename):
     elif counter in MOCK_DEVICE_METADATA:
         return MOCK_DEVICE_METADATA[counter]
     elif counter == 'link_layer':
-        return 'InfiniBand'
+        return MOCK_PORT_DATA['link_layer']
     return '0'
 
 
@@ -105,12 +109,14 @@ def mock_fs():
         mock.patch('os.listdir') as mock_counter_dir,
         mock.patch('glob.glob') as mock_glob,
         mock.patch('builtins.open') as mock_open,
+        mock.patch('os.path.realpath') as mock_realpath,
     ):
         mock_ib_dir.return_value = True
         mock_ib_sub_dir.side_effect = _is_valid_directory
         mock_counter_dir.side_effect = _get_directory_contents
         mock_glob.side_effect = _get_glob_matches
         mock_open.side_effect = lambda f, *args, **kwargs: mock.mock_open(read_data=_get_file_content(f))()
+        mock_realpath.side_effect = lambda p: MOCK_PCI_DEVICE_PATH if p.endswith('/device') else p
 
         yield
 
