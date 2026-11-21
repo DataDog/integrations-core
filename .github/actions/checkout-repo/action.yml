@@ -1,0 +1,20 @@
+name: 'Checkout repo'
+description: 'Pinned actions/checkout wrapper; the pin lives here so bumping it does not flip the resolution inputs hashed by .builders/inputs_hash.py'
+inputs:
+  ref:
+    description: 'Ref to check out; empty checks out the commit that triggered the run'
+    required: false
+    default: ''
+  token:
+    description: 'Token for the checkout; empty uses the default github.token'
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - name: Checkout code
+      # This workflow is push-triggered only, so github.sha is the default ref
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{ inputs.ref || github.sha }}
+        token: ${{ inputs.token || github.token }}
