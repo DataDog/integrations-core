@@ -57,8 +57,17 @@ class Ceph(AgentCheck):
         ceph_args = '{} --cluster {}'.format(ceph_args, ceph_cluster)
 
         raw = {}
-        # `mon_status` is only a valid command in versions of Ceph prior to `octopus` (released 2020-03-23)
-        for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail', 'osd metadata'):
+        for cmd in (
+            'status',
+            'mon_status',
+            'df detail',
+            'osd pool stats',
+            'osd perf',
+            'health detail',
+            'osd metadata',
+        ):
+            if cmd == 'mon_status' and self._mon_status_removed(raw):
+                continue
             try:
                 args = '{} {} -fjson'.format(ceph_args, cmd)
                 output, _, _ = get_subprocess_output(args.split(), self.log)
@@ -75,6 +84,13 @@ class Ceph(AgentCheck):
             raise RuntimeError("Could not detect Ceph release series")
 
         return raw
+
+    @staticmethod
+    def _mon_status_removed(raw: dict) -> bool:
+        # `mon_status` was removed in Octopus, the first release that reports its name here.
+        # Nautilus reports its number ('14'), and older releases don't report the field.
+        release = raw.get('status', {}).get('monmap', {}).get('min_mon_release_name', '')
+        return bool(release) and not release.isdigit()
 
     def _extract_tags(self, raw, instance):
         tags = instance.get('tags', [])
@@ -284,14 +300,13 @@ class Ceph(AgentCheck):
                     self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
                 except KeyError:
                     self.log.debug('Error retrieving mon_status metrics')
-
-                try:
-                    num_mons_active = len(raw['mon_status']['quorum'])
-                    self.gauge(self.NAMESPACE + '.num_mons.active', num_mons_active, tags)
-                except KeyError:
-                    self.log.debug('Error retrieving mon_status quorum metrics')
             else:
                 self.log.debug('Error retrieving num_mons metric')
+
+        try:
+            self.gauge(self.NAMESPACE + '.num_mons.active', len(raw['status']['quorum']), tags)
+        except KeyError:
+            self.log.debug('Error retrieving num_mons.active metric')
 
         try:
             stats = raw['df_detail']['stats']
