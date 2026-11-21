@@ -501,6 +501,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /cisco_asa/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /cisco_asa/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/cisco_ise/                                                           @DataDog/agent-integrations
+/cisco_ise/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
+/cisco_ise/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
+/cisco_ise/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /cisco_secure_client/                                                @DataDog/agent-integrations
 /cisco_secure_client/*.md                                            @DataDog/agent-integrations @DataDog/documentation
 /cisco_secure_client/manifest.json                                   @DataDog/agent-integrations @DataDog/documentation
