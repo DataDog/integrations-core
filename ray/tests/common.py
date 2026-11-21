@@ -313,6 +313,7 @@ OPTIONAL_METRICS = [
     'serve.num_multiplexed_models',
     'serve.registered_multiplexed_model_id',
     'server.num_ongoing_grpc_requests',
+    'serve.ongoing_requests_at_replicas',
     'tasks',
     'worker.register_time.bucket',
     'worker.register_time.count',
