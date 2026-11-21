@@ -23,7 +23,7 @@ class SonatypeNexusCheck(AgentCheck):
         super().__init__(name, init_config, instances)
         self._username = (self.instance.get("username") or "").strip()
         self._password = (self.instance.get("password") or "").strip()
-        self._server_url = self.instance.get("server_url")
+        self._server_url = (self.instance.get("server_url") or "").rstrip("/")
         self.min_collection_interval = self.instance.get("min_collection_interval")
         self.sonatype_nexus_client = SonatypeNexusClient(self)
         self.custom_tags = self.instance.get("tags")

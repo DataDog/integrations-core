@@ -42,6 +42,39 @@ def test_successful_metrics_collection(dd_run_check, mock_http_response_per_endp
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+def test_server_url_trailing_slash(dd_run_check, mock_http_response_per_endpoint, aggregator):
+    # Regression test for https://github.com/DataDog/integrations-core/issues/25827: a trailing slash in
+    # `server_url` produced `//service/...` request paths, which Nexus answers with a 404.
+    status_response_data = {key: {"healthy": True} for key in constants.STATUS_METRICS_MAP.keys()}
+    analytics_response_data = {
+        "gauges": {
+            "jvm.memory.heap.used": {"value": 123456789},
+            "nexus.analytics.bytes_transferred_by_format": {"value": []},
+            "nexus.analytics.blobstore_type_counts": {"value": {}},
+        }
+    }
+
+    http_get = mock_http_response_per_endpoint(
+        {
+            "http://127.0.0.1:8081/service/rest/v1/status/check": [
+                MockResponse(status_code=200, json_data=status_response_data)
+            ],
+            "http://127.0.0.1:8081/service/metrics/data": [
+                MockResponse(status_code=200, json_data=analytics_response_data)
+            ],
+        }
+    )
+
+    check = SonatypeNexusCheck("sonatype_nexus", {}, [{**instance, "server_url": "http://127.0.0.1:8081/"}])
+    dd_run_check(check)
+
+    requested_urls = [call.args[1] for call in http_get.call_args_list]
+    assert len(requested_urls) == 2
+    assert not any("//service" in url for url in requested_urls)
+    aggregator.assert_metric("sonatype_nexus.status.scheduler_health", value=1.0, tags=["sonatype_host:127.0.0.1"])
+    aggregator.assert_metric("sonatype_nexus.analytics.jvm.heap_memory_used", value=123456789)
+
+
 def test_create_metric_for_configs_int(mocker, aggregator):
     check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
     metric_data = {"value": 100}
