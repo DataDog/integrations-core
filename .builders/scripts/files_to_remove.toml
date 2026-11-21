@@ -15,6 +15,12 @@ excluded_paths = [
   "/pymongo/asynchronous/",
   "/gridfs/",
 
+  # --- ddtrace AppSec WAF library ---
+  # ddtrace only loads libddwaf when AppSec is enabled, which the Agent never does. Without it,
+  # ddtrace keeps AppSec disabled and logs a warning if anything tries to enable it.
+  # repair_wheels.py already strips it on macOS, before delocate's minimum macOS version check.
+  "/ddtrace/appsec/_ddwaf/libddwaf/",
+
   # --- Type annotation ---
   "krb5/**/*.pyi",
   "krb5/**/py.typed",

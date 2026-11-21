@@ -107,6 +107,47 @@ def test_clean_wheel_removes_jsonpatch_console_scripts(tmp_path: Path):
     assert 'jsonpatch.py' in recorded_paths
 
 
+@pytest.mark.parametrize(
+    'platform_tag, libddwaf_path',
+    [
+        ('manylinux_2_17_x86_64', 'ddtrace/appsec/_ddwaf/libddwaf/x86_64/lib/libddwaf.so'),
+        ('manylinux_2_17_aarch64', 'ddtrace/appsec/_ddwaf/libddwaf/aarch64/lib/libddwaf.so'),
+        ('win_amd64', 'ddtrace/appsec/_ddwaf/libddwaf/x64/lib/libddwaf.dll'),
+    ],
+)
+def test_clean_wheel_removes_ddtrace_libddwaf_and_keeps_its_bindings(
+    tmp_path: Path, platform_tag: str, libddwaf_path: str
+):
+    dist_info = 'ddtrace-4.16.3.dist-info'
+    record_path = f'{dist_info}/RECORD'
+    bindings_path = 'ddtrace/appsec/_ddwaf/ddwaf_types.py'
+    files = {
+        libddwaf_path: b'native WAF library',
+        bindings_path: b'ddwaf = _load_libddwaf()\n',
+        f'{dist_info}/METADATA': b'Metadata-Version: 2.1\nName: ddtrace\nVersion: 4.16.3\n',
+        f'{dist_info}/WHEEL': (
+            f'Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: false\nTag: cp313-cp313-{platform_tag}\n'.encode()
+        ),
+    }
+    wheel_path = tmp_path / f'ddtrace-4.16.3-cp313-cp313-{platform_tag}.whl'
+    with ZipFile(wheel_path, 'w', compression=ZIP_DEFLATED) as wheel:
+        for name, contents in files.items():
+            wheel.writestr(name, contents)
+        wheel.writestr(record_path, _record_contents(files, record_path))
+
+    assert build_wheels.clean_wheel(wheel_path)
+
+    with ZipFile(wheel_path) as wheel:
+        installed_paths = set(wheel.namelist())
+        recorded_paths = {row[0] for row in csv.reader(io.TextIOWrapper(wheel.open(record_path), encoding='utf-8'))}
+
+    assert libddwaf_path not in installed_paths
+    assert libddwaf_path not in recorded_paths
+    # Only the native library goes, not the ddtrace modules next to it
+    assert bindings_path in installed_paths
+    assert bindings_path in recorded_paths
+
+
 @pytest.mark.parametrize('newline', ['\n', '\r\n'])
 @pytest.mark.parametrize('strip_docstrings', [True, False])
 def test_docstring_trimming_preserves_runtime_strings_and_python_syntax(
