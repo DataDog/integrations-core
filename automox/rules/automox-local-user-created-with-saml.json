@@ -1,0 +1,52 @@
+{
+  "name": "Automox local user created in the presence of SAML user creation",
+  "product": [
+    "security_monitoring"
+  ],
+  "defaultRuleId": "def-000-lus",
+  "tags": [
+    "source:automox",
+    "security:attack",
+    "tactic:TA0003-persistence",
+    "technique:T1136-create-account",
+    "mitre_platform:cloud",
+    "mitre_platform:saas"
+  ],
+  "isEnabled": true,
+  "isShadowDeployed": true,
+  "isBeta": true,
+  "options": {
+    "detectionMethod": "threshold",
+    "evaluationWindow": 86400,
+    "keepAlive": 3600,
+    "maxSignalDuration": 86400
+  },
+  "queries": [
+    {
+      "name": "local_user_create",
+      "query": "source:automox @evt.name:user.create",
+      "groupByFields": [
+        "@organization_id"
+      ],
+      "distinctFields": [],
+      "aggregation": "count"
+    },
+    {
+      "name": "saml_user_create",
+      "query": "source:automox @evt.name:saml.user.create",
+      "groupByFields": [
+        "@organization_id"
+      ],
+      "distinctFields": [],
+      "aggregation": "count"
+    }
+  ],
+  "cases": [
+    {
+      "name": "Automox local account created in an organization that also provisions users through SAML",
+      "status": "Medium",
+      "notifications": [],
+      "condition": "local_user_create > 0 && saml_user_create > 0"
+    }
+  ]
+}
