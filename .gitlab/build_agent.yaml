@@ -27,9 +27,21 @@ build-agent-auto:
     # Do not run on release branches
     - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
       when: never
-    # Only run if the branch is not a Github Merge Queue one.
-    - if: $CI_COMMIT_BRANCH !~ /^gh-readonly-queue.*/
+    # Do not run on Github Merge Queue branches
+    - if: $CI_COMMIT_BRANCH =~ /^gh-readonly-queue.*/
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       changes:
+        paths:
+          - .deps/**/*
+          - .gitlab/build_agent.yaml
+    # Without compare_to, branch pipelines diff against the previous push, so rebasing a stale
+    # branch onto master picks up master's dependency changes and triggers a build.
+    # `ddev release branch create` points compare_to at the release branch, so branches cut from it
+    # compare against the release instead of master.
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      changes:
+        compare_to: refs/heads/master
         paths:
           - .deps/**/*
           - .gitlab/build_agent.yaml
