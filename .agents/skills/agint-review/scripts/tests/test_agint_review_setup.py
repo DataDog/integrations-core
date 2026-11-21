@@ -41,6 +41,12 @@ def test_only_unfiltered_runs_are_posted(setup_script, aspects, expected):
     assert setup_script.is_full_review(aspects) is expected
 
 
+def test_every_reviewer_can_take_a_per_repo_rule_file(setup_script):
+    # Without an entry, a repo's .claude/agint-review/<name>.md is silently ignored.
+    reviewers = {a["name"] for a in setup_script.load_registry()["agents"]}
+    assert reviewers <= set(setup_script.AGENT_RULE_FILES)
+
+
 def test_missing_agents_folder_is_reported(setup_script, monkeypatch, tmp_path):
     monkeypatch.setattr(setup_script, "AGENTS_DIR", tmp_path / "agents")
 
@@ -138,9 +144,10 @@ def agents_for(setup_script, files, aspects=()):
         ([".builders/images/linux/Dockerfile", "docs/developer/index.md", "README.md"], {"conventions"}),
         (["datadog_checks_downloader/datadog_checks/downloader/cli.py"], {"conventions", "security"}),
         (["datadog_checks_dependency_provider/pyproject.toml"], {"conventions"}),
+        (["krakend/assets/logs/krakend.yaml", "krakend/assets/logs/krakend_tests.yaml"], {"conventions", "logs"}),
     ],
     ids=["integration", "base", "dev", "ddev", "repo config", "workflow", "action", "chainguard-only", "other paths", "downloader",
-         "other package"],
+         "other package", "log pipeline"],
 )
 def test_each_pr_type_gets_the_agents_in_the_table(setup_script, files, expected):
     assert set(agents_for(setup_script, files)) == expected
@@ -155,6 +162,19 @@ def test_each_agent_reviews_only_its_files(setup_script):
     assert agents["integrations"] == agents["security"] == ["postgres/datadog_checks/postgres/postgres.py"]
     assert agents["ddev"] == ["ddev/src/ddev/cli/__init__.py"]
     assert agents["github-actions"] == [".github/workflows/pr.yml"]
+
+
+def test_log_pipeline_files_go_to_logs_not_to_the_check_reviewers(setup_script):
+    check, pipeline = "krakend/datadog_checks/krakend/check.py", "krakend/assets/logs/krakend.yaml"
+    agents = agents_for(setup_script, [check, pipeline])
+    assert agents["integrations"] == agents["security"] == [check]
+    assert agents["logs"] == [pipeline]
+    assert agents["conventions"] == [check, pipeline]
+
+
+def test_log_pipeline_files_are_not_conventions_only(setup_script):
+    files = ["krakend/assets/logs/krakend.yaml"]
+    assert setup_script.conventions_only_files(files, setup_script.load_registry(), ROOTS) == []
 
 
 def test_a_directory_named_like_an_integration_prefix_is_not_that_integration(setup_script):
