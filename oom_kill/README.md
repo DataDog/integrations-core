@@ -10,19 +10,25 @@ This check monitors the kernel OOM (out of memory) kill process through the Data
 
 The OOM Kill check is included in the [Datadog Agent][1] package. It relies on an eBPF program implemented in the System Probe.
 
-The eBPF program used by the System Probe is compiled at runtime and requires you to have access to the proper kernel headers.
+The eBPF program used by the System Probe is compiled at runtime and requires either a kernel with BTF (BPF Type Format) built in, or access to the proper kernel headers.
 
-On Host and Docker installations, install the kernel headers:
+To check if your kernel has BTF built in, run:
+```sh
+ls /sys/kernel/btf/vmlinux
+```
 
-- Debian-like distributions:
-  ```sh
-  apt install -y linux-headers-$(uname -r)
-  ```
-- RHEL-like distributions:
-  ```sh
-  yum install -y kernel-headers-$(uname -r)
-  yum install -y kernel-devel-$(uname -r)
-  ```
+If that file exists, no further action is required. If it does not exist, on Host and Docker installations, install the kernel headers using the command for your distribution:
+
+| Distribution | BTF built in | Kernel headers install command |
+|---|---|---|
+| Amazon Linux 2 | No | `yum install -y kernel-headers-$(uname -r) kernel-devel-$(uname -r)` |
+| Amazon Linux 2023 | Yes | N/A |
+| Debian 10 | No | `apt install -y linux-headers-$(uname -r)` |
+| Debian 11+ | Yes | N/A |
+| RHEL/CentOS 8 | No | `yum install -y kernel-headers-$(uname -r) kernel-devel-$(uname -r)` |
+| RHEL/CentOS 9+ | Yes | N/A |
+| Ubuntu 18.04 | No | `apt install -y linux-headers-$(uname -r)` |
+| Ubuntu 20.04+ | Yes | N/A |
 
 **Note**: Kernel version 4.9 or later is required for the OOM Kill check to work.
 In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
