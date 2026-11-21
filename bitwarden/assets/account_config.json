@@ -1,0 +1,61 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and Secret",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_secret",
+          "label": "Client secret",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "instance_type",
+      "label": "Instance type",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "cloud", "label": "Cloud" },
+          { "value": "self_hosted", "label": "Self-hosted" }
+        ]
+      }
+    },
+    {
+      "key": "self_hosted_instance_url",
+      "label": "Self-hosted instance URL",
+      "help": "Required when instance type is Self-hosted.",
+      "editable": true,
+      "required": false,
+      "domain": {}
+    },
+    {
+      "key": "cloud_region",
+      "label": "Cloud Region",
+      "help": "Only used when instance type is Cloud.",
+      "editable": true,
+      "required": false,
+      "dropdown": {
+        "options": [
+          { "value": "eu", "label": "European Union" },
+          { "value": "com", "label": "United States" }
+        ]
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "bitwarden-logs" }
+  ]
+}
