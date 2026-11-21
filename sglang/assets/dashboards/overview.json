@@ -1,0 +1,523 @@
+{
+  "author_name": "Datadog",
+  "description": "Monitor SGLang request performance, token throughput, KV cache efficiency, and optional disaggregated prefill/decode activity.",
+  "layout_type": "ordered",
+  "template_variables": [
+    {
+      "available_values": [],
+      "default": "*",
+      "name": "model_name",
+      "prefix": "model_name"
+    },
+    {
+      "available_values": [],
+      "default": "*",
+      "name": "host",
+      "prefix": "host"
+    },
+    {
+      "available_values": [],
+      "default": "*",
+      "name": "endpoint",
+      "prefix": "endpoint"
+    }
+  ],
+  "title": "SGLang Overview",
+  "widgets": [
+    {
+      "definition": {
+        "background_color": "white",
+        "content": "## SGLang Overview\n\nUse the model, host, and scrape-endpoint filters to inspect each SGLang server. Rank- or shard-labelled metrics show the maximum series for each host, endpoint, and model rather than a fleet total.\n\nLatency percentile panels require SGLang distributions (enabled by the integration default `histogram_buckets_as_distributions`) and Datadog percentile aggregations. They appear after the server has recorded requests. The disaggregated prefill/decode panels are optional and remain empty unless those SGLang metrics are enabled.",
+        "font_size": "14",
+        "has_padding": true,
+        "show_tick": false,
+        "text_align": "left",
+        "tick_edge": "left",
+        "tick_pos": "50%",
+        "type": "note",
+        "vertical_align": "center"
+      },
+      "layout": {
+        "height": 3,
+        "width": 12,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "definition": {
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "legend_layout": "auto",
+        "requests": [
+          {
+            "display_type": "line",
+            "formulas": [
+              {
+                "alias": "Prompt tokens/s",
+                "formula": "query1"
+              },
+              {
+                "alias": "Generation tokens/s",
+                "formula": "query2"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "max:sglang.prompt_tokens.count{$model_name,$host,$endpoint} by {host,endpoint,model_name}.as_rate()"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "max:sglang.generation_tokens.count{$model_name,$host,$endpoint} by {host,endpoint,model_name}.as_rate()"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "show_legend": true,
+        "title": "Token Processing Rate (Maximum per Server)",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "timeseries",
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear"
+        }
+      },
+      "layout": {
+        "height": 4,
+        "width": 6,
+        "x": 0,
+        "y": 3
+      }
+    },
+    {
+      "definition": {
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "legend_layout": "auto",
+        "requests": [
+          {
+            "display_type": "line",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "max:sglang.generation_throughput.tokens_per_second{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "show_legend": true,
+        "title": "Generation Throughput (Maximum per Server)",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "timeseries",
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear"
+        }
+      },
+      "layout": {
+        "height": 4,
+        "width": 6,
+        "x": 6,
+        "y": 3
+      }
+    },
+    {
+      "definition": {
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "legend_layout": "auto",
+        "requests": [
+          {
+            "display_type": "line",
+            "formulas": [
+              {
+                "alias": "Running",
+                "formula": "query1"
+              },
+              {
+                "alias": "Waiting",
+                "formula": "query2"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "max:sglang.num_requests.running{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "max:sglang.num_requests.waiting{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "show_legend": true,
+        "title": "Inference Requests (Maximum per Server)",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "timeseries",
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear"
+        }
+      },
+      "layout": {
+        "height": 4,
+        "width": 6,
+        "x": 0,
+        "y": 7
+      }
+    },
+    {
+      "definition": {
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "legend_layout": "auto",
+        "requests": [
+          {
+            "display_type": "line",
+            "formulas": [
+              {
+                "alias": "KV cache usage",
+                "formula": "query1 * 100"
+              },
+              {
+                "alias": "Prefix cache hit rate",
+                "formula": "query2 * 100"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "max:sglang.kv_cache.usage{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "max:sglang.kv_cache.hit_rate{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "warm"
+            }
+          }
+        ],
+        "show_legend": true,
+        "title": "KV Cache Usage and Hit Rate (%) (Maximum per Server)",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "timeseries",
+        "yaxis": {
+          "include_zero": true,
+          "max": "100",
+          "scale": "linear"
+        }
+      },
+      "layout": {
+        "height": 4,
+        "width": 6,
+        "x": 6,
+        "y": 7
+      }
+    },
+    {
+      "definition": {
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "legend_layout": "auto",
+        "requests": [
+          {
+            "display_type": "line",
+            "formulas": [
+              {
+                "alias": "TTFT p95",
+                "formula": "query1"
+              },
+              {
+                "alias": "End-to-end p95",
+                "formula": "query2"
+              },
+              {
+                "alias": "Inter-token p95",
+                "formula": "query3"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "p95:sglang.time_to_first_token.seconds{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "p95:sglang.e2e_request_latency.seconds{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query3",
+                "query": "p95:sglang.inter_token_latency.seconds{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "show_legend": true,
+        "title": "Request Latency p95 per Server",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "timeseries",
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear"
+        }
+      },
+      "layout": {
+        "height": 4,
+        "width": 12,
+        "x": 0,
+        "y": 11
+      }
+    },
+    {
+      "definition": {
+        "background_color": "blue",
+        "content": "## Optional disaggregated prefill/decode metrics\n\nThese panels are populated only when SGLang emits disaggregated prefill/decode queue and KV-transfer metrics. They use a per-server maximum to prevent tensor-parallel ranks from being summed.",
+        "font_size": "14",
+        "has_padding": true,
+        "show_tick": false,
+        "text_align": "left",
+        "tick_edge": "left",
+        "tick_pos": "50%",
+        "type": "note",
+        "vertical_align": "center"
+      },
+      "layout": {
+        "height": 2,
+        "width": 12,
+        "x": 0,
+        "y": 15
+      }
+    },
+    {
+      "definition": {
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "legend_layout": "auto",
+        "requests": [
+          {
+            "display_type": "line",
+            "formulas": [
+              {
+                "alias": "Prefill preallocation",
+                "formula": "query1"
+              },
+              {
+                "alias": "Prefill bootstrap",
+                "formula": "query2"
+              },
+              {
+                "alias": "Decode transfer",
+                "formula": "query3"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "max:sglang.disaggregation.prefill_preallocation_queue{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "max:sglang.disaggregation.prefill_bootstrap_queue{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query3",
+                "query": "max:sglang.disaggregation.decode_transfer_queue{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "cool"
+            }
+          }
+        ],
+        "show_legend": true,
+        "title": "Disaggregated Queues (Maximum per Server)",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "timeseries",
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear"
+        }
+      },
+      "layout": {
+        "height": 4,
+        "width": 4,
+        "x": 0,
+        "y": 17
+      }
+    },
+    {
+      "definition": {
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "legend_layout": "auto",
+        "requests": [
+          {
+            "display_type": "line",
+            "formulas": [
+              {
+                "alias": "KV transfer throughput (GB/s)",
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "max:sglang.disaggregation.kv_transfer.gigabytes_per_second{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "cool"
+            }
+          }
+        ],
+        "show_legend": true,
+        "title": "KV Transfer Throughput (GB/s) (Maximum per Server)",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "timeseries",
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear"
+        }
+      },
+      "layout": {
+        "height": 4,
+        "width": 4,
+        "x": 4,
+        "y": 17
+      }
+    },
+    {
+      "definition": {
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "legend_layout": "auto",
+        "requests": [
+          {
+            "display_type": "line",
+            "formulas": [
+              {
+                "alias": "KV transfer latency (ms)",
+                "formula": "query2"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "max:sglang.disaggregation.kv_transfer.latency_milliseconds{$model_name,$host,$endpoint} by {host,endpoint,model_name}"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "cool"
+            }
+          }
+        ],
+        "show_legend": true,
+        "title": "KV Transfer Latency (ms) (Maximum per Server)",
+        "title_align": "left",
+        "title_size": "16",
+        "type": "timeseries",
+        "yaxis": {
+          "include_zero": true,
+          "scale": "linear"
+        }
+      },
+      "layout": {
+        "height": 4,
+        "width": 4,
+        "x": 8,
+        "y": 17
+      }
+    }
+  ]
+}
