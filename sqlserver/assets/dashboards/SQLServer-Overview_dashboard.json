@@ -110,7 +110,7 @@
                       "semantic_mode": "combined"
                     },
                     {
-                      "query": "sum:sqlserver.server.uptime{$host} by {host}",
+                      "query": "sum:sqlserver.uptime{$host} by {host}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "last",
@@ -175,7 +175,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:sqlserver.server.uptime{$host}",
+                      "query": "sum:sqlserver.uptime{$host}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "last",
