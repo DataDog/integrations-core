@@ -1,0 +1,34 @@
+# Policy for: .github/workflows/sync-dependency-pins.yaml in DataDog/integrations-core
+# Triggered by push to ADMS dependency-upgrade branches
+#
+# Naming convention:
+#   self:                 Only this repository (DataDog/integrations-core) can use this policy
+#   sync-dependency-pins: Specific workflow
+#   push:                 Primary trigger is push to ADMS branches
+#
+# Security model:
+#   - Only branches under engraver-auto-version-upgrade/ (created by ADMS) can request a token
+#   - Workflow file must be committed to the same branch
+#   - Access is scoped to this specific workflow file via job_workflow_ref
+#
+# Permissions granted:
+#   - contents: write  - Push check pyproject.toml pins synced from agent_requirements.in
+#                        back to the ADMS branch
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.sync-dependency-pins.push
+
+issuer: https://token.actions.githubusercontent.com
+
+subject_pattern: repo:DataDog/integrations-core:ref:refs/heads/engraver-auto-version-upgrade/.*
+
+claim_pattern:
+  event_name: push
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/sync-dependency-pins\.yaml@refs/heads/engraver-auto-version-upgrade/.*
+  repository: DataDog/integrations-core
+
+permissions:
+  contents: write
