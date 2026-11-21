@@ -32,6 +32,7 @@ MEMORY_LINES = {
 }
 VIRTUAL_FILESYSTEMS = frozenset({'none', 'tmpfs', 'cgroup_root'})
 
+# The values of the boolean fields of `show system environmentals` (`alarm`, `Inserted`).
 ALARM_TRUE = frozenset({'true', 'yes'})
 ALARM_FALSE = frozenset({'false', 'no'})
 
@@ -118,27 +119,43 @@ def _slot_number(slot: Element) -> str:
     return slot.tag[4:] if slot.tag.lower().startswith('slot') and len(slot.tag) > 4 else slot.tag
 
 
-def _entries(root: Element, section: str) -> Iterator[tuple[Element, str, str]]:
-    """Yield (entry, slot number, sensor name); an entry without a `description` is named after its slot."""
-    container = root.find(f'result/{section}')
-    for slot in container if container is not None else ():
+def _entries(root: Element, *sections: str) -> Iterator[tuple[Element, str, str]]:
+    """Yield (entry, slot number, sensor name) from the first of `sections` present, which covers a section whose
+    name differs between models. An entry without a `description` is named after its slot."""
+    for section in sections:
+        container = root.find(f'result/{section}')
+        if container is not None:
+            break
+    else:
+        return
+    for slot in container:
         for entry in slot.iterfind('entry'):
             yield entry, _slot_number(slot), text(entry, 'description') or slot.tag
 
 
-def _alarm(entry: Element) -> bool | None:
-    value = (text(entry, 'alarm') or '').lower()
+def _flag(entry: Element, field: str) -> bool | None:
+    value = (text(entry, field) or '').lower()
     if value in ALARM_TRUE:
         return True
     return False if value in ALARM_FALSE else None
 
 
+def _alarm(entry: Element) -> bool | None:
+    return _flag(entry, 'alarm')
+
+
 def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sample]:
-    """Power rails and temperature sensors; empty on a VM-Series. The alarms are PAN's own `alarm` field, never a
-    comparison with the thresholds. A power alarm whose direction cannot be told is warned about, once per sensor."""
+    """Power rails, temperature sensors, fans, power supplies and fan trays; empty on a VM-Series. The alarms are
+    PAN's own `alarm` field, never a comparison with the thresholds. A power sensor sends `power.alarm` whenever
+    that field is readable, and `power.alarm.high` and `power.alarm.low` add its direction when the voltage tells
+    it; a power alarm whose direction cannot be told is warned about, once per sensor."""
     samples: list[Sample] = []
     for entry, slot, name in _entries(root, 'power'):
         tags = (f'sensor:{name}', f'slot:{slot}')
+        # PAN's alarm does not depend on a voltage reading: a sensor in alarm without one is still reported.
+        alarm = _alarm(entry)
+        if alarm is not None:
+            samples.append(Sample('power.alarm', int(alarm), tags, 'gauge'))
         volts = num(entry, 'Volts')
         if volts is None:
             continue
@@ -149,7 +166,6 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
             samples.append(Sample('power.voltage.min', low, tags, 'gauge'))
         if high is not None:
             samples.append(Sample('power.voltage.max', high, tags, 'gauge'))
-        alarm = _alarm(entry)
         if alarm is None:
             continue
         if not alarm:
@@ -161,7 +177,7 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
         else:
             warn(
                 'power sensor `%s` (slot %s) is in alarm but the voltage is not outside its '
-                'thresholds: power.alarm.high and power.alarm.low are not reported for it',
+                'thresholds: only power.alarm is reported for it, not power.alarm.high or power.alarm.low',
                 name,
                 slot,
             )
@@ -182,6 +198,26 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
         alarm = _alarm(entry)
         if alarm is not None:
             samples.append(Sample('temperature.alarm', int(alarm), tags, 'gauge'))
+
+    # The PA-5410 names the section `fans`; other models name it `fan`.
+    for entry, slot, name in _entries(root, 'fan', 'fans'):
+        tags = (f'sensor:{name}', f'slot:{slot}')
+        for metric, field in (('fan.speed', 'RPMs'), ('fan.speed.min', 'min')):
+            value = num(entry, field)
+            if value is not None:
+                samples.append(Sample(metric, value, tags, 'gauge'))
+        alarm = _alarm(entry)
+        if alarm is not None:
+            samples.append(Sample('fan.alarm', int(alarm), tags, 'gauge'))
+
+    # Power supplies and fan trays are pluggable units with the same fields; their `min` is not a threshold.
+    for prefix, section in (('power_supply', 'power-supply'), ('fan_tray', 'fan-tray')):
+        for entry, slot, name in _entries(root, section):
+            tags = (f'sensor:{name}', f'slot:{slot}')
+            for field, metric in (('alarm', 'alarm'), ('Inserted', 'inserted')):
+                value = _flag(entry, field)
+                if value is not None:
+                    samples.append(Sample(f'{prefix}.{metric}', int(value), tags, 'gauge'))
     return samples
 
 
