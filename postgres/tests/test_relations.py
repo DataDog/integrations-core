@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import math
 import threading
 
 import psycopg
@@ -243,6 +244,104 @@ def test_bloat_metrics(aggregator, collect_bloat_metrics, expected_count, integr
     for index in indices:
         expected_tags = base_tags + ["index:{}".format(index)]
         aggregator.assert_metric("postgresql.index_bloat", count=expected_count, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+@pytest.mark.parametrize("index_kind", ["key", "composite", "expression", "include"])
+def test_bloat_index_attributes(aggregator, integration_check, pg_instance, index_kind):
+    # Unindexed payloads must not affect estimates; each index must use its own attributes and row count.
+    with _get_superconn(pg_instance) as conn, conn.cursor() as cur:
+        cur.execute("SHOW server_version_num")
+        if index_kind == "include" and int(cur.fetchone()[0]) < 110000:
+            pytest.skip("INCLUDE requires PostgreSQL 11")
+        schemas = ["bloat_narrow", "bloat_wide"]
+        try:
+            for schema, payload_width, indexed_width in zip(schemas, [16, 1024], [16, 80]):
+                cur.execute(f"CREATE SCHEMA {schema}")
+                cur.execute(f"GRANT USAGE ON SCHEMA {schema} TO PUBLIC")
+                cur.execute(f"CREATE TABLE {schema}.sample (key integer, nullable text, payload text)")
+                cur.execute(
+                    f"INSERT INTO {schema}.sample SELECT n, CASE WHEN n %% 2 = 0 THEN repeat('x', %s) END, "
+                    "repeat('y', %s) FROM generate_series(1, 12000) n",
+                    (indexed_width, payload_width),
+                )
+                cur.execute(f"CREATE INDEX narrow ON {schema}.sample (key)")
+                definition = {
+                    "key": "(key)",
+                    "composite": "(key, nullable)",
+                    "expression": "((key + 1))",
+                    "include": "(key) INCLUDE (nullable)",
+                }[index_kind]
+                cur.execute(
+                    f"CREATE INDEX tested ON {schema}.sample {definition} WITH (fillfactor=70) WHERE key <= 4000"
+                )
+                # pg_stats only exposes expression statistics to the index owner.
+                cur.execute(
+                    psycopg.sql.SQL("ALTER TABLE {}.sample OWNER TO {}").format(
+                        psycopg.sql.Identifier(schema), psycopg.sql.Identifier(pg_instance["username"])
+                    )
+                )
+                cur.execute(f"ANALYZE {schema}.sample")
+
+            pg_instance["relations"] = [{"relation_name": "sample", "schemas": schemas}]
+            pg_instance["collect_bloat_metrics"] = True
+            check = integration_check(pg_instance)
+            check.check(pg_instance)
+            cur.execute("SELECT current_setting('block_size')::int, version() LIKE '%64-bit%'")
+            block_size, is_64_bit = cur.fetchone()
+            alignment = 8 if is_64_bit else 4
+            for schema, indexed_width in zip(schemas, [16, 80]):
+                tags = _get_expected_tags(check, pg_instance, db=pg_instance["dbname"], table="sample", schema=schema)
+                for index in ["narrow", "tested"]:
+                    cur.execute(
+                        "SELECT relpages, reltuples FROM pg_class WHERE oid = %s::regclass",
+                        (f"{schema}.{index}",),
+                    )
+                    pages, tuples = cur.fetchone()
+                    nullable = index == "tested" and index_kind in ("composite", "include")
+                    width = 4 + ((indexed_width + 1) / 2 if nullable else 0)
+                    header = math.ceil((12 if nullable else 8) / alignment) * alignment
+                    tuple_size = header + math.ceil(width / alignment) * alignment + 4
+                    fillfactor = 0.7 if index == "tested" else 0.9
+                    estimated_pages = 1 + math.ceil(tuples * tuple_size / ((block_size - 40) * fillfactor))
+                    aggregator.assert_metric(
+                        "postgresql.index_bloat",
+                        value=round(pages / estimated_pages, 1),
+                        count=1,
+                        tags=tags + [f"index:{index}"],
+                    )
+            aggregator.assert_metric("postgresql.index_bloat", count=4)
+        finally:
+            for schema in schemas:
+                cur.execute(f"DROP SCHEMA IF EXISTS {schema} CASCADE")
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_bloat_missing_index_statistics(aggregator, integration_check, pg_instance):
+    # Missing attribute statistics must omit an estimate without preventing collection for an empty index.
+    with _get_superconn(pg_instance) as conn, conn.cursor() as cur:
+        try:
+            cur.execute("CREATE SCHEMA bloat_stats")
+            cur.execute("GRANT USAGE ON SCHEMA bloat_stats TO PUBLIC")
+            for table in ["empty", "missing"]:
+                cur.execute(f"CREATE TABLE bloat_stats.{table} (key integer)")
+                cur.execute(f"GRANT SELECT ON bloat_stats.{table} TO PUBLIC")
+                cur.execute(f"CREATE INDEX ON bloat_stats.{table} (key)")
+            cur.execute("ALTER TABLE bloat_stats.missing ALTER COLUMN key SET STATISTICS 0")
+            cur.execute("INSERT INTO bloat_stats.missing SELECT generate_series(1, 1000)")
+            cur.execute("ANALYZE bloat_stats.empty")
+            cur.execute("ANALYZE bloat_stats.missing")
+            pg_instance["relations"] = [{"relation_regex": ".*", "schemas": ["bloat_stats"]}]
+            pg_instance["collect_bloat_metrics"] = True
+            check = integration_check(pg_instance)
+            check.check(pg_instance)
+            tags = _get_expected_tags(check, pg_instance, db=pg_instance["dbname"], table="empty", schema="bloat_stats")
+            aggregator.assert_metric("postgresql.index_bloat", value=0, count=1, tags=tags + ["index:empty_key_idx"])
+            aggregator.assert_metric("postgresql.index_bloat", count=1)
+        finally:
+            cur.execute("DROP SCHEMA IF EXISTS bloat_stats CASCADE")
 
 
 @pytest.mark.integration

@@ -370,6 +370,48 @@ SELECT
     ROUND((CASE WHEN iotta=0 OR ipages=0 THEN 0.0 ELSE ipages::float/iotta END)::numeric,1) AS ibloat
 FROM (
     SELECT
+        schemaname, relname, iname, ipages,
+        CASE WHEN ituples=0 THEN 0 ELSE 1 + CEIL(
+            ituples * (4 + CEIL((8 + nullhdr)/ma)*ma + CEIL(datawidth/ma)*ma)
+            / ((bs - 24 - 16) * fillfactor/100.0)
+        ) END AS iotta
+    FROM (
+        SELECT
+            nn.nspname AS schemaname, cc.relname, c2.relname AS iname,
+            c2.relpages AS ipages, c2.reltuples AS ituples,
+            current_setting('block_size')::numeric AS bs,
+            CASE WHEN version() LIKE '%64-bit%' THEN 8 ELSE 4 END AS ma,
+            COALESCE((SELECT option_value::numeric FROM pg_options_to_table(c2.reloptions)
+                      WHERE option_name = 'fillfactor'), 90) AS fillfactor,
+            SUM((1 - s.null_frac) * s.avg_width)::numeric AS datawidth,
+            -- Index tuples use a fixed-size null bitmap whenever stored attributes contain nulls.
+            CASE WHEN BOOL_OR(s.null_frac > 0)
+                 THEN CEIL(current_setting('max_index_keys')::numeric/8) ELSE 0 END AS nullhdr
+        FROM pg_index i
+        JOIN pg_class cc ON cc.oid = i.indrelid
+        JOIN pg_namespace nn ON nn.oid = cc.relnamespace
+        JOIN pg_class c2 ON c2.oid = i.indexrelid
+        JOIN pg_am am ON am.oid = c2.relam AND am.amname = 'btree'
+        -- indkey includes INCLUDE attributes on newer servers, without requiring indnkeyatts.
+        CROSS JOIN LATERAL unnest(i.indkey) WITH ORDINALITY AS keys(attnum, position)
+        JOIN pg_attribute a ON a.attrelid = CASE WHEN keys.attnum = 0 THEN c2.oid ELSE cc.oid END
+                           AND a.attnum = CASE WHEN keys.attnum = 0 THEN keys.position ELSE keys.attnum END
+        LEFT JOIN pg_stats s ON s.schemaname = nn.nspname
+                            AND s.tablename = CASE WHEN keys.attnum = 0 THEN c2.relname ELSE cc.relname END
+                            AND s.attname = a.attname AND NOT s.inherited
+        WHERE nn.nspname <> 'information_schema' AND c2.reltuples >= 0
+        GROUP BY nn.nspname, cc.oid, cc.relname, c2.oid, c2.relname, c2.relpages, c2.reltuples, c2.reloptions
+        -- Do not turn unavailable attribute statistics into zero-width tuples.
+        HAVING c2.reltuples = 0 OR COUNT(s.avg_width) = COUNT(*) AND COUNT(s.null_frac) = COUNT(*)
+    ) AS attributes
+) AS btree WHERE {relations}
+UNION ALL
+-- Preserve the legacy approximation for other index access methods.
+SELECT
+    schemaname, relname, iname,
+    ROUND((CASE WHEN iotta=0 OR ipages=0 THEN 0.0 ELSE ipages::float/iotta END)::numeric,1) AS ibloat
+FROM (
+    SELECT
     schemaname, cc.relname as relname,
     COALESCE(c2.relname,'?') AS iname, COALESCE(c2.reltuples,0) AS ituples, COALESCE(c2.relpages,0) AS ipages,
     COALESCE(CEIL((c2.reltuples*(datahdr-12))/(bs-20::float)),0) AS iotta -- very rough approximation, assumes all cols
@@ -404,6 +446,7 @@ FROM (
     AND nn.nspname <> 'information_schema'
     LEFT JOIN pg_index i ON indrelid = cc.oid
     LEFT JOIN pg_class c2 ON c2.oid = i.indexrelid
+    JOIN pg_am am ON am.oid = c2.relam AND am.amname <> 'btree'
 ) AS sml WHERE {relations};
 """
 
