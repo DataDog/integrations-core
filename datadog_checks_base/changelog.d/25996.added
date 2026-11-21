@@ -1,0 +1,1 @@
+Add a `commit` option to `QueryStats.diff` so query metrics collectors can keep the previous baseline when statement text resolution fails.

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable, Hashable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,9 @@ class Delta[K: Hashable]:
     their deltas."""
     changed_keys: set[K]
     """Keys of :attr:`derivative_rows`, for resolving statement text only for what actually ran."""
+    pending_baselines: dict[K, dict] = field(default_factory=dict, repr=False, compare=False)
+    """Counter values of `changed_keys` held back by `QueryStats.diff(commit=False)`, installed by
+    `QueryStats.commit`. Empty when the diff committed."""
 
 
 class QueryStats[K: Hashable]:
@@ -50,8 +53,19 @@ class QueryStats[K: Hashable]:
     def reset(self):
         self._previous.clear()
 
-    def diff(self, snapshot: list[dict]) -> Delta[K]:
-        """Diff *snapshot* against the previous one and remember it for the next call."""
+    def diff(self, snapshot: list[dict], *, commit: bool = True) -> Delta[K]:
+        """Diff *snapshot* against the committed baseline.
+
+        By default *snapshot* becomes the baseline for the next call. Pass `commit=False` when work
+        that follows the diff, such as fetching statement text, can fail: keys in `changed_keys` keep
+        their previous baseline until the delta is passed to `commit`, so if it never is, the next
+        diff reports their interval too instead of losing it. Every other key is baselined
+        immediately, since it has no delta to retry: holding back a new or reset key would discard
+        its counts up to the next successful collection.
+
+        Commit before emitting the delta, and before the next diff. Emitting a delta and then not
+        committing it reports that interval twice.
+        """
         current = self._collapse(snapshot)
 
         derivative_rows: list[dict] = []
@@ -105,9 +119,17 @@ class QueryStats[K: Hashable]:
             len(changed_keys),
         )
 
-        self._remember(current)
+        pending = {key: self._counters(current[key]) for key in changed_keys}
+        self._remember(current, skip=changed_keys)
+        delta = Delta(derivative_rows=derivative_rows, changed_keys=changed_keys, pending_baselines=pending)
+        if commit:
+            self.commit(delta)
+        return delta
 
-        return Delta(derivative_rows=derivative_rows, changed_keys=changed_keys)
+    def commit(self, delta: Delta[K]):
+        """Install the baselines a `diff(commit=False)` held back for *delta*'s changed keys."""
+        self._previous.update(delta.pending_baselines)
+        delta.pending_baselines = {}
 
     def _collapse(self, snapshot: list[dict]) -> dict[K, dict]:
         """Group rows by key, summing counter columns across rows that share one.
@@ -127,12 +149,17 @@ class QueryStats[K: Hashable]:
                     existing[col] = existing.get(col, 0) + row[col]
         return collapsed
 
-    def _remember(self, current: dict[K, dict]):
+    def _counters(self, row: dict) -> dict:
+        return {col: row[col] for col in self._counter_columns if col in row}
+
+    def _remember(self, current: dict[K, dict], skip: set[K] | None = None):
         stale = self._previous.keys() - current.keys()
         for k in stale:
             del self._previous[k]
 
         for key, row in current.items():
+            if skip and key in skip:
+                continue
             prev = self._previous.get(key)
             if prev is not None:
                 # Only the counter columns are retained; everything else is re-read each cycle.
@@ -142,4 +169,4 @@ class QueryStats[K: Hashable]:
                     elif col in prev:
                         del prev[col]
             else:
-                self._previous[key] = {col: row[col] for col in self._counter_columns if col in row}
+                self._previous[key] = self._counters(row)
