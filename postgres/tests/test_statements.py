@@ -50,6 +50,13 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
+# PG 19 reworked the "function does not exist" diagnostics and no longer appends this hint.
+NO_FUNCTION_MATCH_HINT = (
+    "HINT:  No function matches the given name and argument types. You might need to add explicit type casts.\n"
+    if float(POSTGRES_VERSION) < 19
+    else ""
+)
+
 
 @pytest.fixture(autouse=True)
 def auto_reset_pg_stat_statements(reset_pg_stat_statements):
@@ -697,9 +704,9 @@ def test_failed_explain_handling(
                 "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#undefined-explain-function"
                 " for more details: function datadog.explain_statement(unknown) does not exist\nLINE 1: "
                 "... DDIGNORE */ /* service='datadog-agent' */ SELECT datadog.ex...\n"
-                "                                                             ^\nHINT:  No function matches the given "
-                "name and argument types. You might need to add explicit type casts.\ncode=undefined-explain-function"
-                " dbname=dogs_nofunc host=stubbed.hostname",
+                "                                                             ^\n"
+                + NO_FUNCTION_MATCH_HINT
+                + "code=undefined-explain-function dbname=dogs_nofunc host=stubbed.hostname",
             ],
         ),
         (
