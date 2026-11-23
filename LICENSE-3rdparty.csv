@@ -54,7 +54,7 @@ pyasn1,PyPI,BSD-2-Clause,"Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.c
 pydantic,PyPI,MIT,Copyright (c) 2017 to present Pydantic Services Inc. and individual contributors.
 pymongo,PyPI,Apache-2.0,Copyright The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
-pyodbc,PyPI,MIT,Copyright (c) 2008 Michael Kleehammer
+pyodbc,PyPI,MIT-0,Copyright 2008 Michael Kleehammer
 pysnmp,PyPI,BSD-2-Clause,"Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>"
 pysnmp-mibs,PyPI,BSD-3-Clause,"Copyright (c) 2005-2016, Ilya Etingof <ilya@glas.net>"
 python-binary-memcached,PyPI,MIT,Copyright (c) 2011 Jayson Reis <santosdosreis@gmail.com>
@@ -81,5 +81,5 @@ tuf,PyPI,Apache-2.0,Copyright (c) 2010 New York University
 tuf,PyPI,MIT,Copyright (c) 2010 New York University
 urllib3,PyPI,MIT,Copyright (c) 2008-2020 Andrey Petrov and contributors.
 vertica-python,PyPI,Apache-2.0,"Copyright 2013 Justin Berka, Alex Kim, Siting Ren"
-voltdbclient,PyPI,MIT,"Copyright (C) 2008-2023 Volt Active Data, Inc.  All rights reserved."
+voltdbclient,PyPI,MIT,Copyright (C) 2008-2026 Volt Active Data Inc.
 wrapt,PyPI,BSD-3-Clause,"Copyright (c) 2013-2026, Graham Dumpleton"
