@@ -3,8 +3,8 @@
 ## Overview
 
 Build a Datadog Agent integration for self-hosted KrakenD API Gateway that scrapes the Prometheus
-endpoint of its OpenTelemetry exporter. Use `krakend` as the integration directory and `krakend` as
-the metric namespace. The integration scrapes one component, the gateway.
+endpoint of its OpenTelemetry exporter. Use `krakend` as the integration directory. The integration
+scrapes one component, the gateway.
 
 Platform teams run KrakenD in front of their services to route, aggregate, and protect API
 traffic. They monitor it to see the traffic and latency each route serves, to alert on error rates,

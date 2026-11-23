@@ -11,6 +11,11 @@ description: >-
 
 # Togo PRD
 
+This skill produces one file: a PRD that a Togo flow (`ddev meta ai`) uses to build a Datadog Agent
+integration for a product. Everything else (research, the interview, the review rounds) serves that
+document: the goal is a PRD the flow can build from, not the interview itself. It ends with a
+hand-off in the chat on how to run the flow.
+
 A Togo PRD is the document a product manager would give engineers, with a bit more context on what
 to build: what users need to see and alert on, the setup the customer provides, and a few design
 choices. A Togo flow includes it in its prompts as the intended scope; what it leaves open, the flow
@@ -18,9 +23,11 @@ guesses or stops on. It is not a prompt: it holds no implementation details and 
 because the flow prompts own the engineering, testing, and documentation rules. It covers only the
 integration (no monitors, dashboards, or other assets).
 
-This skill is an interview. Research facts yourself; ask the caller for decisions. Do not assume an
-answer to a decision on the caller's behalf, even in a mode where you would usually proceed without
-asking: ask, then wait for the reply.
+Research first, and decide what the evidence supports. When the docs, the requirements source, or
+the evidence settle a decision, take it and record it with its source in the assumptions list (step
+7). Ask the caller when there is no clear evidence or when several answers are valid. The caller has
+the last word on every decision: they review the assumptions with the draft. Even in a mode where
+you would usually proceed without asking, ask the open decisions and wait for the reply.
 
 ## Inputs
 
@@ -74,8 +81,6 @@ questions it settles.
   one that follows it.
 - The directory is the display name lowercased, with each run of spaces, `.`, `-`, and `_` replaced
   by one `_`.
-- The metric namespace equals the directory. Whether a different namespace is possible depends on
-  the flow: check `flows.md` once the type is known (step 4).
 - Find the `integrations-core` checkout: run `git rev-parse --show-toplevel` from the current
   directory and check that it contains `ddev/` and `datadog_checks_base/`. Otherwise ask for the
   path.
@@ -89,8 +94,8 @@ questions it settles.
 - If it exists on the default branch, say where, and that the flow cannot build a new integration
   over it: it would work on the existing directory instead (read how each flow treats it in
   `flows.md`). Ask whether the existing integration is a compatibility constraint (metric names,
-  tags, or options users rely on) or should be ignored. The caller may also choose another name.
-  When it is ignored, do not read it and do not use it as a similar integration.
+  the metric namespace, tags, or options users rely on) or should be ignored. The caller may also
+  choose another name. When it is ignored, do not read it and do not use it as a similar integration.
 
 ### 3. Requirements source
 
@@ -125,8 +130,10 @@ still record it, tell the caller in the same round, and let them keep or drop it
 
 ### 7. Draft
 
-1. Coverage pass: go through the in-scope items one by one (each use case, event category, log
-   source, setup step, and design choice) and confirm that each is in the draft and backed by the
+1. Coverage pass: the in-scope items are the use cases, event categories, log sources, setup steps,
+   and design choices agreed in the interview or taken from the requirements source. Without a
+   requirements source, scope comes from the caller's answers to the adapter's scope questions. Go
+   through them one by one and confirm that each is in the draft and backed by the
    research the adapter asks for. Fill gaps before writing. Note the adapter's lab needs for the
    hand-off as you go; they stay out of the PRD.
 2. Write the PRD following `references/writing.md`, with the headings and order that fit this

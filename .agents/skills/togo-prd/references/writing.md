@@ -37,9 +37,10 @@ a structure to copy.
 Whatever the shape, a PRD covers these topics. The type's adapter adds its own.
 
 - **What to build**: the display name in the title, then the product, its deployment model, how it
-  is monitored, and the integration directory and metric namespace. A sentence such as "Build a
-  Datadog Agent integration for self-hosted <Product> using its JSON REST API. Use `<directory>` as
-  the integration directory and `<namespace>` as the metric namespace." is enough.
+  is monitored, and the integration directory. A sentence such as "Build a Datadog Agent
+  integration for self-hosted <Product> using its JSON REST API. Use `<directory>` as the
+  integration directory." is enough. Name a metric namespace only when it differs from the
+  directory, with the reason (for example, compatibility with an older integration).
 - **Who uses the product and why they monitor it**, in a sentence or two.
 - **Use cases and scope**: what users need to see and alert on (metrics, events, logs), with the
   dimensions they slice by.
@@ -62,7 +63,7 @@ another section if that reads better.
 
 ## Core checklist
 
-- The display name, directory, and namespace are valid, and the directory exists neither in the
+- The display name and directory are valid, and the directory exists neither in the
   working tree nor on the default branch, or the caller decided how to treat the existing one.
 - Every answer is carried with its full meaning, and every item that did not come from the caller or
   the requirements source is in the assumptions list you give in the chat (check this when you write

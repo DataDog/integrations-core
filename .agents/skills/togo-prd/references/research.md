@@ -12,8 +12,9 @@ The requirements source is the caller's voice.
 - Keep its decisions and its wording. Do not ask again what it already decides.
 - When research contradicts it (for example, it names an endpoint or a version that does not exist),
   raise the conflict as a question. Never correct it silently.
-- When it contains design, such as metric names, option names, or a collection strategy, ask whether
-  those names are required (for example, for compatibility). Keep them only if they are.
+- Keep its names and design (metric names, option names, a collection strategy) as written. Raise
+  them only when they conflict with research (for example, a metric the product does not expose)
+  or with what a PRD holds (implementation details or rules for agents).
 - Anything it leaves open is researched or asked like any other topic.
 
 ## Product facts
@@ -54,10 +55,11 @@ with no instructions on how to use them.
 
 ## Similar integrations
 
-Look at one or two existing integrations in `integrations-core` for similar products, to learn what
-users of this kind of product expect and to offer examples in questions. They are examples, not a
-source of truth: many are old or repeat patterns we do not want to copy. Never copy their design,
-names, or options into the PRD unless the caller requires it for compatibility.
+You may look at one or two existing integrations in `integrations-core` for similar products, only
+to understand what users of this kind of product monitor and to suggest options in questions. Do
+not use them as a source for the PRD's content, design, or names: many are old or repeat patterns
+we do not want to copy. Compatibility with an existing integration is settled in the identity step,
+not here.
 
 ## Evidence
 

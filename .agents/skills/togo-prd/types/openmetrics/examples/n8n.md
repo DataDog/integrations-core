@@ -2,7 +2,7 @@
 
 Build a Datadog Agent integration for self-hosted n8n 2.x, in regular mode and in queue mode, that
 scrapes the Prometheus endpoint of its main and worker processes. Use `n8n` as the integration
-directory and `n8n` as the metric namespace.
+directory.
 
 Teams use n8n to automate workflows that connect their services, often running it in queue mode
 with separate worker processes. They monitor it to catch failing workflows, to see whether the

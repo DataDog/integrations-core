@@ -3,7 +3,7 @@
 ## Overview
 
 Build a Datadog Agent integration for self-hosted Octopus Deploy Server using its JSON REST API. Use
-`octopus_deploy` as the integration directory and `octopus_deploy` as the metric namespace.
+`octopus_deploy` as the integration directory.
 
 Platform and release teams use Octopus Deploy to release software to their environments and to run
 operational runbooks. They monitor it to know that the server and its deployment targets are
