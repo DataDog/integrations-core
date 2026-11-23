@@ -20,6 +20,7 @@ from ddev.ai.config.models import (
     TaskConfig,
     VariableDeclaration,
 )
+from ddev.ai.model_catalog import Route
 
 from .utils import make_agent_config, make_provider_registry
 
@@ -96,7 +97,7 @@ def test_agent_runs_provider_config_validation():
         def supported_models(self) -> frozenset[str]:
             return frozenset()
 
-        def validate_config(self, agent_config: AgentConfig) -> None:
+        def validate_config(self, agent_config: AgentConfig, *, route: Route | None = None) -> None:
             if agent_config.model != "supported-model":
                 raise ValueError("Custom provider rejected model")
 

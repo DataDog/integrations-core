@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import asyncio
 import logging
+from collections.abc import Callable
 from pathlib import Path
 
 from ddev.ai.agent.registry import AgentProviderRegistry
@@ -13,7 +15,7 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
-from ddev.ai.runtime.resources import RunResources
+from ddev.ai.runtime.resources import RunResources, RunRoute
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, OrchestratorHookError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
@@ -34,6 +36,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
         resume: bool = False,
         grace_period: float = DEFAULT_GRACE_PERIOD,
         logger: logging.Logger | None = None,
+        *,
+        report_route: Callable[[RunRoute], None] | None = None,
+        prepare_run_directory: Callable[[], None] | None = None,
     ) -> None:
         """Initialize the orchestrator.
 
@@ -67,6 +72,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._file_access_policy = file_access_policy
         self._callbacks: Callbacks = callbacks or Callbacks()
         self._resume = resume
+        self._report_route = report_route
+        self._prepare_run_directory = prepare_run_directory
+        self._resources: RunResources | None = None
         self._agent_logger: AgentLogger | None = None
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
@@ -75,28 +83,58 @@ class PhaseOrchestrator(EventBusOrchestrator):
     def failed_phase(self) -> str | None:
         return self._failed_phase
 
-    async def on_initialize(self) -> None:
-        """Construct phases from the resolved flow and submit the start PhaseTrigger."""
-        checkpoint_manager = CheckpointManager(self._checkpoint_path)
-        dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in self._resolved_flow.flow}
+    def _announce_route(self, route: RunRoute) -> None:
+        if route.fallback_reason:
+            self._logger.warning("%s", route.describe())
+        else:
+            self._logger.info("%s", route.describe())
+        if self._report_route is not None:
+            self._report_route(route)
 
+    async def on_initialize(self) -> None:
+        """Prepare credentials before touching run state or constructing phases."""
+        checkpoint_manager = CheckpointManager(self._checkpoint_path)
         completed, frontier = (
             resolve_resume_state(self._resolved_flow, checkpoint_manager) if self._resume else (set(), set())
         )
-        if self._resume:
-            self._logger.info(
-                "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
-            )
-
+        initial_agent = next(
+            (
+                self._resolved_flow.agents[agent]
+                for entry in self._resolved_flow.flow
+                if entry.phase not in completed and (agent := self._resolved_flow.phases[entry.phase].agent) is not None
+            ),
+            None,
+        )
         self._agent_logger = AgentLogger(checkpoint_manager.root)
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
-
         self._resources = RunResources(
             provider_registry=self._provider_registry,
             file_access_policy=self._file_access_policy,
             agents=self._resolved_flow.agents,
             callbacks=run_callbacks,
         )
+        try:
+            check = await self._resources.prepare(self._announce_route, initial_agent=initial_agent)
+        except asyncio.CancelledError as error:
+            for note in getattr(error, "__notes__", ()):
+                self._logger.info("%s", note)
+            raise
+        if check is not None:
+            self._logger.info(
+                "AI Gateway startup check: HTTP %s for %s (response model matched: %s)",
+                check.status,
+                check.requested_model,
+                check.model_confirmed,
+            )
+        if self._prepare_run_directory is not None:
+            self._prepare_run_directory()
+
+        dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in self._resolved_flow.flow}
+        if self._resume:
+            self._logger.info(
+                "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
+            )
+
         context = FlowContext(
             runtime_variables=self._runtime_variables,
             flow_variables=self._resolved_flow.variables,
@@ -139,8 +177,12 @@ class PhaseOrchestrator(EventBusOrchestrator):
         raise FatalProcessingError(str(error)) from error.original_exception
 
     async def on_finalize(self, exception: Exception | None) -> None:
-        if self._agent_logger is not None:
-            self._agent_logger.close()
+        try:
+            if self._resources is not None:
+                await self._resources.close()
+        finally:
+            if self._agent_logger is not None:
+                self._agent_logger.close()
         if exception is not None and self._failed_phase is not None:
             self._logger.error(
                 "Pipeline aborted: phase '%s' failed: %s",

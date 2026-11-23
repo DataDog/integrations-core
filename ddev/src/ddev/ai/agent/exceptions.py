@@ -26,6 +26,24 @@ class AgentError(Exception):
 class AgentConnectionError(AgentError):
     """Network failure — the API was unreachable."""
 
+    def __init__(self, message: str, *, timed_out: bool = False) -> None:
+        super().__init__(message)
+        self.timed_out = timed_out
+
+
+class ModelAccessError(AgentError):
+    """An access probe failed; carry the HTTP status without the response body."""
+
+    def __init__(self, status_code: int | None = None) -> None:
+        if status_code in (401, 403):
+            message = f"Model access denied (HTTP {status_code})."
+        elif status_code is not None:
+            message = f"Model access check failed (HTTP {status_code})."
+        else:
+            message = "Model access check failed."
+        super().__init__(message)
+        self.status_code = status_code
+
 
 class AgentRateLimitError(AgentError):
     """Rate limit hit — the request may be retried after a delay."""

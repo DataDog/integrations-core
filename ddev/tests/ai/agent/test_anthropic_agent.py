@@ -301,12 +301,14 @@ def _make_error_agent(side_effect: Exception) -> AnthropicAgent:
 
 
 async def test_connection_error_maps_to_agent_connection_error() -> None:
-    agent = _make_error_agent(anthropic.APIConnectionError(request=MagicMock()))
+    sdk_error = anthropic.APIConnectionError(message="Name resolution failed", request=MagicMock())
+    agent = _make_error_agent(sdk_error)
 
     with pytest.raises(AgentConnectionError) as exc_info:
         await agent.send("Hi")
 
-    assert "Connection failed" in str(exc_info.value)
+    assert str(exc_info.value) == "Connection failed: Name resolution failed"
+    assert exc_info.value.__cause__ is sdk_error
     assert agent.history == []
 
 

@@ -423,6 +423,8 @@ class AnthropicAgent(BaseAgent[MessageParam]):
                 tool_defs=tool_defs,
             )
         except anthropic.APIConnectionError as e:
+            if isinstance(e.__cause__, AgentError):
+                raise e.__cause__ from None
             raise AgentConnectionError(f"Connection failed: {e}") from e
         except anthropic.RateLimitError as e:
             raise AgentRateLimitError(f"Rate limit exceeded: {e}") from e
