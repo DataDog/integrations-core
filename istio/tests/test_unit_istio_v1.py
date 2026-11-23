@@ -1,19 +1,22 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import requests_mock
+
 from datadog_checks.istio import Istio
 
 from . import common
 from .utils import _assert_tags_excluded, get_response
 
 
-def test_legacy_istiod(aggregator, dd_run_check, fake_http_response):
+def test_legacy_istiod(aggregator, dd_run_check):
     """
     Test the istiod deployment endpoint for v1.5+ check for OpenMetricsV1 implementation
     """
     check = Istio('istio', {}, [common.MOCK_LEGACY_ISTIOD_INSTANCE])
-    fake_http_response('http://localhost:8080/metrics', get_response('1.5', 'istiod.txt'))
-    dd_run_check(check)
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://localhost:8080/metrics', text=get_response('1.5', 'istiod.txt'))
+        dd_run_check(check)
 
     for metric in common.ISTIOD_METRICS:
         aggregator.assert_metric(metric)
@@ -21,14 +24,15 @@ def test_legacy_istiod(aggregator, dd_run_check, fake_http_response):
     aggregator.assert_all_metrics_covered()
 
 
-def test_legacy_proxy_mesh(aggregator, dd_run_check, fake_http_response):
+def test_legacy_proxy_mesh(aggregator, dd_run_check):
     """
     Test proxy mesh check for OpenMetricsV1 implementation
     """
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_LEGACY_MESH_INSTANCE])
 
-    fake_http_response('http://localhost:15090/metrics', get_response('1.5', 'istio-proxy.txt'))
-    dd_run_check(check)
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://localhost:15090/metrics', text=get_response('1.5', 'istio-proxy.txt'))
+        dd_run_check(check)
     for metric in common.LEGACY_MESH_METRICS + common.MESH_MERICS_1_5:
         aggregator.assert_metric(metric)
 
@@ -37,7 +41,7 @@ def test_legacy_proxy_mesh(aggregator, dd_run_check, fake_http_response):
     aggregator.assert_all_metrics_covered()
 
 
-def test_legacy_proxy_mesh_exclude(aggregator, dd_run_check, fake_http_response):
+def test_legacy_proxy_mesh_exclude(aggregator, dd_run_check):
     """
     Test proxy mesh check for OpenMetricsV1 implementation
     """
@@ -47,8 +51,9 @@ def test_legacy_proxy_mesh_exclude(aggregator, dd_run_check, fake_http_response)
 
     check = Istio(common.CHECK_NAME, {}, [instance])
 
-    fake_http_response('http://localhost:15090/metrics', get_response('1.5', 'istio-proxy.txt'))
-    dd_run_check(check)
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://localhost:15090/metrics', text=get_response('1.5', 'istio-proxy.txt'))
+        dd_run_check(check)
 
     for metric in common.LEGACY_MESH_METRICS + common.MESH_MERICS_1_5:
         aggregator.assert_metric(metric)
@@ -58,12 +63,13 @@ def test_legacy_proxy_mesh_exclude(aggregator, dd_run_check, fake_http_response)
     aggregator.assert_all_metrics_covered()
 
 
-def test_legacy_version_metadata(datadog_agent, dd_run_check, fake_http_response):
+def test_legacy_version_metadata(datadog_agent, dd_run_check):
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_LEGACY_ISTIOD_INSTANCE])
     check.check_id = 'test:123'
 
-    fake_http_response('http://localhost:8080/metrics', get_response('1.5', 'istiod.txt'))
-    dd_run_check(check)
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://localhost:8080/metrics', text=get_response('1.5', 'istiod.txt'))
+        dd_run_check(check)
 
     # Use version mocked from istiod 1.5 fixture
     MOCK_VERSION = '1.5.0'

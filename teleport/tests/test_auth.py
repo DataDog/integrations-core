@@ -20,7 +20,9 @@ from .common import (
 pytestmark = [pytest.mark.unit]
 
 
-def test_auth_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport_endpoints):
+def test_auth_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
+
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -29,7 +31,9 @@ def test_auth_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport
         aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
-def test_auth_audit_log_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport_endpoints):
+def test_auth_audit_log_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
+
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -38,7 +42,9 @@ def test_auth_audit_log_teleport_metrics(dd_run_check, aggregator, instance, moc
         aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
-def test_auth_backend_s3_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport_endpoints):
+def test_auth_backend_s3_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
+
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -47,7 +53,9 @@ def test_auth_backend_s3_teleport_metrics(dd_run_check, aggregator, instance, mo
         aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
-def test_auth_backend_cache_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport_endpoints):
+def test_auth_backend_cache_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
+
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -56,7 +64,9 @@ def test_auth_backend_cache_teleport_metrics(dd_run_check, aggregator, instance,
         aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
-def test_auth_backend_dynamo_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport_endpoints):
+def test_auth_backend_dynamo_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
+
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -65,7 +75,9 @@ def test_auth_backend_dynamo_teleport_metrics(dd_run_check, aggregator, instance
         aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
-def test_auth_backend_firestore_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport_endpoints):
+def test_auth_backend_firestore_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
+
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -74,7 +86,9 @@ def test_auth_backend_firestore_teleport_metrics(dd_run_check, aggregator, insta
         aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
-def test_auth_backend_gcp_gcs_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport_endpoints):
+def test_auth_backend_gcp_gcs_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
+
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -83,7 +97,9 @@ def test_auth_backend_gcp_gcs_teleport_metrics(dd_run_check, aggregator, instanc
         aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
-def test_auth_backend_etcd_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport_endpoints):
+def test_auth_backend_etcd_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
+
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 

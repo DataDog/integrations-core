@@ -10,7 +10,6 @@ from .metrics import METRIC_MAP, METRIC_MAP_BY_SERVICE
 
 class TeleportCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'teleport'
-    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     DEFAULT_DIAG_PORT = 3000
 

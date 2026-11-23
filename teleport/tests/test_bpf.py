@@ -11,7 +11,9 @@ from .common import BPF_METRICS
 pytestmark = [pytest.mark.unit]
 
 
-def test_bpf_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport_endpoints):
+def test_bpf_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
+
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 

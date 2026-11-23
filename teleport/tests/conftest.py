@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from pathlib import Path
 
 import pytest
 
@@ -46,10 +45,3 @@ def instance():
 @pytest.fixture
 def metrics_path():
     return os.path.join(get_here(), "fixtures", "metrics.txt")
-
-
-@pytest.fixture
-def mock_teleport_endpoints(fake_http_response, instance, metrics_path):
-    diag_addr = f"{instance['teleport_url']}:{instance['diag_port']}"
-    fake_http_response(f"{diag_addr}/healthz")
-    fake_http_response(f"{diag_addr}/metrics", Path(metrics_path).read_bytes())
