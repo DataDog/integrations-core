@@ -32,7 +32,6 @@ MEMORY_LINES = {
 }
 VIRTUAL_FILESYSTEMS = frozenset({'none', 'tmpfs', 'cgroup_root'})
 
-# The values of the boolean fields of `show system environmentals` (`alarm`, `Inserted`).
 ALARM_TRUE = frozenset({'true', 'yes'})
 ALARM_FALSE = frozenset({'false', 'no'})
 
@@ -127,22 +126,18 @@ def _entries(root: Element, section: str) -> Iterator[tuple[Element, str, str]]:
             yield entry, _slot_number(slot), text(entry, 'description') or slot.tag
 
 
-def _flag(entry: Element, field: str) -> bool | None:
-    value = (text(entry, field) or '').lower()
+def _alarm(entry: Element) -> bool | None:
+    value = (text(entry, 'alarm') or '').lower()
     if value in ALARM_TRUE:
         return True
     return False if value in ALARM_FALSE else None
 
 
-def _alarm(entry: Element) -> bool | None:
-    return _flag(entry, 'alarm')
-
-
 def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sample]:
-    """Power rails, temperature sensors and power supplies; empty on a VM-Series. The alarms are
-    PAN's own `alarm` field, never a comparison with the thresholds. A power sensor sends `power.alarm` whenever
-    that field is readable, and `power.alarm.high` and `power.alarm.low` add its direction when the voltage tells
-    it; a power alarm whose direction cannot be told is warned about, once per sensor."""
+    """Power rails and temperature sensors; empty on a VM-Series. The alarms are PAN's own `alarm` field, never a
+    comparison with the thresholds. A power sensor sends `power.alarm` whenever that field is readable, and the
+    direction metrics `power.alarm.high` and `power.alarm.low` only when the voltage tells it; a power alarm
+    whose direction cannot be told is warned about, once per sensor."""
     samples: list[Sample] = []
     for entry, slot, name in _entries(root, 'power'):
         tags = (f'sensor:{name}', f'slot:{slot}')
@@ -192,15 +187,6 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
         alarm = _alarm(entry)
         if alarm is not None:
             samples.append(Sample('temperature.alarm', int(alarm), tags, 'gauge'))
-
-    # The power-supply section and its fields are named after the documented `show system environmentals
-    # power-supply` subcommand and columns.
-    for entry, slot, name in _entries(root, 'power-supply'):
-        tags = (f'sensor:{name}', f'slot:{slot}')
-        for metric, field in (('power_supply.alarm', 'alarm'), ('power_supply.inserted', 'Inserted')):
-            value = _flag(entry, field)
-            if value is not None:
-                samples.append(Sample(metric, int(value), tags, 'gauge'))
     return samples
 
 

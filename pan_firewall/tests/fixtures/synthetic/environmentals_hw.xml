@@ -13,11 +13,7 @@
        power 7: alarm True without a voltage reading (only the alarm is known)
        thermal 1: alarm False
        thermal 2: alarm True
-       thermal 3: alarm yes
-     The power-supply section is named after the `show system environmentals power-supply` subcommand in the Palo
-     Alto docs, and its fields after the documented CLI columns (Alarm, Inserted).
-       power-supply 1: inserted, alarm False
-       power-supply 2: not inserted, alarm True -->
+       thermal 3: alarm yes -->
 <response status="success"><result>
   <power>
     <Slot1>
@@ -39,10 +35,4 @@
       <entry><slot>1</slot><description>Temperature at Exhaust</description><alarm>yes</alarm><DegreesC>82.0</DegreesC><min>0.0</min><max>80.0</max></entry>
     </Slot1>
   </thermal>
-  <power-supply>
-    <Slot1>
-      <entry><slot>1</slot><description>Power Supply #1 (left)</description><alarm>False</alarm><Inserted>True</Inserted></entry>
-      <entry><slot>1</slot><description>Power Supply #2 (right)</description><alarm>True</alarm><Inserted>False</Inserted></entry>
-    </Slot1>
-  </power-supply>
 </result></response>

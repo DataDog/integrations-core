@@ -29,11 +29,6 @@ THERMAL = [
     ('Temperature at CPU', 85.5, 1),
     ('Temperature at Exhaust', 82.0, 1),
 ]
-# (sensor, alarm, inserted), all in slot 1.
-POWER_SUPPLIES = [
-    ('Power Supply #1 (left)', 0, 1),
-    ('Power Supply #2 (right)', 1, 0),
-]
 
 
 def test_vm_series_has_no_sensors():
@@ -50,8 +45,5 @@ def test_hardware_sensors():
     for sensor, current, alarm in THERMAL:
         for name, value in (('current', current), ('min', 0.0), ('max', 80.0), ('alarm', alarm)):
             expected[f'temperature.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
-    for sensor, alarm, inserted in POWER_SUPPLIES:
-        for name, value in (('alarm', alarm), ('inserted', inserted)):
-            expected[f'power_supply.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
 
     assert series(parse_environmentals(load_xml(SYNTHETIC / 'environmentals_hw.xml'), mock.Mock())) == expected
