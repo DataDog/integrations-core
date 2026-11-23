@@ -89,6 +89,10 @@ tests:
           packets_in: 3644
           packets_out: 11911
       outbound_if: "ethernet1/1.1101"
+      pan:
+        firewall:
+          app: "paloalto-shared-services"
+          session_end_reason: "tcp-rst-from-client"
       pan_event_time: 1620102277000
       parent_session_id: 0
       pkts_received: 3644
@@ -266,6 +270,10 @@ tests:
         status_detail: "block-url"
         status_id: 1
         time: 1756928432000
+      pan:
+        firewall:
+          app: "web-browsing"
+          threatid: "Eicar Test File"
       pan_event_time: 1756928432000
       pan_status: "warning"
       proto: "tcp"
@@ -382,6 +390,10 @@ tests:
         status_detail: "block-url"
         status_id: 1
         time: 1756928470000
+      pan:
+        firewall:
+          app: "web-browsing"
+          threatid: "Suspicious URL"
       pan_event_time: 1756928470000
       pan_status: "warning"
       proto: "tcp"
@@ -496,6 +508,10 @@ tests:
         status_detail: "sinkhole"
         status_id: 1
         time: 1756928525000
+      pan:
+        firewall:
+          app: "dns"
+          threatid: "Suspicious DNS Query"
       pan_event_time: 1756928525000
       pan_status: "critical"
       proto: "udp"
@@ -695,6 +711,10 @@ tests:
           packets: 1.0
           packets_in: 0
           packets_out: 1
+      pan:
+        firewall:
+          app: "App-8"
+          session_end_reason: "policy-deny"
       pan_event_time: 1756928432000
       parent_session_id: 0
       pkts_received: 0
@@ -817,6 +837,11 @@ tests:
         status_id: 1
         time: 1756928432000
       outbound_if: "If-12"
+      pan:
+        firewall:
+          app: "ssl"
+          thr_category: "hacktool"
+          threatid: "Threatid-7"
       pan_event_time: 1756928432000
       pan_status: "notice"
       parent_session_id: 0
@@ -949,6 +974,11 @@ tests:
         status_id: 1
         time: 1756928432000
       outbound_if: "If-9"
+      pan:
+        firewall:
+          app: "web-browsing"
+          thr_category: "java-class"
+          threatid: "Threatid-2"
       pan_event_time: 1756928432000
       pan_status: "warning"
       parent_session_id: 0
@@ -1066,6 +1096,10 @@ tests:
           packets_in: 6
           packets_out: 6
       outbound_if: "ethernet1/1"
+      pan:
+        firewall:
+          app: "web-browsing"
+          session_end_reason: "aged-out"
       pan_event_time: 1794997275000
       parent_session_id: 0
       pkts_received: 6
@@ -1254,6 +1288,10 @@ tests:
         time: 1794997275123
       outbound_if: "ethernet1/1"
       packets: 12
+      pan:
+        firewall:
+          app: "web-browsing"
+          session_end_reason: "aged-out"
       pan_event_time: 1794997275123
       pan_log_date: 1794997275123
       pan_status: "info"
@@ -1462,6 +1500,9 @@ tests:
         severity_id: 1
         time: 1794997201000
       outbound_if: "ethernet1/1"
+      pan:
+        firewall:
+          app: "web-browsing"
       pan_event_time: 1794997201000
       pan_status: "info"
       proto: "tcp"
@@ -1594,6 +1635,11 @@ tests:
         status_id: 1
         time: 1794997275123
       outbound_if: "ethernet1/1"
+      pan:
+        firewall:
+          app: "web-browsing"
+          thr_category: "data-filtering"
+          threatid: "Credit Card Numbers"
       pan_event_time: 1794997275123
       pan_log_date: 1794997275123
       pan_status: "warning"
@@ -1750,6 +1796,10 @@ tests:
         status_id: 1
         time: 1794997275123
       outbound_if: "ethernet1/1"
+      pan:
+        firewall:
+          app: "web-browsing"
+          threatid: "(9999)"
       pan_event_time: 1794997275123
       pan_log_date: 1794997275123
       pan_status: "info"
@@ -2102,6 +2152,11 @@ tests:
         status_id: 1
         time: 1794997275123
       outbound_if: "ethernet1/1"
+      pan:
+        firewall:
+          app: "web-browsing"
+          thr_category: "info-leak"
+          threatid: "HTTP /etc/passwd Access Attempt"
       pan_event_time: 1794997275123
       pan_log_date: 1794997275123
       pan_status: "warning"
@@ -2367,6 +2422,10 @@ tests:
         status_id: 1
         time: 1794997277000
       outbound_if: "ethernet1/1"
+      pan:
+        firewall:
+          app: "web-browsing"
+          threatid: "(9999)"
       pan_event_time: 1794997277000
       pan_status: "notice"
       parent_session_id: 0
@@ -2494,6 +2553,11 @@ tests:
         status_id: 1
         time: 1794997187000
       outbound_if: "tunnel.1"
+      pan:
+        firewall:
+          app: "web-browsing"
+          thr_category: "info-leak"
+          threatid: "HTTP /etc/passwd Access Attempt"
       pan_event_time: 1794997187000
       pan_status: "warning"
       parent_session_id: 0
@@ -2709,6 +2773,11 @@ tests:
         status_id: 1
         time: 1794997508000
       outbound_if: "ethernet1/1"
+      pan:
+        firewall:
+          app: "dns-base"
+          thr_category: "dns-malware"
+          threatid: "generic:test-malware.testpanw.com"
       pan_event_time: 1794997508000
       pan_status: "warning"
       parent_session_id: 0
@@ -2825,6 +2894,10 @@ tests:
           packets_in: 6
           packets_out: 6
       outbound_if: "ethernet1/1"
+      pan:
+        firewall:
+          app: "web-browsing"
+          session_end_reason: "aged-out"
       pan_event_time: 1794997275000
       parent_session_id: 0
       pkts_received: 6
@@ -2960,6 +3033,11 @@ tests:
         status_id: 1
         time: 1794997275123
       outbound_if: "ethernet1/1"
+      pan:
+        firewall:
+          app: "web-browsing"
+          thr_category: "data-filtering"
+          threatid: "Credit Card Numbers"
       pan_event_time: 1794997275123
       pan_log_date: 1794997275123
       pan_status: "warning"
@@ -3099,6 +3177,11 @@ tests:
         status_id: 1
         time: 1794997275123
       outbound_if: "ethernet1/1"
+      pan:
+        firewall:
+          app: "web-browsing"
+          thr_category: "virus"
+          threatid: "Virus/Win32.Généric"
       pan_event_time: 1794997275123
       pan_log_date: 1794997275123
       pan_status: "warning"

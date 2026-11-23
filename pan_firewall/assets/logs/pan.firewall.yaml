@@ -182,22 +182,22 @@ facets:
   - groups:
       - PAN Firewall
     name: Threat ID
-    path: threatid
+    path: pan.firewall.threatid
     source: log
   - groups:
       - PAN Firewall
     name: Threat Category
-    path: thr_category
+    path: pan.firewall.thr_category
     source: log
   - groups:
       - PAN Firewall
     name: Application
-    path: app
+    path: pan.firewall.app
     source: log
   - groups:
       - PAN Firewall
     name: Session End Reason
-    path: session_end_reason
+    path: pan.firewall.session_end_reason
     source: log
   - groups:
       - PAN Firewall
@@ -534,6 +534,46 @@ pipeline:
       targetFormat: string
       preserveSource: false
       overrideOnConflict: true
+    - type: attribute-remapper
+      name: Copy `threatid` to `pan.firewall.threatid`
+      enabled: true
+      sources:
+        - threatid
+      sourceType: attribute
+      target: pan.firewall.threatid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Copy `thr_category` to `pan.firewall.thr_category`
+      enabled: true
+      sources:
+        - thr_category
+      sourceType: attribute
+      target: pan.firewall.thr_category
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Copy `app` to `pan.firewall.app`
+      enabled: true
+      sources:
+        - app
+      sourceType: attribute
+      target: pan.firewall.app
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Copy `session_end_reason` to `pan.firewall.session_end_reason`
+      enabled: true
+      sources:
+        - session_end_reason
+      sourceType: attribute
+      target: pan.firewall.session_end_reason
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
     - type: pipeline
       name: Extract the PAN-OS event time into `pan_event_time`
       enabled: true
