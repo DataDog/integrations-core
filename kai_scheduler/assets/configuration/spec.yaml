@@ -59,6 +59,7 @@ files:
         example: true
         default: true
     - name: kube_config_dict
+      fleet_configurable: false
       description: |
         Optional kubeconfig dictionary used to configure the Kubernetes API client.
 
