@@ -1,0 +1,1 @@
+Stop sending `license.days_left` for expired licenses.

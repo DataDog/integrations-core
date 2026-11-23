@@ -1,0 +1,79 @@
+{
+  "app_id": "lustre",
+  "app_uuid": "bbb68905-6876-4287-9a79-49f785e9c16c",
+  "manifest_version": "2.0.0",
+  "display_on_public_website": true,
+  "tile": {
+    "title": "Lustre",
+    "description": "Monitor performance, health, and operations across all nodes in your Lustre cluster.",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Dashboard preview (light)",
+        "image_url": "images/Screenshot 2025-07-31 at 10.54.04.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Dashboard preview (dark)",
+        "image_url": "images/Screenshot 2025-07-31 at 10.53.15.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Data Stores",
+      "Category::OS & System",
+      "Offering::Integration",
+      "Supported OS::Linux",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "oauth": {},
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "sales@datadoghq.com",
+    "vendor_id": "datadog"
+  },
+  "assets": {
+    "dashboards": {
+      "Lustre - Overview": "assets/dashboards/lustre___overview.json"
+    },
+    "monitors": {
+      "High I/O latency": "assets/monitors/high_i_o_latency.json",
+      "Network health degraded": "assets/monitors/network_health_degraded.json",
+      "Low filesystem capacity": "assets/monitors/low_filesystem_capacity.json"
+    },
+    "logs": {
+      "source": "lustre"
+    },
+    "integration": {
+      "source_type_name": "Lustre",
+      "auto_install": true,
+      "configuration": {},
+      "process_signatures": [],
+      "metrics": {
+        "prefix": "lustre",
+        "check": [
+          "lustre.device.health"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 45563554,
+      "supports_ddr_coordinated_failover": false
+    }
+  },
+  "owner": "agent-integrations"
+}

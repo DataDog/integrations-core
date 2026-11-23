@@ -29,10 +29,17 @@
 # `workflow_dispatch` requires the file to exist on the default branch, so changes here only take
 # effect once merged.
 name: Test Batch
+run-name: >-
+  ${{ inputs.dispatch_id && format('Test Batch [dispatch:{0}] {1}', inputs.dispatch_id, inputs.batch_id) || 'Test Batch' }}
 
 on:
   workflow_dispatch:
     inputs:
+      dispatch_id:
+        description: "Unique dispatch identity used to recover a run after an ambiguous API failure"
+        required: false
+        default: ""
+        type: string
       batch_id:
         description: "Logical batch identity, e.g. batch-01"
         required: true
@@ -113,10 +120,38 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     permissions:
+      actions: read
       statuses: write
     outputs:
       matrix: ${{ steps.decode.outputs.matrix }}
     steps:
+      # Ignore cancelled runs; the lowest viable run ID wins, making re-dispatches idempotent.
+      - name: Skip duplicate dispatches
+        if: inputs.dispatch_id != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISPATCH_ID: ${{ inputs.dispatch_id }}
+          BATCH_ID: ${{ inputs.batch_id }}
+        run: |
+          set -euo pipefail
+          title=$(jq -cn --arg dispatch "$DISPATCH_ID" --arg batch "$BATCH_ID" \
+            '"Test Batch [dispatch:\($dispatch)] \($batch)"')
+          if ! earlier=$(gh api --method GET --paginate \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/test-batch.yml/runs" \
+            -f event=workflow_dispatch -f per_page=100 \
+            -f "created=>=$(date -u -d '1 day ago' +'%Y-%m-%dT%H:%M:%SZ')" \
+            --jq ".workflow_runs[]
+              | select(.display_title == ${title} and .id < ${GITHUB_RUN_ID} and .conclusion != \"cancelled\")
+              | .id" \
+            | jq -s 'min // empty'); then
+            echo "Dispatch identity lookup failed; continuing batch ${BATCH_ID}."
+            exit 0
+          fi
+          if [[ -n "$earlier" ]]; then
+            echo "::error::Run ${GITHUB_RUN_ID} defers to run ${earlier} for dispatch ${DISPATCH_ID}."
+            exit 1
+          fi
+
       - name: Decode the job list
         id: decode
         env:

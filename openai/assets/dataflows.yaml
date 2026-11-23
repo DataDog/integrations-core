@@ -8,6 +8,11 @@ provides:
     granular: true
     data_type: cloud_cost
     direction: inbound
+  - id: openai-project-cloud-cost-data
+    always_on: false
+    granular: true
+    data_type: cloud_cost
+    direction: inbound
   - id: openai-llm-completions
     always_on: false
     granular: true

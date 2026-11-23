@@ -76,7 +76,6 @@ def generate_simulator_script(
         with client.messages.stream(
             model=model,
             max_tokens=MAX_TOKENS,
-            temperature=0,  # Deterministic output
             system=stage1_system,
             messages=[{"role": "user", "content": stage1_user}],
         ) as stream:
@@ -107,7 +106,6 @@ def generate_simulator_script(
         with client.messages.stream(
             model=model,
             max_tokens=MAX_TOKENS,
-            temperature=0,  # Deterministic output
             system=stage2_system,
             messages=[{"role": "user", "content": stage2_user}],
         ) as stream:
@@ -171,7 +169,6 @@ def fix_script_error(
         with client.messages.stream(
             model=model,
             max_tokens=MAX_TOKENS,
-            temperature=0,  # Deterministic output
             system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}],
         ) as stream:

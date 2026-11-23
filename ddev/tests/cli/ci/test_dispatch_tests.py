@@ -16,7 +16,6 @@ import httpx
 import pytest
 
 from ddev.cli.application import Application
-from ddev.cli.ci.dispatch_run import resolve_run
 from ddev.cli.ci.dispatch_tests import RUN_OUTCOME_METRICS, attach_datadog_log_handler
 from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.batching.jobs import AgentImageOverride
@@ -55,7 +54,6 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from ddev.cli.application import Application
-    from ddev.cli.ci.dispatch_run import ResolvedRun
     from ddev.cli.ci.tests.messages import TestBatch
     from ddev.config.file import ConfigFileWithOverrides
     from ddev.monitoring import ComponentMonitor
@@ -514,8 +512,8 @@ def test_invocation_options_reach_the_plan_and_batch_workflow(
 
 @pytest.mark.parametrize(
     'mode_options',
-    [[], ['--dry-run'], ['--resolve-only']],
-    ids=['executing', 'dry-run', 'resolve-only'],
+    [[], ['--dry-run']],
+    ids=['executing', 'dry-run'],
 )
 def test_metric_delivery_follows_the_dispatch_mode(
     ddev: CliRunner,
@@ -524,7 +522,7 @@ def test_metric_delivery_follows_the_dispatch_mode(
     config_file: ConfigFileWithOverrides,
     mode_options: list[str],
 ):
-    """A mode that dispatches nothing reports no metrics; an executing run delivers them."""
+    """Dry runs skip metric delivery; executing runs deliver operation and outcome metrics."""
     config_file.model.orgs['default']['api_key'] = 'test-api-key'
     config_file.save()
     submitter = FakeMetricsSubmitter()
@@ -533,11 +531,6 @@ def test_metric_delivery_follows_the_dispatch_mode(
         partial(DatadogMetricsSink, submitter=submitter),
     )
 
-    def resolve(*args: Any, monitor: ComponentMonitor, **kwargs: Any) -> ResolvedRun | None:
-        monitor.metrics.count('probe')
-        return resolve_run(*args, monitor=monitor, **kwargs)
-
-    mocker.patch('ddev.cli.ci.dispatch_tests.resolve_run', resolve)
     mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', return_value=[])
 
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), *mode_options)
@@ -548,13 +541,87 @@ def test_metric_delivery_follows_the_dispatch_mode(
         assert submitter.distributions == []
     else:
         assert {
-            'agent_integrations.test_dispatcher.probe',
+            'agent_integrations.test_dispatcher.operations.count',
             'agent_integrations.test_dispatcher.runs.count',
         } <= {series['metric'] for series in submitter.series}
         assert {series['metric'] for series in submitter.distributions} == {
             'agent_integrations.test_dispatcher.operation.duration',
             'agent_integrations.test_dispatcher.run.duration',
         }
+
+
+@pytest.mark.parametrize('api_key', ['', 'test-api-key'], ids=['without-key', 'with-key'])
+@pytest.mark.parametrize(
+    ('scenario', 'exit_code', 'outcome', 'operation_failed'),
+    [('resolved', 0, 'resolved', 0), ('superseded', 0, 'no-op', 0), ('failed', 1, 'failed', 1)],
+)
+def test_resolve_only_exports_its_own_component(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    mocker: MockerFixture,
+    config_file: ConfigFileWithOverrides,
+    tmp_path: Path,
+    api_key: str,
+    scenario: str,
+    exit_code: int,
+    outcome: str,
+    operation_failed: int,
+):
+    config_file.model.orgs['default']['api_key'] = api_key
+    config_file.save()
+    metrics = FakeMetricsSubmitter()
+    logs = FakeLogSubmitter()
+    mocker.patch(
+        'ddev.monitoring.datadog_metrics.DatadogMetricsSink',
+        partial(DatadogMetricsSink, submitter=metrics),
+    )
+    mocker.patch('ddev.monitoring.datadog.DatadogLogHandler', partial(DatadogLogHandler, submitter=logs))
+    if scenario == 'superseded':
+        github.mock_response('get_pull_request', pull_request(head_sha='a-newer-sha'))
+    elif scenario == 'failed':
+        github.mock_response('get_pull_request', httpx.ConnectError('resolution failed'))
+
+    result = ddev(
+        'ci',
+        'dispatch-tests',
+        '--pr',
+        str(PR_NUMBER),
+        '--pr-head-sha',
+        HEAD_SHA,
+        '--resolve-only',
+        '--output-dir',
+        str(tmp_path),
+    )
+
+    assert result.exit_code == exit_code, result.output
+    assert 'component=run-resolution' in result.output
+    assert f'outcome={outcome}' in result.output
+    if not api_key:
+        assert logs.logs == []
+        assert metrics.series == []
+        assert metrics.distributions == []
+        return
+
+    messages = {log['message'] for log in logs.logs}
+    assert {'Dispatcher invocation started', 'Dispatcher run finished', 'Resolving pull request'} <= messages
+    assert {log['dispatcher.component'] for log in logs.logs} == {'run-resolution'}
+    [finished] = [log for log in logs.logs if log['message'] == 'Dispatcher run finished']
+    assert finished['dispatcher.outcome'] == outcome
+    if scenario == 'superseded':
+        [no_op] = [log for log in logs.logs if log['message'] == 'Nothing to test']
+        assert no_op['dispatcher.reason'] == 'no open pull request matches the requested revision'
+    assert {series['metric'] for series in metrics.series} == {
+        'agent_integrations.test_dispatcher.operations.count',
+        'agent_integrations.test_dispatcher.operations.failed',
+    }
+    [failed] = [series for series in metrics.series if series['metric'].endswith('.failed')]
+    assert failed['points'][0]['value'] == operation_failed
+    assert {series['metric'] for series in metrics.distributions} == {
+        'agent_integrations.test_dispatcher.operation.duration'
+    }
+    assert all(
+        'dispatcher.component:run-resolution' in series['tags'] for series in [*metrics.series, *metrics.distributions]
+    )
 
 
 def test_early_exit_disables_monitoring(
@@ -663,7 +730,10 @@ def test_metrics_are_tagged_with_the_workflow_running_the_dispatcher(
     assert {record.tags.get('ci.pipeline.id') for record in sink.records} == {pipeline_id}
 
 
-def test_pull_request_resolution_meters_the_rate_limit_wait_it_sits_out(ddev, resolved_changes, mocker, monkeypatch):
+@pytest.mark.parametrize('resolve_only', [False, True], ids=['executing', 'resolve-only'])
+def test_pull_request_resolution_meters_the_rate_limit_wait_it_sits_out(
+    ddev, resolved_changes, mocker, monkeypatch, resolve_only: bool
+):
     """Resolution builds its own client before the Dispatcher's exists, so its waits need their own wiring."""
     clock = FakeClock()
     advance_clock_on_sleep(clock, monkeypatch)
@@ -681,13 +751,23 @@ def test_pull_request_resolution_meters_the_rate_limit_wait_it_sits_out(ddev, re
     handler = RecordingJsonHandler()
     sink = recording_runtime(mocker, handler)
 
-    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
+    options = ['--resolve-only'] if resolve_only else []
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), *options)
 
     assert result.exit_code == 0, result.output
     # The 30 seconds GitHub asked for, plus the governor's one-second buffer.
     assert [(record.value, dict(record.tags)) for record in sink.records_named('throttle.wait.duration')] == [
-        (31, {'ci.pipeline.id': '12345', 'dispatcher.reason': 'secondary_limit', 'dispatcher.rate_limiter': 'github'})
+        (
+            31,
+            {
+                'ci.pipeline.id': '12345',
+                'dispatcher.reason': 'secondary_limit',
+                'dispatcher.rate_limiter': 'github',
+            },
+        )
     ]
+    if resolve_only:
+        assert {event['component'] for event in handler.events} == {'run-resolution'}
     # Resolution's own requests are observed too, under the same pipeline ID.
     assert [
         (record.value, record.tags.get('ci.pipeline.id')) for record in sink.records_named('requests.throttled')
@@ -799,13 +879,14 @@ def test_a_failing_datadog_metrics_constructor_leaves_the_dispatcher_usable(
     assert 'Nothing to test' in result.output
 
 
+@pytest.mark.parametrize('resolve_only', [False, True], ids=['executing', 'resolve-only'])
 def test_sink_failures_are_reported_through_the_dedicated_exporter_component(
     ddev: CliRunner,
     github: FakeAsyncGitHubClient,
     mocker: MockerFixture,
     config_file: ConfigFileWithOverrides,
+    resolve_only: bool,
 ):
-    """One HTTP batch carries several components' metrics, so its failures are not any one of theirs."""
     config_file.model.orgs['default']['api_key'] = 'test-api-key'
     config_file.save()
     submitter = FakeMetricsSubmitter()
@@ -837,14 +918,19 @@ def test_sink_failures_are_reported_through_the_dedicated_exporter_component(
     mocker.patch('ddev.monitoring.MonitoringRuntime', make_runtime)
     mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
 
-    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
+    options = ['--resolve-only'] if resolve_only else []
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), *options)
 
     assert result.exit_code == 0, result.output
     # The submission fails while the runtime drains the sink, and the report still reaches the
     # runtime's handlers before they detach.
-    exporter_events = [event for event in json_handler.events if event.get('component') == 'datadog-metrics']
+    component = 'run-resolution' if resolve_only else 'datadog-metrics'
+    exporter_events = [
+        event
+        for event in json_handler.events
+        if event.get('component') == component and event.get('category') == 'submission'
+    ]
     assert exporter_events
-    assert all(event['category'] == 'submission' for event in exporter_events)
     assert any(event['event'].startswith('submitting') for event in exporter_events)
 
 
