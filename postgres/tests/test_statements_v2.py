@@ -9,9 +9,11 @@ specifics layered on top and the wiring between them.
 """
 
 import json
+import re
 from unittest import mock
 
 import pytest
+from psycopg.adapt import Transformer
 from semver import VersionInfo
 
 from datadog_checks.base.utils.db.query_metrics import ObfuscationResult, TextKind
@@ -24,6 +26,7 @@ from datadog_checks.postgres.statements import (
 from datadog_checks.postgres.statements_v2 import (
     DEFAULT_PGSS_MAX,
     LIGHTWEIGHT_DESIRED_COLUMNS,
+    QUERY_TEXT_FETCH,
     PostgresStatementMetricsV2,
     classify_query_text,
 )
@@ -120,6 +123,37 @@ class TestPostgresStatementMetricsV2:
             result = v2._resolve_obfuscations(keys, keys)
         assert bad_key not in result
         assert good_key in result
+
+    # --- text fetch statement identity ---
+
+    @pytest.mark.parametrize(
+        "keys",
+        [
+            pytest.param({(1, 5, 10)}, id='small_ids'),
+            pytest.param({(-6_000_000_000_000_000_000, 16384, 16389), (7, 40000, 16389)}, id='dbid_above_int2'),
+            pytest.param({(7, 5, 40000)}, id='userid_above_int2'),
+            pytest.param({(7, 3_000_000_000, 3_000_000_001)}, id='oids_above_int4'),
+        ],
+    )
+    def test_fetch_query_texts_statement_does_not_vary_with_key_values(self, keys):
+        """The text fetch must reach pg_stat_statements as one statement whatever ids it carries.
+
+        The cursor binds client-side, and psycopg types an integer list by the largest value in it
+        (int2[], int4[], or int8[]). That cast is part of the text Postgres records, so a type that
+        follows the data splits the Agent's own query into several query signatures, one per
+        combination of id widths.
+        """
+        v2 = self._make()
+        baseline = self._rendered_text_fetch(v2, {(1, 5, 10)})
+        assert self._rendered_text_fetch(v2, keys) == baseline
+
+    @staticmethod
+    def _rendered_text_fetch(v2: PostgresStatementMetricsV2, keys: set) -> str:
+        """The SQL `_fetch_query_texts` sends, as ClientCursor renders it, with array contents masked."""
+        with mock.patch.object(v2, '_execute_query', return_value=([], None)) as execute:
+            v2._fetch_query_texts(keys)
+        literals = tuple(Transformer().as_literal(param).decode() for param in execute.call_args.kwargs['params'])
+        return re.sub(r"'\{[^}]*\}'", '?', QUERY_TEXT_FETCH % literals)
 
     # --- execute query cancel event ---
 

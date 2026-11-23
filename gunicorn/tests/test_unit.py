@@ -51,3 +51,16 @@ def test_process_disappearing_during_scan(aggregator, caplog):
     )
 
     assert "Process dd-test-gunicorn (pid=1234) disappeared while scanning" in caplog.text
+
+
+def test_process_exiting_between_cmdline_reads(aggregator):
+    mock_process = mock.Mock()
+    mock_process.cmdline.side_effect = [['python'], []]
+    mock_process.pid = 1234
+
+    check = GUnicornCheck(CHECK_NAME, {}, [INSTANCE])
+
+    with mock.patch('psutil.process_iter', return_value=[mock_process]):
+        check.check(INSTANCE)
+
+    aggregator.assert_service_check("gunicorn.is_running", check.CRITICAL, tags=['app:' + INSTANCE['proc_name']])

@@ -24,7 +24,12 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
+from datadog_checks.sqlserver.utils import (
+    append_agent_service_comment,
+    is_azure_sql_database,
+    needs_comment_recovery,
+    raise_if_cancelled,
+)
 
 DEFAULT_COLLECTION_INTERVAL = 60
 
@@ -289,6 +294,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
         self._collect_execution_plans = is_affirmative(self._config.statement_metrics_config.get('collect_plans', True))
         self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
+        obfuscator_options = json.loads(self._config.obfuscator_options)
+        self._collect_comments = bool(
+            obfuscator_options.get('return_json_metadata') and obfuscator_options.get('collect_comments')
+        )
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -475,6 +484,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if row.get('procedure_name') and row.get('schema_name'):
                 # convert to lowercase for backward compatibility
                 row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}".lower()
+
+            if self._collect_comments:
+                comments = append_agent_service_comment(comments, row.get('text'))
 
             row['dd_comments'] = comments
             row['text'] = obfuscated_statement
