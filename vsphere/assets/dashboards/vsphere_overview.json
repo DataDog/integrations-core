@@ -1,6 +1,7 @@
 {
     "author_name": "Datadog",
     "description": "This dashboard provides a high-level view of your VMware vSphere environment, with in-depth resource utilization metrics from your hosts and VMs, along with the status of your vCenter Server. For further reading on monitoring vSphere: \n\n- [How to monitor vSphere and application metrics with Datadog](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/) \n\n- [Datadog's vSphere integration docs](https://docs.datadoghq.com/integrations/vsphere/#pagetitle). \n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "layout_type": "ordered",
     "template_variables": [
         {
             "available_values": [],
@@ -31,1062 +32,1072 @@
     "widgets": [
         {
             "definition": {
-                "sizing": "fit",
-                "type": "image",
-                "url": "/static/images/logos/vsphere_large.svg"
+                "banner_img": "/static/images/logos/vsphere_large.svg",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "Introduction",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**vSphere**\n\nThis dashboard provides a high-level view of your VMware vSphere environment, with in-depth resource utilization metrics from your hosts and VMs, along with the status of your vCenter Server.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 780172636657145,
+                        "layout": {
+                            "height": 4,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Useful links**\n\n- [How to monitor vSphere and application metrics with Datadog](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/)\n\n- [Datadog's vSphere integration docs](https://docs.datadoghq.com/integrations/vsphere/)\n\n- [VMware vSphere product page](https://www.vmware.com/products/cloud-infrastructure/vsphere)",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 3049694102670684,
+                        "layout": {
+                            "height": 4,
+                            "width": 3,
+                            "x": 3,
+                            "y": 0
+                        }
+                    }
+                ]
             },
-            "id": 0,
+            "id": 7317249024965574,
             "layout": {
-                "height": 10,
-                "width": 47,
+                "height": 7,
+                "width": 6,
                 "x": 0,
-                "y": 1
+                "y": 0
             }
         },
         {
             "definition": {
-                "requests": [
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
                     {
-                        "columns": [],
-                        "query": {
-                            "data_source": "event_stream",
-                            "event_size": "l",
-                            "query_string": "source:vsphere $vcenter_server $vcenter_datacenter $vsphere_host $VM"
+                        "definition": {
+                            "check": "vsphere.can_connect",
+                            "group_by": [
+                                "vcenter_server"
+                            ],
+                            "grouping": "cluster",
+                            "tags": [
+                                "*"
+                            ],
+                            "title": "vSphere status",
+                            "title_align": "center",
+                            "title_size": "16",
+                            "type": "check_status"
                         },
-                        "response_format": "event_list"
+                        "id": 4147126874198210,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "last",
+                                    "formulas": [
+                                        {
+                                            "formula": "q"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "q",
+                                            "query": "sum:vsphere.vm.count{$vcenter_server,$vcenter_datacenter,$VM,$vsphere_host}.rollup(avg)"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "VMs",
+                            "type": "query_value"
+                        },
+                        "id": 8420325823947644,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "aggregator": "last",
+                                    "formulas": [
+                                        {
+                                            "formula": "q"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "q",
+                                            "query": "sum:vsphere.datacenter.count{$vcenter_server,$vcenter_datacenter,$VM}.rollup(avg)"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Datacenters",
+                            "type": "query_value"
+                        },
+                        "id": 1340731173143447,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "group_by": [
+                                "vsphere_vcenter",
+                                "vsphere_datacenter",
+                                "vsphere_cluster",
+                                "tag:service"
+                            ],
+                            "highlighted": "",
+                            "overlay": "Default",
+                            "overlay_filter": "",
+                            "projection": "isometric",
+                            "provider": "vsphere",
+                            "query_string": "",
+                            "show_empty_groups": false,
+                            "title": "vSphere infrastructure map",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "cloudcraft"
+                        },
+                        "id": 841967170746317,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
                     }
-                ],
-                "title": "vSphere events",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "list_stream"
+                ]
             },
-            "id": 1,
+            "id": 1387402706569731,
             "layout": {
-                "height": 62,
-                "width": 47,
+                "height": 7,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Events",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [],
+                                    "query": {
+                                        "data_source": "event_stream",
+                                        "event_size": "l",
+                                        "query_string": "source:vsphere $vcenter_server $vcenter_datacenter $vsphere_host $VM"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "vSphere events",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 6331138104154068,
+                        "layout": {
+                            "height": 4,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 6201445398791814,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 11
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "ESXi hosts",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 70
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.cpu.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Most % CPU loaded hosts (Top 10)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 5200604095051335,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_size": "0",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, \"mean\", \"desc\")"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vsphere.net.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Total network utilization of hosts (Top 25)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 8725553841850596,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 70
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.mem.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "title": "Most % memory loaded hosts (Top 10)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 6957806285246981,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_size": "0",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, \"mean\", \"desc\")"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.mem.vmmemctl.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Memory ballooning by host (Top 25)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 981727255790751,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 3956003845233145,
+            "layout": {
+                "height": 8,
+                "width": 12,
+                "x": 0,
+                "y": 16
+            }
+        },
+        {
+            "definition": {
+                "background_color": "green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Virtual machines",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 70
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.cpu.usage.avg{$vcenter_datacenter,$vcenter_server,vsphere_type:vm, $vsphere_host, $VM} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "style": {},
+                            "title": "Most % CPU loaded VMs (Top 25)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 371165215788932,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 70
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.mem.usage.avg{vsphere_type:vm,$vcenter_server,$vcenter_datacenter, $vsphere_host, $VM} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "style": {},
+                            "title": "Most % memory loaded VMs (Top 25)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 582503079115457,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.disk.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:vm, $vsphere_host, $VM} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Disk I/O rates per VM (Top 25)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4400231660208160,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.net.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:vm, $vsphere_host, $VM} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Total network utilization of VMs (Top 25)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 5972437506770147,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 4605533967172527,
+            "layout": {
+                "height": 8,
+                "width": 12,
+                "x": 0,
+                "y": 24
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Datastores",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 70
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 90
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 90
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.disk.used.latest{$vcenter_server,$vcenter_datacenter,vsphere_type:datastore,$VM , $vsphere_host} by {vsphere_datastore}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:vsphere.disk.capacity.latest{$vcenter_server,$vcenter_datacenter,vsphere_type:datastore} by {vsphere_datastore}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {},
+                            "title": "Datastore used space in % (Top 10)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 670414303123744,
+                        "layout": {
+                            "height": 6,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.datastore.numberWriteAveraged.avg{$vcenter_server,$vcenter_datacenter,$vsphere_host,$VM} by {vmfs_uuid}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Number of writes by VMFS ID",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 4894016424384278,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.datastore.numberReadAveraged.avg{$vcenter_server,$vcenter_datacenter,$vsphere_host,$VM} by {vmfs_uuid}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Number of reads by VMFS ID",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 4713007565175244,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 661544866978721,
+            "layout": {
+                "height": 7,
+                "width": 12,
                 "x": 0,
                 "y": 32
             }
         },
         {
             "definition": {
-                "custom_links": [],
-                "requests": [
+                "background_color": "green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "vSAN clusters",
+                "type": "group",
+                "widgets": [
                     {
-                        "conditional_formats": [
-                            {
-                                "comparator": "<=",
-                                "palette": "white_on_green",
-                                "value": 70
-                            },
-                            {
-                                "comparator": "<=",
-                                "palette": "white_on_yellow",
-                                "value": 90
-                            },
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red",
-                                "value": 90
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "avg",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.mem.usage.avg{vsphere_type:vm,$vcenter_server,$vcenter_datacenter, $vsphere_host, $VM} by {host}"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "sort": {
-                            "count": 25,
-                            "order_by": [
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
                                 {
-                                    "index": 0,
-                                    "order": "desc",
-                                    "type": "formula"
-                                }
-                            ]
-                        },
-                        "style": {
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "style": {},
-                "time": {},
-                "title": "Most % memory loaded VMs (Top 25)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "toplist"
-            },
-            "id": 2,
-            "layout": {
-                "height": 26,
-                "width": 47,
-                "x": 98,
-                "y": 36
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "requests": [
-                    {
-                        "conditional_formats": [
-                            {
-                                "comparator": "<=",
-                                "palette": "white_on_green",
-                                "value": 70
-                            },
-                            {
-                                "comparator": "<=",
-                                "palette": "white_on_yellow",
-                                "value": 90
-                            },
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red",
-                                "value": 90
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "avg",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.cpu.usage.avg{$vcenter_datacenter,$vcenter_server,vsphere_type:vm, $vsphere_host, $VM} by {host}"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "sort": {
-                            "count": 25,
-                            "order_by": [
-                                {
-                                    "index": 0,
-                                    "order": "desc",
-                                    "type": "formula"
-                                }
-                            ]
-                        },
-                        "style": {
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "style": {},
-                "time": {},
-                "title": "Most % CPU loaded VMs (Top 25)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "toplist"
-            },
-            "id": 3,
-            "layout": {
-                "height": 26,
-                "width": 47,
-                "x": 98,
-                "y": 9
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "requests": [
-                    {
-                        "conditional_formats": [
-                            {
-                                "comparator": "<=",
-                                "palette": "white_on_green",
-                                "value": 70
-                            },
-                            {
-                                "comparator": "<=",
-                                "palette": "white_on_yellow",
-                                "value": 90
-                            },
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red",
-                                "value": 90
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "avg",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.mem.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "sort": {
-                            "count": 10,
-                            "order_by": [
-                                {
-                                    "index": 0,
-                                    "order": "desc",
-                                    "type": "formula"
-                                }
-                            ]
-                        },
-                        "style": {
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "title": "Most % memory loaded hosts (Top 10)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "toplist"
-            },
-            "id": 4,
-            "layout": {
-                "height": 26,
-                "width": 47,
-                "x": 49,
-                "y": 36
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "requests": [
-                    {
-                        "conditional_formats": [
-                            {
-                                "comparator": "<=",
-                                "palette": "white_on_green",
-                                "value": 70
-                            },
-                            {
-                                "comparator": "<=",
-                                "palette": "white_on_yellow",
-                                "value": 90
-                            },
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red",
-                                "value": 90
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "avg",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.cpu.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "sort": {
-                            "count": 10,
-                            "order_by": [
-                                {
-                                    "index": 0,
-                                    "order": "desc",
-                                    "type": "formula"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "title": "Most % CPU loaded hosts (Top 10)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "toplist"
-            },
-            "id": 5,
-            "layout": {
-                "height": 26,
-                "width": 47,
-                "x": 49,
-                "y": 9
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "formulas": [
-                            {
-                                "formula": "top(query1, 25, 'mean', 'desc')"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.disk.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:vm, $vsphere_host, $VM} by {host}"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "time": {},
-                "title": "Disk I/O rates per VM (Top 25)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries"
-            },
-            "id": 6,
-            "layout": {
-                "height": 15,
-                "width": 47,
-                "x": 98,
-                "y": 79
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "legend_size": "0",
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "formulas": [
-                            {
-                                "formula": "top(query1, 25, \"mean\", \"desc\")"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.mem.vmmemctl.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "title": "Memory ballooning by host (Top 25)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 7,
-            "layout": {
-                "height": 15,
-                "width": 47,
-                "x": 49,
-                "y": 79
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "formulas": [
-                            {
-                                "formula": "top(query1, 25, 'mean', 'desc')"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.net.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:vm, $vsphere_host, $VM} by {host}"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "time": {},
-                "title": "Total network utilization of VMs (Top 25)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 8,
-            "layout": {
-                "height": 15,
-                "width": 47,
-                "x": 98,
-                "y": 63
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "legend_size": "0",
-                "requests": [
-                    {
-                        "display_type": "area",
-                        "formulas": [
-                            {
-                                "formula": "top(query1, 25, \"mean\", \"desc\")"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "sum:vsphere.net.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "title": "Total network utilization of hosts (Top 25)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 9,
-            "layout": {
-                "height": 15,
-                "width": 47,
-                "x": 49,
-                "y": 63
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
-                "content": "# ESXi Hosts",
-                "font_size": "14",
-                "show_tick": true,
-                "text_align": "center",
-                "tick_edge": "bottom",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 10,
-            "layout": {
-                "height": 6,
-                "width": 47,
-                "x": 49,
-                "y": 1
-            }
-        },
-        {
-            "definition": {
-                "autoscale": true,
-                "custom_links": [],
-                "precision": 0,
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "aggregator": "last",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "sum:vsphere.host.count{$vcenter_server,$vcenter_datacenter,$VM}.rollup(avg)"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "title": "Host count",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 11,
-            "layout": {
-                "height": 9,
-                "width": 15,
-                "x": 32,
-                "y": 12
-            }
-        },
-        {
-            "definition": {
-                "autoscale": true,
-                "custom_links": [],
-                "precision": 0,
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "last",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "sum:vsphere.vm.count{$vcenter_server,$vcenter_datacenter,$VM, $vsphere_host}.rollup(avg)"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "title": "VM count",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 12,
-            "layout": {
-                "height": 9,
-                "width": 15,
-                "x": 16,
-                "y": 12
-            }
-        },
-        {
-            "definition": {
-                "check": "vsphere.can_connect",
-                "group_by": [
-                    "vcenter_server"
-                ],
-                "grouping": "cluster",
-                "tags": [
-                    "*"
-                ],
-                "title": "vSphere status",
-                "title_align": "center",
-                "title_size": "16",
-                "type": "check_status"
-            },
-            "id": 13,
-            "layout": {
-                "height": 9,
-                "width": 15,
-                "x": 0,
-                "y": 12
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "precision": 0,
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "aggregator": "last",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "sum:vsphere.datastore.count{$vcenter_server,$vcenter_datacenter,$VM}.rollup(avg)"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "title": "Datastore count",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 14,
-            "layout": {
-                "height": 9,
-                "width": 15,
-                "x": 0,
-                "y": 22
-            }
-        },
-        {
-            "definition": {
-                "autoscale": true,
-                "custom_links": [],
-                "precision": 0,
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "aggregator": "last",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "sum:vsphere.cluster.count{$vcenter_server,$vcenter_datacenter,$VM}.rollup(avg)"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "title": "Cluster count",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 15,
-            "layout": {
-                "height": 9,
-                "width": 15,
-                "x": 16,
-                "y": 22
-            }
-        },
-        {
-            "definition": {
-                "autoscale": true,
-                "custom_links": [],
-                "precision": 2,
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "aggregator": "last",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "sum:vsphere.datacenter.count{$vcenter_server,$vcenter_datacenter,$VM}.rollup(avg)"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "title": "Datacenter count",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_value"
-            },
-            "id": 16,
-            "layout": {
-                "height": 9,
-                "width": 15,
-                "x": 32,
-                "y": 22
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
-                "content": "# Virtual Machines",
-                "font_size": "14",
-                "show_tick": true,
-                "text_align": "center",
-                "tick_edge": "bottom",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 17,
-            "layout": {
-                "height": 6,
-                "width": 47,
-                "x": 98,
-                "y": 1
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
-                "content": "# Datastores",
-                "font_size": "14",
-                "show_tick": true,
-                "text_align": "center",
-                "tick_edge": "bottom",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 18,
-            "layout": {
-                "height": 6,
-                "width": 47,
-                "x": 147,
-                "y": 1
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "requests": [
-                    {
-                        "conditional_formats": [
-                            {
-                                "comparator": "<=",
-                                "palette": "white_on_green",
-                                "value": 70
-                            },
-                            {
-                                "comparator": "<=",
-                                "palette": "white_on_yellow",
-                                "value": 90
-                            },
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red",
-                                "value": 90
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "query1 / query2 * 100"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "avg",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.disk.used.latest{$vcenter_server,$vcenter_datacenter,vsphere_type:datastore,$VM , $vsphere_host} by {vsphere_datastore}"
-                            },
-                            {
-                                "aggregator": "avg",
-                                "data_source": "metrics",
-                                "name": "query2",
-                                "query": "avg:vsphere.disk.capacity.latest{$vcenter_server,$vcenter_datacenter,vsphere_type:datastore} by {vsphere_datastore}"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "sort": {
-                            "count": 10,
-                            "order_by": [
-                                {
-                                    "index": 0,
-                                    "order": "desc",
-                                    "type": "formula"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "style": {},
-                "title": "Datastore used space in % (Top 10)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "toplist"
-            },
-            "id": 19,
-            "layout": {
-                "height": 26,
-                "width": 47,
-                "x": 147,
-                "y": 9
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "formulas": [
-                            {
-                                "formula": "top(query1, 25, 'mean', 'desc')"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.datastore.numberReadAveraged.avg{$vcenter_server,$vcenter_datacenter,$vsphere_host,$VM} by {vmfs_uuid}"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "title": "Number of reads per datastore (Top 25)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 20,
-            "layout": {
-                "height": 15,
-                "width": 47,
-                "x": 147,
-                "y": 36
-            }
-        },
-        {
-            "definition": {
-                "custom_links": [],
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "legend_layout": "auto",
-                "requests": [
-                    {
-                        "display_type": "line",
-                        "formulas": [
-                            {
-                                "formula": "top(query1, 25, 'mean', 'desc')"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.datastore.numberWriteAveraged.avg{$vcenter_server,$vcenter_datacenter,$vsphere_host,$VM} by {vmfs_uuid}"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "line_type": "solid",
-                            "line_width": "normal",
-                            "palette": "dog_classic"
-                        }
-                    }
-                ],
-                "show_legend": false,
-                "title": "Number of writes per datastore (Top 25)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "timeseries",
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "id": 21,
-            "layout": {
-                "height": 15,
-                "width": 47,
-                "x": 147,
-                "y": 52
-            }
-        },
-        {
-            "definition": {
-                "background_color": "gray",
-                "content": "# vSAN",
-                "font_size": "14",
-                "show_tick": true,
-                "text_align": "center",
-                "tick_edge": "bottom",
-                "tick_pos": "50%",
-                "type": "note"
-            },
-            "id": 22,
-            "layout": {
-                "height": 6,
-                "width": 47,
-                "x": 147,
-                "y": 68
-            }
-        },
-        {
-            "definition": {
-                "has_search_bar": "auto",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "alias": "Is the Cluster Healthy?",
-                                "cell_display_mode": "number",
-                                "conditional_formats": [
-                                    {
-                                        "comparator": ">",
-                                        "palette": "white_on_green",
-                                        "value": 0
+                                    "formulas": [
+                                        {
+                                            "alias": "Is the Cluster Healthy?",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_green",
+                                                    "value": 0
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Is the Cluster Unhealthy?",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_red",
+                                                    "value": 0
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "vsphere.vsan.cluster.health.count{$vcenter_server,status:green} by {vsphere_cluster}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "vsphere.vsan.cluster.health.count{$vcenter_server,status:red} by {vsphere_cluster}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
                                     }
-                                ],
-                                "formula": "query1"
-                            },
-                            {
-                                "alias": "Is the Cluster Unhealthy?",
-                                "cell_display_mode": "number",
-                                "conditional_formats": [
-                                    {
-                                        "comparator": ">",
-                                        "palette": "white_on_red",
-                                        "value": 0
-                                    }
-                                ],
-                                "formula": "query2"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "vsphere.vsan.cluster.health.count{$vcenter_server,status:green} by {vsphere_cluster}"
-                            },
-                            {
-                                "data_source": "metrics",
-                                "name": "query2",
-                                "query": "vsphere.vsan.cluster.health.count{$vcenter_server,status:red} by {vsphere_cluster}"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "sort": {
-                            "count": 25,
-                            "order_by": [
-                                {
-                                    "index": 0,
-                                    "order": "desc",
-                                    "type": "formula"
                                 }
-                            ]
+                            ],
+                            "title": "vSAN cluster health status (Top 25)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 1315560789777994,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
                         }
-                    }
-                ],
-                "title": "vSAN Cluster Health Status (Top 25)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_table"
-            },
-            "id": 23,
-            "layout": {
-                "height": 15,
-                "width": 47,
-                "x": 147,
-                "y": 76
-            }
-        },
-        {
-            "definition": {
-                "has_search_bar": "auto",
-                "requests": [
+                    },
                     {
-                        "formulas": [
-                            {
-                                "alias": "Read IOPS",
-                                "cell_display_mode": "number",
-                                "formula": "query1"
-                            },
-                            {
-                                "alias": "Write IOPS",
-                                "cell_display_mode": "number",
-                                "formula": "query2"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:vsphere.vsan.cluster.iopsRead{$vcenter_server} by {vsphere_cluster}"
-                            },
-                            {
-                                "data_source": "metrics",
-                                "name": "query2",
-                                "query": "avg:vsphere.vsan.cluster.iopsWrite{$vcenter_server} by {vsphere_cluster}"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "sort": {
-                            "count": 25,
-                            "order_by": [
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
                                 {
-                                    "index": 0,
-                                    "order": "desc",
-                                    "type": "formula"
+                                    "formulas": [
+                                        {
+                                            "alias": "Read IOPS",
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Write IOPS",
+                                            "cell_display_mode": "number",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vsphere.vsan.cluster.iopsRead{$vcenter_server} by {vsphere_cluster}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:vsphere.vsan.cluster.iopsWrite{$vcenter_server} by {vsphere_cluster}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
                                 }
-                            ]
+                            ],
+                            "title": "vSAN cluster I/O rates (Top 25)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 1024730132672408,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
                         }
                     }
-                ],
-                "title": "vSAN Cluster I/O Rates (Top 25)",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "query_table"
+                ]
             },
-            "id": 7507009647195320,
+            "id": 736313956737029,
             "layout": {
-                "height": 18,
-                "width": 47,
-                "x": 147,
-                "y": 93
+                "height": 4,
+                "width": 12,
+                "x": 0,
+                "y": 39
             }
         }
-    ],
-    "layout_type": "free"
+    ]
 }
