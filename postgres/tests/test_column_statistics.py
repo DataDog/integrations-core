@@ -9,6 +9,7 @@ import psycopg
 import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.postgres.health import PostgresHealthEvent
 
 from .utils import _get_superconn, run_one_check
 
@@ -240,6 +241,10 @@ def test_collect_column_statistics_function_not_found(integration_check, nofunc_
     function_not_found_events = [e for e in health_events if e['name'] == 'column_statistics_function_not_found']
     assert len(function_not_found_events) == 1
     assert function_not_found_events[0]['status'] == 'warning'
+    data = function_not_found_events[0]['data']
+    assert data['databases'] == ['dogs_nofunc']
+    assert data['affected_databases_count'] == 1
+    assert data['total_databases'] == 1
 
 
 def test_collect_column_statistics_function_not_found_logs_once(integration_check, nofunc_instance, aggregator):
@@ -262,7 +267,7 @@ def test_collect_column_statistics_recovery(check_runner, dbm_instance, pg_insta
     _analyze_tables(pg_instance)
     check = check_runner(dbm_instance)
     collector = check.metadata_samples._column_statistics_collector
-    collector._function_not_found_dbs.add('datadog_test')
+    collector._reported_setup_issues[PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND] = {'datadog_test'}
 
     # Call collector directly — the function exists, so it succeeds and triggers recovery
     collector.collect_column_statistics([])
@@ -272,7 +277,7 @@ def test_collect_column_statistics_recovery(check_runner, dbm_instance, pg_insta
         e for e in health_events if e['name'] == 'column_statistics_function_not_found' and e['status'] == 'ok'
     ]
     assert len(ok_events) == 1, f"Expected OK health event after recovery, got {health_events}"
-    assert 'datadog_test' not in collector._function_not_found_dbs, "Expected datadog_test removed from error set"
+    assert not collector._reported_setup_issues[PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND]
 
 
 def test_collect_column_statistics_collection_interval_in_event(
@@ -494,7 +499,9 @@ def test_collect_column_statistics_insufficient_privilege(check_runner, dbm_inst
     priv_events = [e for e in health_events if e['name'] == 'column_statistics_insufficient_privilege']
     assert len(priv_events) == 1, f"Expected 1 insufficient-privilege health event, got {health_events}"
     assert priv_events[0]['status'] == 'warning'
-    assert 'datadog_test' in collector._insufficient_privilege_dbs
+    assert collector._reported_setup_issues[PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE] == {
+        'datadog_test'
+    }
 
 
 def test_collect_column_statistics_insufficient_privilege_logs_once(check_runner, dbm_instance, aggregator):
@@ -517,7 +524,7 @@ def test_collect_column_statistics_insufficient_privilege_recovery(check_runner,
     _analyze_tables(pg_instance)
     check = check_runner(dbm_instance)
     collector = check.metadata_samples._column_statistics_collector
-    collector._insufficient_privilege_dbs.add('datadog_test')
+    collector._reported_setup_issues[PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE] = {'datadog_test'}
 
     collector.collect_column_statistics([])
 
@@ -526,7 +533,7 @@ def test_collect_column_statistics_insufficient_privilege_recovery(check_runner,
         e for e in health_events if e['name'] == 'column_statistics_insufficient_privilege' and e['status'] == 'ok'
     ]
     assert len(ok_events) == 1, f"Expected 1 OK health event after recovery, got {health_events}"
-    assert 'datadog_test' not in collector._insufficient_privilege_dbs
+    assert not collector._reported_setup_issues[PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE]
 
 
 def test_collect_column_statistics_disabled_when_dbm_false(integration_check, pg_instance, aggregator):
@@ -731,33 +738,24 @@ def test_collect_column_statistics_pre_cancelled_skips_collection(check_runner, 
     assert events == [], "Expected no events when collection is pre-cancelled"
 
 
-def test_collect_column_statistics_partial_recovery_waits_for_all_dbs(
+def test_collect_column_statistics_partial_recovery_reports_remaining_dbs(
     check_runner, dbm_instance, pg_instance, aggregator
 ):
-    """Recovery OK event fires only after every failing db has recovered; partial recovery stays silent."""
     _analyze_tables(pg_instance)
     check = check_runner(dbm_instance)
     collector = check.metadata_samples._column_statistics_collector
-
-    # Seed two dbs into each error set; only recover one of them.
-    collector._function_not_found_dbs.update({'datadog_test', 'still_broken_db'})
-    collector._insufficient_privilege_dbs.update({'datadog_test', 'still_broken_db'})
-    collector._get_databases = lambda: ['datadog_test']
+    event = PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND
+    collector._reported_setup_issues[event] = {'datadog_test', 'dogs_nofunc'}
+    collector._get_databases = lambda: ['datadog_test', 'dogs_nofunc']
 
     collector.collect_column_statistics([])
 
     health_events = aggregator.get_event_platform_events("dbm-health")
-    ok_events = [
-        e
-        for e in health_events
-        if e['name'] in ('column_statistics_function_not_found', 'column_statistics_insufficient_privilege')
-        and e['status'] == 'ok'
-    ]
-    assert ok_events == [], f"Expected no OK events while other dbs remain in error, got {ok_events}"
-    assert 'datadog_test' not in collector._function_not_found_dbs
-    assert 'still_broken_db' in collector._function_not_found_dbs
-    assert 'datadog_test' not in collector._insufficient_privilege_dbs
-    assert 'still_broken_db' in collector._insufficient_privilege_dbs
+    function_not_found_events = [e for e in health_events if e['name'] == event.value]
+    assert [e['status'] for e in function_not_found_events] == ['warning']
+    assert function_not_found_events[0]['data']['databases'] == ['dogs_nofunc']
+    assert function_not_found_events[0]['data']['total_databases'] == 2
+    assert collector._reported_setup_issues[event] == {'dogs_nofunc'}
 
 
 def test_collect_column_statistics_non_database_error_is_absorbed(check_runner, dbm_instance, aggregator):

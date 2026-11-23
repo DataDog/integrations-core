@@ -79,6 +79,23 @@ FUNCTION_PRESENT_QUERY = "SELECT to_regprocedure(%s) IS NOT NULL AS present"
 
 PAYLOAD_MAX_COLUMNS = 5_000
 MAX_QUERY_DURATION_SECONDS = 60
+MAX_DATABASES_IN_MESSAGE = 5
+
+SETUP_ISSUE_MESSAGES = {
+    PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND: (
+        "%s() function not found in %d of %d databases (%s). "
+        "Create the function as described in the documentation: "
+        "https://docs.datadoghq.com/database_monitoring/setup_postgres/ "
+        "Run 'datadog-agent diagnose' for a per-database report.",
+        "%s() function is now available in every database",
+    ),
+    PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE: (
+        "Insufficient privileges to execute %s() in %d of %d databases (%s). "
+        "Grant EXECUTE on the function to the datadog user. "
+        "Run 'datadog-agent diagnose' for a per-database report.",
+        "%s() privileges restored in every database",
+    ),
+}
 
 
 class PostgresColumnStatisticsCollectorConfig:
@@ -112,12 +129,14 @@ class PostgresColumnStatisticsCollector:
         self._config.exclude_schemas = list(check._config.collect_column_statistics.exclude_schemas or [])
         self._config.include_tables = list(check._config.collect_column_statistics.include_tables or [])
         self._config.exclude_tables = list(check._config.collect_column_statistics.exclude_tables or [])
-        self._function_not_found_dbs: set[str] = set()
-        self._insufficient_privilege_dbs: set[str] = set()
+        self._reported_setup_issues: dict[PostgresHealthEvent, set[str]] = {
+            event: set() for event in SETUP_ISSUE_MESSAGES
+        }
         self._reset()
 
     def _reset(self):
         self._collection_started_at = None
+        self._errored_dbs: set[str] = set()
         self._total_tables_count = 0
         self._total_columns_count = 0
         self._payloads_count = 0
@@ -180,11 +199,17 @@ class PostgresColumnStatisticsCollector:
             databases = self._get_databases()
             self._log.debug("Collecting column stats for %d databases", len(databases))
 
+            setup_issues: dict[PostgresHealthEvent, list[str]] = {event: [] for event in SETUP_ISSUE_MESSAGES}
             for db_name in databases:
                 if self._cancel_event.is_set():
                     self._log.debug("Column stats collection cancelled")
                     break
-                self._collect_for_database(db_name, tags_no_db)
+                issue = self._collect_for_database(db_name, tags_no_db)
+                if issue:
+                    setup_issues[issue].append(db_name)
+            else:
+                for event, affected in setup_issues.items():
+                    self._report_setup_issue(event, affected, len(databases))
 
             self._log.debug(
                 "Submitted column stats: %d tables, %d columns, %d payloads across %d databases",
@@ -232,22 +257,19 @@ class PostgresColumnStatisticsCollector:
             self._reset()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_for_database(self, db_name: str, tags_no_db: list[str]):
+    def _collect_for_database(self, db_name: str, tags_no_db: list[str]) -> PostgresHealthEvent | None:
         try:
             with self._check.db_pool.get_connection(db_name) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
                     cursor.execute(FUNCTION_PRESENT_QUERY, (self._function_sql + "()",))
                     if not cursor.fetchone()['present']:
-                        self._handle_function_not_found(db_name)
-                        return
+                        return PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND
                     filters_sql, filter_params = self._build_filters()
                     query = COLUMN_STATISTICS_QUERY.format(filters=filters_sql, function=self._function_sql)
                     filter_params.append(self._config.max_tables)
                     cursor.execute("SET statement_timeout = %s", (MAX_QUERY_DURATION_SECONDS * 1000,))
                     try:
                         cursor.execute(query, filter_params)
-
-                        self._handle_recovery(db_name)
 
                         row = cursor.fetchone()
                         while row:
@@ -271,60 +293,44 @@ class PostgresColumnStatisticsCollector:
             if self._queued_tables:
                 self._flush(tags_no_db)
 
-        except psycopg.errors.DatabaseError as e:
-            if isinstance(e, psycopg.errors.UndefinedFunction):
-                self._handle_function_not_found(db_name)
-            elif isinstance(e, psycopg.errors.InsufficientPrivilege):
-                if db_name not in self._insufficient_privilege_dbs:
-                    self._insufficient_privilege_dbs.add(db_name)
-                    self._log.warning(
-                        "Insufficient privileges to execute %s() in database '%s'. "
-                        "Please check the function permissions.",
-                        self._config.function,
-                        db_name,
-                    )
-                    self._check.health.submit_health_event(
-                        name=PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE,
-                        status=HealthStatus.WARNING,
-                    )
-            else:
-                self._log.exception("Error collecting column stats for database '%s'", db_name)
+        except psycopg.errors.UndefinedFunction:
+            return PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND
+        except psycopg.errors.InsufficientPrivilege:
+            return PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE
         except Exception:
+            self._errored_dbs.add(db_name)
             self._log.exception("Error collecting column stats for database '%s'", db_name)
+        return None
 
-    def _handle_function_not_found(self, db_name: str):
-        if db_name in self._function_not_found_dbs:
+    def _report_setup_issue(self, event: PostgresHealthEvent, affected: list[str], total_databases: int):
+        previous = self._reported_setup_issues[event]
+        current = set(affected) | (previous & self._errored_dbs)
+        if current == previous:
+            if current:
+                self._log.debug("%s still affects %d databases", event.value, len(current))
             return
-        self._function_not_found_dbs.add(db_name)
-        self._log.warning(
-            "%s() function not found in database '%s'. "
-            "Please create the function as described in the documentation: "
-            "https://docs.datadoghq.com/database_monitoring/setup_postgres/",
-            self._config.function,
-            db_name,
-        )
+        self._reported_setup_issues[event] = current
+        warning_message, recovery_message = SETUP_ISSUE_MESSAGES[event]
+        if not current:
+            self._log.info(recovery_message, self._config.function)
+            self._check.health.submit_health_event(name=event, status=HealthStatus.OK)
+            return
+        names = sorted(current)
+        shown = names[:MAX_DATABASES_IN_MESSAGE]
+        listed = ", ".join(shown)
+        if len(names) > len(shown):
+            listed += ", ... and {} more".format(len(names) - len(shown))
+        self._log.warning(warning_message, self._config.function, len(names), total_databases, listed)
         self._check.health.submit_health_event(
-            name=PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND,
+            name=event,
             status=HealthStatus.WARNING,
+            data={
+                "function": self._config.function,
+                "affected_databases_count": len(names),
+                "total_databases": total_databases,
+                "databases": shown,
+            },
         )
-
-    def _handle_recovery(self, db_name: str):
-        if db_name in self._function_not_found_dbs:
-            self._function_not_found_dbs.discard(db_name)
-            self._log.info("%s() function is now available in database '%s'", self._config.function, db_name)
-            if not self._function_not_found_dbs:
-                self._check.health.submit_health_event(
-                    name=PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND,
-                    status=HealthStatus.OK,
-                )
-        if db_name in self._insufficient_privilege_dbs:
-            self._insufficient_privilege_dbs.discard(db_name)
-            self._log.info("%s() privileges restored in database '%s'", self._config.function, db_name)
-            if not self._insufficient_privilege_dbs:
-                self._check.health.submit_health_event(
-                    name=PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE,
-                    status=HealthStatus.OK,
-                )
 
     def _map_row(self, db_name: str, row):
         return {

@@ -12,7 +12,9 @@ import pytest
 from pytest import fail
 from semver import VersionInfo
 
+from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.postgres import PostgreSql, util
+from datadog_checks.postgres.health import PostgresHealthEvent
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
@@ -558,15 +560,118 @@ def test_collect_column_statistics_skips_database_without_function(pg_instance):
     check.db_pool = mock.MagicMock()
     check.db_pool.get_connection.return_value = connection
 
-    collector._collect_for_database('app', [])
-    collector._collect_for_database('app', [])
+    result = collector._collect_for_database('app', [])
 
+    assert result == PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND
     assert executed == [
         ("SELECT to_regprocedure(%s) IS NOT NULL AS present", ('"datadog"."column_statistics"()',)),
-        ("SELECT to_regprocedure(%s) IS NOT NULL AS present", ('"datadog"."column_statistics"()',)),
     ]
+    check.health.submit_health_event.assert_not_called()
+
+
+def _column_statistics_collector(pg_instance, outcomes):
+    pg_instance['dbm'] = True
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.health = mock.MagicMock()
+    collector = check.metadata_samples._column_statistics_collector
+    collector._log = mock.MagicMock()
+    collector._get_databases = lambda: list(outcomes)
+
+    def collect_for_database(db_name, tags_no_db):
+        if outcomes[db_name] == 'error':
+            collector._errored_dbs.add(db_name)
+            return None
+        return outcomes[db_name]
+
+    collector._collect_for_database = collect_for_database
+    return check, collector
+
+
+@pytest.mark.parametrize(
+    'event',
+    [
+        PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND,
+        PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE,
+    ],
+)
+def test_column_statistics_setup_issue_reported_once_across_databases(pg_instance, event):
+    outcomes = {'db{}'.format(i): event for i in range(7)}
+    outcomes['healthy'] = None
+    check, collector = _column_statistics_collector(pg_instance, outcomes)
+
+    collector.collect_column_statistics([])
+    collector.collect_column_statistics([])
+
+    check.health.submit_health_event.assert_called_once_with(
+        name=event,
+        status=HealthStatus.WARNING,
+        data={
+            'function': 'datadog.column_statistics',
+            'affected_databases_count': 7,
+            'total_databases': 8,
+            'databases': ['db0', 'db1', 'db2', 'db3', 'db4'],
+        },
+    )
+    collector._log.warning.assert_called_once()
+    assert collector._log.warning.call_args.args[1:] == (
+        'datadog.column_statistics',
+        7,
+        8,
+        'db0, db1, db2, db3, db4, ... and 2 more',
+    )
+    assert "datadog-agent diagnose" in collector._log.warning.call_args.args[0]
+
+
+def test_column_statistics_setup_issue_reported_again_when_databases_change(pg_instance):
+    event = PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND
+    outcomes = {'app': event, 'billing': event}
+    check, collector = _column_statistics_collector(pg_instance, outcomes)
+
+    collector.collect_column_statistics([])
+    outcomes['app'] = None
+    collector.collect_column_statistics([])
+    outcomes['billing'] = None
+    collector.collect_column_statistics([])
+    collector.collect_column_statistics([])
+
+    calls = check.health.submit_health_event.call_args_list
+    assert [(c.kwargs['status'], c.kwargs.get('data', {}).get('databases')) for c in calls] == [
+        (HealthStatus.WARNING, ['app', 'billing']),
+        (HealthStatus.WARNING, ['billing']),
+        (HealthStatus.OK, None),
+    ]
+    assert collector._log.warning.call_count == 2
+    collector._log.info.assert_called_once_with(
+        "%s() function is now available in every database", 'datadog.column_statistics'
+    )
+
+
+def test_column_statistics_errored_database_keeps_previous_setup_issue(pg_instance):
+    event = PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND
+    outcomes = {'app': event}
+    check, collector = _column_statistics_collector(pg_instance, outcomes)
+
+    collector.collect_column_statistics([])
+    outcomes['app'] = 'error'
+    collector.collect_column_statistics([])
+
     assert check.health.submit_health_event.call_count == 1
-    assert collector._function_not_found_dbs == {'app'}
+    assert collector._reported_setup_issues[event] == {'app'}
+
+
+def test_column_statistics_cancelled_run_does_not_report_setup_issues(pg_instance):
+    event = PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND
+    check, collector = _column_statistics_collector(pg_instance, {'app': event, 'billing': event})
+    collect_for_database = collector._collect_for_database
+
+    def collect_then_cancel(db_name, tags_no_db):
+        collector._cancel_event.set()
+        return collect_for_database(db_name, tags_no_db)
+
+    collector._collect_for_database = collect_then_cancel
+    collector.collect_column_statistics([])
+
+    check.health.submit_health_event.assert_not_called()
 
 
 def test_collect_column_statistics_uses_configured_function(pg_instance):
