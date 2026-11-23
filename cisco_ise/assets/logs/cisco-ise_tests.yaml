@@ -827,6 +827,184 @@ tests:
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1793715498950
+  # Real line after the Agent applied the mask_sequences rules of conf.yaml.example: documents the expected
+  # masked text and that the pipeline parses it. The rules themselves run in the Agent, not in these tests.
+  - sample: "<181>Nov  3 14:18:19 ise-1 CISE_TACACS_Accounting 0000000228 1 0 2026-11-03 14:18:19.271 +00:00 0000001820 3300 NOTICE Tacacs-Accounting: TACACS+ Accounting with Command, ConfigVersionId=138, Device IP Address=192.168.254.11, CmdSet=[ CmdAV=username backdoor privilege 15 secret ******** <cr> ], NetworkDeviceName=luis_mac_radius_sim, Type=Accounting, Privilege-Level=15, Service=Login, User=luis_test, Port=tty2, Remote-Address=10.99.0.200, Authen-Method=TacacsPlus, AVPair=task_id=156543, AVPair=priv-lvl=15, AVPair=stop_time=1793715660, AVPair=timezone=UTC, AcctRequest-Flags=Stop, Service-Argument=shell, AcsSessionID=ise-1/583071475/70, SelectedAccessService=Default Device Admin, RequestLatency=1, Step=13006, Step=15049, Step=15008, Step=13035, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, CPMSessionID=1903999523192.168.254.1152222Accounting1903999523, TotalAuthenLatency=2714136839, ClientLatency=2714136838, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Response={AcctReply-Status=Success; },"
+    result:
+      custom:
+        cisco_ise:
+          attributes:
+            AVPair=priv-lvl: 15
+            AVPair=stop_time: 1793715660
+            AVPair=task_id: 156543
+            AVPair=timezone: "UTC"
+            AcctRequest-Flags: "Stop"
+            AcsSessionID: "ise-1/583071475/70"
+            Authen-Method: "TacacsPlus"
+            CPMSessionID: "1903999523192.168.254.1152222Accounting1903999523"
+            ClientLatency: 2714136838
+            CmdSet: "CmdAV=username backdoor privilege 15 secret ******** <cr>"
+            ConfigVersionId: 138
+            DeviceIPAddress: "192.168.254.11"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            Location: "Location#All Locations#Spain#Madrid"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            Port: "tty2"
+            Privilege-Level: 15
+            Remote-Address: "10.99.0.200"
+            RequestLatency: 1
+            SelectedAccessService: "Default Device Admin"
+            Service: "Login"
+            Service-Argument: "shell"
+            Step:
+              - 13006
+              - 15049
+              - 15008
+              - 13035
+            TotalAuthenLatency: 2714136839
+            Type: "Accounting"
+            User: "luis_test"
+          category: "TACACS_Accounting"
+          message_class: "Tacacs-Accounting"
+          message_code: "3300"
+          message_id: "0000000228"
+          message_text: "TACACS+ Accounting with Command"
+          node: "ise-1"
+          response:
+            AcctReply-Status: "Success"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001820"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
+          tacacs:
+            command: "username backdoor privilege 15 secret ********"
+            command_name: "username"
+        evt:
+          name: "Tacacs-Accounting"
+        network:
+          client:
+            ip: "10.99.0.200"
+        syslog:
+          hostname: "ise-1"
+          priority: 181
+          severity: "notice"
+        timestamp: 1793715499271
+        usr:
+          name: "luis_test"
+      message: "2026-11-03 14:18:19.271 +00:00 0000001820 3300 NOTICE Tacacs-Accounting: TACACS+ Accounting with Command, ConfigVersionId=138, Device IP Address=192.168.254.11, CmdSet=[ CmdAV=username backdoor privilege 15 secret ******** <cr> ], NetworkDeviceName=luis_mac_radius_sim, Type=Accounting, Privilege-Level=15, Service=Login, User=luis_test, Port=tty2, Remote-Address=10.99.0.200, Authen-Method=TacacsPlus, AVPair=task_id=156543, AVPair=priv-lvl=15, AVPair=stop_time=1793715660, AVPair=timezone=UTC, AcctRequest-Flags=Stop, Service-Argument=shell, AcsSessionID=ise-1/583071475/70, SelectedAccessService=Default Device Admin, RequestLatency=1, Step=13006, Step=15049, Step=15008, Step=13035, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, CPMSessionID=1903999523192.168.254.1152222Accounting1903999523, TotalAuthenLatency=2714136839, ClientLatency=2714136838, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Response={AcctReply-Status=Success; },"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1793715499271
+  # Real line after the Agent applied the mask_sequences rules of conf.yaml.example: documents the expected
+  # masked text and that the pipeline parses it. The rules themselves run in the Agent, not in these tests.
+  - sample: "<181>Nov  3 14:18:18 ise-1 CISE_Failed_Attempts 0000000227 1 0 2026-11-03 14:18:18.950 +00:00 0000001815 5402 NOTICE Failed-Attempt: Command Authorization failed, ConfigVersionId=138, Device IP Address=192.168.254.11, Device Port=52220, DestinationIPAddress=10.10.20.77, DestinationPort=49, UserName=luis_test, CmdSet=[ CmdAV=username CmdArgAV=backdoor CmdArgAV=privilege CmdArgAV=15 CmdArgAV=secret CmdArgAV=******** CmdArgAV=<cr> ], Protocol=Tacacs, NetworkDeviceName=luis_mac_radius_sim, Type=Authorization, Privilege-Level=15, Authen-Type=ASCII, Service=Login, User=luis_test, Port=tty2, Remote-Address=10.99.0.200, Authen-Method=TacacsPlus, Service-Argument=shell, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, AcsSessionID=ise-1/583071475/69, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=Lookup, SelectedAccessService=Default Device Admin, SelectedCommandSet=luis_permit_but_username, RequestLatency=8, IdentityGroup=User Identity Groups:Employee, FailureReason=13025 Command failed to match a Permit rule, Step=13005, Step=15049, Step=15008, Step=15041, Step=15048, Step=15013, Step=24210, Step=24212, Step=22037, Step=15036, Step=15018, Step=13025, Step=13034, SelectedAuthenticationIdentityStores=Internal Users, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, AuthorizationPolicyMatchedRule=luis_tacacs_authz, UserType=User, CPMSessionID=3802611232192.168.254.1152220Authorization3802611232, ISEPolicySetName=Default, IdentitySelectionMatchedRule=luis_tacacs_admin, StepData=4= Network Access.UserName, StepData=5=Internal Users, TotalAuthenLatency=2714136518, ClientLatency=2714136510, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, EnableFlag=Enabled, Response={AuthenticationResult=Passed; AuthorizationFailureReason=CmdDidNotMatchPermitRule; Author-Reply-Status=Fail; },"
+    result:
+      custom:
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/69"
+            Authen-Method: "TacacsPlus"
+            Authen-Type: "ASCII"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "Lookup"
+            AuthorizationPolicyMatchedRule: "luis_tacacs_authz"
+            CPMSessionID: "3802611232192.168.254.1152220Authorization3802611232"
+            ClientLatency: 2714136510
+            CmdSet: "CmdAV=username CmdArgAV=backdoor CmdArgAV=privilege CmdArgAV=15 CmdArgAV=secret CmdArgAV=******** CmdArgAV=<cr>"
+            ConfigVersionId: 138
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 49
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            FailureReason: "13025 Command failed to match a Permit rule"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentitySelectionMatchedRule: "luis_tacacs_admin"
+            Location: "Location#All Locations#Spain#Madrid"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            Port: "tty2"
+            Privilege-Level: 15
+            Protocol: "Tacacs"
+            Remote-Address: "10.99.0.200"
+            RequestLatency: 8
+            SelectedAccessService: "Default Device Admin"
+            SelectedAuthenticationIdentityStores: "Internal Users"
+            SelectedCommandSet: "luis_permit_but_username"
+            Service: "Login"
+            Service-Argument: "shell"
+            Step:
+              - 13005
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 15013
+              - 24210
+              - 24212
+              - 22037
+              - 15036
+              - 15018
+              - 13025
+              - 13034
+            StepData=4: "Network Access.UserName"
+            StepData=5: "Internal Users"
+            TotalAuthenLatency: 2714136518
+            Type: "Authorization"
+            User: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+          category: "Failed_Attempts"
+          message_class: "Failed-Attempt"
+          message_code: "5402"
+          message_id: "0000000227"
+          message_text: "Command Authorization failed"
+          node: "ise-1"
+          response:
+            AuthenticationResult: "Passed"
+            Author-Reply-Status: "Fail"
+            AuthorizationFailureReason: "CmdDidNotMatchPermitRule"
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001815"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
+          tacacs:
+            command_name: "username"
+        evt:
+          name: "Failed-Attempt"
+        network:
+          client:
+            ip: "10.99.0.200"
+        syslog:
+          hostname: "ise-1"
+          priority: 181
+          severity: "notice"
+        timestamp: 1793715498950
+        usr:
+          name: "luis_test"
+      message: "2026-11-03 14:18:18.950 +00:00 0000001815 5402 NOTICE Failed-Attempt: Command Authorization failed, ConfigVersionId=138, Device IP Address=192.168.254.11, Device Port=52220, DestinationIPAddress=10.10.20.77, DestinationPort=49, UserName=luis_test, CmdSet=[ CmdAV=username CmdArgAV=backdoor CmdArgAV=privilege CmdArgAV=15 CmdArgAV=secret CmdArgAV=******** CmdArgAV=<cr> ], Protocol=Tacacs, NetworkDeviceName=luis_mac_radius_sim, Type=Authorization, Privilege-Level=15, Authen-Type=ASCII, Service=Login, User=luis_test, Port=tty2, Remote-Address=10.99.0.200, Authen-Method=TacacsPlus, Service-Argument=shell, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, AcsSessionID=ise-1/583071475/69, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=Lookup, SelectedAccessService=Default Device Admin, SelectedCommandSet=luis_permit_but_username, RequestLatency=8, IdentityGroup=User Identity Groups:Employee, FailureReason=13025 Command failed to match a Permit rule, Step=13005, Step=15049, Step=15008, Step=15041, Step=15048, Step=15013, Step=24210, Step=24212, Step=22037, Step=15036, Step=15018, Step=13025, Step=13034, SelectedAuthenticationIdentityStores=Internal Users, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, AuthorizationPolicyMatchedRule=luis_tacacs_authz, UserType=User, CPMSessionID=3802611232192.168.254.1152220Authorization3802611232, ISEPolicySetName=Default, IdentitySelectionMatchedRule=luis_tacacs_admin, StepData=4= Network Access.UserName, StepData=5=Internal Users, TotalAuthenLatency=2714136518, ClientLatency=2714136510, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, EnableFlag=Enabled, Response={AuthenticationResult=Passed; AuthorizationFailureReason=CmdDidNotMatchPermitRule; Author-Reply-Status=Fail; },"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1793715498950
   - sample: "<181>Nov  3 14:18:38 ise-1 CISE_Administrative_and_Operational_Audit 0000000233 1 0 2026-11-03 14:18:38.339 +00:00 0000001899 60115 NOTICE Administrator-Login: A CLI user has logged in from SSH, ConfigVersionId=138, AdminInterface=CLI, AdminIPAddress=192.168.254.11, AdminName=admin, OperationMessageText=User 'admin' logged in to CLI SSH session from SSH client IP: 192.168.254.11, AcsInstance=ise-1,"
     result:
       custom:
