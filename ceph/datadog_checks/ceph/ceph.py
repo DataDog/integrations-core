@@ -77,7 +77,7 @@ class Ceph(AgentCheck):
         return raw
 
     def _extract_tags(self, raw, instance):
-        tags = instance.get('tags', [])
+        tags = list(instance.get('tags', []))
         fsid = None
         try:
             fsid = raw['status']['fsid']
