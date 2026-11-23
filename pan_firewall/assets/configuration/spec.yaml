@@ -14,6 +14,7 @@ files:
         Hostname or IP address of a Panorama management server. When set, the Agent discovers the connected
         firewalls through Panorama and polls each one directly. Set either `panorama_host` or `firewalls`, not both.
         Panorama requires `panorama_username` and `panorama_password`, or `panorama_api_key`.
+      formats: ["host"]
       value:
         type: string
         example: panorama.example.com
