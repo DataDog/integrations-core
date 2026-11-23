@@ -598,7 +598,8 @@ def test_statement_metrics_limit(
         ),
         (
             {'tables_csv': '', 'commands': None, 'comments': []},
-            {'tables': None, 'commands': None, 'comments': []},
+            # The batch text contains the Agent comment, so recovery adds it when the obfuscator omits it.
+            {'tables': None, 'commands': None, 'comments': ["/* service='datadog-agent' */"]},
         ),
     ],
 )
@@ -1284,6 +1285,37 @@ def test_normalize_queries_recovers_leading_comment_for_non_proc_statement(insta
 
 
 @pytest.mark.unit
+def test_normalize_queries_recovers_agent_service_comment(instance_docker, datadog_agent):
+    instance_docker['dbm'] = True
+    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    comment = "/* service='datadog-agent' */"
+    statement_text = "SELECT * FROM orders WHERE customer_id = @P1"
+    row = {
+        'statement_text': statement_text,
+        'text': f"(@P1 int){comment} {statement_text}",
+        'procedure_name': None,
+        'schema_name': None,
+        'sproc_object_id': None,
+        'query_hash': b'\x01\x02\x03\x04',
+        'query_plan_hash': b'\x05\x06\x07\x08',
+        'plan_handle': b'\x09\x0a\x0b\x0c',
+    }
+
+    def _obfuscate_sql(sql_query, options=None):
+        comments = [comment] if comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        result = check.statement_metrics._normalize_queries([row])
+
+    assert result[0]['dd_comments'] == [comment]
+    assert mock_agent.call_count == 1
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'text,statement_text,expected_comments',
     [
@@ -1658,3 +1690,55 @@ def test_collect_plans_payload(aggregator, dbm_instance, case, collect_raw_query
             value=1,
             tags=check.debug_tags() + ["error:obfuscate-xml-plan-<class 'ValueError'>"],
         )
+
+
+def _query_stats_row(
+    query_plan_hash: str, procedure_name: str | None, execution_count: int, total_physical_reads: int
+) -> dict[str, object]:
+    return {
+        'database_name': 'master',
+        'query_signature': 'sig',
+        'query_hash': 'query-hash',
+        'query_plan_hash': query_plan_hash,
+        'procedure_name': procedure_name,
+        'execution_count': execution_count,
+        'total_physical_reads': total_physical_reads,
+    }
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'a, b, expected_both_ran',
+    [
+        pytest.param(('A', None), ('B', None), [(None, 13, 130)], id='two-plans'),
+        pytest.param(('P', 'dbo.p1'), ('P', 'dbo.p2'), [('dbo.p1', 10, 100), ('dbo.p2', 3, 30)], id='two-procedures'),
+    ],
+)
+def test_query_metrics_do_not_report_lifetime_counters_of_returning_row(instance_docker, a, b, expected_both_ran):
+    """Two query stats groups of one statement, where idle B leaves the collection and then comes back.
+
+    Regression test for SDBM-3132 and SDBM-1143: B's whole lifetime counter was reported as one interval.
+    """
+    instance_docker['dbm'] = True
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    collections = [
+        [_query_stats_row(*a, 100, 1_000), _query_stats_row(*b, 50_000, 700_000)],
+        [_query_stats_row(*a, 110, 1_100), _query_stats_row(*b, 50_003, 700_030)],
+        [_query_stats_row(*a, 120, 1_200)],
+        [_query_stats_row(*a, 130, 1_300), _query_stats_row(*b, 50_008, 700_080)],
+    ]
+    reported = []
+    for rows in collections:
+        with (
+            mock.patch.object(check.statement_metrics, '_load_raw_query_metrics_rows', return_value=rows),
+            mock.patch.object(check.statement_metrics, '_normalize_queries', side_effect=lambda r: r),
+        ):
+            result = check.statement_metrics._collect_metrics_rows(mock.Mock())
+        reported.append(sorted((r['procedure_name'], r['execution_count'], r['total_physical_reads']) for r in result))
+
+    assert reported == [
+        [],
+        expected_both_ran,
+        [(a[1], 10, 100)],
+        [(a[1], 10, 100)],
+    ]
