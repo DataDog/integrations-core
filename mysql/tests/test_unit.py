@@ -6,6 +6,7 @@ import inspect
 import json
 import logging
 import subprocess
+import time
 import weakref
 
 import mock
@@ -1022,6 +1023,26 @@ def test_has_literal_values_go_sqllexer_output(datadog_agent, raw_statement, obf
     obfuscated = json.dumps({'query': obfuscated_statement, 'metadata': {}})
     with mock.patch.object(datadog_agent, 'obfuscate_sql', return_value=obfuscated):
         assert has_literal_values(raw_statement, options, logging.getLogger(__name__)) is expected
+
+
+@pytest.mark.parametrize(
+    'raw_statement, obfuscated_statement',
+    [
+        pytest.param("SELECT '" + "EXTRACT(/*" * 6400 + "'", "SELECT ?", id='unterminated_comments_in_literal'),
+        pytest.param("EXTRACT(" + "/**//*" * 10000, "EXTRACT(" + "/**//*" * 10000, id='adjacent_comments'),
+    ],
+)
+def test_has_literal_values_scales_linearly(datadog_agent, raw_statement, obfuscated_statement):
+    """
+    Detection runs on every collected activity row, so statement texts made of repeated comment markers, which
+    used to take seconds, must not stall the collection.
+    """
+    options = get_obfuscate_only_options({'dbms': 'mysql'})
+    obfuscated = json.dumps({'query': obfuscated_statement, 'metadata': {}})
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', return_value=obfuscated):
+        start = time.perf_counter()
+        has_literal_values(raw_statement, options, logging.getLogger(__name__))
+        assert time.perf_counter() - start < 1
 
 
 def test_has_literal_values_obfuscation_failure(datadog_agent):

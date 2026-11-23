@@ -58,12 +58,10 @@ def get_truncation_state(statement):
 
 
 # The field of `EXTRACT(field FROM ...)` that the obfuscator replaces with a placeholder even though it is no
-# literal value, as listed by go-sqllexer (`extractFieldKeywords`). Comments may precede the field; each one ends at
-# its first `*/`, which also keeps the matching linear.
+# literal value, as listed by go-sqllexer (`extractFieldKeywords`)
 EXTRACT_FIELD_PATTERN = re.compile(
-    r'(\bEXTRACT\s*\((?:\s|/\*(?:[^*]|\*(?!/))*\*/)*)(?:CENTURY|DAY|DECADE|DOW|DOY|EPOCH|HOUR|ISODOW|ISOYEAR'
-    r'|JULIAN|MICROSECONDS|MILLENNIUM|MILLISECONDS|MINUTE|MONTH|QUARTER|SECOND|TIMEZONE|TIMEZONE_HOUR'
-    r'|TIMEZONE_MINUTE|WEEK|YEAR)\b',
+    r'(\bEXTRACT\s*\(\s*)(?:CENTURY|DAY|DECADE|DOW|DOY|EPOCH|HOUR|ISODOW|ISOYEAR|JULIAN|MICROSECONDS|MILLENNIUM'
+    r'|MILLISECONDS|MINUTE|MONTH|QUARTER|SECOND|TIMEZONE|TIMEZONE_HOUR|TIMEZONE_MINUTE|WEEK|YEAR)\b',
     re.IGNORECASE,
 )
 # A quoted user variable name such as `@'id'`, whose name the obfuscator replaces like a string literal
@@ -98,9 +96,10 @@ def has_literal_values(raw_statement: str, obfuscate_only_options: str, log: log
     Comparing the raw text with its regular obfuscated form is unreliable because normalization also
     rewrites it (whitespace, comments, grouped placeholders). With the options of `get_obfuscate_only_options`,
     the obfuscator only replaces literal tokens, the `EXTRACT` fields and quoted user variable names, keeping
-    every other token as is. So once the `EXTRACT` fields and quoted user variable names of both texts are
-    replaced the same way, the raw text has literal values exactly when that obfuscation changes it.
-    Replacing them in both texts also leaves alike any text that only looks like them, such as a comment.
+    every other token as is. So once the block comments of both texts are removed and their `EXTRACT` fields
+    and quoted user variable names are replaced the same way, the raw text has literal values exactly when
+    that obfuscation changes it. Doing this to both texts also leaves alike any text that only looks like
+    these tokens, such as a comment mentioning `EXTRACT`.
 
     Returns True when the obfuscation fails, since raw statement collection is explicitly enabled.
     """
@@ -116,8 +115,27 @@ def has_literal_values(raw_statement: str, obfuscate_only_options: str, log: log
 
 def _replace_nonliteral_placeholders(statement: str) -> str:
     """Replace the tokens that the obfuscator turns into placeholders although they carry no values."""
-    statement = EXTRACT_FIELD_PATTERN.sub(r'\1?', statement)
+    statement = EXTRACT_FIELD_PATTERN.sub(r'\1?', _remove_block_comments(statement))
     return QUOTED_USER_VARIABLE_PATTERN.sub('@?', statement)
+
+
+def _remove_block_comments(statement: str) -> str:
+    """
+    Replace each `/* ... */` comment with a space, ending it at its first `*/` and keeping an unterminated one.
+    It scans the statement once, unlike a regular expression, which would search the rest of the statement for
+    a terminator again after every `/*` that has none.
+    """
+    parts = []
+    position = 0
+    while (start := statement.find('/*', position)) != -1:
+        end = statement.find('*/', start + 2)
+        if end == -1:
+            break
+        parts.append(statement[position:start])
+        parts.append(' ')
+        position = end + 2
+    parts.append(statement[position:])
+    return ''.join(parts)
 
 
 def supports_explain_json_format_version(version):
