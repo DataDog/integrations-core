@@ -86,6 +86,7 @@ AGENT_RULE_FILES: dict[str, list[str]] = {
     "security":       ["security.md"],
     "ddev":           ["ddev.md"],
     "github-actions": ["github-actions.md"],
+    "logs":           ["logs.md"],
 }
 
 # The conventions reviewer reviews against the repository's AGENTS.md files.
@@ -381,7 +382,8 @@ def select_agents(
 
     An agent matches a file through `matches = "all_files"`, `matches =
     "integration_roots"` or one of its `globs`; a file matching any of them is
-    the agent's. Order and file order follow the registry and the PR.
+    the agent's. A file matching one of its `exclude_globs` is never the agent's,
+    whatever else matches. Order and file order follow the registry and the PR.
     """
     apply_filter = aspect_filter and "all" not in aspect_filter
 
@@ -390,11 +392,13 @@ def select_agents(
         if apply_filter and agent["aspect"] not in aspect_filter:
             continue
         compiled = [glob_to_regex(g) for g in agent.get("globs", [])]
+        excluded = [glob_to_regex(g) for g in agent.get("exclude_globs", [])]
         matches = agent.get("matches")
         under_roots = set(files_under_roots(files, integration_roots)) if matches == "integration_roots" else set()
         matched = [
             f for f in files
-            if matches == "all_files" or f in under_roots or file_matches_globs(f, compiled)
+            if not file_matches_globs(f, excluded)
+            and (matches == "all_files" or f in under_roots or file_matches_globs(f, compiled))
         ]
         if matched:
             selected.append({"agent": agent, "files": matched})

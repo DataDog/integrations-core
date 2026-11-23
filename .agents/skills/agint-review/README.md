@@ -48,6 +48,7 @@ flowchart TD
         Sec[security]
         D[ddev]
         GA[github-actions]
+        L[logs]
     end
 
     Parallel -->|findings/&lt;agent&gt;.md on disk| Challenger[Challenger agent<br/>challenger]
@@ -92,6 +93,7 @@ How the agents run depends on the harness: `agint-review-<name>` subagents on Cl
 | [`security`](./agents/security.md) | integration roots, `datadog_checks_base/**`, `datadog_checks_dev/**`, `datadog_checks_downloader/**` | Untrusted product data, credentials, TLS, commands, parsing, files and queries. |
 | [`ddev`](./agents/ddev.md) | `ddev/**`, `.ddev/**` | ddev CLI: imports, output, commands, validations, CLI compatibility, repo config (`.ddev/`), tests. References live under [`references/ddev/`](./references/ddev/). |
 | [`github-actions`](./agents/github-actions.md) | `.github/workflows/**`, `.github/actions/**`, `.github/chainguard/**` | Workflows, local actions and octo-sts trust policies: whether they work, security, reliability, cost, maintainability, and callers in other repos (downloaded by setup on integrations-core). |
+| [`logs`](./agents/logs.md) | `**/assets/logs/**` | Log pipelines and their tests against the Logs Backend review guide, read live from Confluence with a bundled fallback; the config's and README's log source. References live under [`references/logs/`](./references/logs/). `integrations` and `security` skip these files. |
 | [`challenger`](./agents/challenger.md) | always (Step 4) | Checks each finding against the tenets, the output contract and the `AGENTS.md` section it cites; keep/demote/drop/merge/contest verdicts. Its citation-failure and cluster-consistency protocols are documented in the agent file. |
 
 Each agent's model is set by the orchestrator from [SKILL.md › Models per subagent](./SKILL.md#models-per-subagent); the agent files carry no `model:`.
@@ -102,11 +104,12 @@ Each agent's model is set by the orchestrator from [SKILL.md › Models per suba
 | `datadog_checks_downloader` | `conventions`, `security` |
 | `ddev/`, `.ddev/` | `conventions`, `ddev` |
 | `.github/workflows/`, `.github/actions/` or `.github/chainguard/` | `conventions`, `github-actions` |
+| `<integration>/assets/logs/` | `conventions`, `logs` |
 | Anything else (`.builders/`, `docs/`, root files) | `conventions` |
 
 Every reviewer and the challenger get [`tenets.md`](./references/tenets.md), [`common-agent-instructions.md`](./references/common-agent-instructions.md) and [`comment-style.md`](./references/comment-style.md). Only `conventions` reviews what an `AGENTS.md` says; the other agents don't get those files and don't restate their rules. A repo convention that matters but isn't in an `AGENTS.md` isn't enforced by any agent: add it to `AGENTS.md`.
 
-The registry ([`references/agent-registry.toml`](./references/agent-registry.toml)) is the source of truth for which agent matches which files — never duplicate matching logic anywhere else.
+The registry ([`references/agent-registry.toml`](./references/agent-registry.toml)) is the source of truth for which agent matches which files — never duplicate matching logic anywhere else. An agent can also list `exclude_globs`, which take files away from it whatever else matches: `integrations` and `security` exclude `**/assets/logs/**` so only `logs` reviews pipelines.
 
 ---
 
@@ -134,6 +137,7 @@ All three scripts are pure Python 3.11+ (stdlib only) and live under [`scripts/`
 | [`prompt-templates.md`](./references/prompt-templates.md) | The scout, reviewer and challenger prompt templates. Also documents the pass-by-reference principle. |
 | [`integrations/lifecycle.md`](./references/integrations/lifecycle.md), [`integrations/persistent-cache.md`](./references/integrations/persistent-cache.md), [`integrations/tests.md`](./references/integrations/tests.md), [`integrations/datadog-checks-base.md`](./references/integrations/datadog-checks-base.md), [`integrations/datadog-checks-dev.md`](./references/integrations/datadog-checks-dev.md) | Rules the integrations reviewer reads by what the PR touches. |
 | [`integrations/metric-types.md`](./references/integrations/metric-types.md) | The `metadata.csv` metric-type rule. Setup gives it to the integrations reviewer only on repos without `AGENTS.md`; on integrations-core it's in the root `AGENTS.md`, for `conventions`. |
+| [`logs/hard-checks.md`](./references/logs/hard-checks.md), [`logs/collection.md`](./references/logs/collection.md) | The logs reviewer's local overrides and fallback for when the guide can't be read, and the config and README log source cross-check. |
 | [`ddev/imports.md`](./references/ddev/imports.md), [`ddev/output.md`](./references/ddev/output.md), [`ddev/commands.md`](./references/ddev/commands.md), [`ddev/testing.md`](./references/ddev/testing.md) | Rules the ddev reviewer reads by what the PR touches. |
 
 ---
@@ -144,7 +148,7 @@ Pass aspect keywords to restrict which reviewers run:
 
 | Keyword | Behavior |
 |---|---|
-| `conventions`, `integrations`, `security`, `ddev`, `github-actions` | Run only the named reviewers (when they match the PR's files). |
+| `conventions`, `integrations`, `security`, `ddev`, `github-actions`, `logs` | Run only the named reviewers (when they match the PR's files). |
 | `post` | Post the latest round's saved `review.json` without reviewing again, e.g. after a failed post. |
 | `all` (default) | Run everything that matches. |
 
@@ -157,7 +161,7 @@ Only a full review is posted: a run narrowed by an aspect filter is saved but no
 Repos can drop rule files into `.claude/agint-review/`:
 
 - `common.md` — applies to every reviewer.
-- `conventions.md`, `integrations.md`, `security.md`, `ddev.md`, `github-actions.md` — per-agent.
+- `conventions.md`, `integrations.md`, `security.md`, `ddev.md`, `github-actions.md`, `logs.md` — per-agent.
 
 These take priority over the general guidelines in [`references/`](./references/) when they conflict, and let teams encode local conventions without forking the skill.
 
@@ -217,6 +221,7 @@ Each sub-agent's `tools:` field is a name-level allowlist (no pattern syntax —
 | `scout` | yes | Explicitly needs `git` commands inside the worktrees for history archeology |
 | `challenger` | yes | Verifies findings (lint configs, quick checks) |
 | `conventions`, `integrations`, `security`, `ddev`, `github-actions` | **no** | Read/Grep/Glob (plus Write for their findings file) cover their work; Bash is unnecessary attack surface |
+| `logs` | **no** | Read/Grep/Glob/WebSearch/WebFetch/Write, plus the Atlassian Confluence read tools: WebFetch reads the vendor's log documentation, Confluence the review guide; no Bash, and it never posts Confluence comments |
 
 If a reviewer ever needs Bash for a real use case, add it to that agent's `tools` field with a comment explaining what it's for. Default-deny is cheaper than discovering an injection vector later.
 
@@ -250,7 +255,7 @@ The principle: **default-deny on tools, default-deny on web access, document the
 
 ## Maintenance notes
 
-- **Adding a new reviewer**: drop a new `agents/<name>.md` file (with `name: agint-review-<name>`), add its `.claude/agents/agint-review-<name>.md` symlink and `.gitignore` entry at the repo root, add an entry to `references/agent-registry.toml` (with its `aspect`, and `globs` and/or `matches`), add it to `AGENT_RULE_FILES` in `scripts/agint-review-setup`, and update the agent tables in this README and in `SKILL.md`. The setup script picks it up automatically.
+- **Adding a new reviewer**: drop a new `agents/<name>.md` file (with `name: agint-review-<name>`), add its `.claude/agents/agint-review-<name>.md` symlink and `.gitignore` entry at the repo root, add an entry to `references/agent-registry.toml` (with its `aspect`, and `globs` and/or `matches`, and `exclude_globs` to take paths from another agent), add it to `AGENT_RULE_FILES` in `scripts/agint-review-setup`, and update the agent tables in this README and in `SKILL.md`. The setup script picks it up automatically.
 - **Adding a new aspect keyword**: just give the agent the new aspect string in the registry. Update the [Aspect filter](#aspect-filter) table here and in `SKILL.md`.
 - **Changing the registry schema**: also update `scripts/agint-review-setup` and the schema docs in `scripts/README.md`. The script's selection logic is the only consumer.
 - **Changing how agents review, what they write, or how comments are worded**: update `references/tenets.md`, `references/common-agent-instructions.md` or `references/comment-style.md`. All three are in every reviewer's instructions automatically — no agent-file edits needed for global rule changes. `references/output-format.md` is the orchestrator's final format.
