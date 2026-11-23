@@ -69,7 +69,7 @@ environment: `evalya.yaml` declares each one as `${VAR:-default}`.
 | `ACTIVITY_GEN` | `1` | Set to `0` for a quiescent fixture: `workload` stays up but sends no queries. |
 | `T_HOT_GROW` | `450` | Seconds before the hot set grows from 10 to 40 names. |
 | `T_RELOAD_BROKEN` | `500` | Seconds before the invalid Corefile is written. |
-| `T_RELOAD_OK` | `530` | Seconds before the valid, extended Corefile is written. |
+| `T_RELOAD_OK` | `530` | Seconds before the valid, extended Corefile is written. Must be at least 10s after `T_RELOAD_BROKEN`, or `workload` exits at startup. |
 | `T_HOSTS_GROW` | `600` | Seconds before the hosts file grows from 3 to 6 names. |
 
 CoreDNS has no authentication, so the fixture has no credential inputs. The task publishes
