@@ -63,6 +63,14 @@ SEEN_EVENT_KEYS_MAX_SIZE = 10_000
 EVENT_KEY_ACTIONS = ("attach_activity_id", "session_id", "request_id", "query_hash", "query_plan_hash")
 # An actual plan holds at least one of these. Without them, it's a plan with no runtime data.
 RUNTIME_ELEMENTS = ("<RunTimeInformation", "<QueryTimeStats")
+# The StatMan aggregate is only in the plans of the statistics builds SQL Server runs while it compiles a statement, or
+# for UPDATE STATISTICS. They aren't the plan of a user statement, and their text and plan are gone from the server
+# before the session is read, so they would be sent without a statement.
+STATISTICS_UPDATE_PLAN = etree.XPath(
+    'boolean(.//sp:Aggregate[@AggType="STATMAN"])',
+    namespaces={'sp': 'http://schemas.microsoft.com/sqlserver/2004/07/showplan'},
+)
+STATISTICS_UPDATE_PLAN_TEXT = 'AggType="STATMAN"'
 # Used when the session has no query_hash or query_plan_hash action.
 PLAN_QUERY_HASH_PATTERN = re.compile(r'\bQueryHash="0x([0-9A-Fa-f]+)"')
 PLAN_QUERY_PLAN_HASH_PATTERN = re.compile(r'\bQueryPlanHash="0x([0-9A-Fa-f]+)"')
@@ -154,6 +162,17 @@ def parse_showplan_xml(data: etree._Element) -> str | None:
             return etree.tostring(child, encoding='unicode', with_tail=False)
     # The value is the plan as text.
     return value.text.strip() if value.text and value.text.strip() else None
+
+
+def is_statistics_update(plan_data: etree._Element) -> bool:
+    """Whether the showplan_xml field of an event is the plan of a statistics build."""
+    value = plan_data.find('./value')
+    if value is None:
+        return False
+    if len(value):
+        return bool(STATISTICS_UPDATE_PLAN(value))
+    # The value is the plan as text.
+    return STATISTICS_UPDATE_PLAN_TEXT in (value.text or '')
 
 
 def event_key(event: etree._Element) -> tuple:
@@ -299,6 +318,11 @@ class QueryPlanEventsHandler(XESessionBase):
                     event_data['object_type'] = extract_text_representation(data) or extract_value(data)
                 elif name:
                     extract_field(data, event_data, name, PLAN_EVENT_NUMERIC_FIELDS, [], self._log)
+            # Skipped before sampling, so that these plans take neither a sample nor the memory budget. The event is
+            # still read: its key is already recorded, and an event_file read moves past it.
+            if plan_data is not None and is_statistics_update(plan_data):
+                self._statuses[("statistics_update", event_data.get('event_name'))] += 1
+                return True
             self._process_action_elements(event, event_data)
             for action in event.findall("./action[@name='tsql_frame']"):
                 event_data.pop('tsql_frame', None)

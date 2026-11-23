@@ -49,6 +49,9 @@ from .conftest import SelfHealingConnection
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'xml_xe_events')
 PLAN_PROFILE_FIXTURE = 'query_post_execution_plan_profile.xml'
 SHOWPLAN_FIXTURE = 'query_post_execution_showplan.xml'
+# The plan of an automatic statistics update that SQL Server ran while it compiled a user statement, whose query_hash
+# action is the user statement's, and whose query_plan_hash action is 0.
+STATISTICS_UPDATE_FIXTURE = 'query_post_execution_plan_profile_statman.xml'
 # The statement of both fixtures, as sys.dm_exec_sql_text returns it.
 STATEMENT = (
     "SELECT /*poc:sp_executesql_rpc_pytds*/ o.order_id, o.amount FROM dbo.orders o "
@@ -496,9 +499,10 @@ def test_plan_event(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'plan_transform,query_plans_config,status',
+    'fixture,plan_transform,query_plans_config,status',
     [
         pytest.param(
+            PLAN_PROFILE_FIXTURE,
             lambda plan: re.sub(
                 r'<RunTimeInformation>.*?</RunTimeInformation>|<QueryTimeStats[^>]*>(</QueryTimeStats>)?', '', plan
             ),
@@ -506,17 +510,18 @@ def test_plan_event(
             'no_runtime_data',
             id='no_runtime_data',
         ),
-        pytest.param(None, {'max_plan_size_bytes': 1000}, 'too_large', id='too_large'),
-        pytest.param(None, {}, 'collected', id='collected'),
+        pytest.param(PLAN_PROFILE_FIXTURE, None, {'max_plan_size_bytes': 1000}, 'too_large', id='too_large'),
+        pytest.param(STATISTICS_UPDATE_FIXTURE, None, {}, 'statistics_update', id='statistics_update'),
+        pytest.param(PLAN_PROFILE_FIXTURE, None, {}, 'collected', id='collected'),
     ],
 )
-def test_plans_without_runtime_data_or_too_large_are_skipped(
-    aggregator, xe_instance, plan_transform, query_plans_config, status
+def test_plans_without_runtime_data_too_large_or_of_statistics_updates_are_skipped(
+    aggregator, xe_instance, fixture, plan_transform, query_plans_config, status
 ):
     server = FakeServer()
     handler = make_handler(xe_instance, server, **query_plans_config)
 
-    run_from_ring_buffer(handler, server, make_event(plan_transform=plan_transform))
+    run_from_ring_buffer(handler, server, make_event(fixture, plan_transform=plan_transform))
 
     assert len(plan_events(aggregator)) == (1 if status == 'collected' else 0)
     assert_events_metric(aggregator, handler, status, 'query_post_execution_plan_profile', 1)
@@ -1389,6 +1394,74 @@ def test_query_plans_from_xe_session(
         raw_values = parameter_runtime_values(raw_event['db']['plan']['definition'])
         # the values of one execution: the plans of the other executions are rate limited
         assert (raw_values['@P1'], re.sub(r"^N?'(.*)'$", r"\1", raw_values['@P2'])) in executions, raw_values
+
+
+# 1,000 rows of distinct names, from an offset.
+INSERT_STATISTICS_ROWS = """\
+WITH d AS (SELECT n FROM (VALUES (0), (1), (2), (3), (4), (5), (6), (7), (8), (9)) v(n))
+INSERT INTO #statistics_update (id, name)
+SELECT ? + a.n * 100 + b.n * 10 + c.n, CONCAT('name', ? + a.n * 100 + b.n * 10 + c.n)
+FROM d a CROSS JOIN d b CROSS JOIN d c
+"""
+# A join, as the trivial plan of a single-table query creates no statistics.
+SELECT_STATISTICS_ROWS = (
+    "SELECT COUNT(*) AS {} FROM #statistics_update a JOIN #statistics_update b ON b.id = a.id WHERE a.name = '{}'"
+)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_query_plans_of_statistics_updates_are_skipped(
+    aggregator, datadog_agent, dd_run_check, dbm_instance_xe_plans, bob_conn_str
+):
+    """
+    A statement compiled without statistics on its columns, or with stale ones, makes SQL Server build them in the
+    application's session, and the session captures the plans of those builds: they're counted as statistics updates
+    rather than sent, and the statement's own plan is sent with its statement.
+    """
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance_xe_plans])
+    # the first run starts after the events already in the session
+    dd_run_check(check, cancel=False)
+
+    # an alias unique to this run, which obfuscation keeps
+    alias = 'xe_statistics_{}'.format(int(time.time() * 1000))
+    conn = SelfHealingConnection(bob_conn_str + 'APP={};'.format(XE_PLANS_TEST_APP))
+    try:
+        with conn.conn.cursor() as cursor:
+            cursor.execute("CREATE TABLE #statistics_update (id int, name varchar(20))")
+            cursor.execute(INSERT_STATISTICS_ROWS, (0, 0))
+            # the first statement on the columns creates their statistics
+            cursor.execute(SELECT_STATISTICS_ROWS.format(alias + '_created', 'name1'))
+            cursor.fetchall()
+            # more changes than the 500 rows and 20% of the table that make the statistics stale, which the next
+            # statement compiled updates
+            cursor.execute(INSERT_STATISTICS_ROWS, (1000, 1000))
+            cursor.execute(SELECT_STATISTICS_ROWS.format(alias + '_updated', 'name2'))
+            cursor.fetchall()
+    finally:
+        conn.close()
+
+    def statistics_updates() -> int:
+        return sum(
+            metric.value
+            for metric in aggregator.metrics('dd.sqlserver.xe.query_plans.events')
+            if 'status:statistics_update' in metric.tags
+        )
+
+    events: list[dict] = []
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        # the session dispatches its events to its file every second
+        time.sleep(2)
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=mock_obfuscate_sql):
+            dd_run_check(check, cancel=False)
+        events = plan_events(aggregator)
+        if statistics_updates() and any(alias in (e['db']['statement'] or '') for e in events):
+            break
+
+    assert statistics_updates() > 0
+    assert [e for e in events if 'STATMAN' in (e['db']['plan']['definition'] or '')] == []
+    assert any(alias in (e['db']['statement'] or '') for e in events)
 
 
 def call_procedure(conn_str: str, sql: str, params: tuple = ()) -> None:
