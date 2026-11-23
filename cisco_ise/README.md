@@ -71,7 +71,7 @@ The Cisco ISE integration collects ISE's syslog messages with `source:cisco-ise`
 
 #### Sensitive data
 
-- **TACACS+ commands** are logged as typed, including secrets, for example `username admin secret 0 <password>`. The two `mask_sequences` rules in the sample configuration replace the value after `secret`, `password`, `key`, `key-string`, `community`, and `pre-shared-key` with `********` in the Agent, before the logs leave your network. They only cover these keywords; to mask other values, add rules or use [Sensitive Data Scanner][7].
+- **TACACS+ commands** are logged as typed, including secrets, for example `username admin secret 0 <password>`. The two `mask_sequences` rules in the sample configuration replace everything typed after `secret`, `password`, `key`, `key-string`, `community`, or `pre-shared-key` in a command with `********` in the Agent, before the logs leave your network. They only cover these keywords; to mask other values, add rules or use [Sensitive Data Scanner][7].
 - **Guest portal messages** (Guest category, and guest logins) contain visitors' personal data: name, email address, phone number, company, and the person visited. Don't attach the Guest category if you don't need it, or use [Sensitive Data Scanner][7] to redact these fields.
 
 ### Metrics

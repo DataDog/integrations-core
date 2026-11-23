@@ -20,11 +20,11 @@
 #     log_processing_rules:
 #     - type: mask_sequences
 #       name: ise_tacacs_cmd_secret
-#       pattern: '(CmdAV=[^\]=]*?\b(?:secret|password|key|key-string|community|pre-shared-key)(?:
-#         [0-9])? )[^ \]<][^ \]]*'
-#       replace_placeholder: ${1}********
+#       pattern: (CmdAV=[^\]=]*?\b(?:secret|password|key|key-string|community|pre-shared-key)
+#         ).*?( <cr> \])
+#       replace_placeholder: ${1}********${2}
 #     - type: mask_sequences
 #       name: ise_tacacs_cmdarg_secret
-#       pattern: (CmdArgAV=(?:secret|password|key|key-string|community|pre-shared-key)
-#         (?:CmdArgAV=[0-9] )?CmdArgAV=)[^ <][^ ]*
-#       replace_placeholder: ${1}********
+#       pattern: ((?:CmdAV|CmdArgAV)=(?:secret|password|key|key-string|community|pre-shared-key)
+#         )(?:CmdArgAV=[^ ]* )+?(CmdArgAV=<cr>)
+#       replace_placeholder: ${1}CmdArgAV=******** ${2}
