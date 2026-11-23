@@ -10,13 +10,13 @@ Cisco ISE is a network access control platform. It decides whether users and dev
 
 The integration collects ISE's logs for each kind of activity ISE controls:
 
-- **Network access (RADIUS authentications)**: Who joined the network or failed to, with the user, the endpoint MAC address, the network device and port, the SSID, the site, the authentication method, the authorization result (VLAN, downloadable ACL, Security Group Tag), and the failure reason.
-- **Network sessions (RADIUS accounting)**: Session start, interim updates, and stop. They link each endpoint IP address to its user and MAC address.
-- **Device administration (TACACS+)**: Administrator logins on switches and routers, their privilege level, and the commands they type.
-- **ISE administration**: ISE administrator logins and configuration changes.
-- **Endpoint profiling**: The device type, operating system, and vendor ISE assigns to each endpoint.
-- **Guest and My Devices portals**: Guest self-registration and logins, and the devices employees register.
-- **Posture and quarantine**: Posture results and quarantine (Adaptive Network Control) actions.
+- **Network access (RADIUS authentications)**, Logging Categories *Passed Authentications* and *Failed Attempts*: Who joined the network or failed to, with the user, the endpoint MAC address, the network device and port, the SSID, the site, the authentication method, the authorization result (VLAN, downloadable ACL, Security Group Tag), and the failure reason.
+- **Network sessions (RADIUS accounting)**, *RADIUS Accounting*: Session start, interim updates, and stop. They link each endpoint IP address to its user and MAC address.
+- **Device administration (TACACS+)**, logins in *Passed Authentications* and *Failed Attempts*, commands in *TACACS Accounting*: Administrator logins on switches and routers, their privilege level, and the commands they type.
+- **ISE administration**, *Administrative and Operational Audit*: ISE administrator logins and configuration changes.
+- **Endpoint profiling**, *Profiler*: The device type, operating system, and vendor ISE assigns to each endpoint.
+- **Guest and My Devices portals**, *Guest* and *MyDevices*: Guest self-registration and logins, and the devices employees register.
+- **Posture and quarantine**, *Posture and Client Provisioning Audit*: Posture results and quarantine (Adaptive Network Control) actions.
 
 ### Supported versions
 
@@ -30,8 +30,6 @@ The Cisco ISE integration is included in the [Datadog Agent][8] package. No addi
 
 ### Configuration
 
-Configure the Agent to listen on a UDP or TCP port, then point an ISE Remote Logging Target at it and attach the Logging Categories to collect.
-
 #### Configure the Datadog Agent
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
@@ -40,64 +38,30 @@ Configure the Agent to listen on a UDP or TCP port, then point an ISE Remote Log
     logs_enabled: true
     ```
 
-2. Add this configuration block to your `cisco_ise.d/conf.yaml` file to start collecting your Cisco ISE logs:
+2. Edit the `cisco_ise.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory. Start from the sample [cisco_ise.d/conf.yaml][5]: uncomment the `logs` section and set the port. Both UDP and TCP are supported (`type: udp` or `type: tcp`); TLS is not.
 
     ```yaml
     logs:
-      - type: udp # or tcp
+      - type: udp
         port: <PORT>
         source: cisco-ise
-        log_processing_rules:
-          - type: mask_sequences
-            name: ise_tacacs_cmd_secret
-            pattern: '(CmdAV=[^\]=]*?\b(?:secret|password|key|key-string|community|pre-shared-key)(?: [0-9])? )[^ \]<][^ \]]*'
-            replace_placeholder: '${1}********'
-          - type: mask_sequences
-            name: ise_tacacs_cmdarg_secret
-            pattern: '(CmdArgAV=(?:secret|password|key|key-string|community|pre-shared-key) (?:CmdArgAV=[0-9] )?CmdArgAV=)[^ <][^ ]*'
-            replace_placeholder: '${1}********'
     ```
 
-    See the sample [`cisco_ise.d/conf.yaml`][5] file for available configuration options. The two `mask_sequences` rules are explained in [Sensitive data](#sensitive-data).
-
-    **Note**: Do not change the `source` value, as it is integral to the pipeline's operation.
+    Keep the two `log_processing_rules` that follow in the sample: they mask secrets typed in TACACS+ commands (see [Sensitive data](#sensitive-data)). Do not change the `source` value, as it is integral to the pipeline's operation.
 
 3. [Restart the Agent][3].
 
-**UDP or TCP**: both are supported; choose the one that fits your network. Over UDP, ISE never waits for the Agent, but a lost packet loses the event silently, and 8192-byte messages are IP-fragmented, which some firewalls drop. Over TCP, nothing is lost silently, and ISE ends each message with a newline, so the Agent's default `tcp` listener needs no extra settings; don't set an `idle_timeout` on it, because ISE keeps one long-lived and often quiet connection. TLS (ISE's "Secure Syslog" target) is not supported.
+#### Configure Cisco ISE
 
-#### Configure a Remote Logging Target in Cisco ISE
+In Cisco ISE, add a Remote Logging Target for the Agent: UDP or TCP syslog (matching the Agent's `type`), the Agent host, and the port set above. Set its **Maximum Length** to **8192**: this is required, over UDP and TCP. With ISE's default of 1024, most events are split into several syslog messages, and each one becomes a separate log.
 
-1. In the ISE admin UI, go to **Administration** > **System** > **Logging** > **Remote Logging Targets** and click **Add**.
-2. Set the following:
-    - **Name**: for example, `datadog_agent` (names can't contain `-`).
-    - **Target Type**: **UDP SysLog** or **TCP SysLog**, matching the Agent's `type`.
-    - **Host / IP Address**: the IP address of the Datadog Agent host.
-    - **Port**: the `port` set in `cisco_ise.d/conf.yaml`.
-    - **Maximum Length**: **8192**. This is required, over UDP and TCP. With ISE's default of 1024, most events are split into 2 to 5 syslog messages; each one becomes a separate Datadog log, so the fields of one event, such as the identity group or the endpoint MAC address, are spread over several logs.
-    - For **TCP SysLog**, leave **Comply to RFC 3164** off. **Buffer Messages When Server Down** is optional.
-3. Click **Save**.
+Then attach to the target the Logging Categories of the activity you want to collect, listed in [What this integration monitors](#what-this-integration-monitors). ISE only sends the categories attached to a target.
 
-#### Attach Logging Categories to the target
+#### Recommended settings
 
-ISE only sends the categories attached to a target. Go to **Administration** > **System** > **Logging** > **Logging Categories**, and for each category below, select it, add the target to **Selected Targets**, and click **Save**:
-
-| Logging Category | What it contains |
-|---|---|
-| Passed Authentications | RADIUS and TACACS+ authentications that succeeded, guest logins, dACL downloads |
-| Failed Attempts | Failed authentications and authorizations, repeated failures (`5434`), failed CoA |
-| RADIUS Accounting | Session start, interim update, and stop: the only place the endpoint IP address appears |
-| TACACS Accounting | Commands typed on network devices through TACACS+ |
-| Administrative and Operational Audit | ISE administrator logins and configuration changes |
-| Profiler | Endpoint profiling results (device type, operating system, vendor) |
-| Guest, MyDevices | Guest self-registration and the My Devices portal |
-| Posture and Client Provisioning Audit | Posture results and quarantine (ANC) actions |
-
-#### Recommended network device and ISE settings
-
-- **RADIUS accounting, including interim updates, on the switches and wireless controllers.** The endpoint IP address is only reported after DHCP, in accounting messages, so the IP address to user and MAC address mapping depends on it.
-- **Network device Location groups** (**Administration** > **Network Resources** > **Network Device Groups**). The device's location path, such as `All Locations#Spain#Madrid`, is the site in the logs.
-- Leave ISE's suppression of repeated events on (the default) to avoid most repeated re-authentications.
+- RADIUS accounting, including interim updates, on the network devices: the endpoint IP address is only reported in accounting messages.
+- Location groups for the network devices in ISE: a device's location path is the site in the logs.
+- ISE's suppression of repeated events left on (the default).
 
 #### Optional: drop noisy messages in the Agent
 
@@ -122,7 +86,7 @@ The Cisco ISE integration collects ISE's syslog messages with `source:cisco-ise`
 
 #### Sensitive data
 
-- **TACACS+ commands** are logged as typed, including secrets, for example `username admin secret 0 <password>`. The two `mask_sequences` rules in the configuration above replace the value after `secret`, `password`, `key`, `key-string`, `community`, and `pre-shared-key` with `********` in the Agent, before the logs leave your network. They only cover these keywords; to mask other values, add rules or use [Sensitive Data Scanner][7].
+- **TACACS+ commands** are logged as typed, including secrets, for example `username admin secret 0 <password>`. The two `mask_sequences` rules in the sample configuration replace the value after `secret`, `password`, `key`, `key-string`, `community`, and `pre-shared-key` with `********` in the Agent, before the logs leave your network. They only cover these keywords; to mask other values, add rules or use [Sensitive Data Scanner][7].
 - **Guest portal messages** (Guest category, and guest logins) contain visitors' personal data: name, email address, phone number, company, and the person visited. Don't attach the Guest category if you don't need it, or use [Sensitive Data Scanner][7] to redact these fields.
 
 ### Metrics
