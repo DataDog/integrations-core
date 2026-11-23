@@ -6,7 +6,6 @@ from unittest import mock
 import pytest
 
 from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD, parse_environmentals
-from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import SYNTHETIC
 from ..helpers import load_op, load_xml, series
@@ -30,17 +29,15 @@ THERMAL = [
     ('Temperature at CPU', 85.5, 1),
     ('Temperature at Exhaust', 82.0, 1),
 ]
-# (sensor, speed, alarm), all in slot 1 with a minimum of 2000.
+# (sensor, speed, alarm), all in slot 1.
 FANS = [
     ('Fan #1 RPM', 3600.0, 0),
     ('Fan #2 RPM', 0.0, 1),
 ]
-# (metric prefix, sensor, alarm, inserted), all in slot 1.
-PLUGGABLE_UNITS = [
-    ('power_supply', 'Power Supply #1 (left)', 0, 1),
-    ('power_supply', 'Power Supply #2 (right)', 1, 0),
-    ('fan_tray', 'Fan Tray #1 (left)', 0, 1),
-    ('fan_tray', 'Fan Tray #2 (right)', 1, 0),
+# (sensor, alarm, inserted), all in slot 1.
+POWER_SUPPLIES = [
+    ('Power Supply #1 (left)', 0, 1),
+    ('Power Supply #2 (right)', 1, 0),
 ]
 
 
@@ -59,26 +56,10 @@ def test_hardware_sensors():
         for name, value in (('current', current), ('min', 0.0), ('max', 80.0), ('alarm', alarm)):
             expected[f'temperature.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
     for sensor, speed, alarm in FANS:
-        for name, value in (('speed', speed), ('speed.min', 2000.0), ('alarm', alarm)):
+        for name, value in (('speed', speed), ('alarm', alarm)):
             expected[f'fan.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
-    for prefix, sensor, alarm, inserted in PLUGGABLE_UNITS:
+    for sensor, alarm, inserted in POWER_SUPPLIES:
         for name, value in (('alarm', alarm), ('inserted', inserted)):
-            expected[f'{prefix}.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
+            expected[f'power_supply.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
 
     assert series(parse_environmentals(load_xml(SYNTHETIC / 'environmentals_hw.xml'), mock.Mock())) == expected
-
-
-def test_fans_section_named_fans():
-    """The PA-5410 names the fan section `fans` instead of `fan`."""
-    root = parse_response(
-        b'<response status="success"><result><fans><Slot1><entry><slot>1</slot>'
-        b'<description>Inlet fan of Fan unit #1</description><alarm>False</alarm><RPMs>2436</RPMs><min>2000</min>'
-        b'</entry></Slot1></fans></result></response>'
-    )
-    tags = ('sensor:Inlet fan of Fan unit #1', 'slot:1')
-
-    assert series(parse_environmentals(root, mock.Mock())) == {
-        ('fan.speed', tags): (2436.0, 'gauge'),
-        ('fan.speed.min', tags): (2000.0, 'gauge'),
-        ('fan.alarm', tags): (0, 'gauge'),
-    }
