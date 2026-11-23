@@ -55,7 +55,7 @@ To filter or mask other messages before they leave the Agent, add [log processin
 
 #### Configure Cisco ISE
 
-In Cisco ISE, add a Remote Logging Target for the Agent: UDP or TCP syslog (matching the Agent's `type`), the Agent host, and the port set above. Set its **Maximum Length** to **8192**, ISE's maximum. ISE splits any event longer than this into several syslog messages, each a separate log, and ISE's default of 1024 splits most events.
+In Cisco ISE, add a Remote Logging Target for the Agent: UDP or TCP syslog (matching the Agent's `type`), the Agent host, and the port set above. Set its **Maximum Length** to **8192**; if your ISE version accepts less, use the highest value it accepts. ISE splits any event longer than this into several syslog messages, each a separate log, and ISE's default of 1024 splits most events.
 
 Then attach to the target the Logging Categories of the activity you want to collect, listed in [What this integration monitors](#what-this-integration-monitors). ISE only sends the categories attached to a target.
 
@@ -71,7 +71,7 @@ The Cisco ISE integration collects ISE's syslog messages with `source:cisco-ise`
 
 #### Sensitive data
 
-- **TACACS+ commands** are logged as typed, including secrets, for example `username admin secret 0 <password>`. The two `mask_sequences` rules in the sample configuration replace everything typed after `secret`, `password`, `key`, `key-string`, `community`, or `pre-shared-key` in a command with `********` in the Agent, before the logs leave your network. They only cover these keywords; to mask other values, add rules or use [Sensitive Data Scanner][7].
+- **TACACS+ commands** are logged as typed, including secrets, for example `username admin secret 0 <password>`. The two `mask_sequences` rules in the sample configuration replace everything typed after `secret`, `password`, `key`, `key-string`, `community`, `pre-shared-key`, `auth`, or `priv` in a command, including hyphenated forms such as `authentication-key`, with `********` in the Agent, before the logs leave your network. The masking needs events that aren't split: if ISE splits an event between the keyword and the value, the value is sent unmasked. The rules only cover these keywords; to mask other values, add rules or use [Sensitive Data Scanner][7].
 - **Guest portal messages** (Guest category, and guest logins) contain visitors' personal data: name, email address, phone number, company, and the person visited. Don't attach the Guest category if you don't need it, or use [Sensitive Data Scanner][7] to redact these fields.
 
 ### Metrics
@@ -94,7 +94,7 @@ In ISE, remove the Datadog target from the Logging Categories, or delete the Rem
 
 **Events are split into several logs:**
 
-ISE splits an event longer than the Remote Logging Target's **Maximum Length** into several syslog messages, and each one becomes a separate log. Set **Maximum Length** to 8192.
+ISE splits an event longer than the Remote Logging Target's **Maximum Length** into several syslog messages, and each one becomes a separate log. Set **Maximum Length** to 8192, or to the highest value your ISE version accepts.
 
 **Only some events arrive over UDP:**
 
