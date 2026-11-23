@@ -25,10 +25,9 @@
   "queries": [
     {
       "name": "automox_wide_reach_worklet",
-      "query": "source:automox ((@ocsf.class_uid:6001 @ocsf.message:(\"Policy Created\" OR \"Policy Configuration Updated\" OR \"Policy Activated\") @ocsf.web_resources.data.policy_type_name:(custom OR required_software) @ocsf.web_resources.data.server_count:>=25) OR (@ocsf.class_uid:3004 @ocsf.message:\"Policies Associated to Group\" @ocsf.entity.data.policy_type_name:(custom OR required_software) @ocsf.entity.data.server_count:>=25))",
+      "query": "source:automox @ocsf.class_uid:6001 @ocsf.message:(\"Policy Created\" OR \"Policy Configuration Updated\" OR \"Policy Activated\") @ocsf.web_resources.data.policy_type_name:(custom OR required_software) @ocsf.web_resources.data.server_count:>=25",
       "groupByFields": [
-        "@ocsf.web_resources.uid",
-        "@ocsf.entity.uid"
+        "@ocsf.web_resources.uid"
       ],
       "distinctFields": [],
       "aggregation": "count"
