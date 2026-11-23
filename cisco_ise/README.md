@@ -1,20 +1,38 @@
+# Agent Integration: Cisco ISE
+
 ## Overview
 
-[Cisco Identity Services Engine (ISE)][4] is a network access control platform. It decides whether users and devices may join the wired, wireless, or VPN network and with which access (VLAN, downloadable ACL, Security Group Tag), and it authenticates network administrators on switches and routers through TACACS+.
+This integration collects [Cisco Identity Services Engine (ISE)][4] logs through the Datadog Agent.
 
-Integrate Cisco ISE with Datadog to search and analyze ISE's syslog messages: RADIUS authentications and failures with the user, endpoint MAC address, network device, port, SSID, and site; RADIUS accounting, which links endpoint IP addresses to users and MAC addresses; TACACS+ logins and commands; ISE administrator logins and configuration changes; profiling; guest and My Devices portal activity.
+Cisco ISE is a network access control platform. It decides whether users and devices may join the wired, wireless, or VPN network and with which access (VLAN, downloadable ACL, Security Group Tag), and it authenticates network administrators on switches and routers through TACACS+. ISE sends its logs as syslog to a **Remote Logging Target**; this integration points that target at a Datadog Agent that listens on a UDP or TCP port.
 
-**Disclaimer**: Your use of this integration, which may collect data that includes personal information, is subject to your agreements with Datadog. Cisco is not responsible for the privacy, security or integrity of any end-user information, including personal data, transmitted through your use of the integration.
+### What this integration monitors
+
+The integration collects ISE's logs for each kind of activity ISE controls:
+
+- **Network access (RADIUS authentications)**: Who joined the network or failed to, with the user, the endpoint MAC address, the network device and port, the SSID, the site, the authentication method, the authorization result (VLAN, downloadable ACL, Security Group Tag), and the failure reason.
+- **Network sessions (RADIUS accounting)**: Session start, interim updates, and stop. They link each endpoint IP address to its user and MAC address.
+- **Device administration (TACACS+)**: Administrator logins on switches and routers, their privilege level, and the commands they type.
+- **ISE administration**: ISE administrator logins and configuration changes.
+- **Endpoint profiling**: The device type, operating system, and vendor ISE assigns to each endpoint.
+- **Guest and My Devices portals**: Guest self-registration and logins, and the devices employees register.
+- **Posture and quarantine**: Posture results and quarantine (Adaptive Network Control) actions.
+
+### Supported versions
+
+Cisco ISE 3.x (tested on 3.2).
 
 ## Setup
 
-Cisco ISE sends its logs as syslog to a **Remote Logging Target**. Point a target at a Datadog Agent that listens on a UDP or TCP port, and attach the Logging Categories you want to collect to it.
+### Installation
 
-Supported versions: Cisco ISE 3.x (tested on 3.2).
+The Cisco ISE integration is included in the [Datadog Agent][8] package. No additional installation is needed on the Agent host, and nothing is installed on ISE: ISE pushes its logs to the Agent, which must be reachable from the ISE nodes on the port you configure.
 
 ### Configuration
 
-#### Enable log collection on the Datadog Agent
+Configure the Agent to listen on a UDP or TCP port, then point an ISE Remote Logging Target at it and attach the Logging Categories to collect.
+
+#### Configure the Datadog Agent
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
 
@@ -100,7 +118,7 @@ ISE logs some messages that rarely matter, such as `52000` configuration changes
 
 ### Logs
 
-The Cisco ISE integration collects ISE's syslog messages with `source:cisco-ise`.
+The Cisco ISE integration collects ISE's syslog messages with `source:cisco-ise`, for the activity listed in [What this integration monitors](#what-this-integration-monitors).
 
 #### Sensitive data
 
@@ -109,11 +127,19 @@ The Cisco ISE integration collects ISE's syslog messages with `source:cisco-ise`
 
 ### Metrics
 
-Cisco ISE does not include any metrics.
+The Cisco ISE integration does not include any metrics.
 
 ### Events
 
 The Cisco ISE integration does not include any events.
+
+### Service Checks
+
+The Cisco ISE integration does not include any service checks.
+
+## Uninstallation
+
+In ISE, remove the Datadog target from the Logging Categories, or delete the Remote Logging Target. Then rename `cisco_ise.d/conf.yaml` to `cisco_ise.d/conf.yaml.example` and [restart the Agent][3].
 
 ## Troubleshooting
 
@@ -139,6 +165,8 @@ Make sure that the firewall on the Agent host allows traffic to the configured p
 
 On systems running syslog, port 514 is usually taken. Configure the Agent to listen on a different, available port and use the same port in the ISE target.
 
+## Support
+
 Need help? Contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help/
@@ -148,3 +176,4 @@ Need help? Contact [Datadog support][1].
 [5]: https://github.com/DataDog/integrations-core/blob/master/cisco_ise/datadog_checks/cisco_ise/data/conf.yaml.example
 [6]: https://app.datadoghq.com/logs?query=source%3Acisco-ise
 [7]: https://docs.datadoghq.com/security/sensitive_data_scanner/
+[8]: https://app.datadoghq.com/account/settings/agent/latest
