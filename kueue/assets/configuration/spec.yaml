@@ -52,7 +52,9 @@ files:
         If unset, the check uses in-cluster Kubernetes configuration.
 
         The check uses the context named by `current-context`, and reads only the fields listed in this option.
-        Fields that are not listed, such as `preferences`, `extensions`, or `proxy-url`, are ignored.
+        Fields that are not listed, such as `preferences` or `proxy-url`, are ignored. The cluster `extensions`
+        are only used by `exec` plugins with `provideClusterInfo: true`, which receive the
+        `client.authentication.k8s.io/exec` extension.
 
         Supported authentication methods, in the order the Kubernetes client tries them:
           - `auth-provider`: the `gcp`, `azure`, or `oidc` provider.
@@ -94,6 +96,16 @@ files:
                 type: boolean
               - name: tls-server-name
                 type: string
+              - name: extensions
+                type: array
+                items:
+                  type: object
+                  properties:
+                  - name: name
+                    type: string
+                  - name: extension
+                    type: object
+                    additionalProperties: true
         - name: contexts
           type: array
           items:

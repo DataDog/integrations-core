@@ -27,6 +27,12 @@ FULL_KUBECONFIG = {
                 'certificate-authority-data': 'Q0EgZGF0YQ==',
                 'insecure-skip-tls-verify': False,
                 'tls-server-name': 'kubernetes.example.com',
+                'extensions': [
+                    {
+                        'name': 'client.authentication.k8s.io/exec',
+                        'extension': {'audience': 'kubernetes', 'scopes': ['openid', 'email']},
+                    }
+                ],
             },
         }
     ],

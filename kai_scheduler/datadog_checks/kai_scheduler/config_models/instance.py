@@ -45,6 +45,15 @@ class ExtraMetrics(BaseModel):
     type: Optional[str] = None
 
 
+class Extension(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    extension: Optional[MappingProxyType[str, Any]] = None
+    name: Optional[str] = None
+
+
 class Cluster1(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -52,6 +61,7 @@ class Cluster1(BaseModel):
     )
     certificate_authority: Optional[str] = Field(None, alias='certificate-authority')
     certificate_authority_data: Optional[str] = Field(None, alias='certificate-authority-data')
+    extensions: Optional[tuple[Extension, ...]] = None
     insecure_skip_tls_verify: Optional[bool] = Field(None, alias='insecure-skip-tls-verify')
     server: Optional[str] = None
     tls_server_name: Optional[str] = Field(None, alias='tls-server-name')
