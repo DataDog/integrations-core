@@ -41,6 +41,7 @@ USER_ATTRIBUTES = [
     'objectGUID',
     'objectSid',
     'objectClass',
+    'primaryGroupID',
     'sAMAccountName',
     'userPrincipalName',
     'mail',
@@ -103,8 +104,6 @@ IN_CHAIN_RULE = '1.2.840.113556.1.4.1941'
 FILETIME_NEVER = (0, 0x7FFFFFFFFFFFFFFF)
 FILETIME_EPOCH_OFFSET = 116444736000000000  # 100ns intervals between 1601-01-01 and 1970-01-01
 
-DN_SPLIT = re.compile(r'(?<!\\),')
-
 
 def guid_to_str(value: bytes) -> str:
     return str(uuid.UUID(bytes_le=value))
@@ -143,7 +142,7 @@ def datetime_to_iso(value: datetime | None) -> str | None:
 
 def _dn_components(dn: str) -> list[tuple[str, str]]:
     components = []
-    for rdn in DN_SPLIT.split(dn):
+    for rdn in re.findall(r'(?:\\.|[^,])+', dn):
         attribute, _, value = rdn.partition('=')
         components.append((attribute.strip().upper(), re.sub(r'\\(.)', r'\1', value)))
     return components
@@ -176,6 +175,10 @@ def privileged_group_filter(domain_sid: str) -> str:
 
 def nested_members_filter(group_dn: str) -> str:
     return f'(&{USER_FILTER}(memberOf:{IN_CHAIN_RULE}:={escape_filter_value(group_dn)}))'
+
+
+def nested_groups_filter(group_dn: str) -> str:
+    return f'(&(objectCategory=group)(memberOf:{IN_CHAIN_RULE}:={escape_filter_value(group_dn)}))'
 
 
 def crossref_filter(domain_dn: str) -> str:
@@ -309,7 +312,8 @@ class AdsiDirectory:
         from win32com import adsi
         from win32com.adsi import adsicon
 
-        searcher = adsi.ADsGetObject(f'LDAP://{self._server}/{base_dn}', adsi.IID_IDirectorySearch)
+        path = base_dn.replace('/', '\\/')  # `/` separates the server from the DN in an ADsPath
+        searcher = adsi.ADsGetObject(f'LDAP://{self._server}/{path}', adsi.IID_IDirectorySearch)
         searcher.SetSearchPreference(
             [
                 (adsicon.ADS_SEARCHPREF_SEARCH_SCOPE, (scope,)),
@@ -318,18 +322,27 @@ class AdsiDirectory:
                 (adsicon.ADS_SEARCHPREF_CHASE_REFERRALS, (adsicon.ADS_CHASE_REFERRALS_NEVER,)),
             ]
         )
+        # Requested names may carry a range (`memberOf;range=1500-*`); results are keyed by the bare name.
+        requested = {name.split(';', 1)[0].lower(): name.split(';', 1)[0] for name in attributes}
         handle = searcher.ExecuteSearch(ldap_filter, attributes)
         try:
             while searcher.GetNextRow(handle) != adsicon.S_ADS_NOMORE_ROWS:
                 entry = {}
-                for attribute in attributes:
-                    try:
-                        _, _, values = searcher.GetColumn(handle, attribute)
-                    except adsi.error as e:
-                        if e.hresult != adsicon.E_ADS_COLUMN_NOT_SET:
-                            raise
+                next_range = {}
+                # Walk the returned columns: past AD's per-attribute value limit a column is named
+                # `memberOf;range=0-1499` instead of `memberOf`, and the rest must be read separately.
+                while (column := searcher.GetNextColumnName(handle)) is not None:
+                    name, _, value_range = column.partition(';range=')
+                    attribute = requested.get(name.lower())
+                    if attribute is None:
                         continue
-                    entry[attribute] = column_values(values)
+                    _, _, values = searcher.GetColumn(handle, column)
+                    entry.setdefault(attribute, []).extend(column_values(values))
+                    if value_range and not value_range.endswith('*'):
+                        next_range[attribute] = int(value_range.rsplit('-', 1)[1]) + 1
+                for attribute, start in next_range.items():
+                    rest = self.read_object(entry['distinguishedName'][0], [f'{attribute};range={start}-*'])
+                    entry[attribute].extend(rest.get(attribute, []))
                 yield entry
         finally:
             searcher.CloseSearchHandle(handle)
@@ -385,17 +398,27 @@ class ActiveDirectoryDirectoryCheck(AgentCheck):
         netbios_name = _first(crossref, 'nETBIOSName')
 
         privileged_groups = defaultdict(set)
+        # Primary group memberships are absent from memberOf, so map the RID of each privileged group, and of
+        # every group nested in it, to the privileged group; users are matched on primaryGroupID below.
+        privileged_by_primary_rid = defaultdict(set)
         groups = directory.search(
-            domain_dn, privileged_group_filter(domain_sid), ['distinguishedName', 'sAMAccountName']
+            domain_dn, privileged_group_filter(domain_sid), ['distinguishedName', 'sAMAccountName', 'objectSid']
         )
         for group in groups:
-            members = directory.search(
-                domain_dn, nested_members_filter(_first(group, 'distinguishedName')), ['objectGUID']
-            )
-            for member in members:
-                privileged_groups[guid_to_str(_first(member, 'objectGUID'))].add(_first(group, 'sAMAccountName'))
+            group_dn = _first(group, 'distinguishedName')
+            group_name = _first(group, 'sAMAccountName')
+            for member in directory.search(domain_dn, nested_members_filter(group_dn), ['objectGUID']):
+                privileged_groups[guid_to_str(_first(member, 'objectGUID'))].add(group_name)
+            nested = directory.search(domain_dn, nested_groups_filter(group_dn), ['objectSid'])
+            for group_with_rid in [group, *nested]:
+                rid = int(sid_to_str(_first(group_with_rid, 'objectSid')).rsplit('-', 1)[1])
+                privileged_by_primary_rid[rid].add(group_name)
 
         users = list(directory.search(domain_dn, USER_FILTER, USER_ATTRIBUTES))
+        for entry in users:
+            primary_groups = privileged_by_primary_rid.get(_first(entry, 'primaryGroupID'), set())
+            if primary_groups:
+                privileged_groups[guid_to_str(_first(entry, 'objectGUID'))] |= primary_groups
         guid_by_dn = {_first(u, 'distinguishedName').lower(): guid_to_str(_first(u, 'objectGUID')) for u in users}
         for entry in users:
             self._submit(

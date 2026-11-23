@@ -5,12 +5,14 @@ import json
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from win32com.adsi import adsicon
 
 from datadog_checks.active_directory import ActiveDirectoryCheck
 from datadog_checks.active_directory.directory import (
     COMPUTER_FILTER,
     USER_FILTER,
     ActiveDirectoryDirectoryCheck,
+    AdsiDirectory,
     build_computer_record,
     build_user_record,
     column_values,
@@ -19,6 +21,7 @@ from datadog_checks.active_directory.directory import (
     escape_filter_value,
     filetime_to_iso,
     guid_to_str,
+    nested_groups_filter,
     nested_members_filter,
     ou_path_from_dn,
     privileged_group_filter,
@@ -44,6 +47,7 @@ ADMINISTRATORS_SID_BYTES = bytes.fromhex('01020000000000052000000020020000')
 JDOE_DN = f'CN=jdoe,OU=Engineering,OU=Users,{DOMAIN_DN}'
 BOSS_DN = f'CN=boss,OU=Users,{DOMAIN_DN}'
 DOMAIN_ADMINS_DN = f'CN=Domain Admins,CN=Users,{DOMAIN_DN}'
+ADMINISTRATORS_DN = f'CN=Administrators,CN=Builtin,{DOMAIN_DN}'
 UTC = timezone.utc
 
 
@@ -95,9 +99,11 @@ class FakeDirectory:
         computers=(),
         groups=(),
         nested=None,
+        nested_groups=None,
         netbios=NETBIOS_NAME,
     ):
         self.server = server
+        self.nested_groups = nested_groups or {}
         self.netbios = netbios
         self.pdc = pdc
         self.users = list(users)
@@ -129,9 +135,12 @@ class FakeDirectory:
             return iter(self.computers)
         if ldap_filter == privileged_group_filter(DOMAIN_SID):
             return iter(self.groups)
-        for group_dn, members in self.nested.items():
+        for group in self.groups:
+            group_dn = group['distinguishedName'][0]
             if ldap_filter == nested_members_filter(group_dn):
-                return iter(members)
+                return iter(self.nested.get(group_dn, []))
+            if ldap_filter == nested_groups_filter(group_dn):
+                return iter(self.nested_groups.get(group_dn, []))
         raise AssertionError(f'unexpected search filter {ldap_filter}')
 
 
@@ -202,6 +211,10 @@ def test_filetime_to_iso(value, expected):
             id='escaped_commas',
         ),
         pytest.param(f'CN=root,{DOMAIN_DN}', 'corp.example.com', '', id='domain_root'),
+        # The comma after an escaped backslash is a real separator.
+        pytest.param(
+            'CN=x,OU=Ops\\\\,DC=corp,DC=example,DC=com', 'corp.example.com', 'Ops\\', id='value_ending_in_backslash'
+        ),
     ],
 )
 def test_dn_parsing(dn, domain, ou_path):
@@ -219,6 +232,54 @@ def test_nested_members_filter_escapes_group_dn():
     assert nested_members_filter('CN=Ops (EU),DC=corp') == (
         f'(&{USER_FILTER}(memberOf:1.2.840.113556.1.4.1941:=CN=Ops \\28EU\\29,DC=corp))'
     )
+
+
+class FakeSearcher:
+    """Stands in for an ADSI IDirectorySearch returning the given rows of {column name: values}."""
+
+    def __init__(self, rows):
+        self.rows = rows
+        self.index = -1
+
+    def SetSearchPreference(self, prefs):
+        pass
+
+    def ExecuteSearch(self, ldap_filter, attributes):
+        return 1
+
+    def GetNextRow(self, handle):
+        self.index += 1
+        if self.index >= len(self.rows):
+            return adsicon.S_ADS_NOMORE_ROWS
+        self.columns = iter(list(self.rows[self.index]))
+        return 0
+
+    def GetNextColumnName(self, handle):
+        return next(self.columns, None)
+
+    def GetColumn(self, handle, name):
+        return name, 3, [(value, 3) for value in self.rows[self.index][name]]
+
+    def CloseSearchHandle(self, handle):
+        pass
+
+
+def test_adsi_search_reads_every_value_range(mocker):
+    # Past AD's per-attribute limit, values arrive as `memberOf;range=0-1499`; reading only `memberOf` drops them all.
+    dn = 'CN=big/user,OU=Users,DC=corp'
+    searchers = {
+        'LDAP://dc1/DC=corp': FakeSearcher(
+            [{'ADsPath': ['LDAP://dc1/x'], 'distinguishedName': [dn], 'memberOf;range=0-1': ['g1', 'g2']}]
+        ),
+        # The rest is read from the object itself; `/` must be escaped in an ADsPath.
+        'LDAP://dc1/CN=big\\/user,OU=Users,DC=corp': FakeSearcher([{'memberOf;range=2-*': ['g3']}]),
+    }
+    mocker.patch('win32api.GetComputerNameEx', return_value='dc1')
+    mocker.patch('win32com.adsi.ADsGetObject', side_effect=lambda path, iid: searchers[path])
+
+    entries = list(AdsiDirectory().search('DC=corp', '(objectClass=user)', ['distinguishedName', 'memberOf']))
+
+    assert entries == [{'distinguishedName': [dn], 'memberOf': ['g1', 'g2', 'g3']}]
 
 
 def test_column_values_normalizes_adsi_buffers():
@@ -501,7 +562,13 @@ def test_pdc_sends_all_users_and_computers(aggregator, dd_run_check, fake_direct
         FakeDirectory(
             users=[user_entry(1, JDOE_DN, manager=[BOSS_DN]), user_entry(2, BOSS_DN)],
             computers=[computer_entry(3, 'WEB1')],
-            groups=[{'distinguishedName': [DOMAIN_ADMINS_DN], 'sAMAccountName': ['Domain Admins']}],
+            groups=[
+                {
+                    'distinguishedName': [DOMAIN_ADMINS_DN],
+                    'sAMAccountName': ['Domain Admins'],
+                    'objectSid': [sid_to_bytes(f'{DOMAIN_SID}-512')],
+                }
+            ],
             nested={DOMAIN_ADMINS_DN: [{'objectGUID': [guid(2)]}]},
         )
     )
@@ -535,6 +602,36 @@ def test_pdc_sends_all_users_and_computers(aggregator, dd_run_check, fake_direct
     )
     aggregator.assert_metric('active_directory.directory.crawl.duration', tags=tags)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_primary_group_counts_as_privileged_membership(aggregator, dd_run_check, fake_directory, clock):
+    # AD keeps the primary group out of memberOf; making Domain Admins the primary group is a known way to hide it.
+    domain_admins = {
+        'distinguishedName': [DOMAIN_ADMINS_DN],
+        'sAMAccountName': ['Domain Admins'],
+        'objectSid': [sid_to_bytes(f'{DOMAIN_SID}-512')],
+    }
+    administrators = {
+        'distinguishedName': [ADMINISTRATORS_DN],
+        'sAMAccountName': ['Administrators'],
+        'objectSid': [ADMINISTRATORS_SID_BYTES],
+    }
+    fake_directory(
+        FakeDirectory(
+            users=[user_entry(1, JDOE_DN, primaryGroupID=[512]), user_entry(2, BOSS_DN, primaryGroupID=[513])],
+            groups=[domain_admins, administrators],
+            nested_groups={ADMINISTRATORS_DN: [domain_admins]},
+        )
+    )
+    dd_run_check(ActiveDirectoryDirectoryCheck('active_directory', {}, [{'collect_directory': True}]))
+
+    records = {r.key: json.loads(r.fields_json) for r in decode_resources(aggregator)}
+    assert records[guid_str(1)]['privilege'] == {
+        'is_privileged': True,
+        'privileged_groups': ['Administrators', 'Domain Admins'],
+        'admin_count': False,
+    }
+    assert records[guid_str(2)]['privilege']['is_privileged'] is False
 
 
 def test_crawls_once_per_interval(aggregator, dd_run_check, fake_directory, clock):
