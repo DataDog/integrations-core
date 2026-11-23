@@ -3,7 +3,7 @@
   "additional_config_fields": [
     {
       "key": "api_domain",
-      "label": "API Domain",
+      "label": "API domain",
       "help": "Enter the API domain assigned to your Anomali ThreatStream instance, such as api.threatstream.com. The domain must end in threatstream.com.",
       "editable": true,
       "required": true,
@@ -20,15 +20,15 @@
     },
     {
       "key": "api_key",
-      "label": "API Key",
+      "label": "API key",
       "editable": true,
       "required": true,
       "password": {}
     },
     {
       "key": "domain_risk_enabled",
-      "label": "Collect Domain Indicators (Threat Intel Feed)",
-      "help": "Enrich logs with Anomali ThreatStream domain indicators data",
+      "label": "Collect domain indicators (threat intel feed)",
+      "help": "Enrich logs with Anomali ThreatStream domain indicator data.",
       "editable": true,
       "required": false,
       "checkbox": {
@@ -37,8 +37,8 @@
     },
     {
       "key": "ip_risk_enabled",
-      "label": "Collect IP Address Indicators (Threat Intel Feed)",
-      "help": "Enrich logs with Anomali ThreatStream ip address indicators data",
+      "label": "Collect IP address indicators (threat intel feed)",
+      "help": "Enrich logs with Anomali ThreatStream IP address indicator data.",
       "editable": true,
       "required": false,
       "checkbox": {
@@ -47,8 +47,8 @@
     },
     {
       "key": "hash_risk_enabled",
-      "label": "Collect hash SHA256 Indicators (Threat Intel Feed)",
-      "help": "Enrich logs with Anomali ThreatStream hash SHA256 indicators data",
+      "label": "Collect SHA256 hash indicators (threat intel feed)",
+      "help": "Enrich logs with Anomali ThreatStream SHA256 hash indicator data.",
       "editable": true,
       "required": false,
       "checkbox": {
