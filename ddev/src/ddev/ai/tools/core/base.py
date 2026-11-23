@@ -12,6 +12,8 @@ from typing import Any
 from anthropic.types import ToolParam
 from pydantic import BaseModel, ConfigDict, ValidationError
 
+from ddev.ai.errors import RunAbortError
+
 from .types import ToolResult
 from .validation import format_validation_error
 
@@ -127,6 +129,8 @@ class BaseTool[TInput: BaseToolInput](ABC):
             return ToolResult(success=False, error=str(e))
         try:
             return await self(validated)
+        except RunAbortError:
+            raise
         except Exception as e:
             msg = str(e) or repr(e)
             logger.exception("Unhandled exception in tool %s: %s", type(self).__name__, msg)

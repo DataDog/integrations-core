@@ -623,7 +623,7 @@ ModalScreen {
     padding: 1 2;
 }
 
-#phase-error-message {
+#phase-error-message, #credential-refresh-message {
     height: auto;
 }
 

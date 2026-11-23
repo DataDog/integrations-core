@@ -2,10 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import httpx2
+from unittest.mock import AsyncMock, Mock
 
-from ddev.ai.runtime.connections import DirectAuthScheme, DirectConnection
-from ddev.ai.runtime.tokens import DirectTokenProducer
+import httpx2
+import pytest
+
+from ddev.ai.runtime.connections import DirectAuthScheme, DirectConnection, GatewayConnection, RouteConnection
+from ddev.ai.runtime.gateway_transport import GATEWAY_BASE_URL
+from ddev.ai.runtime.tokens import DirectTokenProducer, TokenProducer
 
 
 async def test_direct_connection_applies_the_adapters_auth_scheme():
@@ -27,3 +31,35 @@ async def test_direct_connection_applies_the_adapters_auth_scheme():
         assert response.status_code == 200
     finally:
         await connection.aclose()
+
+
+@pytest.mark.parametrize("gateway", [True, False], ids=["gateway", "direct"])
+async def test_closing_one_client_leaves_the_run_connection_open(gateway, monkeypatch):
+    network = httpx2.MockTransport(lambda _: httpx2.Response(200))
+    close = AsyncMock(wraps=network.aclose)
+    monkeypatch.setattr(network, "aclose", close)
+    connection: RouteConnection
+    if gateway:
+        tokens = Mock(spec=TokenProducer)
+        tokens.token_for.return_value = "ddpat_token"
+        connection = GatewayConnection(tokens, transport=network)
+        base_url = GATEWAY_BASE_URL
+    else:
+        connection = DirectConnection(DirectTokenProducer({"test": lambda: "key"}), transport=network)
+        base_url = "https://provider.example"
+
+    def client() -> httpx2.AsyncClient:
+        return httpx2.AsyncClient(
+            base_url=base_url,
+            transport=connection.transport("test", direct_auth=DirectAuthScheme("Authorization", "Bearer ")),
+        )
+
+    try:
+        async with client() as remaining:
+            async with client() as first:
+                assert (await first.get("/models")).status_code == 200
+            assert (await remaining.get("/models")).status_code == 200
+        close.assert_not_awaited()
+    finally:
+        await connection.aclose()
+    close.assert_awaited_once()

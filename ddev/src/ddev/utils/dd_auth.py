@@ -19,6 +19,14 @@ class DdAuthLaunchError(DdAuthError):
     """The resolved `dd-auth` executable could not be started."""
 
 
+class DdAuthTimeoutError(DdAuthError):
+    """The credential lookup did not complete before the deadline."""
+
+
+class DdAuthLoginError(DdAuthError):
+    """The lookup reported that OAuth login was required or failed."""
+
+
 def find_dd_auth() -> str | None:
     """Look up `dd-auth` without searching relative PATH entries."""
     for entry in os.get_exec_path():
@@ -30,15 +38,29 @@ def find_dd_auth() -> str | None:
     return None
 
 
-async def acquire_datadog_pat(executable: str) -> str:
-    """Capture a Datadog PAT from `dd-auth --output` using the default domain."""
+async def acquire_datadog_pat(executable: str, *, rejected_pat: str | None = None) -> str:
+    """Capture a PAT for the default domain, bypassing the cache only to replace a rejected PAT."""
     env = os.environ.copy()
     env.pop("DD_AUTH_DOMAIN", None)
     env.pop("DD_AUTH_SHELL", None)
+    # Togo's use window assumes dd-auth's default cache lifetime.
+    env.pop("DD_AUTH_PAT_CACHE_DURATION", None)
+    try:
+        async with asyncio.timeout(TOKEN_TIMEOUT):
+            token = await _run_dd_auth(executable, env)
+            if token == rejected_pat:
+                token = await _run_dd_auth(executable, env, "--no-cache")
+            return token
+    except TimeoutError:
+        raise DdAuthTimeoutError(f"dd-auth timed out after {TOKEN_TIMEOUT} seconds.") from None
+
+
+async def _run_dd_auth(executable: str, env: dict[str, str], *flags: str) -> str:
     try:
         process = await asyncio.create_subprocess_exec(
             executable,
             "--output",
+            *flags,
             stdin=asyncio.subprocess.DEVNULL,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
@@ -48,19 +70,17 @@ async def acquire_datadog_pat(executable: str) -> str:
         raise DdAuthLaunchError("Could not launch dd-auth.") from None
 
     try:
-        async with asyncio.timeout(TOKEN_TIMEOUT):
-            stdout, stderr = await process.communicate()
-    except (TimeoutError, asyncio.CancelledError) as error:
+        stdout, stderr = await process.communicate()
+    except asyncio.CancelledError:
         with suppress(ProcessLookupError):
             process.kill()
         await process.communicate()
-        if isinstance(error, asyncio.CancelledError):
-            raise
-        raise DdAuthError(f"dd-auth timed out after {TOKEN_TIMEOUT} seconds.") from None
+        raise
 
     if process.returncode != 0:
-        failure = "dd-auth login required or failed" if b"oauth" in stderr.lower() else "dd-auth failed"
-        raise DdAuthError(f"{failure}.")
+        if b"oauth" in stderr.lower():
+            raise DdAuthLoginError("dd-auth login required or failed.")
+        raise DdAuthError("dd-auth failed.")
 
     # v2.0 emits the PAT as DD_APP_KEY; newer versions also emit DD_PAT.
     keys: dict[bytes, bytes] = {}

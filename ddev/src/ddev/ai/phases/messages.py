@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from ddev.event_bus.orchestrator import BaseMessage
@@ -15,4 +17,4 @@ class PhaseTrigger(BaseMessage):
 @dataclass
 class PhaseFailedMessage(BaseMessage):
     phase_id: str
-    error: str
+    error: Exception

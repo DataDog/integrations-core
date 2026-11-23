@@ -8,6 +8,7 @@ import anthropic
 
 from ddev.ai.agent.exceptions import AgentConnectionError, AgentError, ModelAccessError
 from ddev.ai.agent.provider import ModelAccessCheck
+from ddev.ai.errors import RunAbortError
 from ddev.ai.model_catalog import ANTHROPIC, ANTHROPIC_MESSAGES, ResolvedModel
 from ddev.ai.runtime.connections import DirectAuthScheme, RouteConnection
 
@@ -48,7 +49,7 @@ async def check_messages_access(client: anthropic.AsyncAnthropic, model: Resolve
     except (TimeoutError, anthropic.APITimeoutError):
         raise AgentConnectionError("Model access check timed out.", timed_out=True) from None
     except anthropic.APIConnectionError as error:
-        if isinstance(error.__cause__, AgentError):
+        if isinstance(error.__cause__, (AgentError, RunAbortError)):
             raise error.__cause__ from None
         raise AgentConnectionError("Model access check could not connect.") from None
     except anthropic.APIStatusError as error:

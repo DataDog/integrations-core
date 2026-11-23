@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import asyncio
+from functools import partial
 
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import AgentError, FlowStopRequested
@@ -10,6 +10,7 @@ from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.react.types import ReActResult
+from ddev.ai.runtime.parallel import gather_until_run_abort
 from ddev.ai.tools.core.types import ToolResult
 
 TOOL_RESULTS_SENTINEL = "Tool results"
@@ -97,10 +98,9 @@ class ReActProcess:
         return True
 
     async def _execute_tool_calls(self, tool_calls: list[ToolCall]) -> list[ToolResult]:
-        """Run all tool calls in parallel, converting any raised exception into a failure result."""
-        raw_results = await asyncio.gather(
-            *[self._tool_registry.run(tc.name, tc.input) for tc in tool_calls],
-            return_exceptions=True,
+        """Run tool calls in parallel, returning local tool failures to the agent."""
+        raw_results = await gather_until_run_abort(
+            partial(self._tool_registry.run, tc.name, tc.input) for tc in tool_calls
         )
         return [
             r if isinstance(r, ToolResult) else ToolResult(success=False, error=f"{type(r).__name__}: {r}")

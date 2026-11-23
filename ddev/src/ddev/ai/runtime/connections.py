@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from dataclasses import dataclass
-from functools import partial
 from typing import Protocol
 
 import httpx2
@@ -61,9 +60,7 @@ class GatewayConnection:
     def transport(self, provider: str, *, direct_auth: DirectAuthScheme) -> httpx2.AsyncBaseTransport:
         if self._transport is None:
             self._transport = httpx2.AsyncHTTPTransport(trust_env=False)
-        return GatewayTransport(
-            partial(self._tokens.token_for, provider), self._transport, direct_auth_header=direct_auth.header
-        )
+        return GatewayTransport(self._tokens, self._transport, provider=provider, direct_auth_header=direct_auth.header)
 
     async def aclose(self) -> None:
         if self._transport is not None:

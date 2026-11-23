@@ -19,7 +19,14 @@ from ddev.ai.model_catalog import Route
 from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.runtime.connections import DirectConnection, GatewayConnection, RouteConnection
-from ddev.ai.runtime.gateway_auth import DD_AUTH_INSTALL_HELP, LOGIN_HELP, GatewayAuthError, GatewayTokenProducer
+from ddev.ai.runtime.errors import CredentialRefreshError
+from ddev.ai.runtime.gateway_auth import (
+    DD_AUTH_INSTALL_HELP,
+    LOGIN_HELP,
+    REPLACE_PAT_HELP,
+    GatewayAuthError,
+    GatewayTokenProducer,
+)
 from ddev.ai.runtime.tokens import TokenProducer
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -113,6 +120,9 @@ class RunResources:
         try:
             await tokens.token_for(initial_agent.provider)
             return await registry.check_access(initial_agent)
+        except CredentialRefreshError as error:
+            # No phase has started; give startup retry guidance instead of interrupted-phase Resume steps.
+            raise GatewayAuthError(f"AI Gateway startup check failed. {error.cause} {REPLACE_PAT_HELP}") from None
         except AgentConnectionError as error:
             if error.timed_out:
                 raise GatewayAuthError(f"AI Gateway startup check timed out. Retry the run. {LOGIN_HELP}") from None

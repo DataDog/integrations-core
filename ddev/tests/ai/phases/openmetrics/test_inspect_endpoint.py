@@ -282,7 +282,7 @@ async def _assert_phase_fails(phase, checkpoint_mgr, message_queue, *, error_con
         assert error_contains.lower() in checkpoint.error.lower()
         msg = message_queue.get_nowait()
         assert isinstance(msg, PhaseFailedMessage)
-        assert error_contains.lower() in msg.error.lower()
+        assert error_contains.lower() in str(msg.error).lower()
         return raised
     pytest.fail(f"Expected process_message() to raise; error should contain {error_contains!r}")
 

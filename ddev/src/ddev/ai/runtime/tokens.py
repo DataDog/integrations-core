@@ -13,6 +13,10 @@ class TokenProducer(Protocol):
 
     async def token_for(self, provider: str) -> str: ...
 
+    def reject(self, token: str) -> None:
+        """Invalidate a matching credential if the producer supports replacement."""
+        ...
+
     def clear(self) -> None: ...
 
 
@@ -31,6 +35,9 @@ class DirectTokenProducer:
         if key is None:
             raise ResourceUnavailableError(f"No direct credential is configured for {provider}.")
         return key
+
+    def reject(self, token: str) -> None:
+        """Keep using the configured key; direct credentials cannot be refreshed."""
 
     def clear(self) -> None:
         self._keys.clear()
