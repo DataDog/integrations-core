@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import re
 import time
 from collections import namedtuple
@@ -35,7 +36,9 @@ from .util import (
     DatabaseConfigurationError,
     ManagedAuthConnectionMixin,
     StatementTruncationState,
+    get_obfuscate_only_options,
     get_truncation_state,
+    has_literal_values,
     warning_with_tags,
 )
 
@@ -252,6 +255,8 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
         }
         self._preferred_explain_strategies = ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT']
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
+        self._collect_raw_query_statement = self._config.collect_raw_query_statement["enabled"]
+        self._obfuscate_only_options = get_obfuscate_only_options(self._config.obfuscator_options)
         self._init_caches()
 
     def _init_caches(self):
@@ -389,8 +394,13 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
             num_sent += 1
 
     def _collect_plan_for_statement(self, row):
+        """
+        Returns the events to submit for the statement: nothing, its plan event, or, when raw query statements
+        are collected, its raw plan (`rqp`) event followed by its plan event.
+        """
         # Plans have several important signatures to tag events with:
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
+        # - `raw_signature` - hash computed from the raw JSON plan to look up the raw plan event
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the digest text to match query metrics
         try:
@@ -409,7 +419,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
                 tags=self._tags + ["error:sql-obfuscate"] + self._check._get_debug_tags(),
                 hostname=self._check.reported_hostname,
             )
-            return None
+            return []
 
         obfuscated_statement = statement['query']
         obfuscated_digest_text = statement_digest_text['query']
@@ -418,7 +428,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         query_cache_key = (row['current_schema'], query_signature)
         if not self._explained_statements_ratelimiter.acquire(query_cache_key):
-            return None
+            return []
 
         with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
             plan, error_states = self._explain_statement(
@@ -459,9 +469,9 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
             event_timestamp = time.time() * 1000
 
             if self._has_sampled_since_completion(row, event_timestamp):
-                return None
+                return []
 
-            return {
+            obfuscated_plan_event = {
                 "timestamp": event_timestamp,
                 "dbm_type": "plan",
                 "host": self._check.reported_hostname,
@@ -495,6 +505,21 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
                 },
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
+            if (
+                self._collect_raw_query_statement
+                and plan_signature
+                and has_literal_values(row['sql_text'], self._obfuscate_only_options, self._log)
+            ):
+                raw_plan_signature = compute_exec_plan_signature(plan)
+                raw_plan_event = copy.deepcopy(obfuscated_plan_event)
+                raw_plan_event["dbm_type"] = "rqp"  # raw query plan
+                raw_plan_event["db"]["statement"] = row['sql_text']
+                raw_plan_event["db"]["plan"]["definition"] = plan
+                raw_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
+                obfuscated_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
+                return [raw_plan_event, obfuscated_plan_event]
+            return [obfuscated_plan_event]
+        return []
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def _collect_plans_for_statements(self, rows):
@@ -506,9 +531,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
                     # and TIMER_START, TIMER_END, and TIMER_WAIT are all NULL.
                     self._log.debug("Skipping statement with missing timer_end: %s", row)
                     continue
-                event = self._collect_plan_for_statement(row)
-                if event:
-                    yield event
+                yield from self._collect_plan_for_statement(row)
             except Exception:
                 self._log.debug("Failed to collect plan for statement", exc_info=1)
 

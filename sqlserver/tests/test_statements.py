@@ -1588,3 +1588,55 @@ def test_plan_lookup_failure_during_cancellation_propagates(dbm_instance):
         pytest.raises(Exception, match='Job loop cancelled'),
     ):
         list(check.statement_metrics._collect_plans([_plan_row('cancelled')], mock.Mock(), float('inf')))
+
+
+def _query_stats_row(
+    query_plan_hash: str, procedure_name: str | None, execution_count: int, total_physical_reads: int
+) -> dict[str, object]:
+    return {
+        'database_name': 'master',
+        'query_signature': 'sig',
+        'query_hash': 'query-hash',
+        'query_plan_hash': query_plan_hash,
+        'procedure_name': procedure_name,
+        'execution_count': execution_count,
+        'total_physical_reads': total_physical_reads,
+    }
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'a, b, expected_both_ran',
+    [
+        pytest.param(('A', None), ('B', None), [(None, 13, 130)], id='two-plans'),
+        pytest.param(('P', 'dbo.p1'), ('P', 'dbo.p2'), [('dbo.p1', 10, 100), ('dbo.p2', 3, 30)], id='two-procedures'),
+    ],
+)
+def test_query_metrics_do_not_report_lifetime_counters_of_returning_row(instance_docker, a, b, expected_both_ran):
+    """Two query stats groups of one statement, where idle B leaves the collection and then comes back.
+
+    Regression test for SDBM-3132 and SDBM-1143: B's whole lifetime counter was reported as one interval.
+    """
+    instance_docker['dbm'] = True
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    collections = [
+        [_query_stats_row(*a, 100, 1_000), _query_stats_row(*b, 50_000, 700_000)],
+        [_query_stats_row(*a, 110, 1_100), _query_stats_row(*b, 50_003, 700_030)],
+        [_query_stats_row(*a, 120, 1_200)],
+        [_query_stats_row(*a, 130, 1_300), _query_stats_row(*b, 50_008, 700_080)],
+    ]
+    reported = []
+    for rows in collections:
+        with (
+            mock.patch.object(check.statement_metrics, '_load_raw_query_metrics_rows', return_value=rows),
+            mock.patch.object(check.statement_metrics, '_normalize_queries', side_effect=lambda r: r),
+        ):
+            result = check.statement_metrics._collect_metrics_rows(mock.Mock())
+        reported.append(sorted((r['procedure_name'], r['execution_count'], r['total_physical_reads']) for r in result))
+
+    assert reported == [
+        [],
+        expected_both_ran,
+        [(a[1], 10, 100)],
+        [(a[1], 10, 100)],
+    ]

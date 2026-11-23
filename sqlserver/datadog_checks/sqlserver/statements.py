@@ -213,6 +213,27 @@ def _row_key(row):
     return (row.get('database_name'), row['query_signature'], row['query_hash'], row.get('procedure_name'))
 
 
+def _plan_row_key(row):
+    """
+    Key at the grain of the collection query's counters. The query omits idle `query_plan_hash` groups, so
+    differencing a sum across plans would report a returning plan's lifetime totals.
+    """
+    return _row_key(row) + (row['query_plan_hash'],)
+
+
+def _sum_rows_by_row_key(rows, metric_columns):
+    rows_by_key = {}
+    for row in rows:
+        key = _row_key(row)
+        if key not in rows_by_key:
+            rows_by_key[key] = row
+            continue
+        merged = rows_by_key[key]
+        for column in metric_columns:
+            merged[column] += row[column]
+    return list(rows_by_key.values())
+
+
 XML_PLAN_OBFUSCATION_ATTRS = frozenset(
     {
         "StatementText",
@@ -507,8 +528,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if not rows:
             return []
         metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
-        return rows
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_plan_row_key)
+        return _sum_rows_by_row_key(rows, metric_columns)
 
     @staticmethod
     def _to_metrics_payload_row(row):
