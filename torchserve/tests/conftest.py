@@ -4,10 +4,12 @@
 import copy
 import json
 import os
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
@@ -129,10 +131,12 @@ FIXTURE_RESPONSES = {
 
 
 @pytest.fixture
-def mock_http_responses(fake_http, fake_http_response):
+def mock_http_responses(
+    fake_http: FakeHTTPClient, fake_http_response: Callable[..., FakeHTTPResponse]
+) -> Iterator[Callable[..., None]]:
     """Serve every fixture endpoint, optionally replacing the payload of the model list."""
 
-    def register(all_models_file: str = 'management/models.json'):
+    def register(all_models_file: str = 'management/models.json') -> None:
         for url, fixture in {**FIXTURE_RESPONSES, 'http://torchserve:8081/models': all_models_file}.items():
             with open(os.path.join(HERE, 'fixtures', fixture)) as f:
                 content = f.read()
