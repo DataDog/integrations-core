@@ -22,6 +22,7 @@ from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
 from ddev.ai.runtime.errors import CredentialRefreshError
+from ddev.ai.runtime.gateway_auth import LOGIN_INTERRUPTED_NOTE
 from ddev.cli.meta.ai.rendering import (
     render_agent_error_line,
     render_agent_finish_line,
@@ -39,6 +40,7 @@ from ddev.cli.meta.ai.rendering import (
     render_web_search_line,
 )
 from ddev.cli.meta.ai.tui.app import OrchestratorLike
+from ddev.cli.meta.ai.tui.login_prompt import TuiLoginPrompt
 from ddev.cli.meta.ai.tui.messages import (
     AfterGoalCheck,
     AgentBeforeSend,
@@ -185,15 +187,20 @@ class ExecutionScreen(TogoScreen):
 
         callbacks = Callbacks([build_app_callback_set(self.togo_app)])
         orchestrator: OrchestratorLike | None = None
+        real_orchestrator = None
 
         try:
             if self._orchestrator_builder is not None:
                 orchestrator = self._orchestrator_builder(callbacks)
             else:
-                orchestrator = self._build_real_orchestrator(callbacks)
+                real_orchestrator = self._build_real_orchestrator(callbacks)
+                orchestrator = real_orchestrator
             self._orchestrator = orchestrator
             await orchestrator.run_async()
-            self.togo_app.execution_status = ExecutionStatus.COMPLETED
+            if real_orchestrator is not None and (timeout := real_orchestrator.login_timeout) is not None:
+                self.post_message(ExecutionFailed(timeout))
+            else:
+                self.togo_app.execution_status = ExecutionStatus.COMPLETED
         except asyncio.CancelledError:
             if self.togo_app.bridge_target is self:
                 self.togo_app.execution_status = ExecutionStatus.IDLE
@@ -241,6 +248,7 @@ class ExecutionScreen(TogoScreen):
             resume=self.resume,
             report_route=self._show_route,
             prepare_run_directory=prepare_run_directory,
+            gateway_login_prompt=TuiLoginPrompt(self.togo_app),
         )
 
     def _show_route(self, route: RunRoute) -> None:
@@ -390,7 +398,13 @@ class ExecutionScreen(TogoScreen):
 
     def on_execution_failed(self, msg: ExecutionFailed) -> None:
         self.togo_app.execution_status = ExecutionStatus.FAILED
+        if LOGIN_INTERRUPTED_NOTE in getattr(msg.error, "__notes__", ()):
+            self._show_error_banner(f"{msg.error}\n\n{LOGIN_INTERRUPTED_NOTE}")
+            return
         if isinstance(msg.error, CredentialRefreshError):
+            if msg.error.login_cancelled:
+                self._show_error_banner(str(msg.error))
+                return
             self.app.push_screen(CredentialRefreshModal(msg.error))
             if self._phase_errors:
                 return

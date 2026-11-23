@@ -15,11 +15,14 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
+from ddev.ai.runtime.errors import CredentialRefreshError
+from ddev.ai.runtime.gateway_auth import LOGIN_INTERRUPTED_NOTE
+from ddev.ai.runtime.login_prompt import LoginPrompt, TerminalLoginPrompt
 from ddev.ai.runtime.resources import RunResources, RunRoute
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, OrchestratorHookError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
-from ddev.event_bus.shutdown import ShutdownRequest
+from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 
 DEFAULT_GRACE_PERIOD = 10.0
 
@@ -40,6 +43,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         *,
         report_route: Callable[[RunRoute], None] | None = None,
         prepare_run_directory: Callable[[], None] | None = None,
+        gateway_login_prompt: LoginPrompt | None = None,
     ) -> None:
         """Initialize the orchestrator.
 
@@ -75,6 +79,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._resume = resume
         self._report_route = report_route
         self._prepare_run_directory = prepare_run_directory
+        self._gateway_login_prompt = TerminalLoginPrompt() if gateway_login_prompt is None else gateway_login_prompt
+        self.login_timeout: Exception | None = None
         self._resources: RunResources | None = None
         self._agent_logger: AgentLogger | None = None
         self._failed_phase: str | None = None
@@ -113,6 +119,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
             file_access_policy=self._file_access_policy,
             agents=self._resolved_flow.agents,
             callbacks=run_callbacks,
+            gateway_login_prompt=self._gateway_login_prompt,
         )
         try:
             check = await self._resources.prepare(self._announce_route, initial_agent=initial_agent)
@@ -174,11 +181,22 @@ class PhaseOrchestrator(EventBusOrchestrator):
 
     async def on_error(self, error: OrchestratorHookError) -> None:
         """Stop the run after an unexpected orchestrator failure."""
+        if isinstance(error.original_exception, CredentialRefreshError):
+            # Record the original error so run_async() raises it after cleanup.
+            # The TUI needs its type to show login recovery instead of a generic failure.
+            self.request_shutdown(ShutdownRequest.failed(error.original_exception))
+            return
         raise FatalProcessingError(str(error)) from error.original_exception
 
     async def on_finalize(self, exception: Exception | None) -> None:
         try:
             if self._resources is not None:
+                shutdown = self.shutdown_request
+                if shutdown is not None and shutdown.kind is ShutdownKind.TIMED_OUT:
+                    if self._resources.gateway_login_interrupted and shutdown.error is not None:
+                        self.login_timeout = shutdown.error
+                        self.login_timeout.add_note(LOGIN_INTERRUPTED_NOTE)
+                        self._logger.warning("%s", LOGIN_INTERRUPTED_NOTE)
                 await self._resources.close()
         finally:
             if self._agent_logger is not None:

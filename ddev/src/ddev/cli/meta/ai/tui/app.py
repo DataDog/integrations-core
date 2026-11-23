@@ -73,6 +73,7 @@ class TogoApp(App):
     ENABLE_COMMAND_PALETTE = False
 
     execution_status: reactive[ExecutionStatus] = reactive(ExecutionStatus.IDLE)
+    gateway_login_pending = reactive(False)
 
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit"),

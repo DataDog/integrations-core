@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from collections.abc import Callable
+
 import httpx2
 
-from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentRateLimitError
+from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentRateLimitError, ModelAccessError
 from ddev.ai.runtime.errors import RefreshFailureCause
 from ddev.ai.runtime.gateway_auth import LOGIN_HELP, REPLACE_PAT_HELP, GatewayAuthError, gateway_refresh_error
 from ddev.ai.runtime.tokens import TokenProducer
@@ -27,11 +29,13 @@ class GatewayTransport(httpx2.AsyncBaseTransport):
         *,
         provider: str,
         direct_auth_header: str = "authorization",
+        token_for_probe: Callable[[], str | None] | None = None,
     ) -> None:
         self._tokens = tokens
         self._provider = provider
         self._transport = transport
         self._direct_auth_header = direct_auth_header
+        self._token_for_probe = token_for_probe
 
     async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
         """Send the request without exposing the PAT or error response body to the SDK."""
@@ -44,8 +48,12 @@ class GatewayTransport(httpx2.AsyncBaseTransport):
             request.headers.pop(header, None)
         request.headers[ATTRIBUTION_HEADER] = TOGO_ML_APP_ID
         replayable = isinstance(request.stream, httpx2.ByteStream)
-        token = await self._tokens.token_for(self._provider)
+        probe_token = self._token_for_probe() if self._token_for_probe is not None else None
+        token = probe_token if probe_token is not None else await self._tokens.token_for(self._provider)
         response = await self._send(request, token)
+        if response.status_code == 401 and probe_token is not None:
+            await response.aclose()
+            raise ModelAccessError(401)
         if response.status_code == 401 and replayable:
             self._tokens.reject(token)
             await response.aclose()
