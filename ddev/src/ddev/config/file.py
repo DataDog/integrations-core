@@ -162,7 +162,7 @@ class ConfigFileWithOverrides:
         self.combined_model = RootConfig(
             deep_merge_with_list_handling(
                 cast(RootConfig, self.global_model).raw_data,
-                self.overrides_model.raw_data,
+                {key: value for key, value in self.overrides_model.raw_data.items() if key != "ai"},
             )
         )
         self.combined_content = dumps_toml_data(self.combined_model.raw_data)
@@ -199,16 +199,19 @@ class ConfigFileWithOverrides:
             )
 
         line_sources = {}
-        # Use SequenceMatcher to find matching lines and their sources
+        in_ai_table = False
         for line_number, line in enumerate(combined_lines):
             stripped_line = line.strip()
 
             if not stripped_line:  # Skip empty lines
                 continue
 
+            if stripped_line.startswith("["):
+                in_ai_table = stripped_line == "[ai]" or stripped_line.startswith(("[ai.", "[[ai."))
+
             try:
-                # Check if this line exists in the overrides config
-                if stripped_line in overrides_index:
+                # AI settings only come from the global config, even if the override has identical lines.
+                if not in_ai_table and stripped_line in overrides_index:
                     line_sources[line_number] = f"Overrides:{overrides_index[stripped_line].pop(0)}"
                 # If not found in overrides, it must be from global
                 elif stripped_line in global_index:

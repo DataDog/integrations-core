@@ -6,6 +6,31 @@ import pytest
 from .utils import get_legacy_check
 
 
+def test_legacy_bearer_token_translation_reaches_http_client(tmp_path, mocker):
+    token_path = str(tmp_path / 'token')
+    check = get_legacy_check({'bearer_token_auth': True, 'bearer_token_path': token_path})
+    create_http_client = mocker.spy(check, 'create_http_client')
+    check.configure_scrapers()
+
+    create_http_client.assert_called_once()
+    assert create_http_client.call_args.args[0]['auth_token'] == {
+        'reader': {'type': 'file', 'path': token_path},
+        'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+    }
+
+
+def test_scraper_http_configuration_is_endpoint_scoped():
+    check = get_legacy_check()
+    check.scraper_configs = [
+        {'openmetrics_endpoint': 'http://first', 'headers': {'X-Endpoint': 'first'}},
+        {'openmetrics_endpoint': 'http://second', 'headers': {'X-Endpoint': 'second'}},
+    ]
+    check.configure_scrapers()
+
+    assert check.scrapers['http://first'].http.get_header('X-Endpoint') == 'first'
+    assert check.scrapers['http://second'].http.get_header('X-Endpoint') == 'second'
+
+
 class TestRawMetricPrefix:
     def test_not_string(self, dd_run_check):
         check = get_legacy_check({'prometheus_metrics_prefix': 9000})

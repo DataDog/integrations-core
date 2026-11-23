@@ -1,1 +1,0 @@
-Fetch only uncached partitions when the earliest-offsets cache is fresh, so one unfetchable partition no longer bypasses the cache for all partitions.

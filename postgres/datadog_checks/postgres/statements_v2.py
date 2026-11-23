@@ -10,6 +10,7 @@ import time
 import psycopg
 from cachetools import TTLCache
 from psycopg.rows import dict_row
+from psycopg.types.numeric import Int8
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.query_metrics import (
@@ -358,9 +359,12 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         if not keys:
             return {}
         ordered = sorted(keys)
-        qids = [k[0] for k in ordered]
-        dbids = [k[1] for k in ordered]
-        userids = [k[2] for k in ordered]
+        # The cursor binds client-side, so psycopg renders each list as a literal with an array cast
+        # chosen from its values (int2[], int4[], or int8[]), and Postgres records that cast in the
+        # text it tracks for this query. Int8 pins the cast so the query keeps a single signature.
+        qids = [Int8(k[0]) for k in ordered]
+        dbids = [Int8(k[1]) for k in ordered]
+        userids = [Int8(k[2]) for k in ordered]
         try:
             rows, _ = self._execute_query(
                 QUERY_TEXT_FETCH,

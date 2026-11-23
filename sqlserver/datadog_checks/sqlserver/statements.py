@@ -24,7 +24,12 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
+from datadog_checks.sqlserver.utils import (
+    append_agent_service_comment,
+    is_azure_sql_database,
+    needs_comment_recovery,
+    raise_if_cancelled,
+)
 
 DEFAULT_COLLECTION_INTERVAL = 60
 
@@ -208,12 +213,34 @@ def _row_key(row):
     return (row.get('database_name'), row['query_signature'], row['query_hash'], row.get('procedure_name'))
 
 
+def _plan_row_key(row):
+    """
+    Key at the grain of the collection query's counters. The query omits idle `query_plan_hash` groups, so
+    differencing a sum across plans would report a returning plan's lifetime totals.
+    """
+    return _row_key(row) + (row['query_plan_hash'],)
+
+
+def _sum_rows_by_row_key(rows, metric_columns):
+    rows_by_key = {}
+    for row in rows:
+        key = _row_key(row)
+        if key not in rows_by_key:
+            rows_by_key[key] = row
+            continue
+        merged = rows_by_key[key]
+        for column in metric_columns:
+            merged[column] += row[column]
+    return list(rows_by_key.values())
+
+
 XML_PLAN_OBFUSCATION_ATTRS = frozenset(
     {
         "StatementText",
         "ConstValue",
         "ScalarString",
         "ParameterCompiledValue",
+        "ParameterRuntimeValue",
     }
 )
 
@@ -288,6 +315,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
         self._collect_execution_plans = is_affirmative(self._config.statement_metrics_config.get('collect_plans', True))
         self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
+        obfuscator_options = json.loads(self._config.obfuscator_options)
+        self._collect_comments = bool(
+            obfuscator_options.get('return_json_metadata') and obfuscator_options.get('collect_comments')
+        )
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -475,6 +506,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 # convert to lowercase for backward compatibility
                 row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}".lower()
 
+            if self._collect_comments:
+                comments = append_agent_service_comment(comments, row.get('text'))
+
             row['dd_comments'] = comments
             row['text'] = obfuscated_statement
             row['query_signature'] = query_signature
@@ -494,8 +528,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if not rows:
             return []
         metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
-        return rows
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_plan_row_key)
+        return _sum_rows_by_row_key(rows, metric_columns)
 
     @staticmethod
     def _to_metrics_payload_row(row):
@@ -743,8 +777,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     raw_plan_event = copy.deepcopy(obfuscated_plan_event)
                     raw_plan_event["dbm_type"] = "rqp"  # raw query plan
                     raw_plan_event["db"]["plan"]["definition"] = raw_plan
-                    # add the raw signature to the event so we can use it to look up the raw plan
-                    raw_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
-                    obfuscated_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
+                    if raw_plan:
+                        # add the raw signature to the event so we can use it to look up the raw plan.
+                        # query_plan_hash only identifies the plan shape, so hash the raw plan content instead.
+                        raw_plan_signature = compute_sql_signature(raw_plan)
+                        raw_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
+                        obfuscated_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
                     yield raw_plan_event
                 yield obfuscated_plan_event

@@ -5,7 +5,22 @@ import re
 
 import ibm_db
 
+from datadog_checks.base import to_native_string
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.utils.serialization import json
+
+OBFUSCATION_OPTIONS = to_native_string(
+    json.dumps(
+        {
+            'obfuscation_mode': 'obfuscate_and_normalize',
+            'dbms': 'ibm_db2',
+            'return_json_metadata': True,
+            'table_names': True,
+            'collect_commands': True,
+            'collect_comments': True,
+        }
+    )
+)
 
 CONN_STRING_PASSWORD = re.compile('(?:^|;)pwd=([^;]+)')
 

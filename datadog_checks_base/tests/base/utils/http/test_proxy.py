@@ -244,3 +244,18 @@ def test_proxy_passes_right_params_to_requests(proxy, expected_proxy, url):
             'allow_redirects': True,
         }
         mock_get.assert_called_with(url, **call_args)
+
+
+class TestShouldBypassProxy:
+    def test_no_no_proxy_rules_never_bypasses(self):
+        http = RequestsWrapper({}, {})
+        assert http.no_proxy_uris is None
+        assert http.should_bypass_proxy('http://example.com') is False
+
+    def test_matching_host_bypasses(self):
+        http = RequestsWrapper({'proxy': {'http': 'http://p:3128', 'no_proxy': 'example.com'}}, {})
+        assert http.should_bypass_proxy('http://example.com/path') is True
+
+    def test_non_matching_host_does_not_bypass(self):
+        http = RequestsWrapper({'proxy': {'http': 'http://p:3128', 'no_proxy': 'example.com'}}, {})
+        assert http.should_bypass_proxy('http://other.com') is False

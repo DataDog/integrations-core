@@ -501,7 +501,8 @@ def test_statement_metrics_and_plans(
         raw_plan_events = [s for s in matching_samples if s['dbm_type'] == "rqp"]
         # raw plan events should be one to one with the plan events
         assert len(raw_plan_events) == 1, "should have collected exactly one raw plan event"
-        for event in plan_events:
+        plan_event = plan_events[0]
+        for event in raw_plan_events:
             if is_encrypted:
                 assert not event['db']['plan']['definition']
                 assert event['sqlserver']['is_plan_encrypted']
@@ -513,6 +514,12 @@ def test_statement_metrics_and_plans(
             else:
                 assert event['db']['plan']['definition'], "event plan definition missing"
                 assert event['db']['plan']['raw_signature'], "event plan raw signature missing"
+                assert event['db']['plan']['raw_signature'] == plan_event['db']['plan']['raw_signature'], (
+                    "raw plan event and plan event should share the raw signature"
+                )
+                assert event['db']['plan']['raw_signature'] != event['sqlserver']['query_plan_hash'], (
+                    "raw signature should hash the raw plan, not identify the plan shape"
+                )
                 parsed_plan = ET.fromstring(event['db']['plan']['definition'])
                 assert parsed_plan.tag.endswith("ShowPlanXML"), "plan does not match expected structure"
                 assert not event['sqlserver']['is_plan_encrypted']
@@ -589,7 +596,8 @@ def test_statement_metrics_limit(
         ),
         (
             {'tables_csv': '', 'commands': None, 'comments': []},
-            {'tables': None, 'commands': None, 'comments': []},
+            # The batch text contains the Agent comment, so recovery adds it when the obfuscator omits it.
+            {'tables': None, 'commands': None, 'comments': ["/* service='datadog-agent' */"]},
         ),
     ],
 )
@@ -897,6 +905,8 @@ def _mock_sql_obfuscate(sql_string, options=None):
     [
         ("test1_raw.xml", "test1_obfuscated.xml"),
         ("test2_raw.xml", "test2_obfuscated.xml"),
+        # actual plan: ParameterRuntimeValue holds the parameter value of the captured execution
+        ("test3_raw.xml", "test3_obfuscated.xml"),
     ],
 )
 def test_obfuscate_xml_plan(test_file, obfuscated_file, datadog_agent):
@@ -1273,6 +1283,37 @@ def test_normalize_queries_recovers_leading_comment_for_non_proc_statement(insta
 
 
 @pytest.mark.unit
+def test_normalize_queries_recovers_agent_service_comment(instance_docker, datadog_agent):
+    instance_docker['dbm'] = True
+    instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    comment = "/* service='datadog-agent' */"
+    statement_text = "SELECT * FROM orders WHERE customer_id = @P1"
+    row = {
+        'statement_text': statement_text,
+        'text': f"(@P1 int){comment} {statement_text}",
+        'procedure_name': None,
+        'schema_name': None,
+        'sproc_object_id': None,
+        'query_hash': b'\x01\x02\x03\x04',
+        'query_plan_hash': b'\x05\x06\x07\x08',
+        'plan_handle': b'\x09\x0a\x0b\x0c',
+    }
+
+    def _obfuscate_sql(sql_query, options=None):
+        comments = [comment] if comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        result = check.statement_metrics._normalize_queries([row])
+
+    assert result[0]['dd_comments'] == [comment]
+    assert mock_agent.call_count == 1
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'text,statement_text,expected_comments',
     [
@@ -1496,6 +1537,44 @@ def test_plan_lookup_failure_allows_later_rows_and_retry(aggregator, dbm_instanc
 
 
 @pytest.mark.unit
+def test_collect_plans_raw_signature_hashes_raw_plan(dbm_instance):
+    """Plans of the same shape get distinct raw signatures, shared by each plan event and its raw copy."""
+    dbm_instance['collect_raw_query_statement'] = {'enabled': True}
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    first_row = _plan_row('first')
+    second_row = _plan_row('second')
+    encrypted_row = _plan_row('encrypted')
+    for row in (first_row, second_row, encrypted_row):
+        row['query_plan_hash'] = 'shared-plan-hash'
+    plans = [
+        ('<ShowPlanXML><QueryPlan CompileTime="1"/></ShowPlanXML>', False),
+        ('<ShowPlanXML><QueryPlan CompileTime="2"/></ShowPlanXML>', False),
+        (None, True),
+    ]
+
+    with mock.patch.object(check.statement_metrics, '_load_plan', side_effect=plans):
+        events = list(
+            check.statement_metrics._collect_plans([first_row, second_row, encrypted_row], mock.Mock(), float('inf'))
+        )
+
+    raw_signatures = {
+        (event['db']['query_signature'], event['dbm_type']): event['db']['plan'].get('raw_signature')
+        for event in events
+    }
+    assert len(raw_signatures) == 6
+    first_signature = raw_signatures[('first', 'plan')]
+    second_signature = raw_signatures[('second', 'plan')]
+    assert first_signature and second_signature
+    assert raw_signatures[('first', 'rqp')] == first_signature
+    assert raw_signatures[('second', 'rqp')] == second_signature
+    assert first_signature != second_signature
+    assert 'shared-plan-hash' not in (first_signature, second_signature)
+    # no raw plan to look up, so no raw signature
+    assert raw_signatures[('encrypted', 'plan')] is None
+    assert raw_signatures[('encrypted', 'rqp')] is None
+
+
+@pytest.mark.unit
 def test_plan_lookup_failure_during_cancellation_propagates(dbm_instance):
     """Cancellation during a failing plan lookup still aborts plan collection."""
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
@@ -1509,3 +1588,55 @@ def test_plan_lookup_failure_during_cancellation_propagates(dbm_instance):
         pytest.raises(Exception, match='Job loop cancelled'),
     ):
         list(check.statement_metrics._collect_plans([_plan_row('cancelled')], mock.Mock(), float('inf')))
+
+
+def _query_stats_row(
+    query_plan_hash: str, procedure_name: str | None, execution_count: int, total_physical_reads: int
+) -> dict[str, object]:
+    return {
+        'database_name': 'master',
+        'query_signature': 'sig',
+        'query_hash': 'query-hash',
+        'query_plan_hash': query_plan_hash,
+        'procedure_name': procedure_name,
+        'execution_count': execution_count,
+        'total_physical_reads': total_physical_reads,
+    }
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'a, b, expected_both_ran',
+    [
+        pytest.param(('A', None), ('B', None), [(None, 13, 130)], id='two-plans'),
+        pytest.param(('P', 'dbo.p1'), ('P', 'dbo.p2'), [('dbo.p1', 10, 100), ('dbo.p2', 3, 30)], id='two-procedures'),
+    ],
+)
+def test_query_metrics_do_not_report_lifetime_counters_of_returning_row(instance_docker, a, b, expected_both_ran):
+    """Two query stats groups of one statement, where idle B leaves the collection and then comes back.
+
+    Regression test for SDBM-3132 and SDBM-1143: B's whole lifetime counter was reported as one interval.
+    """
+    instance_docker['dbm'] = True
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    collections = [
+        [_query_stats_row(*a, 100, 1_000), _query_stats_row(*b, 50_000, 700_000)],
+        [_query_stats_row(*a, 110, 1_100), _query_stats_row(*b, 50_003, 700_030)],
+        [_query_stats_row(*a, 120, 1_200)],
+        [_query_stats_row(*a, 130, 1_300), _query_stats_row(*b, 50_008, 700_080)],
+    ]
+    reported = []
+    for rows in collections:
+        with (
+            mock.patch.object(check.statement_metrics, '_load_raw_query_metrics_rows', return_value=rows),
+            mock.patch.object(check.statement_metrics, '_normalize_queries', side_effect=lambda r: r),
+        ):
+            result = check.statement_metrics._collect_metrics_rows(mock.Mock())
+        reported.append(sorted((r['procedure_name'], r['execution_count'], r['total_physical_reads']) for r in result))
+
+    assert reported == [
+        [],
+        expected_both_ran,
+        [(a[1], 10, 100)],
+        [(a[1], 10, 100)],
+    ]

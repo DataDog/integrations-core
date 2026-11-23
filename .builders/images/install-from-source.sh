@@ -21,7 +21,7 @@ workdir="/tmp/build-${archive_name}"
 mkdir -p "${workdir}"
 
 curl "${url}" -Lo "${workdir}/${archive_name}"
-echo "${SHA256}  ${workdir}/${archive_name}" | sha256sum --check
+echo "${SHA256}  ${workdir}/${archive_name}" | sha256sum -c -
 tar -C "${workdir}" -xf "${workdir}/${archive_name}"
 pushd "${workdir}/${relative_path}"
 

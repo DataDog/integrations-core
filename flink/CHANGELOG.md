@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.4.1 / 2026-10-29
+
+***Fixed***:
+
+* Submit Flink Counter metrics (`numRecordsIn`, `numRecordsOut`, etc.) as `count` instead of `gauge` in the OpenMetrics-based collection mode. ([#24740](https://github.com/DataDog/integrations-core/pull/24740))
+
 ## 3.4.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:

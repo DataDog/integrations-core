@@ -50,6 +50,7 @@ from .factories import (
     make_file_content,
     make_git_object,
     make_git_reference,
+    make_git_tag,
     make_github_user,
     make_issue_comment,
     make_job_step,
@@ -65,6 +66,7 @@ from .factories import (
     make_workflow_job,
     make_workflow_jobs_list,
     make_workflow_run,
+    make_workflow_runs_list,
 )
 from .fake_client import DEFAULT_COMMENT_ID, DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient, RecordedRequest
 
@@ -86,6 +88,7 @@ __all__ = [
     'make_file_content',
     'make_git_object',
     'make_git_reference',
+    'make_git_tag',
     'make_github_user',
     'make_issue_comment',
     'make_job_step',
@@ -101,4 +104,5 @@ __all__ = [
     'make_workflow_job',
     'make_workflow_jobs_list',
     'make_workflow_run',
+    'make_workflow_runs_list',
 ]

@@ -456,6 +456,104 @@ def test_statement_metrics_reused_prepared_statement_instance_id_is_not_merged(d
     assert rows == []
 
 
+@pytest.mark.unit
+def test_statement_metrics_deallocated_prepared_statement_instances_are_not_retained(dbm_instance, datadog_agent):
+    # Clients that re-prepare a statement for every execution produce a new object_instance_begin per run. Once an
+    # instance is gone from prepared_statements_instances its cached row must be dropped, or the cache grows forever
+    # for any signature that stays active.
+    normalized_query = 'SELECT `id` FROM `dbm_order` WHERE `id` = ?'
+    query_signature = compute_sql_signature(normalized_query)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    statement_metrics = mysql_check.statement_metrics
+    runs = 50
+
+    def prepared_row(object_instance_begin, count_star):
+        return {
+            '_dd_statement_id': object_instance_begin,
+            'schema_name': 'personio',
+            'digest': None,
+            'digest_text': 'SELECT id FROM dbm_order WHERE id = ?',
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    def obfuscate_sql(query, options=None):
+        return json.dumps({'query': normalized_query, 'metadata': {}})
+
+    rows_by_run = iter([[prepared_row(1000 + run, 1)] for run in range(runs)])
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
+        mock.patch.object(statement_metrics, '_get_statement_count'),
+        mock.patch.object(statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+    ):
+        mock_agent.side_effect = obfuscate_sql
+
+        for _ in range(runs):
+            statement_metrics._collect_per_statement_metrics([])
+
+    assert len(statement_metrics._statement_rows[('personio', query_signature)]) == 1
+    assert len(statement_metrics._state._previous_statements) == 1
+
+
+@pytest.mark.unit
+def test_statement_metrics_live_prepared_statement_instance_keeps_its_baseline(dbm_instance, datadog_agent):
+    # Dropping deallocated instances must not touch instances that are still allocated, or digests that are absent
+    # from a run: those rows are kept so a statement that returns later is diffed rather than dumped.
+    normalized_query = 'SELECT `id` FROM `dbm_order` WHERE `id` = ?'
+    query_signature = compute_sql_signature(normalized_query)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    statement_metrics = mysql_check.statement_metrics
+
+    def prepared_row(object_instance_begin, count_star):
+        return {
+            '_dd_statement_id': object_instance_begin,
+            'schema_name': 'personio',
+            'digest': None,
+            'digest_text': 'SELECT id FROM dbm_order WHERE id = ?',
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    def digest_row(count_star):
+        return {
+            '_dd_statement_id': None,
+            'schema_name': 'personio',
+            'digest': 'digest-a',
+            'digest_text': 'SELECT id FROM dbm_order WHERE id = ?',
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    rows_by_run = iter(
+        [
+            [digest_row(100), prepared_row(1001, 10), prepared_row(2002, 20)],
+            # the digest row is absent and 2002 was deallocated; 1001 is still allocated
+            [prepared_row(1001, 15)],
+            [digest_row(107), prepared_row(1001, 18)],
+        ]
+    )
+
+    def obfuscate_sql(query, options=None):
+        return json.dumps({'query': normalized_query, 'metadata': {}})
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
+        mock.patch.object(statement_metrics, '_get_statement_count'),
+        mock.patch.object(statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+    ):
+        mock_agent.side_effect = obfuscate_sql
+
+        assert statement_metrics._collect_per_statement_metrics([]) == []
+        second = statement_metrics._collect_per_statement_metrics([])
+        third = statement_metrics._collect_per_statement_metrics([])
+
+    assert [row['count_star'] for row in second] == [5]
+    # digest-a contributes its delta (7) and 1001 contributes 3
+    assert [row['count_star'] for row in third] == [10]
+    assert len(statement_metrics._statement_rows[('personio', query_signature)]) == 2
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
