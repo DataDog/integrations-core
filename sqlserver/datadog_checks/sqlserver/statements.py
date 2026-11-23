@@ -76,14 +76,15 @@ qstats_aggr as (
         query_plan_hash,
         CAST(qs.dbid as int) as dbid,
         D.name as database_name,
-        max(plan_handle_and_offsets) as plan_handle_and_offsets,
+        plan_handle_and_offsets,
         max(last_execution_time) as last_execution_time,
         max(last_elapsed_time) as last_elapsed_time,
         sproc_object_id,
         {query_metrics_column_sums}
     from qstats qs
     left join sys.databases D on qs.dbid = D.database_id
-    group by query_hash, query_plan_hash, qs.dbid, D.name, sproc_object_id
+    group by query_hash, query_plan_hash, qs.dbid, D.name, sproc_object_id,
+             plan_handle_and_offsets
 ),
 qstats_aggr_split as (
     select TOP {limit}
@@ -168,13 +169,14 @@ qstats_aggr as (
         query_plan_hash,
         CAST(qs.dbid as int) as dbid,
         DB_NAME(CAST(qs.dbid as int)) as database_name,
-        max(plan_handle_and_offsets) as plan_handle_and_offsets,
+        plan_handle_and_offsets,
         max(last_execution_time) as last_execution_time,
         max(last_elapsed_time) as last_elapsed_time,
         sproc_object_id,
         {query_metrics_column_sums}
     from qstats qs
-    group by query_hash, query_plan_hash, qs.dbid, sproc_object_id
+    group by query_hash, query_plan_hash, qs.dbid, sproc_object_id,
+             plan_handle_and_offsets
 ),
 qstats_aggr_split as (
     select TOP {limit}
@@ -211,6 +213,31 @@ def _row_key(row):
     :return: a tuple uniquely identifying this row
     """
     return (row.get('database_name'), row['query_signature'], row['query_hash'], row.get('procedure_name'))
+
+
+def _plan_row_key(row):
+    """Delta grain: the cached plan itself.
+
+    Counters in sys.dm_exec_query_stats accumulate per plan_handle, and that is the only grain
+    at which they are monotonic. query_plan_hash still sums several handles together, and that
+    sum drops whenever one of them is evicted.
+    """
+    return _row_key(row) + (row['plan_handle'], row['statement_start_offset'], row['statement_end_offset'])
+
+
+def _merge_plan_rows(rows, metric_columns):
+    """Collapse per-plan deltas back to the reporting grain. Summing deltas is safe; summing
+    the lifetime counters they came from is not."""
+    merged = {}
+    for row in rows:
+        key = _row_key(row)
+        existing = merged.get(key)
+        if existing is None:
+            merged[key] = row
+            continue
+        for column in metric_columns:
+            existing[column] += row[column]
+    return list(merged.values())
 
 
 XML_PLAN_OBFUSCATION_ATTRS = frozenset(
@@ -285,7 +312,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.enforce_collection_interval_deadline = is_affirmative(
             self._config.statement_metrics_config.get('enforce_collection_interval_deadline', True)
         )
-        self._state = StatementMetrics()
+        self._state = StatementMetrics(
+            retain_absent_keys=60,
+            max_size=4 * self.dm_exec_query_stats_row_limit,
+            emit_new_keys=True,
+        )
         self._init_caches()
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
@@ -507,8 +538,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if not rows:
             return []
         metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
-        return rows
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_plan_row_key)
+        return _merge_plan_rows(rows, metric_columns)
 
     @staticmethod
     def _to_metrics_payload_row(row):

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from itertools import islice
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +20,22 @@ class StatementMetrics:
     in values between check runs.
     """
 
-    def __init__(self):
+    def __init__(self, retain_absent_keys=0, max_size=None, emit_new_keys=False):
+        """
+        :params retain_absent_keys (_int_): consecutive calls a key may be missing from `rows`
+            before its previous reading is discarded. 0 keeps the historical behaviour.
+        :params max_size (_int_): cap on retained readings, least-recently-seen evicted first.
+        :params emit_new_keys (_bool_): emit a key's whole counter the first time it is seen.
+            Correct only when the source lists just rows active in the last few intervals, so a
+            key never seen cannot have been active before and its counter is all new work. The
+            very first call is exempt, since everything looks new then.
+        """
         self._previous_statements = {}
+        self._retain_absent_keys = retain_absent_keys
+        self._max_size = max_size
+        self._emit_new_keys = emit_new_keys
+        self._primed = False
+        self._absent_for = {}
 
     def compute_derivative_rows(self, rows, metrics, key, execution_indicators=None):
         """
@@ -68,6 +83,8 @@ class StatementMetrics:
         for row_key, row in merged_rows.items():
             prev = self._previous_statements.get(row_key)
             if prev is None:
+                if self._emit_new_keys and self._primed:
+                    result.append(dict(row))
                 continue
 
             if metric_columns is None:
@@ -106,7 +123,15 @@ class StatementMetrics:
         new_keys = merged_rows.keys()
         stale_keys = self._previous_statements.keys() - new_keys
         for k in stale_keys:
-            del self._previous_statements[k]
+            absent_for = self._absent_for.get(k, 0) + 1
+            if absent_for > self._retain_absent_keys:
+                del self._previous_statements[k]
+                self._absent_for.pop(k, None)
+            else:
+                self._absent_for[k] = absent_for
+        if self._absent_for:
+            for k in new_keys:
+                self._absent_for.pop(k, None)
 
         for row_key, row in merged_rows.items():
             prev = self._previous_statements.get(row_key)
@@ -119,6 +144,14 @@ class StatementMetrics:
                         del prev[col]
             else:
                 self._previous_statements[row_key] = {col: row[col] for col in metrics if col in row}
+
+        if self._max_size is not None:
+            overflow = len(self._previous_statements) - self._max_size
+            if overflow > 0:
+                for k in list(islice(self._previous_statements, overflow)):
+                    del self._previous_statements[k]
+                    self._absent_for.pop(k, None)
+        self._primed = True
 
         return result
 
