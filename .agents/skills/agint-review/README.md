@@ -221,7 +221,7 @@ Each sub-agent's `tools:` field is a name-level allowlist (no pattern syntax —
 | `scout` | yes | Explicitly needs `git` commands inside the worktrees for history archeology |
 | `challenger` | yes | Verifies findings (lint configs, quick checks) |
 | `conventions`, `integrations`, `security`, `ddev`, `github-actions` | **no** | Read/Grep/Glob (plus Write for their findings file) cover their work; Bash is unnecessary attack surface |
-| `logs` | **no** | Read/Grep/Glob/WebSearch/Write, plus the Atlassian Confluence read tools to read the review guide; no Bash, and it never posts Confluence comments |
+| `logs` | **no** | Read/Grep/Glob/WebSearch/WebFetch/Write, plus the Atlassian Confluence read tools: WebFetch reads the vendor's log documentation, Confluence the review guide; no Bash, and it never posts Confluence comments |
 
 If a reviewer ever needs Bash for a real use case, add it to that agent's `tools` field with a comment explaining what it's for. Default-deny is cheaper than discovering an injection vector later.
 
