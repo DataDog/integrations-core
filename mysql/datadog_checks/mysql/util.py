@@ -66,6 +66,16 @@ EXTRACT_FIELD_PATTERN = re.compile(
 )
 # A quoted user variable name such as `@'id'`, whose name the obfuscator replaces like a string literal
 QUOTED_USER_VARIABLE_PATTERN = re.compile(r"@(?:'(?:[^'\\]|\\.|'')*'|\"(?:[^\"\\]|\\.|\"\")*\")")
+# The quoted texts and comments of a statement, read from left to right as the obfuscator does, so that comment
+# markers inside quotes or line comments are not taken for block comments. An unterminated token runs to the end.
+QUOTED_TEXT_OR_COMMENT_PATTERN = re.compile(
+    r"'(?:[^'\\]|\\.|'')*'?"
+    r'|"(?:[^"\\]|\\.|"")*"?'
+    r'|`(?:[^`]|``)*`?'
+    r'|/\*(?:[^*]|\*(?!/))*(?:\*/)?'
+    r'|(?:--|#)[^\n]*',
+    re.DOTALL,
+)
 
 
 def get_obfuscate_only_options(obfuscator_options: dict) -> str:
@@ -121,21 +131,18 @@ def _replace_nonliteral_placeholders(statement: str) -> str:
 
 def _remove_block_comments(statement: str) -> str:
     """
-    Replace each `/* ... */` comment with a space, ending it at its first `*/` and keeping an unterminated one.
-    It scans the statement once, unlike a regular expression, which would search the rest of the statement for
-    a terminator again after every `/*` that has none.
+    Replace each terminated `/* ... */` comment with a space, keeping quoted texts, line comments and an
+    unterminated block comment as they are. The statement is read once: an unterminated token runs to its end
+    instead of being searched for a terminator again from every later position.
     """
-    parts = []
-    position = 0
-    while (start := statement.find('/*', position)) != -1:
-        end = statement.find('*/', start + 2)
-        if end == -1:
-            break
-        parts.append(statement[position:start])
-        parts.append(' ')
-        position = end + 2
-    parts.append(statement[position:])
-    return ''.join(parts)
+    return QUOTED_TEXT_OR_COMMENT_PATTERN.sub(_blank_block_comment, statement)
+
+
+def _blank_block_comment(match: re.Match) -> str:
+    token = match.group()
+    if len(token) >= 4 and token.startswith('/*') and token.endswith('*/'):
+        return ' '
+    return token
 
 
 def supports_explain_json_format_version(version):

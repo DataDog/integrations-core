@@ -1012,6 +1012,18 @@ def test_has_literal_values(datadog_agent, raw_statement, expected):
             id='literal_looking_like_extract',
         ),
         pytest.param("SET @'id' = 5", "SET @? = ?", True, id='quoted_user_variable_and_literal'),
+        pytest.param(
+            "SELECT NULL AS `/*`, 123, NULL AS `*/`",
+            "SELECT NULL AS `/*`, ?, NULL AS `*/`",
+            True,
+            id='comment_markers_in_quoted_identifiers',
+        ),
+        pytest.param(
+            "SELECT a # /*\nFROM users WHERE id = 5 # */",
+            "SELECT a # /*\nFROM users WHERE id = ? # */",
+            True,
+            id='comment_markers_in_line_comments',
+        ),
     ],
 )
 def test_has_literal_values_go_sqllexer_output(datadog_agent, raw_statement, obfuscated_statement, expected):
@@ -1030,6 +1042,7 @@ def test_has_literal_values_go_sqllexer_output(datadog_agent, raw_statement, obf
     [
         pytest.param("SELECT '" + "EXTRACT(/*" * 6400 + "'", "SELECT ?", id='unterminated_comments_in_literal'),
         pytest.param("EXTRACT(" + "/**//*" * 10000, "EXTRACT(" + "/**//*" * 10000, id='adjacent_comments'),
+        pytest.param("SELECT " + "`/*" * 20000, "SELECT " + "`/*" * 20000, id='quoted_comment_markers'),
     ],
 )
 def test_has_literal_values_scales_linearly(datadog_agent, raw_statement, obfuscated_statement):
