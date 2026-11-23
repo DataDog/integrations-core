@@ -57,6 +57,11 @@ STATEMENT = (
     "SELECT /*poc:sp_executesql_rpc_pytds*/ o.order_id, o.amount FROM dbo.orders o "
     "WHERE o.customer_id = @P1 AND o.status >= @P2 ORDER BY o.amount DESC"
 )
+# A statement SQL Server parameterizes, but caches unparameterized as it isn't safe to parameterize: query metrics see
+# its text, while the tsql_frame action's sql handle is the parameterized text, cut at the statement's offsets in the
+# original batch.
+AUTO_PARAMETERIZED_STATEMENT = "SELECT COUNT(*) FROM dbo.t WHERE c LIKE 'val5%' AND v <> 6"
+AUTO_PARAMETERIZED_FRAME_TEXT = "(@1 tinyint,@2 varchar(8000))SELECT COUNT(*) FROM [dbo].[t] WHE"
 PLAN_HANDLE = '0600050012eb2f1b60fced1f1200000001000000000000000000000000000000000000000000000000000000'
 SQL_HANDLE = '0x0200000012EB2F1BB0F35DCC64332DC0EB7A17EDFDB853E60000000000000000000000000000000000000000'
 CURRENT_FILE = '/var/opt/mssql/log/datadog_query_plans_0_134080000000000000.xel'
@@ -694,15 +699,20 @@ def test_query_plans_handler_registration(xe_instance, query_plans_config, enabl
     'fixture,frame_text,query_stats_text,expected_statement,expected_lookups',
     [
         pytest.param(
-            PLAN_PROFILE_FIXTURE, STATEMENT, None, STATEMENT, {FRAME_STATEMENT_QUERY: 1}, id='from_tsql_frame'
+            PLAN_PROFILE_FIXTURE,
+            AUTO_PARAMETERIZED_FRAME_TEXT,
+            AUTO_PARAMETERIZED_STATEMENT,
+            AUTO_PARAMETERIZED_STATEMENT,
+            {QUERY_STATS_STATEMENT_QUERY: 1},
+            id='from_query_stats',
         ),
         pytest.param(
             PLAN_PROFILE_FIXTURE,
+            STATEMENT,
             None,
             STATEMENT,
-            STATEMENT,
-            {FRAME_STATEMENT_QUERY: 1, QUERY_STATS_STATEMENT_QUERY: 1},
-            id='sql_handle_gone',
+            {QUERY_STATS_STATEMENT_QUERY: 1, FRAME_STATEMENT_QUERY: 1},
+            id='plan_not_cached',
         ),
         pytest.param(
             SHOWPLAN_FIXTURE, None, STATEMENT, STATEMENT, {QUERY_STATS_STATEMENT_QUERY: 1}, id='no_tsql_frame'
@@ -712,7 +722,7 @@ def test_query_plans_handler_registration(xe_instance, query_plans_config, enabl
             None,
             None,
             None,
-            {FRAME_STATEMENT_QUERY: 1, QUERY_STATS_STATEMENT_QUERY: 1},
+            {QUERY_STATS_STATEMENT_QUERY: 1, FRAME_STATEMENT_QUERY: 1},
             id='statement_gone',
         ),
     ],
@@ -721,8 +731,8 @@ def test_statement_text(
     aggregator, xe_instance, fixture, frame_text, query_stats_text, expected_statement, expected_lookups
 ):
     """
-    The statement comes from the tsql_frame action, else from the cached plan's statistics, and each lookup is
-    cached.
+    The statement is the one query metrics see in the cached plan's statistics, so the plan has their query signature,
+    else the tsql_frame action's, and each lookup is cached.
     """
     server = FakeServer(frame_text=frame_text, query_stats_text=query_stats_text)
     handler = make_handler(xe_instance, server)
@@ -1518,7 +1528,7 @@ def test_query_plans_of_stored_procedure_statements(
         if len(events) >= len(PROCEDURE_STATEMENTS):
             break
 
-    # the statement as `tsql_frame` delimits it, which can include its semicolon
+    # the statement as query metrics delimit it, which can include its semicolon
     assert sorted(e['db']['statement'].rstrip(';') for e in events) == sorted(PROCEDURE_STATEMENTS)
     for event in events:
         assert event['db']['plan']['type'] == 'real'
