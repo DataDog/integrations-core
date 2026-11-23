@@ -104,7 +104,7 @@
                   ],
                   "queries": [
                     {
-                      "aggregator": "avg",
+                      "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "avg:pan_firewall.can_connect{$firewall,$panorama} by {device_ip}.rollup(avg)"
@@ -145,12 +145,18 @@
                   "formulas": [
                     {
                       "alias": "Unreachable firewalls",
-                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                      "formula": "count_not_null(query2) - count_nonzero(query1)"
                     }
                   ],
                   "queries": [
                     {
-                      "aggregator": "min",
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "min:pan_firewall.can_connect{$firewall,$panorama} by {device_ip}.rollup(min)"
+                    },
+                    {
+                      "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.can_connect{$firewall,$panorama} by {device_ip}.rollup(min)"
@@ -232,12 +238,18 @@
                   "formulas": [
                     {
                       "alias": "Inactive tunnels",
-                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                      "formula": "count_not_null(query2) - count_nonzero(query1)"
                     }
                   ],
                   "queries": [
                     {
-                      "aggregator": "min",
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "min:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}.rollup(min)"
+                    },
+                    {
+                      "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}.rollup(min)"
@@ -278,12 +290,18 @@
                   "formulas": [
                     {
                       "alias": "Panoramas unreachable",
-                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                      "formula": "count_not_null(query2) - count_nonzero(query1)"
                     }
                   ],
                   "queries": [
                     {
-                      "aggregator": "min",
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "min:pan_firewall.panorama.can_connect{$panorama} by {panorama_host}.rollup(min)"
+                    },
+                    {
+                      "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.panorama.can_connect{$panorama} by {panorama_host}.rollup(min)"
@@ -324,12 +342,18 @@
                   "formulas": [
                     {
                       "alias": "BGP peers down",
-                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                      "formula": "count_not_null(query2) - count_nonzero(query1)"
                     }
                   ],
                   "queries": [
                     {
-                      "aggregator": "min",
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "min:pan_firewall.bgp.peer.status{$firewall,$panorama} by {device_id,vr,peer}.rollup(min)"
+                    },
+                    {
+                      "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.bgp.peer.status{$firewall,$panorama} by {device_id,vr,peer}.rollup(min)"
@@ -439,7 +463,7 @@
                   ],
                   "queries": [
                     {
-                      "aggregator": "min",
+                      "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}.rollup(min)"
@@ -2227,7 +2251,7 @@
                   ],
                   "queries": [
                     {
-                      "aggregator": "max",
+                      "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "max:pan_firewall.license.expired{$firewall,$panorama} by {device_id,feature}.rollup(max)"
@@ -2334,7 +2358,7 @@
                   ],
                   "queries": [
                     {
-                      "aggregator": "min",
+                      "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}.rollup(min)"
@@ -2405,7 +2429,7 @@
           },
           {
             "definition": {
-              "description": "Threat log events by severity. Requires Palo Alto Networks Firewall log collection; shows No data without it. Follows the firewall filter through the logs' device_hostname attribute; logs without a device_hostname are always shown, since they cannot be matched to a firewall; the Panorama filter does not apply to logs.",
+              "description": "Threat log events by severity. Requires Palo Alto Networks Firewall log collection; shows No data without it. Follows the firewall filter through the logs' device_hostname attribute; the Panorama filter does not apply to logs.",
               "requests": [
                 {
                   "formulas": [
@@ -2435,7 +2459,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall @type:THREAT (@device_hostname:$firewall.value OR -@device_hostname:*)"
+                        "query": "source:pan.firewall @type:THREAT $firewall"
                       }
                     }
                   ],
@@ -2458,7 +2482,7 @@
           },
           {
             "definition": {
-              "description": "Most frequent threat log subtypes, such as virus, spyware or vulnerability. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_hostname attribute; logs without a device_hostname are always shown, since they cannot be matched to a firewall; the Panorama filter does not apply to logs.",
+              "description": "Most frequent threat log subtypes, such as virus, spyware or vulnerability. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_hostname attribute; the Panorama filter does not apply to logs.",
               "requests": [
                 {
                   "formulas": [
@@ -2488,7 +2512,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall @type:THREAT (@device_hostname:$firewall.value OR -@device_hostname:*)"
+                        "query": "source:pan.firewall @type:THREAT $firewall"
                       }
                     }
                   ],
@@ -2511,7 +2535,7 @@
           },
           {
             "definition": {
-              "description": "Client IPs that triggered the most threat log events. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_hostname attribute; logs without a device_hostname are always shown, since they cannot be matched to a firewall; the Panorama filter does not apply to logs.",
+              "description": "Client IPs that triggered the most threat log events. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_hostname attribute; the Panorama filter does not apply to logs.",
               "requests": [
                 {
                   "formulas": [
@@ -2541,7 +2565,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall @type:THREAT (@device_hostname:$firewall.value OR -@device_hostname:*)"
+                        "query": "source:pan.firewall @type:THREAT $firewall"
                       }
                     }
                   ],
@@ -2598,7 +2622,7 @@
           },
           {
             "definition": {
-              "description": "Recent Palo Alto Networks Firewall logs with alert, error or critical status. The device_name column is the firewall that sent the log. Follows the firewall filter through the logs' device_hostname attribute; logs without a device_hostname are always shown, since they cannot be matched to a firewall.",
+              "description": "Recent Palo Alto Networks Firewall logs with alert, error or critical status. The device_name column is the firewall that sent the log. Follows the firewall filter through the logs' device_hostname attribute.",
               "requests": [
                 {
                   "columns": [
@@ -2630,7 +2654,7 @@
                   "query": {
                     "data_source": "logs_stream",
                     "indexes": [],
-                    "query_string": "source:pan.firewall status:(alert OR error OR critical) (@device_hostname:$firewall.value OR -@device_hostname:*)",
+                    "query_string": "source:pan.firewall status:(alert OR error OR critical) $firewall",
                     "sort": {
                       "column": "timestamp",
                       "order": "desc"
@@ -2653,7 +2677,7 @@
           },
           {
             "definition": {
-              "description": "Palo Alto Networks Firewall log volume over time by status. A drop to zero means logs stopped arriving. Follows the firewall filter through the logs' device_hostname attribute; logs without a device_hostname are always shown, since they cannot be matched to a firewall; the Panorama filter does not apply to logs.",
+              "description": "Palo Alto Networks Firewall log volume over time by status. A drop to zero means logs stopped arriving. Follows the firewall filter through the logs' device_hostname attribute; the Panorama filter does not apply to logs.",
               "legend_columns": [
                 "avg",
                 "max",
@@ -2692,7 +2716,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall (@device_hostname:$firewall.value OR -@device_hostname:*)"
+                        "query": "source:pan.firewall $firewall"
                       }
                     }
                   ],
