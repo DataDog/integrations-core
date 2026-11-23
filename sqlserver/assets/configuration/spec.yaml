@@ -531,7 +531,7 @@ files:
         type: array
         items:
           type: string
-      fleet_configurable: true
+      fleet_configurable: false
     - name: index_usage_table_names
       description: |
         Index usage metrics normally emit metrics for all user tables and their indexes within a database.
@@ -542,7 +542,7 @@ files:
         type: array
         items:
           type: string
-      fleet_configurable: true
+      fleet_configurable: false
     - name: table_size_table_names
       description: |
         Table size metrics normally emit metrics for all user tables within a database.
@@ -552,7 +552,7 @@ files:
         type: array
         items:
           type: string
-      fleet_configurable: true
+      fleet_configurable: false
     - name: adoprovider
       fleet_configurable: true
       description: |
@@ -899,7 +899,7 @@ files:
             Client ID of the Managed Identity.
           value:
             type: string
-          fleet_configurable: true
+          fleet_configurable: false
         - name: identity_scope
           description: |
             The permission scope from where to access the identity token. This value is optional if using the default
@@ -910,7 +910,7 @@ files:
           value:
             type: string
             example: https://database.windows.net/.default
-          fleet_configurable: true
+          fleet_configurable: false
 
     - name: obfuscator_options
       description: |
