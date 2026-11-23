@@ -83,16 +83,17 @@ QUERY_PLANS_SETUP_DOCS_TABS = {
     "Azure SQL Managed Instance": "azuresqlmanagedinstance",
 }
 
-# The statement of a tsql_frame action, extracted as query metrics extract it from sys.dm_exec_query_stats, so they
-# compute the same query signature.
+# The statement of a tsql_frame action, for plans no longer in the cache: its sql handle's text, cut at its offsets as
+# query metrics cut the text of a cached plan.
 FRAME_STATEMENT_QUERY = """\
 SELECT SUBSTRING(qt.text, (o.start_offset / 2) + 1,
     ((CASE o.end_offset WHEN -1 THEN DATALENGTH(qt.text) ELSE o.end_offset END - o.start_offset) / 2) + 1)
 FROM (SELECT CAST(? AS int) AS start_offset, CAST(? AS int) AS end_offset) o
 CROSS APPLY sys.dm_exec_sql_text(CONVERT(varbinary(64), ?, 1)) qt
 """
-# The statement of a cached plan, for events without a tsql_frame action or whose sql handle is gone. A plan can have
-# several statements with the same query hash, so the one at the frame's offset comes first when it's known.
+# The statement of a cached plan, from the `sys.dm_exec_query_stats` row query metrics read, so they compute the same
+# query signature. A plan can have several statements with the same query hash, so the one at the frame's offset comes
+# first when it's known.
 QUERY_STATS_STATEMENT_QUERY = """\
 SELECT TOP 1 SUBSTRING(qt.text, (qs.statement_start_offset / 2) + 1,
     ((CASE qs.statement_end_offset WHEN -1 THEN DATALENGTH(qt.text) ELSE qs.statement_end_offset END
@@ -608,30 +609,33 @@ class QueryPlanEventsHandler(XESessionBase):
 
     def _statement_text(self, cursor: Any, event: dict) -> str | None:
         """
-        The statement the plan executed: from the tsql_frame action through `sys.dm_exec_sql_text`, or else from
-        `sys.dm_exec_query_stats`, since XE plans have no statement text.
+        The statement the plan executed, since XE plans have no statement text: the one query metrics see for the plan
+        in `sys.dm_exec_query_stats`, or else, for a plan no longer in the cache, the tsql_frame action's through
+        `sys.dm_exec_sql_text`. The query metrics statement comes first, as the frame's can differ: for a statement
+        SQL Server parameterizes but caches unparameterized, the frame's sql handle is the parameterized text, while
+        its offsets are in the original batch.
         """
-        sql_handle = event.get('sql_handle')
         offset_start = event.get('offset_start')
-        if sql_handle and offset_start is not None:
-            offset_end = event.get('offset_end', -1)
-            text = self._cached_statement_text(
-                cursor,
-                ("frame", sql_handle, offset_start, offset_end),
-                FRAME_STATEMENT_QUERY,
-                (offset_start, offset_end, sql_handle),
-            )
-            if text:
-                return text
         plan_handle = event.get('plan_handle')
         query_hash = event.get('query_hash')
         if plan_handle and query_hash:
             offset = offset_start if offset_start is not None else UNKNOWN_OFFSET
-            return self._cached_statement_text(
+            text = self._cached_statement_text(
                 cursor,
                 ("query_stats", plan_handle, query_hash, offset),
                 QUERY_STATS_STATEMENT_QUERY,
                 ("0x" + plan_handle, "0x" + query_hash, offset),
+            )
+            if text:
+                return text
+        sql_handle = event.get('sql_handle')
+        if sql_handle and offset_start is not None:
+            offset_end = event.get('offset_end', -1)
+            return self._cached_statement_text(
+                cursor,
+                ("frame", sql_handle, offset_start, offset_end),
+                FRAME_STATEMENT_QUERY,
+                (offset_start, offset_end, sql_handle),
             )
         return None
 
