@@ -14,10 +14,8 @@
        thermal 1: alarm False
        thermal 2: alarm True
        thermal 3: alarm yes
-     The fans and power-supply sections are named after the `show system environmentals` subcommands in the Palo
-     Alto docs, and their fields after the documented CLI columns (Alarm, RPMs, Inserted).
-       fan 1: alarm False
-       fan 2: alarm True, stopped
+     The power-supply section is named after the `show system environmentals power-supply` subcommand in the Palo
+     Alto docs, and its fields after the documented CLI columns (Alarm, Inserted).
        power-supply 1: inserted, alarm False
        power-supply 2: not inserted, alarm True -->
 <response status="success"><result>
@@ -41,12 +39,6 @@
       <entry><slot>1</slot><description>Temperature at Exhaust</description><alarm>yes</alarm><DegreesC>82.0</DegreesC><min>0.0</min><max>80.0</max></entry>
     </Slot1>
   </thermal>
-  <fans>
-    <Slot1>
-      <entry><slot>1</slot><description>Fan #1 RPM</description><alarm>False</alarm><RPMs>3600</RPMs></entry>
-      <entry><slot>1</slot><description>Fan #2 RPM</description><alarm>True</alarm><RPMs>0</RPMs></entry>
-    </Slot1>
-  </fans>
   <power-supply>
     <Slot1>
       <entry><slot>1</slot><description>Power Supply #1 (left)</description><alarm>False</alarm><Inserted>True</Inserted></entry>

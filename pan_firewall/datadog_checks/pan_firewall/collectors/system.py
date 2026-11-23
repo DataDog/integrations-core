@@ -139,7 +139,7 @@ def _alarm(entry: Element) -> bool | None:
 
 
 def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sample]:
-    """Power rails, temperature sensors, fans and power supplies; empty on a VM-Series. The alarms are
+    """Power rails, temperature sensors and power supplies; empty on a VM-Series. The alarms are
     PAN's own `alarm` field, never a comparison with the thresholds. A power sensor sends `power.alarm` whenever
     that field is readable, and `power.alarm.high` and `power.alarm.low` add its direction when the voltage tells
     it; a power alarm whose direction cannot be told is warned about, once per sensor."""
@@ -193,17 +193,8 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
         if alarm is not None:
             samples.append(Sample('temperature.alarm', int(alarm), tags, 'gauge'))
 
-    # The sections are named after the documented `show system environmentals` subcommands, and the fields after
-    # their documented columns.
-    for entry, slot, name in _entries(root, 'fans'):
-        tags = (f'sensor:{name}', f'slot:{slot}')
-        speed = num(entry, 'RPMs')
-        if speed is not None:
-            samples.append(Sample('fan.speed', speed, tags, 'gauge'))
-        alarm = _alarm(entry)
-        if alarm is not None:
-            samples.append(Sample('fan.alarm', int(alarm), tags, 'gauge'))
-
+    # The power-supply section and its fields are named after the documented `show system environmentals
+    # power-supply` subcommand and columns.
     for entry, slot, name in _entries(root, 'power-supply'):
         tags = (f'sensor:{name}', f'slot:{slot}')
         for metric, field in (('power_supply.alarm', 'alarm'), ('power_supply.inserted', 'Inserted')):

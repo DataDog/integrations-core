@@ -29,11 +29,6 @@ THERMAL = [
     ('Temperature at CPU', 85.5, 1),
     ('Temperature at Exhaust', 82.0, 1),
 ]
-# (sensor, speed, alarm), all in slot 1.
-FANS = [
-    ('Fan #1 RPM', 3600.0, 0),
-    ('Fan #2 RPM', 0.0, 1),
-]
 # (sensor, alarm, inserted), all in slot 1.
 POWER_SUPPLIES = [
     ('Power Supply #1 (left)', 0, 1),
@@ -55,9 +50,6 @@ def test_hardware_sensors():
     for sensor, current, alarm in THERMAL:
         for name, value in (('current', current), ('min', 0.0), ('max', 80.0), ('alarm', alarm)):
             expected[f'temperature.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
-    for sensor, speed, alarm in FANS:
-        for name, value in (('speed', speed), ('alarm', alarm)):
-            expected[f'fan.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
     for sensor, alarm, inserted in POWER_SUPPLIES:
         for name, value in (('alarm', alarm), ('inserted', inserted)):
             expected[f'power_supply.{name}', (f'sensor:{sensor}', 'slot:1')] = (value, 'gauge')
