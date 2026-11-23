@@ -1,0 +1,1 @@
+Fix a memory leak: the check no longer appends to the instance's `tags` on every run.
