@@ -1,1 +1,0 @@
-Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. Invalid JSON from the API now gets the invalid JSON message on the `vault.can_connect` service check, and a read timeout while receiving the response body gets the timeout message.
