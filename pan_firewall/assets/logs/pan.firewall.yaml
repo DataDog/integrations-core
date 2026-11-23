@@ -547,6 +547,8 @@ pipeline:
         # start in GTP), then `time_generated`, then `high_res_timestamp` (ISO 8601 with offset).
         # Times without an offset are firewall-local and are parsed as UTC. Firewalls that don't
         # populate high_res_timestamp send a 1969-12-31 placeholder, which is skipped.
+        # Only `high_res_timestamp` carries an offset, so only it becomes the official log date
+        # (`pan_log_date`); without it the log keeps its intake time. `pan_event_time` feeds `ocsf.time`.
         - type: grok-parser
           name: Parse `timestamp` into `pan_event_time`
           enabled: true
@@ -568,20 +570,30 @@ pipeline:
               time_generated %{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}
             supportRules: ''
         - type: grok-parser
-          name: Parse `high_res_timestamp` into `pan_event_time`
+          name: Parse `high_res_timestamp` into `pan_log_date`
           enabled: true
           source: high_res_timestamp
           samples:
             - "2025-09-03T12:40:32.123-07:00"
           grok:
             matchRules: |
-              high_res_timestamp (?!1969-)%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):pan_event_time}
+              high_res_timestamp (?!1969-)%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):pan_log_date}
             supportRules: ''
+        - type: attribute-remapper
+          name: Copy `pan_log_date` to `pan_event_time`
+          enabled: true
+          sources:
+            - pan_log_date
+          sourceType: attribute
+          target: pan_event_time
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
     - type: date-remapper
-      name: Define `pan_event_time` as the official date of the log
+      name: Define `pan_log_date` as the official date of the log
       enabled: true
       sources:
-        - pan_event_time
+        - pan_log_date
     # Follows the PAN-OS syslog severity table: high and medium both map to warning.
     - type: category-processor
       name: Map PAN-OS `severity` to `pan_status`
