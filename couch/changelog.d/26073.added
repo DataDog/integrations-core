@@ -1,0 +1,1 @@
+Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. Bump the minimum `datadog-checks-base` version to 38.11.0. A read timeout that `requests` reported as a connection error now gets the `Request timeout` message on the `couchdb.can_connect` service check.
