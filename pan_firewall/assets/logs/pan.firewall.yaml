@@ -489,10 +489,10 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - "<14>Nov 18 10:20:05 fw-a timestamp=2026/11/18 10:20:05, serial=007955000930601, type=THREAT, subtype=spyware, time_generated=2026/11/18 10:20:05, network.client.ip=10.60.2.100, network.destination.ip=8.8.8.8, rule=trust-out, usr.id=, dstuser=,\tapp=dns-base,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\t evt.name=drop,\tmisc=test-malware.testpanw.com,\tthreatid=generic:test-malware.testpanw.com,\tcategory=any,\tseverity=medium,\turl_idx=0,\thttp.useragent=,\tfiletype=,\txff=\treferer=,\ttunnel=N/A,\tthr_category=dns-malware"
-        - "<14>Nov 18 10:15:48 fw-b timestamp=2026/11/18 10:15:48, serial=007955000930602, type=SYSTEM, subtype=general,\tvsys=,\tevt.name=general,\tobject=,\tmodule=general,\tseverity=informational,\topaque=WildFire job enqueued. Enqueue time=2026/11/18 10:15:48. JobId=13752.  . Type: Full,\tseqno=7701028248951498075, actionflags=0x0, vsys_name=, device_name=fw-b"
-        - "<14>Oct 26 16:59:23 fw-b timestamp=2026/10/26 16:59:23,\tserial=007955000930602,\ttype=CONFIG,\tsubtype=0,\t network.client.ip=38.32.8.169,\tvsys=,\tevt.name=set,\tusr.id=admin,\tclient=CLI,\tevt.outcome=Succeeded,\tpath= network interface ethernet  ethernet1/1 layer3 ip, before_change_detail=,\tafter_change_detail=,\tseqno=7701021535917572103,\tactionflags=0x0, vsys_name=, device_name=fw-b"
-        - "<14>Nov 18 10:19:48 fw-a timestamp=2026/11/18 10:19:48, serial=007955000930601, type=TRAFFIC, subtype=end, time_generated=2026/11/18 10:19:48, network.client.ip=10.60.3.100, network.destination.ip=10.60.2.100, rule=vpn-to-trust, usr.id=, dstuser=,\tapp=incomplete,\tinbound_if=tunnel.1,\toutbound_if=ethernet1/2,\tnetwork.client.port=54096,\tnetwork.destination.port=8080, natsport=0\tnatdport=0,\tproto=tcp,\t evt.name=allow, start=2026/11/18 10:19:34, tunnel=N/A"
+        - "<14>Nov 18 10:20:05 fw-a timestamp=2026/11/18 10:20:05, serial=007900000000001, type=THREAT, subtype=spyware, time_generated=2026/11/18 10:20:05, network.client.ip=10.60.2.100, network.destination.ip=8.8.8.8, rule=trust-out, usr.id=, dstuser=,\tapp=dns-base,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\t evt.name=drop,\tmisc=test-malware.testpanw.com,\tthreatid=generic:test-malware.testpanw.com,\tcategory=any,\tseverity=medium,\turl_idx=0,\thttp.useragent=,\tfiletype=,\txff=\treferer=,\ttunnel=N/A,\tthr_category=dns-malware"
+        - "<14>Nov 18 10:15:48 fw-b timestamp=2026/11/18 10:15:48, serial=007900000000002, type=SYSTEM, subtype=general,\tvsys=,\tevt.name=general,\tobject=,\tmodule=general,\tseverity=informational,\topaque=WildFire job enqueued. Enqueue time=2026/11/18 10:15:48. JobId=13752.  . Type: Full,\tseqno=7701028248951498075, actionflags=0x0, vsys_name=, device_name=fw-b"
+        - "<14>Oct 26 16:59:23 fw-b timestamp=2026/10/26 16:59:23,\tserial=007900000000002,\ttype=CONFIG,\tsubtype=0,\t network.client.ip=198.51.100.50,\tvsys=,\tevt.name=set,\tusr.id=admin,\tclient=CLI,\tevt.outcome=Succeeded,\tpath= network interface ethernet  ethernet1/1 layer3 ip, before_change_detail=,\tafter_change_detail=,\tseqno=7701021535917572103,\tactionflags=0x0, vsys_name=, device_name=fw-b"
+        - "<14>Nov 18 10:19:48 fw-a timestamp=2026/11/18 10:19:48, serial=007900000000001, type=TRAFFIC, subtype=end, time_generated=2026/11/18 10:19:48, network.client.ip=10.60.3.100, network.destination.ip=10.60.2.100, rule=vpn-to-trust, usr.id=, dstuser=,\tapp=incomplete,\tinbound_if=tunnel.1,\toutbound_if=ethernet1/2,\tnetwork.client.port=54096,\tnetwork.destination.port=8080, natsport=0\tnatdport=0,\tproto=tcp,\t evt.name=allow, start=2026/11/18 10:19:34, tunnel=N/A"
       grok:
         matchRules: |
           rule_panos %{_header}%{_kv}
@@ -582,6 +582,7 @@ pipeline:
       enabled: true
       sources:
         - pan_event_time
+    # Follows the PAN-OS syslog severity table: high and medium both map to warning.
     - type: category-processor
       name: Map PAN-OS `severity` to `pan_status`
       enabled: true
@@ -592,7 +593,7 @@ pipeline:
           name: critical
         - filter:
             query: "@severity:high"
-          name: error
+          name: warning
         - filter:
             query: "@severity:medium"
           name: warning
