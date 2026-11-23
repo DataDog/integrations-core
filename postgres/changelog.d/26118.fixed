@@ -1,0 +1,1 @@
+Fix the Agent's own tagged queries being reported in query metrics on Postgres 18, which strips leading `/* DDIGNORE */` comments; the Agent now appends its comments on Postgres 18 and later.
