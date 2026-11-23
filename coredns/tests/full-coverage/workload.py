@@ -67,6 +67,11 @@ def write(path, text):
     os.replace(tmp, path)
 
 
+def write_corefile(fragment):
+    """Writes the seed Corefile with `fragment` appended, so every variant shares one base."""
+    write(os.path.join(CONF, "Corefile"), read("Corefile") + "\n" + read(fragment))
+
+
 def resolve():
     """Returns the first name in HOSTS that resolves, with its address."""
     while True:
@@ -101,11 +106,11 @@ def main():
             done.add("hot")
             log_change(t, "hot set 10 -> 40 names")
         if t >= T_BROKEN and "broken" not in done:
-            write(os.path.join(CONF, "Corefile"), read("Corefile.broken"))
+            write_corefile("Corefile.broken")
             done.add("broken")
             log_change(t, "wrote an invalid Corefile (reload fails once)")
         if t >= T_RELOAD and "reload" not in done:
-            write(os.path.join(CONF, "Corefile"), read("Corefile.extra"))
+            write_corefile("Corefile.extra")
             done.add("reload")
             log_change(t, "wrote a valid Corefile with one more server block (reload succeeds)")
         if t >= T_HOSTS and "hosts" not in done:

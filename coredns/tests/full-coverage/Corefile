@@ -1,7 +1,8 @@
 # CoreDNS config for the coredns-full evalya fixture. Self-contained: no query
 # leaves the container. workload.py drives every zone at a fixed rate
-# (../README.md, workload plan) and rewrites this file mid-run from Corefile.broken and
-# Corefile.extra, which the reload plugin picks up.
+# (../README.md, workload plan) and rewrites this file mid-run, appending
+# Corefile.broken and then Corefile.extra to it. The reload plugin picks up each
+# rewrite.
 
 # Test upstream for example.test: template answers, a 60s TTL for the hot
 # names (cache hits) and a 1s TTL for the miss names (always a cache miss).

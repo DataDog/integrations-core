@@ -19,7 +19,8 @@ Three services, all upstream or mirror images pinned by digest, none built local
   on the health plugin (`evalya.yaml`), not a shell healthcheck.
 - **`workload`**: `full-coverage/workload.py` (stdlib Python) on `python:3.12-alpine`. It sends UDP
   queries at fixed rates without waiting for answers, so a slow or dead upstream never changes the
-  send rate.
+  send rate. Its Corefile rewrites are the seed `Corefile` with `Corefile.broken` or
+  `Corefile.extra` appended, so the base config is defined once.
 
 `coredns` depends on `seed` (completed) and `workload` (started), so requesting `coredns-full` starts
 the whole fixture. `workload` waits for one of `DNS_HOSTS` (`coredns coredns-full`) to resolve:
