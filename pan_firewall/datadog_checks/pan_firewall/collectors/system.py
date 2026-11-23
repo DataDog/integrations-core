@@ -136,8 +136,8 @@ def _alarm(entry: Element) -> bool | None:
 def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sample]:
     """Power rails and temperature sensors; empty on a VM-Series. The alarms are PAN's own `alarm` field, never a
     comparison with the thresholds. A power sensor sends `power.alarm` whenever that field is readable, and the
-    direction metrics `power.alarm.high` and `power.alarm.low` only when the voltage tells it; a power alarm
-    whose direction cannot be told is warned about, once per sensor."""
+    direction metrics `power.alarm.high` and `power.alarm.low` only when the voltage tells it; a sensor with a
+    voltage reading whose alarm direction cannot be told is warned about, once per sensor."""
     samples: list[Sample] = []
     for entry, slot, name in _entries(root, 'power'):
         tags = (f'sensor:{name}', f'slot:{slot}')
