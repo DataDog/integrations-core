@@ -50,14 +50,8 @@ Read each file at the step that names it. Paths are relative to this skill's dir
 | `references/interview.md` | step 6, and before any question | How to ask: rounds, options, tools, faithful answers |
 | `references/writing.md` | steps 7 and 8 | Writing principles, what a PRD covers, core checklist |
 | `types/http-api/adapter.md` | step 4, if the type is HTTP API | Decisions, research, interview topics, lab needs, checklist |
-| `types/http-api/examples/octopus_deploy.md`, `types/http-api/examples/prefect.md` | step 4, if HTTP API | Finished PRDs |
 | `types/openmetrics/adapter.md` | step 4, if the type is OpenMetrics | Decisions, research, interview topics, lab needs, checklist |
-| `types/openmetrics/examples/krakend.md`, `types/openmetrics/examples/n8n.md` | step 4, if OpenMetrics | Finished PRDs |
 | `flows.md` | steps 2 (only if the directory exists), 4, 6, 7, and 9 | The Togo flow for each type: inputs, limits, hand-off |
-
-Examples show the tone and level of detail. They are not a structure to copy: each one is shaped
-by its product, and so is yours. Never copy product content from an example into another product's
-PRD. Some example files may be missing: work with the ones present.
 
 ## Workflow
 
@@ -114,7 +108,7 @@ If no type fits, tell the caller that this type is not
 supported yet and stop. If several types fit (for example, a product with both a REST API and a
 Prometheus endpoint), ask the caller which one to build, saying in a sentence what each covers.
 
-Then read the type's adapter and examples, and the type's section in `flows.md`.
+Then read the type's adapter and the type's section in `flows.md`.
 
 ### 5. Research
 

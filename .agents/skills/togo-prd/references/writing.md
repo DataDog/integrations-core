@@ -31,8 +31,7 @@
 
 There is no fixed template. Each product is different: choose the headings, their order, and how
 much each one says to fit the product, merging topics that have little to say and splitting the
-ones that have a lot. The examples show a few shapes; use them for tone and level of detail, not as
-a structure to copy.
+ones that have a lot.
 
 Whatever the shape, a PRD covers these topics. The type's adapter adds its own.
 
