@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b7be28c8-9982-4ea3-a23f-b7b6f45830b0",
   "app_id": "tensorrt-llm",
-  "owner": "gpu-monitoring-agent",
+  "owner": "accelerator-telemetry",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
