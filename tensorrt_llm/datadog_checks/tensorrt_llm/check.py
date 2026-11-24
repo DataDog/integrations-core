@@ -21,12 +21,18 @@ class TensorrtLlmCheck(OpenMetricsBaseCheckV2):
         # TensorRT-LLM ships as part of the GPU monitoring SKU; only run it when GPU monitoring is on.
         if not is_affirmative(datadog_agent.get_config('gpu.enabled')):
             raise SkipInstanceError("GPU monitoring (gpu.enabled) is not enabled.")
+        # Prometheus multiprocess mode adds the worker pid, which changes on every restart. An instance's
+        # `exclude_labels` replaces the default list, so merge `pid` into it rather than setting a default.
+        instances = [
+            {**instance, 'exclude_labels': list(dict.fromkeys(['pid', *(instance.get('exclude_labels') or [])]))}
+            for instance in instances
+        ]
         super().__init__(name, init_config, instances)
 
     def get_default_config(self) -> dict[str, Any]:
         return {
             'histogram_buckets_as_distributions': True,
             'collect_counters_with_distributions': True,
-            # Prometheus multiprocess mode adds the worker pid, which changes on every restart.
-            'exclude_labels': ['pid'],
+            # vLLM's per-position speculative decoding metrics use the `position` label.
+            'rename_labels': {'token_position': 'position'},
         }

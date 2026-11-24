@@ -12,6 +12,6 @@
             "endpoint"
         ],
         "name": "TensorRT-LLM OpenMetrics endpoint health",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to the TensorRT-LLM OpenMetrics endpoint, otherwise returns `OK`."
+        "description": "Returns `CRITICAL` if the Agent cannot connect to the TensorRT-LLM OpenMetrics endpoint or receives an HTTP error, otherwise returns `OK`."
     }
 ]

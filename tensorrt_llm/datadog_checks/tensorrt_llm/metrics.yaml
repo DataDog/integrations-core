@@ -3,7 +3,7 @@ trtllm_request_success: request.success
 trtllm_request_error: request.error
 trtllm_e2e_request_latency_seconds: e2e_request_latency.seconds
 trtllm_time_to_first_token_seconds: time_to_first_token.seconds
-trtllm_time_per_output_token_seconds: time_per_output_token.seconds
+trtllm_time_per_output_token_seconds: request.time_per_output_token.seconds
 trtllm_request_queue_time_seconds: request.queue_time.seconds
 trtllm_request_prefill_time_seconds: request.prefill_time.seconds
 trtllm_request_decode_time_seconds: request.decode_time.seconds
@@ -43,8 +43,8 @@ trtllm_pinned_memory_usage_bytes: memory.pinned_usage_bytes
 
 # KV cache.
 trtllm_kv_cache_hit_rate: kv_cache.hit_rate
-trtllm_kv_cache_utilization: kv_cache.utilization
-trtllm_kv_cache_host_utilization: kv_cache.host_utilization
+trtllm_kv_cache_utilization: kv_cache.usage
+trtllm_kv_cache_host_utilization: kv_cache.host_usage
 trtllm_kv_cache_reused_blocks: kv_cache.reused_blocks
 trtllm_kv_cache_missed_blocks: kv_cache.missed_blocks
 trtllm_kv_cache_iter_reuse_rate: kv_cache.iter.reuse_rate
@@ -74,9 +74,9 @@ trtllm_gen_init_holds: disaggregation.gen_init_holds
 # Speculative decoding.
 trtllm_spec_decode_num_draft_tokens: spec_decode.num_draft_tokens
 trtllm_spec_decode_num_accepted_tokens: spec_decode.num_accepted_tokens
-trtllm_spec_decode_drafted_tokens: spec_decode.drafted_tokens
-trtllm_spec_decode_accepted_tokens: spec_decode.accepted_tokens
-trtllm_spec_decode_acceptance_length: spec_decode.acceptance_length
+trtllm_spec_decode_drafted_tokens: spec_decode.num_drafted_tokens_per_pos
+trtllm_spec_decode_accepted_tokens: spec_decode.num_accepted_tokens_per_pos
+trtllm_spec_decode_acceptance_length: spec_decode.accept_length
 trtllm_spec_decode_draft_overhead: spec_decode.draft_overhead
 
 # Quality and multimodal input processing.
