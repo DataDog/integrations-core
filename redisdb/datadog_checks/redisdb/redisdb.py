@@ -259,7 +259,7 @@ class Redis(AgentCheck):
             self.warning("Redis database is empty")
             for key in key_list:
                 key_tags = ['key:{}'.format(key)]
-                if instance_db:
+                if instance_db is not None:
                     key_tags.append('redis_db:db{}'.format(instance_db))
                 key_tags.extend(tags)
                 self.gauge('redis.key.length', 0, tags=key_tags)
@@ -272,7 +272,7 @@ class Redis(AgentCheck):
         databases = [int(dbstring[2:]) for dbstring in databases]
 
         # user might have configured the instance to target one specific db
-        if instance_db:
+        if instance_db is not None:
             if instance_db not in databases:
                 self.warning("Cannot find database %s", instance_db)
                 return
@@ -353,7 +353,7 @@ class Redis(AgentCheck):
         for key, total in lengths_overall.items():
             if total == 0:
                 key_tags = ['key:{}'.format(key)]
-                if instance_db:
+                if instance_db is not None:
                     key_tags.append('redis_db:db{}'.format(instance_db))
                 key_tags.extend(tags)
                 self.gauge('redis.key.length', 0, tags=key_tags)
