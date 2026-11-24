@@ -1313,6 +1313,10 @@ integration/tenable:
 - changed-files:
   - any-glob-to-any-file:
     - tenable/**/*
+integration/tensorrt_llm:
+- changed-files:
+  - any-glob-to-any-file:
+    - tensorrt_llm/**/*
 integration/teradata:
 - changed-files:
   - any-glob-to-any-file:

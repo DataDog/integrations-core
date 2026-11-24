@@ -416,6 +416,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /llm_d/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 /llm_d/metadata.csv                                                    @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 
+/tensorrt_llm/                                                         @DataDog/gpu-monitoring-agent
+/tensorrt_llm/*.md                                                     @DataDog/gpu-monitoring-agent @DataDog/documentation
+/tensorrt_llm/manifest.json                                            @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+/tensorrt_llm/metadata.csv                                             @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
+
 /linux_audit_logs/                                                  @DataDog/agent-integrations
 /linux_audit_logs/*.md                                              @DataDog/agent-integrations @DataDog/documentation
 /linux_audit_logs/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
