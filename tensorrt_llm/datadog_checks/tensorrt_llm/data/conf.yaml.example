@@ -47,8 +47,9 @@ instances:
 
     ## @param openmetrics_endpoint - string - required
     ## Endpoint exposing TensorRT-LLM's Prometheus metrics. The `trtllm-serve` server mounts
-    ## `/prometheus/metrics` on its HTTP port only when `return_perf_metrics: true` is set in the file passed
-    ## to `--config` (`--extra_llm_api_options` in older releases). Also set `enable_iter_perf_stats: true` to
+    ## `/prometheus/metrics` on its HTTP port only when `return_perf_metrics: true` (or
+    ## `perf_metrics_output_dir`) is set in the file passed to `--config` (`--extra_llm_api_options` in older
+    ## releases). Also set `enable_iter_perf_stats: true` to
     ## expose the scheduler, batching, memory, and KV cache metrics.
     ##
     ## This integration is part of GPU Monitoring and only runs when GPU Monitoring is enabled
