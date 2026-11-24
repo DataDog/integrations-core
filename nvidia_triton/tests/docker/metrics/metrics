@@ -439,3 +439,158 @@ nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.9"
 nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.95"} 3
 nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.99"} 3
 nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.999"} 3
+# HELP nv_model_load_duration_secs Model load time in seconds
+# TYPE nv_model_load_duration_secs gauge
+nv_model_load_duration_secs{model="tensorrt_llm",version="1"} 42.5
+# HELP nv_pinned_memory_pool_total_bytes Pinned memory pool total memory size, in bytes
+# TYPE nv_pinned_memory_pool_total_bytes gauge
+nv_pinned_memory_pool_total_bytes 268435456
+# HELP nv_pinned_memory_pool_used_bytes Pinned memory pool used memory size, in bytes
+# TYPE nv_pinned_memory_pool_used_bytes gauge
+nv_pinned_memory_pool_used_bytes 1048576
+# HELP nv_cache_num_hits_per_model Number of cache hits per model
+# TYPE nv_cache_num_hits_per_model counter
+nv_cache_num_hits_per_model{model="tensorrt_llm",version="1"} 20
+# HELP nv_cache_hit_duration_per_model Total cache hit duration per model, in microseconds
+# TYPE nv_cache_hit_duration_per_model counter
+nv_cache_hit_duration_per_model{model="tensorrt_llm",version="1"} 240
+# HELP nv_cache_num_misses_per_model Number of cache misses per model
+# TYPE nv_cache_num_misses_per_model counter
+nv_cache_num_misses_per_model{model="tensorrt_llm",version="1"} 5
+# HELP nv_cache_miss_duration_per_model Total cache miss (insert+lookup) duration per model, in microseconds
+# TYPE nv_cache_miss_duration_per_model counter
+nv_cache_miss_duration_per_model{model="tensorrt_llm",version="1"} 95
+# HELP nv_cache_hit_summary_per_model Summary of cache hit counts/durations per model, in microseconds
+# TYPE nv_cache_hit_summary_per_model summary
+nv_cache_hit_summary_per_model{model="tensorrt_llm",version="1",quantile="0.5"} 12
+nv_cache_hit_summary_per_model{model="tensorrt_llm",version="1",quantile="0.9"} 12
+nv_cache_hit_summary_per_model{model="tensorrt_llm",version="1",quantile="0.95"} 12
+nv_cache_hit_summary_per_model{model="tensorrt_llm",version="1",quantile="0.99"} 12
+nv_cache_hit_summary_per_model{model="tensorrt_llm",version="1",quantile="0.999"} 12
+nv_cache_hit_summary_per_model_sum{model="tensorrt_llm",version="1"} 240
+nv_cache_hit_summary_per_model_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_cache_miss_summary_per_model Summary of cache miss counts/durations per model, in microseconds
+# TYPE nv_cache_miss_summary_per_model summary
+nv_cache_miss_summary_per_model{model="tensorrt_llm",version="1",quantile="0.5"} 12
+nv_cache_miss_summary_per_model{model="tensorrt_llm",version="1",quantile="0.9"} 12
+nv_cache_miss_summary_per_model{model="tensorrt_llm",version="1",quantile="0.95"} 12
+nv_cache_miss_summary_per_model{model="tensorrt_llm",version="1",quantile="0.99"} 12
+nv_cache_miss_summary_per_model{model="tensorrt_llm",version="1",quantile="0.999"} 12
+nv_cache_miss_summary_per_model_sum{model="tensorrt_llm",version="1"} 240
+nv_cache_miss_summary_per_model_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_inference_first_response_histogram_ms Duration from request to first response in milliseconds
+# TYPE nv_inference_first_response_histogram_ms histogram
+nv_inference_first_response_histogram_ms_bucket{model="tensorrt_llm",version="1",le="100"} 3
+nv_inference_first_response_histogram_ms_bucket{model="tensorrt_llm",version="1",le="500"} 15
+nv_inference_first_response_histogram_ms_bucket{model="tensorrt_llm",version="1",le="2000"} 19
+nv_inference_first_response_histogram_ms_bucket{model="tensorrt_llm",version="1",le="5000"} 20
+nv_inference_first_response_histogram_ms_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_first_response_histogram_ms_sum{model="tensorrt_llm",version="1"} 4210
+nv_inference_first_response_histogram_ms_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_inference_request_histogram_us Histogram of request duration in microseconds
+# TYPE nv_inference_request_histogram_us histogram
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_request_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_inference_request_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_inference_queue_histogram_us Histogram of queue duration in microseconds
+# TYPE nv_inference_queue_histogram_us histogram
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_queue_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_inference_queue_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_inference_compute_input_histogram_us Histogram of compute input duration in microseconds
+# TYPE nv_inference_compute_input_histogram_us histogram
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_compute_input_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_inference_compute_input_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_inference_compute_infer_histogram_us Histogram of compute infer duration in microseconds
+# TYPE nv_inference_compute_infer_histogram_us histogram
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_compute_infer_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_inference_compute_infer_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_inference_compute_output_histogram_us Histogram of compute output duration in microseconds
+# TYPE nv_inference_compute_output_histogram_us histogram
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_compute_output_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_inference_compute_output_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_cache_hit_histogram_us Histogram of cache hit duration in microseconds
+# TYPE nv_cache_hit_histogram_us histogram
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_cache_hit_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_cache_hit_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_cache_miss_histogram_us Histogram of cache miss duration in microseconds
+# TYPE nv_cache_miss_histogram_us histogram
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_cache_miss_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_cache_miss_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_trt_llm_request_metrics TRT LLM request metrics
+# TYPE nv_trt_llm_request_metrics gauge
+nv_trt_llm_request_metrics{model="tensorrt_llm",version="1",request_type="waiting"} 1
+nv_trt_llm_request_metrics{model="tensorrt_llm",version="1",request_type="context"} 1
+nv_trt_llm_request_metrics{model="tensorrt_llm",version="1",request_type="scheduled"} 1
+nv_trt_llm_request_metrics{model="tensorrt_llm",version="1",request_type="max"} 512
+nv_trt_llm_request_metrics{model="tensorrt_llm",version="1",request_type="active"} 0
+# HELP nv_trt_llm_runtime_memory_metrics TRT LLM runtime memory metrics
+# TYPE nv_trt_llm_runtime_memory_metrics gauge
+nv_trt_llm_runtime_memory_metrics{memory_type="pinned",model="tensorrt_llm",version="1"} 0
+nv_trt_llm_runtime_memory_metrics{memory_type="gpu",model="tensorrt_llm",version="1"} 1610236
+nv_trt_llm_runtime_memory_metrics{memory_type="cpu",model="tensorrt_llm",version="1"} 0
+# HELP nv_trt_llm_kv_cache_block_metrics TRT LLM KV cache block metrics
+# TYPE nv_trt_llm_kv_cache_block_metrics gauge
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="fraction",model="tensorrt_llm",version="1"} 0.4875
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="tokens_per",model="tensorrt_llm",version="1"} 64
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="used",model="tensorrt_llm",version="1"} 1
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="free",model="tensorrt_llm",version="1"} 6239
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="max",model="tensorrt_llm",version="1"} 6239
+# HELP nv_trt_llm_inflight_batcher_metrics TRT LLM inflight_batcher-specific metrics
+# TYPE nv_trt_llm_inflight_batcher_metrics gauge
+nv_trt_llm_inflight_batcher_metrics{inflight_batcher_specific_metric="micro_batch_id",model="tensorrt_llm",version="1"} 0
+nv_trt_llm_inflight_batcher_metrics{inflight_batcher_specific_metric="generation_requests",model="tensorrt_llm",version="1"} 0
+nv_trt_llm_inflight_batcher_metrics{inflight_batcher_specific_metric="total_context_tokens",model="tensorrt_llm",version="1"} 0
+# HELP nv_trt_llm_v1_metrics TRT LLM v1-specific metrics
+# TYPE nv_trt_llm_v1_metrics gauge
+nv_trt_llm_v1_metrics{model="tensorrt_llm",version="1",v1_specific_metric="total_generation_tokens"} 20
+nv_trt_llm_v1_metrics{model="tensorrt_llm",version="1",v1_specific_metric="empty_generation_slots"} 0
+nv_trt_llm_v1_metrics{model="tensorrt_llm",version="1",v1_specific_metric="total_context_tokens"} 5
+# HELP nv_trt_llm_general_metrics General TRT LLM metrics
+# TYPE nv_trt_llm_general_metrics gauge
+nv_trt_llm_general_metrics{general_type="iteration_counter",model="tensorrt_llm",version="1"} 0
+nv_trt_llm_general_metrics{general_type="timestamp",model="tensorrt_llm",version="1"} 1700074049
+# HELP nv_trt_llm_disaggregated_serving_metrics TRT LLM disaggregated serving metrics
+# TYPE nv_trt_llm_disaggregated_serving_metrics counter
+nv_trt_llm_disaggregated_serving_metrics{disaggregated_serving_type="kv_cache_transfer_ms",model="tensorrt_llm",version="1"} 0
+nv_trt_llm_disaggregated_serving_metrics{disaggregated_serving_type="request_count",model="tensorrt_llm",version="1"} 0
