@@ -13,6 +13,7 @@ from datadog_checks.base.errors import SkipInstanceError
 
 
 class TensorrtLlmCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'tensorrt_llm'
 

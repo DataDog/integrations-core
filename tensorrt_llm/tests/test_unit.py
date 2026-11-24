@@ -8,7 +8,6 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.stubs import datadog_agent
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.tensorrt_llm import TensorrtLlmCheck
 
@@ -22,10 +21,10 @@ from .common import (
 )
 
 
-def run_check(dd_run_check, instance, fixture_file):
-    check = TensorrtLlmCheck('tensorrt_llm', {}, [instance])
-    with mock.patch('requests.Session.get', return_value=MockResponse(file_path=get_fixture_path(fixture_file))):
-        dd_run_check(check)
+def run_check(dd_run_check, fake_http_response, instance, fixture_file):
+    with open(get_fixture_path(fixture_file)) as f:
+        fake_http_response(instance['openmetrics_endpoint'], f.read())
+    dd_run_check(TensorrtLlmCheck('tensorrt_llm', {}, [instance]))
 
 
 @pytest.mark.parametrize(
@@ -38,8 +37,10 @@ def run_check(dd_run_check, instance, fixture_file):
         ),
     ],
 )
-def test_check_collects_mapped_metrics(dd_run_check, aggregator, instance, fixture_file, metrics, histograms):
-    run_check(dd_run_check, instance, fixture_file)
+def test_check_collects_mapped_metrics(
+    dd_run_check, aggregator, fake_http_response, instance, fixture_file, metrics, histograms
+):
+    run_check(dd_run_check, fake_http_response, instance, fixture_file)
 
     for metric in metrics:
         aggregator.assert_metric(metric)
@@ -55,8 +56,8 @@ def test_check_collects_mapped_metrics(dd_run_check, aggregator, instance, fixtu
     aggregator.assert_service_check('tensorrt_llm.openmetrics.health', ServiceCheck.OK)
 
 
-def test_model_name_tag_and_no_pid_tag(dd_run_check, aggregator, instance):
-    run_check(dd_run_check, instance, 'tensorrt_llm_1.3.0_metrics.txt')
+def test_model_name_tag_and_no_pid_tag(dd_run_check, aggregator, fake_http_response, instance):
+    run_check(dd_run_check, fake_http_response, instance, 'tensorrt_llm_1.3.0_metrics.txt')
 
     aggregator.assert_metric_has_tag('tensorrt_llm.num_requests.running', 'model_name:qwen3-0.6b')
     aggregator.assert_metric_has_tag('tensorrt_llm.request.success.count', 'finished_reason:length')
@@ -66,12 +67,12 @@ def test_model_name_tag_and_no_pid_tag(dd_run_check, aggregator, instance):
 
 
 def test_emits_critical_openmetrics_service_check_when_service_is_down(
-    dd_run_check, aggregator, instance, mock_http_response
+    dd_run_check, aggregator, fake_http_response, instance
 ):
-    mock_http_response(status_code=404)
+    fake_http_response(instance['openmetrics_endpoint'], status_code=404)
     check = TensorrtLlmCheck('tensorrt_llm', {}, [instance])
 
-    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match='HTTPClientStatusError'):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
