@@ -87,9 +87,12 @@ class Ceph(AgentCheck):
 
     @staticmethod
     def _mon_status_removed(raw: dict) -> bool:
-        # `mon_status` was removed in Octopus, the first release that reports its name here.
-        # Nautilus reports its number ('14'), and older releases don't report the field.
-        release = raw.get('status', {}).get('monmap', {}).get('min_mon_release_name', '')
+        # Octopus and later, where `mon_status` was removed, name the release in the monmap summary, and Nautilus
+        # 14.2.17 and later give its number. Older releases return the full monmap, which has no `num_mons`.
+        monmap = raw.get('status', {}).get('monmap', {})
+        if 'num_mons' not in monmap:
+            return False
+        release = monmap.get('min_mon_release_name', '')
         return bool(release) and not release.isdigit()
 
     def _extract_tags(self, raw, instance):

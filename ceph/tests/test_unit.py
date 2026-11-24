@@ -283,18 +283,17 @@ def test_num_mons_active_leader_down(aggregator, dd_run_check):
 
 
 @pytest.mark.parametrize(
-    'min_mon_release_name, runs_mon_status',
+    'monmap, runs_mon_status',
     [
-        pytest.param(None, True, id='luminous'),
-        pytest.param('14', True, id='nautilus'),
-        pytest.param('octopus', False, id='octopus'),
-        pytest.param('umbrella', False, id='umbrella'),
+        pytest.param({'mons': []}, True, id='luminous'),
+        # Before 14.2.17, `status` returns the full monmap, which names the release and has no `num_mons`.
+        pytest.param({'min_mon_release_name': 'nautilus', 'mons': []}, True, id='nautilus-before-14.2.17'),
+        pytest.param({'num_mons': 3, 'min_mon_release_name': '14'}, True, id='nautilus'),
+        pytest.param({'num_mons': 3, 'min_mon_release_name': 'octopus'}, False, id='octopus'),
+        pytest.param({'num_mons': 3, 'min_mon_release_name': 'umbrella'}, False, id='umbrella'),
     ],
 )
-def test_mon_status_only_runs_before_octopus(min_mon_release_name, runs_mon_status):
-    monmap = {'num_mons': 3}
-    if min_mon_release_name is not None:
-        monmap['min_mon_release_name'] = min_mon_release_name
+def test_mon_status_only_runs_before_octopus(monmap, runs_mon_status):
     commands = []
 
     def run_ceph(args, log):
