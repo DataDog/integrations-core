@@ -80,7 +80,7 @@ _METRICS_1_3_0 = [
     'time_to_first_token.seconds.sum',
 ]
 
-# Added by trtllm-serve 1.4.0rc4 (fixture: live dump with a host KV cache tier and request errors).
+# Added by trtllm-serve 1.4.0rc4 (fixture: live dump with a host KV cache tier and n-gram speculative decoding).
 _METRICS_1_4_0RC4_ADDED = [
     'disaggregation.gen_deferred_receives',
     'kv_cache.host_slab_bytes',
@@ -88,6 +88,13 @@ _METRICS_1_4_0RC4_ADDED = [
     'kv_cache.offload_bytes.count',
     'prompt_tokens.cache_hit.count',
     'request.error.count',
+    'spec_decode.acceptance_length',
+    'spec_decode.accepted_tokens.count',
+    'spec_decode.draft_overhead',
+    'spec_decode.drafted_tokens.count',
+    'spec_decode.num_accepted_tokens.count',
+    'spec_decode.num_draft_tokens.count',
+    'speculative_config_info',
 ]
 
 # Conditional families (fixture: hand-written from the collector source).
