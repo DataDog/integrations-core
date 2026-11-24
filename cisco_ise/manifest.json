@@ -1,0 +1,46 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "c43044ad-dff9-48c0-9471-5a212082c2a3",
+  "app_id": "cisco-ise",
+  "owner": "agent-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track network access and device administration from Cisco ISE logs",
+    "title": "Cisco ISE",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Security",
+      "Category::Network",
+      "Category::Log Collection",
+      "Category::SIEM",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 94992791,
+      "source_type_name": "Cisco ISE",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      }
+    },
+    "logs": {
+      "source": "cisco-ise"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
