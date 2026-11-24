@@ -101,8 +101,8 @@ The Agent must run on a host that the firewall can reach on the syslog port and 
 
    **Notes**:
    - The formats wrap free-text fields such as `threatid`, `http.useragent`, `opaque`, `path`, `before_change_detail`, `after_change_detail`, `error`, `message`, `client_os_ver`, and `evidence` in double quotes so that commas and `=` inside them parse correctly. The formats don't wrap `misc` because PAN-OS always encloses it in double quotes.
-   - Include `high_res_timestamp` to use the event time as the log date. It's the only time field with a time zone offset, so the pipeline uses it as the log date when your PAN-OS version populates it; otherwise, logs keep the time Datadog received them. `time_generated` and `timestamp` have no offset and are interpreted as UTC; they're used for `ocsf.time` when `high_res_timestamp` is missing.
-   - Formats copied from earlier versions of this page are still parsed.
+   - The pipeline uses `high_res_timestamp` as the log date because it's the only time field with a time zone offset. If your format doesn't include it or your PAN-OS version doesn't populate it, logs keep the time Datadog received them. PAN-OS doesn't provide `high_res_timestamp` for Correlated Events logs. The pipeline interprets `time_generated` and `timestamp` as UTC and uses them for `ocsf.time` when `high_res_timestamp` is missing.
+   - The pipeline also parses formats copied from earlier versions of this page. In those formats, free-text values that aren't quoted can be cut off at a comma or a `key=value` pair. Update to the formats in the preceding table to parse those values in full.
 
 5. Go to **Objects > Log Forwarding** and add a log forwarding profile that sends the log types you configured in step 4 to the syslog server profile. Attach the profile to your security policy rules. For system and configuration logs, select the server profile in **Device > Log Settings**.
 
