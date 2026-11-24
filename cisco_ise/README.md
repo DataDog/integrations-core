@@ -4,19 +4,21 @@
 
 This integration collects [Cisco Identity Services Engine (ISE)][4] logs through the Datadog Agent.
 
-Cisco ISE is a network access control platform. It decides whether users and devices may join the wired, wireless, or VPN network and with which access (VLAN, downloadable ACL, Security Group Tag), and it authenticates network administrators on switches and routers through TACACS+. ISE sends its logs as syslog to a *Remote Logging Target*; this integration points that target at a Datadog Agent that listens on a UDP or TCP port.
+Cisco ISE is a network access control platform. It decides whether users and devices can join the wired, wireless, or VPN network and what access they get (VLAN, downloadable ACL, Security Group Tag). It also authenticates network administrators on switches and routers through TACACS+. ISE sends its logs as syslog to a *Remote Logging Target*; this integration points that target at a Datadog Agent that listens on a UDP or TCP port.
 
 ### What this integration monitors
 
 The integration collects ISE's logs for each kind of activity ISE controls:
 
-- **Network access (RADIUS authentications)**, Logging Categories *Passed Authentications* and *Failed Attempts*: Who joined the network or failed to, with the user, the endpoint MAC address, the network device and port, the SSID, the site, the authentication method, the authorization result (VLAN, downloadable ACL, Security Group Tag), and the failure reason.
-- **Network sessions (RADIUS accounting)**, *RADIUS Accounting*: Session start, interim updates, and stop. They link each endpoint IP address to its user and MAC address. Requires RADIUS accounting on the network devices.
-- **Device administration (TACACS+)**, logins in *Passed Authentications* and *Failed Attempts*, commands in *TACACS Accounting*: Administrator logins on switches and routers, their privilege level, and the commands they type.
-- **ISE administration**, *Administrative and Operational Audit*: ISE administrator logins and configuration changes.
-- **Endpoint profiling**, *Profiler*: The device type, operating system, and vendor ISE assigns to each endpoint.
-- **Guest and My Devices portals**, *Guest* and *MyDevices*: Guest self-registration and logins, and the devices employees register.
-- **Posture and quarantine**, *Posture and Client Provisioning Audit*: Posture results and quarantine (Adaptive Network Control) actions.
+| Activity | Logging Categories | What's collected |
+|---|---|---|
+| **Network access (RADIUS authentications)** | *Passed Authentications*, *Failed Attempts* | Who joined the network or failed to, with the user, the endpoint MAC address, the network device and port, the SSID, the site, the authentication method, the authorization result (VLAN, downloadable ACL, Security Group Tag), and the failure reason. |
+| **Network sessions (RADIUS accounting)** | *RADIUS Accounting* | Session start, interim updates, and stop. They link each endpoint IP address to its user and MAC address. Requires RADIUS accounting on the network devices. |
+| **Device administration (TACACS+)** | *Passed Authentications* and *Failed Attempts* (logins), *TACACS Accounting* (commands) | Administrator logins on switches and routers, their privilege level, and the commands they type. |
+| **ISE administration** | *Administrative and Operational Audit* | ISE administrator logins and configuration changes. |
+| **Endpoint profiling** | *Profiler* | The device type, operating system, and vendor ISE assigns to each endpoint. |
+| **Guest and My Devices portals** | *Guest*, *MyDevices* | Guest self-registration and logins, and the devices employees register. |
+| **Posture and quarantine** | *Posture and Client Provisioning Audit* | Posture results and quarantine (Adaptive Network Control) actions. |
 
 ### Supported versions
 
@@ -57,7 +59,7 @@ To filter or mask other messages before they leave the Agent, add [log processin
 
 In Cisco ISE, add a Remote Logging Target for the Agent: UDP or TCP syslog (matching the Agent's `type`), the Agent host, and the port set above. Set its **Maximum Length** to **8192**; if your ISE version accepts less, use the highest value it accepts. ISE splits any event longer than this into several syslog messages, each a separate log, and ISE's default of 1024 splits most events.
 
-Then attach to the target the Logging Categories of the activity you want to collect, listed in [What this integration monitors](#what-this-integration-monitors). ISE only sends the categories attached to a target.
+Then attach the Logging Categories you want to collect to the target. For the list, see [What this integration monitors](#what-this-integration-monitors). ISE only sends the categories attached to a target.
 
 ### Validation
 
@@ -71,7 +73,7 @@ The Cisco ISE integration collects ISE's syslog messages with `source:cisco-ise`
 
 #### Sensitive data
 
-- **TACACS+ commands** are logged as typed, including secrets, for example `username admin secret 0 <password>`. The two `mask_sequences` rules in the sample configuration replace everything typed after `secret`, `password`, `key`, `key-string`, `community`, `pre-shared-key`, `auth`, or `priv` in a command, including hyphenated forms such as `authentication-key`, with `********` in the Agent, before the logs leave your network. The masking needs events that aren't split: if ISE splits an event between the keyword and the value, the value is sent unmasked. The rules only cover these keywords; to mask other values, add rules or use [Sensitive Data Scanner][7].
+- **TACACS+ commands** are logged as typed, including secrets, for example `username admin secret 0 <password>`. The two `mask_sequences` rules in the sample configuration mask these secrets in the Agent, before the logs leave your network. They replace everything typed after any of these keywords in a command with `********`: `secret`, `password`, `key`, `key-string`, `community`, `pre-shared-key`, `auth`, or `priv`, including hyphenated forms such as `authentication-key`. The masking needs events that aren't split: if ISE splits an event between the keyword and the value, the value is sent unmasked. The rules only cover these keywords; to mask other values, add rules or use [Sensitive Data Scanner][7].
 - **Guest portal messages** (Guest category, and guest logins) contain visitors' personal data: name, email address, phone number, company, and the person visited. Don't attach the Guest category if you don't need it, or use [Sensitive Data Scanner][7] to redact these fields.
 
 ### Metrics
