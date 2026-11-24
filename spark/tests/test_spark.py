@@ -748,26 +748,6 @@ def test_auth_yarn_options():
 
 
 @pytest.mark.unit
-def test_auth_yarn(aggregator, dd_run_check, fake_http):
-    register_yarn_routes(fake_http)
-    c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
-    dd_run_check(c)
-
-    tags = ['url:http://localhost:8088'] + CUSTOM_TAGS + CLUSTER_TAGS
-    tags.sort()
-
-    for sc in aggregator.service_checks(YARN_SERVICE_CHECK):
-        assert sc.status == SparkCheck.OK
-        sc.tags.sort()
-        assert sc.tags == tags
-
-    for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
-        assert sc.status == SparkCheck.OK
-        sc.tags.sort()
-        assert sc.tags == tags
-
-
-@pytest.mark.unit
 def test_mesos(aggregator, dd_run_check, fake_http):
     register_mesos_routes(fake_http)
     c = SparkCheck('spark', {}, [MESOS_CONFIG])
