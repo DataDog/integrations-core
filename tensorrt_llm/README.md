@@ -30,7 +30,7 @@ For containerized environments, see the [Autodiscovery integration templates][3]
 
 The `trtllm-serve` server exposes Prometheus metrics at `/prometheus/metrics` on its HTTP port (`8000` by default)
 only when `return_perf_metrics` is enabled. Set it in the file passed to `--config` (`--extra_llm_api_options` in
-older releases). `enable_iter_perf_stats` is optional and adds the scheduler, batching, memory, and KV cache metrics:
+older releases). Optionally, also set `enable_iter_perf_stats` to add the scheduler, batching, memory, and KV cache metrics:
 
 ```yaml
 return_perf_metrics: true
@@ -43,7 +43,7 @@ Then pass the file when you start the server:
 trtllm-serve <MODEL> --config config.yaml
 ```
 
-Without `return_perf_metrics`, the endpoint returns 404 and the `tensorrt_llm.openmetrics.health` service check
+Without `return_perf_metrics`, the endpoint returns an HTTP 404 error and the `tensorrt_llm.openmetrics.health` service check
 reports `CRITICAL`.
 
 Enable GPU Monitoring in the Datadog Agent configuration:
