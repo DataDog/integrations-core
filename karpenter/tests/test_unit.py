@@ -25,7 +25,7 @@ def test_check_mock_karpenter_openmetrics(dd_run_check, instance, aggregator, mo
     aggregator.assert_service_check('karpenter.openmetrics.health', ServiceCheck.OK)
 
 
-def test_check_mock_karpenter_v1_openmetrics(dd_run_check, instance, aggregator, mock_http_response):
+def test_check_mock_karpenter_v1_openmetrics(dd_run_check, instance, aggregator, mock_http_response, allow_service_tag):
     mock_http_response(file_path=get_fixture_path('karpenter_metrics_v1.txt'))
     check = KarpenterCheck('karpenter', {}, [instance])
     dd_run_check(check)
