@@ -40,7 +40,7 @@ The [latency summary][10] metrics are disabled by default. To enable summary met
 tritonserver --metrics-config summary_latencies=true
 ```
 
-The [latency histogram][15] metrics are also disabled by default. To enable the request, queue, and compute histograms, and the time to first response histogram, use the command below:
+The [latency histogram][15] metrics are disabled by default. To enable the request, queue, and compute and first response histograms, use the command below:
 
 ```
 tritonserver --metrics-config summary_latencies=simplified --metrics-config histogram_latencies=true

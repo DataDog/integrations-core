@@ -1,1 +1,1 @@
-Collect the current Triton metrics: time to first response, latency histograms, model load duration, per-model response cache and pinned memory pool. Also collect the TensorRT-LLM backend metrics, including input and output token length.
+Collect the current Triton metrics: Time to first response, latency histograms, model load duration, per-model response cache, and pinned memory pool. Additionally, collect the TensorRT-LLM backend metrics, including input and output token length.
