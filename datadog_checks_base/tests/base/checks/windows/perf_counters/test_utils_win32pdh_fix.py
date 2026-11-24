@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import ctypes
 import ctypes.wintypes
+from collections.abc import Sequence
 
 import pytest
 
@@ -11,8 +12,13 @@ from datadog_checks.dev.testing import requires_windows
 pytestmark = [requires_windows]
 
 
-def format_counter_array(mocker, slots, data_call_result=None):
-    """`slots` holds `(name, cstatus, value)` tuples; `None` leaves a slot zeroed, as if pdh.dll never wrote it.
+def format_counter_array(
+    mocker,
+    slots: Sequence[tuple[str, int, float] | None],
+    data_call_result: int | None = None,
+) -> dict[str, float | list[float]]:
+    """Each entry of `slots` is a `(name, cstatus, value)` tuple, or `None` to leave a slot zeroed
+    as if pdh.dll never wrote it.
 
     The data call returns `PDH_CALC_NEGATIVE_VALUE` unless `data_call_result` is given, and reports the
     item count only when it succeeds, as pdh.dll does.
@@ -97,9 +103,11 @@ def test_get_formatted_counter_array_all_instances_invalid(mocker):
 
 def test_get_formatted_counter_array_null_szname_skipped(mocker):
     from datadog_checks.base.checks.windows.perf_counters.constants import PDH_CSTATUS_VALID_DATA
+    from datadog_checks.base.checks.windows.perf_counters.utils_win32pdh_fix import PartialCounterValues
 
     result = format_counter_array(mocker, [('healthy_share', PDH_CSTATUS_VALID_DATA, 12.0), None])
     assert result == {'healthy_share': 12.0}
+    assert isinstance(result, PartialCounterValues)
     assert result.invalid_instances == []
 
 

@@ -4,6 +4,7 @@
 
 import ctypes
 import ctypes.wintypes
+from collections.abc import Mapping
 
 import pywintypes
 import win32pdh
@@ -61,11 +62,11 @@ class PDH_FMT_COUNTERVALUE_ITEM_W(ctypes.Structure):
 class PartialCounterValues(dict):
     """Instance values recovered when `PdhGetFormattedCounterArrayW` returns `PDH_CALC_NEGATIVE_*`.
 
-    `invalid_instances` lists the instances that had no valid value in this sample, so that callers
-    can tell whether an aggregate over the returned values is complete.
+    The `invalid_instances` attribute lists the instances that had no valid value in this sample,
+    so that callers can tell whether an aggregate over the returned values is complete.
     """
 
-    def __init__(self, values, invalid_instances):
+    def __init__(self, values: Mapping[str, float | list[float]], invalid_instances: list[str]):
         super().__init__(values)
         self.invalid_instances = invalid_instances
 

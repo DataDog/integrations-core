@@ -402,9 +402,10 @@ class PerfObject:
         return self._instance_filtered_out(instance)
 
     # Only the `include`/`exclude` filters, without the derived-class callback above
-    def _instance_filtered_out(self, instance):
-        return self.exclude_pattern.search(instance) or (
-            self.include_pattern is not None and not self.include_pattern.search(instance)
+    def _instance_filtered_out(self, instance: str) -> bool:
+        return bool(
+            self.exclude_pattern.search(instance)
+            or (self.include_pattern is not None and not self.include_pattern.search(instance))
         )
 
     def _log_multi_instance_option_defined(self, option_name):
@@ -614,7 +615,8 @@ class MultiCounter(CounterBase):
         self.unique_instance_count = 0
 
         total = 0
-        # Skip `.sum`/`.avg` rather than report them short if a handle failed or a monitored instance had no value
+        # Skip `.sum`/`.avg` rather than report them short if a handle failed
+        # or a partial result is missing a monitored instance
         aggregate_incomplete = False
         for idx, counter_handle in enumerate(self.instances):
             try:
@@ -735,6 +737,6 @@ class MultiCounter(CounterBase):
         perf_obj = self.perf_obj_weakref()
         return perf_obj._instance_excluded(instance)
 
-    def _instance_filtered_out(self, instance):
+    def _instance_filtered_out(self, instance: str) -> bool:
         perf_obj = self.perf_obj_weakref()
         return perf_obj._instance_filtered_out(instance)
