@@ -45,7 +45,7 @@ on:
         type: string
       agent-image-windows-py2:
         required: false
-        default: "datadog/agent-dev:master-py2-win-servercore"
+        default: "registry.datadoghq.com/agent-dev:master-py2-win-servercore"
         type: string
       pytest-args:
         description: "Arguments to pass to pytest"

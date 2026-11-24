@@ -31,7 +31,7 @@ on:
       agent-image-windows-py2:
         required: false
         description: Agent 6 image on Windows
-        default: "datadog/agent-dev:master-py2-win-servercore"
+        default: "registry.datadoghq.com/agent-dev:master-py2-win-servercore"
         type: string
       target:
         required: false
