@@ -2,7 +2,7 @@
   "name": "Top IPs flagged in high severity threats",
   "type": "logs",
   "page": "analytics",
-  "query": "source:pan.firewall @type:THREAT @severity:high",
+  "query": "source:pan.firewall @type:THREAT @severity:(high OR critical)",
   "timerange": {
     "interval_ms": 3600000
   },

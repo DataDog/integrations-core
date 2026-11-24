@@ -2,7 +2,7 @@
   "name": "All high severity issues",
   "type": "logs",
   "page": "stream",
-  "query": "source:pan.firewall @type:THREAT @severity:high",
+  "query": "source:pan.firewall @type:THREAT @severity:(high OR critical)",
   "timerange": {
     "interval_ms": 3600000
   },

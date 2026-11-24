@@ -140,6 +140,11 @@ facets:
     name: Device Name
     path: device_name
     source: log
+  - groups:
+      - PAN Firewall
+    name: Device Hostname
+    path: device_hostname
+    source: log
   - facetType: range
     groups:
       - Web Access
@@ -170,10 +175,30 @@ facets:
   - facetType: range
     groups:
       - Web Access
-    name: Packets Recieved
+    name: Packets Received
     path: pkts_received
     source: log
     type: double
+  - groups:
+      - PAN Firewall
+    name: Threat ID
+    path: pan.firewall.threatid
+    source: log
+  - groups:
+      - PAN Firewall
+    name: Threat Category
+    path: pan.firewall.thr_category
+    source: log
+  - groups:
+      - PAN Firewall
+    name: Application
+    path: pan.firewall.app
+    source: log
+  - groups:
+      - PAN Firewall
+    name: Session End Reason
+    path: pan.firewall.session_end_reason
+    source: log
   - groups:
       - PAN Firewall
     name: Authentication Policy
@@ -464,16 +489,177 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
+        - "<14>Nov 18 10:20:05 fw-a timestamp=2026/11/18 10:20:05, serial=007900000000001, type=THREAT, subtype=spyware, time_generated=2026/11/18 10:20:05, network.client.ip=10.60.2.100, network.destination.ip=8.8.8.8, rule=trust-out, usr.id=, dstuser=,\tapp=dns-base,\tinbound_if=ethernet1/2,\toutbound_if=ethernet1/1,\t evt.name=drop,\tmisc=test-malware.testpanw.com,\tthreatid=generic:test-malware.testpanw.com,\tcategory=any,\tseverity=medium,\turl_idx=0,\thttp.useragent=,\tfiletype=,\txff=\treferer=,\ttunnel=N/A,\tthr_category=dns-malware"
+        - "<14>Nov 18 10:15:48 fw-b timestamp=2026/11/18 10:15:48, serial=007900000000002, type=SYSTEM, subtype=general,\tvsys=,\tevt.name=general,\tobject=,\tmodule=general,\tseverity=informational,\topaque=WildFire job enqueued. Enqueue time=2026/11/18 10:15:48. JobId=13752.  . Type: Full,\tseqno=7701028248951498075, actionflags=0x0, vsys_name=, device_name=fw-b"
+        - "<14>Oct 26 16:59:23 fw-b timestamp=2026/10/26 16:59:23,\tserial=007900000000002,\ttype=CONFIG,\tsubtype=0,\t network.client.ip=198.51.100.50,\tvsys=,\tevt.name=set,\tusr.id=admin,\tclient=CLI,\tevt.outcome=Succeeded,\tpath= network interface ethernet  ethernet1/1 layer3 ip, before_change_detail=,\tafter_change_detail=,\tseqno=7701021535917572103,\tactionflags=0x0, vsys_name=, device_name=fw-b"
+        - "<14>Nov 18 10:19:48 fw-a timestamp=2026/11/18 10:19:48, serial=007900000000001, type=TRAFFIC, subtype=end, time_generated=2026/11/18 10:19:48, network.client.ip=10.60.3.100, network.destination.ip=10.60.2.100, rule=vpn-to-trust, usr.id=, dstuser=,\tapp=incomplete,\tinbound_if=tunnel.1,\toutbound_if=ethernet1/2,\tnetwork.client.port=54096,\tnetwork.destination.port=8080, natsport=0\tnatdport=0,\tproto=tcp,\t evt.name=allow, start=2026/11/18 10:19:34, tunnel=N/A"
       grok:
         matchRules: |
-          rule_panos %{data::keyvalue("="," \"")}
+          rule_panos %{_header}%{_kv}
+        supportRules: |
+          _kv %{data::keyvalue("=", " \"/:\\\\()'\\[\\]#?&;+%!*~<>@|{}$^\\p{L}\\p{N}")}
+          _header (?:[^=]*\s)?
+    - type: grok-parser
+      name: Keep `serial` as a string
+      enabled: true
+      source: message
+      samples:
+        - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end"
+      grok:
+        matchRules: |
+          serial %{data},[ \t]*serial=%{regex("[^,\\s\"]*"):serial}%{greedyData}
         supportRules: ''
-    - type: date-remapper
-      name: Define `timestamp` as the official date of the log
+    - type: grok-parser
+      name: Copy `device_name` to a lowercase `device_hostname`
+      enabled: true
+      source: device_name
+      samples:
+        - "PA-3220"
+      grok:
+        # Metric tags are lowercase and log attribute search is case-sensitive. `device_hostname`
+        # matches the metric tag of the same name, so dashboards can filter logs and metrics with
+        # one template variable. `device_name` keeps the firewall's own spelling. Read from the
+        # parsed attribute, not the message, so text inside a free-text field can't be picked up.
+        matchRules: |
+          device_hostname %{data:device_hostname:lowercase}
+        supportRules: ''
+    - type: attribute-remapper
+      name: Keep `subtype` as a string
       enabled: true
       sources:
-        - timestamp
+        - subtype
+      sourceType: attribute
+      target: subtype
+      targetType: attribute
+      targetFormat: string
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Copy `threatid` to `pan.firewall.threatid`
+      enabled: true
+      sources:
+        - threatid
+      sourceType: attribute
+      target: pan.firewall.threatid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Copy `thr_category` to `pan.firewall.thr_category`
+      enabled: true
+      sources:
+        - thr_category
+      sourceType: attribute
+      target: pan.firewall.thr_category
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Copy `app` to `pan.firewall.app`
+      enabled: true
+      sources:
+        - app
+      sourceType: attribute
+      target: pan.firewall.app
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Copy `session_end_reason` to `pan.firewall.session_end_reason`
+      enabled: true
+      sources:
+        - session_end_reason
+      sourceType: attribute
+      target: pan.firewall.session_end_reason
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: pipeline
+      name: Extract the PAN-OS event time into `pan_event_time`
+      enabled: true
+      filter:
+        query: "*"
+      processors:
+        # Event time, read from the parsed attributes (not the message, so a URL parameter such as
+        # `?high_res_timestamp=...` inside a free-text field can't be picked up). The steps run from
+        # lowest to highest precedence and each overwrites `pan_event_time` only if its attribute
+        # parses: `timestamp` (receive_time in Threat, URL, Data Filtering and GlobalProtect formats;
+        # start in GTP), then `time_generated`, then `high_res_timestamp` (ISO 8601 with offset).
+        # Times without an offset are firewall-local and are parsed as UTC. Firewalls that don't
+        # populate high_res_timestamp send a 1969-12-31 placeholder, which is skipped.
+        # Only `high_res_timestamp` carries an offset, so only it becomes the official log date
+        # (`pan_log_date`); without it the log keeps its intake time. `pan_event_time` feeds `ocsf.time`.
+        - type: grok-parser
+          name: Parse `timestamp` into `pan_event_time`
+          enabled: true
+          source: timestamp
+          samples:
+            - "2025/09/03 19:41:10"
+          grok:
+            matchRules: |
+              timestamp %{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}
+            supportRules: ''
+        - type: grok-parser
+          name: Parse `time_generated` into `pan_event_time`
+          enabled: true
+          source: time_generated
+          samples:
+            - "2025/09/03 19:40:32"
+          grok:
+            matchRules: |
+              time_generated %{date("yyyy/MM/dd HH:mm:ss"):pan_event_time}
+            supportRules: ''
+        - type: grok-parser
+          name: Parse `high_res_timestamp` into `pan_log_date`
+          enabled: true
+          source: high_res_timestamp
+          samples:
+            - "2025-09-03T12:40:32.123-07:00"
+          grok:
+            matchRules: |
+              high_res_timestamp (?!1969-)%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):pan_log_date}
+            supportRules: ''
+        - type: attribute-remapper
+          name: Copy `pan_log_date` to `pan_event_time`
+          enabled: true
+          sources:
+            - pan_log_date
+          sourceType: attribute
+          target: pan_event_time
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+    - type: date-remapper
+      name: Define `pan_log_date` as the official date of the log
+      enabled: true
+      sources:
+        - pan_log_date
+    # Follows the PAN-OS syslog severity table: high and medium both map to warning.
+    - type: category-processor
+      name: Map PAN-OS `severity` to `pan_status`
+      enabled: true
+      target: pan_status
+      categories:
+        - filter:
+            query: "@severity:critical"
+          name: critical
+        - filter:
+            query: "@severity:high"
+          name: warning
+        - filter:
+            query: "@severity:medium"
+          name: warning
+        - filter:
+            query: "@severity:low"
+          name: notice
+        - filter:
+            query: "@severity:informational"
+          name: info
+    - type: status-remapper
+      name: Define `pan_status` as the official status of the log
+      enabled: true
+      sources:
+        - pan_status
     - type: geo-ip-parser
       name: Fetching GeoIp data for client ip
       enabled: true
@@ -481,7 +667,7 @@ pipeline:
         - network.client.ip
       target: network.client.geoip
     - type: user-agent-parser
-      name: Parsing useragent detils from http.useragent
+      name: Parsing useragent details from http.useragent
       enabled: true
       sources:
         - http.useragent
@@ -501,30 +687,16 @@ pipeline:
       filter:
         query: "*"
       processors:
-        - type: grok-parser
-          name: Parse the `timestamp` attribute into `ocsf.time`
+        - type: attribute-remapper
+          name: Map `pan_event_time` to `ocsf.time`
           enabled: true
-          source: timestamp
-          samples:
-            - "2025/09/03 19:44:00"
-            - "2025-09-03T19:44:00Z"
-          grok:
-            supportRules: ""
-            matchRules: |-
-              slash_fmt %{date("yyyy/MM/dd HH:mm:ss"):ocsf.time}
-              iso_fmt %{date("yyyy-MM-dd'T'HH:mm:ss'Z'"):ocsf.time}
-        - type: grok-parser
-          name: Parse the PAN-OS event time into `ocsf.time`
-          enabled: true
-          source: message
-          samples:
-            - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, serial=016201026426, type=TRAFFIC, subtype=end, time_generated=2025/09/03 19:40:32, network.client.ip=172.16.28.190"
-            - "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM"
-          grok:
-            supportRules: ""
-            matchRules: |-
-              event_time %{data}time_generated=%{date("yyyy/MM/dd HH:mm:ss"):ocsf.time}%{data}
-              receive_time %{data}timestamp=%{date("yyyy/MM/dd HH:mm:ss"):ocsf.time}%{data}
+          sources:
+            - pan_event_time
+          sourceType: attribute
+          target: ocsf.time
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
         - type: string-builder-processor
           name: Add product name
           enabled: true
@@ -581,29 +753,36 @@ pipeline:
           enabled: true
           source: message
           samples:
-            - "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, type=THREAT, subtype=url, evt.name=block-url, misc=http://malware.example.com/payload.bin, threatid=Suspicious URL"
+            - "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, type=THREAT, subtype=url, evt.name=block-url, misc=http://malware.example.com/payload.bin?id=42&ref=mail, threatid=Suspicious URL"
+            - "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, type=THREAT, subtype=url, evt.name=block-url, misc=\"http://malware.example.com/payload.bin\", threatid=\"Suspicious URL\""
+            - "<14>Sep  3 19:41:10 PA-3220 timestamp=2025/09/03 19:41:10, type=THREAT, subtype=url, evt.name=block-url, misc=\"\"http://malware.example.com/payload.bin?id=42,43\"\", threatid=\"Suspicious URL\""
           grok:
             supportRules: ""
             matchRules: |-
-              misc_url %{data}misc=%{regex("[^,]*"):ocsf.evidence.url.url_string}%{data}
+              misc_url_quoted %{data},[ \t]*misc="(?!")%{regex("[^\"]+"):ocsf.evidence.url.url_string}"(?=[,\s]|$)%{greedyData}
+              misc_url_double_quoted %{data},[ \t]*misc=""(?!"|[,\s]+[\w.]+=|$)%{regex("[^\"]+"):ocsf.evidence.url.url_string}""(?=[,\s]|$)%{greedyData}
+              misc_url %{data},[ \t]*misc=%{regex("[^,\"]+"):ocsf.evidence.url.url_string}%{greedyData}
     - type: pipeline
       name: misc field filename extraction
       enabled: true
       ocsf:
         isOcsf: true
       filter:
-        query: "@type:THREAT @subtype:(file OR virus OR wildfire-virus OR wildfire)"
+        query: "@type:THREAT @subtype:(file OR virus OR wildfire-virus OR wildfire OR data)"
       processors:
-        - type: attribute-remapper
-          name: Map `misc` to `ocsf.evidence.file.name`
+        - type: grok-parser
+          name: Parse `misc` to `ocsf.evidence.file.name`
           enabled: true
-          sources:
-            - misc
-          sourceType: attribute
-          target: ocsf.evidence.file.name
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: true
+          source: message
+          samples:
+            - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, type=THREAT, subtype=virus, evt.name=block-url, misc=invoice_2025.pdf, threatid=Eicar Test File"
+            - "<14>Sep  3 19:40:32 PA-3220 timestamp=2025/09/03 19:40:32, type=THREAT, subtype=data, evt.name=alert, misc=\"payroll, Q3.xlsx\", threatid=\"Credit Card Numbers\""
+          grok:
+            supportRules: ""
+            matchRules: |-
+              misc_file_quoted %{data},[ \t]*misc="(?!")%{regex("[^\"]+"):ocsf.evidence.file.name}"(?=[,\s]|$)%{greedyData}
+              misc_file_double_quoted %{data},[ \t]*misc=""(?!"|[,\s]+[\w.]+=|$)%{regex("[^\"]+"):ocsf.evidence.file.name}""(?=[,\s]|$)%{greedyData}
+              misc_file %{data},[ \t]*misc=%{regex("[^,\"]+"):ocsf.evidence.file.name}%{greedyData}
         - type: string-builder-processor
           name: Add type_id
           enabled: true
@@ -809,6 +988,12 @@ pipeline:
           template: "Firewall"
           target: ocsf.evidence.device.type
           replaceMissing: false
+        - type: string-builder-processor
+          name: Build a device-unique `ocsf.finding_info.uid` from `serial` and `seqno`
+          enabled: true
+          template: "%{serial}-%{seqno}"
+          target: ocsf.finding_info.uid
+          replaceMissing: false
         - type: array-processor
           name: Move `ocsf.evidence` into the `ocsf.evidences` array
           enabled: true
@@ -892,8 +1077,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `seqno` to `ocsf.finding_info.uid`
+              name: Map `ocsf.finding_info.uid`, `seqno` to `ocsf.finding_info.uid`
               sources:
+                - ocsf.finding_info.uid
                 - seqno
               sourceType: attribute
               target: ocsf.finding_info.uid
@@ -953,15 +1139,15 @@ pipeline:
               name: ocsf.disposition_id
               categories:
                 - filter:
-                    query: "@evt.name:allow"
+                    query: "@evt.name:(allow OR continue OR override)"
                   name: Allowed
                   id: 1
                 - filter:
-                    query: "@evt.name:(deny OR block OR block-url OR block-ip OR block-continue OR sinkhole)"
+                    query: "@evt.name:(deny OR block OR block-url OR block-ip OR block-continue OR block-override OR override-lockout OR sinkhole)"
                   name: Blocked
                   id: 2
                 - filter:
-                    query: "@evt.name:drop"
+                    query: "@evt.name:(drop OR drop-packet OR drop-all-packets OR random-drop OR drop-icmp)"
                   name: Dropped
                   id: 6
                 - filter:
@@ -985,6 +1171,35 @@ pipeline:
                   ocsf.disposition_id: "99"
                 sources:
                   ocsf.disposition:
+                    - evt.name
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "@evt.name:(allow OR continue OR override)"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@evt.name:(deny OR drop OR drop-packet OR drop-all-packets OR random-drop OR drop-icmp OR block OR block-url OR block-ip OR block-continue OR block-override OR override-lockout OR sinkhole OR reset-both OR reset-client OR reset-server)"
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: "@evt.name:alert"
+                  name: Observed
+                  id: 3
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.action
+                id: ocsf.action_id
+              fallback:
+                values:
+                  ocsf.action: Other
+                  ocsf.action_id: "99"
+                sources:
+                  ocsf.action:
                     - evt.name
             - type: schema-category-mapper
               name: ocsf.activity_id
@@ -1261,15 +1476,15 @@ pipeline:
               name: ocsf.disposition_id
               categories:
                 - filter:
-                    query: "@evt.name:allow"
+                    query: "@evt.name:(allow OR continue OR override)"
                   name: Allowed
                   id: 1
                 - filter:
-                    query: "@evt.name:(deny OR block OR block-url OR block-ip OR block-continue OR sinkhole)"
+                    query: "@evt.name:(deny OR block OR block-url OR block-ip OR block-continue OR block-override OR override-lockout OR sinkhole)"
                   name: Blocked
                   id: 2
                 - filter:
-                    query: "@evt.name:drop"
+                    query: "@evt.name:(drop OR drop-packet OR drop-all-packets OR random-drop OR drop-icmp)"
                   name: Dropped
                   id: 6
                 - filter:
@@ -1298,11 +1513,11 @@ pipeline:
               name: ocsf.action_id
               categories:
                 - filter:
-                    query: "@evt.name:allow"
+                    query: "@evt.name:(allow OR continue OR override)"
                   name: Allowed
                   id: 1
                 - filter:
-                    query: "@evt.name:(deny OR drop OR block OR block-url OR block-ip OR block-continue OR sinkhole OR reset-both OR reset-client OR reset-server)"
+                    query: "@evt.name:(deny OR drop OR drop-packet OR drop-all-packets OR random-drop OR drop-icmp OR block OR block-url OR block-ip OR block-continue OR block-override OR override-lockout OR sinkhole OR reset-both OR reset-client OR reset-server)"
                   name: Denied
                   id: 2
                 - filter:
