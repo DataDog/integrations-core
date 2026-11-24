@@ -819,7 +819,7 @@
                   "formulas": [
                     {
                       "alias": "Sensors in alarm",
-                      "formula": "default_zero(count_nonzero(query1)) + default_zero(count_nonzero(query2)) + default_zero(count_nonzero(query3))"
+                      "formula": "default_zero(count_nonzero(query1)) + default_zero(count_nonzero(default_zero(query4) + default_zero(query2) + default_zero(query3)))"
                     }
                   ],
                   "queries": [
@@ -840,6 +840,12 @@
                       "data_source": "metrics",
                       "name": "query3",
                       "query": "max:pan_firewall.power.alarm.low{$firewall,$panorama} by {device_id,sensor,slot}.rollup(max)"
+                    },
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "max:pan_firewall.power.alarm{$firewall,$panorama} by {device_id,sensor,slot}.rollup(max)"
                     }
                   ],
                   "response_format": "scalar"
