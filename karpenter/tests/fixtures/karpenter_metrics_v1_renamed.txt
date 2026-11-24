@@ -1,0 +1,23 @@
+# Metrics that older v1 releases of Karpenter register under a name that the supported release no longer uses.
+# Written by hand from their definitions, because the tool only lists the supported release.
+# The check keeps collecting them for customers that run an older release.
+#
+# karpenter_ignored_pod_count: v1.1.0 to v1.2.5, named karpenter_scheduler_ignored_pods_count since v1.3.0.
+# karpenter_pods_pods_drained_total: v1.5.0 to v1.6.4, named karpenter_pods_drained_total since.
+# karpenter_pods_scheduling_undecided_time_seconds: v1.1.0 to v1.2.5, named
+# karpenter_pods_provisioning_scheduling_undecided_time_seconds since.
+# operator_node_event_total: the provider v1.1.0 to v1.2.x, until it dropped the operatorpkg events controller.
+# The provider docs listed this one as operator_node_event_count, which no release registers.
+
+# HELP karpenter_ignored_pod_count Number of pods ignored during scheduling by Karpenter
+# TYPE karpenter_ignored_pod_count gauge
+karpenter_ignored_pod_count 0
+# HELP karpenter_pods_pods_drained_total The total number of pods drained during node termination by Karpenter, labeled by reason
+# TYPE karpenter_pods_pods_drained_total counter
+karpenter_pods_pods_drained_total{reason="x"} 0
+# HELP karpenter_pods_scheduling_undecided_time_seconds The time from when Karpenter has seen a pod without making a scheduling decision for the pod. Note: this calculated from a point in memory, not by the pod creation timestamp.
+# TYPE karpenter_pods_scheduling_undecided_time_seconds gauge
+karpenter_pods_scheduling_undecided_time_seconds{name="x",namespace="x"} 0
+# HELP operator_node_event_total The total of events of a given type for an object.
+# TYPE operator_node_event_total counter
+operator_node_event_total{reason="x",type="x"} 0
