@@ -43,7 +43,7 @@
           {
             "definition": {
               "background_color": "white",
-              "content": "Palo Alto Networks next-generation firewalls enforce network security policy (traffic, threat, and URL inspection, IPsec VPN, routing) and are managed centrally through Panorama. This dashboard covers firewall reachability, management-plane and dataplane resources, hardware environment, IPsec tunnels, BGP and OSPF routing, licenses, interfaces, HA links, and firewall logs.\n\n- [Datadog integration documentation](https://docs.datadoghq.com/integrations/pan-firewall/)\n- [Palo Alto Networks PAN-OS documentation](https://docs.paloaltonetworks.com/pan-os)",
+              "content": "Palo Alto Networks next-generation firewalls enforce network security policy (traffic, threat, and URL inspection, IPsec VPN, routing) and are managed centrally through Panorama. This dashboard covers firewall reachability, management-plane and dataplane resources, hardware environment, IPsec tunnels, BGP and OSPF routing, licenses, interfaces, HA links, and firewall logs.\n\n- [Datadog integration documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n- [Palo Alto Networks PAN-OS documentation](https://docs.paloaltonetworks.com/pan-os)",
               "text_align": "left",
               "type": "note"
             },
@@ -126,7 +126,7 @@
           },
           {
             "definition": {
-              "description": "Firewalls whose API did not respond to at least one check run in the selected time range. 0 means every firewall answered every run.",
+              "description": "Firewalls whose API did not respond to the latest check run in the selected time range. 0 means every firewall currently answers.",
               "precision": 0,
               "requests": [
                 {
@@ -145,21 +145,15 @@
                   "formulas": [
                     {
                       "alias": "Unreachable firewalls",
-                      "formula": "count_not_null(query2) - count_nonzero(query1)"
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
                     }
                   ],
                   "queries": [
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "query2",
-                      "query": "min:pan_firewall.can_connect{$firewall,$panorama} by {device_ip}.rollup(min)"
-                    },
-                    {
-                      "aggregator": "last",
-                      "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:pan_firewall.can_connect{$firewall,$panorama} by {device_ip}.rollup(min)"
+                      "query": "min:pan_firewall.can_connect{$firewall,$panorama} by {device_ip}"
                     }
                   ],
                   "response_format": "scalar"
@@ -185,7 +179,7 @@
                   "conditional_formats": [],
                   "formulas": [
                     {
-                      "alias": "Tunnels up all range",
+                      "alias": "Tunnels up the whole range",
                       "formula": "count_nonzero(clamp_min(1 - abs(qmin - 1) - abs(qmax - 1), 0))"
                     }
                   ],
@@ -206,7 +200,7 @@
                   "response_format": "scalar"
                 }
               ],
-              "title": "Tunnels up all range",
+              "title": "Tunnels up the whole range",
               "type": "query_value"
             },
             "id": 4742144319920927,
@@ -219,7 +213,7 @@
           },
           {
             "definition": {
-              "description": "IPsec tunnels that were inactive at some point in the selected time range. See the IPsec VPN section for which ones.",
+              "description": "IPsec tunnels that are currently inactive, from their latest state reading in the selected time range. See the IPsec VPN section for which ones.",
               "precision": 0,
               "requests": [
                 {
@@ -238,21 +232,15 @@
                   "formulas": [
                     {
                       "alias": "Inactive tunnels",
-                      "formula": "count_not_null(query2) - count_nonzero(query1)"
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
                     }
                   ],
                   "queries": [
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "query2",
-                      "query": "min:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}.rollup(min)"
-                    },
-                    {
-                      "aggregator": "last",
-                      "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}.rollup(min)"
+                      "query": "min:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}"
                     }
                   ],
                   "response_format": "scalar"
@@ -271,7 +259,7 @@
           },
           {
             "definition": {
-              "description": "Panorama hosts whose discovery call failed at some point in the selected time range. Collection continues: the integration keeps polling the firewalls from the last list Panorama returned, but firewalls added to Panorama during the outage are not discovered. Only applies when firewalls are discovered through Panorama; shows No data otherwise. Ignores the firewall filter, since Panorama is not tied to one firewall.",
+              "description": "Panorama hosts whose latest discovery call in the selected time range failed. Collection continues: the integration keeps polling the firewalls from the last list Panorama returned, but firewalls added to Panorama during the outage are not discovered. Only applies when firewalls are discovered through Panorama; shows No data otherwise. Ignores the firewall filter, since Panorama is not tied to one firewall.",
               "precision": 0,
               "requests": [
                 {
@@ -290,21 +278,15 @@
                   "formulas": [
                     {
                       "alias": "Panoramas unreachable",
-                      "formula": "count_not_null(query2) - count_nonzero(query1)"
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
                     }
                   ],
                   "queries": [
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "query2",
-                      "query": "min:pan_firewall.panorama.can_connect{$panorama} by {panorama_host}.rollup(min)"
-                    },
-                    {
-                      "aggregator": "last",
-                      "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:pan_firewall.panorama.can_connect{$panorama} by {panorama_host}.rollup(min)"
+                      "query": "min:pan_firewall.panorama.can_connect{$panorama} by {panorama_host}"
                     }
                   ],
                   "response_format": "scalar"
@@ -323,7 +305,7 @@
           },
           {
             "definition": {
-              "description": "BGP peers that were not established at some point in the selected time range. See the BGP peers table for which ones.",
+              "description": "BGP peers that are currently not established, from their latest status reading in the selected time range. See the BGP peers table for which ones.",
               "precision": 0,
               "requests": [
                 {
@@ -342,21 +324,15 @@
                   "formulas": [
                     {
                       "alias": "BGP peers down",
-                      "formula": "count_not_null(query2) - count_nonzero(query1)"
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
                     }
                   ],
                   "queries": [
                     {
                       "aggregator": "last",
                       "data_source": "metrics",
-                      "name": "query2",
-                      "query": "min:pan_firewall.bgp.peer.status{$firewall,$panorama} by {device_id,vr,peer}.rollup(min)"
-                    },
-                    {
-                      "aggregator": "last",
-                      "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:pan_firewall.bgp.peer.status{$firewall,$panorama} by {device_id,vr,peer}.rollup(min)"
+                      "query": "min:pan_firewall.bgp.peer.status{$firewall,$panorama} by {device_id,vr,peer}"
                     }
                   ],
                   "response_format": "scalar"
@@ -417,21 +393,9 @@
           },
           {
             "definition": {
-              "description": "The three licenses closest to expiry on the selected firewalls, per firewall and feature, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not included.",
+              "description": "The three licenses closest to expiry on the selected firewalls, per firewall and feature, from the latest license reading. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not included.",
               "requests": [
                 {
-                  "conditional_formats": [
-                    {
-                      "comparator": "<=",
-                      "palette": "white_on_yellow",
-                      "value": 60.0
-                    },
-                    {
-                      "comparator": "<=",
-                      "palette": "white_on_red",
-                      "value": 30.0
-                    }
-                  ],
                   "formulas": [
                     {
                       "alias": "Days left",
@@ -466,7 +430,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}.rollup(min)"
+                      "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}"
                     }
                   ],
                   "response_format": "scalar",
@@ -1306,7 +1270,7 @@
           },
           {
             "definition": {
-              "description": "BGP peers whose session came up in the last 30 minutes at some point in the selected time range. Repeated restarts mean a flapping peer.",
+              "description": "BGP peers that restarted (their session came up less than 30 minutes earlier) at some point in the selected time range. Repeated restarts mean a flapping peer.",
               "precision": 0,
               "requests": [
                 {
@@ -2227,7 +2191,7 @@
           },
           {
             "definition": {
-              "description": "Licenses that were expired at any point in the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. An expired threat or URL filtering license stops content updates for that feature.",
+              "description": "Licenses that are currently expired, from the latest license reading in the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. An expired threat or URL filtering license stops content updates for that feature.",
               "precision": 0,
               "requests": [
                 {
@@ -2254,7 +2218,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:pan_firewall.license.expired{$firewall,$panorama} by {device_id,feature}.rollup(max)"
+                      "query": "max:pan_firewall.license.expired{$firewall,$panorama} by {device_id,feature}"
                     }
                   ],
                   "response_format": "scalar"
@@ -2324,7 +2288,7 @@
           },
           {
             "definition": {
-              "description": "Days until each license expires, per firewall and feature, lowest first, over the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not listed.",
+              "description": "Days until each license expires, per firewall and feature, lowest first, from the latest license reading. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not listed.",
               "requests": [
                 {
                   "formulas": [
@@ -2361,7 +2325,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}.rollup(min)"
+                      "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}"
                     }
                   ],
                   "response_format": "scalar",
@@ -2459,7 +2423,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall @type:THREAT $firewall"
+                        "query": "source:pan.firewall @type:THREAT @device_hostname:$firewall.value"
                       }
                     }
                   ],
@@ -2512,7 +2476,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall @type:THREAT $firewall"
+                        "query": "source:pan.firewall @type:THREAT @device_hostname:$firewall.value"
                       }
                     }
                   ],
@@ -2565,7 +2529,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall @type:THREAT $firewall"
+                        "query": "source:pan.firewall @type:THREAT @device_hostname:$firewall.value"
                       }
                     }
                   ],
@@ -2654,7 +2618,7 @@
                   "query": {
                     "data_source": "logs_stream",
                     "indexes": [],
-                    "query_string": "source:pan.firewall status:(alert OR error OR critical) $firewall",
+                    "query_string": "source:pan.firewall status:critical @device_hostname:$firewall.value",
                     "sort": {
                       "column": "timestamp",
                       "order": "desc"
@@ -2716,7 +2680,7 @@
                       ],
                       "name": "query1",
                       "search": {
-                        "query": "source:pan.firewall $firewall"
+                        "query": "source:pan.firewall @device_hostname:$firewall.value"
                       }
                     }
                   ],
