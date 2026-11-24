@@ -545,6 +545,12 @@
                                                 "palette": "blue"
                                             },
                                             "formula": "query1"
+                                        },
+                                        {
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "formula": "query2"
                                         }
                                     ],
                                     "style": {
@@ -885,7 +891,7 @@
                 "x": 0,
                 "y": 0,
                 "width": 12,
-                "height": 12
+                "height": 8
             }
         },
         {
@@ -1192,7 +1198,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 8,
                 "width": 12,
                 "height": 3
             }
@@ -1680,7 +1686,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 15,
+                "y": 11,
                 "width": 12,
                 "height": 9
             }
@@ -1688,7 +1694,7 @@
         {
             "id": 3227071323603929,
             "definition": {
-                "title": "Cluster Check Runner Overview",
+                "title": "Cluster Checks Runner Overview",
                 "background_color": "blue",
                 "show_title": true,
                 "type": "group",
@@ -1697,7 +1703,7 @@
                     {
                         "id": 201426039289003,
                         "definition": {
-                            "title": "Cluster Check Runner Version",
+                            "title": "Cluster Checks Runner Version",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -1707,6 +1713,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1811,7 +1818,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:container.memory.usage{app:datadog-cluster-agent,$cluster}.fill(null)"
+                                            "query": "avg:container.memory.usage{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2389,7 +2396,7 @@
                     {
                         "id": 2101534586710438,
                         "definition": {
-                            "title": "Cluster Check Dispatching",
+                            "title": "Cluster Checks Dispatching",
                             "show_title": true,
                             "default_state": "closed",
                             "type": "group",
@@ -2454,7 +2461,6 @@
                                             "value",
                                             "sum"
                                         ],
-                                        "time": {},
                                         "type": "timeseries",
                                         "requests": [
                                             {
@@ -2557,7 +2563,6 @@
                                             "value",
                                             "sum"
                                         ],
-                                        "time": {},
                                         "type": "timeseries",
                                         "requests": [
                                             {
@@ -2653,7 +2658,6 @@
                                             "value",
                                             "sum"
                                         ],
-                                        "time": {},
                                         "type": "timeseries",
                                         "requests": [
                                             {
@@ -2806,9 +2810,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 48,
+                "y": 40,
                 "width": 12,
-                "height": 18,
+                "height": 10,
                 "is_column_break": true
             }
         },
@@ -2834,7 +2838,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2996,7 +2999,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -3250,7 +3252,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -3455,7 +3456,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 66,
+                "y": 50,
                 "width": 12,
                 "height": 9
             }
