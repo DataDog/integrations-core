@@ -6,7 +6,8 @@
 This check collects Prometheus metrics from a `trtllm-serve` server for:
 
 - Request and token throughput, and request errors
-- Time to first token, time per output token, end-to-end latency, and queue, prefill, and decode time
+- Time to first token, time per output token, and end-to-end latency
+- Queue, prefill, and decode time
 - Running, waiting, and scheduled requests, and batch sizes
 - KV cache utilization, block reuse, and host offload
 - Speculative decoding acceptance
@@ -16,13 +17,13 @@ This check collects Prometheus metrics from a `trtllm-serve` server for:
 Histogram buckets are submitted as Datadog distributions by default, so percentile aggregations are
 available for request latency and token-count metrics.
 
-This integration is part of [GPU Monitoring][9] and only runs when GPU Monitoring is enabled.
+This integration is part of [GPU Monitoring][9] and runs only when GPU Monitoring is enabled.
 
 **Minimum Agent version:** 7.87.0
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host.
+Follow these instructions to install and configure this check for an Agent running on a host.
 For containerized environments, see the [Autodiscovery integration templates][3].
 
 ### Prerequisites
@@ -34,6 +35,8 @@ enable iteration statistics in the file passed to `--extra_llm_api_options`:
 ```yaml
 enable_iter_perf_stats: true
 ```
+
+Then pass the file when you start the server:
 
 ```shell
 trtllm-serve <MODEL> --extra_llm_api_options extra_llm_api_options.yaml
@@ -94,8 +97,8 @@ Need help? Contact [Datadog support][10].
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/tensorrt_llm/datadog_checks/tensorrt_llm/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/tensorrt_llm/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/tensorrt_llm/assets/service_checks.json
 [9]: https://docs.datadoghq.com/gpu_monitoring/
