@@ -45,18 +45,198 @@ files:
         example: true
         default: true
     - name: kube_config_dict
+      fleet_configurable: true
       description: |
         Optional kubeconfig dictionary used to configure the Kubernetes API client.
 
         If unset, the check uses in-cluster Kubernetes configuration.
+
+        The check uses the context named by `current-context`, and reads only the fields listed in this option.
+        Fields that are not listed, such as `preferences` or `proxy-url`, are ignored. The cluster `extensions`
+        are only used by `exec` plugins with `provideClusterInfo: true`, which receive the
+        `client.authentication.k8s.io/exec` extension.
+
+        Supported authentication methods, in the order the Kubernetes client tries them:
+          - `auth-provider`: the `gcp`, `azure`, or `oidc` provider.
+          - `token` or `tokenFile`: a bearer token.
+          - `exec`: a credential plugin command, which runs on the Agent host.
+          - `username` and `password`: basic authentication.
+        Client certificate authentication (`client-certificate` and `client-key`, or their `-data` variants) can be
+        combined with any of them. File paths are read on the Agent host.
+
+        When configured through Fleet Automation, `token`, `password`, `client-key-data`, and the `access-token`,
+        `refresh-token`, `id-token`, and `client-secret` fields of `auth-provider.config` are secrets and must be
+        set as secret references.
       value:
         type: object
+        properties:
+        - name: apiVersion
+          type: string
+        - name: kind
+          type: string
+        - name: current-context
+          type: string
+        - name: clusters
+          type: array
+          items:
+            type: object
+            properties:
+            - name: name
+              type: string
+            - name: cluster
+              type: object
+              properties:
+              - name: server
+                type: string
+              - name: certificate-authority
+                type: string
+              - name: certificate-authority-data
+                type: string
+              - name: insecure-skip-tls-verify
+                type: boolean
+              - name: tls-server-name
+                type: string
+              - name: extensions
+                type: array
+                items:
+                  type: object
+                  properties:
+                  - name: name
+                    type: string
+                  - name: extension
+                    type: object
+                    additionalProperties: true
+        - name: contexts
+          type: array
+          items:
+            type: object
+            properties:
+            - name: name
+              type: string
+            - name: context
+              type: object
+              properties:
+              - name: cluster
+                type: string
+              - name: user
+                type: string
+              - name: namespace
+                type: string
+        - name: users
+          type: array
+          items:
+            type: object
+            properties:
+            - name: name
+              type: string
+            - name: user
+              type: object
+              properties:
+              - name: token
+                type: string
+                secret: true
+              - name: tokenFile
+                type: string
+              - name: client-certificate
+                type: string
+              - name: client-certificate-data
+                type: string
+              - name: client-key
+                type: string
+              - name: client-key-data
+                type: string
+                secret: true
+              - name: username
+                type: string
+              - name: password
+                type: string
+                secret: true
+              - name: auth-provider
+                type: object
+                properties:
+                - name: name
+                  type: string
+                - name: config
+                  type: object
+                  properties:
+                  - name: access-token
+                    type: string
+                    secret: true
+                  - name: refresh-token
+                    type: string
+                    secret: true
+                  - name: id-token
+                    type: string
+                    secret: true
+                  - name: client-secret
+                    type: string
+                    secret: true
+                  - name: client-id
+                    type: string
+                  - name: expiry
+                    type: string
+                  - name: expires-on
+                    type: string
+                  - name: cmd-path
+                    type: string
+                  - name: cmd-args
+                    type: string
+                  - name: scopes
+                    type: string
+                  - name: token-key
+                    type: string
+                  - name: expiry-key
+                    type: string
+                  - name: tenant-id
+                    type: string
+                  - name: apiserver-id
+                    type: string
+                  - name: idp-issuer-url
+                    type: string
+                  - name: idp-certificate-authority
+                    type: string
+                  - name: idp-certificate-authority-data
+                    type: string
+              - name: exec
+                type: object
+                properties:
+                - name: apiVersion
+                  type: string
+                - name: command
+                  type: string
+                - name: args
+                  type: array
+                  items:
+                    type: string
+                - name: env
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                    - name: name
+                      type: string
+                    - name: value
+                      type: string
+                - name: provideClusterInfo
+                  type: boolean
         example:
           apiVersion: v1
           kind: Config
-          clusters: []
-          contexts: []
-          users: []
+          current-context: <CONTEXT_NAME>
+          clusters:
+          - name: <CLUSTER_NAME>
+            cluster:
+              server: https://<KUBERNETES_API_SERVER>
+              certificate-authority-data: <BASE64_ENCODED_CA_CERTIFICATE>
+          contexts:
+          - name: <CONTEXT_NAME>
+            context:
+              cluster: <CLUSTER_NAME>
+              user: <USER_NAME>
+          users:
+          - name: <USER_NAME>
+            user:
+              token: <TOKEN>
     - name: workload_events_namespaces
       description: |
         Optional list of namespaces to collect Workload events from. If unset, Workloads are collected from all

@@ -138,6 +138,7 @@ The registry lives in `references/agent-registry.toml` — TOML rather than JSON
 | `matches = "all_files"` | Every changed file. Used by `conventions`, which runs on every PR. |
 | `matches = "integration_roots"` | Every changed file under a touched [integration root](#integration-root-detection). |
 | `globs = [...]` | Files matching a glob (`**` is any number of path components, `*` one). `integrations` and `security` combine it with `integration_roots` to add `datadog_checks_base/**` and `datadog_checks_dev/**`, which `.ddev/config.toml` marks as not integrations. |
+| `exclude_globs = [...]` | Optional, same syntax as `globs`. A file matching one is never the agent's, whatever `matches` and `globs` say. `integrations` and `security` exclude `**/assets/logs/**`, which `logs` reviews. |
 
 An agent with no matched file doesn't run. The aspect filter is checked first; if `--aspect` is set and the agent's aspect isn't in the filter (and the user didn't pass `all`), it's skipped before any matching happens.
 
@@ -149,6 +150,7 @@ The result, by what the PR touches:
 | `datadog_checks_downloader` | `conventions`, `security` |
 | `ddev/`, `.ddev/` | `conventions`, `ddev` |
 | `.github/workflows/`, `.github/actions/` or `.github/chainguard/` | `conventions`, `github-actions` |
+| `<integration>/assets/logs/` | `conventions`, `logs` |
 | Anything else (`.builders/`, `docs/`, root files, other packages) | `conventions` |
 
 `conventions_only_files(...)` runs the same matching without `conventions` and returns the files nothing else matched; setup writes them to `context.json` and the summary.

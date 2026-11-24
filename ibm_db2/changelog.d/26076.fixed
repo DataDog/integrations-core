@@ -1,1 +1,0 @@
-Prepare local Db2 activity reads with row limits, UTF-8-safe statement truncation after code-page conversion, native identifiers, and statement cleanup.

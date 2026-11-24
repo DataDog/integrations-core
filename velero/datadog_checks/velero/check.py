@@ -8,6 +8,7 @@ from datadog_checks.velero.metrics import METRIC_MAP
 
 class VeleroCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'velero'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 

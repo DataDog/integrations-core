@@ -71,7 +71,8 @@
     },
     "dashboards": {
       "Vault - Overview": "assets/dashboards/vault_overview_legacy.json",
-      "Vault - Overview (OpenMetricsV2)": "assets/dashboards/vault_overview.json"
+      "Vault - Overview (OpenMetricsV2)": "assets/dashboards/vault_overview.json",
+      "Vault - Security Overview": "assets/dashboards/vault_security_overview.json"
     },
     "monitors": {
       "Time to access secrets is high": "assets/monitors/vault_S3_time_high.json"

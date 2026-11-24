@@ -265,6 +265,10 @@ integration/cisco_catalyst_center:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_catalyst_center/**/*
+integration/cisco_ise:
+- changed-files:
+  - any-glob-to-any-file:
+    - cisco_ise/**/*
 integration/cisco_sdwan:
 - changed-files:
   - any-glob-to-any-file:
