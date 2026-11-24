@@ -5,15 +5,17 @@ from collections.abc import Mapping
 from typing import Any
 
 from kubernetes import client, config
+from pydantic import BaseModel
 
 # The Kubernetes client waits forever by default, which would block the check run on a stalled API server.
 REQUEST_TIMEOUT = 10
 
 
 class KubernetesAPIClient:
-    def __init__(self, kube_config_dict: Mapping[str, Any] | None = None):
+    def __init__(self, kube_config_dict: BaseModel | Mapping[str, Any] | None = None):
+        kube_config_dict = to_mutable_config(kube_config_dict)
         if kube_config_dict:
-            self.api_client = config.new_client_from_config_dict(to_mutable_config(kube_config_dict))
+            self.api_client = config.new_client_from_config_dict(kube_config_dict)
         else:
             config.load_incluster_config()
             self.api_client = client.ApiClient()
@@ -34,7 +36,10 @@ class KubernetesAPIClient:
 
 
 def to_mutable_config(value: Any) -> Any:
-    # The configuration models freeze mappings and lists, which the kubernetes client cannot load.
+    # The configuration models turn the kubeconfig into frozen models, mappings and tuples, which the kubernetes
+    # client cannot load. Dump the models with their kubeconfig key names, and only the keys that were set.
+    if isinstance(value, BaseModel):
+        value = value.model_dump(by_alias=True, exclude_unset=True)
     if isinstance(value, Mapping):
         return {key: to_mutable_config(item) for key, item in value.items()}
     if isinstance(value, tuple):

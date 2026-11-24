@@ -50,6 +50,7 @@ FRONTEND_METRICS_MOCK = [
     'frontend.model.migration_max_seq_len_exceeded.count',
     'frontend.model.cancellation.count',
     'frontend.model.rejection.count',
+    'frontend.model.ready',
     'frontend.worker.active_decode_blocks',
     'frontend.worker.active_prefill_tokens',
     'frontend.worker.last_time_to_first_token_seconds',
@@ -110,6 +111,7 @@ WORKER_METRICS_MOCK = [
 # records them as histogram buckets under the base metric name rather than as regular `.bucket` metrics.
 FRONTEND_HISTOGRAM_BUCKETS_MOCK = [
     'frontend.request_duration.seconds',
+    'frontend.stage_duration.seconds',
     'frontend.input_sequence_tokens',
     'frontend.output_sequence_tokens',
     'frontend.tokenizer_latency_ms',

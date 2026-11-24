@@ -73,6 +73,7 @@ pan_firewall.mgmt.swap.used_pct,gauge,,percent,,Percentage of management-plane s
 pan_firewall.ospf.neighbor.state_changes,count,,,,OSPF neighbor state changes. Sent only by the Advanced Routing Engine.,-1,palo_alto_networks_firewall,ospf neighbor state changes,,"neighbor,router_id,area,vr"
 pan_firewall.ospf.neighbor.status,gauge,,,,"Whether the OSPF neighbor is in the `full` state (1 = full, 0 = not full).",1,palo_alto_networks_firewall,ospf neighbor status,,"neighbor,router_id,area,vr"
 pan_firewall.panorama.can_connect,gauge,,,,"Whether the Panorama discovery call succeeded (1 = succeeded, 0 = failed).",1,palo_alto_networks_firewall,panorama can connect,,"device_namespace,panorama_host"
+pan_firewall.power.alarm,gauge,,,,"Whether the power sensor is in alarm, regardless of direction (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,power alarm,,"sensor,slot"
 pan_firewall.power.alarm.high,gauge,,,,"Whether the power sensor is in alarm above the maximum (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,power alarm high,,"sensor,slot"
 pan_firewall.power.alarm.low,gauge,,,,"Whether the power sensor is in alarm below the minimum (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,power alarm low,,"sensor,slot"
 pan_firewall.power.voltage,gauge,,volt,,Current voltage.,0,palo_alto_networks_firewall,power voltage,,"sensor,slot"

@@ -1,0 +1,1 @@
+Pick the E2E Agent CMD port outside the ephemeral port range, so another Agent process cannot take it before the core Agent starts.

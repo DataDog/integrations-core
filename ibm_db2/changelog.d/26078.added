@@ -1,1 +1,1 @@
-Collect opt-in Db2 query activity snapshots with normalized SQL, comments, truncation state, native identifiers, elapsed time, session context, configured tags, and estimated payload limits.
+Add opt-in Query Activity collection for IBM Db2 Database Monitoring, with obfuscated running-query snapshots, execution identifiers, elapsed time, session context, SQL comments, and truncation indicators.
