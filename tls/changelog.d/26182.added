@@ -1,0 +1,1 @@
+Add opt-in `send_cert_identity_tags` option to tag certificate metrics with the certificate SHA-256 fingerprint and serial number.
