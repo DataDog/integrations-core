@@ -1637,23 +1637,32 @@ def test_invalid_consumer_groups_shard_settings_raise(check, kafka_instance, sha
         check(instance)
 
 
-@pytest.mark.parametrize('shard_index, all_partitions', [(0, True), (1, False)])
-def test_only_shard_zero_fetches_all_broker_highwatermarks(
-    check, kafka_instance, dd_run_check, shard_index, all_partitions
+@pytest.mark.parametrize('shard_index, shard_zero', [(0, True), (1, False)])
+def test_only_shard_zero_fetches_and_reports_all_broker_highwatermarks(
+    check, kafka_instance, dd_run_check, aggregator, shard_index, shard_zero
 ):
+    # Shard 0 covers every partition, so a second report from another shard would duplicate the series.
     mock_client = seed_mock_client()
     mock_client.list_consumer_groups.return_value = SHARDED_GROUPS
+    group = GROUPS_BY_SHARD[shard_index][0]
+    mock_client.list_consumer_group_offsets.return_value = [(group, [('topic1', 'partition1', 4)])]
     instance = sharded_instance(
         kafka_instance, shard_index, monitor_unlisted_consumer_groups=True, monitor_all_broker_highwatermarks=True
     )
     kafka_consumer_check = check(instance)
     kafka_consumer_check.client = mock_client
 
-    with mock.patch.object(kafka_consumer_check, 'get_highwater_offsets', return_value=({}, "")) as get_highwater:
+    with mock.patch.object(
+        kafka_consumer_check, 'get_highwater_offsets', return_value=({('topic1', 'partition1'): 10}, 'cluster_id')
+    ) as get_highwater:
         dd_run_check(kafka_consumer_check)
 
     (partitions,), _ = get_highwater.call_args
-    assert (partitions is None) == all_partitions
+    assert (partitions is None) == shard_zero
+    aggregator.assert_metric('kafka.broker_offset', count=1 if shard_zero else 0)
+    # Every shard still computes its own groups' lag from the highwater offsets.
+    aggregator.assert_metric('kafka.consumer_lag', value=6, count=1)
+    aggregator.assert_metric_has_tag('kafka.consumer_lag', f'consumer_group:{group}')
 
 
 def test_shard_count_without_shard_index_raises(check, kafka_instance):

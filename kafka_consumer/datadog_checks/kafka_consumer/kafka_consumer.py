@@ -151,11 +151,18 @@ class KafkaCheck(AgentCheck):
         if self.config._kafka_cluster_id_override:
             cluster_id = self.config._kafka_cluster_id_override
 
-        self.report_highwater_offsets(highwater_offsets, reporting_limit, cluster_id)
+        # Shard 0 already reports every partition's highwater offset; a second report from another shard,
+        # taken at a different time, would make the same series step back and forth.
+        reported_highwater_offsets = (
+            {}
+            if self.config._monitor_all_broker_highwatermarks and self.config._consumer_groups_shard_index != 0
+            else highwater_offsets
+        )
+        self.report_highwater_offsets(reported_highwater_offsets, reporting_limit, cluster_id)
         self.report_consumer_offsets_and_lag(
             consumer_offsets,
             highwater_offsets,
-            reporting_limit - len(highwater_offsets),
+            reporting_limit - len(reported_highwater_offsets),
             broker_timestamps,
             cluster_id,
             low_watermark_offsets,

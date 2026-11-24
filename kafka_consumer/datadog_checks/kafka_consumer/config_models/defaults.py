@@ -24,10 +24,6 @@ def instance_consumer_groups_shard_count():
     return 1
 
 
-def instance_consumer_groups_shard_index():
-    return 0
-
-
 def instance_consumer_queued_max_messages_kbytes():
     return 1024
 
