@@ -127,9 +127,12 @@ def parse_request(raw: str) -> dict:
         if not _text(request["query"]) or type(request["includeSchema"]) is not bool:
             raise ValueError
         delivery = request["resultDelivery"]
-        if not _object(delivery, {"crawlId", "taskId", "uploadId", "baseUrl", "limits"}):
+        # The Agent tunnel path omits crawlId: intake owns the stored crawl ID, and the upload ID is not one.
+        if not _object(delivery, {"taskId", "uploadId", "baseUrl", "limits"}, {"crawlId"}):
             raise ValueError
         for key in ("crawlId", "taskId"):
+            if key not in delivery:
+                continue
             if not isinstance(delivery[key], str):
                 raise ValueError
             UUID(delivery[key])
@@ -252,6 +255,12 @@ class Page:
         return len(self.ends) - 1
 
 
+# Width stand-in for the crawl ID that intake stamps into the file when the request carries none. The worker
+# generates canonical UUIDs (36 ASCII characters), which JSON-encode without escaping. It is used for sizing
+# only and is never sent or logged.
+ABSENT_CRAWL_ID_PLACEHOLDER = "0" * 36
+
+
 class ResultSizer:
     """Estimate intake's JSON file without decoding or converting PostgreSQL values."""
 
@@ -259,7 +268,7 @@ class ResultSizer:
         schema = [{"column_name": c["column_name"], "vendor_data_type": c["vendor_data_type"]} for c in columns]
         header = {
             "contract_version": "1.0.0",
-            "crawl_id": delivery["crawlId"],
+            "crawl_id": delivery.get("crawlId", ABSENT_CRAWL_ID_PLACEHOLDER),
             "task_id": delivery["taskId"],
             "record_offset": 2**63 - 1,
             "data": [],
@@ -339,15 +348,14 @@ class Run:
         if self.task is not None:
             self.task.cancel()
 
+    @property
+    def _ids(self) -> str:
+        """Correlation IDs for logs; crawl_id appears only when the request carried a real one."""
+        crawl = f"crawl_id={self.delivery['crawlId']} " if "crawlId" in self.delivery else ""
+        return f"{crawl}task_id={self.delivery['taskId']} upload_id={self.delivery['uploadId']}"
+
     def log(self, check: PostgreSql, event: str, code: str) -> None:
-        check.log.debug(
-            "Remote query %s code=%s crawl_id=%s task_id=%s upload_id=%s",
-            event,
-            code,
-            self.delivery["crawlId"],
-            self.delivery["taskId"],
-            self.delivery["uploadId"],
-        )
+        check.log.debug("Remote query %s code=%s %s", event, code, self._ids)
 
     def log_page(
         self,
@@ -362,11 +370,9 @@ class Run:
     ) -> None:
         """Log one acknowledged page: sizes and timings only, never its content."""
         check.log.debug(
-            "Remote query page_uploaded crawl_id=%s task_id=%s upload_id=%s page=%d rows=%d bytes=%d sent_bytes=%d "
+            "Remote query page_uploaded %s page=%d rows=%d bytes=%d sent_bytes=%d "
             "encoding=%s compress_ms=%.1f upload_ms=%.1f gzip_not_smaller=%s",
-            self.delivery["crawlId"],
-            self.delivery["taskId"],
-            self.delivery["uploadId"],
+            self._ids,
             self.page_count,
             rows,
             page_bytes,

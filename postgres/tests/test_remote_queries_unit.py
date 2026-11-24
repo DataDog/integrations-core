@@ -10,9 +10,9 @@ import pytest
 from pydantic import ValidationError
 
 from datadog_checks.postgres import PostgreSql
-from datadog_checks.postgres.remote_queries import RecordFramer, RemoteQueryError, ResultSizer
+from datadog_checks.postgres.remote_queries import RecordFramer, RemoteQueryError, ResultSizer, Run, parse_request
 
-from .remote_query_helpers import call, request
+from .remote_query_helpers import call, request, tunnel_request
 
 pytestmark = pytest.mark.unit
 
@@ -38,6 +38,9 @@ def test_req01_operations(check: PostgreSql, raw: str):
         ("traceContext", {"traceId": "0", "parentId": "1", "samplingPriority": 1}),
         ("traceContext", {"traceId": "1", "parentId": "2", "samplingPriority": True}),
         ("resultDelivery.crawlId", "not-uuid"),
+        ("resultDelivery.crawlId", None),
+        ("resultDelivery.crawlId", ""),
+        ("resultDelivery.crawlId", 1),
         ("resultDelivery.taskId", 1),
         ("resultDelivery.uploadId", "../other/upload"),
         ("resultDelivery.baseUrl", ""),
@@ -131,6 +134,37 @@ def test_size01_estimate_includes_repeated_names(check: PostgreSql, schema: bool
     long = ResultSizer(delivery, [{"column_name": "λ" * 50, "vendor_data_type": "text"}], schema, "agent")
     # The 99 extra UTF-8 name bytes occur in each row, and once more in the optional schema.
     assert long.page_bytes(100, 2) - short.page_bytes(100, 2) == 99 * (3 if schema else 2)
+
+
+def test_req03_crawl_id_is_optional_but_task_id_is_not(check: PostgreSql):
+    tunnel = tunnel_request(check, "http://127.0.0.1:1")
+    assert "crawlId" not in parse_request(json.dumps(tunnel))["resultDelivery"]
+    del tunnel["resultDelivery"]["taskId"]
+    with pytest.raises(RemoteQueryError) as error:
+        parse_request(json.dumps(tunnel))
+    assert error.value.code == "invalid_request"
+
+
+@pytest.mark.parametrize("schema", [True, False])
+def test_size05_absent_crawl_id_budgets_a_canonical_uuid(check: PostgreSql, schema: bool):
+    columns = [{"column_name": "a", "vendor_data_type": "text"}]
+    supplied = request(check, "http://127.0.0.1:1")["resultDelivery"]
+    absent = tunnel_request(check, "http://127.0.0.1:1")["resultDelivery"]
+    assert ResultSizer(absent, columns, schema, "agent").header_bytes == (
+        ResultSizer(supplied, columns, schema, "agent").header_bytes
+    )
+
+
+def test_obs04_logs_omit_an_absent_crawl_id(check: PostgreSql, caplog: pytest.LogCaptureFixture):
+    for payload in (request(check, "http://127.0.0.1:1"), tunnel_request(check, "http://127.0.0.1:1")):
+        delivery = payload["resultDelivery"]
+        with caplog.at_level("DEBUG"):
+            Run(payload, 0).log(check, "failed", "timeout")
+        crawl = f"crawl_id={delivery['crawlId']} " if "crawlId" in delivery else ""
+        assert caplog.records[-1].message == (
+            f"Remote query failed code=timeout {crawl}task_id={delivery['taskId']} upload_id={delivery['uploadId']}"
+        )
+        assert ("crawl_id" in caplog.records[-1].message) is bool(crawl)
 
 
 def test_obs01_safe_unexpected_answer(check: PostgreSql, monkeypatch: pytest.MonkeyPatch):
