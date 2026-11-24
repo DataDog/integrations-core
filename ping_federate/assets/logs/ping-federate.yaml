@@ -134,3 +134,175 @@ pipeline:
       enabled: true
       sources:
         - timestamp
+    - enabled: true
+      filter:
+        query: ((service:audit AND @evt.name:AUTHN_ATTEMPT) OR (service:admin AND @evt.name:LOGIN_ATTEMPT)) AND @timestamp:*
+      name: OCSF sub pipeline for class Authentication [3002]
+      ocsf:
+        isOcsf: true
+      processors:
+        - enabled: true
+          name: Set OCSF product name
+          replaceMissing: false
+          target: ocsf.metadata.product.name
+          template: PingFederate
+          type: string-builder-processor
+        - enabled: true
+          name: Set OCSF product vendor
+          replaceMissing: false
+          target: ocsf.metadata.product.vendor_name
+          template: Ping Identity
+          type: string-builder-processor
+        - enabled: true
+          name: Set authenticating service
+          replaceMissing: false
+          target: ocsf.service.name
+          template: PingFederate
+          type: string-builder-processor
+        - type: grok-parser
+          name: Parse `ping_federate.transaction.subject` as an email
+          enabled: true
+          source: ping_federate.transaction.subject
+          samples: []
+          grok:
+            supportRules: ''
+            matchRules: email %{regex("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"):ocsf_preprocessing.email_0}
+        - type: grok-parser
+          name: Parse `usr.name` as an email
+          enabled: true
+          source: usr.name
+          samples: []
+          grok:
+            supportRules: ''
+            matchRules: email %{regex("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}"):ocsf_preprocessing.email_1}
+        - enabled: true
+          mappers:
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: '*'
+                  name: Logon
+                  id: 1
+              targets:
+                id: ocsf.activity_id
+                name: ocsf.activity_name
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: '*'
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: '@evt.outcome:success'
+                  name: Success
+                  id: 1
+                - filter:
+                    query: '@evt.outcome:failure'
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: '*'
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-remapper
+              name: Map `timestamp` to `ocsf.time`
+              sources:
+                - timestamp
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `evt.name` to `ocsf.metadata.event_code`
+              sources:
+                - evt.name
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.service.name` to `ocsf.service.name`
+              sources:
+                - ocsf.service.name
+              target: ocsf.service.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ping_federate.transaction.subject`, `usr.name` to `ocsf.actor.user.name`
+              sources:
+                - ping_federate.transaction.subject
+                - usr.name
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf_preprocessing.email_0`, `ocsf_preprocessing.email_1` to `ocsf.actor.user.email_addr`
+              sources:
+                - ocsf_preprocessing.email_0
+                - ocsf_preprocessing.email_1
+              target: ocsf.actor.user.email_addr
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `usr.id` to `ocsf.actor.user.uid`
+              sources:
+                - usr.id
+              target: ocsf.actor.user.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ping_federate.transaction.subject`, `usr.name` to `ocsf.user.name`
+              sources:
+                - ping_federate.transaction.subject
+                - usr.name
+              target: ocsf.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf_preprocessing.email_0`, `ocsf_preprocessing.email_1` to `ocsf.user.email_addr`
+              sources:
+                - ocsf_preprocessing.email_0
+                - ocsf_preprocessing.email_1
+              target: ocsf.user.email_addr
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `usr.id` to `ocsf.user.uid`
+              sources:
+                - usr.id
+              target: ocsf.user.uid
+              preserveSource: true
+              overrideOnConflict: true
+          name: Apply OCSF schema for 3002
+          schema:
+            className: Authentication
+            classUid: 3002
+            schemaType: ocsf
+            version: 1.5.0
+            extensions: []
+            profiles: []
+          type: schema-processor
+      type: pipeline

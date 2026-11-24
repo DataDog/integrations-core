@@ -37,6 +37,31 @@ tests:
         timestamp: 1717499993283
         usr:
           name: "Administrator"
+        ocsf:
+          activity_id: 1
+          activity_name: "Logon"
+          actor:
+            user:
+              name: "Administrator"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Authentication"
+          class_uid: 3002
+          metadata:
+            event_code: "LOGIN_ATTEMPT"
+            product:
+              name: "PingFederate"
+              vendor_name: "Ping Identity"
+            version: "1.5.0"
+          service:
+            name: "PingFederate"
+          severity: "Unknown"
+          severity_id: 0
+          status: "Unknown"
+          status_id: 0
+          time: 1717499993283
+          user:
+            name: "Administrator"
       message: "2024-06-04 11:19:53,283 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 185.64.148.0 | USER | LOGIN_ATTEMPT | testevdentdetailid | Login was successful"
       service: "admin"
       tags:
@@ -129,6 +154,31 @@ tests:
         protocol: "SAML20"
         timestamp: 1718622259342
         trackingid: "LFcUz_Kyuqp4RcRrdnB2YS72Z3g"
+        ocsf:
+          activity_id: 1
+          activity_name: "Logon"
+          actor:
+            user:
+              name: "analyst"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Authentication"
+          class_uid: 3002
+          metadata:
+            event_code: "AUTHN_ATTEMPT"
+            product:
+              name: "PingFederate"
+              vendor_name: "Ping Identity"
+            version: "1.5.0"
+          service:
+            name: "PingFederate"
+          severity: "Unknown"
+          severity_id: 0
+          status: "Failure"
+          status_id: 2
+          time: 1718622259342
+          user:
+            name: "analyst"
       message: "2024-06-17 11:04:19,342| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g| AUTHN_ATTEMPT| analyst| 185.64.148.0 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| failure| OpenLDAP| Invalid Credentials| 200"
       service: "audit"
       tags:
@@ -207,8 +257,98 @@ tests:
           id: "john.doe"
         validatorid: "pcv-ldap"
         virtualserverid: "virtualserver-01"
+        ocsf:
+          activity_id: 1
+          activity_name: "Logon"
+          actor:
+            user:
+              name: "analyst"
+              uid: "john.doe"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Authentication"
+          class_uid: 3002
+          metadata:
+            event_code: "AUTHN_ATTEMPT"
+            product:
+              name: "PingFederate"
+              vendor_name: "Ping Identity"
+            version: "1.5.0"
+          service:
+            name: "PingFederate"
+          severity: "Unknown"
+          severity_id: 0
+          status: "Failure"
+          status_id: 2
+          time: 1718622259341
+          user:
+            name: "analyst"
+            uid: "john.doe"
       message: "2024-06-17 11:04:19,341| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g| AUTHN_ATTEMPT| analyst| 185.64.148.0 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| failure| OpenLDAP| Invalid Credentials| 200| qwerty-1234-asdfgh-5678| email=john.doe@example.com, name=John Doe, role=admin| authorization_code| SP| Request| response-123456| john.doe| req-abcdef123456| 1617692015000| resp-7890ghijkl| sts-processor-1234| [spAdapter.SAML2, spConnection.PartnerSP]| [adapter.HTMLFormSimplePCV, idpConnection.IdP, localIdentity.A8me9rySDn1aIM48]| pcv-ldap| virtualserver-01| MyOAuthClient| req-1234567890abcdef"
       service: "audit"
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1718622259341
+  - service: audit
+    sample: 2026-11-01 09:01:00,123| tid:synthetic-flow| AUTHN_ATTEMPT| analyst| 192.0.2.2
+      | PingApp| connection1| SAML20| example.test| IdP| failure| OpenLDAP| Invalid
+      credentials| 200
+    result:
+      custom:
+        ocsf:
+          activity_id: 1
+          activity_name: "Logon"
+          actor:
+            user:
+              name: "analyst"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Authentication"
+          class_uid: 3002
+          metadata:
+            event_code: "AUTHN_ATTEMPT"
+            product:
+              name: "PingFederate"
+              vendor_name: "Ping Identity"
+            version: "1.5.0"
+          service:
+            name: "PingFederate"
+          severity: "Unknown"
+          severity_id: 0
+          status: "Failure"
+          status_id: 2
+          time: 1793523660123
+          user:
+            name: "analyst"
+  - service: admin
+    sample: 2026-11-01 09:02:00,123 | admin@example.test | UserAdmin | 192.0.2.2 |
+      USER | LOGIN_ATTEMPT | synthetic-login | Login was successful
+    result:
+      custom:
+        ocsf:
+          activity_id: 1
+          activity_name: "Logon"
+          actor:
+            user:
+              email_addr: "admin@example.test"
+              name: "admin@example.test"
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Authentication"
+          class_uid: 3002
+          metadata:
+            event_code: "LOGIN_ATTEMPT"
+            product:
+              name: "PingFederate"
+              vendor_name: "Ping Identity"
+            version: "1.5.0"
+          service:
+            name: "PingFederate"
+          severity: "Unknown"
+          severity_id: 0
+          status: "Unknown"
+          status_id: 0
+          time: 1793523720123
+          user:
+            email_addr: "admin@example.test"
+            name: "admin@example.test"
