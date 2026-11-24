@@ -48,6 +48,8 @@ METRICS_MAP = {
     'nv_inference_request_histogram_us': 'inference.request.histogram_us',
     'nv_inference_request_success': 'inference.request_success',
     'nv_inference_request_summary_us': 'inference.request.summary_us',
+    'nv_llm_input_token_len': 'llm.input_token_len',
+    'nv_llm_output_token_len': 'llm.output_token_len',
     'nv_model_load_duration_secs': 'model.load.duration_secs',
     'nv_pinned_memory_pool_total_bytes': 'pinned_memory.pool.total_bytes',
     'nv_pinned_memory_pool_used_bytes': 'pinned_memory.pool.used_bytes',
