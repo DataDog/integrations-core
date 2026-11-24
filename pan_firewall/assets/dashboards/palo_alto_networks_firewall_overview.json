@@ -2607,7 +2607,7 @@
           {
             "definition": {
               "background_color": "orange",
-              "content": "Firewall logs forwarded from PAN-OS: alert, error, and critical entries and log volume by status.",
+              "content": "Firewall logs forwarded from PAN-OS: critical-severity entries and log volume by status.",
               "text_align": "center",
               "type": "note",
               "vertical_align": "center"
@@ -2622,7 +2622,7 @@
           },
           {
             "definition": {
-              "description": "Recent Palo Alto Networks Firewall logs with alert, error or critical status. The device_name column is the firewall that sent the log. Follows the firewall filter through the logs' device_hostname attribute.",
+              "description": "Recent Palo Alto Networks Firewall logs with critical status, which the log pipeline sets from PAN-OS critical severity; high and medium severity map to warning and are not listed. The device_name column is the firewall that sent the log. Follows the firewall filter through the logs' device_hostname attribute.",
               "requests": [
                 {
                   "columns": [
@@ -2664,7 +2664,7 @@
                   "response_format": "event_list"
                 }
               ],
-              "title": "Error logs",
+              "title": "Critical logs",
               "type": "list_stream"
             },
             "id": 8421795120062092,
