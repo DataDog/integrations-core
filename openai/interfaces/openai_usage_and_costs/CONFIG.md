@@ -7,7 +7,7 @@ An **admin-scoped** API key is required to collect usage metrics and Cloud Cost 
 3. Click **Create a new secret key**.
 4. Copy the generated admin API key.
 
-Admin keys cannot call model endpoints, so they cannot run LLM evaluations. To use a key for evaluations in LLM Observability, add a standard API key on the **LLM Evaluations** interface.
+Admin keys cannot call model endpoints, so they cannot run LLM evaluations. To use a key for evaluations in LLM Observability, add a standard API key on the **Model Inference** interface.
 
 **Step 2: Create the Datadog integration**
 

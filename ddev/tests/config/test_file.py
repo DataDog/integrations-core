@@ -117,6 +117,38 @@ def test_with_local_file_in_parent_dir(tmp_path: PathLibPath, helpers, monkeypat
         assert config_file.combined_model.repos["local"] == "local_repo"
 
 
+@pytest.mark.parametrize("in_parent", [False, True], ids=["working_directory", "parent_directory"])
+@pytest.mark.parametrize(
+    "global_ai",
+    [None, {"anthropic_api_key": "global-key", "flow_dirs": ["global-flows"]}],
+    ids=["defaults", "configured"],
+)
+def test_ai_config_comes_from_global_file(tmp_path: PathLibPath, monkeypatch, in_parent: bool, global_ai: dict | None):
+    from ddev.utils.toml import dumps_toml_data
+
+    global_config: dict = {"repo": "core"}
+    if global_ai is not None:
+        global_config["ai"] = global_ai
+    global_path = Path(tmp_path) / "config.toml"
+    global_path.write_text(dumps_toml_data(global_config))
+    (Path(tmp_path) / DDEV_TOML).write_text(
+        'repo = "extras"\n'
+        '[ai]\n'
+        'anthropic_api_key = "local-key"\n'
+        'flow_dirs = ["local-flows"]\n'
+        '[ai.gateway]\n'
+        'command = "local-command"\n'
+    )
+    working_dir = tmp_path / "child" if in_parent else tmp_path
+    working_dir.mkdir(exist_ok=True)
+    monkeypatch.chdir(working_dir)
+
+    config = ConfigFileWithOverrides(global_path)
+    config.load()
+
+    assert config.combined_model.raw_data == {**global_config, "repo": "extras"}
+
+
 def test_pretty_overrides_path_relative(tmp_path: PathLibPath, monkeypatch):
     """Test that the relative path is shown when the override file is close."""
     project_dir = Path(tmp_path) / "project"

@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "title": "High admission wait time",
+  "tags": [
+    "integration:kueue"
+  ],
+  "definition": {
+    "name": "[Kueue] Admission wait time is high",
+    "type": "query alert",
+    "query": "sum(last_5m):sum:kueue.admission.wait_time.seconds.sum{*} by {kueue_cluster_queue}.as_count() / sum:kueue.admission.wait_time.seconds.count{*} by {kueue_cluster_queue}.as_count() > 300",
+    "message": "{{#is_alert}}\n## What's happening?\n\nThe average admission wait time for ClusterQueue **{{kueue_cluster_queue.name}}** is {{value}} seconds, above the critical threshold of {{threshold}} seconds. Workloads are waiting too long between creation/requeue and admission.\n\n> **Note:** This monitor approximates p95 wait time using the ratio of `kueue.admission.wait_time.seconds.sum` to `kueue.admission.wait_time.seconds.count` (an average-based proxy), because native percentile/quantile aggregation over Prometheus histogram buckets is not directly expressible in this query. If you need a true p95, build a histogram_quantile-style calculation on the `.bucket` submetric in a dashboard and adjust this monitor's threshold based on observed skew between average and p95.\n{{/is_alert}}\n\n{{#is_warning}}\n## What's happening?\n\nThe average admission wait time for ClusterQueue **{{kueue_cluster_queue.name}}** is {{value}} seconds, above the warning threshold of {{warn_threshold}} seconds.\n{{/is_warning}}\n\n{{#is_recovery}}\n## Recovered\n\nAdmission wait time for ClusterQueue {{kueue_cluster_queue.name}} has resolved. Current value: {{value}} seconds.\n{{/is_recovery}}",
+    "tags": [
+      "integration:kueue",
+      "$env",
+      "$kueue_cluster_queue"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 300,
+        "warning": 60
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "include_tags": true,
+      "new_group_delay": 60,
+      "on_missing_data": "default",
+      "silenced": {}
+    }
+  },
+  "created_at": "2026-07-23",
+  "last_updated_at": "2026-08-04",
+  "description": "Alerts when workloads in a Kueue ClusterQueue wait too long between creation/requeue and admission, indicating queueing pressure. Thresholds (60s warning / 300s critical) are starting points — tune per your team's SLOs."
+}

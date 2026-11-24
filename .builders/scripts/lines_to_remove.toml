@@ -1,5 +1,6 @@
 # Rules for stripping specific lines from wheel contents
-# Each rule specifies a package pattern and line patterns to remove
+# Each rule specifies a package pattern and line patterns to remove, `strip_docstrings = true`
+# to empty Python docstrings, or both
 
 # Example: add another rule like this
 # [[rules]]
@@ -31,3 +32,40 @@ line_patterns = [
     "^from pymongo\\.asynchronous\\.helpers import _getaddrinfo$",
     "^\\s*\"AsyncMongoClient\",$",
 ]
+
+[[rules]]
+# kubernetes.watch.Watch parses the `:return:` and `:param bool follow:` lines of the
+# kubernetes/client/api docstrings, so only the model docstrings are emptied.
+package_pattern = "kubernetes-*"
+file_pattern = "kubernetes/client/models/*.py"
+strip_docstrings = true
+
+[[rules]]
+# The generated Cloudera Manager API client does not read its docstrings at runtime.
+package_pattern = "cm_client-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# openstacksdk does not read its docstrings at runtime.
+package_pattern = "openstacksdk-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# ddtrace only reads the docstrings of user-defined LLM tools, never its own.
+package_pattern = "ddtrace-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# redis-py does not read its docstrings at runtime.
+package_pattern = "redis-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# The Hazelcast client does not read its docstrings at runtime.
+package_pattern = "hazelcast_python_client-*"
+file_pattern = "*.py"
+strip_docstrings = true

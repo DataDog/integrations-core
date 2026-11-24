@@ -8,6 +8,7 @@ import sys
 from typing import Dict, Optional, Sequence
 from xml.etree import ElementTree
 
+from datadog_checks.base.utils.db.sql_commenter import generate_sql_comment
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 
@@ -162,6 +163,27 @@ def needs_comment_recovery(full_text: Optional[str], statement_comments: Optiona
     return has_dbm_comment_marker(full_text) and not any(
         has_dbm_comment_marker(comment) for comment in statement_comments or ()
     )
+
+
+DD_QUERY_ATTRIBUTES = {
+    'service': 'datadog-agent',
+}
+AGENT_SERVICE_COMMENT = generate_sql_comment(**DD_QUERY_ATTRIBUTES)
+
+
+def append_agent_service_comment(comments: Sequence[str] | None, full_text: Optional[str]) -> Sequence[str]:
+    """Append the Agent service comment when the batch text has it and the statement comments do not."""
+    if comments is None:
+        comments = []
+    if (
+        not full_text
+        or AGENT_SERVICE_COMMENT not in full_text
+        or any(comment and AGENT_SERVICE_COMMENT in comment for comment in comments)
+    ):
+        return comments
+    merged = list(comments)
+    merged.append(AGENT_SERVICE_COMMENT)
+    return merged
 
 
 _SQLCOMMENTER_COMMENT = re.compile(r"/\*\s*[\w.-]+='[^']*'(?:\s*,\s*[\w.-]+='[^']*')*\s*\*/")

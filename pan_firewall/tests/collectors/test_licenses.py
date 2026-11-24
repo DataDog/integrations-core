@@ -45,7 +45,13 @@ def test_licenses_of_the_capture():
 @pytest.mark.parametrize(
     'expired, expires, expected',
     [
-        pytest.param('yes', 'October 01, 2026', {'license.expired': 1, 'license.days_left': -8}, id='expired'),
+        # The last day is still in force: dropping 0 would silence the monitor on the day it matters most.
+        pytest.param('no', 'October 09, 2026', {'license.expired': 0, 'license.days_left': 0}, id='expires-today'),
+        # PAN-OS keeps listing expired licenses, so a negative count would keep the expiry monitor red forever.
+        pytest.param('yes', 'October 01, 2026', {'license.expired': 1}, id='expired'),
+        # PAN-OS may not have flagged a lapsed license yet; the date alone must still suppress a negative count.
+        pytest.param('no', 'October 01, 2026', {'license.expired': 0}, id='past-date-not-flagged'),
+        # A perpetual license has no expiry to count down to, so no day count is made up.
         pytest.param('no', 'Never', {'license.expired': 0}, id='perpetual'),
         pytest.param('no', '22/10/2026', {'license.expired': 0}, id='unparseable-date'),
         pytest.param('no', 'February 30, 2026', {'license.expired': 0}, id='impossible-date'),

@@ -45,7 +45,7 @@ while the matching gauges are present, suspect this before touching the workload
 
 - `ddev env agent <integration> <env> check <integration>` and parse the human-readable "Metrics"
   section, or
-- the pytest E2E path (`ddev env test --dev <integration> <env>`) with the aggregator stub, which
+- the pytest E2E path (`ddev env test --dev <integration> --envs <env>`) with the aggregator stub, which
   records every submitted metric and exposes coverage assertions.
 
 State which oracle you used; do not assert coverage from reasoning alone.

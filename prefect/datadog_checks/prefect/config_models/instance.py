@@ -12,7 +12,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
@@ -135,6 +135,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     prefect_url: str
+    prefect_userpass: Optional[str] = Field(None, pattern='^[^:]+:.+$')
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None

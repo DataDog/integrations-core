@@ -43,8 +43,10 @@ from datadog_checks.sqlserver.schemas import (
 )
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
+    AGENT_SERVICE_COMMENT,
     DRIVER_CONFIG_DIR,
     Database,
+    append_agent_service_comment,
     construct_use_statement,
     extract_sql_comments_and_procedure_name,
     extract_trailing_dbm_comments,
@@ -1568,6 +1570,28 @@ def test_needs_comment_recovery_recognizes_dbm_comment_markers(marker):
 )
 def test_needs_comment_recovery_requires_missing_dbm_comment(full_text, statement_comments, expected):
     assert needs_comment_recovery(full_text, statement_comments) is expected
+
+
+@pytest.mark.parametrize(
+    'full_text,statement_comments,expected',
+    [
+        pytest.param(None, [], [], id='no_batch'),
+        pytest.param(
+            f"(@P1 int){AGENT_SERVICE_COMMENT} SELECT 1",
+            [],
+            [AGENT_SERVICE_COMMENT],
+            id='offsets_omit_the_comment',
+        ),
+        pytest.param(
+            f"{AGENT_SERVICE_COMMENT} SELECT 1",
+            [AGENT_SERVICE_COMMENT],
+            [AGENT_SERVICE_COMMENT],
+            id='already_in_statement_metadata',
+        ),
+    ],
+)
+def test_append_agent_service_comment(full_text, statement_comments, expected):
+    assert append_agent_service_comment(statement_comments, full_text) == expected
 
 
 @pytest.mark.parametrize(

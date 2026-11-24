@@ -50,7 +50,7 @@ def assert_event_field_values(event, expected_values):
 def validate_common_payload_fields(payload, expected_type):
     """Validate common fields in event payloads"""
     assert 'timestamp' in payload
-    assert payload['host'] == 'test-host'
+    assert payload['host'] == 'reported-host'
     assert payload['ddagentversion'] == '7.30.0'
     assert payload['ddsource'] == 'sqlserver'
     assert payload['dbm_type'] == expected_type
@@ -95,6 +95,7 @@ def mock_check():
 
     check.static_info_cache = {'version': '2019', 'engine_edition': 'Standard Edition'}
     check.resolved_hostname = "test-host"
+    check.reported_hostname = "reported-host"
     check.agent_version = '7.30.0'
     check.tag_manager = TagManager()
     check.tag_manager.set_tag('test', 'tag')
@@ -187,6 +188,7 @@ def rpc_completed_expected_values():
         'client_app_name': 'SQLAgent - Job Manager',
         'username': 'NT AUTHORITY\\NETWORK SERVICE',
         'object_name': 'sp_executesql',
+        'context_info': '013c9a1faa3f4412716ae2258a000000005c74e664fdcdb363',
     }
 
 
@@ -207,6 +209,7 @@ def error_expected_values():
         'message': "'REPEAT' is not a recognized built-in function name.",
         'activity_id': 'F961B15C-752A-487E-AC4F-F2A9BAB11DB7-1',
         'activity_id_xfer': 'AFCCDE6F-EACD-47F3-9B62-CC02D517191B-0',
+        'context_info': '015aaf8e1bc78021026ae22574000000004d8e7c9259c4eea8',
     }
 
 
@@ -895,6 +898,29 @@ class TestPayloadGeneration:
         assert metadata['tables'] == ['Customers']
         assert metadata['commands'] == ['SELECT']
         assert metadata['comments'] == []
+        assert query_details['context_info'] == ''
+
+    @pytest.mark.parametrize(
+        "handler_fixture,xml_fixture,expected_context_info",
+        [
+            (
+                'query_completion_handler',
+                'sample_rpc_completed_event_xml',
+                '013c9a1faa3f4412716ae2258a000000005c74e664fdcdb363',
+            ),
+            ('error_events_handler', 'sample_error_event_xml', '015aaf8e1bc78021026ae22574000000004d8e7c9259c4eea8'),
+        ],
+    )
+    def test_create_event_payload_includes_context_info(
+        self, request, handler_fixture, xml_fixture, expected_context_info
+    ):
+        """context_info carries trace context from tracers in DBM full mode and must reach the payload"""
+        handler = request.getfixturevalue(handler_fixture)
+        events = handler._process_events(wrap_xml_in_events_tag(request.getfixturevalue(xml_fixture)))
+        assert len(events) == 1
+
+        payload = handler._create_event_payload(events[0])
+        assert payload['query_details']['context_info'] == expected_context_info
 
     def test_create_rqt_event(self, query_completion_handler):
         """Test creation of Raw Query Text event"""
@@ -1172,6 +1198,7 @@ class TestRunJob:
 
             # Now validate the actual payload structure that was going to be serialized
             assert original_payload is not None, "Payload was not captured"
+            assert original_payload['host'] == 'reported-host'
 
             # Check essential payload properties
             assert 'ddsource' in original_payload, "Missing 'ddsource' in payload"
@@ -1194,6 +1221,41 @@ class TestRunJob:
                 assert "query_details" in event, "Missing 'query_details' in event"
                 query_details = event["query_details"]
                 assert "xe_type" in query_details, "Missing 'xe_type' in query_details"
+
+    @pytest.mark.parametrize(
+        'exclude_hostname, expected_host',
+        [
+            pytest.param(False, 'resolved.hostname', id='hostname_included'),
+            pytest.param(True, None, id='hostname_excluded'),
+        ],
+    )
+    def test_run_job_payload_host_respects_exclude_hostname(
+        self, aggregator, sample_multiple_events_xml, exclude_hostname, expected_host
+    ):
+        instance = {
+            'host': 'localhost,1433',
+            'username': 'sa',
+            'password': 'Password12!',
+            'dbm': True,
+            'exclude_hostname': exclude_hostname,
+            'collect_raw_query_statement': {'enabled': True},
+        }
+        with patch('datadog_checks.sqlserver.SQLServer.resolve_db_host', return_value='resolved.hostname'):
+            check = SQLServer(CHECK_NAME, {}, [instance])
+            handler = QueryCompletionEventsHandler(check, check._config)
+            with (
+                patch.object(handler, 'session_exists', return_value=True),
+                patch.object(handler, '_query_ring_buffer', return_value=sample_multiple_events_xml),
+            ):
+                handler.run_job()
+
+        activity_events = aggregator.get_event_platform_events('dbm-activity')
+        rqt_events = aggregator.get_event_platform_events('dbm-samples')
+        assert len(activity_events) == 1
+        assert rqt_events
+        assert [event['host'] for event in activity_events + rqt_events] == [expected_host] * (
+            len(activity_events) + len(rqt_events)
+        )
 
     def test_no_session(self, query_completion_handler, mock_check, mock_handler_log):
         """Test behavior when session doesn't exist"""
