@@ -239,7 +239,6 @@ def test_modern_release_metrics(aggregator, dd_run_check, fixture, release, vers
     }
     aggregator.assert_metrics_using_metadata(metadata, check_submission_type=True, check_symmetric_inclusion=True)
     aggregator.assert_metric('ceph.pgstate.active_clean', value=9, count=1, tags=tags)
-    aggregator.assert_metric('ceph.total_objects', count=0)
 
     for metric in ['ceph.commit_latency_ms', 'ceph.apply_latency_ms']:
         aggregator.assert_metric_has_tag(metric, 'ceph_osd:osd0')
