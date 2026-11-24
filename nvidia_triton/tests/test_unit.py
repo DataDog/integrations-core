@@ -5,6 +5,7 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nvidia_triton import NvidiaTritonCheck
 
 from .common import METRICS_MOCK, get_fixture_path
@@ -24,6 +25,7 @@ def test_check_metrics_nvidia_triton(dd_run_check, aggregator, instance_metrics,
         aggregator.assert_metric_has_tag(metric, 'test:test')
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('nvidia_triton.openmetrics.health', ServiceCheck.OK)
 
 

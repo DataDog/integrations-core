@@ -40,6 +40,14 @@ The [latency summary][10] metrics are disabled by default. To enable summary met
 tritonserver --metrics-config summary_latencies=true
 ```
 
+The [latency histogram][15] metrics are disabled by default. To enable the request, queue, and compute and first response histograms, use the command below:
+
+```
+tritonserver --metrics-config summary_latencies=simplified --metrics-config histogram_latencies=true
+```
+
+When Triton serves models with the TensorRT-LLM backend, the integration also collects the [TensorRT-LLM metrics][16] (`nvidia_triton.trt_llm.*`).
+
 The [response cache metrics][11] are not reported by default. You need to enable a cache implementation on the server side by specifying a <cache_implementation> and corresponding configuration.
 
 For instance:
@@ -143,3 +151,5 @@ Need help? Contact [Datadog support][9].
 [12]: https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html#custom-metrics
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration
+[15]: https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html#histograms
+[16]: https://github.com/triton-inference-server/tensorrtllm_backend#triton-metrics
