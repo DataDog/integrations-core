@@ -1622,6 +1622,12 @@ def test_offsets_are_only_fetched_for_consumer_groups_in_shard(check, kafka_inst
         pytest.param(3, 3, id='index equal to count'),
         pytest.param(3, -1, id='index negative'),
         pytest.param(1, 1, id='index without count'),
+        pytest.param(3, '', id='index empty string'),
+        pytest.param(3, -0.5, id='index fractional'),
+        pytest.param(3, '1', id='index string'),
+        pytest.param(3, False, id='index bool'),
+        pytest.param(2.5, 0, id='count fractional'),
+        pytest.param('3', 0, id='count string'),
     ],
 )
 def test_invalid_consumer_groups_shard_settings_raise(check, kafka_instance, shard_count, shard_index):
@@ -1629,6 +1635,25 @@ def test_invalid_consumer_groups_shard_settings_raise(check, kafka_instance, sha
 
     with pytest.raises(ConfigurationError, match='consumer_groups_shard'):
         check(instance)
+
+
+@pytest.mark.parametrize('shard_index, all_partitions', [(0, True), (1, False)])
+def test_only_shard_zero_fetches_all_broker_highwatermarks(
+    check, kafka_instance, dd_run_check, shard_index, all_partitions
+):
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = SHARDED_GROUPS
+    instance = sharded_instance(
+        kafka_instance, shard_index, monitor_unlisted_consumer_groups=True, monitor_all_broker_highwatermarks=True
+    )
+    kafka_consumer_check = check(instance)
+    kafka_consumer_check.client = mock_client
+
+    with mock.patch.object(kafka_consumer_check, 'get_highwater_offsets', return_value=({}, "")) as get_highwater:
+        dd_run_check(kafka_consumer_check)
+
+    (partitions,), _ = get_highwater.call_args
+    assert (partitions is None) == all_partitions
 
 
 def test_shard_count_without_shard_index_raises(check, kafka_instance):

@@ -131,6 +131,9 @@ instances:
     ## Sharding only spreads the load when the shards run on different cluster check runners. Size each
     ## runner to handle all of the shards that may be scheduled on it at the same time.
     ##
+    ## With `monitor_all_broker_highwatermarks`, only shard 0 reports the highwater offsets of every
+    ## partition. The other shards report them only for partitions consumed by their own groups.
+    ##
     ## Sharding cannot be combined with `enable_kafka_console`, which collects cluster-wide metadata.
     #
     # consumer_groups_shard_count: 1

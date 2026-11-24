@@ -93,8 +93,12 @@ class KafkaCheck(AgentCheck):
             if consumer_contexts_count < self._context_limit or self.config._kafka_console_enabled:
                 # Fetch highwater offsets
                 # Build partitions list or use all if configured
-                # If Kafka Console is enabled, always fetch all broker highwater marks
-                if self.config._kafka_console_enabled or self.config._monitor_all_broker_highwatermarks:
+                # If Kafka Console is enabled, always fetch all broker highwater marks.
+                # With sharding, only shard 0 fetches them all, so the cluster-wide scan runs once per set
+                # and the other shards keep their context budget for their own groups' lag.
+                if self.config._kafka_console_enabled or (
+                    self.config._monitor_all_broker_highwatermarks and self.config._consumer_groups_shard_index == 0
+                ):
                     partitions = None
                 else:
                     partitions = set()

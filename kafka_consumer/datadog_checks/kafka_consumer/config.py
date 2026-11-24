@@ -37,14 +37,14 @@ class KafkaConfig:
             if self._consumer_groups_regex
             else ""
         )
-        self._consumer_groups_shard_count = int(instance.get('consumer_groups_shard_count', 1))
-        shard_index = instance.get('consumer_groups_shard_index')
+        self._consumer_groups_shard_count = self._shard_setting(instance, 'consumer_groups_shard_count', 1)
+        shard_index = self._shard_setting(instance, 'consumer_groups_shard_index')
         if shard_index is None and self._consumer_groups_shard_count > 1:
             # Defaulting to shard 0 would silently collect only a fraction of the groups.
             raise ConfigurationError(
                 "`consumer_groups_shard_index` is required when `consumer_groups_shard_count` is greater than 1"
             )
-        self._consumer_groups_shard_index = int(shard_index or 0)
+        self._consumer_groups_shard_index = 0 if shard_index is None else shard_index
         self._validate_consumer_groups_shard()
         # Optimization to avoid OOM kill:
         # https://github.com/confluentinc/confluent-kafka-python/issues/759
@@ -305,6 +305,16 @@ class KafkaConfig:
                 patterns.append(template.format(consumer_group, ".+", ".+"))
 
         return patterns
+
+    @staticmethod
+    def _shard_setting(instance, name, default=None):
+        value = instance.get(name)
+        if value is None:
+            return default
+        # int() would turn "" or -0.5 into shard 0 and truncate 1.9; bool is an int subclass.
+        if type(value) is not int:
+            raise ConfigurationError(f"`{name}` must be an integer")
+        return value
 
     def _validate_consumer_groups_shard(self) -> None:
         if self._consumer_groups_shard_count < 1:
