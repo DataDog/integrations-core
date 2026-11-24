@@ -21,11 +21,11 @@ E2E_METADATA = {
 }
 
 
-def ceph(*args):
+def ceph(*args: str) -> str:
     return run_command(['docker', 'exec', 'dd-test-ceph', 'ceph', *args], capture='out', check=True).stdout
 
 
-def wait_for_healthy_cluster():
+def wait_for_healthy_cluster() -> None:
     # The cluster reports HEALTH_OK before its placement groups are active, so both are required.
     pg_stat = json.loads(ceph('pg', 'stat', '-fjson'))
     # Newer releases nest the summary under `pg_summary`.
