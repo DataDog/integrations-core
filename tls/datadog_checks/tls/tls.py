@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import service_identity
+from cryptography.hazmat.primitives import hashes
 
 from datadog_checks.base import AgentCheck, is_affirmative
 
@@ -92,6 +93,7 @@ class TLSCheck(AgentCheck):
         )
 
         self._send_cert_duration = self.instance.get('send_cert_duration', False)
+        self._send_cert_identity_tags = is_affirmative(self.instance.get('send_cert_identity_tags', False))
 
         # Global tags
         self._tags = self.instance.get('tags', [])
@@ -177,22 +179,25 @@ class TLSCheck(AgentCheck):
             self.log.debug('Cannot verify certificate expiration')
             return
 
+        # Built per run so tags of a rotated certificate don't accumulate in the global tags
+        metric_tags = (self._tags + self.get_cert_identity_tags(cert)) if self._send_cert_identity_tags else self._tags
+
         if self._send_cert_duration:
             self.log.debug('Checking issued days of certificate')
             issued_delta = cert.not_valid_after_utc - cert.not_valid_before_utc
             issued_seconds = issued_delta.total_seconds()
             issued_days = seconds_to_days(issued_seconds)
 
-            self.count('tls.issued_days', issued_days, tags=self._tags)
-            self.count('tls.issued_seconds', issued_seconds, tags=self._tags)
+            self.count('tls.issued_days', issued_days, tags=metric_tags)
+            self.count('tls.issued_seconds', issued_seconds, tags=metric_tags)
 
         self.log.debug('Checking age of certificate')
         delta = cert.not_valid_after_utc - datetime.now(timezone.utc)
         seconds_left = delta.total_seconds()
         days_left = seconds_to_days(seconds_left)
 
-        self.gauge('tls.days_left', days_left, tags=self._tags)
-        self.gauge('tls.seconds_left', seconds_left, tags=self._tags)
+        self.gauge('tls.days_left', days_left, tags=metric_tags)
+        self.gauge('tls.seconds_left', seconds_left, tags=metric_tags)
 
         if seconds_left <= 0:
             self.service_check(
@@ -215,6 +220,14 @@ class TLSCheck(AgentCheck):
         else:
             self.log.debug('Age is valid')
             self.service_check(SERVICE_CHECK_EXPIRATION, self.OK, tags=self._tags)
+
+    @staticmethod
+    def get_cert_identity_tags(cert):
+        # Non-conforming CAs may issue negative serial numbers, format the magnitude to avoid a leading minus
+        return [
+            'cert_fingerprint_sha256:{}'.format(cert.fingerprint(hashes.SHA256()).hex()),
+            'cert_serial_number:{}'.format(format(abs(cert.serial_number), 'x')),
+        ]
 
     def create_connection(self):
         """See: https://github.com/python/cpython/blob/40ee9a3640d702bce127e9877c82a99ce817f0d1/Lib/socket.py#L691"""

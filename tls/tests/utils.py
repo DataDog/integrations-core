@@ -1,12 +1,15 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import hashlib
 import os
 import socket
 import ssl
 import time
 from contextlib import contextmanager
 from urllib.parse import urlparse
+
+from cryptography.x509 import load_pem_x509_certificate
 
 from datadog_checks.dev import TempDir
 
@@ -47,3 +50,15 @@ def download_cert(filepath, host, raw=False):
         cert = ssl.DER_cert_to_PEM_cert(cert)
         with open(filepath, 'w') as f:
             f.write(cert)
+
+
+def expected_cert_identity_tags(pem_path):
+    with open(pem_path) as f:
+        pem = f.read()
+
+    der = ssl.PEM_cert_to_DER_cert(pem)
+    serial_number = load_pem_x509_certificate(pem.encode()).serial_number
+    return [
+        'cert_fingerprint_sha256:{}'.format(hashlib.sha256(der).hexdigest()),
+        'cert_serial_number:{:x}'.format(serial_number),
+    ]

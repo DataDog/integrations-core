@@ -17,6 +17,8 @@ from datadog_checks.tls.const import (
 from datadog_checks.tls.tls import TLSCheck
 from datadog_checks.tls.tls_remote import TLSRemoteCheck
 
+from .utils import expected_cert_identity_tags
+
 try:
     from unittest.mock import MagicMock, patch
 except ImportError:  # Python 2
@@ -296,6 +298,32 @@ def test_cert_send_cert_duration(aggregator, instance_remote_send_cert_duration)
     aggregator.assert_metric('tls.issued_days', count=1)
     aggregator.assert_metric('tls.issued_seconds', count=1)
     aggregator.assert_all_metrics_covered()
+
+
+def test_cert_identity_tags_stay_scoped_to_metrics(aggregator, certs, instance_remote_ok):
+    instance = dict(instance_remote_ok, send_cert_identity_tags=True)
+    c = TLSCheck('tls', {}, [instance])
+    c.check(None)
+    c.check(None)
+
+    metric_tags = c._tags + expected_cert_identity_tags(certs['valid.pem'])
+    aggregator.assert_metric('tls.days_left', tags=metric_tags, count=2)
+    aggregator.assert_metric('tls.seconds_left', tags=metric_tags, count=2)
+    for service_check in (
+        SERVICE_CHECK_CAN_CONNECT,
+        SERVICE_CHECK_VERSION,
+        SERVICE_CHECK_VALIDATION,
+        SERVICE_CHECK_EXPIRATION,
+    ):
+        aggregator.assert_service_check(service_check, status=c.OK, tags=c._tags, count=2)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_cert_identity_tags_negative_serial_number():
+    cert = MagicMock(serial_number=-0x1A2B)
+    cert.fingerprint.return_value = bytes.fromhex('ab01')
+
+    assert TLSCheck.get_cert_identity_tags(cert) == ['cert_fingerprint_sha256:ab01', 'cert_serial_number:1a2b']
 
 
 def test_cert_critical_days(aggregator, instance_remote_cert_critical_days):

@@ -103,6 +103,14 @@ files:
       value:
         example: false
         type: boolean
+    - name: send_cert_identity_tags
+      description: |
+        Whether or not to tag the certificate metrics with identifying attributes of the inspected certificate:
+        `cert_fingerprint_sha256` (the SHA-256 fingerprint as lowercase hex without separators) and
+        `cert_serial_number` (the serial number as lowercase hex).
+      value:
+        example: false
+        type: boolean
     - name: intermediate_cert_refresh_interval
       description: |
         When `fetch_intermediate_certs` is set to `true`, this indicates how often to

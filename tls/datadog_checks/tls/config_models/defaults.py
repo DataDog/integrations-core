@@ -52,6 +52,10 @@ def instance_send_cert_duration():
     return False
 
 
+def instance_send_cert_identity_tags():
+    return False
+
+
 def instance_timeout():
     return 10
 

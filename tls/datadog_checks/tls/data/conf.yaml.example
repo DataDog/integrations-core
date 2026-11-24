@@ -87,6 +87,13 @@ instances:
     #
     # send_cert_duration: false
 
+    ## @param send_cert_identity_tags - boolean - optional - default: false
+    ## Whether or not to tag the certificate metrics with identifying attributes of the inspected certificate:
+    ## `cert_fingerprint_sha256` (the SHA-256 fingerprint as lowercase hex without separators) and
+    ## `cert_serial_number` (the serial number as lowercase hex).
+    #
+    # send_cert_identity_tags: false
+
     ## @param intermediate_cert_refresh_interval - number - optional - default: 60
     ## When `fetch_intermediate_certs` is set to `true`, this indicates how often to
     ## refresh the intermediate certificate cache in minutes.

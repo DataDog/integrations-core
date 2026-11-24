@@ -13,6 +13,8 @@ from datadog_checks.tls.const import (
 )
 from datadog_checks.tls.tls_local import TLSLocalCheck
 
+from .utils import expected_cert_identity_tags
+
 
 def test_right_class(instance_local_no_server_hostname):
     c = TLSCheck('tls', {}, [instance_local_no_server_hostname])
@@ -134,6 +136,25 @@ def test_cert_send_cert_duration(aggregator, instance_local_send_cert_duration):
     aggregator.assert_metric('tls.seconds_left', count=1)
     aggregator.assert_metric('tls.issued_days', count=1)
     aggregator.assert_metric('tls.issued_seconds', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize('send_cert_identity_tags', [True, False])
+def test_cert_identity_tags(aggregator, certs, send_cert_identity_tags):
+    instance = {
+        'local_cert_path': certs['valid.pem'],
+        'tls_validate_hostname': False,
+        'send_cert_duration': True,
+        'send_cert_identity_tags': send_cert_identity_tags,
+        'tags': ['foo:bar'],
+    }
+    c = TLSCheck('tls', {}, [instance])
+    c.check(None)
+
+    metric_tags = c._tags + expected_cert_identity_tags(certs['valid.pem']) if send_cert_identity_tags else c._tags
+    for metric in ('tls.days_left', 'tls.seconds_left', 'tls.issued_days', 'tls.issued_seconds'):
+        aggregator.assert_metric(metric, tags=metric_tags, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_EXPIRATION, status=c.OK, tags=c._tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 

@@ -54,6 +54,7 @@ class InstanceConfig(BaseModel):
     seconds_critical: Optional[int] = None
     seconds_warning: Optional[int] = None
     send_cert_duration: Optional[bool] = None
+    send_cert_identity_tags: Optional[bool] = None
     server: str
     server_hostname: Optional[str] = None
     service: Optional[str] = None
