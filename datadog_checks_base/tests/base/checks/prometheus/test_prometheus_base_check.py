@@ -1,3 +1,5 @@
+import pytest
+
 from datadog_checks.checks.prometheus import GenericPrometheusCheck
 
 
@@ -34,6 +36,37 @@ def test_timeout_override():
     instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace', 'prometheus_timeout': 5}
     check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
     assert check.get_scraper(instance).prometheus_timeout == 5
+
+
+def test_composed_scraper_applies_legacy_http_options():
+    endpoint = 'https://example.test/metrics'
+    instance = {
+        'prometheus_url': endpoint,
+        'namespace': 'test',
+        'metrics': ['test_metric'],
+        'prometheus_timeout': 37,
+        'ssl_verify': False,
+    }
+    check = GenericPrometheusCheck('prometheus_check', {}, {}, [instance])
+
+    handler = check.get_scraper(instance).get_http_handler(endpoint, instance)
+
+    assert handler.options['timeout'] == (37.0, 37.0)
+    assert handler.options['verify'] is False
+
+
+@pytest.mark.parametrize(
+    'init_config',
+    [pytest.param(None, id='missing'), pytest.param({'timeout': 99}, id='http-settings')],
+)
+def test_composed_scraper_ignores_check_init_config(init_config):
+    endpoint = 'https://example.test/metrics'
+    instance = {'prometheus_url': endpoint, 'namespace': 'test', 'metrics': ['test_metric']}
+    check = GenericPrometheusCheck('prometheus_check', init_config, {}, [instance])
+
+    handler = check.get_scraper(instance).get_http_handler(endpoint, instance)
+
+    assert handler.options['timeout'] == (10.0, 10.0)
 
 
 def test_label_to_hostname_override():

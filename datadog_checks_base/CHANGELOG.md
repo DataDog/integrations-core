@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 38.11.0 / 2026-11-17
+
+***Added***:
+
+* Add backend-agnostic HTTP protocols, exceptions, and structural test fakes, so checks and their tests can avoid depending on `requests`. Checks opt in by setting `AGNOSTIC_HTTP_CLIENT = True`, and checks that leave it unset keep their current HTTP behavior. ([#25420](https://github.com/DataDog/integrations-core/pull/25420))
+* Add a shared malloc_trim helper in datadog_checks.base.utils.native_memory for integrations that allocate heavily through C libraries. ([#25718](https://github.com/DataDog/integrations-core/pull/25718))
+
+## 38.10.0 / 2026-11-16
+
+***Security***:
+
+* Bump `ddtrace` to 4.16.3 and `oauthlib` to 4.0.1 to address CVE-2026-116588, CVE-2026-116589, and CVE-2026-49272. ([#25968](https://github.com/DataDog/integrations-core/pull/25968))
+
+## 38.9.2 / 2026-11-02
+
+***Fixed***:
+
+* Wait a full collection interval after the first run of a DBM async job instead of running a second collection immediately. ([#25855](https://github.com/DataDog/integrations-core/pull/25855))
+
+## 38.9.1 / 2026-10-30
+
+***Fixed***:
+
+* Wait a full collection interval after the first run of a DBM async job instead of running a second collection immediately. ([#25855](https://github.com/DataDog/integrations-core/pull/25855))
+
 ## 38.9.0 / 2026-10-29
 
 ***Added***:

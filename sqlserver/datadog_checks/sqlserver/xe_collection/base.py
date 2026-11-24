@@ -94,6 +94,9 @@ class XESessionBase(DBMAsyncJob):
         "username",
         "activity_id",
         "activity_id_xfer",
+        # Populated only when the XE session collects the sqlserver.context_info action. Tracers in DBM full
+        # mode for SQL Server propagate trace context through context_info rather than the SQL comment.
+        "context_info",
     ]
 
     BASE_SQL_FIELDS = [
@@ -466,7 +469,7 @@ class XESessionBase(DBMAsyncJob):
         }
 
         return {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
             "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
@@ -597,7 +600,7 @@ class XESessionBase(DBMAsyncJob):
         if all_query_details:
             # Create base payload from the common fields (using the same structure as _create_event_payload)
             batched_payload = {
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
                 "ddagentversion": self._check.agent_version,
                 "ddsource": "sqlserver",
@@ -795,7 +798,7 @@ class XESessionBase(DBMAsyncJob):
 
         return {
             "timestamp": time() * 1000,
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
             "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",

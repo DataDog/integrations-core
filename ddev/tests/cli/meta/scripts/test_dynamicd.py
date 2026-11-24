@@ -178,6 +178,47 @@ class TestGetApiKeys:
         app.abort.assert_called_once()
 
 
+class TestGenerator:
+    """Runs the generator through the installed SDK with the HTTP layer mocked.
+
+    Mocking the client object instead would hide arguments the SDK rejects, such as the
+    `temperature` argument that SDK 1.0.0 removed.
+    """
+
+    def test_generate_simulator_script(self, anthropic_requests):
+        from ddev.cli.meta.scripts._dynamicd.constants import DEFAULT_MODEL
+        from ddev.cli.meta.scripts._dynamicd.generator import generate_simulator_script
+
+        context = MagicMock(display_name='Redis')
+        context.name = 'redisdb'
+        context.to_prompt_context.return_value = 'redis context'
+
+        script = generate_simulator_script(
+            context=context,
+            scenario='healthy',
+            dd_site='datadoghq.com',
+            metrics_per_batch=10,
+            duration=60,
+            api_key='test-key',
+        )
+
+        assert script == '#!/usr/bin/env python3\nprint("simulating")'
+        assert [request['model'] for request in anthropic_requests] == [DEFAULT_MODEL, DEFAULT_MODEL]
+
+    def test_fix_script_error(self, anthropic_requests):
+        from ddev.cli.meta.scripts._dynamicd.generator import fix_script_error
+
+        script = fix_script_error(
+            original_script='print(',
+            error_message='SyntaxError',
+            attempt=1,
+            api_key='test-key',
+        )
+
+        assert script == '#!/usr/bin/env python3\nprint("simulating")'
+        assert len(anthropic_requests) == 1
+
+
 class TestReadMetrics:
     """Tests for _read_metrics function."""
 

@@ -45,6 +45,149 @@ class ExtraMetrics(BaseModel):
     type: Optional[str] = None
 
 
+class Extension(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    extension: Optional[MappingProxyType[str, Any]] = None
+    name: Optional[str] = None
+
+
+class Cluster1(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    certificate_authority: Optional[str] = Field(None, alias='certificate-authority')
+    certificate_authority_data: Optional[str] = Field(None, alias='certificate-authority-data')
+    extensions: Optional[tuple[Extension, ...]] = None
+    insecure_skip_tls_verify: Optional[bool] = Field(None, alias='insecure-skip-tls-verify')
+    server: Optional[str] = None
+    tls_server_name: Optional[str] = Field(None, alias='tls-server-name')
+
+
+class Cluster(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    cluster: Optional[Cluster1] = None
+    name: Optional[str] = None
+
+
+class Context1(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    cluster: Optional[str] = None
+    namespace: Optional[str] = None
+    user: Optional[str] = None
+
+
+class Context(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    context: Optional[Context1] = None
+    name: Optional[str] = None
+
+
+class Config(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    access_token: Optional[str] = Field(None, alias='access-token')
+    apiserver_id: Optional[str] = Field(None, alias='apiserver-id')
+    client_id: Optional[str] = Field(None, alias='client-id')
+    client_secret: Optional[str] = Field(None, alias='client-secret')
+    cmd_args: Optional[str] = Field(None, alias='cmd-args')
+    cmd_path: Optional[str] = Field(None, alias='cmd-path')
+    expires_on: Optional[str] = Field(None, alias='expires-on')
+    expiry: Optional[str] = None
+    expiry_key: Optional[str] = Field(None, alias='expiry-key')
+    id_token: Optional[str] = Field(None, alias='id-token')
+    idp_certificate_authority: Optional[str] = Field(None, alias='idp-certificate-authority')
+    idp_certificate_authority_data: Optional[str] = Field(None, alias='idp-certificate-authority-data')
+    idp_issuer_url: Optional[str] = Field(None, alias='idp-issuer-url')
+    refresh_token: Optional[str] = Field(None, alias='refresh-token')
+    scopes: Optional[str] = None
+    tenant_id: Optional[str] = Field(None, alias='tenant-id')
+    token_key: Optional[str] = Field(None, alias='token-key')
+
+
+class AuthProvider(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    config: Optional[Config] = None
+    name: Optional[str] = None
+
+
+class EnvItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    name: Optional[str] = None
+    value: Optional[str] = None
+
+
+class Exec(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    apiVersion: Optional[str] = None
+    args: Optional[tuple[str, ...]] = None
+    command: Optional[str] = None
+    env: Optional[tuple[EnvItem, ...]] = None
+    provideClusterInfo: Optional[bool] = None
+
+
+class User1(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    auth_provider: Optional[AuthProvider] = Field(None, alias='auth-provider')
+    client_certificate: Optional[str] = Field(None, alias='client-certificate')
+    client_certificate_data: Optional[str] = Field(None, alias='client-certificate-data')
+    client_key: Optional[str] = Field(None, alias='client-key')
+    client_key_data: Optional[str] = Field(None, alias='client-key-data')
+    exec: Optional[Exec] = None
+    password: Optional[str] = None
+    token: Optional[str] = None
+    tokenFile: Optional[str] = None
+    username: Optional[str] = None
+
+
+class User(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    name: Optional[str] = None
+    user: Optional[User1] = None
+
+
+class KubeConfigDict(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    apiVersion: Optional[str] = None
+    clusters: Optional[tuple[Cluster, ...]] = None
+    contexts: Optional[tuple[Context, ...]] = None
+    current_context: Optional[str] = Field(None, alias='current-context')
+    kind: Optional[str] = None
+    users: Optional[tuple[User, ...]] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -101,6 +244,8 @@ class InstanceConfig(BaseModel):
     cluster_check: Optional[bool] = None
     collect_counters_with_distributions: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_histograms_as_distributions: Optional[bool] = None
+    collect_podgroup_events: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
@@ -125,6 +270,7 @@ class InstanceConfig(BaseModel):
     kerberos_hostname: Optional[str] = None
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
+    kube_config_dict: Optional[KubeConfigDict] = None
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None

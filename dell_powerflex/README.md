@@ -84,27 +84,27 @@ The Dell PowerFlex integration can collect logs from multiple PowerFlex componen
    logs:
      - type: file
        path: /opt/emc/scaleio/mdm/logs/eventLogger.log
-       source: dell_powerflex
+       source: dell-powerflex
        service: <SERVICE>
 
      - type: file
        path: /opt/emc/scaleio/mdm/logs/trc.0
-       source: dell_powerflex
+       source: dell-powerflex
        service: <SERVICE>
 
      - type: file
        path: /opt/emc/scaleio/sds/logs/trc.0
-       source: dell_powerflex
+       source: dell-powerflex
        service: <SERVICE>
 
      - type: file
        path: /opt/emc/scaleio/lia/logs/trc.0
-       source: dell_powerflex
+       source: dell-powerflex
        service: <SERVICE>
 
      - type: file
        path: /opt/emc/scaleio/activemq/data/activemq.log
-       source: dell_powerflex
+       source: dell-powerflex
        service: <SERVICE>
    ```
 
@@ -130,7 +130,11 @@ When `collect_events` is enabled, the Dell PowerFlex integration collects CRITIC
 
 The Dell PowerFlex integration does not include any service checks.
 
-## Troubleshooting
+## Uninstallation
+
+To uninstall the integration, rename the configuration file from `dell_powerflex.d/conf.yaml` to `dell_powerflex.d/conf.yaml.example`. Alternatively, if you are running a containerized environment, you can remove the annotation used to enable the integration.
+
+## Support
 
 Need help? Contact [Datadog support][8].
 

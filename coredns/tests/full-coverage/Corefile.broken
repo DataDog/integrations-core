@@ -1,0 +1,5 @@
+# Appended to Corefile mid-run by workload.py: an unknown directive, so this
+# reload fails once (coredns_reload_failed_total +1) and the running config stays.
+broken.test:53 {
+    notaplugin
+}

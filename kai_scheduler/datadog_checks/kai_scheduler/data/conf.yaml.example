@@ -68,6 +68,60 @@ instances:
     #
     # binder_endpoint: http://binder.kai-scheduler.svc:8080/metrics
 
+    ## @param collect_podgroup_events - boolean - optional - default: true
+    ## Submit events for KAI PodGroup life cycle transitions by polling PodGroup custom resources from the Kubernetes
+    ## API.
+    ##
+    ## This requires `list` role-based access control (RBAC) permission on `podgroups.scheduling.run.ai`, and `list`
+    ## on `events` to add the eviction reason and preemptor to eviction events.
+    ##
+    ## Every instance with this option enabled polls all the PodGroups of the cluster. When you configure several
+    ## instances, such as one per scheduling shard, set it to `false` on all but one of them to avoid duplicate
+    ## events.
+    #
+    # collect_podgroup_events: true
+
+    ## @param kube_config_dict - mapping - optional
+    ## Optional kubeconfig dictionary used to configure the Kubernetes API client.
+    ##
+    ## If unset, the check uses in-cluster Kubernetes configuration.
+    ##
+    ## The check uses the context named by `current-context`, and reads only the fields listed in this option.
+    ## Fields that are not listed, such as `preferences` or `proxy-url`, are ignored. The cluster `extensions`
+    ## are only used by `exec` plugins with `provideClusterInfo: true`, which receive the
+    ## `client.authentication.k8s.io/exec` extension.
+    ##
+    ## Supported authentication methods, in the order the Kubernetes client tries them:
+    ##   - `auth-provider`: the `gcp`, `azure`, or `oidc` provider.
+    ##   - `token` or `tokenFile`: a bearer token.
+    ##   - `exec`: a credential plugin command, which runs on the Agent host.
+    ##   - `username` and `password`: basic authentication.
+    ## Client certificate authentication (`client-certificate` and `client-key`, or their `-data` variants) can be
+    ## combined with any of them. File paths are read on the Agent host.
+    ##
+    ## When configured through Fleet Automation, `token`, `password`, `client-key-data`, and the `access-token`,
+    ## `refresh-token`, `id-token`, and `client-secret` fields of `auth-provider.config` are secrets and must be
+    ## set as secret references.
+    #
+    # kube_config_dict:
+    #   apiVersion: v1
+    #   kind: Config
+    #   current-context: <CONTEXT_NAME>
+    #   clusters:
+    #   - name: <CLUSTER_NAME>
+    #     cluster:
+    #       server: https://<KUBERNETES_API_SERVER>
+    #       certificate-authority-data: <BASE64_ENCODED_CA_CERTIFICATE>
+    #   contexts:
+    #   - name: <CONTEXT_NAME>
+    #     context:
+    #       cluster: <CLUSTER_NAME>
+    #       user: <USER_NAME>
+    #   users:
+    #   - name: <USER_NAME>
+    #     user:
+    #       token: <TOKEN>
+
     ## @param cluster_check - boolean - optional - default: true
     ## Set to true when configuring this integration as a Cluster Agent cluster check.
     #
@@ -237,6 +291,15 @@ instances:
     ## This integration enables this option by default.
     #
     # collect_counters_with_distributions: true
+
+    ## @param collect_histograms_as_distributions - boolean - optional - default: false
+    ## Whether or not to send histogram buckets as Datadog distribution metrics without the `upper_bound`
+    ## and `lower_bound` tags. This implicitly enables the `histogram_buckets_as_distributions` option.
+    ##
+    ## This option requires an Agent version that supports submitting histogram buckets without bound
+    ## tags. On older Agent versions, the check fails with a configuration error.
+    #
+    # collect_histograms_as_distributions: false
 
     ## @param use_process_start_time - boolean - optional - default: false
     ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,

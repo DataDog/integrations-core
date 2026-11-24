@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import click
 
 from ddev.config.constants import AppEnvVars
+from ddev.testing.selection import TestCommand, parse_envs, parse_pytest_args
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -35,11 +36,11 @@ ddev test -l postgres
 
 \b
 Run only unit tests:
-ddev test postgres:py3.11-9.6 -- -m unit
+ddev test postgres --envs py3.13-9.6-UTF8 --pytest-args='-m unit'
 
 \b
 Run specific test in multiple environments:
-ddev test postgres:py3.11-9.6,py3.11-16.0 -- -k test_my_special_test
+ddev test postgres --envs py3.13-9.6-UTF8,py3.13-16.0-UTF8 --pytest-args='-k test_my_special_test'
 '''
 
 
@@ -76,9 +77,12 @@ def on_error_fmt_callback(app: Application) -> Callable[[int, str], None]:
     return callback
 
 
-@click.command(epilog=epilog)
-@click.argument('target_spec', required=False)
-@click.argument('pytest_args', nargs=-1)
+@click.command(cls=TestCommand, epilog=epilog)
+@click.argument('target_spec', required=False, metavar='TARGET')
+@click.option('--envs', callback=parse_envs, help='Comma-separated environment names or matrix aliases')
+@click.option(
+    '--pytest-args', default='', callback=parse_pytest_args, help='Pytest arguments, parsed with POSIX quoting'
+)
 @click.option('--lint', '-s', is_flag=True, help='Run only lint & style checks')
 @click.option('--lint-unsafe', '-su', is_flag=True, help='Show unsafe fixes proposed by the linter')
 @click.option('--fmt', '-fs', is_flag=True, help='Fix formatting and linting errors')
@@ -103,6 +107,7 @@ def on_error_fmt_callback(app: Application) -> Callable[[int, str], None]:
 def test(
     app: Application,
     target_spec: str | None,
+    envs: tuple[str, ...] | None,
     pytest_args: tuple[str, ...],
     lint: bool,
     lint_unsafe: bool,
@@ -124,23 +129,27 @@ def test(
     """
     Run unit and integration tests.
 
-    Please see these docs to know how to pass TARGET_SPEC and PYTEST_ARGS:
+    The target defaults to changed integrations. Select environments with --envs
+    and pass pytest flags, paths and test IDs with --pytest-args.
+
+    See the testing documentation:
 
     \b
     https://datadoghq.dev/integrations-core/testing/
     """
-    import json
     import os
     import sys
 
     from ddev.testing.constants import EndToEndEnvVars, TestEnvVars
+    from ddev.testing.selection import e2e_pytest_args, load_environment_catalog, validate_target
     from ddev.utils.ci import running_in_ci
     from ddev.utils.hatch import get_hatch_env_vars
 
     if target_spec is None:
         target_spec = 'changed'
 
-    target_name, _, environments = target_spec.partition(':')
+    validate_target(target_spec, 'ddev test')
+    target_name = target_spec
 
     # These operations only need Hatch configuration, not a pytest suite.
     hatch_only = list_envs or lint or lint_unsafe or fmt or fmt_unsafe
@@ -204,96 +213,75 @@ def test(
     # Only enable certain functionality when running standard tests
     standard_tests = not (lint or lint_unsafe or fmt or fmt_unsafe or bench or latest)
 
-    # Keep track of environments so that they can first be removed if requested
-    chosen_environments = []
-
-    # Define the on_error callback
     on_error = None
-
-    base_command = [sys.executable, '-m', 'hatch', 'env', 'run']
-    if environments and not standard_tests:
-        app.abort('Cannot specify environments when using specific functionality like linting')
-    elif lint:
-        chosen_environments.append('lint')
-        base_command.extend(('--env', 'lint', '--', 'all'))
+    if lint:
+        script = ['all']
         on_error = on_error_lint_callback(app)
     elif lint_unsafe:
-        chosen_environments.append('lint')
-        base_command.extend(('--env', 'lint', '--', 'style-unsafe'))
+        script = ['style-unsafe']
     elif fmt:
-        chosen_environments.append('lint')
-        base_command.extend(('--env', 'lint', '--', 'fmt'))
+        script = ['fmt']
         on_error = on_error_fmt_callback(app)
     elif fmt_unsafe:
-        chosen_environments.append('lint')
-        base_command.extend(('--env', 'lint', '--', 'fmt-unsafe'))
+        script = ['fmt-unsafe']
         on_error = on_error_fmt_callback(app)
     elif bench:
-        filter_data = json.dumps({'benchmark-env': True})
-        base_command.extend(('--filter', filter_data, '--', 'benchmark'))
+        script = ['benchmark']
     elif latest:
-        filter_data = json.dumps({'latest-env': True})
-        base_command.extend(('--filter', filter_data, '--', 'test', '--run-latest-metrics'))
+        script = ['test', '--run-latest-metrics']
     else:
-        if environments:
-            for env_name in environments.split(','):
-                chosen_environments.append(env_name)
-                base_command.extend(('--env', env_name))
-        else:
-            chosen_environments.append('default')
-            base_command.append('--ignore-compat')
-
-        if python_filter:
-            filter_data = json.dumps({'python': python_filter})
-            base_command.extend(('--filter', filter_data))
-
-        base_command.extend(('--', 'test-cov' if coverage else 'test'))
-
+        script = ['test-cov' if coverage else 'test']
         if app.verbosity <= 0:
-            base_command.extend(('--tb', 'short'))
-
+            script.extend(('--tb', 'short'))
         if memray:
             if app.platform.windows:
                 app.abort('Memory profiling with `memray` is not supported on Windows')
-
-            base_command.append('--memray')
-
+            script.append('--memray')
         if e2e:
-            # Convert pytest_args to a list if it's a tuple
-            pytest_args_list = list(pytest_args) if isinstance(pytest_args, tuple) else pytest_args
-
-            # Initialize a list to hold indices of '-m' options and their values to be removed
-            indices_to_remove = []
-            marker_values = []
-
-            # Iterate over pytest_args_list to find '-m' or '--markers' options and their values
-            for i, arg in enumerate(pytest_args_list):
-                if arg in ('-m', '--markers') and i + 1 < len(pytest_args_list):
-                    indices_to_remove.extend([i, i + 1])
-                    marker_values.append(pytest_args_list[i + 1])
-
-            # Reverse sort indices_to_remove to avoid index shifting issues during removal
-            indices_to_remove.sort(reverse=True)
-
-            # Remove the '-m' options and their values from pytest_args_list
-            for index in indices_to_remove:
-                pytest_args_list.pop(index)
-
-            # After removing the '-m' options and their values
-            # Convert the modified pytest_args_list back to a tuple
-            pytest_args = tuple(pytest_args_list)
-
-            # Construct the combined marker expression with extracted marker values and 'e2e'
-            combined_marker = " and ".join(marker_values) + " and e2e" if marker_values else "e2e"
-            base_command.extend(('-m', combined_marker))
+            pytest_args = e2e_pytest_args(pytest_args)
             global_env_vars[EndToEndEnvVars.PARENT_PYTHON] = sys.executable
+
+    linting = lint or lint_unsafe or fmt or fmt_unsafe
+    if linting and (envs is not None or pytest_args):
+        app.abort('Lint and format modes do not accept --envs or --pytest-args.')
+
+    # Resolve every target before recreating or testing any environment.
+    selections = {}
+    skip_incompatible: set[str] = set()
+    for target in targets.values():
+        if linting:
+            selections[target.name] = ['lint']
+            continue
+        catalog = load_environment_catalog(target)
+        if envs is None or any(name in catalog.aliases for name in envs):
+            skip_incompatible.add(target.name)
+        if envs is not None:
+            names = catalog.resolve(envs)
+        elif bench or latest:
+            names = list(catalog.environments)
+        else:
+            names = catalog.resolve([os.environ.get('HATCH_ENV', 'default')])
+        mode = 'benchmark_env' if bench else 'latest_env' if latest else 'e2e_env' if e2e else 'test_env'
+        selected, excluded = catalog.select(names, mode=mode, platform=app.platform.name, python_filter=python_filter)
+        selections[target.name] = selected
+        for name, reason in excluded.items():
+            app.display_info(f'Excluded {target.name}:{name} by {reason}.')
 
     app.display_debug(f'Targets: {", ".join(targets)}')
     for target in targets.values():
         if not hide_header:
             app.display_header(target.display_name)
 
-        command = base_command.copy()
+        chosen_environments = selections[target.name]
+        if not chosen_environments:
+            app.display_info(f'No eligible environments selected for {target.name}.')
+            continue
+        command = [sys.executable, '-m', 'hatch', 'env', 'run']
+        for env_name in chosen_environments:
+            command.extend(('--env', env_name))
+        if standard_tests and target.name in skip_incompatible:
+            command.append('--ignore-compat')
+        command.extend(('--', *script))
         env_vars = global_env_vars.copy()
 
         if standard_tests:
@@ -330,17 +318,8 @@ def test(
             app.display_debug(f'Command: {command}')
 
             if recreate:
-                if bench or latest:
-                    variable = 'benchmark-env' if bench else 'latest-env'
-                    env_data = json.loads(
-                        app.platform.check_command_output([sys.executable, '-m', 'hatch', 'env', 'show', '--json'])
-                    )
-                    for env_name, env_config in env_data.items():
-                        if env_config.get(variable, False):
-                            app.platform.check_command([sys.executable, '-m', 'hatch', 'env', 'remove', env_name])
-                else:
-                    for env_name in chosen_environments:
-                        app.platform.check_command([sys.executable, '-m', 'hatch', 'env', 'remove', env_name])
+                for env_name in chosen_environments:
+                    app.platform.check_command([sys.executable, '-m', 'hatch', 'env', 'remove', env_name])
 
             # We use check_command_output to get the output of the command on the on_error callback
             # And force color to be enabled
