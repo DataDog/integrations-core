@@ -161,6 +161,53 @@ def placeholder():
         assert path.read_bytes() == source.replace('\n', newline).encode('utf-8')
 
 
+def test_kubernetes_api_docstrings_are_kept_for_watch(tmp_path: Path):
+    # `kubernetes.watch.Watch` reads the API method docstrings to pick the event type and the streaming
+    # argument, so only the model docstrings may be emptied.
+    api = tmp_path / 'kubernetes/client/api/core_v1_api.py'
+    api_source = '''class CoreV1Api:
+    def read_namespaced_pod_log(self, name, namespace, **kwargs):
+        """read log of the specified Pod
+
+        :param bool follow: Follow the log stream of the pod.
+        :return: str
+        """
+'''
+    model = tmp_path / 'kubernetes/client/models/v1_pod.py'
+    model_source = '''class V1Pod:
+    """Pod is a collection of containers that can run on a host."""
+'''
+    for path, source in ((api, api_source), (model, model_source)):
+        path.parent.mkdir(parents=True)
+        path.write_text(source, encoding='utf-8')
+
+    rules = build_wheels._get_matching_rules('kubernetes-35.0.0-py2.py3-none-any.whl')
+
+    assert build_wheels._strip_lines_from_dir(tmp_path, rules)
+    assert api.read_text(encoding='utf-8') == api_source
+    assert 'collection of containers' not in model.read_text(encoding='utf-8')
+
+
+@pytest.mark.parametrize(
+    'wheel_name, strip_docstrings',
+    [
+        ('cm_client-45.0.4-py3-none-manylinux2014_x86_64.whl', True),
+        ('ddtrace-4.16.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl', True),
+        ('hazelcast_python_client-5.7.0-py3-none-any.whl', True),
+        ('openstacksdk-4.18.0-py3-none-any.whl', True),
+        ('redis-8.1.0-py3-none-any.whl', True),
+        # A separate distribution whose docstrings were not reviewed
+        ('ddtrace_internal-0.1.0-py3-none-any.whl', False),
+    ],
+)
+def test_docstring_rules_match_wheel_filenames(wheel_name: str, strip_docstrings: bool):
+    # Wheel filenames use the normalized project name (`cm-client` becomes `cm_client`), so a rule
+    # written with the project name would never apply.
+    rules = build_wheels._get_matching_rules(wheel_name)
+
+    assert any(rule.get('strip_docstrings', False) for rule in rules) is strip_docstrings
+
+
 ORJSON_MACOS_15 = 'orjson-3.13.0-cp313-cp313-macosx_15_0_arm64.whl'
 ORJSON_UNIVERSAL = 'orjson-3.13.0-cp313-cp313-macosx_10_15_x86_64.macosx_11_0_arm64.macosx_10_15_universal2.whl'
 

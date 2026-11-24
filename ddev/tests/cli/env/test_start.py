@@ -16,7 +16,7 @@ from ddev.utils.structures import EnvVars
 @pytest.fixture(autouse=True)
 def free_port(mocker):
     port = 9000
-    mocker.patch('ddev.e2e.agent.docker._find_free_port', return_value=port)
+    mocker.patch('ddev.e2e.agent.docker._find_free_cmd_port', return_value=port)
     return port
 
 

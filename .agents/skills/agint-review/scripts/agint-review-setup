@@ -1,0 +1,1311 @@
+#!/usr/bin/env python3
+"""
+agint-review-setup — Sets up a PR review by gathering context, creating worktrees,
+and selecting which review agents to run.
+
+Usage:
+    agint-review-setup <pr-url-or-number> [--aspect a,b,c] [--review-dir-base DIR]
+                       [--round N]
+
+Writes <review-dir>/context.json with everything the orchestrator needs to launch
+the scout, reviewers, challenger, and synthesis steps. Per-agent filtered diffs are
+written to <review-dir>/diffs/<agent>.diff so prompts don't have to carry full diffs.
+When the github-actions reviewer runs on integrations-core, the workflow files of the
+other repos that call its workflows @master are downloaded to <review-dir>/callers/.
+
+The last line of stdout is the absolute path to context.json. Human-readable progress
+goes to stderr.
+
+Maintainers (human or agent): scripts/README.md documents the CLI, pipeline, agent
+selection logic, integration-root detection, context.json schema, and error handling
+for this script. If you change any of those, update the matching section in the
+README in the same change. Pure bugfixes or internal refactors that don't alter
+observable behavior do not need a README update.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import Any, Callable, NoReturn
+
+
+SCRIPT_DIR: Path = Path(__file__).resolve().parent
+SKILL_DIR: Path = SCRIPT_DIR.parent
+REGISTRY_PATH: Path = SKILL_DIR / "references" / "agent-registry.toml"
+CLEANUP_SCRIPT: Path = SCRIPT_DIR / "agint-review-cleanup"
+POST_SCRIPT: Path = SCRIPT_DIR / "gh-post-review"
+# Agent instruction files ship inside the skill, in agents/.
+AGENTS_DIR: Path = SKILL_DIR / "agents"
+
+ROUND_DIR_RE = re.compile(r"^round-(\d+)$")
+
+# Type aliases used across the script. They're load-bearing in two ways: agents
+# reading the script can see the shape of the data flowing between functions
+# without re-deriving it from the call sites, and our own type checker catches
+# the kinds of None-shaped surprises that show up when downstream code assumes
+# a key always exists in a returned dict.
+PathStr = str  # absolute path serialized into context.json
+InstructionEntry = dict[str, str]  # {"label": str, "path": str}
+InstructionList = list[InstructionEntry]
+SelectedEntry = dict[str, Any]  # {"agent": <registry agent dict>, "files": [...], ...}
+
+EXT_TO_LANG: dict[str, str] = {
+    ".py": "python", ".go": "go", ".js": "javascript", ".ts": "typescript",
+    ".java": "java", ".rb": "ruby", ".rs": "rust", ".sh": "shell",
+    ".c": "c", ".cpp": "cpp", ".cs": "csharp",
+    ".tf": "terraform", ".tfvars": "terraform",
+    ".yml": "yaml", ".yaml": "yaml",
+}
+
+# Per-repo override directory. Files in here override / supplement the bundled
+# rules in references/. See the skill's README.md → "Project-specific
+# instructions" for the contract teams expect from us.
+PROJECT_RULES_DIR = ".claude/agint-review"
+
+# Shared rule files every reviewer (and the challenger) reads. These are
+# bundled with the skill and resolved against SKILL_DIR.
+SHARED_RULES: list[tuple[str, str]] = [
+    ("Review tenets (how every agent reviews)",  "references/tenets.md"),
+    ("Reviewer output contract",                 "references/common-agent-instructions.md"),
+    ("Comment style and comment types",          "references/comment-style.md"),
+]
+
+# Per-agent project rule files under PROJECT_RULES_DIR, by agent name.
+AGENT_RULE_FILES: dict[str, list[str]] = {
+    "conventions":    ["conventions.md"],
+    "integrations":   ["integrations.md"],
+    "security":       ["security.md"],
+    "ddev":           ["ddev.md"],
+    "github-actions": ["github-actions.md"],
+    "logs":           ["logs.md"],
+}
+
+# The conventions reviewer reviews against the repository's AGENTS.md files.
+# Setup gives it the ones on the changed paths (root plus nested ones between a
+# changed file and the root); the agent looks for other nested ones itself.
+CONVENTIONS_AGENT = "conventions"
+AGENTS_MD = "AGENTS.md"
+
+# Other repos call integrations-core workflows. Only callers @master matter
+# (pinned SHAs change only when the caller bumps them), and the github-actions
+# reviewer can't search other orgs, so setup downloads those callers' workflow
+# files. ddoghq/integrations-internal needs a ddoghq account; without one it's
+# skipped with a warning.
+GITHUB_ACTIONS_AGENT = "github-actions"
+CALLER_REPOS: list[str] = [
+    "DataDog/integrations-extras",
+    "DataDog/marketplace",
+    "ddoghq/integrations-internal",
+]
+CALLERS_OF_REPO = "integrations-core"
+MASTER_CALL_RE = re.compile(
+    r"uses:\s*['\"]?(?:DataDog|ddoghq)/integrations-core/\.github/(?:workflows|actions)/[^@\s'\"]+@master\b",
+    re.IGNORECASE,
+)
+CALLERS_DIRNAME = "callers"
+CALLERS_INDEX = "index.md"
+CALLERS_LABEL = "Callers of integrations-core workflows @master in other repos (downloaded at setup)"
+
+def log(msg: str):
+    print(msg, file=sys.stderr, flush=True)
+
+
+def fail(msg: str, code: int = 1) -> NoReturn:
+    log(f"error: {msg}")
+    sys.exit(code)
+
+
+def run(cmd: list[str], *, check: bool = True, cwd: Path | str | None = None) -> subprocess.CompletedProcess[str]:
+    res = subprocess.run(cmd, check=False, capture_output=True, text=True, cwd=cwd)
+    if check and res.returncode != 0:
+        fail(f"command failed: {' '.join(cmd)}\n{res.stderr.strip()}")
+    return res
+
+
+def preflight_checks() -> list[str]:
+    """Verify the working directory is in a shape that allows a clean review setup.
+
+    Each check runs before any network call or filesystem mutation so that
+    environmental problems are caught early and reported together. Any failure is
+    fatal — the orchestrator should surface the message verbatim and stop the
+    skill rather than try to recover.
+    """
+    issues = []
+
+    res = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True
+    )
+    if res.returncode != 0:
+        # Without a git repo nothing else makes sense — return early so the
+        # follow-up checks don't produce noise.
+        return [
+            "The current directory is not inside a git repository.\n"
+            "  Fix: cd into the repository that owns the PR you want to review."
+        ]
+    repo_root_path = Path(res.stdout.strip())
+
+    if subprocess.run(["which", "gh"], capture_output=True).returncode != 0:
+        issues.append(
+            "The 'gh' CLI is not installed or not on PATH.\n"
+            "  Fix: install GitHub CLI from https://cli.github.com and run 'gh auth login'."
+        )
+    elif subprocess.run(["gh", "auth", "status"], capture_output=True).returncode != 0:
+        issues.append(
+            "The 'gh' CLI is not authenticated.\n"
+            "  Fix: run 'gh auth login' and try again."
+        )
+
+    res = subprocess.run(
+        ["git", "rev-parse", "--absolute-git-dir"], capture_output=True, text=True
+    )
+    if res.returncode == 0:
+        git_dir = Path(res.stdout.strip())
+        in_progress = []
+        if (git_dir / "MERGE_HEAD").exists():
+            in_progress.append("merge")
+        if (git_dir / "CHERRY_PICK_HEAD").exists():
+            in_progress.append("cherry-pick")
+        if (git_dir / "REVERT_HEAD").exists():
+            in_progress.append("revert")
+        if (git_dir / "rebase-merge").exists() or (git_dir / "rebase-apply").exists():
+            in_progress.append("rebase")
+        if (git_dir / "BISECT_LOG").exists():
+            in_progress.append("bisect")
+        if in_progress:
+            issues.append(
+                f"A git operation is in progress in this repository: "
+                f"{', '.join(sorted(set(in_progress)))}.\n"
+                f"  Fix: complete or abort the operation, then re-run the setup."
+            )
+
+    return issues
+
+
+def fail_preflight(issues: list[str]) -> NoReturn:
+    """Print all preflight issues at once with a clear stop signal for the orchestrator."""
+    log("")
+    log("Cannot start the review — the working directory is not in a shape that")
+    log("allows a clean setup. The following issue(s) must be resolved first:")
+    log("")
+    for issue in issues:
+        for line in issue.splitlines():
+            log(f"  - {line}" if not line.startswith("  ") else f"  {line}")
+        log("")
+    log("Stop the skill and ask the user to address the issues above before retrying.")
+    sys.exit(2)
+
+
+def parse_pr_id(token: str) -> tuple[int, str | None]:
+    m = re.match(r"https?://github\.com/([^/]+/[^/]+)/pull/(\d+)", token)
+    if m:
+        return int(m.group(2)), m.group(1)
+    if token.isdigit():
+        return int(token), None
+    fail(f"unrecognized PR identifier: {token!r} (expected URL or number)")
+
+
+def fetch_pr_metadata(pr_number: int, repo: str | None) -> dict[str, Any]:
+    cmd = ["gh", "pr", "view", str(pr_number)]
+    if repo:
+        cmd += ["--repo", repo]
+    cmd += [
+        "--json",
+        "title,body,headRefName,baseRefName,number,additions,deletions,"
+        "changedFiles,headRefOid,author,isCrossRepository",
+    ]
+    return json.loads(run(cmd).stdout)
+
+
+def current_repo_full_name() -> str:
+    res = run(["gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner"])
+    return res.stdout.strip()
+
+
+def fetch_changed_files(pr_number: int, repo: str | None) -> list[str]:
+    cmd = ["gh", "pr", "diff", str(pr_number)]
+    if repo:
+        cmd += ["--repo", repo]
+    cmd += ["--name-only"]
+    return [line for line in run(cmd).stdout.splitlines() if line.strip()]
+
+
+def fetch_full_diff(pr_number: int, repo: str | None) -> str:
+    cmd = ["gh", "pr", "diff", str(pr_number)]
+    if repo:
+        cmd += ["--repo", repo]
+    return run(cmd).stdout
+
+
+def split_unified_diff(diff_text: str) -> dict[str, str]:
+    """Returns dict[path -> diff block] keyed by post-image (b/) path."""
+    blocks: dict[str, str] = {}
+    current_path = None
+    current_lines = []
+    header = re.compile(r"^diff --git a/(.+?) b/(.+?)$")
+    for line in diff_text.splitlines(keepends=True):
+        m = header.match(line.rstrip("\n"))
+        if m:
+            if current_path:
+                blocks[current_path] = "".join(current_lines)
+            current_path = m.group(2)
+            current_lines = [line]
+        else:
+            current_lines.append(line)
+    if current_path:
+        blocks[current_path] = "".join(current_lines)
+    return blocks
+
+
+def load_registry() -> dict[str, Any]:
+    import tomllib
+    with REGISTRY_PATH.open("rb") as f:
+        return tomllib.load(f)
+
+
+def glob_to_regex(glob: str) -> re.Pattern[str]:
+    """Translate a glob with ** support into a regex anchored to the full path."""
+    parts = []
+    i = 0
+    while i < len(glob):
+        if glob.startswith("**/", i):
+            parts.append("(?:.*/)?")
+            i += 3
+        elif glob.startswith("**", i):
+            parts.append(".*")
+            i += 2
+        elif glob[i] == "*":
+            parts.append("[^/]*")
+            i += 1
+        elif glob[i] == "?":
+            parts.append("[^/]")
+            i += 1
+        elif glob[i] in ".+()|^$":
+            parts.append("\\" + glob[i])
+            i += 1
+        else:
+            parts.append(glob[i])
+            i += 1
+    return re.compile("^" + "".join(parts) + "$")
+
+
+def file_matches_globs(path: str, compiled_globs: list[re.Pattern[str]]) -> bool:
+    return any(g.match(path) for g in compiled_globs)
+
+
+def detect_languages(files: list[str]) -> list[str]:
+    langs: set[str] = set()
+    for f in files:
+        for ext, lang in EXT_TO_LANG.items():
+            if f.endswith(ext):
+                langs.add(lang)
+    return sorted(langs)
+
+
+def find_integration_roots_in_tree(head_tree: Path) -> set[str]:
+    """Enumerate integration roots from the head worktree.
+
+    integrations-core uses an inverted convention: every top-level directory is an
+    integration unless explicitly listed `false` in `[overrides.is-integration]`
+    of `.ddev/config.toml`. This is how new integrations like `krakend` and
+    `lustre` work without a `manifest.json`.
+
+    Other repos (integrations-extras, marketplace, integrations-internal) don't
+    have that section. For those, we fall back to the `manifest.json`-per-
+    directory convention.
+
+    Returns a set of integration root names (single path component, e.g. `"krakend"`).
+    """
+    config_path = head_tree / ".ddev" / "config.toml"
+    excluded = None  # None = denylist absent; set() = denylist present (possibly empty)
+
+    if config_path.exists():
+        try:
+            import tomllib
+            data = tomllib.loads(config_path.read_text())
+            section = data.get("overrides", {}).get("is-integration")
+            if isinstance(section, dict):
+                excluded = {k for k, v in section.items() if v is False}
+        except Exception as e:
+            log(f"  warning: could not parse {config_path} ({e}); falling back to manifest.json")
+
+    if excluded is not None:
+        roots = set()
+        for entry in head_tree.iterdir():
+            if not entry.is_dir():
+                continue
+            if entry.name.startswith("."):
+                continue
+            if entry.name in excluded:
+                continue
+            roots.add(entry.name)
+        return roots
+
+    # Fallback: manifest.json convention
+    return {p.parent.name for p in head_tree.glob("*/manifest.json")}
+
+
+def files_under_roots(files: list[str], roots: list[str]) -> list[str]:
+    return [f for f in files if any(f == r or f.startswith(r + "/") for r in roots)]
+
+
+def touched_integration_roots(files: list[str], integration_roots: list[str]) -> list[str]:
+    """The integration roots that have at least one changed file, sorted."""
+    return sorted({r for r in integration_roots for f in files if f == r or f.startswith(r + "/")})
+
+
+def changed_integration_roots(files: list[str], head_tree: Path, base_tree: Path) -> list[str]:
+    """The integration roots the PR changes, found in either tree.
+
+    The base tree counts too, so a PR that deletes a whole integration still gets
+    the integration reviewers.
+    """
+    roots = find_integration_roots_in_tree(head_tree) | find_integration_roots_in_tree(base_tree)
+    return touched_integration_roots(files, sorted(roots))
+
+
+def select_agents(
+    files: list[str],
+    registry: dict[str, Any],
+    aspect_filter: list[str],
+    integration_roots: list[str],
+) -> list[SelectedEntry]:
+    """The agents that match at least one changed file, each with the files it matched.
+
+    An agent matches a file through `matches = "all_files"`, `matches =
+    "integration_roots"` or one of its `globs`; a file matching any of them is
+    the agent's. A file matching one of its `exclude_globs` is never the agent's,
+    whatever else matches. Order and file order follow the registry and the PR.
+    """
+    apply_filter = aspect_filter and "all" not in aspect_filter
+
+    selected: list[SelectedEntry] = []
+    for agent in registry["agents"]:
+        if apply_filter and agent["aspect"] not in aspect_filter:
+            continue
+        compiled = [glob_to_regex(g) for g in agent.get("globs", [])]
+        excluded = [glob_to_regex(g) for g in agent.get("exclude_globs", [])]
+        matches = agent.get("matches")
+        under_roots = set(files_under_roots(files, integration_roots)) if matches == "integration_roots" else set()
+        matched = [
+            f for f in files
+            if not file_matches_globs(f, excluded)
+            and (matches == "all_files" or f in under_roots or file_matches_globs(f, compiled))
+        ]
+        if matched:
+            selected.append({"agent": agent, "files": matched})
+    return selected
+
+
+def target_branch_has_agents_md(base_tree: Path) -> bool:
+    """Whether the target branch has any AGENTS.md, at the root or nested anywhere.
+
+    Asks git for the tracked files rather than walking the checkout. Falls back to
+    a filesystem search when the tree isn't a git checkout (or git fails).
+    """
+    try:
+        res = subprocess.run(
+            ["git", "-C", str(base_tree), "ls-files", "--", f":(glob)**/{AGENTS_MD}"],
+            capture_output=True, text=True, timeout=60,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        res = None
+    if res is not None and res.returncode == 0:
+        return bool(res.stdout.strip())
+    return base_tree.is_dir() and next(base_tree.rglob(AGENTS_MD), None) is not None
+
+
+def skip_conventions_without_agents_md(
+    selected: list[SelectedEntry], base_tree: Path
+) -> tuple[list[SelectedEntry], list[dict[str, str]]]:
+    """Drop `conventions` when the target branch has no AGENTS.md at all.
+
+    `conventions` reviews only against AGENTS.md files, including nested ones off
+    the changed paths whose subject the PR uses (e.g. the async GitHub client's),
+    so it's skipped only when there's none anywhere: then it would run a full agent
+    to write an empty findings file (integrations-extras, marketplace and
+    integrations-internal have none today). Returns the remaining agents and the
+    skipped ones, as {"name", "reason"}.
+    """
+    if any(e["agent"]["name"] == CONVENTIONS_AGENT for e in selected) and not target_branch_has_agents_md(base_tree):
+        return (
+            [e for e in selected if e["agent"]["name"] != CONVENTIONS_AGENT],
+            [{"name": CONVENTIONS_AGENT, "reason": "the target branch has no AGENTS.md"}],
+        )
+    return selected, []
+
+
+def uncovered_files(files: list[str], selected: list[SelectedEntry]) -> list[str]:
+    """Changed files that no agent in the plan reviews, in PR order."""
+    covered = {f for e in selected for f in e["files"]}
+    return [f for f in files if f not in covered]
+
+
+METRIC_TYPES_REFERENCE = "references/integrations/metric-types.md"
+METRIC_TYPES_LABEL = "Metric types in metadata.csv (no AGENTS.md on this repo, so integrations applies it)"
+
+
+def add_rules_conventions_would_own(
+    per_agent: dict[str, InstructionList],
+    challenger: InstructionList,
+    skipped_agents: list[dict[str, str]],
+) -> None:
+    """When conventions was skipped for lack of AGENTS.md, give integrations the rules it needs from it.
+
+    On integrations-core the metadata.csv metric-type rule lives in the root
+    AGENTS.md and belongs to conventions; on a repo with no AGENTS.md nobody would
+    check it, so the integrations agent (and the challenger) get it as a reference.
+    """
+    if not any(s["name"] == CONVENTIONS_AGENT for s in skipped_agents) or "integrations" not in per_agent:
+        return
+    entry: InstructionEntry = {"label": METRIC_TYPES_LABEL, "path": str((SKILL_DIR / METRIC_TYPES_REFERENCE).resolve())}
+    per_agent["integrations"].append(entry)
+    challenger.append(entry)
+
+
+def conventions_only_files(files: list[str], registry: dict[str, Any], integration_roots: list[str]) -> list[str]:
+    """Changed files that no agent but conventions reviews (no aspect filter applied)."""
+    specialists = {"agents": [a for a in registry["agents"] if a.get("matches") != "all_files"]}
+    covered = {f for e in select_agents(files, specialists, [], integration_roots) for f in e["files"]}
+    return [f for f in files if f not in covered]
+
+
+def agents_md_on_paths(base_tree: Path, files: list[str]) -> list[tuple[str, Path]]:
+    """AGENTS.md files between each changed file and the repo root, root first, from the target branch.
+
+    The rules in force are the target branch's, so every file is read from the
+    base tree (the target branch's tip), even one the PR edits, adds, renames or
+    deletes: a branch that is behind may carry an outdated AGENTS.md, and a PR
+    can't change the rules its own review applies. Returned as (path relative to
+    the repo root, absolute path to read), ordered from the root down so broader
+    files come before the narrower ones that refine them.
+    """
+    found: dict[str, Path] = {}
+    for f in files:
+        parts = Path(f).parts[:-1]
+        for depth in range(len(parts) + 1):
+            rel = (Path(*parts[:depth], AGENTS_MD) if depth else Path(AGENTS_MD)).as_posix()
+            if (base_tree / rel).is_file():
+                found[rel] = base_tree / rel
+    return sorted(found.items(), key=lambda item: (item[0].count("/"), item[0]))
+
+
+def detect_jira_key(*texts: str | None) -> str | None:
+    pattern = re.compile(r"\b([A-Z][A-Z0-9]{1,9}-\d+)\b")
+    for text in texts:
+        if not text:
+            continue
+        m = pattern.search(text)
+        if m:
+            return m.group(1)
+    return None
+
+
+def repo_root() -> Path:
+    return Path(run(["git", "rev-parse", "--show-toplevel"]).stdout.strip())
+
+
+def existing_rounds(pr_dir: Path) -> list[int]:
+    """Round numbers that have a round-<N>/ directory under pr_dir, sorted."""
+    if not pr_dir.is_dir():
+        return []
+    rounds = []
+    for entry in pr_dir.iterdir():
+        m = ROUND_DIR_RE.match(entry.name)
+        if m and entry.is_dir():
+            rounds.append(int(m.group(1)))
+    return sorted(rounds)
+
+
+def resolve_round(pr_dir: Path, explicit: int | None, reuse_latest: bool) -> int:
+    """Pick the round number for this run.
+
+    An explicit --round always wins (redo). A `post`-only run re-uses the latest
+    existing round, since it posts that round's review.json. Otherwise the next
+    round after the latest one, or 1 if there is none.
+    """
+    if explicit is not None:
+        return explicit
+    rounds = existing_rounds(pr_dir)
+    if reuse_latest:
+        return rounds[-1] if rounds else 1
+    return rounds[-1] + 1 if rounds else 1
+
+
+def prune_worktrees():
+    """Drop git's records of worktrees whose directories no longer exist."""
+    res = subprocess.run(["git", "worktree", "prune"], capture_output=True, text=True)
+    if res.returncode != 0:
+        log(f"  warning: git worktree prune failed ({res.stderr.strip()})")
+
+
+def cleanup_older_rounds(pr_dir: Path, current_round: int, review_dir_base: str):
+    """Run agint-review-cleanup on this PR's rounds older than current_round.
+
+    Only this PR's directory is touched: other PRs' rounds may belong to another
+    session that is still using their worktrees. Cleanup failures are warnings.
+    """
+    for n in existing_rounds(pr_dir):
+        if n >= current_round:
+            continue
+        round_dir = pr_dir / f"round-{n}"
+        res = subprocess.run(
+            [sys.executable, str(CLEANUP_SCRIPT), str(round_dir),
+             "--review-dir-base", review_dir_base],
+            capture_output=True, text=True,
+        )
+        if res.returncode != 0:
+            log(f"  warning: cleanup of {round_dir} failed: {res.stderr.strip()}")
+        else:
+            log(f"  cleaned up round {n}")
+
+
+# A leftover worktree in an open PR's folder may belong to a review another
+# session is still running in this clone. Only remove it once its round has been
+# untouched this long.
+LEFTOVER_WORKTREE_MIN_AGE_S = 6 * 3600
+GONE_PR_STATES = {"MERGED", "CLOSED"}
+
+
+def lookup_pr_state(repo: str, pr_number: int) -> str | None:
+    """OPEN, MERGED or CLOSED from gh, or None when the lookup fails for any reason."""
+    try:
+        res = subprocess.run(
+            ["gh", "pr", "view", str(pr_number), "--repo", repo, "--json", "state", "--jq", ".state"],
+            capture_output=True, text=True, timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    state = res.stdout.strip().upper()
+    return state if res.returncode == 0 and state else None
+
+
+def is_strictly_inside(path: Path, base: Path) -> bool:
+    """True when path, after resolving `..` and symlinks, is below base (not base itself)."""
+    try:
+        resolved, base_resolved = path.resolve(), base.resolve()
+    except OSError:
+        return False
+    return resolved != base_resolved and base_resolved in resolved.parents
+
+
+def safe_rmtree(path: Path, base: Path) -> bool:
+    """Delete path only if it is strictly inside base. Returns whether it was deleted."""
+    if path.is_symlink() or not is_strictly_inside(path, base):
+        log(f"  refusing to delete {path}: it is not inside {base}")
+        return False
+    shutil.rmtree(path, ignore_errors=True)
+    return not path.exists()
+
+
+def remove_round_worktrees(round_dir: Path, base: Path) -> int:
+    """Remove a round's head/base worktrees; returns how many were removed."""
+    present = [n for n in ("head", "base") if (round_dir / n).exists()]
+    if not present or not is_strictly_inside(round_dir, base):
+        return 0
+    subprocess.run(
+        [sys.executable, str(CLEANUP_SCRIPT), str(round_dir), "--review-dir-base", base.name],
+        capture_output=True, text=True,
+    )
+    return sum(1 for n in present if not (round_dir / n).exists())
+
+
+def sweep_review_base(
+    base: Path,
+    current_pr: int,
+    state_of: Callable[[int], str | None],
+    now: float | None = None,
+) -> tuple[int, int]:
+    """Clean up other PRs' review folders under base. Returns (folders deleted, worktrees removed).
+
+    - A merged or closed PR's folder is deleted entirely.
+    - An open PR's folder keeps its files; head/base worktrees left by a crashed run
+      are removed once the round is older than LEFTOVER_WORKTREE_MIN_AGE_S.
+    - An unknown state (gh failed) keeps the folder untouched.
+    - The current PR's folder is never touched, and nothing outside base is deleted.
+    """
+    if not base.is_dir():
+        return 0, 0
+    now = time.time() if now is None else now
+    folders = sorted(
+        (d for d in base.iterdir() if d.is_dir() and d.name.isdigit() and int(d.name) != current_pr),
+        key=lambda d: int(d.name),
+    )
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        states = dict(zip(folders, pool.map(lambda d: state_of(int(d.name)), folders)))
+
+    deleted = worktrees = 0
+    for folder in folders:
+        if not is_strictly_inside(folder, base):
+            log(f"  refusing to clean {folder}: it is not inside {base}")
+            continue
+        state = states[folder]
+        rounds = [r for r in folder.iterdir() if r.is_dir() and ROUND_DIR_RE.match(r.name)]
+        if state in GONE_PR_STATES:
+            for r in rounds:
+                worktrees += remove_round_worktrees(r, base)
+            deleted += safe_rmtree(folder, base)
+        elif state is not None:
+            for r in rounds:
+                if now - r.stat().st_mtime >= LEFTOVER_WORKTREE_MIN_AGE_S:
+                    worktrees += remove_round_worktrees(r, base)
+    return deleted, worktrees
+
+
+REMOTE_REPO_RE = re.compile(r"[:/]([^/:]+)/([^/]+?)(?:\.git)?/?$")
+
+
+def remote_for_repo(repo: str, remotes_output: str) -> str | None:
+    """The git remote whose URL points at repo (owner/name), from `git remote -v` output.
+
+    `gh` picks the PR's repository from `gh repo set-default`, which doesn't change
+    git's `origin`: in a fork clone, `origin` is the fork and the PR lives on another
+    remote. The host is ignored, so SSH host aliases still match. `origin` wins when
+    several remotes point at repo.
+    """
+    matches = []
+    for line in remotes_output.splitlines():
+        parts = line.split()
+        if len(parts) < 2 or (len(parts) > 2 and parts[2] != "(fetch)"):
+            continue
+        m = REMOTE_REPO_RE.search(parts[1])
+        if m and f"{m.group(1)}/{m.group(2)}".lower() == repo.lower():
+            matches.append(parts[0])
+    if not matches:
+        return None
+    return "origin" if "origin" in matches else matches[0]
+
+
+def setup_worktrees(pr_number: int, head_sha: str, base_ref: str, review_dir: Path, remote: str) -> tuple[Path, Path]:
+    review_dir.mkdir(parents=True, exist_ok=True)
+
+    log(f"  fetching pull/{pr_number}/head from {remote}…")
+    run(["git", "fetch", remote, f"pull/{pr_number}/head"])
+    log(f"  fetching {base_ref} from {remote}…")
+    run(["git", "fetch", remote, base_ref])
+
+    head_path = review_dir / "head"
+    base_path = review_dir / "base"
+
+    _ensure_worktree_at(head_path, head_sha, label="head")
+    _ensure_worktree_at(base_path, f"{remote}/{base_ref}", label="base")
+
+    return head_path, base_path
+
+
+ROUND_WORKTREES = ("head", "base")
+
+
+def reset_round_outputs(review_dir: Path):
+    """Delete a redone round's earlier outputs, keeping its worktrees, and create an empty findings/.
+
+    Everything else in the round belongs to the earlier run: the challenger reads
+    every file in findings/, and `post` would publish an old review.json (for
+    example a partial one) under this run's context.json.
+    """
+    for entry in review_dir.iterdir():
+        if entry.name in ROUND_WORKTREES:
+            continue
+        if entry.is_dir() and not entry.is_symlink():
+            safe_rmtree(entry, review_dir)
+        else:
+            entry.unlink()
+    (review_dir / "findings").mkdir()
+
+
+def _ensure_worktree_at(path: Path, target_ref: str, label: str):
+    """
+    Make sure the worktree at `path` is checked out at `target_ref`.
+
+    A re-run of the review against a PR that has gained new commits would
+    otherwise reuse a stale worktree: the diff and context.json reflect the new
+    head SHA while reviewers read source from the old checkout. Resolve the
+    target ref's SHA and `git checkout --detach` if the worktree is at a
+    different commit. Same logic for the base worktree, since `<remote>/<base>`
+    advances when the base branch moves.
+    """
+    target_sha = run(["git", "rev-parse", target_ref]).stdout.strip()
+    if path.exists():
+        current_sha = run(["git", "-C", str(path), "rev-parse", "HEAD"]).stdout.strip()
+        if current_sha == target_sha:
+            log(f"  {label} worktree already at {target_sha[:12]}; reusing")
+            return
+        log(f"  {label} worktree at {current_sha[:12]}; refreshing to {target_sha[:12]}")
+        run(["git", "-C", str(path), "checkout", "--detach", target_sha])
+    else:
+        log(f"  creating {label} worktree at {path} ({target_sha[:12]})")
+        run(["git", "worktree", "add", "--detach", str(path), target_sha])
+
+
+GhApi = Callable[[str, "str | None"], "str | None"]  # (api path, token) -> raw body, or None on failure
+
+
+def gh_env(token: str | None) -> dict[str, str]:
+    """The environment for one gh call: GH_TOKEN/GITHUB_TOKEN dropped, then token set if given."""
+    env = {k: v for k, v in os.environ.items() if k not in ("GH_TOKEN", "GITHUB_TOKEN")}
+    if token:
+        env["GH_TOKEN"] = token
+    return env
+
+
+def gh_api_raw(path: str, token: str | None) -> str | None:
+    """GET a GitHub API path with gh, raw media type. None on any failure (404 included)."""
+    try:
+        res = subprocess.run(
+            ["gh", "api", path, "-H", "Accept: application/vnd.github.raw"],
+            capture_output=True, text=True, timeout=60, env=gh_env(token),
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return res.stdout if res.returncode == 0 else None
+
+
+def gh_tokens() -> list[tuple[str, str | None]]:
+    """(label, token) for every way gh can authenticate, to try in order.
+
+    A token already in GH_TOKEN/GITHUB_TOKEN comes first, then every account
+    logged in to github.com (DataDog and ddoghq repos need different accounts,
+    and a repo read with the wrong one returns 404, not a permission error).
+    Falls back to gh's active account when the accounts can't be listed.
+    """
+    tokens: list[tuple[str, str | None]] = []
+    for var in ("GH_TOKEN", "GITHUB_TOKEN"):
+        if os.environ.get(var):
+            tokens.append((f"${var}", os.environ[var]))
+    try:
+        res = subprocess.run(
+            ["gh", "auth", "status", "--json", "hosts"],
+            capture_output=True, text=True, timeout=30, env=gh_env(None),
+        )
+        accounts = json.loads(res.stdout).get("hosts", {}).get("github.com", []) if res.returncode == 0 else []
+    except (OSError, subprocess.TimeoutExpired, ValueError):
+        accounts = []
+    for account in accounts:
+        login = account.get("login")
+        if not login or account.get("state") != "success":
+            continue
+        try:
+            tok = subprocess.run(
+                ["gh", "auth", "token", "--user", login],
+                capture_output=True, text=True, timeout=30, env=gh_env(None),
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+        if tok.returncode == 0 and tok.stdout.strip():
+            tokens.append((login, tok.stdout.strip()))
+    if not any(label for label, _ in tokens if not label.startswith("$")):
+        tokens.append(("gh active account", None))
+    return tokens
+
+
+def master_calls(text: str) -> list[tuple[int, str]]:
+    """(line number, line) for each `uses:` of an integrations-core workflow or action @master."""
+    return [(n, line.strip()) for n, line in enumerate(text.splitlines(), 1) if MASTER_CALL_RE.search(line)]
+
+
+def fetch_master_callers(
+    review_dir: Path,
+    tokens: list[tuple[str, str | None]],
+    gh_api: GhApi = gh_api_raw,
+    repos: list[str] = CALLER_REPOS,
+) -> tuple[Path, list[str]]:
+    """Download the workflow files of other repos that call integrations-core @master.
+
+    For each repo, the first token that can list `.github/workflows` is used;
+    every workflow file is read and the ones calling an integrations-core
+    workflow or action @master are written to
+    <review_dir>/callers/<owner>/<repo>/.github/workflows/. A repo no token can
+    read is skipped, and a file that fails to download is listed as missing
+    (the repo is only reported as having no callers when every file was read).
+    Writes callers/index.md (what was saved, from which account, the calling
+    lines, and what was skipped or missing) and returns its path plus one
+    warning per repo that was skipped or has missing files.
+    """
+    callers_dir = review_dir / CALLERS_DIRNAME
+    callers_dir.mkdir(parents=True, exist_ok=True)
+    index = [
+        "# Callers of integrations-core workflows @master",
+        "",
+        "Downloaded by setup from other repositories. Only workflow files with a `uses:` of an "
+        "integrations-core workflow or action pinned to `@master` are kept: callers pinned to a SHA "
+        "only change when they bump it. Paths below are relative to this file's folder.",
+        "",
+    ]
+    warnings: list[str] = []
+    for repo in repos:
+        listing, account = None, None
+        for label, token in tokens:
+            listing = gh_api(f"repos/{repo}/contents/.github/workflows", token)
+            if listing is not None:
+                account = (label, token)
+                break
+        index.append(f"## {repo}")
+        index.append("")
+        if listing is None or account is None:
+            tried = ", ".join(label for label, _ in tokens) or "none"
+            warnings.append(
+                f"could not read {repo} with any gh account (tried: {tried}); "
+                "github-actions reviews without its callers. Log in with an account that can read it "
+                "(gh auth login) to include it."
+            )
+            index += [f"Skipped: no gh account could read it (tried: {tried}).", ""]
+            continue
+        index.append(f"Read with: {account[0]}.")
+        index.append("")
+        try:
+            names = [e["path"] for e in json.loads(listing) if e.get("type") == "file"]
+        except (ValueError, TypeError, KeyError, AttributeError):
+            warnings.append(
+                f"could not parse the .github/workflows listing of {repo}; "
+                "github-actions reviews without its callers."
+            )
+            index += ["Missing: the `.github/workflows` listing could not be parsed, so no file was checked.", ""]
+            continue
+        _, token = account
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            bodies = list(pool.map(lambda p: gh_api(f"repos/{repo}/contents/{p}", token), names))
+        saved = 0
+        failed = [path for path, body in zip(names, bodies) if body is None]
+        for path, body in zip(names, bodies):
+            calls = master_calls(body or "")
+            if not calls:
+                continue
+            out = callers_dir / repo / path
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(body or "")
+            saved += 1
+            index.append(f"- `{repo}/{path}`")
+            index += [f"  - line {n}: `{line}`" for n, line in calls]
+        if failed:
+            warnings.append(
+                f"could not download {len(failed)} workflow file{'s' if len(failed) != 1 else ''} of {repo} "
+                f"({', '.join(failed)}); github-actions reviews without them."
+            )
+            index.append("")
+            index.append("Missing: these files could not be downloaded, so whether they call integrations-core "
+                         "@master is unknown:")
+            index += [f"- `{repo}/{path}`" for path in failed]
+        elif not saved:
+            index.append("No workflow calls integrations-core @master.")
+        index.append("")
+    index_path = callers_dir / CALLERS_INDEX
+    index_path.write_text("\n".join(index))
+    return index_path, warnings
+
+
+def ensure_gitignore(repo_root_path: Path, review_dir_base: str) -> bool:
+    """Append the review dir to .gitignore if not already covered. Returns True if added."""
+    gi = repo_root_path / ".gitignore"
+    entry = f"{review_dir_base}/"
+    candidates = {review_dir_base, entry, f"/{review_dir_base}", f"/{entry}"}
+
+    if gi.exists():
+        existing = {line.strip() for line in gi.read_text().splitlines()}
+        if existing & candidates:
+            return False
+        with gi.open("a") as f:
+            if not gi.read_text().endswith("\n"):
+                f.write("\n")
+            f.write(f"{entry}\n")
+        return True
+
+    gi.write_text(f"{entry}\n")
+    return True
+
+
+def resolve_instruction_paths(
+    repo_root_path: Path,
+    selected: list[SelectedEntry],
+    base_tree: Path | None = None,
+) -> tuple[dict[str, InstructionList], InstructionList]:
+    """
+    Build the ordered, fully-resolved instruction lists per agent and for the
+    challenger.
+
+    Why this lives in setup: the orchestrator used to Glob `.claude/agint-review/`
+    and apply per-agent fan-out logic on every run. That kept a non-trivial chunk
+    of selection logic in the model's hot path, paid for in tokens, and left room
+    for drift between what the SKILL.md said and what actually got passed to
+    reviewers. Resolving once here matches the same disk-as-source-of-truth
+    contract we already use for diffs and worktrees: the orchestrator's job is
+    reduced to "dump these labelled paths verbatim into the prompt."
+
+    Returns:
+      per_agent: dict[agent_name -> list of {label, path}]
+                 (the full ordered list a reviewer should see, shared rules first;
+                 conventions also gets the AGENTS.md files on its changed paths,
+                 always base_tree's copy)
+      challenger: list of {label, path}
+                 (shared rules + project common + every project per-agent file
+                 and AGENTS.md file reviewers were given in this run, deduped)
+    """
+    project_dir = repo_root_path / PROJECT_RULES_DIR
+
+    shared_entries: InstructionList = [
+        {"label": label, "path": str((SKILL_DIR / rel).resolve())}
+        for label, rel in SHARED_RULES
+    ]
+
+    project_common_path = project_dir / "common.md"
+    project_common_entry: InstructionEntry | None = (
+        {
+            "label": "Project common (applies to all agents)",
+            "path": str(project_common_path.resolve()),
+        }
+        if project_common_path.exists()
+        else None
+    )
+
+    per_agent: dict[str, InstructionList] = {}
+    for entry in selected:
+        name = entry["agent"]["name"]
+        rule_files = AGENT_RULE_FILES.get(name, [])
+
+        agent_specific: InstructionList = []
+        for filename in rule_files:
+            f = project_dir / filename
+            if not f.exists():
+                continue
+            # Distinguish the canonical per-agent file from legacy split files
+            # so a reader scanning the prompt sees what matched.
+            label = (
+                "Project agent-specific"
+                if filename == f"{name}.md"
+                else f"Project agent-specific (legacy: {filename})"
+            )
+            agent_specific.append({"label": label, "path": str(f.resolve())})
+
+        full = list(shared_entries)
+        if project_common_entry:
+            full.append(project_common_entry)
+        full.extend(agent_specific)
+        if name == CONVENTIONS_AGENT and base_tree is not None:
+            full.extend(
+                {"label": f"AGENTS.md on the changed paths: {rel} (target branch)", "path": str(path.resolve())}
+                for rel, path in agents_md_on_paths(base_tree, entry["files"])
+            )
+        per_agent[name] = full
+
+    # Challenger sees every project file reviewers were given so it can validate
+    # citations against the same rule set. Bundled rules + project common +
+    # union of per-agent project files actually loaded for this run.
+    challenger: InstructionList = list(shared_entries)
+    if project_common_entry:
+        challenger.append(project_common_entry)
+    seen: set[str] = {p["path"] for p in challenger}
+    for name, paths in per_agent.items():
+        for entry in paths:
+            if entry["path"] in seen:
+                continue
+            seen.add(entry["path"])
+            label = (
+                entry["label"] if entry["label"].startswith("AGENTS.md")
+                else f"Reviewer rules ({name}: {Path(entry['path']).name})"
+            )
+            challenger.append({"label": label, "path": entry["path"]})
+
+    return per_agent, challenger
+
+
+def agent_file(name: str) -> PathStr:
+    """Absolute path to an agent's instruction file (agents/<name>.md in the skill)."""
+    return str((AGENTS_DIR / f"{name}.md").resolve())
+
+
+def skill_paths() -> dict[str, PathStr]:
+    """Absolute paths of everything bundled with the skill that a run needs.
+
+    The orchestrator reads these from context.json instead of resolving them
+    itself, so SKILL.md needs no harness-specific path substitution.
+    """
+    refs = SKILL_DIR / "references"
+    return {
+        "skill_dir": str(SKILL_DIR.resolve()),
+        "setup_script": str(Path(__file__).resolve()),
+        "post_script": str(POST_SCRIPT.resolve()),
+        "cleanup_script": str(CLEANUP_SCRIPT.resolve()),
+        "prompt_templates": str((refs / "prompt-templates.md").resolve()),
+        "output_format": str((refs / "output-format.md").resolve()),
+        "comment_style": str((refs / "comment-style.md").resolve()),
+        "tenets": str((refs / "tenets.md").resolve()),
+        "common_agent_instructions": str((refs / "common-agent-instructions.md").resolve()),
+        "scout_agent": agent_file("scout"),
+        "challenger_agent": agent_file("challenger"),
+    }
+
+
+def check_agent_files(registry: dict[str, Any]) -> list[str]:
+    """Agent instruction files that are missing, as human-readable problems.
+
+    The agents live in the skill's agents/ folder. A copy of the skill without
+    that folder would only fail after the worktrees are built.
+    """
+    names = ["scout", "challenger"] + [a["name"] for a in registry["agents"]]
+    missing = [n for n in names if not Path(agent_file(n)).is_file()]
+    if not missing:
+        return []
+    return [
+        f"agent instruction files are missing from {AGENTS_DIR}: "
+        + ", ".join(f"{n}.md" for n in missing)
+        + ". Copy the whole agint-review skill folder, including agents/."
+    ]
+
+
+def prepare_post_only(review_dir: Path) -> Path:
+    """Check that review_dir holds a full, saved review and return its context.json.
+
+    Refuses (exit 1) when there's no saved review, or when the saved run was partial
+    (post: false): posting it would put the Slack marker on a partial review. Keeps
+    the saved run's fields (aspects, post) and only refreshes the paths.
+    """
+    context_path = review_dir / "context.json"
+    if not (review_dir / "review.json").is_file() or not context_path.is_file():
+        fail(f"no saved review to post in {review_dir}; run a full review first")
+    context = json.loads(context_path.read_text())
+    # Rounds saved before the `post` field existed only have their aspects.
+    if context.get("post", is_full_review(context.get("aspects") or [])) is False:
+        fail(
+            f"the saved review in {review_dir} is partial (aspects: "
+            f"{', '.join(context.get('aspects') or []) or 'unknown'}), so it is not posted; "
+            "run a full review to post one"
+        )
+    context["paths"] = skill_paths()
+    context_path.write_text(json.dumps(context, indent=2))
+    return context_path
+
+
+def is_full_review(aspects: list[str]) -> bool:
+    """True when no aspect filter narrows the reviewers, so the run may be posted."""
+    return not aspects or "all" in aspects
+
+
+def write_per_agent_diffs(selected: list[SelectedEntry], full_diff: str, review_dir: Path) -> str:
+    diffs_dir = review_dir / "diffs"
+    diffs_dir.mkdir(exist_ok=True)
+    blocks = split_unified_diff(full_diff)
+
+    for entry in selected:
+        per_agent = [blocks[f] for f in entry["files"] if f in blocks]
+        path = diffs_dir / f"{entry['agent']['name']}.diff"
+        path.write_text("".join(per_agent))
+        entry["diff_path"] = str(path.resolve())
+
+    full_path = review_dir / "diff.full"
+    full_path.write_text(full_diff)
+    return str(full_path.resolve())
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Set up a PR review for agint-review.")
+    parser.add_argument("pr", help="PR URL or number")
+    parser.add_argument("--aspect", default="", help="comma-separated aspect filter")
+    parser.add_argument("--review-dir-base", default=".agint-review",
+                        help="base directory for review artifacts (default: .agint-review)")
+    parser.add_argument(
+        "--round",
+        type=int,
+        default=None,
+        help=(
+            "Round number for this review. The review dir is always "
+            "<review-dir-base>/<PR>/round-<N>/. By default setup picks the "
+            "latest existing round + 1 (1 if none); with --aspect post "
+            "alone it picks the latest existing round. Pass N explicitly to "
+            "redo a round."
+        ),
+    )
+    args = parser.parse_args()
+
+    issues = preflight_checks()
+    registry = load_registry()
+    issues += check_agent_files(registry)
+    if issues:
+        fail_preflight(issues)
+    prune_worktrees()
+
+    pr_number, url_repo = parse_pr_id(args.pr)
+    aspects = [a.strip() for a in args.aspect.split(",") if a.strip()]
+
+    log(f"fetching PR #{pr_number}{' from ' + url_repo if url_repo else ''}…")
+    pr = fetch_pr_metadata(pr_number, url_repo)
+    current_repo = current_repo_full_name()
+    pr_repo = url_repo or current_repo
+
+    if pr_repo != current_repo:
+        fail(
+            f"This PR belongs to {pr_repo} but you are in {current_repo}.\n"
+            f"git worktree commands require you to be inside the target repository.\n"
+            f"cd into the correct repository and re-run."
+        )
+
+    root = repo_root()
+    pr_dir = root / args.review_dir_base / str(pr_number)
+
+    deleted, worktrees = sweep_review_base(
+        root / args.review_dir_base, pr_number, lambda n: lookup_pr_state(current_repo, n)
+    )
+    prune_worktrees()
+    log(f"Cleaned up {deleted} folder{'s' if deleted != 1 else ''} for merged/closed PRs, "
+        f"{worktrees} leftover worktree{'s' if worktrees != 1 else ''}.")
+
+    # `post` alone: post the latest round's existing review.json again (e.g. after
+    # a failed post). No worktrees, no new round, no cleanup of older rounds. A
+    # partial run's review (post: false) is never posted this way either.
+    if aspects == ["post"]:
+        review_dir = pr_dir / f"round-{resolve_round(pr_dir, args.round, True)}"
+        context_path = prepare_post_only(review_dir)
+        log(f"post-only: posting the saved review in {review_dir}")
+        print(str(context_path.resolve()))
+        return
+
+    log("fetching diff…")
+    files = fetch_changed_files(pr_number, url_repo)
+    full_diff = fetch_full_diff(pr_number, url_repo)
+    if not files:
+        fail("no changed files found in PR")
+
+    round_number = resolve_round(pr_dir, args.round, False)
+    review_dir = pr_dir / f"round-{round_number}"
+
+    # Rounds never build on earlier ones, so their worktrees are dead weight.
+    cleanup_older_rounds(pr_dir, round_number, args.review_dir_base)
+
+    remote = remote_for_repo(current_repo, run(["git", "remote", "-v"]).stdout)
+    if remote is None:
+        fail(f"no git remote points at {current_repo}. Add one (git remote add upstream <url>) and re-run.")
+
+    log("setting up worktrees…")
+    head_path, base_path = setup_worktrees(
+        pr_number, pr["headRefOid"], pr["baseRefName"], review_dir, remote
+    )
+    reset_round_outputs(review_dir)
+    gi_added = ensure_gitignore(root, args.review_dir_base)
+
+    integration_roots = changed_integration_roots(files, head_path, base_path)
+    selected = select_agents(files, registry, aspects, integration_roots)
+    selected, skipped_agents = skip_conventions_without_agents_md(selected, base_path)
+    languages = detect_languages(files)
+    only_conventions = conventions_only_files(files, registry, integration_roots)
+    diff_full_path = write_per_agent_diffs(selected, full_diff, review_dir)
+    per_agent_instructions, challenger_instructions = resolve_instruction_paths(root, selected, base_path)
+    add_rules_conventions_would_own(per_agent_instructions, challenger_instructions, skipped_agents)
+
+    # github-actions on integrations-core: download the other repos' workflows
+    # that call ours @master. Best effort: a repo no account can read is skipped
+    # with a warning, and the reviewer runs without it.
+    caller_warnings: list[str] = []
+    if any(e["agent"]["name"] == GITHUB_ACTIONS_AGENT for e in selected) \
+            and current_repo.split("/")[-1] == CALLERS_OF_REPO:
+        log("  downloading workflows of repos that call integrations-core @master…")
+        index_path, caller_warnings = fetch_master_callers(review_dir, gh_tokens())
+        entry: InstructionEntry = {"label": CALLERS_LABEL, "path": str(index_path.resolve())}
+        per_agent_instructions[GITHUB_ACTIONS_AGENT].append(entry)
+        challenger_instructions.append(entry)
+
+    jira_key = detect_jira_key(pr.get("title"), pr.get("headRefName"))
+
+    context = {
+        "pr_number": pr_number,
+        "repo": current_repo,
+        # The repo's name without the owner (a fork or an org move keeps it), as the
+        # tenets' Severity by repository section names repos.
+        "repo_name": current_repo.split("/")[-1],
+        "title": pr["title"],
+        "description": pr.get("body") or "",
+        "author": pr["author"]["login"] if pr.get("author") else None,
+        "branch": {
+            "head": pr["headRefName"],
+            "base": pr["baseRefName"],
+            "head_sha": pr["headRefOid"],
+        },
+        "stats": {
+            "additions": pr.get("additions", 0),
+            "deletions": pr.get("deletions", 0),
+            "changed_files": pr.get("changedFiles", 0),
+        },
+        "is_cross_repository": pr.get("isCrossRepository", False),
+        "review_dir": str(review_dir.resolve()),
+        "head_tree": str(head_path.resolve()),
+        "base_tree": str(base_path.resolve()),
+        "languages": languages,
+        "integration_roots": integration_roots,
+        "conventions_only_files": only_conventions,
+        # Files no agent in this plan reviews. When the plan is empty on a full
+        # review, the orchestrator posts a clean review listing these.
+        "uncovered_files": uncovered_files(files, selected),
+        "skipped_agents": skipped_agents,
+        "files": files,
+        "agents_to_run": [
+            {
+                "name": e["agent"]["name"],
+                "aspect": e["agent"]["aspect"],
+                "agent_file": agent_file(e["agent"]["name"]),
+                "files": e["files"],
+                "diff_path": e["diff_path"],
+                "instruction_paths": per_agent_instructions[e["agent"]["name"]],
+            }
+            for e in selected
+        ],
+        "challenger_instruction_paths": challenger_instructions,
+        "jira_key": jira_key,
+        "aspects": aspects,
+        "diff_full_path": diff_full_path,
+        "gitignore_appended": gi_added,
+        "round": round_number,
+        "post": is_full_review(aspects),
+        "paths": skill_paths(),
+    }
+
+    context_path = review_dir / "context.json"
+    with context_path.open("w") as f:
+        json.dump(context, f, indent=2)
+
+    # Summary on stderr
+    log("")
+    log(f"PR #{pr_number}: {pr['title']!r}")
+    log(f"  branch: {pr['headRefName']} → {pr['baseRefName']}")
+    log(f"  files: {len(files)} changed (+{pr.get('additions', 0)}/-{pr.get('deletions', 0)})")
+    log(f"  languages: {', '.join(languages) or 'none detected'}")
+    if integration_roots:
+        log(f"  integrations touched: {', '.join(integration_roots[:8])}"
+            + (f" (+{len(integration_roots) - 8} more)" if len(integration_roots) > 8 else ""))
+    for skipped in skipped_agents:
+        log(f"  skipped {skipped['name']}: {skipped['reason']}")
+    if only_conventions:
+        reviewer = "no agent" if skipped_agents else "conventions only"
+        log(f"  reviewed by {reviewer}: {len(only_conventions)} file"
+            f"{'s' if len(only_conventions) != 1 else ''} ({', '.join(only_conventions[:5])}"
+            + (", …" if len(only_conventions) > 5 else "") + ")")
+    for w in caller_warnings:
+        log(f"  warning: {w}")
+    if jira_key:
+        log(f"  jira: {jira_key}")
+    log(f"  worktrees: {head_path}, {base_path}")
+    log(f"  round: {round_number} (review_dir = .../round-{round_number}/)")
+    if not is_full_review(aspects):
+        log("  partial review (aspect filter): it will be saved, not posted")
+    if gi_added:
+        log(f"  appended {args.review_dir_base}/ to .gitignore")
+    log("")
+    log("agents to run:")
+    for entry in selected:
+        log(f"  - {entry['agent']['name']} ({len(entry['files'])} files)")
+    if not selected and is_full_review(aspects):
+        log("  (none — no reviewer covers the changed files; a clean review saying so will be posted)")
+    elif not selected:
+        log("  (none — no registered agent matches the changed files or the aspect filter)")
+    log("")
+
+    # Path to context.json on stdout — orchestrator reads this last line
+    print(str(context_path.resolve()))
+
+
+if __name__ == "__main__":
+    main()

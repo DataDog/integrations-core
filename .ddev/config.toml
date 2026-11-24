@@ -58,7 +58,6 @@ hpe_aruba_edgeconnect = "HPE Aruba EdgeConnect"
 control_m = "Control-M"
 nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
-dynamo = "Dynamo"
 intersystems_iris = "InterSystems IRIS"
 kai_scheduler = "KAI Scheduler"
 
@@ -71,7 +70,6 @@ n8n = "n8n."
 control_m = "control_m."
 dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
-dynamo = "dynamo."
 intersystems_iris = "intersystems_iris."
 kai_scheduler = "kai."
 
@@ -302,7 +300,6 @@ n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
 dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
-dynamo = ["linux", "windows", "mac_os"]
 intersystems_iris = ["linux", "windows", "mac_os"]
 kai_scheduler = ["linux", "windows", "mac_os"]
 

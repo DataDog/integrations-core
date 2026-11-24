@@ -10,6 +10,7 @@ import time
 import psycopg
 from cachetools import TTLCache
 from psycopg.rows import dict_row
+from psycopg.types.numeric import Int8
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.query_metrics import (
@@ -64,6 +65,11 @@ SELECT s.queryid, s.dbid, s.userid, s.query
 """
 
 DEFAULT_PGSS_MAX = 5000
+
+# Longest wait between query text fetches while they keep failing. Every fetch makes Postgres load
+# the whole pg_stat_statements text file into one backend, however few keys it asks for, so a fetch
+# that fails because that file is very large costs the database as much as a full read each time.
+QUERY_TEXT_FETCH_MAX_BACKOFF = 60 * 60
 
 LIGHTWEIGHT_REQUIRED_COLUMNS = frozenset({'queryid', 'userid', 'dbid', 'calls'})
 
@@ -151,6 +157,9 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         self._check = check
         self._config = config
         self._metrics_collection_interval = collection_interval
+        self._text_fetch_failures = 0
+        self._text_fetch_wait = 0
+        self._text_fetch_error: str | None = None
         self._pg_stat_statements_max_warning_threshold = config.query_metrics.pg_stat_statements_max_warning_threshold
         self.batch_max_content_size = config.query_metrics.batch_max_content_size
         self._tags_no_db: list[str] | None = None
@@ -355,27 +364,96 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _fetch_query_texts(self, keys: set[PgssKey]) -> dict[PgssKey, str]:
+        """Read statement text for *keys*, backing off while reads keep failing.
+
+        Postgres loads the entire query text file to answer this, so its cost tracks the total text
+        size on the server rather than `len(keys)`. Keys left unanswered stay misses and come back
+        next collection, so without a backoff a fetch that fails because of that size is repeated,
+        at full cost, every collection.
+        """
         if not keys:
             return {}
+        if self._text_fetch_wait:
+            self._log.debug("Skipping query text fetch for %d pgss keys while backing off", len(keys))
+            return {}
         ordered = sorted(keys)
-        qids = [k[0] for k in ordered]
-        dbids = [k[1] for k in ordered]
-        userids = [k[2] for k in ordered]
+        # The cursor binds client-side, so psycopg renders each list as a literal with an array cast
+        # chosen from its values (int2[], int4[], or int8[]), and Postgres records that cast in the
+        # text it tracks for this query. Int8 pins the cast so the query keeps a single signature.
+        qids = [Int8(k[0]) for k in ordered]
+        dbids = [Int8(k[1]) for k in ordered]
+        userids = [Int8(k[2]) for k in ordered]
         try:
             rows, _ = self._execute_query(
                 QUERY_TEXT_FETCH,
                 params=(qids, dbids, userids),
                 row_factory=dict_row,
             )
-            return {pgss_key(row): row['query'] for row in rows}
         except psycopg.Error as e:
-            self._log.warning("Failed to fetch query text for %d pgss keys: %s", len(keys), e)
+            self._record_text_fetch_failure(len(keys), str(e))
             return {}
+
+        # pg_stat_statements does not raise when it cannot load its text file, for instance when the
+        # allocation for it fails: it logs on the server and returns NULL for every text instead.
+        if rows and all(row['query'] is None for row in rows):
+            self._record_text_fetch_failure(len(keys), "pg_stat_statements returned no query text")
+            return {}
+
+        if self._text_fetch_failures:
+            self._log.info("Query text fetch succeeded after %d consecutive failures", self._text_fetch_failures)
+        self._text_fetch_failures = 0
+        self._text_fetch_error = None
+        return {pgss_key(row): row['query'] for row in rows}
+
+    def _record_text_fetch_failure(self, key_count: int, reason: str) -> None:
+        """Hold off the next text fetch, doubling the wait on each consecutive failure.
+
+        The wait is counted in collections rather than seconds, so a retry lands on the collection it
+        is due at instead of slipping one collection whenever a run starts slightly early. The first
+        wait is a single collection, so a one-off failure costs one collection.
+        """
+        self._text_fetch_failures += 1
+        self._text_fetch_error = reason
+        max_wait = max(1, int(QUERY_TEXT_FETCH_MAX_BACKOFF // self._metrics_collection_interval))
+        self._text_fetch_wait = min(2 ** (self._text_fetch_failures - 1), max_wait)
+        self._log.warning(
+            "Failed to fetch query text for %d pgss keys: %s. Retrying in %ds (consecutive failures: %d)",
+            key_count,
+            reason,
+            self._text_fetch_wait * self._metrics_collection_interval,
+            self._text_fetch_failures,
+        )
+
+    def _warn_if_text_fetch_failing(self) -> None:
+        """Report repeated text fetch failures as a check warning on every collection they persist.
+
+        Check warnings only show in the Agent status page for the run that raised them, so raising
+        this once per failure would leave it hidden for most of a long backoff. A single failure is
+        common and harmless, so it stays a log line.
+        """
+        if self._text_fetch_failures < 2:
+            return
+        self._check.warning(
+            warning_with_tags(
+                "Query text fetches from pg_stat_statements failed %d times in a row, most recently with: %s. "
+                "Each fetch makes Postgres load all stored query text, so very large query texts can put "
+                "memory and temp file pressure on the database. Metrics for queries whose text has not been "
+                "collected yet are delayed. Next attempt in %ds.",
+                self._text_fetch_failures,
+                self._text_fetch_error,
+                self._text_fetch_wait * self._metrics_collection_interval,
+                host=self._check.reported_hostname,
+                dbname=self._config.dbname,
+            ),
+        )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _resolve_obfuscations(
         self, live_pgss_keys: set[PgssKey], changed_pgss_keys: set[PgssKey]
     ) -> dict[PgssKey, ObfuscationResult]:
+        # One collection of the backoff passes per call, whether or not this collection has misses.
+        if self._text_fetch_wait:
+            self._text_fetch_wait -= 1
         result = resolve_obfuscations(
             lookup=self._obfuscation_lookup,
             live_keys=live_pgss_keys,
@@ -384,6 +462,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
             classify=classify_query_text,
         )
         self._emit_resolve_stats(result.stats)
+        self._warn_if_text_fetch_failing()
         return result.results
 
     def _emit_resolve_stats(self, stats: ResolveStats):
@@ -395,6 +474,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
             ("ignored", stats.ignored),
             ("failed", stats.failed),
             ("dropped", stats.dropped),
+            ("fetch_failures", self._text_fetch_failures),
         ):
             self._check.gauge(
                 "dd.postgres.statement_metrics.lookup.{}".format(name),

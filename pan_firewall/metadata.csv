@@ -49,7 +49,7 @@ pan_firewall.ipsec.tunnels.active,gauge,,,,Tunnels active.,1,palo_alto_networks_
 pan_firewall.ipsec.tunnels.inactive,gauge,,,,Tunnels inactive.,-1,palo_alto_networks_firewall,ipsec tunnels inactive,,
 pan_firewall.ipsec.tunnels.init,gauge,,,,Tunnels initializing.,0,palo_alto_networks_firewall,ipsec tunnels init,,
 pan_firewall.ipsec.tunnels.total,gauge,,,,IPsec tunnels configured.,0,palo_alto_networks_firewall,ipsec tunnels total,,
-pan_firewall.license.days_left,gauge,,day,,"Days until the license expires, reported every 24 hours. Not sent for perpetual licenses.",1,palo_alto_networks_firewall,license days left,,feature
+pan_firewall.license.days_left,gauge,,day,,"Days until the license expires, reported every 24 hours. Not sent for perpetual or expired licenses.",1,palo_alto_networks_firewall,license days left,,feature
 pan_firewall.license.expired,gauge,,,,"Whether the license has expired (1 = expired, 0 = not expired), reported every 24 hours.",-1,palo_alto_networks_firewall,license expired,,feature
 pan_firewall.mgmt.cpu.hardirq,gauge,,percent,,"Management-plane CPU, hardware interrupts.",-1,palo_alto_networks_firewall,mgmt cpu hardirq,,
 pan_firewall.mgmt.cpu.idle,gauge,,percent,,"Management-plane CPU, idle.",1,palo_alto_networks_firewall,mgmt cpu idle,,
@@ -73,6 +73,7 @@ pan_firewall.mgmt.swap.used_pct,gauge,,percent,,Percentage of management-plane s
 pan_firewall.ospf.neighbor.state_changes,count,,,,OSPF neighbor state changes. Sent only by the Advanced Routing Engine.,-1,palo_alto_networks_firewall,ospf neighbor state changes,,"neighbor,router_id,area,vr"
 pan_firewall.ospf.neighbor.status,gauge,,,,"Whether the OSPF neighbor is in the `full` state (1 = full, 0 = not full).",1,palo_alto_networks_firewall,ospf neighbor status,,"neighbor,router_id,area,vr"
 pan_firewall.panorama.can_connect,gauge,,,,"Whether the Panorama discovery call succeeded (1 = succeeded, 0 = failed).",1,palo_alto_networks_firewall,panorama can connect,,"device_namespace,panorama_host"
+pan_firewall.power.alarm,gauge,,,,"Whether the power sensor is in alarm, regardless of direction (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,power alarm,,"sensor,slot"
 pan_firewall.power.alarm.high,gauge,,,,"Whether the power sensor is in alarm above the maximum (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,power alarm high,,"sensor,slot"
 pan_firewall.power.alarm.low,gauge,,,,"Whether the power sensor is in alarm below the minimum (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,power alarm low,,"sensor,slot"
 pan_firewall.power.voltage,gauge,,volt,,Current voltage.,0,palo_alto_networks_firewall,power voltage,,"sensor,slot"

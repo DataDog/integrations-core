@@ -1,0 +1,1 @@
+Fix the subscription error metrics on PostgreSQL 19, where `pg_stat_subscription_stats.sync_error_count` was renamed.

@@ -20,6 +20,7 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import (
+    append_agent_service_comment,
     extract_trailing_dbm_comments,
     is_statement_proc,
     needs_comment_recovery,
@@ -410,6 +411,8 @@ class SqlserverActivity(DBMAsyncJob):
                 # tail_text is cut at a fixed length and can start inside a string literal, which hides
                 # the trailing comments from the obfuscator, so read them directly from the end instead.
                 comments = self._merge_comments(comments, {'comments': extract_trailing_dbm_comments(row['tail_text'])})
+            if self._collect_comments:
+                comments = append_agent_service_comment(comments, row.get('text'))
             obfuscated_statement = statement['query']
             metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)

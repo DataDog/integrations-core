@@ -1,3 +1,43 @@
+## Datadog Agent version [7.86.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7860)
+
+### New Integrations
+* KAI Scheduler [1.0.0](https://github.com/DataDog/integrations-core/blob/master/kai_scheduler/CHANGELOG.md)
+### Integration Updates
+* Amazon Kafka [7.12.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Datadog Checks Base [38.10.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Cisco ACI [6.1.1](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* ClickHouse [7.3.2](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+* Datadog Cluster Agent [6.7.0](https://github.com/DataDog/integrations-core/blob/master/datadog_cluster_agent/CHANGELOG.md)
+* DNS [5.6.0](https://github.com/DataDog/integrations-core/blob/master/dns_check/CHANGELOG.md)
+* DO Query Actions [1.6.0](https://github.com/DataDog/integrations-core/blob/master/do_query_actions/CHANGELOG.md)
+* Dynamo [1.1.0](https://github.com/DataDog/integrations-core/blob/master/dynamo/CHANGELOG.md)
+* ESXi [4.4.1](https://github.com/DataDog/integrations-core/blob/master/esxi/CHANGELOG.md)
+* flink [3.4.1](https://github.com/DataDog/integrations-core/blob/master/flink/CHANGELOG.md)
+* IBM Db2 [4.5.0](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
+* Kafka Actions [2.12.0](https://github.com/DataDog/integrations-core/blob/master/kafka_actions/CHANGELOG.md)
+* Kafka Consumer [9.4.0](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* Kueue [3.0.0](https://github.com/DataDog/integrations-core/blob/master/kueue/CHANGELOG.md) **BREAKING CHANGE**
+* MongoDB [11.2.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [15.24.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Nvidia Triton [3.4.2](https://github.com/DataDog/integrations-core/blob/master/nvidia_triton/CHANGELOG.md)
+* Octopus Deploy [2.4.1](https://github.com/DataDog/integrations-core/blob/master/octopus_deploy/CHANGELOG.md)
+* Palo Alto Networks Firewall [4.0.0](https://github.com/DataDog/integrations-core/blob/master/pan_firewall/CHANGELOG.md) **BREAKING CHANGE**
+* Postgres [23.15.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Prefect [2.1.0](https://github.com/DataDog/integrations-core/blob/master/prefect/CHANGELOG.md)
+* Process [6.0.0](https://github.com/DataDog/integrations-core/blob/master/process/CHANGELOG.md) **BREAKING CHANGE**
+* Redis [8.11.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
+* RiakCS [4.18.0](https://github.com/DataDog/integrations-core/blob/master/riakcs/CHANGELOG.md)
+* Slurm [2.5.3](https://github.com/DataDog/integrations-core/blob/master/slurm/CHANGELOG.md)
+* SNMP [13.6.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md)
+* SQL Server [23.7.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* TLS [6.0.0](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md) **BREAKING CHANGE**
+* vLLM [3.6.0](https://github.com/DataDog/integrations-core/blob/master/vllm/CHANGELOG.md)
+* vSphere [10.0.2](https://github.com/DataDog/integrations-core/blob/master/vsphere/CHANGELOG.md)
+
+## Datadog Agent version [7.85.5](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7855)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.85.4](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7854)
 
 * There were no integration updates for this version of the Agent.
