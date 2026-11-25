@@ -416,6 +416,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /llm_d/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 /llm_d/metadata.csv                                                    @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
 
+/tensorrt_llm/                                                         @DataDog/accelerator-telemetry
+/tensorrt_llm/*.md                                                     @DataDog/accelerator-telemetry @DataDog/documentation
+/tensorrt_llm/manifest.json                                            @DataDog/accelerator-telemetry @DataDog/agent-integrations @DataDog/documentation
+/tensorrt_llm/metadata.csv                                             @DataDog/accelerator-telemetry @DataDog/agent-integrations @DataDog/documentation
+
 /linux_audit_logs/                                                  @DataDog/agent-integrations
 /linux_audit_logs/*.md                                              @DataDog/agent-integrations @DataDog/documentation
 /linux_audit_logs/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
@@ -500,6 +505,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /cisco_asa/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
 /cisco_asa/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /cisco_asa/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/cisco_ise/                                                           @DataDog/agent-integrations
+/cisco_ise/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
+/cisco_ise/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
+/cisco_ise/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /cisco_secure_client/                                                @DataDog/agent-integrations
 /cisco_secure_client/*.md                                            @DataDog/agent-integrations @DataDog/documentation

@@ -2,9 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from collections.abc import Callable
+from typing import Any
 
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx.metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, METRICS_SEND_AS_HISTOGRAM
 
@@ -104,15 +105,6 @@ def assert_num_metrics(aggregator, num_expected):
     assert total == num_expected
 
 
-def mock_http_responses(url, **_params):
-    mapping = {
-        'http://localhost:8080/vts_status': 'vts.json',
-    }
-
-    metrics_file = mapping.get(url)
-
-    if not metrics_file:
-        raise Exception("url `{url}` not registered".format(url=url))
-
-    with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-        return MockResponse(content=f.read(), headers={"content-type": "application/json"})
+def register_vts_response(fake_http_response: Callable[..., Any], url: str) -> None:
+    with open(os.path.join(HERE, 'fixtures', 'vts.json'), 'rb') as f:
+        fake_http_response(url, f.read(), headers={"content-type": "application/json"})

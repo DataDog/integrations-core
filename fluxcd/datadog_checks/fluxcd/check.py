@@ -9,6 +9,7 @@ from datadog_checks.fluxcd.metrics import KSM_METRICS, METRIC_MAP
 class FluxcdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = "fluxcd"
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)

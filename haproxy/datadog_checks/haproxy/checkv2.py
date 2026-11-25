@@ -11,6 +11,7 @@ class HaproxyCheckV2(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'haproxy'
 
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def get_default_config(self):
         return {'metrics': construct_metrics_config(METRIC_MAP)}

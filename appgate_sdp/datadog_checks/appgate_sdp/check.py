@@ -9,6 +9,7 @@ from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 class AppgateSDPCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'appgate_sdp'
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super(AppgateSDPCheck, self).__init__(name, init_config, instances)

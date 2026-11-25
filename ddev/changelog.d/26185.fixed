@@ -1,0 +1,1 @@
+Report the Dispatcher run context from the first log when the invocation or its manifest supplies it.

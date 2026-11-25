@@ -2,15 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import os
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.torchserve import TorchserveCheck
 
 from .common import (
@@ -115,29 +117,39 @@ def check():
     return lambda instance: TorchserveCheck('torchserve', {}, [instance])
 
 
-def mock_http_responses(all_models_file='management/models.json'):
-    def _mock_http_responses(url, **_params):
-        mapping = {
-            'http://torchserve:8080/ping': 'inference/healthy.json',
-            'http://torchserve:8081/models': all_models_file,
-            'http://torchserve:8081/models/linear_regression_1_1/all': 'management/models/linear_regression_1_1.json',
-            'http://torchserve:8081/models/linear_regression_1_2/all': 'management/models/linear_regression_1_2.json',
-            'http://torchserve:8081/models/linear_regression_2_2/all': 'management/models/linear_regression_2_2.json',
-            'http://torchserve:8081/models/linear_regression_2_3/all': 'management/models/linear_regression_2_3.json',
-            'http://torchserve:8081/models/linear_regression_3_2/all': 'management/models/linear_regression_3_2.json',
-            'http://torchserve:8081/models/linear_regression_3_3/all': 'management/models/linear_regression_3_3.json',
-            'http://torchserve:8082/metrics': 'openmetrics/metrics.txt',
-        }
+FIXTURE_RESPONSES = {
+    'http://torchserve:8080/ping': 'inference/healthy.json',
+    'http://torchserve:8081/models': 'management/models.json',
+    'http://torchserve:8081/models/linear_regression_1_1/all': 'management/models/linear_regression_1_1.json',
+    'http://torchserve:8081/models/linear_regression_1_2/all': 'management/models/linear_regression_1_2.json',
+    'http://torchserve:8081/models/linear_regression_2_2/all': 'management/models/linear_regression_2_2.json',
+    'http://torchserve:8081/models/linear_regression_2_3/all': 'management/models/linear_regression_2_3.json',
+    'http://torchserve:8081/models/linear_regression_3_2/all': 'management/models/linear_regression_3_2.json',
+    'http://torchserve:8081/models/linear_regression_3_3/all': 'management/models/linear_regression_3_3.json',
+    'http://torchserve:8082/metrics': 'openmetrics/metrics.txt',
+}
 
-        metrics_file = mapping.get(url)
 
-        if not metrics_file:
-            pytest.fail(f"url `{url}` not registered")
+@pytest.fixture
+def mock_http_responses(
+    fake_http: FakeHTTPClient, fake_http_response: Callable[..., FakeHTTPResponse]
+) -> Iterator[Callable[..., None]]:
+    """Serve every fixture endpoint, optionally replacing the payload of the model list."""
 
-        with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-            return MockResponse(content=f.read())
+    def register(all_models_file: str = 'management/models.json') -> None:
+        for url, fixture in {**FIXTURE_RESPONSES, 'http://torchserve:8081/models': all_models_file}.items():
+            with open(os.path.join(HERE, 'fixtures', fixture)) as f:
+                content = f.read()
+            if fixture.endswith('.json'):
+                fake_http_response(url, json_data=json.loads(content))
+            else:
+                fake_http_response(url, content)
 
-    return _mock_http_responses
+    yield register
+
+    # The checks catch `Exception` around each request, so the fake's error for an unregistered URL is swallowed.
+    unregistered = sorted({request.url for request in fake_http.requests} - FIXTURE_RESPONSES.keys())
+    assert not unregistered, f'Requests sent to URLs without a fixture: {unregistered}'
 
 
 @contextmanager

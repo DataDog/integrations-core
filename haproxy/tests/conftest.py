@@ -6,8 +6,10 @@ import logging
 import os
 import re
 import subprocess
+from collections.abc import Callable
 from contextlib import contextmanager
 from copy import deepcopy
+from typing import Any
 
 import mock
 import pytest
@@ -15,6 +17,7 @@ import requests
 from packaging import version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run, get_e2e_discovery_metadata
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
 
@@ -204,14 +207,20 @@ def instancev2():
     return instance
 
 
-@pytest.fixture(scope="module")
-def haproxy_mock():
-    filepath = os.path.join(HERE, 'fixtures', 'mock_data')
-    with open(filepath, 'rb') as f:
-        data = f.read()
-    p = mock.patch('requests.Session.get', return_value=mock.Mock(content=data))
-    yield p.start()
-    p.stop()
+LEGACY_UNIT_URL = 'http://localhost/admin?stats'
+LEGACY_UNIT_STATS_URL = LEGACY_UNIT_URL + '/;csv;norefresh'
+ENTERPRISE_VERSION_URL = 'http://the_url_does_not_matter/'
+
+
+def _serve_for_legacy_unit_url(fake_http_response: Callable[..., Any], data: bytes) -> None:
+    # The legacy check reads the HTML stats page for its version, then the CSV export for its metrics.
+    fake_http_response(LEGACY_UNIT_URL, data)
+    fake_http_response(LEGACY_UNIT_STATS_URL, data)
+
+
+@pytest.fixture
+def haproxy_mock(fake_http_response):
+    _serve_for_legacy_unit_url(fake_http_response, read_file_binary(os.path.join(HERE, 'fixtures', 'mock_data')))
 
 
 @pytest.fixture(scope="module")
@@ -222,23 +231,16 @@ def mock_data():
     return data.split('\n')
 
 
-@pytest.fixture(scope="module")
-def haproxy_mock_evil():
-    filepath = os.path.join(HERE, 'fixtures', 'mock_data_evil')
-    with open(filepath, 'rb') as f:
-        data = f.read()
-    p = mock.patch('requests.Session.get', return_value=mock.Mock(content=data))
-    yield p.start()
-    p.stop()
+@pytest.fixture
+def haproxy_mock_evil(fake_http_response):
+    _serve_for_legacy_unit_url(fake_http_response, read_file_binary(os.path.join(HERE, 'fixtures', 'mock_data_evil')))
 
 
-@pytest.fixture(scope="module")
-def haproxy_mock_enterprise_version_info():
-    filepath = os.path.join(HERE, 'fixtures', 'enterprise_version_info.html')
-    with open(filepath, 'rb') as f:
-        data = f.read()
-    with mock.patch('requests.Session.get', return_value=mock.Mock(content=data)) as p:
-        yield p
+@pytest.fixture
+def haproxy_mock_enterprise_version_info(fake_http_response):
+    fake_http_response(
+        ENTERPRISE_VERSION_URL, read_file_binary(os.path.join(HERE, 'fixtures', 'enterprise_version_info.html'))
+    )
 
 
 @pytest.fixture(scope="session")

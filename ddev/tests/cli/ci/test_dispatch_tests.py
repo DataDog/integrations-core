@@ -1408,26 +1408,53 @@ def test_a_change_comparison_failure_fails_its_operation(
     assert operation_error['event'] == 'Operation resolve_changes failed: Could not compare a-sha with its parent'
 
 
-@pytest.mark.parametrize('from_manifest', [False, True], ids=['resolution', 'manifest'])
+@pytest.mark.parametrize(
+    ('source', 'content', 'message', 'context'),
+    [
+        pytest.param('--pr', None, 'reports no merge commit', 'pr', id='resolution'),
+        pytest.param('--run-manifest', None, 'Could not read run manifest', 'unresolved', id='missing-file'),
+        pytest.param('--run-manifest', '{not json', 'is not a valid run', 'unresolved', id='malformed-json'),
+        pytest.param(
+            '--run-manifest',
+            {'repository': 'DataDog/integrations-extras'},
+            'describes repository DataDog/integrations-extras, not DataDog/integrations-core.',
+            'unresolved',
+            id='other-repository',
+        ),
+    ],
+)
 def test_a_resolution_failure_keeps_unresolved_metric_dimensions(
     ddev: CliRunner,
     fake_async_github: FakeAsyncGitHubClient,
     mocker: MockerFixture,
     monkeypatch: pytest.MonkeyPatch,
+    planned: MagicMock,
     tmp_path: Path,
-    from_manifest: bool,
+    source: str,
+    content: str | dict[str, str] | None,
+    message: str,
+    context: str,
 ):
     monkeypatch.setenv('GITHUB_RUN_ID', '12345')
-    mocker.patch('ddev.cli.ci.dispatch_run.MERGE_COMMIT_REFRESH_SECONDS', 0.0)
-    fake_async_github.mock_response('get_pull_request', pull_request(merge_commit_sha=None))
+    if source == '--pr':
+        mocker.patch('ddev.cli.ci.dispatch_run.MERGE_COMMIT_REFRESH_SECONDS', 0.0)
+        fake_async_github.mock_response('get_pull_request', pull_request(merge_commit_sha=None))
+        value = str(PR_NUMBER)
+    else:
+        manifest = tmp_path / 'run.json'
+        if isinstance(content, dict):
+            content = json.dumps({**PULL_REQUEST_RUN_MANIFEST, **content})
+        if content is not None:
+            manifest.write_text(content, encoding='utf-8')
+        value = str(manifest)
     handler = RecordingJsonHandler()
     sink = recording_runtime(mocker, handler=handler)
-    options = ['--run-manifest', str(tmp_path / 'missing.json')] if from_manifest else ['--pr', str(PR_NUMBER)]
 
     result = ddev(
         'ci',
         'dispatch-tests',
-        *options,
+        source,
+        value,
         '--output-dir',
         str(tmp_path),
         '--tags',
@@ -1435,41 +1462,50 @@ def test_a_resolution_failure_keeps_unresolved_metric_dimensions(
     )
 
     assert result.exit_code == 1, result.output
-    assert ('Could not read run manifest' if from_manifest else 'reports no merge commit') in result.output
+    assert message in result.output
+    planned.assert_not_called()
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.failed')] == [1]
     assert [record.value for record in sink.records_named('runs.no_op')] == [0]
     assert not any(record.name.startswith('jobs.') for record in sink.records)
     [failed] = sink.records_named('runs.failed')
+    assert failed.value == 1
     assert failed.tags == {
         'team': 'agent-integrations',
         'git.repository.id_v2': 'github.com/datadog/integrations-core',
-        'dispatcher.context': 'unresolved',
+        'dispatcher.context': context,
         'git.branch': 'unresolved',
         'dispatcher.base_branch': 'unresolved',
         'dispatcher.run.is_fork': 'unresolved',
         'ci.pipeline.id': '12345',
         'dispatcher.component': 'dispatcher',
     }
-    [started] = [event for event in handler.events if event['event'] == 'Dispatcher invocation started']
-    assert started['team'] == 'agent-integrations'
-    assert all(started[name] == 'unresolved' for name in ('context', 'head_branch', 'base_branch', 'is_fork'))
+    lifecycle = ('Dispatcher invocation started', 'Dispatcher run finished')
+    events = [event for event in handler.events if event['event'] in lifecycle]
+    assert [event['event'] for event in events] == list(lifecycle)
+    for event in events:
+        assert event['team'] == 'agent-integrations'
+        assert event['context'] == context
+        assert all(event[name] == 'unresolved' for name in ('head_branch', 'base_branch', 'is_fork'))
 
 
 def test_a_superseded_revision_is_a_no_op_run_not_a_failure(
     ddev: CliRunner, github: FakeAsyncGitHubClient, planned: MagicMock, mocker: MockerFixture
 ):
     github.mock_response('list_pull_requests', pulls_page())
-    sink = recording_runtime(mocker)
+    handler = RecordingJsonHandler()
+    sink = recording_runtime(mocker, handler=handler)
 
     result = ddev('ci', 'dispatch-tests', *HEAD_LOOKUP_OPTIONS)
 
     assert result.exit_code == 0, result.output
     assert 'No open pull request matches the requested revision' in result.output
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.no_op')] == [1]
+    [no_op] = sink.records_named('runs.no_op')
+    assert no_op.value == 1
+    assert no_op.tags['dispatcher.context'] == 'pr'
     assert [record.value for record in sink.records_named('runs.failed')] == [0]
     assert not any(record.name.startswith('jobs.') for record in sink.records)
+    assert {event['context'] for event in handler.events} == {'pr'}
 
 
 @pytest.mark.usefixtures('resolved_changes')
@@ -1685,9 +1721,16 @@ def test_a_pull_request_round_trips_through_its_manifest(
 
     merge_checkout(mocker)
     github_calls = len(fake_async_github.requests)
+    handler = RecordingJsonHandler()
+    recording_runtime(mocker, handler=handler)
     second = ddev('ci', 'dispatch-tests', '--run-manifest', str(tmp_path / 'run.json'), '--dry-run')
 
     assert second.exit_code == 0, second.output
+    [started] = [event for event in handler.events if event['event'] == 'Dispatcher invocation started']
+    assert started['context'] == 'pr'
+    assert started['head_branch'] == 'hs/a-branch'
+    assert started['base_branch'] == 'a-target-branch'
+    assert started['is_fork'] is False
     assert len(fake_async_github.requests) == github_calls
     local_changes.assert_called_once_with(ANY, MERGE_SHA)
     assert planned.call_args.kwargs['changed_files'] == local_changes.return_value
@@ -1750,8 +1793,6 @@ def test_an_all_target_run_round_trips_through_its_recorded_scope(
 @pytest.mark.parametrize(
     ('content', 'message'),
     [
-        pytest.param(None, 'Could not read run manifest', id='missing-file'),
-        pytest.param('{not json', 'is not a valid run', id='malformed-json'),
         pytest.param(b'\xff', 'is not a valid run', id='invalid-utf8'),
         pytest.param(
             json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 5}),
@@ -1770,11 +1811,6 @@ def test_an_all_target_run_round_trips_through_its_recorded_scope(
             id='older-schema',
         ),
         pytest.param(
-            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'repository': 'DataDog/integrations-extras'}),
-            'describes repository',
-            id='other-repository',
-        ),
-        pytest.param(
             json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'head_tag': '7.85.0'}),
             'is not a valid run',
             id='both-branch-and-tag',
@@ -1786,11 +1822,11 @@ def test_an_all_target_run_round_trips_through_its_recorded_scope(
         ),
     ],
 )
-def test_an_unusable_manifest_is_refused(ddev, planned, tmp_path, content: str | bytes | None, message: str):
+def test_an_unusable_manifest_is_refused(ddev, planned, tmp_path, content: str | bytes, message: str):
     """Whatever is wrong with the file, planning never starts from a run that could not be read."""
     if isinstance(content, bytes):
         (tmp_path / 'run.json').write_bytes(content)
-    elif content is not None:
+    else:
         (tmp_path / 'run.json').write_text(content, encoding='utf-8')
 
     result = ddev('ci', 'dispatch-tests', '--run-manifest', str(tmp_path / 'run.json'), '--dry-run')
@@ -2080,9 +2116,14 @@ def test_a_tag_is_the_whole_selection(ddev, planned, resolved_changes, conflicti
     planned.assert_not_called()
 
 
-def test_a_called_run_round_trips_its_scope_and_context(ddev, planned, resolved_changes, mocker, tmp_path):
-    """Phase two plans what phase one resolved, and tags it with the caller's context."""
+@pytest.mark.parametrize(('tags', 'context'), [((), 'master'), (('--tags', 'context:nightly'), 'nightly')])
+def test_a_called_run_round_trips_its_scope_and_context(
+    ddev, planned, resolved_changes, mocker, tmp_path, tags, context
+):
+    """Both phases start with the same context, even though only phase one takes the caller's tags."""
     mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.85.x')
+    handler = RecordingJsonHandler()
+    recording_runtime(mocker, handler=handler)
     first = ddev(
         'ci',
         'dispatch-tests',
@@ -2090,8 +2131,7 @@ def test_a_called_run_round_trips_its_scope_and_context(ddev, planned, resolved_
         'a-sha',
         '--targets',
         'ntp',
-        '--tags',
-        'context:test-agent',
+        *tags,
         '--resolve-only',
         '--output-dir',
         str(tmp_path),
@@ -2111,6 +2151,10 @@ def test_a_called_run_round_trips_its_scope_and_context(ddev, planned, resolved_
     )
 
     assert second.exit_code == 0, second.output
+    assert [event['context'] for event in handler.events if event['event'] == 'Dispatcher invocation started'] == [
+        context,
+        context,
+    ]
     kwargs = planned.call_args.kwargs
     assert (kwargs['targets'], kwargs['all_targets']) == (('ntp',), False)
     assert kwargs['agent_image_resolver'] == AgentImageOverride(linux='registry/agent:7.85.0')

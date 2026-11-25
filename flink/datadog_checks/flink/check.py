@@ -19,6 +19,7 @@ class FlinkCheck(OpenMetricsBaseCheckV2):
     """
 
     __NAMESPACE__ = 'flink'
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):

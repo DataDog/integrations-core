@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pywintypes
 import win32pdh
 
-from .constants import COUNTER_VALUE_FORMAT
+from .constants import COUNTER_VALUE_FORMAT, PDH_CALC_NEGATIVE_ERRORS
 from .utils_win32pdh_fix import GetFormattedCounterArray
 
 
@@ -38,7 +39,11 @@ def get_counter_values(counter_handle, duplicate_instances_exist):
         # This function cannot handle duplicate/non-unique instances (e.g. for "Process" counters)
         # See its implementation at
         #     https://github.com/mhammond/pywin32/blob/main/win32/src/win32pdhmodule.cpp#L677
-        return win32pdh.GetFormattedCounterArray(counter_handle, COUNTER_VALUE_FORMAT)
+        try:
+            return win32pdh.GetFormattedCounterArray(counter_handle, COUNTER_VALUE_FORMAT)
+        except pywintypes.error as error:
+            if error.winerror not in PDH_CALC_NEGATIVE_ERRORS:
+                raise
 
     # utils_win32pdh_fix.GetFormattedCounterArray
     return GetFormattedCounterArray(counter_handle, COUNTER_VALUE_FORMAT)

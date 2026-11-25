@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nBGP peer **{{peer.name}}** ({{peer_ip.name}}, AS {{remote_as.name}}) in virtual router {{vr.name}} on firewall **{{device_ip.name}}** has not been in the established state for the last 5 minutes.\n{{/is_alert}}\n\n{{#is_recovery}}\n## Recovered\n\nBGP peer {{peer.name}} ({{peer_ip.name}}, AS {{remote_as.name}}) in virtual router {{vr.name}} on firewall {{device_ip.name}} is established again.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nRoutes learned from this peer are no longer exchanged, which can blackhole or reroute the traffic that depends on them.\n\n---\n\n## Why?\n\nPossible causes:\n* **The peer is unreachable**: a link, routing, or interface problem between the firewall and the peer.\n* **A session configuration mismatch**: AS number, peer address, authentication, or timers.\n* **The peer was disabled or decommissioned on purpose.**\n* **This firewall is the passive unit of an active/passive HA pair**, which does not run dynamic routing.\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Run `show routing protocol bgp peer` on the firewall to see the peer's state and last error.\n2. Check reachability to {{peer_ip.name}} from the firewall.\n3. Compare the session configuration on both sides.\n4. If this peer is down on purpose, exclude it by adding `!peer:{{peer.name}}` to the monitor query.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Metrics Explorer](/metric/explorer?exp_metric=pan_firewall.bgp.peer.status&exp_scope=device_ip:{{device_ip.name}},peer:{{peer.name}}&exp_agg=max&exp_type=line)\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] BGP peer {{peer.name}} ({{peer_ip.name}}) is down on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_5m):max:pan_firewall.bgp.peer.status{*} by {device_namespace,device_ip,vr,peer,peer_ip,remote_as} <= 0",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the session state of each BGP peer on the firewall. A peer that leaves the established state stops exchanging routes, which can blackhole or reroute traffic. On an active/passive HA pair, the passive firewall does not run dynamic routing, so its peers alert until a failover.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "BGP peer is not established",
+  "version": 2
+}

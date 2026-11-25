@@ -1,0 +1,52 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b7be28c8-9982-4ea3-a23f-b7b6f45830b0",
+  "app_id": "tensorrt-llm",
+  "owner": "accelerator-telemetry",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Troubleshooting",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor TensorRT-LLM request latency, token throughput, batching, and KV cache efficiency",
+    "title": "TensorRT-LLM",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::AI/ML",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 95542080,
+      "source_type_name": "TensorRT-LLM",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "tensorrt_llm.",
+        "check": "tensorrt_llm.request.success.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "trtllm-serve"
+      ]
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

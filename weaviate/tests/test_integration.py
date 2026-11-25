@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+from pathlib import Path
 
 import pytest
 
@@ -11,8 +13,11 @@ from .common import MOCKED_INSTANCE, get_fixture_path
 pytestmark = pytest.mark.integration
 
 
-def test_check_mock_weaviate_metadata(datadog_agent, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('weaviate_meta_api.json'))
+def test_check_mock_weaviate_metadata(datadog_agent, fake_http_response):
+    fake_http_response(
+        'http://weaviate:8080/v1/meta',
+        json_data=json.loads(Path(get_fixture_path('weaviate_meta_api.json')).read_text()),
+    )
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     check.check_id = 'test:123'
     check._submit_version_metadata()

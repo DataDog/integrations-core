@@ -9,6 +9,7 @@ from .metrics import ENDPOINTS_METRICS_MAP
 
 class TektonCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super(TektonCheck, self).__init__(name, init_config, instances)

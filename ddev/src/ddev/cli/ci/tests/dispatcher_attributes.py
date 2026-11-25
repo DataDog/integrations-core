@@ -10,6 +10,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from ddev.cli.ci.dispatch_run import run_context
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchProgressUpdate, TestBatch
 from ddev.cli.ci.tests.status import has_run, job_status
 from ddev.event_bus.orchestrator import BaseMessage
@@ -520,7 +521,7 @@ def run_fields(run: ResolvedRun, *, tags: Sequence[str] = ()) -> dict[str, Any]:
             'base_branch': run.base_branch,
             'base_sha': run.base_sha,
             'is_fork': run.is_fork,
-            'context': 'pr' if run.pr_number is not None else run.context,
+            'context': run_context(run.context, is_pr=run.pr_number is not None),
         }
     )
     return fields
