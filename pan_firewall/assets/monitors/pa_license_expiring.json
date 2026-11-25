@@ -22,7 +22,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "max(last_2d):min:pan_firewall.license.days_left{*} by {device_ip,feature} <= 30",
+    "query": "max(last_2d):min:pan_firewall.license.days_left{*} by {device_namespace,device_ip,feature} <= 30",
     "tags": [
       "integration:pan-firewall"
     ],

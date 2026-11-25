@@ -22,7 +22,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_15m):100 * (1 - avg:pan_firewall.mgmt.memory.available{*} by {device_ip} / avg:pan_firewall.mgmt.memory.total{*} by {device_ip}) > 95",
+    "query": "avg(last_15m):100 * (1 - avg:pan_firewall.mgmt.memory.available{*} by {device_namespace,device_ip} / avg:pan_firewall.mgmt.memory.total{*} by {device_namespace,device_ip}) > 95",
     "tags": [
       "integration:pan-firewall"
     ],

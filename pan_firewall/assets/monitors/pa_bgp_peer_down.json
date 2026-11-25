@@ -19,7 +19,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "max(last_5m):max:pan_firewall.bgp.peer.status{*} by {device_ip,vr,peer,peer_ip,remote_as} <= 0",
+    "query": "max(last_5m):max:pan_firewall.bgp.peer.status{*} by {device_namespace,device_ip,vr,peer,peer_ip,remote_as} <= 0",
     "tags": [
       "integration:pan-firewall"
     ],

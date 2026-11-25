@@ -19,7 +19,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "max(last_2d):max:pan_firewall.license.expired{*} by {device_ip,feature} >= 1",
+    "query": "max(last_2d):max:pan_firewall.license.expired{*} by {device_namespace,device_ip,feature} >= 1",
     "tags": [
       "integration:pan-firewall"
     ],

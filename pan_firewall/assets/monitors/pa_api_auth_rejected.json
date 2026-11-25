@@ -19,7 +19,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "max(last_10m):max:pan_firewall.api.authentication.status{*} by {device_ip} >= 1",
+    "query": "max(last_10m):max:pan_firewall.api.authentication.status{*} by {device_namespace,device_ip} >= 1",
     "tags": [
       "integration:pan-firewall"
     ],

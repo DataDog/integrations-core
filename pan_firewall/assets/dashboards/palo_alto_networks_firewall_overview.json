@@ -1354,7 +1354,7 @@
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:pan_firewall.bgp.peer.connections.dropped{$firewall,$panorama}.rollup(sum)"
+                      "query": "sum:pan_firewall.bgp.peer.connections.dropped{$firewall,$panorama}.as_count()"
                     }
                   ],
                   "response_format": "scalar"
@@ -1446,7 +1446,7 @@
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:pan_firewall.ospf.neighbor.state_changes{$firewall,$panorama}.rollup(sum)"
+                      "query": "sum:pan_firewall.ospf.neighbor.state_changes{$firewall,$panorama}.as_count()"
                     }
                   ],
                   "response_format": "scalar"
@@ -1716,25 +1716,25 @@
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:pan_firewall.interface.rx.errors{$firewall,$panorama} by {device_hostname,interface}.rollup(sum)"
+                      "query": "sum:pan_firewall.interface.rx.errors{$firewall,$panorama} by {device_hostname,interface}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:pan_firewall.interface.rx.drops{$firewall,$panorama} by {device_hostname,interface}.rollup(sum)"
+                      "query": "sum:pan_firewall.interface.rx.drops{$firewall,$panorama} by {device_hostname,interface}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "sum:pan_firewall.interface.forward_errors{$firewall,$panorama} by {device_hostname,interface}.rollup(sum)"
+                      "query": "sum:pan_firewall.interface.forward_errors{$firewall,$panorama} by {device_hostname,interface}.as_count()"
                     },
                     {
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "sum:pan_firewall.interface.flow_state{$firewall,$panorama} by {device_hostname,interface}.rollup(sum)"
+                      "query": "sum:pan_firewall.interface.flow_state{$firewall,$panorama} by {device_hostname,interface}.as_count()"
                     }
                   ],
                   "response_format": "scalar"

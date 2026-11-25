@@ -19,7 +19,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "max(last_15m):1 - abs(max:pan_firewall.ipsec.tunnel.state{*} by {device_ip,tunnel,gateway,peer_ip} - 1) <= 0",
+    "query": "max(last_15m):1 - abs(max:pan_firewall.ipsec.tunnel.state{*} by {device_namespace,device_ip,tunnel,gateway,peer_ip} - 1) <= 0",
     "tags": [
       "integration:pan-firewall"
     ],

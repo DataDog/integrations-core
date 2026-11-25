@@ -22,7 +22,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_15m):avg:pan_firewall.mgmt.cpu.used{*} by {device_ip} > 95",
+    "query": "avg(last_15m):avg:pan_firewall.mgmt.cpu.used{*} by {device_namespace,device_ip} > 95",
     "tags": [
       "integration:pan-firewall"
     ],

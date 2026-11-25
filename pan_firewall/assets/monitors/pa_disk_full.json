@@ -22,7 +22,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_1h):max:pan_firewall.disk.used_pct{!mount:/opt/panlogs} by {device_ip,mount} > 97",
+    "query": "avg(last_1h):max:pan_firewall.disk.used_pct{!mount:/opt/panlogs} by {device_namespace,device_ip,mount} > 97",
     "tags": [
       "integration:pan-firewall"
     ],

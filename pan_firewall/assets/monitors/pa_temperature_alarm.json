@@ -19,7 +19,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "max(last_15m):max:pan_firewall.temperature.alarm{*} by {device_ip,slot,sensor} >= 1",
+    "query": "max(last_15m):max:pan_firewall.temperature.alarm{*} by {device_namespace,device_ip,slot,sensor} >= 1",
     "tags": [
       "integration:pan-firewall"
     ],
