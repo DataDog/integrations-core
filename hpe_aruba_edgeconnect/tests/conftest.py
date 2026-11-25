@@ -24,6 +24,9 @@ USE_EDGECONNECT_LAB = os.environ.get('USE_EDGECONNECT_LAB')
 # The fake Orchestrator only accepts this backend, so the E2E login fails unless the check
 # actually sends `loginType`.
 ORCH_LOGIN_TYPE = 2
+E2E_AUTH = os.environ.get('EDGECONNECT_E2E_AUTH', 'password')
+# Test-only value, not a real credential.
+ORCH_API_KEY = 'e2e-api-key'
 
 
 HERE = get_here()
@@ -35,20 +38,33 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 def dd_environment(instance, dd_save_state):
     if USE_EDGECONNECT_LAB:
         orch_ip = os.environ['EDGECONNECT_ORCH_IP']
-        orch_username = os.environ['EDGECONNECT_ORCH_USERNAME']
-        orch_password = os.environ['EDGECONNECT_ORCH_PASSWORD']
-        appliance_username = os.environ.get('EDGECONNECT_APPLIANCE_USERNAME', orch_username)
-        appliance_password = os.environ.get('EDGECONNECT_APPLIANCE_PASSWORD', orch_password)
+        if E2E_AUTH == 'api-key':
+            # Appliances only take username/password, so there are no Orchestrator credentials to fall back on.
+            auth = {
+                'orchestrator_api_key': os.environ['EDGECONNECT_ORCH_API_KEY'],
+                'orchestrator_username': None,
+                'orchestrator_password': None,
+            }
+            appliance_username = os.environ['EDGECONNECT_APPLIANCE_USERNAME']
+            appliance_password = os.environ['EDGECONNECT_APPLIANCE_PASSWORD']
+        else:
+            auth = {
+                'orchestrator_username': os.environ['EDGECONNECT_ORCH_USERNAME'],
+                'orchestrator_password': os.environ['EDGECONNECT_ORCH_PASSWORD'],
+            }
+            appliance_username = os.environ.get('EDGECONNECT_APPLIANCE_USERNAME', auth['orchestrator_username'])
+            appliance_password = os.environ.get('EDGECONNECT_APPLIANCE_PASSWORD', auth['orchestrator_password'])
+        # Narrow the CIDR to leave some appliances uncovered and exercise the skip path.
+        appliance_cidr = os.environ.get('EDGECONNECT_APPLIANCE_CIDR', '0.0.0.0/0')
         appliance_credentials = [
-            {'cidr': '0.0.0.0/0', 'username': appliance_username, 'password': appliance_password},
+            {'cidr': appliance_cidr, 'username': appliance_username, 'password': appliance_password},
         ]
         inst = instance(
             orch_ip,
-            orchestrator_username=orch_username,
-            orchestrator_password=orch_password,
             appliance_credentials_overrides=appliance_credentials,
             send_ndm_metadata=True,
             collect_events=True,
+            **auth,
         )
         dd_save_state('e2e_instance', inst)
         yield {
@@ -74,11 +90,23 @@ def dd_environment(instance, dd_save_state):
             urlopen(f'https://{orch_ip}/health', timeout=2, context=ctx)
             urlopen(f'https://{HOST}:{appliance_port}/health', timeout=2, context=ctx)
 
+        if E2E_AUTH == 'api-key':
+            # The fake Orchestrator rejects data requests without this key, and appliances only take
+            # username/password, so they get credentials from an override.
+            auth = {
+                'orchestrator_api_key': ORCH_API_KEY,
+                'orchestrator_username': None,
+                'orchestrator_password': None,
+                'appliance_credentials': [{'cidr': '0.0.0.0/0', 'username': 'admin', 'password': ''}],
+            }
+        else:
+            auth = {'orchestrator_login_type': ORCH_LOGIN_TYPE}
+
         inst = instance(
             orch_ip,
             connect_timeout=2,
             appliance_ips={'exclude': [f'{EXCLUDED_APPLIANCE_IP}/32']},
-            orchestrator_login_type=ORCH_LOGIN_TYPE,
+            **auth,
         )
 
         with docker_run(
@@ -91,6 +119,7 @@ def dd_environment(instance, dd_save_state):
                 'ORCH_USERNAME': 'admin',
                 'ORCH_PASSWORD': '',
                 'ORCH_LOGIN_TYPE': str(ORCH_LOGIN_TYPE),
+                'ORCH_API_KEY': ORCH_API_KEY if E2E_AUTH == 'api-key' else '',
                 'APPLIANCE_USERNAME': 'admin',
                 'APPLIANCE_PASSWORD': '',
             },
@@ -102,8 +131,8 @@ def dd_environment(instance, dd_save_state):
 def instance():
     def builder(
         orchestrator_ip: str,
-        orchestrator_username: str = 'admin',
-        orchestrator_password: str = '',
+        orchestrator_username: str | None = 'admin',
+        orchestrator_password: str | None = '',
         appliance_ips=None,
         appliance_credentials=None,
         send_ndm_metadata: bool = False,
@@ -111,12 +140,14 @@ def instance():
     ) -> dict:
         inst = {
             'orchestrator_ip': orchestrator_ip,
-            'orchestrator_username': orchestrator_username,
-            'orchestrator_password': orchestrator_password,
             'tls_verify': False,
             'send_ndm_metadata': send_ndm_metadata,
             **kwargs,
         }
+        if orchestrator_username is not None:
+            inst['orchestrator_username'] = orchestrator_username
+        if orchestrator_password is not None:
+            inst['orchestrator_password'] = orchestrator_password
         if appliance_ips is not None:
             inst['appliance_ips'] = appliance_ips if isinstance(appliance_ips, dict) else {'include': appliance_ips}
         if appliance_credentials is not None:

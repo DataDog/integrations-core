@@ -123,15 +123,14 @@ async def test_on_error_writes_failed_checkpoint(flow_dir, flow_context, message
 async def test_on_error_emits_failed_message(flow_dir, flow_context, message_queue):
     phase, _ = _make_stub_phase(flow_dir, flow_context, message_queue)
 
-    wrapped = ProcessorHookError(
-        HookName.ON_SUCCESS, "p1", PhaseTrigger(id="start", phase_id=None), RuntimeError("boom")
-    )
+    original_error = RuntimeError("boom")
+    wrapped = ProcessorHookError(HookName.ON_SUCCESS, "p1", PhaseTrigger(id="start", phase_id=None), original_error)
     await phase.on_error(wrapped)
 
     msg = message_queue.get_nowait()
     assert isinstance(msg, PhaseFailedMessage)
     assert msg.phase_id == "p1"
-    assert msg.error == "boom"
+    assert msg.error is original_error
 
 
 async def test_on_error_writes_failed_checkpoint_after_start(flow_dir, flow_context, message_queue):

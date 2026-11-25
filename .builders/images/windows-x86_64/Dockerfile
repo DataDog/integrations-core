@@ -127,11 +127,11 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
     Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
 
-ENV OPENSSL_VERSION="3.6.4"
+ENV OPENSSL_VERSION="3.6.5"
 RUN Get-RemoteFile `
       -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
       -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
-      -Hash '9bffaa1ad1e07b354c21bd3324ec02fa15579f45a7d0494b3e74bc449b7333ef'; `
+      -Hash 'a2157c2830efdec3788939b00c9b0638306d3f0bbb76dc4832ee503bb397df98'; `
     7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
     7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
     cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
@@ -150,9 +150,9 @@ RUN Get-RemoteFile `
     Add-ToPath -Append 'C:\winflexbison'
 # Meson + Ninja for building PostgreSQL 18+ on Windows
 # renovate: datasource=pypi depName=meson
-ENV MESON_VERSION="1.11.1"
+ENV MESON_VERSION="1.12.1"
 # renovate: datasource=pypi depName=ninja
-ENV NINJA_VERSION="1.13.0"
+ENV NINJA_VERSION="1.13.2"
 RUN python -m pip install --no-warn-script-location meson==$Env:MESON_VERSION ninja==$Env:NINJA_VERSION && `
     Add-ToPath -Append 'C:\Program Files\Python313\Scripts'
 # libpq and pg_config as needed by psycopg
@@ -170,7 +170,7 @@ RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenS
     RunOnVSConsole -Command 'ninja -C C:\pgbuild install' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
-ENV CURL_VERSION="8.21.0"
+ENV CURL_VERSION="8.23.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt

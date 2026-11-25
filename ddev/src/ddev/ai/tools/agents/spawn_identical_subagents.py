@@ -5,10 +5,12 @@
 from __future__ import annotations
 
 import asyncio
+from functools import partial
 from typing import TYPE_CHECKING, Annotated
 
 from pydantic import AfterValidator, Field
 
+from ddev.ai.runtime.parallel import gather_until_run_abort
 from ddev.ai.tools.agents.base import SPAWN_IDENTICAL_NAME, BaseSpawnTool, ChildOutcome
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
@@ -77,8 +79,8 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
     Prefer this over issuing several 'spawn_subagent' calls when the children share a role: the shared
     system prompt and tool set are sent once, not repeated per child, saving output tokens. Each child
     differs only by its short assignment prompt — e.g. renaming metrics where each child handles one
-    batch of metric families. Children run in parallel; results come back in assignment order and one
-    failing child never affects its siblings."""
+    batch of metric families. Children run in parallel and results come back in assignment order.
+    Ordinary child failures stay local; a fatal credential refresh failure aborts the batch."""
 
     def __init__(
         self,
@@ -114,9 +116,7 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
                     subagent_id, assignment.name, system_prompt, assignment.prompt, tool_input.tools
                 )
 
-        results = await asyncio.gather(
-            *(run(i, a) for i, a in enumerate(tool_input.assignments)), return_exceptions=True
-        )
+        results = await gather_until_run_abort(partial(run, i, a) for i, a in enumerate(tool_input.assignments))
 
         outcomes: list[ChildOutcome] = []
         for assignment, result in zip(tool_input.assignments, results, strict=True):

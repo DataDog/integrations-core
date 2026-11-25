@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import NamedTuple
 from zipfile import ZipFile
 
-from utils import iter_wheels
+from utils import iter_wheels, wheel_supports_macos
 
 
 MACOS_DDTRACE_LIBDDWAF_PATTERN = 'ddtrace/appsec/_ddwaf/libddwaf/*/lib/libddwaf.dylib'
@@ -266,6 +266,8 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
         return not any(excl.search(libname) for excl in exclusions)
 
     min_macos_version = Version(os.environ["MACOSX_DEPLOYMENT_TARGET"])
+    macos_target = (min_macos_version.major, min_macos_version.minor)
+    arch = os.uname().machine
 
     for wheel in iter_wheels(source_external_dir):
         print(f'--> {wheel.name}')
@@ -273,6 +275,14 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
         if wheel_name.name == 'ddtrace' and find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_PATTERN]):
             shutil.move(wheel, Path(source_built_dir) / wheel.name)
             continue
+        # build_wheels.py already swapped incompatible wheels for compatible ones of the same release where one
+        # exists. Built wheels get this check from delocate below; external wheels only get it here.
+        if not wheel_supports_macos(wheel.name, macos_target, arch):
+            raise RuntimeError(
+                f'External wheel {wheel.name} does not support macOS {min_macos_version} on {arch} and no wheel '
+                'of the same release that does could be downloaded; build it from source by adding it to '
+                '`always_build` in images/macos/extra_build.sh'
+            )
         print('Using existing wheel')
         shutil.move(wheel, external_dir)
 

@@ -14,6 +14,7 @@ from ddev.ai.agent.exceptions import AgentConnectionError, AgentError, FlowStopR
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
+from ddev.ai.errors import RunAbortError
 from ddev.ai.react.process import GENERIC_TRUNCATED_TOOL_CALL_HINT, ReActProcess
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
@@ -243,6 +244,38 @@ async def test_multi_tool_parallel_dispatches_all(fake_tool: FakeToolFactory) ->
     assert len(tool_b.calls) == 1
     assert len(tool_c.calls) == 1
     assert len(agent.send_calls[1]) == 3
+
+
+async def test_tool_run_abort_error_cancels_sibling(fake_tool: FakeToolFactory, monkeypatch: pytest.MonkeyPatch):
+    started = asyncio.Event()
+    stopped = asyncio.Event()
+    error = RunAbortError("the run cannot continue")
+    slow = fake_tool("slow")
+    fatal = fake_tool("fatal")
+
+    async def wait_for_cancellation(_raw: dict[str, object]) -> ToolResult:
+        started.set()
+        try:
+            return await asyncio.Future[ToolResult]()
+        finally:
+            stopped.set()
+
+    async def fail_refresh(_raw: dict[str, object]) -> ToolResult:
+        await started.wait()
+        raise error
+
+    monkeypatch.setattr(slow, "run", wait_for_cancellation)
+    monkeypatch.setattr(fatal, "run", fail_refresh)
+    calls = [make_tool_call("tc_01", "slow"), make_tool_call("tc_02", "fatal")]
+    agent = MockAgent([make_response(StopReason.TOOL_USE, tool_calls=calls)])
+    process = make_process(agent, registry=ToolRegistry([slow, fatal]))
+
+    async with asyncio.timeout(2):
+        with pytest.raises(RunAbortError) as raised:
+            await process.start("Run both tools")
+
+    assert raised.value is error
+    assert stopped.is_set()
 
 
 # ---------------------------------------------------------------------------

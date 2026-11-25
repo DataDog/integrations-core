@@ -91,7 +91,7 @@ files:
         type: boolean
         example: false
         default: false
-      fleet_configurable: false
+      fleet_configurable: true
     - name: database_identifier
       description: |
         Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
@@ -121,7 +121,7 @@ files:
             - instance_name: The resolved instance name of the instance.
             - full_server_name: The resolved full server name of the instance i.e. the value returned by `@@SERVERNAME`.
             In addition, you can use any key from the `tags` section of the configuration.
-          fleet_configurable: false
+          fleet_configurable: true
     - name: database_autodiscovery
       fleet_configurable: true
       description: |
@@ -218,7 +218,7 @@ files:
               example: false
             - name: ao_database
               type: string
-          fleet_configurable: false
+          fleet_configurable: true
         - name: db_backup_metrics
           description: |
             Configure collection of database backup metrics.
@@ -239,7 +239,7 @@ files:
               type: integer
               example: 300
               display_default: 300
-          fleet_configurable: false
+          fleet_configurable: true
         - name: db_files_metrics
           description: |
             Configure collection of database files metrics.
@@ -252,7 +252,7 @@ files:
               - name: enabled
                 type: boolean
                 example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: db_stats_metrics
           description: |
             Configure collection of database stats metrics
@@ -265,7 +265,7 @@ files:
             - name: enabled
               type: boolean
               example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: db_fragmentation_metrics
           description: |
             Configure collection of database fragmentation metrics.
@@ -299,7 +299,7 @@ files:
                 type: integer
                 example: 300
                 display_default: 300
-          fleet_configurable: false
+          fleet_configurable: true
         - name: fci_metrics
           description: |
             Configure collection of Failover Cluster Instance metrics. Note that these metrics
@@ -313,7 +313,7 @@ files:
               - name: enabled
                 type: boolean
                 example: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: file_stats_metrics
           description: |
             Configure collection of file stats metrics.
@@ -326,7 +326,7 @@ files:
             - name: enabled
               type: boolean
               example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: index_usage_metrics
           description: |
             Configure collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
@@ -359,7 +359,7 @@ files:
               type: integer
               example: 300
               display_default: 300
-          fleet_configurable: false
+          fleet_configurable: true
         - name: instance_metrics
           description: |
             Configure collection of server-level instance metrics.  When setting up multiple instances for
@@ -373,7 +373,7 @@ files:
             - name: enabled
               type: boolean
               example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: master_files_metrics
           description: |
             Configure collection of database file size and state from `sys.master_files`
@@ -386,7 +386,7 @@ files:
             - name: enabled
               type: boolean
               example: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: primary_log_shipping_metrics
           description: |
             Configure collection of metrics for a log shipping setup. Required to run against the
@@ -401,7 +401,7 @@ files:
             - name: enabled
               type: boolean
               example: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: secondary_log_shipping_metrics
           description: |
             Configure collection of metrics for a log shipping setup. Required to run against the
@@ -416,7 +416,7 @@ files:
             - name: enabled
               type: boolean
               example: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: server_state_metrics
           description: |
             Configure collection of server state metrics
@@ -429,7 +429,7 @@ files:
             - name: enabled
               type: boolean
               example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: task_scheduler_metrics
           description: |
             Configure collection of additional Task and Scheduler metrics.
@@ -442,7 +442,7 @@ files:
             - name: enabled
               type: boolean
               example: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: tempdb_file_space_usage_metrics
           description: |
             Configure collection of tempdb file space usage metrics for how space is used in tempdb data files.
@@ -455,7 +455,7 @@ files:
             - name: enabled
               type: boolean
               example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: xe_metrics
           description: |
             Configure collection of extended events (XE) metrics.
@@ -467,7 +467,7 @@ files:
             - name: enabled
               type: boolean
               example: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: table_size_metrics
           description: |
             Configure collection of table size metrics.
@@ -485,7 +485,7 @@ files:
               type: integer
               example: 600
               display_default: 600
-          fleet_configurable: false
+          fleet_configurable: true
     - name: include_instance_metrics
       deprecation:
         Agent version: 7.84.0
@@ -506,7 +506,7 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: collection_interval
           description: |
             Configure the interval (in seconds) for the collection of agent jobs events and metrics.
@@ -514,14 +514,14 @@ files:
           value:
             type: number
             example: 15
-          fleet_configurable: false
+          fleet_configurable: true
         - name: history_row_limit
           description: |
             Set the maximum number of job step rows that can be retrieved in a single check run.
           value:
             type: integer
             example: 10000
-          fleet_configurable: false
+          fleet_configurable: true
     - name: db_fragmentation_object_names
       description: |
         Fragmentation metrics normally emit metrics for all objects within a database.
@@ -531,7 +531,7 @@ files:
         type: array
         items:
           type: string
-      fleet_configurable: false
+      fleet_configurable: true
     - name: index_usage_table_names
       description: |
         Index usage metrics normally emit metrics for all user tables and their indexes within a database.
@@ -542,7 +542,7 @@ files:
         type: array
         items:
           type: string
-      fleet_configurable: false
+      fleet_configurable: true
     - name: table_size_table_names
       description: |
         Table size metrics normally emit metrics for all user tables within a database.
@@ -552,7 +552,7 @@ files:
         type: array
         items:
           type: string
-      fleet_configurable: false
+      fleet_configurable: true
     - name: adoprovider
       fleet_configurable: true
       description: |
@@ -705,7 +705,7 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
+          fleet_configurable: true
     - name: procedure_metrics
       description: Configure collection of procedure metrics
       options:
@@ -715,7 +715,7 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: collection_interval
           description: |
             Set the procedure metric collection interval (in seconds). Each collection involves one query to
@@ -725,14 +725,14 @@ files:
           value:
             type: number
             example: 60
-          fleet_configurable: false
+          fleet_configurable: true
         - name: dm_exec_procedure_stats_row_limit
           description: |
             Set the maximum number of procedure stats rows that can be retrieved in a single check run.
           value:
             type: integer
             example: 10000
-          fleet_configurable: false
+          fleet_configurable: true
         - name: max_procedures
           description: |
             Limit the number of procedures sent to the backend.
@@ -743,7 +743,7 @@ files:
             example: 250
             display_default: 250
           hidden: true
-          fleet_configurable: false
+          fleet_configurable: true
     - name: query_activity
       description: Configure collection of active sessions monitoring
       fleet_configurable: true
@@ -882,7 +882,7 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: false
+          fleet_configurable: true
 
     - name: managed_identity
       description: |
@@ -899,7 +899,7 @@ files:
             Client ID of the Managed Identity.
           value:
             type: string
-          fleet_configurable: false
+          fleet_configurable: true
         - name: identity_scope
           description: |
             The permission scope from where to access the identity token. This value is optional if using the default
@@ -910,7 +910,7 @@ files:
           value:
             type: string
             example: https://database.windows.net/.default
-          fleet_configurable: false
+          fleet_configurable: true
 
     - name: obfuscator_options
       description: |
@@ -935,7 +935,7 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: collect_metadata
           description: |
             Set to `false` to disable the collection of metadata in your SQL statements.
@@ -943,7 +943,7 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: collect_tables
           description: |
             Set to `false` to disable the collection of tables in your SQL statements.
@@ -951,7 +951,7 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: collect_commands
           description: |
             Set to `false` to disable the collection of commands in your SQL statements.
@@ -961,7 +961,7 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: collect_comments
           description: |
             Set to `false` to disable the collection of comments in your SQL statements.
@@ -971,7 +971,7 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: collect_procedures
           description: |
             Set to `false` to disable the collection of procedure names in your SQL statements.
@@ -979,7 +979,7 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: keep_sql_alias
           description: |
             Set to `true` to keep sql aliases in obfuscated SQL statements. Examples of aliases are
@@ -989,7 +989,7 @@ files:
             type: boolean
             example: true
             display_default: true
-          fleet_configurable: false
+          fleet_configurable: true
         - name: remove_space_between_parentheses
           description: |
             Set to `true` to remove spaces between parentheses in your normalized SQL statements.
@@ -997,7 +997,7 @@ files:
             type: boolean
             example: false
             display_default: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: keep_null
           description: |
             Set to `true` to keep the keyword `NULL` in your obfuscated SQL statements.
@@ -1005,7 +1005,7 @@ files:
             type: boolean
             example: false
             display_default: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: keep_boolean
           description: |
             Set to `true` to keep the keywords `TRUE` and `FALSE` in your obfuscated SQL statements.
@@ -1013,7 +1013,7 @@ files:
             type: boolean
             example: false
             display_default: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: keep_positional_parameter
           description: |
             Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
@@ -1021,7 +1021,7 @@ files:
             type: boolean
             example: false
             display_default: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: replace_bind_parameter
           description: |
             Set to `true` to replace bind parameters (e.g. `@p1`) with `?` in your obfuscated SQL statements.
@@ -1029,7 +1029,7 @@ files:
             type: boolean
             example: false
             display_default: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: keep_trailing_semicolon
           description: |
             Set to `true` to keep trailing semicolons in your normalized SQL statements.
@@ -1037,7 +1037,7 @@ files:
             type: boolean
             example: false
             display_default: false
-          fleet_configurable: false
+          fleet_configurable: true
         - name: keep_identifier_quotation
           description: |
             Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
@@ -1045,7 +1045,7 @@ files:
             type: boolean
             example: false
             display_default: false
-          fleet_configurable: false
+          fleet_configurable: true
     - name: collect_raw_query_statement
       description: |
         Configure the collection of raw query statements in query activity, and XE events.
@@ -1135,7 +1135,7 @@ files:
         type: number
         example: 1800
         display_default: 300
-      fleet_configurable: false
+      fleet_configurable: true
     - name: collect_schemas
       description: |
         Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
@@ -1177,7 +1177,7 @@ files:
           value:
             type: integer
             example: 1000
-          fleet_configurable: false
+          fleet_configurable: true
         - name: max_execution_time
           deprecation:
             Agent version: 7.74.0
@@ -1259,7 +1259,7 @@ files:
       value:
         example: false
         type: boolean
-      fleet_configurable: false
+      fleet_configurable: true
     - name: collect_xe
       description: |
         Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
@@ -1454,7 +1454,7 @@ files:
           value:
             type: number
             example: 600
-          fleet_configurable: false
+          fleet_configurable: true
         - name: max_deadlocks
           description: |
             Set the maximum number of deadlocks to retrieve per collection.

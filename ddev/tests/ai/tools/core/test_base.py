@@ -6,6 +6,7 @@ from typing import Annotated
 import pytest
 from pydantic import Field
 
+from ddev.ai.errors import RunAbortError
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput, _get_input_type
 from ddev.ai.tools.core.types import ToolResult
 
@@ -36,14 +37,15 @@ class EchoTool(BaseTool[SimpleInput]):
 
 
 class FailingTool(BaseTool[SimpleInput]):
-    """A tool that always raises."""
+    def __init__(self, error: Exception) -> None:
+        self._error = error
 
     @property
     def name(self) -> str:
         return "failing"
 
     async def __call__(self, tool_input: SimpleInput) -> ToolResult:
-        raise RuntimeError("something went wrong")
+        raise self._error
 
 
 class FullInputTool(BaseTool[FullInput]):
@@ -220,11 +222,6 @@ def echo_tool() -> EchoTool:
     return EchoTool()
 
 
-@pytest.fixture
-def failing_tool() -> FailingTool:
-    return FailingTool()
-
-
 def test_build_tool(echo_tool: EchoTool):
     assert echo_tool.name == "echo"
     assert echo_tool.description == "Echo the message back."
@@ -276,9 +273,15 @@ async def test_run_invalid_input_returns_failure(echo_tool: EchoTool, raw: dict)
 # --- run(): __call__ exception handling ---
 
 
-async def test_run_captures_exception_from_call(failing_tool: FailingTool):
-    result = await failing_tool.run({"message": "boom"})
-    assert isinstance(result, ToolResult)
+async def test_run_captures_ordinary_tool_failure():
+    result = await FailingTool(RuntimeError("something went wrong")).run({"message": "boom"})
     assert result.success is False
-    assert "RuntimeError" in result.error
-    assert "something went wrong" in result.error
+    assert result.error == "RuntimeError: something went wrong"
+
+
+async def test_run_propagates_run_abort_error():
+    error = RunAbortError("the run cannot continue")
+    with pytest.raises(RunAbortError) as raised:
+        await FailingTool(error).run({"message": "boom"})
+
+    assert raised.value is error

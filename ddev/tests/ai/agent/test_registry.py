@@ -14,8 +14,8 @@ import ddev.ai.agent.anthropic_provider as anthropic_provider
 import ddev.ai.agent.registry as agent_registry
 from ddev.ai.agent.registry import AgentProviderRegistry, build_agent_provider_registry
 from ddev.ai.config.models import AgentConfig
-from ddev.ai.model_catalog import ModelResolver
-from tests.ai.config.utils import make_agent_config
+from ddev.ai.model_catalog import ModelResolver, Route
+from ddev.ai.runtime.connections import DirectConnection
 
 
 def make_provider(*models: str) -> MagicMock:
@@ -148,19 +148,13 @@ def test_gateway_route_is_captured_when_the_registry_is_built(tmp_path: Path):
     registry = build_agent_provider_registry(config)
     config.use_ai_gateway = False
 
-    with pytest.raises(ValueError, match="not implemented yet"):
-        registry.build_agent(
-            make_agent_config(model="fixture-model"),
-            tools=MagicMock(),
-            system_prompt="system",
-            owner_id="owner",
-        )
+    assert registry.requested_route is Route.AI_GATEWAY
 
 
 def test_custom_catalog_is_captured_at_startup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     agent_factory = MagicMock()
     monkeypatch.setattr(anthropic_provider, "AnthropicAgent", agent_factory)
-    monkeypatch.setattr(anthropic_provider.anthropic, "AsyncAnthropic", MagicMock())
+    monkeypatch.setattr(anthropic_provider, "messages_client", MagicMock())
     first = tmp_path / "first.yaml"
     second = tmp_path / "second.yaml"
     first.write_text(CUSTOM_CATALOG, encoding="utf-8")
@@ -174,7 +168,8 @@ def test_custom_catalog_is_captured_at_startup(tmp_path: Path, monkeypatch: pyte
 
     context = {"provider_registry": registry}
     config = AgentConfig.model_validate({"model": "fixture-model"}, context=context)
-    registry.build_agent(config, tools=MagicMock(), system_prompt="system", owner_id="owner")
+    run_registry = registry.for_run(DirectConnection(registry.direct_tokens_for_run()))
+    run_registry.build_agent(config, tools=MagicMock(), system_prompt="system", owner_id="owner")
     resolved = agent_factory.call_args.kwargs["model"]
     assert resolved.binding.model == "Fixture-Wire"
     assert resolved.model.context_window == 100_000
@@ -189,7 +184,7 @@ def test_default_catalog_is_captured_for_each_registry(tmp_path: Path, monkeypat
     monkeypatch.setattr(agent_registry, "ModelResolver", partial(ModelResolver, catalog))
     agent_factory = MagicMock()
     monkeypatch.setattr(anthropic_provider, "AnthropicAgent", agent_factory)
-    monkeypatch.setattr(anthropic_provider.anthropic, "AsyncAnthropic", MagicMock())
+    monkeypatch.setattr(anthropic_provider, "messages_client", MagicMock())
     config = SimpleNamespace(anthropic_api_key="secret", use_ai_gateway=False, models_catalog=None)
 
     original = build_agent_provider_registry(config)
@@ -198,5 +193,6 @@ def test_default_catalog_is_captured_for_each_registry(tmp_path: Path, monkeypat
 
     for registry, expected_wire in ((original, "Fixture-Wire"), (updated, "Updated-Wire")):
         agent_config = AgentConfig.model_validate({"model": "fixture-model"}, context={"provider_registry": registry})
-        registry.build_agent(agent_config, tools=MagicMock(), system_prompt="system", owner_id="owner")
+        run_registry = registry.for_run(DirectConnection(registry.direct_tokens_for_run()))
+        run_registry.build_agent(agent_config, tools=MagicMock(), system_prompt="system", owner_id="owner")
         assert agent_factory.call_args.kwargs["model"].binding.model == expected_wire

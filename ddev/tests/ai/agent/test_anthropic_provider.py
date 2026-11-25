@@ -3,20 +3,19 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 import yaml
 
 import ddev.ai.agent.anthropic_provider as anthropic_provider
 from ddev.ai.agent.anthropic_agent import DEFAULT_MAX_TOKENS
-from ddev.ai.agent.anthropic_provider import (
-    GATEWAY_EXECUTION_PENDING,
-    AnthropicProvider,
-)
+from ddev.ai.agent.anthropic_provider import AnthropicProvider
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.model_catalog import ANTHROPIC_MESSAGES, BindingConfig, ModelConfig, ModelResolver, Route
+from ddev.ai.runtime.connections import DirectConnection, GatewayConnection
+from ddev.ai.runtime.tokens import TokenProducer
 from ddev.ai.tools.registry import ToolRegistry
 from tests.ai.config.utils import make_agent_config
 
@@ -52,25 +51,19 @@ def make_entry(headers: dict[str, str] | None = None, max_output_tokens: int | N
 def test_anthropic_client_is_created_lazily_and_cached(monkeypatch: pytest.MonkeyPatch):
     client = MagicMock()
     client_factory = MagicMock(return_value=client)
-    monkeypatch.setattr(anthropic_provider.anthropic, "AsyncAnthropic", client_factory)
-    provider = AnthropicProvider("secret")
+    monkeypatch.setattr(anthropic_provider, "messages_client", client_factory)
+    connection = DirectConnection(Mock(spec=TokenProducer))
+    provider = AnthropicProvider().for_run(connection)
 
-    assert client_factory.call_count == 0
+    client_factory.assert_not_called()
     assert provider.client is client
     assert provider.client is client
-    client_factory.assert_called_once_with(api_key="secret")
-
-
-def test_client_construction_requires_an_api_key():
-    provider = AnthropicProvider(None)
-
-    with pytest.raises(ValueError, match="requires an API key"):
-        _ = provider.client
+    client_factory.assert_called_once_with(connection)
 
 
 def test_supported_models_include_canonical_names_and_aliases(tmp_path: Path):
     resolver = make_resolver(tmp_path, make_entry(), aliases={"fixture-alias": "fixture-model"})
-    provider = AnthropicProvider("secret", resolver=resolver)
+    provider = AnthropicProvider(resolver=resolver)
 
     models = provider.supported_models()
 
@@ -78,7 +71,7 @@ def test_supported_models_include_canonical_names_and_aliases(tmp_path: Path):
 
 
 def test_validate_config_rejects_unknown_model():
-    provider = AnthropicProvider("secret")
+    provider = AnthropicProvider()
     config = make_agent_config(model="bogus")
 
     with pytest.raises(ValueError, match="Unknown model 'bogus'"):
@@ -87,7 +80,7 @@ def test_validate_config_rejects_unknown_model():
 
 def test_validate_config_accepts_alias_and_canonical_names(tmp_path: Path):
     resolver = make_resolver(tmp_path, make_entry(), aliases={"fixture-alias": "fixture-model"})
-    provider = AnthropicProvider("secret", resolver=resolver)
+    provider = AnthropicProvider(resolver=resolver)
 
     provider.validate_config(make_agent_config(model="fixture-alias"))
     provider.validate_config(make_agent_config(model="fixture-model"))
@@ -95,7 +88,7 @@ def test_validate_config_accepts_alias_and_canonical_names(tmp_path: Path):
 
 @pytest.mark.parametrize("max_tokens", [None, 100_000], ids=["default", "explicit"])
 def test_validate_config_rejects_max_tokens_above_the_declared_output_limit(tmp_path: Path, max_tokens: int | None):
-    provider = AnthropicProvider("secret", resolver=make_resolver(tmp_path, make_entry(max_output_tokens=4096)))
+    provider = AnthropicProvider(resolver=make_resolver(tmp_path, make_entry(max_output_tokens=4096)))
     config = make_agent_config(model="fixture-model", max_tokens=max_tokens)
 
     requested = DEFAULT_MAX_TOKENS if max_tokens is None else max_tokens
@@ -105,10 +98,12 @@ def test_validate_config_rejects_max_tokens_above_the_declared_output_limit(tmp_
 
 def test_build_agent_forwards_agent_configuration(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     client = MagicMock()
-    monkeypatch.setattr(anthropic_provider.anthropic, "AsyncAnthropic", MagicMock(return_value=client))
+    monkeypatch.setattr(anthropic_provider, "messages_client", MagicMock(return_value=client))
     agent_factory = MagicMock()
     monkeypatch.setattr(anthropic_provider, "AnthropicAgent", agent_factory)
-    provider = AnthropicProvider("secret", resolver=make_resolver(tmp_path, make_entry()))
+    provider = AnthropicProvider(resolver=make_resolver(tmp_path, make_entry())).for_run(
+        DirectConnection(Mock(spec=TokenProducer))
+    )
     tools = MagicMock(spec=ToolRegistry)
     config = make_agent_config(model="fixture-model", max_tokens=2048)
 
@@ -129,10 +124,12 @@ def test_build_agent_forwards_agent_configuration(monkeypatch: pytest.MonkeyPatc
 
 def test_build_agent_uses_default_model_when_unset(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     monkeypatch.setattr(anthropic_provider, "DEFAULT_MODEL", "fixture-model")
-    monkeypatch.setattr(anthropic_provider.anthropic, "AsyncAnthropic", MagicMock(return_value=MagicMock()))
+    monkeypatch.setattr(anthropic_provider, "messages_client", MagicMock(return_value=MagicMock()))
     agent_factory = MagicMock()
     monkeypatch.setattr(anthropic_provider, "AnthropicAgent", agent_factory)
-    provider = AnthropicProvider("secret", resolver=make_resolver(tmp_path, make_entry()))
+    provider = AnthropicProvider(resolver=make_resolver(tmp_path, make_entry())).for_run(
+        DirectConnection(Mock(spec=TokenProducer))
+    )
     registry = AgentProviderRegistry()
     registry.register("anthropic", provider)
     config = AgentConfig.model_validate({"provider": "anthropic"}, context={"provider_registry": registry})
@@ -145,11 +142,13 @@ def test_build_agent_uses_default_model_when_unset(monkeypatch: pytest.MonkeyPat
 
 
 def test_build_agent_passes_binding_headers(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
-    monkeypatch.setattr(anthropic_provider.anthropic, "AsyncAnthropic", MagicMock(return_value=MagicMock()))
+    monkeypatch.setattr(anthropic_provider, "messages_client", MagicMock(return_value=MagicMock()))
     agent_factory = MagicMock()
     monkeypatch.setattr(anthropic_provider, "AnthropicAgent", agent_factory)
     headers = {"anthropic-beta": "fixture-beta"}
-    provider = AnthropicProvider("secret", resolver=make_resolver(tmp_path, make_entry(headers)))
+    provider = AnthropicProvider(resolver=make_resolver(tmp_path, make_entry(headers))).for_run(
+        DirectConnection(Mock(spec=TokenProducer))
+    )
 
     provider.build_agent(
         make_agent_config(model="fixture-model"), tools=MagicMock(spec=ToolRegistry), system_prompt="s", owner_id="a"
@@ -159,12 +158,12 @@ def test_build_agent_passes_binding_headers(monkeypatch: pytest.MonkeyPatch, tmp
     assert kwargs["model"].binding.headers == headers
 
 
-def test_gateway_build_agent_fails_before_any_request(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+def test_build_agent_requires_a_prepared_run(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     client_factory = MagicMock()
-    monkeypatch.setattr(anthropic_provider.anthropic, "AsyncAnthropic", client_factory)
-    provider = AnthropicProvider(None, route=Route.AI_GATEWAY, resolver=make_resolver(tmp_path, make_entry()))
+    monkeypatch.setattr(anthropic_provider, "messages_client", client_factory)
+    provider = AnthropicProvider(resolver=make_resolver(tmp_path, make_entry()))
 
-    with pytest.raises(ValueError, match=GATEWAY_EXECUTION_PENDING):
+    with pytest.raises(ValueError, match="Agent execution requires prepared run resources"):
         provider.build_agent(
             make_agent_config(model="fixture-model"),
             tools=MagicMock(spec=ToolRegistry),
@@ -176,7 +175,9 @@ def test_gateway_build_agent_fails_before_any_request(monkeypatch: pytest.Monkey
 
 
 def test_gateway_mode_resolves_and_validates_models(tmp_path: Path):
-    provider = AnthropicProvider(None, route=Route.AI_GATEWAY, resolver=make_resolver(tmp_path, make_entry()))
+    provider = AnthropicProvider(resolver=make_resolver(tmp_path, make_entry())).for_run(
+        GatewayConnection(Mock(spec=TokenProducer))
+    )
 
     resolved = provider.resolve_model("fixture-model")
 

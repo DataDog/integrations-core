@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "title": "Low filesystem capacity",
+  "tags": [
+    "integration:lustre"
+  ],
+  "definition": {
+    "name": "[Lustre] Low filesystem capacity",
+    "type": "query alert",
+    "query": "avg(last_10m):(avg:lustre.filesystem.kbytesavail{*} by {device_uuid} / avg:lustre.filesystem.kbytestotal{*} by {device_uuid}) * 100 < 10",
+    "message": "Lustre filesystem capacity is running low (<10% available space).\n\nThis could lead to:\n* Failed write operations\n* Application errors\n* Job failures\n* Performance degradation\n\n{{#is_alert}}\nAvailable space: {{value}}%\nDevice: {{device_uuid.name}}\n{{/is_alert}}\n\nImmediate actions:\n1. Check which files/directories are consuming space\n2. Archive or delete unnecessary data\n3. Add more storage capacity if needed\n4. Review data retention policies",
+    "tags": [
+      "integration:lustre"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 10,
+        "warning": 20
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "renotify_interval": 60,
+      "include_tags": true,
+      "evaluation_delay": 600,
+      "escalation_message": "",
+      "on_missing_data": "show_and_notify_no_data",
+      "new_group_delay": 0,
+      "silenced": {}
+    },
+    "priority": 1
+  },
+  "created_at": "2025-07-28",
+  "last_updated_at": "2025-07-28",
+  "description": "Lustre filesystem capacity is running low (<10% available space)."
+}

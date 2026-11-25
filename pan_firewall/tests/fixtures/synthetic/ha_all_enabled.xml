@@ -1,4 +1,0 @@
-<!-- Derived from fw-a/ha_all.xml (standalone: `enabled` no, `group/local-info`) with `enabled` set to yes and a
-     `state` added under `group/local-info`. UNVERIFIED against a real HA pair: the real PAN-OS element
-     for the local state is assumed to be `group/local-info/state`. -->
-<response status="success"><result><enabled>yes</enabled><group><local-info><ha1-encrypt-imported>no</ha1-encrypt-imported><state>active</state></local-info></group></result></response>

@@ -395,17 +395,21 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
         agents={"writer": make_agent_config(tools=["spawn_subagent"])},
         callbacks=run_callbacks,
     )
-    phase = AgenticPhase.build(
-        phase_id="p1",
-        config=PhaseConfig(name="p1", agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
-        deps=[],
-        resources=resources,
-        checkpoint_manager=checkpoint_manager,
-        context=flow_context,
-    )
-    phase.bus = StubBus(message_queue)
+    try:
+        await resources.prepare(lambda _: None, initial_agent=resources.agent_config("writer"))
+        phase = AgenticPhase.build(
+            phase_id="p1",
+            config=PhaseConfig(name="p1", agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
+            deps=[],
+            resources=resources,
+            checkpoint_manager=checkpoint_manager,
+            context=flow_context,
+        )
+        phase.bus = StubBus(message_queue)
 
-    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+    finally:
+        await resources.close()
 
     submitted = [message_queue.get_nowait() for _ in range(message_queue.qsize())]
     assert not any(isinstance(m, PhaseFailedMessage) for m in submitted)

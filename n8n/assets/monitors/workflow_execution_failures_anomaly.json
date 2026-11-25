@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "title": "Workflow Execution Failures Anomaly",
+  "tags": [
+    "integration:n8n"
+  ],
+  "definition": {
+    "name": "[n8n] Workflow Execution Failures Anomaly",
+    "type": "query alert",
+    "query": "avg(last_10m):anomalies(sum:n8n.workflow.failed.count{*} by {host}.as_rate(), 'agile', 3, direction='above', interval=300, alert_window='last_10m', count_default_zero='true', seasonality='hourly') >= 1",
+    "message": "{{#is_alert}}Anomalous spike in workflows failures. Failure rate significantly higher than baseline.{{/is_alert}}{{#is_warning}}Workflows showing unusual failure patterns.{{/is_warning}}{{#is_recovery}}Failure rate returned to normal patterns.{{/is_recovery}}",
+    "tags": [
+      "integration:n8n",
+      "service:n8n",
+      "category:workflow",
+      "category:anomaly"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0,
+        "warning": 0.8
+      },
+      "notify_audit": false,
+      "require_full_window": true,
+      "renotify_interval": 60,
+      "threshold_windows": {
+        "trigger_window": "last_10m",
+        "recovery_window": "last_15m"
+      },
+      "include_tags": true,
+      "evaluation_delay": 120,
+      "new_group_delay": 600,
+      "escalation_message": "Anomalous failure pattern persists. Immediate investigation recommended.",
+      "renotify_statuses": [
+        "alert"
+      ],
+      "on_missing_data": "show_no_data",
+      "silenced": {}
+    },
+    "priority": 2
+  },
+  "created_at": "2026-01-28",
+  "last_updated_at": "2026-05-21",
+  "description": "The monitor alerts when the workflow execution has an anomaly"
+}

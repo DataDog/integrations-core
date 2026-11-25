@@ -28,7 +28,7 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     confluent_kafka_src="/tmp/confluent_kafka-${kafka_version}"
     curl -L "https://files.pythonhosted.org/packages/source/c/confluent-kafka/confluent_kafka-${kafka_version}.tar.gz" \
         -o "${confluent_kafka_src}.tar.gz"
-    echo "619d10d1d77c9821ba913b3e42a33ade7f889f3573c7f3c17b57c3056e3310f5  ${confluent_kafka_src}.tar.gz" | sha256sum --check
+    echo "619d10d1d77c9821ba913b3e42a33ade7f889f3573c7f3c17b57c3056e3310f5  ${confluent_kafka_src}.tar.gz" | sha256sum -c -
     rm -rf "${confluent_kafka_src}"
     tar -C /tmp -xzf "${confluent_kafka_src}.tar.gz"
     patch -d "${confluent_kafka_src}" -p1 -i "${DD_MOUNT_DIR}/patches/confluent-kafka-fix-metadata-overread.patch"

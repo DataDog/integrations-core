@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import StopReason
+from ddev.ai.errors import RunAbortError
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 
 if TYPE_CHECKING:
@@ -92,6 +93,8 @@ class BaseSpawnTool[TInput: BaseToolInput](BaseTool[TInput]):
 
         try:
             result = await process.start(prompt)
+        except RunAbortError:
+            raise
         except FlowStopRequested as e:
             # The parent decides whether this warrants stopping the whole run.
             return ChildOutcome(
