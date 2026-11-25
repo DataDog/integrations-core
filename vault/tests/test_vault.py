@@ -3,17 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import re
+from pathlib import Path
 from urllib.parse import urlparse
 
 import mock
 import pytest
 
 from datadog_checks.base.stubs.http import FakeHTTPResponse
-from datadog_checks.base.utils.http_exceptions import (
-    HTTPClientConnectionError,
-    HTTPClientReadTimeoutError,
-    HTTPClientStatusError,
-)
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientReadTimeoutError
 from datadog_checks.vault import Vault
 from datadog_checks.vault.common import DEFAULT_API_VERSION
 from datadog_checks.vault.errors import ApiUnreachable
@@ -596,16 +593,18 @@ class TestVault:
 
 def test_token_renewal_on_forbidden(aggregator, dd_run_check, token_instance, global_tags, vault_api):
     token_instance['use_openmetrics'] = False
-    c = Vault(Vault.CHECK_NAME, {}, [token_instance])
-    # The check recognizes a forbidden scrape by the error message `raise_for_status` produces.
-    vault_api(
-        METRICS_URL,
-        status_code=403,
-        status_error=HTTPClientStatusError(f'403 Client Error: Forbidden for url: {METRICS_URL}'),
-    )
+    check = Vault(Vault.CHECK_NAME, {}, [token_instance])
+    check.run_check_initializations()
 
-    dd_run_check(c)
+    scraper = check.get_http_handler(check._scraper_config)
+    assert scraper.get_header('X-Vault-Token') == 'the-token'
 
+    Path(token_instance['client_token_path']).write_text('rotated-token', encoding='utf-8')
+    vault_api(METRICS_URL, status_code=403)
+
+    dd_run_check(check)
+
+    assert scraper.get_header('X-Vault-Token') == 'rotated-token'
     aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=1, tags=global_tags)
     aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
 

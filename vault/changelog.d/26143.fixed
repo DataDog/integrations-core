@@ -1,0 +1,1 @@
+Reload the file-backed token when the legacy metrics scrape returns HTTP 403, regardless of the response reason phrase.

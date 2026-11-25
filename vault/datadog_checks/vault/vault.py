@@ -4,7 +4,7 @@
 import time
 
 from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
-from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientStatusError, HTTPClientTimeoutError
 
 from .check import VaultCheckV2
 from .common import API_METHODS, DEFAULT_API_VERSION, SYS_HEALTH_DEFAULT_CODES, SYS_LEADER_DEFAULT_CODES, Api, Leader
@@ -113,7 +113,12 @@ class Vault(OpenMetricsBaseCheck):
                 self.process(self._scraper_config, self._metric_transformers)
             except Exception as e:
                 error = str(e)
-                if self._client_token_path and error.startswith('403 Client Error: Forbidden for url'):
+                if (
+                    self._client_token_path
+                    and isinstance(e, HTTPClientStatusError)
+                    and e.response is not None
+                    and e.response.status_code == 403
+                ):
                     message = 'Permission denied, refreshing the client token...'
                     self.log.warning(message)
                     self.renew_client_token()
