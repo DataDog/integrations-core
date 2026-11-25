@@ -3,10 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPClient
 from datadog_checks.dev.fs import get_here
 
 from .common import INSTANCE, SERVER_ROOT, fake_response
@@ -27,7 +29,7 @@ def get_json_value_from_file(file_path):
         return json.load(file)
 
 
-def parse_fixture_params(segments):
+def parse_fixture_params(segments: Iterable[str]) -> dict[str, str | int]:
     """Turn `key=value` path segments into the `params` mapping the check sends."""
     params = {}
     for segment in segments:
@@ -36,7 +38,7 @@ def parse_fixture_params(segments):
     return params
 
 
-def register_fixture_tree(fake_http):
+def register_fixture_tree(fake_http: FakeHTTPClient) -> None:
     """Serve every `fixtures/GET/<path>[/<key>=<value>...]/response.json` file at `<path>`.
 
     Requests to a fixture URL with query parameters that have no matching file get a 404, as a server would.
