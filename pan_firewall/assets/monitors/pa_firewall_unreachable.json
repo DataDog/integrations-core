@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nThe Agent has not been able to reach firewall **{{device_ip.name}}** for the last 5 minutes.\n{{/is_alert}}\n\n{{#is_recovery}}\n## Recovered\n\nFirewall {{device_ip.name}} is answering the Agent's API requests again.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nNo metrics or metadata are collected from this firewall while it is unreachable, so its other monitors and dashboard widgets go silent.\n\n---\n\n## Why?\n\nPossible causes:\n* **The firewall is down or rebooting.**\n* **The management interface is unreachable from the Agent host**: a routing change, an access rule, or a changed management IP.\n* **HTTPS to the firewall is blocked** by a firewall rule or a proxy between the Agent and the device.\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Check that the firewall is up, for example from its console or from Panorama.\n2. From the Agent host, test HTTPS to the firewall's management IP.\n3. Check that the management interface allows HTTPS from the Agent host (the management profile and permitted IP addresses).\n4. Run `datadog-agent check pan_firewall` on the Agent host to see the connection error.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Metrics Explorer](/metric/explorer?exp_metric=pan_firewall.can_connect&exp_scope=device_ip:{{device_ip.name}}&exp_agg=max&exp_type=line)\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Firewall {{device_ip.name}} is unreachable",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_5m):max:pan_firewall.can_connect{*} by {device_namespace,device_ip} <= 0",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks whether the firewall's XML API answers the Agent on each check run. A firewall that stops responding for several minutes may be down, overloaded, or cut off from the network, and no other metric from it can be trusted until it answers again.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Firewall is unreachable",
+  "version": 2
+}

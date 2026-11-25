@@ -5,6 +5,7 @@
 import datetime
 import json as json_module
 import logging
+import re
 from abc import abstractmethod
 from io import BytesIO
 from time import time
@@ -13,6 +14,7 @@ from dateutil import parser
 from lxml import etree
 
 from datadog_checks.base import is_affirmative
+from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -23,13 +25,48 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.health import SqlServerHealthEvent
 from datadog_checks.sqlserver.utils import is_azure_sql_database, raise_if_cancelled
 
 from .xml_tools import extract_int_value, extract_value
 
+EVENT_FILE_TARGET = "event_file"
+RING_BUFFER_TARGET = "ring_buffer"
+# The error of a read of a session or its target that the login isn't allowed, as SQL Server 2022 reports a missing
+# permission ("The user does not have permission to perform this action.", "VIEW SERVER PERFORMANCE STATE permission
+# was denied"), or of a file the server isn't allowed to open, such as a blob without a credential on Azure.
+TARGET_READ_DENIED_ERROR_PATTERN = re.compile(r"permission|access is denied|credential", re.IGNORECASE)
+TARGET_READ_PERMISSIONS = (
+    "VIEW SERVER STATE, or VIEW SERVER PERFORMANCE STATE on SQL Server 2022 and later, or VIEW DATABASE STATE on Azure "
+    "SQL Database. On Azure SQL Database and Managed Instance, where the event_file target writes to Azure Blob "
+    "Storage, the server also needs a credential for the container."
+)
+# The session and its targets. Only the event_file target's data is read: it holds the current file's path, while a
+# ring buffer's data is all its events.
+SESSION_TARGETS_QUERY = """\
+SELECT t.target_name,
+    CASE WHEN t.target_name = N'event_file' THEN CAST(t.target_data AS nvarchar(max)) END AS target_data
+FROM sys.dm_xe_{level}sessions s
+LEFT JOIN sys.dm_xe_{level}session_targets t ON s.address = t.event_session_address
+WHERE s.name = ?
+"""
+
 
 def agent_check_getter(self):
     return self._check
+
+
+def is_target_read_denied(error: Exception) -> bool:
+    """Whether a read of a session or its target failed because the login or the server isn't allowed it."""
+    return bool(TARGET_READ_DENIED_ERROR_PATTERN.search(str(error)))
+
+
+def event_file_current_file(target_data: str | None) -> str | None:
+    """The current file of an event_file target, from its target data. Raises `etree.XMLSyntaxError` on invalid XML."""
+    if not target_data:
+        return None
+    file_element = etree.fromstring(target_data.encode('utf-8')).find('.//File')
+    return file_element.get('name') if file_element is not None else None
 
 
 class TimestampHandler:
@@ -94,6 +131,9 @@ class XESessionBase(DBMAsyncJob):
         "username",
         "activity_id",
         "activity_id_xfer",
+        # Populated only when the XE session collects the sqlserver.context_info action. Tracers in DBM full
+        # mode for SQL Server propagate trace context through context_info rather than the SQL comment.
+        "context_info",
     ]
 
     BASE_SQL_FIELDS = [
@@ -105,6 +145,15 @@ class XESessionBase(DBMAsyncJob):
     # Fields that should use text representation when available
     # Both rpc_completed and batch_completed use the result field
     TEXT_FIELDS = ["result"]
+
+    # Set by the handlers that find their target with `_session_target`: the health events of the session's setup
+    # problems, what the warnings say isn't collected without the session, and their docs. `_session_setup_docs_url`
+    # is the docs on creating the session.
+    SESSION_MISSING_HEALTH_EVENT: SqlServerHealthEvent
+    TARGET_UNSUPPORTED_HEALTH_EVENT: SqlServerHealthEvent
+    COLLECTED_DATA_NAME: str
+    SESSION_DOCS_URL: str
+    TARGET_READ_DENIED_HEALTH_EVENT: SqlServerHealthEvent
 
     def __init__(self, check, config, session_name):
         self.session_name = session_name
@@ -118,6 +167,8 @@ class XESessionBase(DBMAsyncJob):
             session_config = xe_config.get('query_completions', {})
         elif session_name == "datadog_query_errors":
             session_config = xe_config.get('query_errors', {})
+        elif session_name == "datadog_query_plans":
+            session_config = xe_config.get('query_plans', {})
         else:
             session_config = {}
 
@@ -164,6 +215,10 @@ class XESessionBase(DBMAsyncJob):
         self._conn_key_prefix = f"dbm-xe-{session_name}-"
         self._is_azure_sql_database = False
         self._check_azure_status()
+        # The current setup problem, so its warning is logged once and its health event goes back to OK when fixed.
+        self._session_problem: SqlServerHealthEvent | None = None
+        # Whether the last read of the session or its target was denied, so its warning is logged once.
+        self._target_read_denied = False
 
     # Methods to allow subclasses to extend field definitions
     def get_numeric_fields(self, event_type=None):
@@ -217,6 +272,90 @@ class XESessionBase(DBMAsyncJob):
 
                 return cursor.fetchone() is not None
 
+    def _session_target(self, cursor) -> tuple[str | None, str | None]:
+        """
+        The target to read, event_file first, and the event_file target's current file. Reports setup problems with a
+        health event and a warning.
+        """
+        level = "database_" if self._is_azure_sql_database else ""
+        cursor.execute(SESSION_TARGETS_QUERY.format(level=level), (self.session_name,))
+        rows = cursor.fetchall() or []
+        if not rows:
+            self._report_session_problem(
+                self.SESSION_MISSING_HEALTH_EVENT,
+                "The {session} XE session doesn't exist or isn't running, so no {data} are collected.",
+            )
+            return None, None
+        targets = {row[0]: row[1] for row in rows if row[0]}
+        if EVENT_FILE_TARGET in targets:
+            self._report_session_problem(None)
+            return EVENT_FILE_TARGET, self._event_file_current_file(targets[EVENT_FILE_TARGET])
+        if RING_BUFFER_TARGET in targets:
+            self._report_session_problem(None)
+            return RING_BUFFER_TARGET, None
+        self._report_session_problem(
+            self.TARGET_UNSUPPORTED_HEALTH_EVENT,
+            "The {session} XE session has no event_file or ring_buffer target, so no {data} are collected.",
+        )
+        return None, None
+
+    def _event_file_current_file(self, target_data: str | None) -> str | None:
+        try:
+            return event_file_current_file(target_data)
+        except etree.XMLSyntaxError as e:
+            self._log.debug("Failed to parse the event_file target data of %s: %s", self.session_name, e)
+            return None
+
+    def _report_target_read(self, denied_error: Exception | None) -> None:
+        """
+        Reports a read of the session or its target that was denied, with a health event and a warning logged once,
+        and the read working again.
+        """
+        denied = denied_error is not None
+        if denied == self._target_read_denied:
+            return
+        self._target_read_denied = denied
+        if not denied:
+            self._check.health.submit_health_event(name=self.TARGET_READ_DENIED_HEALTH_EVENT, status=HealthStatus.OK)
+            self._log.info("The Agent can read the %s XE session again", self.session_name)
+            return
+        self._check.health.submit_health_event(
+            name=self.TARGET_READ_DENIED_HEALTH_EVENT,
+            status=HealthStatus.WARNING,
+            data={"session_name": self.session_name, "error": str(denied_error)},
+        )
+        self._log.warning(
+            "The Agent isn't allowed to read the %s XE session, so no %s are collected: %s The Datadog login needs %s "
+            "See %s",
+            self.session_name,
+            self.COLLECTED_DATA_NAME,
+            denied_error,
+            TARGET_READ_PERMISSIONS,
+            self.SESSION_DOCS_URL,
+        )
+
+    def _report_session_problem(self, problem: SqlServerHealthEvent | None, message: str = "") -> None:
+        if problem == self._session_problem:
+            return
+        if self._session_problem is not None:
+            self._check.health.submit_health_event(name=self._session_problem, status=HealthStatus.OK)
+        self._session_problem = problem
+        if problem is None:
+            self._log.info("The %s XE session is running with a supported target", self.session_name)
+            return
+        self._check.health.submit_health_event(
+            name=problem, status=HealthStatus.WARNING, data={"session_name": self.session_name}
+        )
+        self._log.warning(
+            "%s See %s",
+            message.format(session=self.session_name, data=self.COLLECTED_DATA_NAME),
+            self._session_setup_docs_url(),
+        )
+
+    def _session_setup_docs_url(self) -> str:
+        """The docs on creating the session, for the handlers that find their target with `_session_target`."""
+        raise NotImplementedError
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_ring_buffer(self):
         """
@@ -225,47 +364,51 @@ class XESessionBase(DBMAsyncJob):
         """
         raise_if_cancelled(self._cancel_event)
 
-        raw_xml = None
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
-                # For Azure SQL Database support
-                level = ""
-                if self._is_azure_sql_database:
-                    level = "database_"
+                return self._read_ring_buffer(cursor)
 
-                # Determine if we need to use CONVERT based on connector type
-                use_convert = False
-                if self._check.connection.connector == "adodbapi":
-                    use_convert = True
-                    self._log.debug("Using CONVERT syntax for Windows/adodbapi compatibility")
+    def _read_ring_buffer(self, cursor):
+        """Read the session's ring buffer target data with an open cursor, or None when it's empty or unreadable."""
+        raw_xml = None
+        # For Azure SQL Database support
+        level = ""
+        if self._is_azure_sql_database:
+            level = "database_"
 
-                try:
-                    # Choose the appropriate query based on connector type
-                    if use_convert:
-                        query = f"""
-                            SELECT CONVERT(NVARCHAR(MAX), t.target_data) AS target_xml
-                            FROM sys.dm_xe_{level}sessions s
-                            JOIN sys.dm_xe_{level}session_targets t
-                                ON s.address = t.event_session_address
-                            WHERE s.name = ?
-                            AND t.target_name = 'ring_buffer'
-                        """
-                    else:
-                        query = f"""
-                            SELECT CAST(t.target_data AS XML) AS target_xml
-                            FROM sys.dm_xe_{level}sessions s
-                            JOIN sys.dm_xe_{level}session_targets t
-                                ON s.address = t.event_session_address
-                            WHERE s.name = ?
-                            AND t.target_name = 'ring_buffer'
-                        """
+        # Determine if we need to use CONVERT based on connector type
+        use_convert = False
+        if self._check.connection.connector == "adodbapi":
+            use_convert = True
+            self._log.debug("Using CONVERT syntax for Windows/adodbapi compatibility")
 
-                    cursor.execute(query, (self.session_name,))
-                    row = cursor.fetchone()
-                    if row and row[0]:
-                        raw_xml = str(row[0])
-                except Exception as e:
-                    self._log.error(f"Error querying ring buffer: {e}")
+        try:
+            # Choose the appropriate query based on connector type
+            if use_convert:
+                query = f"""
+                    SELECT CONVERT(NVARCHAR(MAX), t.target_data) AS target_xml
+                    FROM sys.dm_xe_{level}sessions s
+                    JOIN sys.dm_xe_{level}session_targets t
+                        ON s.address = t.event_session_address
+                    WHERE s.name = ?
+                    AND t.target_name = 'ring_buffer'
+                """
+            else:
+                query = f"""
+                    SELECT CAST(t.target_data AS XML) AS target_xml
+                    FROM sys.dm_xe_{level}sessions s
+                    JOIN sys.dm_xe_{level}session_targets t
+                        ON s.address = t.event_session_address
+                    WHERE s.name = ?
+                    AND t.target_name = 'ring_buffer'
+                """
+
+            cursor.execute(query, (self.session_name,))
+            row = cursor.fetchone()
+            if row and row[0]:
+                raw_xml = str(row[0])
+        except Exception as e:
+            self._log.error(f"Error querying ring buffer: {e}")
 
         if not raw_xml:
             return None
@@ -286,35 +429,15 @@ class XESessionBase(DBMAsyncJob):
 
         processed_events = []
         try:
-            try:
-                xml_stream = BytesIO(xml_data.encode('utf-8'))
-            except UnicodeEncodeError:
-                self._log.debug("UTF-8 encoding failed, falling back to UTF-16")
-                xml_stream = BytesIO(xml_data.encode('utf-16'))
+            xml_stream = BytesIO(self._xml_bytes(xml_data))
 
             # Only parse 'end' events for <event> tags
             context = etree.iterparse(xml_stream, events=('end',), tag='event')
 
             for _, elem in context:
-                try:
-                    # Get basic timestamp for filtering
-                    timestamp = elem.get('timestamp')
-
-                    # Filter by timestamp
-                    if not self._last_event_timestamp or (timestamp and timestamp > self._last_event_timestamp):
-                        # Extract event attributes
-                        event_data = {"timestamp": timestamp, "event_name": elem.get('name', '')}
-
-                        # Process the event using appropriate handler
-                        event_name = event_data["event_name"]
-                        if event_name in self._event_handlers:
-                            handler = self._event_handlers[event_name]
-                            if handler(elem, event_data):
-                                processed_events.append(event_data)
-                        else:
-                            self._log.debug(f"No handler for event type: {event_name}")
-                except Exception as e:
-                    self._log.error(f"Error processing event {elem.get('name', 'unknown')}: {e}")
+                event_data = self._process_event(elem)
+                if event_data is not None:
+                    processed_events.append(event_data)
 
                 # Free memory for processed elements
                 elem.clear()
@@ -333,6 +456,38 @@ class XESessionBase(DBMAsyncJob):
         except Exception as e:
             self._log.error(f"Error processing ring buffer events: {e}")
             return []
+
+    def _xml_bytes(self, xml_data: str) -> bytes:
+        """XML text encoded for lxml: as UTF-8, or as UTF-16 when it can't be UTF-8, as with unpaired surrogates."""
+        try:
+            return xml_data.encode('utf-8')
+        except UnicodeEncodeError:
+            self._log.debug("UTF-8 encoding failed, falling back to UTF-16")
+            return xml_data.encode('utf-16')
+
+    def _process_event(self, elem: etree._Element) -> dict | None:
+        """The data of an `<event>` element, or None when it was read before, has no handler or fails to process."""
+        try:
+            if self._is_new_event(elem):
+                # Extract event attributes
+                event_data = {"timestamp": elem.get('timestamp'), "event_name": elem.get('name', '')}
+
+                # Process the event using appropriate handler
+                event_name = event_data["event_name"]
+                if event_name in self._event_handlers:
+                    handler = self._event_handlers[event_name]
+                    if handler(elem, event_data):
+                        return event_data
+                else:
+                    self._log.debug(f"No handler for event type: {event_name}")
+        except Exception as e:
+            self._log.error(f"Error processing event {elem.get('name', 'unknown')}: {e}")
+        return None
+
+    def _is_new_event(self, event: etree._Element) -> bool:
+        """Whether an event wasn't read before: by default, whether it's newer than the last event timestamp."""
+        timestamp = event.get('timestamp')
+        return not self._last_event_timestamp or bool(timestamp and timestamp > self._last_event_timestamp)
 
     def _process_action_elements(self, event, event_data):
         """Process common action elements for all event types"""
@@ -466,7 +621,7 @@ class XESessionBase(DBMAsyncJob):
         }
 
         return {
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
             "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
@@ -597,7 +752,7 @@ class XESessionBase(DBMAsyncJob):
         if all_query_details:
             # Create base payload from the common fields (using the same structure as _create_event_payload)
             batched_payload = {
-                "host": self._check.resolved_hostname,
+                "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
                 "ddagentversion": self._check.agent_version,
                 "ddsource": "sqlserver",
@@ -795,7 +950,7 @@ class XESessionBase(DBMAsyncJob):
 
         return {
             "timestamp": time() * 1000,
-            "host": self._check.resolved_hostname,
+            "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
             "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",

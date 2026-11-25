@@ -11,8 +11,9 @@ from datadog_checks.keda import KedaCheck
 from .common import TEST_METRICS, get_fixture_path
 
 
-def test_check_mock_keda_openmetrics(dd_run_check, instance, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('keda_metrics.txt'))
+def test_check_mock_keda_openmetrics(dd_run_check, instance, aggregator, fake_http_response):
+    with open(get_fixture_path('keda_metrics.txt'), 'rb') as f:
+        fake_http_response(instance['openmetrics_endpoint'], f.read())
     check = KedaCheck('keda', {}, [instance])
     dd_run_check(check)
 

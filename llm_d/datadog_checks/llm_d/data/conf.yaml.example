@@ -172,7 +172,8 @@ instances:
 
     ## @param rename_labels - mapping - optional
     ## A mapping of llm-d label names to their Datadog tag names. By default, the integration renames
-    ## the InferencePool `name` label to `inference_pool`, and the `namespace` and `port` labels, which
+    ## the EPP pool name labels (`name` and `inference_pool`) to `llm_d_pool`, so the `inference_pool`
+    ## tag comes only from the pod annotation. It also renames the `namespace` and `port` labels, which
     ## describe the target model server endpoint rather than the scraped pod, to `endpoint_namespace`
     ## and `endpoint_port`.
     #
@@ -231,6 +232,15 @@ instances:
     ## This integration enables this option by default.
     #
     # collect_counters_with_distributions: true
+
+    ## @param collect_histograms_as_distributions - boolean - optional - default: false
+    ## Whether or not to send histogram buckets as Datadog distribution metrics without the `upper_bound`
+    ## and `lower_bound` tags. This implicitly enables the `histogram_buckets_as_distributions` option.
+    ##
+    ## This option requires an Agent version that supports submitting histogram buckets without bound
+    ## tags. On older Agent versions, the check fails with a configuration error.
+    #
+    # collect_histograms_as_distributions: false
 
     ## @param use_process_start_time - boolean - optional - default: false
     ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,

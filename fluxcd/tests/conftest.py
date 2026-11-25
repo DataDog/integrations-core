@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from unittest import mock
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -111,55 +112,27 @@ def check(instance):
     return FluxcdCheck("fluxcd", {}, [instance])
 
 
-@pytest.fixture()
-def mock_metrics_v1():
-    fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-v1.txt")
-
-    with open(fixture_file, "r") as f:
+def _register_metrics(fake_http_response: Callable[..., Any], fixture_name: str, *urls: str) -> None:
+    with open(os.path.join(os.path.dirname(__file__), "fixtures", fixture_name), "r") as f:
         content = f.read()
 
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+    for url in urls:
+        fake_http_response(url, content, headers={"Content-Type": "text/plain"})
 
 
 @pytest.fixture()
-def mock_metrics_v2():
-    fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-v2.txt")
-
-    with open(fixture_file, "r") as f:
-        content = f.read()
-
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+def mock_metrics_v1(fake_http_response):
+    _register_metrics(fake_http_response, "metrics-v1.txt", "http://localhost:3000/metrics")
 
 
 @pytest.fixture()
-def mock_metrics_ksm():
-    fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-ksm.txt")
+def mock_metrics_v2(fake_http_response):
+    _register_metrics(fake_http_response, "metrics-v2.txt", "http://localhost:3000/metrics")
 
-    with open(fixture_file, "r") as f:
-        content = f.read()
 
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+@pytest.fixture()
+def mock_metrics_ksm(fake_http_response):
+    # The KSM test configures both the OpenMetrics and the kube-state-metrics endpoints, so both serve this payload.
+    _register_metrics(
+        fake_http_response, "metrics-ksm.txt", "http://localhost:3000/metrics", "http://localhost:3001/metrics"
+    )

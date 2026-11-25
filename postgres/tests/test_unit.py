@@ -632,3 +632,22 @@ def test_autodiscovery_group_failure_does_not_skip_later_groups(pg_instance):
     )
 
     assert collected == ['db1']
+
+
+@pytest.mark.parametrize(
+    'version, sync_error_column',
+    [
+        pytest.param(VersionInfo(15, 0, 0), 'sync_error_count', id='pg15'),
+        pytest.param(VersionInfo(18, 9, 0), 'sync_error_count', id='pg18'),
+        pytest.param(VersionInfo(19, 0, 0), 'sync_table_error_count', id='pg19'),
+    ],
+)
+def test_stat_subscription_stats_query_matches_server_version(pg_instance, version, sync_error_column):
+    """PG19 renamed `sync_error_count`; selecting the old name makes the whole query fail on PG19."""
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.version = version
+    check.is_aurora = False
+
+    queries = {query.name: query.query for query in check.dynamic_queries[0].queries}
+
+    assert sync_error_column in queries['stat_subscription_stats_metrics']

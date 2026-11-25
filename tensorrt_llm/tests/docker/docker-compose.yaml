@@ -1,0 +1,8 @@
+services:
+  caddy:
+    image: caddy:2.7
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/tensorrt_llm_1.4.0rc4_metrics.txt:/usr/share/caddy/metrics

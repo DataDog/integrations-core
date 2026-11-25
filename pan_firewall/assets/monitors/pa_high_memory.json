@@ -1,0 +1,38 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nManagement-plane memory on firewall **{{device_ip.name}}** has averaged {{value}}% in use over the last 15 minutes.\n{{/is_alert}}\n\n{{#is_warning}}\n## What's happening?\n\nManagement-plane memory on firewall **{{device_ip.name}}** has averaged {{value}}% in use over the last 15 minutes. This monitor alerts above 95%.\n{{/is_warning}}\n\n{{#is_recovery}}\n## Recovered\n\nManagement-plane memory usage on firewall {{device_ip.name}} is back below 80%.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nManagement services such as the web interface, the API, logging, and commits may slow down or fail.\n\n---\n\n## Why?\n\nPossible causes:\n* **A management process is using more memory than usual**, for example after a large commit or report.\n* **A software issue causing a memory leak.**\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Run `show system resources` on the firewall to find the processes using the most memory.\n2. Check whether the increase follows a commit, a content update, or a software upgrade.\n3. If one process keeps growing, check the PAN-OS release notes for known issues and contact Palo Alto Networks support.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Metrics Explorer](/metric/explorer?exp_metric=pan_firewall.mgmt.memory.available&exp_scope=device_ip:{{device_ip.name}}&exp_agg=max&exp_type=line)\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Management-plane memory usage is high on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 95,
+        "critical_recovery": 80,
+        "warning": 85,
+        "warning_recovery": 80
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_15m):100 * (1 - avg:pan_firewall.mgmt.memory.available{*} by {device_namespace,device_ip} / avg:pan_firewall.mgmt.memory.total{*} by {device_namespace,device_ip}) > 95",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the percentage of management-plane memory in use (not available to processes) on each firewall. When it runs out, management services such as the web interface, the API, logging, and commits slow down or fail.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Management-plane memory usage is high",
+  "version": 2
+}

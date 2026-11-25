@@ -3,7 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import gc
 import inspect
+import json
+import logging
 import subprocess
+import time
 import weakref
 
 import mock
@@ -13,10 +16,15 @@ import pytest
 
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
-from datadog_checks.mysql.util import supports_explain_json_format_version
+from datadog_checks.mysql.util import (
+    get_obfuscate_only_options,
+    has_literal_values,
+    supports_explain_json_format_version,
+)
 from datadog_checks.mysql.version_utils import parse_version
 
 from . import common
+from .utils import obfuscate_sql_literals
 
 pytestmark = pytest.mark.unit
 
@@ -953,3 +961,124 @@ def test_check_gc_after_cancel():
             pytest.fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
     finally:
         gc.enable()
+
+
+@pytest.mark.parametrize(
+    'raw_statement, expected',
+    [
+        pytest.param("SELECT * FROM users WHERE name = 'bob'", True, id='string_literal'),
+        pytest.param("SELECT * FROM users WHERE id = 42", True, id='number_literal'),
+        pytest.param("SELECT EXTRACT(YEAR FROM created_at) FROM users WHERE id = 42", True, id='extract_and_literal'),
+        pytest.param("SELECT * FROM users WHERE id = ? AND name IN (?, ?)", False, id='prepared_statement'),
+        pytest.param("SELECT *\n  FROM users\n  WHERE id = ?  ", False, id='prepared_statement_unnormalized'),
+        pytest.param("SELECT * FROM users_123 WHERE id = ?", False, id='identifier_digits'),
+        pytest.param("SELECT EXTRACT(YEAR FROM created_at) FROM users WHERE id = ?", False, id='extract_field'),
+        pytest.param("SELECT * FROM users WHERE deleted_at IS NULL AND active = TRUE", False, id='null_and_boolean'),
+        pytest.param("SELECT * FROM users", False, id='no_values'),
+    ],
+)
+def test_has_literal_values(datadog_agent, raw_statement, expected):
+    """
+    Raw text is only worth collecting when it reveals string or number literals that obfuscation hides,
+    whatever its formatting and the obfuscator options rewriting other tokens.
+    """
+    options = get_obfuscate_only_options(
+        {'dbms': 'mysql', 'obfuscation_mode': 'obfuscate_and_normalize', 'replace_digits': True, 'keep_null': False}
+    )
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate_sql_literals):
+        assert has_literal_values(raw_statement, options, logging.getLogger(__name__)) is expected
+
+
+@pytest.mark.parametrize(
+    'raw_statement, obfuscated_statement, expected',
+    [
+        pytest.param(
+            "SELECT /* EXTRACT(YEAR FROM created_at) */ * FROM users WHERE id = ?",
+            "SELECT /* EXTRACT(YEAR FROM created_at) */ * FROM users WHERE id = ?",
+            False,
+            id='extract_in_comment',
+        ),
+        pytest.param(
+            "SELECT EXTRACT( /* field */ YEAR FROM created_at) FROM users WHERE id = ?",
+            "SELECT EXTRACT( /* field */ ? FROM created_at) FROM users WHERE id = ?",
+            False,
+            id='comment_before_extract_field',
+        ),
+        pytest.param("EXECUTE stmt USING @'id'", "EXECUTE stmt USING @?", False, id='quoted_user_variable'),
+        pytest.param(
+            "SELECT * FROM users WHERE email = 'EXTRACT(YEAR FROM x)'",
+            "SELECT * FROM users WHERE email = ?",
+            True,
+            id='literal_looking_like_extract',
+        ),
+        pytest.param("SET @'id' = 5", "SET @? = ?", True, id='quoted_user_variable_and_literal'),
+        pytest.param(
+            "SELECT NULL AS `/*`, 123, NULL AS `*/`",
+            "SELECT NULL AS `/*`, ?, NULL AS `*/`",
+            True,
+            id='comment_markers_in_quoted_identifiers',
+        ),
+        pytest.param(
+            "SELECT a # /*\nFROM users WHERE id = 5 # */",
+            "SELECT a # /*\nFROM users WHERE id = ? # */",
+            True,
+            id='comment_markers_in_line_comments',
+        ),
+    ],
+)
+def test_has_literal_values_go_sqllexer_output(datadog_agent, raw_statement, obfuscated_statement, expected):
+    """
+    Tokens that the obfuscator replaces although they carry no values are told apart from literals, using the
+    output of the agent obfuscator (go-sqllexer v0.2.6) in `obfuscate_only` mode with the detection options.
+    """
+    options = get_obfuscate_only_options({'dbms': 'mysql'})
+    obfuscated = json.dumps({'query': obfuscated_statement, 'metadata': {}})
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', return_value=obfuscated):
+        assert has_literal_values(raw_statement, options, logging.getLogger(__name__)) is expected
+
+
+@pytest.mark.parametrize(
+    'raw_statement, obfuscated_statement',
+    [
+        pytest.param("SELECT '" + "EXTRACT(/*" * 6400 + "'", "SELECT ?", id='unterminated_comments_in_literal'),
+        pytest.param("EXTRACT(" + "/**//*" * 10000, "EXTRACT(" + "/**//*" * 10000, id='adjacent_comments'),
+        pytest.param("SELECT " + "`/*" * 20000, "SELECT " + "`/*" * 20000, id='quoted_comment_markers'),
+    ],
+)
+def test_has_literal_values_scales_linearly(datadog_agent, raw_statement, obfuscated_statement):
+    """
+    Detection runs on every collected activity row, so statement texts made of repeated comment markers, which
+    used to take seconds, must not stall the collection.
+    """
+    options = get_obfuscate_only_options({'dbms': 'mysql'})
+    obfuscated = json.dumps({'query': obfuscated_statement, 'metadata': {}})
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', return_value=obfuscated):
+        start = time.perf_counter()
+        has_literal_values(raw_statement, options, logging.getLogger(__name__))
+        assert time.perf_counter() - start < 1
+
+
+def test_has_literal_values_obfuscation_failure(datadog_agent):
+    """A failing detection keeps the raw statement, since raw statement collection is explicitly enabled."""
+    options = get_obfuscate_only_options({'dbms': 'mysql'})
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=Exception('boom')):
+        assert has_literal_values("SELECT * FROM users WHERE id = ?", options, logging.getLogger(__name__)) is True
+
+
+@pytest.mark.parametrize(
+    'collect_raw_query_statement, expected_tagged',
+    [
+        pytest.param(None, False, id='default'),
+        pytest.param({'enabled': False}, False, id='disabled'),
+        pytest.param({'enabled': True}, True, id='enabled'),
+    ],
+)
+def test_raw_query_statement_tag(collect_raw_query_statement, expected_tagged):
+    """The data of an instance collecting raw query statements is tagged so it can be told apart."""
+    instance = {'server': 'localhost', 'user': 'datadog', 'dbm': True}
+    if collect_raw_query_statement is not None:
+        instance['collect_raw_query_statement'] = collect_raw_query_statement
+
+    check = MySql(common.CHECK_NAME, {}, instances=[instance])
+
+    assert ('raw_query_statement:enabled' in check.tag_manager.get_tags()) is expected_tagged

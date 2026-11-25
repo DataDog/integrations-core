@@ -258,24 +258,26 @@ def write_run_manifest(base_path: Path, *, run: ResolvedRun) -> None:
     (base_path / RUN_MANIFEST_NAME).write_text(f'{run.model_dump_json(indent=2)}\n', encoding='utf-8')
 
 
-def load_run_manifest(app: Application, path: Path, *, repository: str) -> ResolvedRun:
-    """Read a run resolved by an earlier invocation, refusing a manifest that cannot be trusted.
-
-    The manifest is the run's identity, so an unusable one stops the invocation here. The
-    repository check sits outside the model because only this caller knows which was asked for.
-    """
+def load_run_manifest(path: Path, *, repository: str) -> ResolvedRun:
+    """Read a run resolved by an earlier invocation, raising `RunResolutionError` if unusable."""
     try:
         # Pass bytes so Pydantic reports encoding problems as validation errors.
         run = ResolvedRun.model_validate_json(path.read_bytes())
     except OSError as error:
-        app.abort(f'Could not read run manifest {path}: {error}')
+        raise RunResolutionError(f'Could not read run manifest {path}: {error}') from error
     except ValidationError as error:
-        app.abort(f'Run manifest {path} is not a valid run: {error}')
+        raise RunResolutionError(f'Run manifest {path} is not a valid run: {error}') from error
 
     if run.repository.casefold() != repository.casefold():
-        app.abort(f'Run manifest {path} describes repository {run.repository}, not {repository}.')
+        raise RunResolutionError(f'Run manifest {path} describes repository {run.repository}, not {repository}.')
 
     return run
+
+
+def run_context(context: str | None = None, *, is_pr: bool) -> str:
+    if is_pr:
+        return 'pr'
+    return 'master' if context is None else context
 
 
 def resolve_run(
@@ -505,7 +507,7 @@ def resolve_pull_request_run(
                 base_sha=pull.base.sha,
                 is_fork=head_is_fork(pull.head, owner=resolver.owner, repo=resolver.repo),
                 exclude_targets=exclude_targets,
-                context='pr',
+                context=run_context(is_pr=True),
             )
             if monitor is not None:
                 monitor.logger.info(

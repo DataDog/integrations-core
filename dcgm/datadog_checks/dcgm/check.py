@@ -8,6 +8,7 @@ from datadog_checks.dcgm.metrics import IGNORED_TAGS, METRIC_MAP, RENAME_LABELS_
 
 class DcgmCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'dcgm'
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     def get_default_config(self):

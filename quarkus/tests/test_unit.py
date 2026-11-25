@@ -62,9 +62,12 @@ EXPECTED_SUMMARIES = [
 ]
 
 
-def test_check(dd_run_check, aggregator, instance, mock_http_response):
+def test_check(dd_run_check, aggregator, instance, fake_http_response):
     # Given
-    mock_http_response(file_path=Path(__file__).parent.absolute() / "fixtures" / "quarkus_auto_metrics.txt")
+    fake_http_response(
+        instance['openmetrics_endpoint'],
+        (Path(__file__).parent.absolute() / "fixtures" / "quarkus_auto_metrics.txt").read_bytes(),
+    )
     check = QuarkusCheck('quarkus', {}, [instance])
     # When
     dd_run_check(check)
@@ -78,12 +81,12 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http_response):
+def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http_response):
     # Given
-    mock_http_response(status_code=404)
+    fake_http_response(instance['openmetrics_endpoint'], status_code=404)
     check = QuarkusCheck('quarkus', {}, [instance])
     # When
-    with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
+    with pytest.raises(Exception, match="HTTPClientStatusError"):
         dd_run_check(check)
     # Then
     aggregator.assert_service_check('quarkus.openmetrics.health', QuarkusCheck.CRITICAL)

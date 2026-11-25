@@ -24,6 +24,7 @@ from ddev.cli.ci.dispatch_run import (
     load_run_manifest,
     resolution_github_client,
     resolve_run,
+    run_context,
     write_run_manifest,
 )
 from ddev.cli.ci.tests.execution_metrics import ExecutionOutcome, MetricsHelper, Operation
@@ -259,12 +260,18 @@ def dispatch_tests(
     tested_repository = f'{owner}/{repo}'
 
     caller_tags = tuple(tags.split()) if tags else ()
+    caller_fields = tag_fields(caller_tags)
+    context = (
+        UNRESOLVED_RUN_FIELDS['context']
+        if run_manifest is not None
+        else run_context(caller_fields.get('context') or None, is_pr=pr_resolver is not None)
+    )
     output_level = getattr(logging, log_level.upper())
 
     console_handler = AppLoggingHandler(app)
     console_handler.setLevel(output_level)
     console_handler.setFormatter(
-        console_formatter(hidden_fields=console_hidden_fields() | PROTECTED_RUN_FIELDS | set(tag_fields(caller_tags)))
+        console_formatter(hidden_fields=console_hidden_fields() | PROTECTED_RUN_FIELDS | caller_fields.keys())
     )
     metrics_sink = None if (dry_run and not resolve_only) else build_datadog_metrics_sink(app)
     monitoring = MonitoringRuntime(
@@ -274,10 +281,11 @@ def dispatch_tests(
         component_override='run-resolution' if resolve_only else None,
         protected_fields=PROTECTED_RUN_FIELDS,
         base_fields={
-            **{name: value for name, value in tag_fields(caller_tags).items() if name not in PROTECTED_RUN_FIELDS},
+            **{name: value for name, value in caller_fields.items() if name not in PROTECTED_RUN_FIELDS},
             **BASE_FIELDS,
             **repository_fields(owner, repo),
             **UNRESOLVED_RUN_FIELDS,
+            'context': context,
             # Bind even when absent, so caller tags and scopes cannot forge the workflow's identity.
             'ci_pipeline_id': ci_pipeline_id(),
         },
@@ -290,27 +298,34 @@ def dispatch_tests(
     dispatcher: Dispatcher | None = None
     summary_error: str | None = None
     batch_count = job_count = 0
+    run: ResolvedRun | None = None
+    manifest_error: RunResolutionError | None = None
     try:
-        monitor.logger.info(
-            'Dispatcher invocation started',
-            all_targets=all_targets,
-            dry_run=dry_run,
-            minimum_base_package=minimum_base_package,
-            tags=list(caller_tags) if caller_tags else None,
-        )
+        try:
+            if run_manifest is not None:
+                run = load_run_manifest(Path(run_manifest), repository=tested_repository)
+                monitoring.set_run_fields(**run_fields(run, tags=caller_tags))
+        except RunResolutionError as error:
+            manifest_error = error
+        finally:
+            # An unusable or interrupted manifest read still needs a start record.
+            monitor.logger.info(
+                'Dispatcher invocation started',
+                all_targets=all_targets,
+                dry_run=dry_run,
+                minimum_base_package=minimum_base_package,
+                tags=list(caller_tags) if caller_tags else None,
+            )
+        if manifest_error is not None:
+            app.abort(str(manifest_error))
 
         # One INFO line per request would bury the Dispatcher's own progress.
         logging.getLogger('httpx').setLevel(logging.WARNING)
 
         base_path = app.repo.path / output_dir
 
-        run: ResolvedRun | None
         resolution = monitoring.component('resolution')
-        if run_manifest is not None:
-            # The manifest is the whole run: its identity is read, not recalculated, and a
-            # manifest the caller explicitly supplied is not rewritten either.
-            run = load_run_manifest(app, Path(run_manifest), repository=tested_repository)
-        else:
+        if run is None:
             # Abort outside the operation: it settles on the error, and the abort's `SystemExit` settles nothing.
             try:
                 with MetricsHelper(resolution).operation(Operation.RESOLVE_RUN):
@@ -324,7 +339,7 @@ def dispatch_tests(
                         targets=targets,
                         exclude_targets=exclude_targets,
                         head_tag=head_tag,
-                        context=tag_fields(caller_tags).get('context') or 'master',
+                        context=context,
                         monitor=resolution,
                     )
             except RunResolutionError as error:
@@ -334,10 +349,8 @@ def dispatch_tests(
                 no_op_reason = NO_MATCHING_PR_REASON
                 return
 
-        # Bind before setup can fail, so terminal records retain the resolved identity.
-        monitoring.set_run_fields(**run_fields(run, tags=caller_tags))
-
-        if run_manifest is None:
+            # Bind before setup can fail, so terminal records retain the resolved identity.
+            monitoring.set_run_fields(**run_fields(run, tags=caller_tags))
             write_run_manifest(base_path, run=run)
             if resolve_only:
                 outcome = ExecutionOutcome.RESOLVED

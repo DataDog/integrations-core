@@ -70,12 +70,12 @@ def scraped_aggregator(
     dd_run_check: Callable[..., None],
     aggregator: AggregatorStub,
     instance: InstanceType,
-    mock_http_response: Callable[..., None],
+    fake_http_response: Callable[..., Any],
 ) -> AggregatorStub:
     # Aggregator populated from the offline exposition fixture. The check is run twice because
     # the counter and rate transformers need a previous sample before they submit anything, so a
     # single run would leave those families out of the aggregator entirely.
-    mock_http_response(file_path=FIXTURE_PATH)
+    fake_http_response(instance['openmetrics_endpoint'], Path(FIXTURE_PATH).read_bytes())
     check = IrisCheck('intersystems_iris', {}, [instance])
     dd_run_check(check)
     dd_run_check(check)

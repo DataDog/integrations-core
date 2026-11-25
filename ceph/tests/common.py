@@ -9,6 +9,8 @@ import os
 CHECK_NAME = 'ceph'
 HERE = os.path.abspath(os.path.dirname(__file__))
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
+# For example `v14.2.22-20210630`; only set in environments that start a cluster.
+CEPH_VERSION = os.environ.get('CEPH_VERSION', '')
 
 BASIC_CONFIG = {'ceph_cmd': 'docker exec dd-test-ceph ceph', 'tags': ['optional:tag1']}
 
@@ -23,6 +25,7 @@ EXPECTED_METRICS = [
     "ceph.num_up_osds",
     "ceph.num_pgs",
     "ceph.num_mons",
+    "ceph.num_mons.active",
     "ceph.aggregate_pct_used",
     "ceph.num_objects",
     "ceph.read_bytes",

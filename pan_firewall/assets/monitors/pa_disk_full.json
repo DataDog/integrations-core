@@ -1,0 +1,38 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nFile system **{{mount.name}}** on firewall **{{device_ip.name}}** is {{value}}% full.\n{{/is_alert}}\n\n{{#is_warning}}\n## What's happening?\n\nFile system **{{mount.name}}** on firewall **{{device_ip.name}}** is {{value}}% full. This monitor alerts above 97%.\n{{/is_warning}}\n\n{{#is_recovery}}\n## Recovered\n\nFile system {{mount.name}} on firewall {{device_ip.name}} is back below 85% used.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nLogging, software and content updates, and commits may fail.\n\n---\n\n## Why?\n\nPossible causes:\n* **Old software images** left after upgrades.\n* **Debug, core, or tech support files.**\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Run `show system disk-space` on the firewall to confirm which mount is full.\n2. Delete unused software images with `delete software version <version>`.\n3. Delete old debug and core files.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Metrics Explorer](/metric/explorer?exp_metric=pan_firewall.disk.used_pct&exp_scope=device_ip:{{device_ip.name}},mount:{{mount.name}}&exp_agg=max&exp_type=line)\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] File system {{mount.name}} is nearly full on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 97,
+        "critical_recovery": 85,
+        "warning": 90,
+        "warning_recovery": 85
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_1h):max:pan_firewall.disk.used_pct{!mount:/opt/panlogs} by {device_namespace,device_ip,mount} > 97",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the percentage of space used on each file system of the firewall. A full file system can stop logging and block updates and commits. The log partition `/opt/panlogs` is excluded: PAN-OS fills it up to the log quota and purges the oldest logs, so high usage there is normal.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "File system is nearly full",
+  "version": 2
+}
