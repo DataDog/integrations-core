@@ -147,7 +147,7 @@ datadog-kubevirt-api==2.5.2
 datadog-kubevirt-controller==3.0.0
 datadog-kubevirt-handler==3.0.0
 datadog-kueue==3.1.0
-datadog-kuma==2.5.0
+datadog-kuma==3.0.0
 datadog-kyototycoon==4.5.0
 datadog-kyverno==3.5.0
 datadog-lighttpd==5.5.0
