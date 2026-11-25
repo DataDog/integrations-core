@@ -16,7 +16,6 @@ ddtrace==4.16.3
 dnspython==2.9.2
 fastavro==1.12.2
 foundationdb==6.3.25
-hazelcast-python-client==5.7.0
 in-toto==2.0.0
 jellyfish==1.2.1
 kubernetes==35.0.0
