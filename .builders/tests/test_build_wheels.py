@@ -161,16 +161,29 @@ def placeholder():
         assert path.read_bytes() == source.replace('\n', newline).encode('utf-8')
 
 
-def test_kubernetes_api_docstrings_are_kept_for_watch(tmp_path: Path):
-    # `kubernetes.watch.Watch` reads the API method docstrings to pick the event type and the streaming
-    # argument, so only the model docstrings may be emptied.
+def test_kubernetes_api_docstrings_keep_only_watch_directives(tmp_path: Path):
+    # `kubernetes.watch.Watch` reads `:param bool follow:` and `:return:` from API method docstrings
+    # to pick the streaming argument and event type, so those directive lines must remain while the
+    # surrounding API prose and model docstrings are stripped.
     api = tmp_path / 'kubernetes/client/api/core_v1_api.py'
     api_source = '''class CoreV1Api:
+    """Generated API client prose that Watch does not read."""
+
     def read_namespaced_pod_log(self, name, namespace, **kwargs):
         """read log of the specified Pod
 
+        This method makes a synchronous HTTP request by default.
+        :param str name: name of the Pod
         :param bool follow: Follow the log stream of the pod.
         :return: str
+                 If the method is called asynchronously, returns the request thread.
+        """
+
+    def list_namespaced_pod(self, namespace, **kwargs):
+        """list or watch objects of kind Pod
+
+        :param str namespace: object name and auth scope
+        :return: V1PodList
         """
 '''
     model = tmp_path / 'kubernetes/client/models/v1_pod.py'
@@ -184,20 +197,70 @@ def test_kubernetes_api_docstrings_are_kept_for_watch(tmp_path: Path):
     rules = build_wheels._get_matching_rules('kubernetes-35.0.0-py2.py3-none-any.whl')
 
     assert build_wheels._strip_lines_from_dir(tmp_path, rules)
-    assert api.read_text(encoding='utf-8') == api_source
+    updated_api = api.read_text(encoding='utf-8')
+    namespace: dict[str, Any] = {}
+    exec(compile(updated_api, str(api), 'exec'), namespace)
+    api_cls = namespace['CoreV1Api']
+    assert api_cls.__doc__ == ''
+    assert (
+        api_cls.read_namespaced_pod_log.__doc__ == ':param bool follow: Follow the log stream of the pod.\n:return: str'
+    )
+    assert api_cls.list_namespaced_pod.__doc__ == ':return: V1PodList'
+    assert 'synchronous HTTP request' not in updated_api
     assert 'collection of containers' not in model.read_text(encoding='utf-8')
 
 
 @pytest.mark.parametrize(
     'wheel_name, strip_docstrings',
     [
+        ('aerospike-7.1.1-cp313-cp313-manylinux_2_17_x86_64.whl', True),
+        ('azure_core-1.41.0-py3-none-any.whl', True),
+        ('azure_identity-1.25.3-py3-none-any.whl', True),
+        ('backports_zstd-1.8.0-cp313-cp313-manylinux2014_x86_64.whl', True),
+        ('beautifulsoup4-4.15.0-py3-none-any.whl', True),
+        ('boto3-1.43.119-py3-none-any.whl', True),
+        ('botocore-1.43.119-py3-none-any.whl', True),
+        ('clickhouse_connect-1.6.0-cp313-cp313-manylinux2014_x86_64.whl', True),
         ('cm_client-45.0.4-py3-none-manylinux2014_x86_64.whl', True),
+        ('confluent_kafka-2.13.2-cp313-cp313-manylinux_2_17_x86_64.whl', True),
         ('ddtrace-4.16.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl', True),
+        ('dogpile_cache-1.5.0-py3-none-any.whl', True),
         ('hazelcast_python_client-5.7.0-py3-none-any.whl', True),
+        ('in_toto-2.0.0-py3-none-any.whl', True),
+        ('keystoneauth1-5.19.0-py3-none-any.whl', True),
+        ('kubernetes-35.0.0-py2.py3-none-any.whl', True),
+        ('ldap3-2.9.1-py2.py3-none-any.whl', True),
+        ('oauthlib-4.0.1-py3-none-any.whl', True),
         ('openstacksdk-4.18.0-py3-none-any.whl', True),
+        ('opentelemetry_api-1.45.2-py3-none-any.whl', True),
+        ('packaging-26.3-py3-none-any.whl', True),
+        ('paramiko-5.0.0-py3-none-any.whl', True),
+        ('pathspec-1.1.1-py3-none-any.whl', True),
+        ('platformdirs-4.14.8-py3-none-any.whl', True),
+        ('protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl', True),
+        ('psycopg-3.3.4-py3-none-any.whl', True),
+        ('pydantic-2.13.5-py3-none-any.whl', True),
+        ('pydantic_core-2.46.5-cp313-cp313-manylinux_2_17_x86_64.whl', True),
+        ('pynacl-1.6.2-cp38-abi3-manylinux2014_x86_64.whl', True),
+        ('pyopenssl-26.4.0-py3-none-any.whl', True),
+        ('pysnmp-7.1.22-py3-none-any.whl', True),
+        ('pyspnego-0.12.4-py3-none-any.whl', True),
         ('redis-8.1.0-py3-none-any.whl', True),
-        # A separate distribution whose docstrings were not reviewed
+        ('requests_toolbelt-1.0.0-py2.py3-none-any.whl', True),
+        ('s3transfer-0.19.3-py3-none-any.whl', True),
+        ('securesystemslib-0.28.0-py3-none-any.whl', True),
+        ('setuptools-84.2.1-py3-none-any.whl', True),
+        ('tuf-4.0.0-py3-none-any.whl', True),
+        ('urllib3-2.8.0-py3-none-any.whl', True),
+        # Distributions whose docstrings are read at runtime or were not reviewed
+        ('click-8.5.1-py3-none-any.whl', False),
         ('ddtrace_internal-0.1.0-py3-none-any.whl', False),
+        ('dnspython-2.9.2-py3-none-any.whl', False),
+        ('lxml-6.1.0-cp313-cp313-manylinux2014_x86_64.whl', False),
+        ('msal-1.39.0-py3-none-any.whl', False),
+        ('psycopg_c-3.3.4-cp313-cp313-manylinux_2_17_x86_64.whl', False),
+        ('pysnmp_mibs-0.1.6-py2.py3-none-any.whl', False),
+        ('requests-2.34.2-py3-none-any.whl', False),
     ],
 )
 def test_docstring_rules_match_wheel_filenames(wheel_name: str, strip_docstrings: bool):
