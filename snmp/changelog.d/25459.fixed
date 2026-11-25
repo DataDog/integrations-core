@@ -1,1 +1,0 @@
-Document `core` as the default `loader` and explain how the Agent selects between the core and Python SNMP implementations.
