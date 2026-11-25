@@ -10,6 +10,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
     HTTPClientInvalidURLError,
+    HTTPClientReadTimeoutError,
     HTTPClientStatusError,
     HTTPClientTimeoutError,
 )
@@ -673,6 +674,12 @@ class SparkCheck(AgentCheck):
                 response.raise_for_status()
 
         except HTTPClientTimeoutError as e:
+            # The neutral client does not distinguish header and body read timeouts.
+            if isinstance(e, HTTPClientReadTimeoutError) and self._should_suppress_terminal_pod_error(
+                e, self._get_pod_phase(tags)
+            ):
+                return None
+
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,
@@ -746,14 +753,19 @@ class SparkCheck(AgentCheck):
         self._startup_retry_count = 0
         return response_json
 
+    def _should_suppress_terminal_pod_error(self, exception: Exception, pod_phase: str | None) -> bool:
+        if pod_phase in ('failed', 'succeeded', 'unknown'):
+            self.log.debug("Pod phase is terminal, suppressing request error: %s", exception)
+            return True
+        return False
+
     def _should_suppress_connection_error(self, exception, tags):
         """Suppress kubernetes-only connection false positives during pod shutdown."""
         pod_phase = self._get_pod_phase(tags)
         if pod_phase is None:
             return False
 
-        if pod_phase in ('failed', 'succeeded', 'unknown'):
-            self.log.debug("Pod phase is terminal, suppressing request error: %s", exception)
+        if self._should_suppress_terminal_pod_error(exception, pod_phase):
             return True
 
         if (

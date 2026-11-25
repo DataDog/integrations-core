@@ -21,6 +21,7 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPClientInvalidURLError,
     HTTPClientReadTimeoutError,
     HTTPClientRequestError,
+    HTTPClientTimeoutError,
 )
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.spark import SparkCheck
@@ -1750,6 +1751,38 @@ def test_rest_request_failure_service_check(aggregator, fake_http, outcome, expe
     (service_check,) = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
     assert service_check.status == SparkCheck.CRITICAL
     assert service_check.message.startswith(expected_message)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'pod_phase, error, suppress',
+    [
+        pytest.param('Failed', HTTPClientReadTimeoutError('read timed out'), True, id='failed-pod-read-timeout'),
+        pytest.param('Succeeded', HTTPClientReadTimeoutError('read timed out'), True, id='succeeded-pod-read-timeout'),
+        pytest.param('Unknown', HTTPClientReadTimeoutError('read timed out'), True, id='unknown-pod-read-timeout'),
+        pytest.param('Running', HTTPClientReadTimeoutError('read timed out'), False, id='running-pod-read-timeout'),
+        pytest.param(
+            'Failed', HTTPClientConnectTimeoutError('connect timed out'), False, id='failed-pod-connect-timeout'
+        ),
+    ],
+)
+def test_driver_timeout_service_check_by_pod_phase(
+    aggregator, fake_http, pod_phase: str, error: HTTPClientTimeoutError, suppress: bool
+):
+    fake_http.register_response('GET', str(DRIVER_APP_URL), error)
+    check = SparkCheck('spark', {}, [DRIVER_CONFIG])
+    tags = [f'pod_phase:{pod_phase}']
+
+    if suppress:
+        assert (
+            check._rest_request(DRIVER_CONFIG['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, tags) is None
+        )
+        assert not aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+    else:
+        with pytest.raises(type(error)):
+            check._rest_request(DRIVER_CONFIG['spark_url'], SPARK_REST_PATH, SPARK_DRIVER_SERVICE_CHECK, tags)
+        (service_check,) = aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK)
+        assert service_check.status == SparkCheck.CRITICAL
 
 
 @pytest.mark.unit
