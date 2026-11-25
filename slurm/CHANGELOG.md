@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.6.0 / 2026-11-25
+
+***Added***:
+
+* Add job lifecycle events, polled from `sacct`, behind the `collect_job_events` option. ([#25723](https://github.com/DataDog/integrations-core/pull/25723))
+
 ## 2.5.3 / 2026-10-26 / Agent 7.86.0
 
 ***Fixed***:
