@@ -26,6 +26,14 @@ def request_count(fake_http, url):
     return sum(1 for request in fake_http.requests if request.url == url)
 
 
+def test_fixture_uses_current_page_after_scripted_response(mock_http_get):
+    url = 'https://10.0.0.197:9440/api/prism/v4.0/config/tasks'
+    register_sequence(mock_http_get, url, [FakeHTTPResponse(status_code=429)])
+
+    assert mock_http_get.get(url, params={'$page': 0}).status_code == 429
+    assert mock_http_get.get(url, params={'$page': 1}).json()['data'] == []
+
+
 def test_retry_on_rate_limit_success_no_retry(dd_run_check, aggregator, mock_instance, mock_http_get):
     """Test successful request without needing retries."""
     check = NutanixCheck('nutanix', {}, [mock_instance])
@@ -89,8 +97,12 @@ def test_retry_on_non_429_error_no_retry(dd_run_check, aggregator, mock_instance
     register_sequence(mock_http_get, URL, [FakeHTTPResponse(status_code=500)])
     mock_sleep = mocker.patch('time.sleep')
 
-    with pytest.raises(HTTPClientStatusError):
+    with pytest.raises(HTTPClientStatusError) as error:
         check._get_request_data("api/test")
+
+    assert error.value.response is not None
+    assert error.value.response.status_code == 500
+    mock_http_get.assert_all_responses_consumed()
 
     # Should only try once, no retries for non-429 errors
     assert request_count(mock_http_get, URL) == 1

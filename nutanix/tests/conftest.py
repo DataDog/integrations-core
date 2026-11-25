@@ -296,13 +296,12 @@ def mock_http_get(mocker, fake_http):
         print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
         return FakeHTTPResponse(status_code=404)
 
-    # The fake only serves preregistered responses matched on exact URL and options, but these responses
-    # depend on `$page` and time-based `$filter` params computed while the check runs. Register each
-    # response just before the fake looks it up; one-time registrations made by a test are served first.
+    # Generate the fallback from this request's `$page` and `$filter`. Scripted one-shot responses
+    # take priority, and the latest fallback wins when no scripted response matches.
     fake_get = FakeHTTPClient.get
 
     def get(client, url, **options):
-        client.register_response('GET', url, mock_response(url, options.get('params')), once=True)
+        client.register_response('GET', url, mock_response(url, options.get('params')))
         return fake_get(client, url, **options)
 
     mocker.patch.object(FakeHTTPClient, 'get', get)
