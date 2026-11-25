@@ -24,6 +24,7 @@ This module only depends on the PodGroup and pod JSON, so it can be tested witho
 from __future__ import annotations
 
 import logging
+import re
 import time
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Mapping
@@ -61,6 +62,10 @@ SCHEDULER_TAG = 'job_scheduler'
 SCHEDULER_QUEUE_TAG = 'job_scheduler_queue'
 SCHEDULER_WORKLOAD_TAG = 'job_scheduler_workload'
 UNKNOWN_REASON = 'unknown'
+# The GPU model, as the Agent tags it on GPU metrics.
+GPU_TYPE_TAG = 'gpu_type'
+# Node label that carries the GPU model, which a pod can require in its `nodeSelector` or `nodeAffinity`.
+GPU_PRODUCT_LABELS = ('nvidia.com/gpu.product',)
 KAI_REASONS = {
     'OverLimit': 'quota_exhausted',
     'NonPreemptibleOverQuota': 'quota_exhausted',
@@ -136,6 +141,8 @@ class Observation(NamedTuple):
     """Raw reason the PodGroup waits, as KAI reports it, or derived by the check (see `DERIVED_REASONS`)."""
     cause: str | None = None
     """Reason normalized across schedulers, submitted as `reason`. Only set for badput states."""
+    gpu_type: str | None = None
+    """Normalized GPU model that the active pods explicitly require, submitted as `gpu_type`, or None."""
     owner_finished_at: float | None = None
     """Unix time the owner Job completed or failed, which can be later than its last pod, such as when it fails while
     waiting to retry."""
@@ -151,6 +158,7 @@ class Contribution(NamedTuple):
     seconds: float
     cause: str | None = None
     reason: str | None = None
+    gpu_type: str | None = None
 
     @property
     def gpu_seconds(self) -> float:
@@ -208,6 +216,58 @@ def pod_gpus(pod: dict, resource_names: Iterable[str] = GPU_RESOURCE_NAMES) -> f
     if fraction:
         total += parse_gpu_quantity(fraction)
     return total
+
+
+GPU_TYPE_PATTERN = re.compile(r'^(?:nvidia|tesla)_(?:geforce_)?(rtx_pro_|rtx_)?([a-z\d]+)')
+AMD_GPU_TYPE_PATTERN = re.compile(r'^amd_(?:radeon_)?instinct_([a-z]+\d+[a-z]*)')
+GPU_TYPE_VARIANTS = {'a10g': 'a10', 'l40s': 'l40'}
+
+
+def extract_gpu_type(device_name: str | None) -> str | None:
+    """Return the normalized GPU model of a device name or `nvidia.com/gpu.product` label value, such as `a100` for
+    `NVIDIA-A100-SXM4-80GB`. It follows the Agent, so that the values match the `gpu_type` tag of its GPU metrics."""
+    if not device_name:
+        return None
+    name = re.sub(r'[^a-z\d]+', '_', device_name.strip().lower()).strip('_')
+    if match := GPU_TYPE_PATTERN.match(name):
+        gpu_type = (match.group(1) or '') + match.group(2)
+        return GPU_TYPE_VARIANTS.get(gpu_type, gpu_type)
+    if match := AMD_GPU_TYPE_PATTERN.match(name):
+        return match.group(1)
+    return None
+
+
+def _single(types: Iterable[str | None]) -> str | None:
+    """Return the only type of a collection, or None when it is empty, has an unknown value, or is ambiguous."""
+    types = list(types)
+    return types[0] if types and None not in types and len(set(types)) == 1 else None
+
+
+def pod_gpu_type(pod: dict) -> str | None:
+    """Return the GPU model that a pod explicitly requires, or None.
+
+    KAI PodGroups do not expose the GPU model. It comes from a `nodeSelector`, or from a `nodeAffinity` whose terms
+    all require a single GPU model with `In`. A pod that does not constrain the model, or that allows several, has no
+    type: it is not guessed.
+    """
+    spec = pod.get('spec') or {}
+    selector = spec.get('nodeSelector') or {}
+    for label in GPU_PRODUCT_LABELS:
+        if label in selector:
+            return extract_gpu_type(str(selector[label]))
+    required = (
+        ((spec.get('affinity') or {}).get('nodeAffinity') or {}).get('requiredDuringSchedulingIgnoredDuringExecution')
+    ) or {}
+    # Terms are alternatives, so each one must require the same single model.
+    term_types = []
+    for term in required.get('nodeSelectorTerms') or []:
+        values = [
+            expression.get('values') or []
+            for expression in term.get('matchExpressions') or []
+            if expression.get('key') in GPU_PRODUCT_LABELS and expression.get('operator') == 'In'
+        ]
+        term_types.append(_single(extract_gpu_type(value) for value in values[0]) if values else None)
+    return _single(term_types)
 
 
 def parse_timestamp(value: str | None) -> float | None:
@@ -331,6 +391,7 @@ def observe(podgroup: dict, pods: list[dict], owner: OwnerStatus | None = None) 
         finished_at=finished_at,
         reason=reason,
         cause=normalize_reason(state, reason),
+        gpu_type=_single(pod_gpu_type(pod) for pod in active if pod_gpus(pod) > 0),
         owner_finished_at=owner_finished_at,
     )
 
@@ -421,6 +482,10 @@ class GoodputTracker:
                 # Pods can be briefly missing, such as between an eviction and the replacement pod: keep the request.
                 gpus = previous.gpus if previous is not None and previous.gpus is not None else 0.0
                 observation = observation._replace(gpus=gpus)
+            if observation.gpu_type is None and previous is not None and previous.gpu_type:
+                # Keep the GPU model once known, so that the series of a PodGroup do not change while its pods are
+                # briefly missing.
+                observation = observation._replace(gpu_type=previous.gpu_type)
             if gpus <= 0 and previous is None:
                 continue
             # A tracked PodGroup whose active pods need no GPU, such as CPU pods still running after the GPU ones
@@ -487,6 +552,7 @@ class GoodputTracker:
                     seconds=seconds,
                     cause=previous.cause,
                     reason=previous.reason,
+                    gpu_type=previous.gpu_type,
                 )
             )
         return contributions
@@ -552,6 +618,8 @@ def workload_points(contributions: Iterable[Contribution]) -> list[tuple[str, fl
     for contribution in contributions:
         name = workload_name(contribution.name)
         tags = [*queue_tags(contribution.queue), f'{WORKLOAD_TAG}:{name}', f'{SCHEDULER_WORKLOAD_TAG}:{name}']
+        if contribution.gpu_type:
+            tags.append(f'{GPU_TYPE_TAG}:{contribution.gpu_type}')
         hours = contribution.gpu_seconds / SECONDS_PER_HOUR
         if contribution.category == Category.BADPUT:
             reason = contribution.cause or UNKNOWN_REASON

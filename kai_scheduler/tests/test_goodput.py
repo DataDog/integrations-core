@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import csv
+import json
 import os
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -14,6 +16,7 @@ from datadog_checks.kai_scheduler.goodput import (
     FULLY_ADMITTED_METRIC,
     GPU_FRACTION_ANNOTATION,
     PODGROUP_ANNOTATION,
+    Category,
     GoodputCollector,
     GoodputTracker,
     OwnerStatus,
@@ -22,8 +25,10 @@ from datadog_checks.kai_scheduler.goodput import (
     aggregate,
     badput_by_reason,
     classify,
+    extract_gpu_type,
     job_status,
     normalize_reason,
+    pod_gpu_type,
     pod_gpus,
     queue_tags,
     workload_points,
@@ -302,7 +307,8 @@ def test_collector_submits_one_series_per_podgroup(aggregator, instance, mocker)
         'kube_namespace:ns',
         'kai_queue:team-a',
         'job_scheduler_queue:team-a',
-        'kai_workload:pg', 'job_scheduler_workload:pg',
+        'kai_workload:pg',
+        'job_scheduler_workload:pg',
     ]
     aggregator.assert_metric(BADPUT_METRIC, value=30 / 3600, tags=[*tags, 'reason:waiting_for_pods'], count=1)
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=0, tags=tags, count=1)
@@ -460,7 +466,8 @@ def test_collector_submits_zero_badput_without_reason(aggregator, instance, mock
         'kube_namespace:ns',
         'kai_queue:team-a',
         'job_scheduler_queue:team-a',
-        'kai_workload:pg', 'job_scheduler_workload:pg',
+        'kai_workload:pg',
+        'job_scheduler_workload:pg',
     ]
     aggregator.assert_metric(BADPUT_METRIC, value=0, tags=tags, count=1)
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=30 / 3600, tags=tags, count=1)
@@ -729,3 +736,164 @@ def test_job_read_right_after_the_pods_stop_is_read_again(aggregator, instance, 
     # Running ended with the pod, and the wait for the Job to complete lasted 1 second after the poll at 15.
     assert sum(m.value for m in aggregator.metrics(FULLY_ADMITTED_METRIC)) == pytest.approx(2 * 5 / 3600)
     assert sum(m.value for m in aggregator.metrics(BADPUT_METRIC)) == pytest.approx(2 * 1 / 3600)
+
+
+# The PodGroups below are the ones of a kind cluster running KAI Scheduler v0.19.0: allocated by the scheduler
+# (`kai.scheduler/last-start-timestamp`, `status.resourcesStatus.allocated`). The pods are the ones the scenarios need.
+def kind_podgroup(index=1):
+    with open(get_fixture_path('podgroups_kind_v0_19.json')) as f:
+        return json.load(f)[index]
+
+
+def kind_pod(podgroup, phase='Running', gpus=2, index=0, node_selector=None):
+    metadata = podgroup['metadata']
+    result = pod(metadata['name'], phase=phase, gpus=gpus, index=index)
+    result['metadata']['namespace'] = metadata['namespace']
+    if node_selector:
+        result['spec']['nodeSelector'] = node_selector
+    return result
+
+
+def badput_tags(contributions):
+    """Return the tags of the badput points, which hold the reason and GPU type."""
+    return [tags for metric, value, tags in workload_points(contributions) if metric == BADPUT_METRIC and value]
+
+
+def test_kind_admitted_but_unable_to_run_keeps_badput_until_all_pods_run():
+    # KAI allocated the PodGroup (`last-start-timestamp`, allocated resources), but one of its two pods is still
+    # pending: the scheduler's admission alone does not end the badput.
+    t, clock = tracker()
+    pg = kind_podgroup()
+    partial = [kind_pod(pg), kind_pod(pg, phase='Pending', index=1)]
+    assert classify(pg, partial) == (SchedulingState.WAITING, 'PodsPending')
+    t.update([pg], partial)
+    clock.now = 10
+    contributions = t.update([pg], partial)
+    [tags] = badput_tags(contributions)
+    assert [(c.category, c.gpu_seconds) for c in contributions] == [(Category.BADPUT, 40)]
+    assert 'reason:waiting_for_pods' in tags
+    # `PodsPending` is derived by the check, not a KAI reason.
+    assert not any(tag.startswith('scheduler_reason:') for tag in tags)
+
+    running = [kind_pod(pg), kind_pod(pg, index=1)]
+    clock.now = 20
+    assert [c.category for c in t.update([pg], running)] == [Category.BADPUT]
+    clock.now = 30
+    assert [(c.category, c.gpu_seconds) for c in t.update([pg], running)] == [(Category.FULLY_ADMITTED, 40)]
+
+
+def test_kind_preemption_is_tagged_preempted_until_the_scheduler_starts_it_again():
+    t, clock = tracker()
+    pg = kind_podgroup()
+    t.update([pg], [kind_pod(pg)])
+    evicted = copy.deepcopy(pg)
+    evicted['metadata']['annotations'][LAST_EVICTION_ANNOTATION] = '2026-11-24T13:45:00Z'
+    clock.now = 10
+    t.update([evicted], [kind_pod(pg, phase='Pending')])
+    clock.now = 20
+    contributions = t.update([evicted], [kind_pod(pg, phase='Pending')])
+    [tags] = badput_tags(contributions)
+    assert 'reason:preempted' in tags
+
+    # KAI starts it again, but its pod is not running yet: still badput, no longer a preemption wait.
+    restarted = copy.deepcopy(evicted)
+    restarted['metadata']['annotations'][LAST_START_ANNOTATION] = '2026-11-24T13:46:00Z'
+    clock.now = 30
+    assert [c.cause for c in t.update([restarted], [kind_pod(pg, phase='Pending')])] == ['preempted']
+    clock.now = 40
+    contributions = t.update([restarted], [kind_pod(pg, phase='Pending')])
+    assert [(c.category, c.cause) for c in contributions] == [(Category.BADPUT, 'waiting_for_pods')]
+
+
+def test_quota_exhausted_badput_is_tagged_while_running_workloads_stay_fully_admitted():
+    t, clock = tracker()
+    running = kind_podgroup()
+    blocked = podgroup('blocked', queue=running['spec']['queue'], unschedulable='OverLimit')
+    pods = [kind_pod(running, gpus=8), pod('blocked', phase='Pending', gpus=4)]
+    t.update([running, blocked], pods)
+    clock.now = 10
+    contributions = t.update([running, blocked], pods)
+
+    assert {c.name.split('/')[1]: (c.category, c.gpu_seconds) for c in contributions} == {
+        running['metadata']['name']: (Category.FULLY_ADMITTED, 80),
+        'blocked': (Category.BADPUT, 40),
+    }
+    [tags] = badput_tags(contributions)
+    assert {'reason:quota_exhausted', 'scheduler_reason:OverLimit'} <= set(tags)
+
+
+@pytest.mark.parametrize(
+    ('label', 'expected'),
+    [
+        ('NVIDIA-A100-SXM4-80GB', 'a100'),
+        ('NVIDIA-H100-80GB-HBM3', 'h100'),
+        ('NVIDIA-GeForce-RTX-4090', 'rtx_4090'),
+        ('AMD-Instinct-MI300X', 'mi300x'),
+        ('something-else', None),
+        (None, None),
+    ],
+)
+def test_extract_gpu_type(label, expected):
+    assert extract_gpu_type(label) == expected
+
+
+def affinity_pod(*terms):
+    result = pod()
+    result['spec']['affinity'] = {
+        'nodeAffinity': {
+            'requiredDuringSchedulingIgnoredDuringExecution': {
+                'nodeSelectorTerms': [
+                    {'matchExpressions': [{'key': 'nvidia.com/gpu.product', 'operator': 'In', 'values': values}]}
+                    for values in terms
+                ]
+            }
+        }
+    }
+    return result
+
+
+def selector_pod(model):
+    result = pod()
+    result['spec']['nodeSelector'] = {'nvidia.com/gpu.product': model}
+    return result
+
+
+@pytest.mark.parametrize(
+    ('pod_with_constraint', 'expected'),
+    [
+        pytest.param(pod(), None, id='unconstrained'),
+        pytest.param(selector_pod('NVIDIA-A100-SXM4-80GB'), 'a100', id='selector'),
+        pytest.param(affinity_pod(['NVIDIA-H100-80GB-HBM3']), 'h100', id='affinity'),
+        pytest.param(affinity_pod(['NVIDIA-A100-SXM4-80GB', 'NVIDIA-H100-80GB-HBM3']), None, id='several_models'),
+        pytest.param(affinity_pod(['NVIDIA-A100-SXM4-80GB'], ['NVIDIA-H100-80GB-HBM3']), None, id='different_terms'),
+    ],
+)
+def test_pod_gpu_type(pod_with_constraint, expected):
+    assert pod_gpu_type(pod_with_constraint) == expected
+
+
+def test_gpu_type_tags_both_metrics_when_the_pods_require_a_model_and_is_unset_otherwise():
+    t, clock = tracker()
+    pg = kind_podgroup()
+    constrained = [kind_pod(pg, phase='Pending', node_selector={'nvidia.com/gpu.product': 'NVIDIA-A100-SXM4-80GB'})]
+    t.update([pg], constrained)
+    clock.now = 10
+    pending = t.update([pg], constrained)
+    [tags] = badput_tags(pending)
+    assert 'gpu_type:a100' in tags
+
+    # The pods go missing for a moment: the series keep the model.
+    clock.now = 20
+    [missing] = t.update([pg], [])
+    assert missing.gpu_type == 'a100'
+
+    # A PodGroup without a constraint has no type: it is not guessed.
+    other = kind_podgroup(0)
+    free = [kind_pod(other, phase='Pending')]
+    t.update([other], free)
+    clock.now = 30
+    [contribution] = t.update([other], free)
+    assert contribution.gpu_type is None
+    assert not any(tag.startswith('gpu_type:') for tag in badput_tags([contribution])[0])
+    points = workload_points(pending)
+    assert all('gpu_type:a100' in tags for _, _, tags in points)

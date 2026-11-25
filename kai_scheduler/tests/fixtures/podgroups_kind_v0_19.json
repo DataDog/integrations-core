@@ -1,0 +1,79 @@
+[
+  {
+    "metadata": {
+      "name": "pg-r-build-f04c1104-3f10-4473-87c9-5023b8666a0a",
+      "namespace": "team-k",
+      "uid": "1e3086d3-5c2e-49c4-beb1-6eaf50330599",
+      "annotations": {
+        "kai.scheduler/last-start-timestamp": "2026-11-24T13:41:44Z"
+      },
+      "labels": {
+        "kai.scheduler/queue": "default-queue"
+      },
+      "ownerReferences": [
+        {
+          "apiVersion": "v1",
+          "kind": "Pod",
+          "name": "r-build",
+          "uid": "f04c1104-3f10-4473-87c9-5023b8666a0a"
+        }
+      ]
+    },
+    "spec": {
+      "minMember": 1,
+      "priorityClassName": "build",
+      "queue": "default-queue",
+      "topologyConstraint": {}
+    },
+    "status": {
+      "resourcesStatus": {
+        "allocated": {
+          "cpu": "900m"
+        },
+        "allocatedNonPreemptible": {
+          "cpu": "900m"
+        },
+        "requested": {
+          "cpu": "900m"
+        }
+      }
+    }
+  },
+  {
+    "metadata": {
+      "name": "pg-r-train-1-96b751d8-667e-411d-a494-bcf252f77466",
+      "namespace": "team-k",
+      "uid": "829f2a27-6366-41fa-a8b3-4d05d8ef8e92",
+      "annotations": {
+        "kai.scheduler/last-start-timestamp": "2026-11-24T13:40:20Z"
+      },
+      "labels": {
+        "kai.scheduler/queue": "default-queue"
+      },
+      "ownerReferences": [
+        {
+          "apiVersion": "v1",
+          "kind": "Pod",
+          "name": "r-train-1",
+          "uid": "96b751d8-667e-411d-a494-bcf252f77466"
+        }
+      ]
+    },
+    "spec": {
+      "minMember": 1,
+      "priorityClassName": "train",
+      "queue": "default-queue",
+      "topologyConstraint": {}
+    },
+    "status": {
+      "resourcesStatus": {
+        "allocated": {
+          "cpu": "900m"
+        },
+        "requested": {
+          "cpu": "900m"
+        }
+      }
+    }
+  }
+]
