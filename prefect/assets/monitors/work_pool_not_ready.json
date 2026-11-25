@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "title": "Work pool not ready",
+  "tags": [
+    "integration:prefect"
+  ],
+  "definition": {
+    "name": "[Prefect] Work pool not ready",
+    "type": "query alert",
+    "query": "max(last_5m):sum:prefect.server.work_pool.is_not_ready{*} by {host,work_pool_id,work_pool_name,work_pool_type} > 0",
+    "message": "{{#is_alert}}\nWork Pool {{work_pool_name.name}} is in NOT_READY state.\n\nPool Details:\n- Work Pool: {{work_pool_name.name}} ({{work_pool_id.name}})\n- Pool Type: {{work_pool_type.name}}\n- Host: {{host.name}}\n{{/is_alert}}\n\n\n{{#is_alert_recovery}}\nWork Pool {{work_pool_name.name}} is no longer in NOT_READY state.\n\nPool Details:\n- Work Pool: {{work_pool_name.name}} ({{work_pool_id.name}})\n- Pool Type: {{work_pool_type.name}}\n- Host: {{host.name}}\n{{/is_alert_recovery}}",
+    "tags": [
+      "integration:prefect"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 0
+      },
+      "notify_audit": false,
+      "threshold_windows": null,
+      "on_missing_data": "show_and_notify_no_data",
+      "include_tags": true,
+      "new_group_delay": 60,
+      "silenced": {}
+    },
+    "priority": 1
+  },
+  "created_at": "2026-02-25",
+  "last_updated_at": "2026-04-08",
+  "description": "Triggers when a Prefect work pool is in a not ready state, preventing workers from pulling and executing flow runs."
+}

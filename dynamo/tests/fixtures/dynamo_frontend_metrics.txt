@@ -510,3 +510,26 @@ dynamo_transport_tcp_bytes_sent_total 2048
 # HELP dynamo_transport_tcp_errors_total TCP transport errors
 # TYPE dynamo_transport_tcp_errors_total counter
 dynamo_transport_tcp_errors_total 2
+# HELP dynamo_frontend_model_ready Whether the frontend can currently route at least one inference request for the model
+# TYPE dynamo_frontend_model_ready gauge
+dynamo_frontend_model_ready{model="meta-llama/Llama-3-8B-Instruct"} 1
+# HELP dynamo_frontend_stage_duration_seconds Time spent in each frontend pipeline stage
+# TYPE dynamo_frontend_stage_duration_seconds histogram
+dynamo_frontend_stage_duration_seconds_bucket{stage="preprocess",le="0.005"} 10
+dynamo_frontend_stage_duration_seconds_bucket{stage="preprocess",le="0.05"} 25
+dynamo_frontend_stage_duration_seconds_bucket{stage="preprocess",le="0.5"} 28
+dynamo_frontend_stage_duration_seconds_bucket{stage="preprocess",le="+Inf"} 30
+dynamo_frontend_stage_duration_seconds_sum{stage="preprocess"} 0.09
+dynamo_frontend_stage_duration_seconds_count{stage="preprocess"} 30
+dynamo_frontend_stage_duration_seconds_bucket{stage="route",le="0.005"} 10
+dynamo_frontend_stage_duration_seconds_bucket{stage="route",le="0.05"} 25
+dynamo_frontend_stage_duration_seconds_bucket{stage="route",le="0.5"} 28
+dynamo_frontend_stage_duration_seconds_bucket{stage="route",le="+Inf"} 30
+dynamo_frontend_stage_duration_seconds_sum{stage="route"} 0.03
+dynamo_frontend_stage_duration_seconds_count{stage="route"} 30
+dynamo_frontend_stage_duration_seconds_bucket{stage="transport_roundtrip",le="0.005"} 10
+dynamo_frontend_stage_duration_seconds_bucket{stage="transport_roundtrip",le="0.05"} 25
+dynamo_frontend_stage_duration_seconds_bucket{stage="transport_roundtrip",le="0.5"} 28
+dynamo_frontend_stage_duration_seconds_bucket{stage="transport_roundtrip",le="+Inf"} 30
+dynamo_frontend_stage_duration_seconds_sum{stage="transport_roundtrip"} 4.8
+dynamo_frontend_stage_duration_seconds_count{stage="transport_roundtrip"} 30

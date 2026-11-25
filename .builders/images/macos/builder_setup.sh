@@ -56,8 +56,8 @@ cp -R /opt/mqm "${DD_PREFIX_PATH}"
 
 # openssl
 DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
-VERSION="3.6.4" \
-SHA256="9bffaa1ad1e07b354c21bd3324ec02fa15579f45a7d0494b3e74bc449b7333ef" \
+VERSION="3.6.5" \
+SHA256="a2157c2830efdec3788939b00c9b0638306d3f0bbb76dc4832ee503bb397df98" \
 RELATIVE_PATH="openssl-{{version}}" \
 CONFIGURE_SCRIPT="./config" \
   install-from-source \
@@ -104,8 +104,8 @@ RELATIVE_PATH="libxslt-{{version}}" \
 
 # curl
 DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
-VERSION="8.21.0" \
-SHA256="d9b327997999045a24cda50f3983e69e51c516bd8be6ef9842fc7f99135e33bb" \
+VERSION="8.23.0" \
+SHA256="e3de77cfa6367083c776a26647fc9f633b538c06c3baa73d931a252ac8f72b49" \
 RELATIVE_PATH="curl-{{version}}" \
   install-from-source \
     --disable-manual \

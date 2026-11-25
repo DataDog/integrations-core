@@ -318,6 +318,377 @@ facets:
     unit:
       family: bytes
       name: byte
+  - groups:
+      - OCSF
+    name: Application Name
+    path: ocsf.app_name
+    source: log
+  - groups:
+      - OCSF
+    name: Protocol Name
+    path: ocsf.connection_info.protocol_name
+    source: log
+  - groups:
+      - OCSF
+    name: Connection Info Session Unique ID
+    path: ocsf.connection_info.session.uid
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Count
+    path: ocsf.count
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Device Name
+    path: ocsf.device.name
+    source: log
+  - groups:
+      - OCSF
+    name: Device Unique ID
+    path: ocsf.device.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Dst Endpoint Hostname
+    path: ocsf.dst_endpoint.hostname
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Endpoint Network Interface Name
+    path: ocsf.dst_endpoint.interface_name
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Intermediate IP Addresses
+    path: ocsf.dst_endpoint.intermediate_ips
+    source: log
+  - groups:
+      - OCSF
+    name: Destination IP Address
+    path: ocsf.dst_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Endpoint Geo Location City
+    path: ocsf.dst_endpoint.location.city
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Endpoint Geo Location Continent
+    path: ocsf.dst_endpoint.location.continent
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Endpoint Geo Location Country
+    path: ocsf.dst_endpoint.location.country
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Destination Endpoint Geo Location Latitude
+    path: ocsf.dst_endpoint.location.lat
+    source: log
+    type: double
+  - facetType: range
+    groups:
+      - OCSF
+    name: Destination Endpoint Geo Location Longitude
+    path: ocsf.dst_endpoint.location.long
+    source: log
+    type: double
+  - groups:
+      - OCSF
+    name: Destination Endpoint Geo Location Region
+    path: ocsf.dst_endpoint.location.region
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Endpoint MAC Address
+    path: ocsf.dst_endpoint.mac
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Endpoint Owner Name
+    path: ocsf.dst_endpoint.owner.name
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Dst Endpoint Port
+    path: ocsf.dst_endpoint.port
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Destination Endpoint Unique ID
+    path: ocsf.dst_endpoint.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Destination Endpoint Network Zone
+    path: ocsf.dst_endpoint.zone
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Duration Milliseconds
+    path: ocsf.duration
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Finding Information Analytic Category
+    path: ocsf.finding_info.analytic.category
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Info Analytic Name
+    path: ocsf.finding_info.analytic.name
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Info Analytic UID
+    path: ocsf.finding_info.analytic.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Information Analytic Version
+    path: ocsf.finding_info.analytic.version
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Information Description
+    path: ocsf.finding_info.desc
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Info Title
+    path: ocsf.finding_info.title
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Info Unique ID
+    path: ocsf.finding_info.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Firewall Rule Name
+    path: ocsf.firewall_rule.name
+    source: log
+  - groups:
+      - OCSF
+    name: Firewall Rule Unique ID
+    path: ocsf.firewall_rule.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Event Code
+    path: ocsf.metadata.event_code
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Log Name
+    path: ocsf.metadata.log_name
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Original Time
+    path: ocsf.metadata.original_time
+    source: log
+  - groups:
+      - OCSF
+    name: Product Name
+    path: ocsf.metadata.product.name
+    source: log
+  - groups:
+      - OCSF
+    name: Vendor Name
+    path: ocsf.metadata.product.vendor_name
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Event UID
+    path: ocsf.metadata.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Hostname
+    path: ocsf.src_endpoint.hostname
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Network Interface Name
+    path: ocsf.src_endpoint.interface_name
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Geo Location City
+    path: ocsf.src_endpoint.location.city
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Geo Location Continent
+    path: ocsf.src_endpoint.location.continent
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Geo Location Country
+    path: ocsf.src_endpoint.location.country
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Source Endpoint Geo Location Latitude
+    path: ocsf.src_endpoint.location.lat
+    source: log
+    type: double
+  - facetType: range
+    groups:
+      - OCSF
+    name: Source Endpoint Geo Location Longitude
+    path: ocsf.src_endpoint.location.long
+    source: log
+    type: double
+  - groups:
+      - OCSF
+    name: Source Endpoint Geo Location Region
+    path: ocsf.src_endpoint.location.region
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint MAC Address
+    path: ocsf.src_endpoint.mac
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Owner Name
+    path: ocsf.src_endpoint.owner.name
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Src Endpoint Port
+    path: ocsf.src_endpoint.port
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Source Endpoint Unique ID
+    path: ocsf.src_endpoint.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Network Zone
+    path: ocsf.src_endpoint.zone
+    source: log
+  - groups:
+      - OCSF
+    name: Status Code
+    path: ocsf.status_code
+    source: log
+  - groups:
+      - OCSF
+    name: Status Detail
+    path: ocsf.status_detail
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Event Time
+    path: ocsf.time
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: TLS Certificate Issuer Details
+    path: ocsf.tls.certificate.issuer
+    source: log
+  - groups:
+      - OCSF
+    name: TLS Certificate Serial Number
+    path: ocsf.tls.certificate.serial_number
+    source: log
+  - groups:
+      - OCSF
+    name: TLS Certificate Subject Details
+    path: ocsf.tls.certificate.subject
+    source: log
+  - groups:
+      - OCSF
+    name: TLS Certificate Version
+    path: ocsf.tls.certificate.version
+    source: log
+  - groups:
+      - OCSF
+    name: TLS Cipher
+    path: ocsf.tls.cipher
+    source: log
+  - groups:
+      - OCSF
+    name: TLS SNI
+    path: ocsf.tls.sni
+    source: log
+  - groups:
+      - OCSF
+    name: TLS Version
+    path: ocsf.tls.version
+    source: log
+  - groups:
+      - OCSF
+    name: Traffic Bytes
+    path: ocsf.traffic.bytes
+    source: log
+  - groups:
+      - OCSF
+    name: Traffic Bytes In
+    path: ocsf.traffic.bytes_in
+    source: log
+  - groups:
+      - OCSF
+    name: Traffic Bytes Out
+    path: ocsf.traffic.bytes_out
+    source: log
+  - groups:
+      - OCSF
+    name: Traffic Chunks
+    path: ocsf.traffic.chunks
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Traffic Chunks In
+    path: ocsf.traffic.chunks_in
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Traffic Chunks Out
+    path: ocsf.traffic.chunks_out
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Traffic Packets
+    path: ocsf.traffic.packets
+    source: log
+  - groups:
+      - OCSF
+    name: Traffic Packets In
+    path: ocsf.traffic.packets_in
+    source: log
+  - groups:
+      - OCSF
+    name: Traffic Packets Out
+    path: ocsf.traffic.packets_out
+    source: log
 pipeline:
   type: pipeline
   name: Palo Alto Panorama
@@ -362,11 +733,56 @@ pipeline:
           12:15:30|tunnel=IPsec|bytes=847|bytes_sent=781|bytes_received=66|pkt=4|pkts_sent=3|pkts_received=1|max_encap=1|unknown_proto=2|strict_check=2|tunnel_fragment=3|sessions_created=2|sessions_closed=3|session_end_reason=threat|action_source=allow|start=2024/01/01
           12:30:15|elapsed=0|tunnel_insp_rule=insepction_rule_1|remote_user_ip=10.1.2.3|remote_user_id=40201234567|rule_uuid=731925f6-8e55-xxyy-b82f-910b26004dfd|pcap_id=1223xa155545|dynusergroup_name=agnet145|src_edl=10.0.1.2|dst_edl=10.0.3.4|high_res_timestamp=2024-01-16T14:15:34.518+05:30|nssai_sd=|nssai_sst=|pdu_session_id=1234758662|subcategory_of_app=encrypted-tunnel|category_of_app=business-systems|technology_of_app=browser-based|risk_of_app=1|characteristic_of_app=used-by-malware,able-to-transfer-file|container_of_app=google|is_saas_of_app=1|sanctioned_state_of_app=0|cluster_name=test-nw-cluster
       grok:
-        supportRules: ""
-        matchRules: >
-          rule_panorama (<%{integer}>)?((%{date("MMM  d HH:mm:ss")}|%{date("MMM
-          dd HH:mm:ss")}) (%{notSpace})?) %{data::keyvalue("="," \"/:,(){};+",
-          "", "|")}
+        supportRules: |-
+          _syslog_header (<%{integer}>)?(%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) %{notSpace}
+        matchRules: |-
+          rule_panos_csv_traffic (%{_syslog_header} )?%{regex("[0-9]*,[^,]*,[^,]*,TRAFFIC,.*")::csv("future_use_1,receive_time,serial,type,subtype,future_use_6,time_generated,src,dst,natsrc,natdst,rule,suser,duser,app,vsys,from,to,inboundif,outboundif,logset,future_use_22,sessionid,repeatcnt,sport,dport,natsport,natdport,flags,proto,act,bytes,bytes_sent,bytes_received,pkt,start,elapsed,cat,future_use_39,seq,actflag,sloc,dloc,future_use_44,pktsent,pktrcvd,sessionendreason,dg_hier_level_1,dg_hier_level_2,dg_hier_level_3,dg_hier_level_4,vsysname,dvc,actsrc,suuid,duuid,tunnelid,monitortag,parentid,parentst,tunnel,associd,chunk,chunksent,chunkrcvd,ruleuuid,http2conn,appflap,policyid,link,sdwan_cluster,sdwan_device_type,sdwan_cluster_type,sdwan_site,dynusrgrp,xffip,scat,sprofile,smodel,sven,sosfam,sosver,shost,smac,dcat,dprofile,dmodel,dven,dosfam,dosver,dhost,dmac,contid,podnamespace,podname,sedl,dedl,hostid,srnum,sdag,ddag,sessionown,high_res_timestamp,nssai_sst,nssai_sd,subcatapp,appcat,apptech,apprisk,appchar,appcont,tunneledapp,appsaas,appstate,offloaded,flowtype,cluster")}
+          rule_panos_csv_threat (%{_syslog_header} )?%{regex("[0-9]*,[^,]*,[^,]*,THREAT,.*")::csv("future_use_1,receive_time,serial,type,subtype,future_use_6,time_generated,src,dst,natsrc,natdst,rule,suser,duser,app,vsys,from,to,inboundif,outboundif,logset,future_use_22,sessionid,repeatcnt,sport,dport,natsport,natdport,flags,proto,act,misc,threatid,cat,severity,dir,seqno,actflags,sloc,dloc,future_use_41,contenttype,pcapip,filedigest,cloud,urlidx,useragent,filetype,xff,ref,sender,sub,recipient,reportid,dg_hier_level_1,dg_hier_level_2,dg_hier_level_3,dg_hier_level_4,vsysname,dvc,future_use_61,suuid,duuid,http_method,tunnelid,monitortag,parent_session_id,parent_start_time,tunnel,thrcategory,contentver,future_use_72,assoc_id,ppid,httpheaders,urlcategory,ruleuuid,http2conn,dynusrgrp,xffip,scat,sprofile,smodel,sven,sosfam,sosver,shost,smac,dcat,dprofile,dmodel,dven,dosfam,dosver,dhost,dmac,contid,podnamespace,podname,src_edl,dst_edl,hostid,srnum,domain_edl,src_dag,dst_dag,partial_hash,high_res_timestamp,reason,justification,nssai_sst,subcatApp,appcat,apptech,apprisk,appchar,appcont,tunneledapp,appsaas,appstate,cloudreportid,flowtype,cluster")}
+          rule_panos_csv_system (%{_syslog_header} )?%{regex("[0-9]*,[^,]*,[^,]*,SYSTEM,.*")::csv("future_use_1,receive_time,serial,type,subtype,future_use_6,time_generated,vsys,eventid,object,future_use_11,future_use_12,module,severity,opaque,seqno,actionflags,dg_hier_level_1,dg_hier_level_2,dg_hier_level_3,dg_hier_level_4,vsys_name,device_name,future_use_24,future_use_25,high_res_timestamp")}
+          rule_pan_firewall_keyvalue (%{_syslog_header} )?%{regex("[A-Za-z0-9_.]+=[^|,]*, [A-Za-z0-9_.]+=.*")::keyvalue("=", " \"/:(){};+@")}
+          rule_panorama (<%{integer}>)?((%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) (%{notSpace})?) %{data::keyvalue("="," \"/:,(){};+\\\\", "", "|")}
+    # The csv filter needs a unique name for every column, including the unnamed FUTURE_USE ones. Remapping
+    # them onto `type`, which every parsed log has, drops them without changing `type`.
+    - type: attribute-remapper
+      name: Remove the FUTURE_USE columns of default PAN-OS CSV logs
+      enabled: true
+      sources:
+        - future_use_1
+        - future_use_6
+        - future_use_11
+        - future_use_12
+        - future_use_22
+        - future_use_24
+        - future_use_25
+        - future_use_39
+        - future_use_41
+        - future_use_44
+        - future_use_61
+        - future_use_72
+      sourceType: attribute
+      target: type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: grok-parser
+      name: Parsing exact sequence numbers from default PAN-OS CSV logs
+      enabled: true
+      source: message
+      samples:
+        - <14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,SYSTEM,general,0,2026/10/05 16:15:07,,general,,0,0,general,informational,"User admin logged in",7300000000000000003,0x0,0,0,0,0,,fw-01
+      grok:
+        # The csv filter infers numbers as doubles, which rounds 19-digit `seq`/`seqno` values. Skip the
+        # fields before them (quoted fields may contain commas and `""` escaped quotes) and extract them as
+        # integers.
+        supportRules: |-
+          _syslog_header (<%{integer}>)?(%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) %{notSpace}
+          _field (?:"(?:[^"]|"")*"|[^,]*),
+          _fields_5 %{_field}%{_field}%{_field}%{_field}%{_field}
+          _csv_prefix (%{_syslog_header} )?[0-9]*,[^,]*,[^,]*,
+        matchRules: |-
+          rule_panos_csv_traffic_seq %{_csv_prefix}TRAFFIC,%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{integer:seq}(,.*)?
+          rule_panos_csv_threat_seqno %{_csv_prefix}THREAT,%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_fields_5}%{_field}%{_field}%{integer:seqno}(,.*)?
+          rule_panos_csv_system_seqno %{_csv_prefix}SYSTEM,%{_fields_5}%{_fields_5}%{_field}%{integer:seqno}(,.*)?
     - type: grok-parser
       name: Parsing 'time_generated' to 'timestamp' (epoch)
       enabled: true
@@ -375,7 +791,57 @@ pipeline:
         - Jan 24 2024 10:30:11 GMT
       grok:
         supportRules: ""
-        matchRules: date_rule %{date("MMM dd yyyy HH:mm:ss z"):timestamp}
+        matchRules: |-
+          date_rule %{date("MMM dd yyyy HH:mm:ss z"):timestamp}
+          panos_date_rule %{date("yyyy/MM/dd HH:mm:ss"):timestamp}
+    - type: pipeline
+      name: Processors for timestamps of default PAN-OS CSV logs
+      enabled: true
+      filter:
+        # The default CSV format's `time_generated` is the firewall's local time without an offset.
+        # `high_res_timestamp` (PAN-OS 10.0+) carries the firewall's offset but is the management plane's
+        # receive time, so only its offset is applied to `time_generated`. Other formats' `time_generated`
+        # does not match the date pattern below and is left unchanged.
+        query: '@high_res_timestamp:*'
+      processors:
+        - type: grok-parser
+          name: Extract the UTC offset of 'high_res_timestamp'
+          enabled: true
+          source: high_res_timestamp
+          samples:
+            - 2026-10-05T16:15:07.123+05:30
+          grok:
+            supportRules: ""
+            matchRules: |-
+              high_res_offset_rule %{regex("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+")}%{regex("Z|[+-][0-9]{2}:[0-9]{2}"):time_generated_with_offset}
+        # The string builder reads the extracted offset and replaces it with the joined value.
+        - type: string-builder-processor
+          name: Join 'time_generated' and its UTC offset
+          enabled: true
+          template: "%{time_generated} %{time_generated_with_offset}"
+          target: time_generated_with_offset
+          replaceMissing: false
+        - type: grok-parser
+          name: Parsing 'time_generated' with its UTC offset to 'timestamp' (epoch)
+          enabled: true
+          source: time_generated_with_offset
+          samples:
+            - 2026/10/05 16:15:07 +05:30
+          grok:
+            supportRules: ""
+            matchRules: |-
+              panos_date_offset_rule %{date("yyyy/MM/dd HH:mm:ss ZZ"):timestamp}
+        # Remapping onto an attribute that is already set drops the helper without changing the target.
+        - type: attribute-remapper
+          name: Remove the joined 'time_generated' string
+          enabled: true
+          sources:
+            - time_generated_with_offset
+          sourceType: attribute
+          target: time_generated
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
@@ -416,44 +882,44 @@ pipeline:
         query: '@type:("DECRYPTION" OR "TRAFFIC" OR "THREAT" OR "START" OR "END") '
       processors:
         - type: attribute-remapper
-          name: Map `natsrc` to `network.client.ip`
+          name: Map `src` to `network.client.ip`
           enabled: true
           sources:
-            - natsrc
+            - src
           sourceType: attribute
           target: network.client.ip
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `natdst` to `network.destination.ip`
+          name: Map `dst` to `network.destination.ip`
           enabled: true
           sources:
-            - natdst
+            - dst
           sourceType: attribute
           target: network.destination.ip
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `natsport` to `network.client.port`
+          name: Map `sport` to `network.client.port`
           enabled: true
           sources:
-            - natsport
+            - sport
           sourceType: attribute
           target: network.client.port
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `natdport` to `network.destination.port`
+          name: Map `dport` to `network.destination.port`
           enabled: true
           sources:
-            - natdport
+            - dport
           sourceType: attribute
           target: network.destination.port
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: geo-ip-parser
           name: Map `network.client.ip` to `network.client.geoip`
@@ -470,20 +936,22 @@ pipeline:
           target: network.destination.geoip
           ip_processing_behavior: do-nothing
         - type: attribute-remapper
-          name: Map `from` to `srczone`
+          name: Map `from` and `source_zone` to `srczone`
           enabled: true
           sources:
             - from
+            - source_zone
           sourceType: attribute
           target: srczone
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `to` to `dstzone`
+          name: Map `to` and `destination_zone` to `dstzone`
           enabled: true
           sources:
             - to
+            - destination_zone
           sourceType: attribute
           target: dstzone
           targetType: attribute
@@ -543,6 +1011,26 @@ pipeline:
           target: palo.alto.panorama.action
           targetType: attribute
           preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `evt.name` to `palo.alto.panorama.action`
+          enabled: true
+          sources:
+            - evt.name
+          sourceType: attribute
+          target: palo.alto.panorama.action
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `session_end_reason` to `sessionendreason`
+          enabled: true
+          sources:
+            - session_end_reason
+          sourceType: attribute
+          target: sessionendreason
+          targetType: attribute
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Processors for "User ID" log type
@@ -789,7 +1277,7 @@ pipeline:
           sourceType: attribute
           target: usr.name
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: Processors for "Config" log type
@@ -1067,3 +1555,1487 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    # With Agent auto multi-line aggregation, several syslog messages can be merged into one log, which turns
+    # `type`, `seqno` and the other keys into arrays (SCI2-5977). A filter like `@type:THREAT` still matches such a
+    # log, but the grok parser below only matches a single string value, so `ocsf.metadata.log_name` is only set for
+    # logs that hold exactly one message. Every OCSF pipeline below filters on it, and merged logs are not normalized.
+    - type: pipeline
+      name: OCSF log name for single-message logs
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@type:("TRAFFIC" OR "DECRYPTION" OR "THREAT" OR "CORRELATION")'
+      processors:
+        - type: grok-parser
+          name: Parse `type` to `ocsf.metadata.log_name`
+          enabled: true
+          source: type
+          samples:
+            - TRAFFIC
+            - CORRELATION
+          grok:
+            supportRules: ""
+            matchRules: |-
+              single_log_type %{regex("[A-Z-]+"):ocsf.metadata.log_name}
+    - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.log_name:*"
+      processors:
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: Panorama
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: Palo Alto Networks
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `timestamp` to `ocsf.time`
+          enabled: true
+          sources:
+            - timestamp
+          sourceType: attribute
+          target: ocsf.time
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `seq`, `seqno` to `ocsf.metadata.uid`
+          enabled: true
+          sources:
+            - seq
+            - seqno
+          sourceType: attribute
+          target: ocsf.metadata.uid
+          targetType: attribute
+          targetFormat: string
+          preserveSource: true
+          overrideOnConflict: true
+        # The key-value and CSV parsers infer numbers, so `serial` can lose leading zeros or be rendered as a
+        # double. Read the device serial as text from the raw message instead.
+        - type: grok-parser
+          name: Parse `message` to `ocsf.device.uid`
+          enabled: true
+          source: message
+          samples:
+            - "<14>Nov 16 08:07:01 pan-01.example.com serial=001000000001|type=TRAFFIC|subtype=start"
+            - "<13>Nov 16 10:07:01 panorama-01.example.com 1,2026/11/16 10:07:01,001000000002,THREAT,file,2817"
+          grok:
+            supportRules: |-
+              _syslog_header (<%{integer}>)?(%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) %{notSpace}
+            matchRules: |-
+              kv_serial (.*?[ |])?serial=%{regex("[^|, ]+"):ocsf.device.uid}.*
+              csv_serial (%{_syslog_header} )?[0-9]*,[^,]*,%{regex("[^,]+"):ocsf.device.uid},(TRAFFIC|THREAT|DECRYPTION|CORRELATION),.*
+    - type: pipeline
+      name: OCSF evidence URL for THREAT url logs
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.log_name:THREAT @subtype:url"
+      processors:
+        - type: attribute-remapper
+          name: Map `misc` to `ocsf.evidence.url.url_string`
+          enabled: true
+          sources:
+            - misc
+          sourceType: attribute
+          target: ocsf.evidence.url.url_string
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+    - type: pipeline
+      name: OCSF evidence file for THREAT file logs
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.log_name:THREAT @subtype:(file OR virus OR wildfire OR wildfire-virus)"
+      processors:
+        - type: attribute-remapper
+          name: Map `misc` to `ocsf.evidence.file.name`
+          enabled: true
+          sources:
+            - misc
+          sourceType: attribute
+          target: ocsf.evidence.file.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: string-builder-processor
+          name: Add evidence file type_id
+          enabled: true
+          template: "1"
+          target: ocsf.evidence.file.type_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.evidence.file.type_id` to `ocsf.evidence.file.type_id`
+          enabled: true
+          sources:
+            - ocsf.evidence.file.type_id
+          sourceType: attribute
+          target: ocsf.evidence.file.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: true
+        - type: string-builder-processor
+          name: Add evidence file type
+          enabled: true
+          template: Regular File
+          target: ocsf.evidence.file.type
+          replaceMissing: false
+    - type: pipeline
+      name: OCSF sub pipeline for class Detection Finding [2004]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.log_name:(THREAT OR CORRELATION)"
+      processors:
+        - type: string-builder-processor
+          name: Add is_alert
+          enabled: true
+          template: "true"
+          target: ocsf.is_alert
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse `ocsf.is_alert` to `ocsf.is_alert`
+          enabled: true
+          source: ocsf.is_alert
+          samples:
+            - "true"
+          grok:
+            supportRules: ""
+            matchRules: to_bool %{boolean("true","false"):ocsf.is_alert}
+        # `threatid` is the threat name followed by its numeric ID in parentheses, e.g. `SCAN: Host Sweep(8002)`.
+        # URL filtering logs carry only the ID, e.g. `(9999)`.
+        - type: grok-parser
+          name: Parse `threatid` to `ocsf.finding_info.analytic`
+          enabled: true
+          source: threatid
+          samples:
+            - "SCAN: Host Sweep(8002)"
+            - "(9999)"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              threat_id_only \(%{regex("[0-9]+"):ocsf.finding_info.analytic.uid}\)
+              threat_name_and_id %{regex(".+?"):ocsf.finding_info.analytic.name}\(%{regex("[0-9]+"):ocsf.finding_info.analytic.uid}\)
+        # CORRELATION logs have no sequence number, so their finding ID is built from the device serial, the
+        # correlation object ID, the affected host and the event time.
+        - type: string-builder-processor
+          name: Add finding_info uid for CORRELATION logs
+          enabled: true
+          template: "%{ocsf.device.uid}-%{object_id}-%{network.client.ip}-%{timestamp}"
+          target: ocsf.finding_info.uid
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `src`, `network.client.ip` to `ocsf.evidence.src_endpoint.ip`
+          enabled: true
+          sources:
+            - src
+            - network.client.ip
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `sport`, `network.client.port` to `ocsf.evidence.src_endpoint.port`
+          enabled: true
+          sources:
+            - sport
+            - network.client.port
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `srczone` to `ocsf.evidence.src_endpoint.zone`
+          enabled: true
+          sources:
+            - srczone
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.zone
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `dst`, `network.destination.ip` to `ocsf.evidence.dst_endpoint.ip`
+          enabled: true
+          sources:
+            - dst
+            - network.destination.ip
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `dport`, `network.destination.port` to `ocsf.evidence.dst_endpoint.port`
+          enabled: true
+          sources:
+            - dport
+            - network.destination.port
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.port
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `dstzone` to `ocsf.evidence.dst_endpoint.zone`
+          enabled: true
+          sources:
+            - dstzone
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.zone
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `suser`, `srcuser` to `ocsf.evidence.actor.user.name`
+          enabled: true
+          sources:
+            - suser
+            - srcuser
+          sourceType: attribute
+          target: ocsf.evidence.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: grok-parser
+          name: Parse `ocsf.evidence.actor.user.name` to user domain and name
+          enabled: true
+          source: ocsf.evidence.actor.user.name
+          samples:
+            - "example\\user2"
+          grok:
+            supportRules: ""
+            matchRules: 'domain_and_name %{regex("[^\\\\]+"):ocsf.evidence.actor.user.domain}\\%{data:ocsf.evidence.actor.user.name}'
+        - type: attribute-remapper
+          name: Map `duser` to `ocsf.evidence.dst_endpoint.owner.name`
+          enabled: true
+          sources:
+            - duser
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.owner.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `useragent` to `ocsf.evidence.http_request.user_agent`
+          enabled: true
+          sources:
+            - useragent
+          sourceType: attribute
+          target: ocsf.evidence.http_request.user_agent
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.country.iso_code` to `ocsf.evidence.src_endpoint.location.country`
+          enabled: true
+          sources:
+            - network.client.geoip.country.iso_code
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.country
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.subdivision.iso_code` to `ocsf.evidence.src_endpoint.location.region`
+          enabled: true
+          sources:
+            - network.client.geoip.subdivision.iso_code
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.region
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.city.name` to `ocsf.evidence.src_endpoint.location.city`
+          enabled: true
+          sources:
+            - network.client.geoip.city.name
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.city
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.continent.name` to `ocsf.evidence.src_endpoint.location.continent`
+          enabled: true
+          sources:
+            - network.client.geoip.continent.name
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.continent
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.location.latitude` to `ocsf.evidence.src_endpoint.location.lat`
+          enabled: true
+          sources:
+            - network.client.geoip.location.latitude
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.lat
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.client.geoip.location.longitude` to `ocsf.evidence.src_endpoint.location.long`
+          enabled: true
+          sources:
+            - network.client.geoip.location.longitude
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.long
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.country.iso_code` to `ocsf.evidence.dst_endpoint.location.country`
+          enabled: true
+          sources:
+            - network.destination.geoip.country.iso_code
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.country
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.subdivision.iso_code` to `ocsf.evidence.dst_endpoint.location.region`
+          enabled: true
+          sources:
+            - network.destination.geoip.subdivision.iso_code
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.region
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.city.name` to `ocsf.evidence.dst_endpoint.location.city`
+          enabled: true
+          sources:
+            - network.destination.geoip.city.name
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.city
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.continent.name` to `ocsf.evidence.dst_endpoint.location.continent`
+          enabled: true
+          sources:
+            - network.destination.geoip.continent.name
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.continent
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.location.latitude` to `ocsf.evidence.dst_endpoint.location.lat`
+          enabled: true
+          sources:
+            - network.destination.geoip.location.latitude
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.lat
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `network.destination.geoip.location.longitude` to `ocsf.evidence.dst_endpoint.location.long`
+          enabled: true
+          sources:
+            - network.destination.geoip.location.longitude
+          sourceType: attribute
+          target: ocsf.evidence.dst_endpoint.location.long
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Move `ocsf.evidence` into the `ocsf.evidences` array
+          enabled: true
+          operation:
+            source: ocsf.evidence
+            target: ocsf.evidences
+            preserveSource: false
+            type: append
+        - type: schema-processor
+          name: Apply OCSF schema for 2004
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.is_alert` to `ocsf.is_alert`
+              sources:
+                - ocsf.is_alert
+              target: ocsf.is_alert
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.evidences` to `ocsf.evidences`
+              sources:
+                - ocsf.evidences
+              target: ocsf.evidences
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `seqno`, `ocsf.finding_info.uid` to `ocsf.finding_info.uid`
+              sources:
+                - seqno
+                - ocsf.finding_info.uid
+              target: ocsf.finding_info.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `threatid`, `ocsf.finding_info.analytic.name`, `objectname` to `ocsf.finding_info.title`
+              sources:
+                - threatid
+                - ocsf.finding_info.analytic.name
+                - objectname
+              target: ocsf.finding_info.title
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.analytic.name`, `objectname` to `ocsf.finding_info.analytic.name`
+              sources:
+                - ocsf.finding_info.analytic.name
+                - objectname
+              target: ocsf.finding_info.analytic.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.analytic.uid`, `object_id` to `ocsf.finding_info.analytic.uid`
+              sources:
+                - ocsf.finding_info.analytic.uid
+                - object_id
+              target: ocsf.finding_info.analytic.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `subtype`, `category` to `ocsf.finding_info.analytic.category`
+              sources:
+                - subtype
+                - category
+              target: ocsf.finding_info.analytic.category
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `dvc`, `device_name` to `ocsf.device.name`
+              sources:
+                - dvc
+                - device_name
+              target: ocsf.device.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.uid`, `serial` to `ocsf.device.uid`
+              sources:
+                - ocsf.device.uid
+                - serial
+              target: ocsf.device.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `rule` to `ocsf.firewall_rule.name`
+              sources:
+                - rule
+              target: ocsf.firewall_rule.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ruleuuid` to `ocsf.firewall_rule.uid`
+              sources:
+                - ruleuuid
+              target: ocsf.firewall_rule.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `type` to `ocsf.metadata.event_code`
+              sources:
+                - type
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `repeatcnt` to `ocsf.count`
+              sources:
+                - repeatcnt
+              target: ocsf.count
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `time_generated` to `ocsf.metadata.original_time`
+              sources:
+                - time_generated
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `contentver` to `ocsf.finding_info.analytic.version`
+              sources:
+                - contentver
+              target: ocsf.finding_info.analytic.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `evidence` to `ocsf.finding_info.desc`
+              sources:
+                - evidence
+              target: ocsf.finding_info.desc
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Create
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: New
+                  id: 1
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-category-mapper
+              name: ocsf.finding_info.analytic.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Rule
+                  id: 1
+              targets:
+                name: ocsf.finding_info.analytic.type
+                id: ocsf.finding_info.analytic.type_id
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "@ocsf.metadata.log_name:CORRELATION"
+                  name: Server
+                  id: 1
+                - filter:
+                    query: "*"
+                  name: Firewall
+                  id: 9
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "-@severity:*"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@severity:informational"
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: "@severity:low"
+                  name: Low
+                  id: 2
+                - filter:
+                    query: "@severity:medium"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@severity:high"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@severity:critical"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - severity
+            - type: schema-category-mapper
+              name: ocsf.disposition_id
+              categories:
+                - filter:
+                    query: "-@palo.alto.panorama.action:*"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@palo.alto.panorama.action:allow"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@palo.alto.panorama.action:(deny OR block-url OR block-ip OR block-continue OR sinkhole)"
+                  name: Blocked
+                  id: 2
+                - filter:
+                    query: "@palo.alto.panorama.action:(drop OR drop-packet OR drop-all-packets)"
+                  name: Dropped
+                  id: 6
+                - filter:
+                    query: "@palo.alto.panorama.action:alert"
+                  name: Alert
+                  id: 19
+                - filter:
+                    query: "@palo.alto.panorama.action:(reset-both OR reset-client OR reset-server)"
+                  name: Reset
+                  id: 21
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.disposition
+                id: ocsf.disposition_id
+              fallback:
+                values:
+                  ocsf.disposition: Other
+                  ocsf.disposition_id: "99"
+                sources:
+                  ocsf.disposition:
+                    - palo.alto.panorama.action
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "-@palo.alto.panorama.action:*"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@palo.alto.panorama.action:allow"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@palo.alto.panorama.action:(deny OR block-url OR block-ip OR block-continue OR sinkhole OR drop OR drop-packet OR drop-all-packets OR reset-both OR reset-client OR reset-server)"
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: "@palo.alto.panorama.action:alert"
+                  name: Observed
+                  id: 3
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.action
+                id: ocsf.action_id
+              fallback:
+                values:
+                  ocsf.action: Other
+                  ocsf.action_id: "99"
+                sources:
+                  ocsf.action:
+                    - palo.alto.panorama.action
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Detection Finding
+            classUid: 2004
+            extensions: []
+            profiles:
+              - security_control
+    - type: pipeline
+      name: OCSF sub pipeline for class Network Activity [4001]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.metadata.log_name:(TRAFFIC OR DECRYPTION)"
+      processors:
+        # Read the session ID as text, so CSV logs do not render it as a double.
+        - type: grok-parser
+          name: Parse `message` to `ocsf.connection_info.session.uid`
+          enabled: true
+          source: message
+          samples:
+            - "<14>Nov 16 08:07:01 pan-01.example.com serial=001000000001|type=TRAFFIC|subtype=start|sessionid=36137871|repeatcnt=1"
+            - "<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,TRAFFIC,end,2049,2026/10/05 16:15:07,10.0.0.10,185.64.148.0,203.0.113.5,185.64.148.0,allow-web,,,ssl,vsys1,trust,untrust,ethernet1/1,ethernet1/2,log-forwarding,2026/10/05 16:15:07,123456,1"
+          grok:
+            supportRules: |-
+              _syslog_header (<%{integer}>)?(%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) %{notSpace}
+            matchRules: |-
+              kv_session (.*?[ |,])?sessionid=%{regex("[0-9]+"):ocsf.connection_info.session.uid}.*
+              csv_session (%{_syslog_header} )?[0-9]*,[^,]*,[^,]*,TRAFFIC,(?:(?:"(?:[^"]|"")*"|[^,]*),){18}%{regex("[0-9]+"):ocsf.connection_info.session.uid},.*
+        # A NAT address means the firewall translated the address, unless it is empty, `0.0.0.0` or equal to the
+        # original address. Each original and NAT pair is joined into the endpoint `ip` field, so a grok rule can
+        # compare the two. The grok rule then rewrites `ip`, and the schema mappers below set its final value.
+        # The destination string also carries the NAT port and the GeoIP location of the original destination,
+        # so that both follow the address the grok rule selects.
+        - type: string-builder-processor
+          name: Join `network.client.ip` and `natsrc` into `ocsf.src_endpoint.ip`
+          enabled: true
+          template: "%{network.client.ip}|%{natsrc}"
+          target: ocsf.src_endpoint.ip
+          replaceMissing: true
+        - type: string-builder-processor
+          name: Join `network.destination.ip`, `natdst`, `natdport` and `network.destination.geoip` into `ocsf.dst_endpoint.ip`
+          enabled: true
+          template: "%{network.destination.ip}|%{natdst}|%{natdport}|%{network.destination.geoip.country.iso_code}|%{network.destination.geoip.subdivision.iso_code}|%{network.destination.geoip.city.name}|%{network.destination.geoip.continent.name}|%{network.destination.geoip.location.latitude}|%{network.destination.geoip.location.longitude}"
+          target: ocsf.dst_endpoint.ip
+          replaceMissing: true
+        # Source NAT: `src` stays the source IP, and `natsrc` is the translated address the traffic left through.
+        - type: grok-parser
+          name: Parse `ocsf.src_endpoint.ip` to `ocsf.src_endpoint.ip`, `ocsf.src_endpoint.nat_ip`
+          enabled: true
+          source: ocsf.src_endpoint.ip
+          samples:
+            - "10.0.0.10|203.0.113.5"
+            - "10.0.0.15|0.0.0.0"
+            - "10.0.0.15|10.0.0.15"
+            - "10.0.0.15|"
+          grok:
+            supportRules: ""
+            matchRules: |-
+              not_translated %{regex("[^|]*"):ocsf.src_endpoint.ip}\|(?:\1|0\.0\.0\.0)?
+              translated %{regex("[^|]*"):ocsf.src_endpoint.ip}\|%{regex("[^|]+"):ocsf.src_endpoint.nat_ip}
+        # Destination NAT: `natdst` is the host the traffic reached, and `dst` is the address the client targeted.
+        # A translated destination takes `natdport` when it is set, and drops the location of `dst`.
+        - type: grok-parser
+          name: Parse `ocsf.dst_endpoint.ip` to `ocsf.dst_endpoint.ip`, `port`, `nat_ip`, `location`
+          enabled: true
+          source: ocsf.dst_endpoint.ip
+          samples:
+            - "185.64.148.0|10.0.1.20|8389|FR|FR-IDF|Paris|Europe|48.90654|2.33339"
+            - "185.64.148.0|185.64.148.0|443|FR|FR-IDF|Paris|Europe|48.90654|2.33339"
+            - "10.0.1.20|0.0.0.0|0||||||"
+            - "10.0.1.20|||||||"
+            - "|10.0.1.20|0||||||"
+          grok:
+            supportRules: |-
+              _location (?:%{regex("[^|]+"):ocsf.dst_endpoint.location.country})?\|(?:%{regex("[^|]+"):ocsf.dst_endpoint.location.region})?\|(?:%{regex("[^|]+"):ocsf.dst_endpoint.location.city})?\|(?:%{regex("[^|]+"):ocsf.dst_endpoint.location.continent})?\|(?:%{number:ocsf.dst_endpoint.location.lat})?\|(?:%{number:ocsf.dst_endpoint.location.long})?
+            matchRules: |-
+              not_translated %{regex("[^|]*"):ocsf.dst_endpoint.ip}\|(?:\1|0\.0\.0\.0)?\|[^|]*\|%{_location}
+              translated %{regex("[^|]+"):ocsf.dst_endpoint.nat_ip}\|%{regex("[^|]+"):ocsf.dst_endpoint.ip}\|(?:(?=[1-9])%{integer:ocsf.dst_endpoint.port})?.*
+              no_original \|%{regex("[^|]+"):ocsf.dst_endpoint.ip}\|.*
+        - type: array-processor
+          name: Move `ocsf.src_endpoint.nat_ip` into `ocsf.src_endpoint.intermediate_ips`
+          enabled: true
+          operation:
+            source: ocsf.src_endpoint.nat_ip
+            target: ocsf.src_endpoint.intermediate_ips
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move `ocsf.dst_endpoint.nat_ip` into `ocsf.dst_endpoint.intermediate_ips`
+          enabled: true
+          operation:
+            source: ocsf.dst_endpoint.nat_ip
+            target: ocsf.dst_endpoint.intermediate_ips
+            preserveSource: false
+            type: append
+        - type: arithmetic-processor
+          name: Calculate `ocsf.duration` from `elapsed`
+          enabled: true
+          expression: elapsed * 1000
+          target: ocsf.duration
+          isReplaceMissing: false
+        - type: schema-processor
+          name: Apply OCSF schema for 4001
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+              sources:
+                - ocsf.metadata.log_name
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.duration` to `ocsf.duration`
+              sources:
+                - ocsf.duration
+              target: ocsf.duration
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `src`, `network.client.ip` to `ocsf.src_endpoint.ip`
+              sources:
+                - src
+                - network.client.ip
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.src_endpoint.intermediate_ips` to `ocsf.src_endpoint.intermediate_ips`
+              sources:
+                - ocsf.src_endpoint.intermediate_ips
+              target: ocsf.src_endpoint.intermediate_ips
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `sport`, `network.client.port` to `ocsf.src_endpoint.port`
+              sources:
+                - sport
+                - network.client.port
+              target: ocsf.src_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `srczone` to `ocsf.src_endpoint.zone`
+              sources:
+                - srczone
+              target: ocsf.src_endpoint.zone
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `inboundif`, `inbound_if` to `ocsf.src_endpoint.interface_name`
+              sources:
+                - inboundif
+                - inbound_if
+              target: ocsf.src_endpoint.interface_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `suser` to `ocsf.src_endpoint.owner.name`
+              sources:
+                - suser
+              target: ocsf.src_endpoint.owner.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.ip`, `dst`, `network.destination.ip` to `ocsf.dst_endpoint.ip`
+              sources:
+                - ocsf.dst_endpoint.ip
+                - dst
+                - network.destination.ip
+              target: ocsf.dst_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.intermediate_ips` to `ocsf.dst_endpoint.intermediate_ips`
+              sources:
+                - ocsf.dst_endpoint.intermediate_ips
+              target: ocsf.dst_endpoint.intermediate_ips
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.port`, `dport`, `network.destination.port` to `ocsf.dst_endpoint.port`
+              sources:
+                - ocsf.dst_endpoint.port
+                - dport
+                - network.destination.port
+              target: ocsf.dst_endpoint.port
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `dstzone` to `ocsf.dst_endpoint.zone`
+              sources:
+                - dstzone
+              target: ocsf.dst_endpoint.zone
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `outboundif`, `outbound_if` to `ocsf.dst_endpoint.interface_name`
+              sources:
+                - outboundif
+                - outbound_if
+              target: ocsf.dst_endpoint.interface_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `duser` to `ocsf.dst_endpoint.owner.name`
+              sources:
+                - duser
+              target: ocsf.dst_endpoint.owner.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `proto` to `ocsf.connection_info.protocol_name`
+              sources:
+                - proto
+              target: ocsf.connection_info.protocol_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.connection_info.session.uid`, `sessionid` to `ocsf.connection_info.session.uid`
+              sources:
+                - ocsf.connection_info.session.uid
+                - sessionid
+              target: ocsf.connection_info.session.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `app` to `ocsf.app_name`
+              sources:
+                - app
+              target: ocsf.app_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `bytes` to `ocsf.traffic.bytes`
+              sources:
+                - bytes
+              target: ocsf.traffic.bytes
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.bytes_read` to `ocsf.traffic.bytes_out`
+              sources:
+                - network.bytes_read
+              target: ocsf.traffic.bytes_out
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.bytes_written` to `ocsf.traffic.bytes_in`
+              sources:
+                - network.bytes_written
+              target: ocsf.traffic.bytes_in
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `palo.alto.panorama.pkt` to `ocsf.traffic.packets`
+              sources:
+                - palo.alto.panorama.pkt
+              target: ocsf.traffic.packets
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `palo.alto.panorama.pktsent`, `pkts_sent` to `ocsf.traffic.packets_out`
+              sources:
+                - palo.alto.panorama.pktsent
+                - pkts_sent
+              target: ocsf.traffic.packets_out
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `palo.alto.panorama.pktrcvd`, `pkts_received` to `ocsf.traffic.packets_in`
+              sources:
+                - palo.alto.panorama.pktrcvd
+                - pkts_received
+              target: ocsf.traffic.packets_in
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `sessionendreason`, `err` to `ocsf.status_detail`
+              sources:
+                - sessionendreason
+                - err
+              target: ocsf.status_detail
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `sessionendreason` to `ocsf.status_code`
+              sources:
+                - sessionendreason
+              target: ocsf.status_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `rule` to `ocsf.firewall_rule.name`
+              sources:
+                - rule
+              target: ocsf.firewall_rule.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ruleuuid` to `ocsf.firewall_rule.uid`
+              sources:
+                - ruleuuid
+              target: ocsf.firewall_rule.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `dvc` to `ocsf.device.name`
+              sources:
+                - dvc
+              target: ocsf.device.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.device.uid`, `serial` to `ocsf.device.uid`
+              sources:
+                - ocsf.device.uid
+                - serial
+              target: ocsf.device.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `tlsver` to `ocsf.tls.version`
+              sources:
+                - tlsver
+              target: ocsf.tls.version
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `tlsenc` to `ocsf.tls.cipher`
+              sources:
+                - tlsenc
+              target: ocsf.tls.cipher
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `sni` to `ocsf.tls.sni`
+              sources:
+                - sni
+              target: ocsf.tls.sni
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `certserial` to `ocsf.tls.certificate.serial_number`
+              sources:
+                - certserial
+              target: ocsf.tls.certificate.serial_number
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `issuercn` to `ocsf.tls.certificate.issuer`
+              sources:
+                - issuercn
+              target: ocsf.tls.certificate.issuer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `cn` to `ocsf.tls.certificate.subject`
+              sources:
+                - cn
+              target: ocsf.tls.certificate.subject
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `certver` to `ocsf.tls.certificate.version`
+              sources:
+                - certver
+              target: ocsf.tls.certificate.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `type` to `ocsf.metadata.event_code`
+              sources:
+                - type
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `repeatcnt` to `ocsf.count`
+              sources:
+                - repeatcnt
+              target: ocsf.count
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `time_generated` to `ocsf.metadata.original_time`
+              sources:
+                - time_generated
+              target: ocsf.metadata.original_time
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `chunk` to `ocsf.traffic.chunks`
+              sources:
+                - chunk
+              target: ocsf.traffic.chunks
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `chunksent` to `ocsf.traffic.chunks_out`
+              sources:
+                - chunksent
+              target: ocsf.traffic.chunks_out
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `chunkrcvd` to `ocsf.traffic.chunks_in`
+              sources:
+                - chunkrcvd
+              target: ocsf.traffic.chunks_in
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `smac` to `ocsf.src_endpoint.mac`
+              sources:
+                - smac
+              target: ocsf.src_endpoint.mac
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `shost` to `ocsf.src_endpoint.hostname`
+              sources:
+                - shost
+              target: ocsf.src_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `suuid` to `ocsf.src_endpoint.uid`
+              sources:
+                - suuid
+              target: ocsf.src_endpoint.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `palo.alto.panorama.dmac` to `ocsf.dst_endpoint.mac`
+              sources:
+                - palo.alto.panorama.dmac
+              target: ocsf.dst_endpoint.mac
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `dhost` to `ocsf.dst_endpoint.hostname`
+              sources:
+                - dhost
+              target: ocsf.dst_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `duuid` to `ocsf.dst_endpoint.uid`
+              sources:
+                - duuid
+              target: ocsf.dst_endpoint.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.country.iso_code` to `ocsf.src_endpoint.location.country`
+              sources:
+                - network.client.geoip.country.iso_code
+              target: ocsf.src_endpoint.location.country
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.subdivision.iso_code` to `ocsf.src_endpoint.location.region`
+              sources:
+                - network.client.geoip.subdivision.iso_code
+              target: ocsf.src_endpoint.location.region
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.city.name` to `ocsf.src_endpoint.location.city`
+              sources:
+                - network.client.geoip.city.name
+              target: ocsf.src_endpoint.location.city
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.continent.name` to `ocsf.src_endpoint.location.continent`
+              sources:
+                - network.client.geoip.continent.name
+              target: ocsf.src_endpoint.location.continent
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.location.latitude` to `ocsf.src_endpoint.location.lat`
+              sources:
+                - network.client.geoip.location.latitude
+              target: ocsf.src_endpoint.location.lat
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `network.client.geoip.location.longitude` to `ocsf.src_endpoint.location.long`
+              sources:
+                - network.client.geoip.location.longitude
+              target: ocsf.src_endpoint.location.long
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.location.country` to `ocsf.dst_endpoint.location.country`
+              sources:
+                - ocsf.dst_endpoint.location.country
+              target: ocsf.dst_endpoint.location.country
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.location.region` to `ocsf.dst_endpoint.location.region`
+              sources:
+                - ocsf.dst_endpoint.location.region
+              target: ocsf.dst_endpoint.location.region
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.location.city` to `ocsf.dst_endpoint.location.city`
+              sources:
+                - ocsf.dst_endpoint.location.city
+              target: ocsf.dst_endpoint.location.city
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.location.continent` to `ocsf.dst_endpoint.location.continent`
+              sources:
+                - ocsf.dst_endpoint.location.continent
+              target: ocsf.dst_endpoint.location.continent
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.location.lat` to `ocsf.dst_endpoint.location.lat`
+              sources:
+                - ocsf.dst_endpoint.location.lat
+              target: ocsf.dst_endpoint.location.lat
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.dst_endpoint.location.long` to `ocsf.dst_endpoint.location.long`
+              sources:
+                - ocsf.dst_endpoint.location.long
+              target: ocsf.dst_endpoint.location.long
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@ocsf.metadata.log_name:TRAFFIC @subtype:start"
+                  name: Open
+                  id: 1
+                - filter:
+                    query: "@ocsf.metadata.log_name:TRAFFIC @subtype:end"
+                  name: Close
+                  id: 2
+                - filter:
+                    query: "@ocsf.metadata.log_name:TRAFFIC @subtype:(drop OR deny)"
+                  name: Refuse
+                  id: 5
+                - filter:
+                    query: "@ocsf.metadata.log_name:DECRYPTION"
+                  name: Traffic
+                  id: 6
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - subtype
+            # PAN-OS logs have no direction field and zone names are customer-defined, so direction is derived from
+            # whether the pre-NAT source and destination are private (RFC 1918, CGNAT or IPv6 ULA) or public.
+            - type: schema-category-mapper
+              name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "@network.client.ip:* NOT (CIDR(@network.client.ip,10.0.0.0/8) OR CIDR(@network.client.ip,172.16.0.0/12) OR CIDR(@network.client.ip,192.168.0.0/16) OR CIDR(@network.client.ip,100.64.0.0/10) OR CIDR(@network.client.ip,fc00::/7)) AND (CIDR(@network.destination.ip,10.0.0.0/8) OR CIDR(@network.destination.ip,172.16.0.0/12) OR CIDR(@network.destination.ip,192.168.0.0/16) OR CIDR(@network.destination.ip,100.64.0.0/10) OR CIDR(@network.destination.ip,fc00::/7))"
+                  name: Inbound
+                  id: 1
+                - filter:
+                    query: "(CIDR(@network.client.ip,10.0.0.0/8) OR CIDR(@network.client.ip,172.16.0.0/12) OR CIDR(@network.client.ip,192.168.0.0/16) OR CIDR(@network.client.ip,100.64.0.0/10) OR CIDR(@network.client.ip,fc00::/7)) AND @network.destination.ip:* NOT (CIDR(@network.destination.ip,10.0.0.0/8) OR CIDR(@network.destination.ip,172.16.0.0/12) OR CIDR(@network.destination.ip,192.168.0.0/16) OR CIDR(@network.destination.ip,100.64.0.0/10) OR CIDR(@network.destination.ip,fc00::/7))"
+                  name: Outbound
+                  id: 2
+                - filter:
+                    query: "(CIDR(@network.client.ip,10.0.0.0/8) OR CIDR(@network.client.ip,172.16.0.0/12) OR CIDR(@network.client.ip,192.168.0.0/16) OR CIDR(@network.client.ip,100.64.0.0/10) OR CIDR(@network.client.ip,fc00::/7)) AND (CIDR(@network.destination.ip,10.0.0.0/8) OR CIDR(@network.destination.ip,172.16.0.0/12) OR CIDR(@network.destination.ip,192.168.0.0/16) OR CIDR(@network.destination.ip,100.64.0.0/10) OR CIDR(@network.destination.ip,fc00::/7))"
+                  name: Lateral
+                  id: 3
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+            - type: schema-category-mapper
+              name: ocsf.device.type_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Firewall
+                  id: 9
+              targets:
+                name: ocsf.device.type
+                id: ocsf.device.type_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "-@sessionendreason:* OR @sessionendreason:\"n/a\""
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@sessionendreason:(tcp-fin OR aged-out OR tcp-rst-from-client OR tcp-rst-from-server)"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@sessionendreason:(policy-deny OR threat OR resources-unavailable OR decrypt-error OR decrypt-cert-validation OR decrypt-unsupport-param)"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - sessionendreason
+            - type: schema-category-mapper
+              name: ocsf.disposition_id
+              categories:
+                - filter:
+                    query: "@palo.alto.panorama.action:allow"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@palo.alto.panorama.action:deny"
+                  name: Blocked
+                  id: 2
+                - filter:
+                    query: "@palo.alto.panorama.action:(drop OR drop-icmp)"
+                  name: Dropped
+                  id: 6
+                - filter:
+                    query: "@palo.alto.panorama.action:(reset-both OR reset-client OR reset-server)"
+                  name: Reset
+                  id: 21
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.disposition
+                id: ocsf.disposition_id
+              fallback:
+                values:
+                  ocsf.disposition: Other
+                  ocsf.disposition_id: "99"
+                sources:
+                  ocsf.disposition:
+                    - palo.alto.panorama.action
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "@palo.alto.panorama.action:allow"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@palo.alto.panorama.action:(deny OR drop OR drop-icmp OR reset-both OR reset-client OR reset-server)"
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.action
+                id: ocsf.action_id
+              fallback:
+                values:
+                  ocsf.action: Other
+                  ocsf.action_id: "99"
+                sources:
+                  ocsf.action:
+                    - palo.alto.panorama.action
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Network Activity
+            classUid: 4001
+            extensions: []
+            profiles:
+              - host
+              - security_control

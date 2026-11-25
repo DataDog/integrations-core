@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "title": "High error rate in the global layer",
+  "tags": [
+    "integration:krakend"
+  ],
+  "definition": {
+    "name": "[KrakenD] The API gateway is reporting high number unsuccessful responses",
+    "tags": [
+      "integration:krakend"
+    ],
+    "type": "query alert",
+    "query": "sum(last_5m):sum:krakend.api.http_server.duration.count{! code_class:2xx} by {http_route,krakend.service_name,host}.as_count() / sum:krakend.api.http_server.duration.count{*} by {http_route,krakend.service_name,host}.as_count() > 0.2",
+    "message": "Your KrakenD API Gateway is experiencing an error rate {{comparator}} {{threshold}} in endpoint `{{http_route.name}}`.\n\n- **Service**: {{[krakend.service_name].name}}\n- **Host**: {{host.name}}\n\nMonitor triggered at {{first_triggered_at}}",
+    "options": {
+      "silenced": {},
+      "notify_by": [
+        "http_route",
+        "krakend.service_name"
+      ],
+      "thresholds": {
+        "warning": 0.1,
+        "critical": 0.2
+      },
+      "include_tags": false,
+      "notify_audit": false,
+      "new_group_delay": 60,
+      "on_missing_data": "show_and_notify_no_data"
+    },
+    "priority": 2
+  },
+  "created_at": "2025-07-31",
+  "description": "This monitor warns when more than 10% of the total requests served by KrakenD are returned with a non-2xx status code. It goes into alert when it is over 20%.",
+  "last_updated_at": "2025-08-07"
+}
