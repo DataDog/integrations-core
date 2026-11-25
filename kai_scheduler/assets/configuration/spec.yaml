@@ -65,11 +65,16 @@ files:
         queue, cluster or reason:
 
         - `gpu.scheduling.badput_time`: GPU time that GPU PodGroups spent waiting to become fully runnable, tagged with
-          the normalized `reason` and, when KAI reports one, the raw `scheduler_reason`.
+          the normalized `reason` and, when KAI reports one, the raw `scheduler_reason`. It doesn't stop when KAI
+          allocates a PodGroup, but when all its active pods run. After a preemption it is tagged `reason:preempted`
+          until KAI starts the PodGroup again.
         - `gpu.scheduling.fully_admitted_time`: GPU time that GPU PodGroups spent with all their active pods running.
 
         Goodput is `fully_admitted_time / (fully_admitted_time + badput_time)`. The metrics have no `kai.` prefix so
-        that every scheduler integration submits the same metrics.
+        that every scheduler integration submits the same metrics. Both metrics are also tagged with `gpu_type`, when the
+        pods of the PodGroup require a GPU model with the `nvidia.com/gpu.product` node label in their `nodeSelector` or
+        `nodeAffinity`, and the tag is unset otherwise. It works when `collect_podgroup_events` is `false`, such as when
+        the Cluster Agent `job_scheduler_events` check sends the PodGroup events.
 
         Each GPU PodGroup active in an hour adds at least two custom metric series, plus one per extra badput reason.
 

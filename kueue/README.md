@@ -22,7 +22,7 @@ Configure this integration as an [endpoints check][14], so that each Kueue contr
 Kueue serves its metrics over HTTPS (port `8443` by default) with a self-signed certificate, and authorizes callers with their service account token. The node Agent service account needs the following permissions:
 
 - `get` on the `/metrics` non-resource URL. The default Datadog Helm chart and Datadog Operator node Agent roles already include it.
-- `get` and `list` on `workloads` in the `kueue.x-k8s.io` API group, for Workload lifecycle events and the experimental scheduling goodput. Set `collect_workload_events: false` to disable event collection. Scheduling goodput still needs these permissions when `collect_scheduling_goodput` is enabled.
+- `get` and `list` on `workloads` in the `kueue.x-k8s.io` API group, for Workload lifecycle events and the experimental scheduling goodput. Set `collect_workload_events: false` to disable event collection. Scheduling goodput still needs these permissions when `collect_scheduling_goodput` is enabled, and it keeps working when `collect_workload_events` is `false`, such as when the Cluster Agent `job_scheduler_events` check sends the Workload events.
 
 1. To collect optional ClusterQueue resource metrics, such as `kueue.cluster_queue.resource_usage.gpu`, configure Kueue with `metrics.enableClusterQueueResources: true` and restart the Kueue controller manager.
 
@@ -164,6 +164,27 @@ Set `collect_scheduling_goodput: true` to measure how much of the GPU time that 
 - `gpu.scheduling.badput_time`: the Workload waits for quota, for admission, or for its pods to be ready, or it was evicted or preempted and waits to be admitted again. It is tagged with a `reason` shared with the other scheduler integrations, such as `quota_exhausted`, `exceeds_max_quota`, or `waiting_for_pods`, and with the raw Kueue `scheduler_reason` when Kueue reports one.
 - `gpu.scheduling.fully_admitted_time`: the Workload is admitted and Kueue reports `PodsReady`.
 
+Badput doesn't stop when Kueue admits a Workload. It stops once Kueue reports `PodsReady=True`, so a Workload that is admitted but whose pods are pending or only partly ready keeps accumulating badput, with `reason:waiting_for_pods`. After a preemption, the badput is tagged `reason:preempted` until Kueue admits the Workload again.
+
+The `reason` tag is derived from the blocking Workload condition, mostly `QuotaReserved=False`, and `scheduler_reason` keeps the raw value:
+
+| `reason` | Kueue `scheduler_reason` |
+|---|---|
+| `quota_exhausted` | `WaitingForQuota` |
+| `exceeds_max_quota` | `ExceedsMaxQuota` |
+| `no_matching_resources` | `NoMatchingFlavor`, `DRAResourcesUnresolved` |
+| `topology` | `TopologyPlacementFailed` |
+| `waiting_for_preemption` | `WaitingForPreemptedWorkloads` |
+| `admission_checks` | `PendingEvaluation`, `UnsatisfiedAdmissionChecks`, `AdmissionCheck` |
+| `waiting_for_pods` | `WaitingForPodsReady`, `WaitForStart`, `PodsReadyTimeout` |
+| `misconfigured` | `Misconfigured`, `UnrecordableResourceUsage` |
+| `suspended` | `Suspended` |
+| `queue_stopped` | `ClusterQueueStopped`, `LocalQueueStopped` |
+| `preempted` | the Workload was preempted and Kueue hasn't admitted it again |
+| `unknown` | any other value |
+
+Without the `UnadmittedWorkloadsObservability` feature gate, Kueue reports `Pending` or `Inadmissible`, and the check reads the cause from the condition message.
+
 **Requirements**: Kueue reports `PodsReady` only when [`waitForPodsReady`][16] is enabled. Without it, the check can't measure the fully admitted time, so it submits no goodput metrics and logs a warning. The node Agent needs `get` and `list` on `workloads.kueue.x-k8s.io`. Only the instance that scraped the Kueue leader submits the metrics. The `workload_events_namespaces` option also limits which Workloads the check counts.
 
 **Querying**: The scheduling goodput of a group, such as a ClusterQueue, is `fully_admitted_time / (fully_admitted_time + badput_time)` summed over its series:
@@ -174,9 +195,9 @@ sum:gpu.scheduling.fully_admitted_time{*} by {kueue_cluster_queue}.as_count().fi
 
 Use `.fill(zero)` so that a group that stops reporting does not repeat its last value. On every run where a Workload is counted, it submits both metrics, with a value of 0 for the metric that doesn't apply. This way, a group's goodput is defined even when all its Workloads are waiting or all are running. The 0 `badput_time` point has no `reason` tag, so grouping badput by `reason` shows an extra group with no reason. A Workload name is unique only within a namespace, so group by `kube_namespace` and `kueue_workload` to look at a single Workload.
 
-**Tags**: Both metrics are tagged with `kueue_workload`, `kueue_local_queue`, `kube_namespace`, and the scheduler tags shared by all batch schedulers: `job_scheduler:kueue` and `job_scheduler_workload` (the Workload name). When the ClusterQueue is known, they're also tagged with `kueue_cluster_queue` and `job_scheduler_queue`. The shared tags match the ones on the Workload events, so the same queries work for Kueue and KAI. A Workload that isn't admitted yet has no ClusterQueue, so the check reads it from the Agent tagger. The tagger lookup requires [Kueue metadata in the Cluster Agent](#cluster-agent-configuration-and-gpu-monitoring-integration), and the Cluster Agent service account needs `get`, `list`, and `watch` on `localqueues`, `clusterqueues`, `resourceflavors`, and `workloads` in the `kueue.x-k8s.io` API group. Without them, the badput of pending Workloads has no ClusterQueue tag, so group goodput by `kueue_local_queue` instead. The check doesn't add instance tags, including the tags that Autodiscovery adds from the controller pod, so they don't collide with the Workload's tags.
+**Tags**: Both metrics are tagged with `kueue_workload`, `kueue_local_queue`, `kube_namespace`, and the scheduler tags shared by all batch schedulers: `job_scheduler:kueue` and `job_scheduler_workload` (the Workload name). When the ClusterQueue is known, they're also tagged with `kueue_cluster_queue` and `job_scheduler_queue`. The shared tags match the ones on the Workload events, so the same queries work for Kueue and KAI. A Workload that isn't admitted yet has no ClusterQueue, so the check reads it from the Agent tagger. Both metrics also carry `gpu_type` (for example `a100`), when it's known. Once Kueue assigned a ResourceFlavor, it comes from the Agent tagger, which reads it from the flavor's `nvidia.com/gpu.product` node label, like the `gpu_type` of the Agent's GPU metrics. Before that, the check uses the model that the Workload's pods require in their `nodeSelector` or `nodeAffinity`. Without either, the tag is unset. The tagger lookup requires [Kueue metadata in the Cluster Agent](#cluster-agent-configuration-and-gpu-monitoring-integration), and the Cluster Agent service account needs `get`, `list`, and `watch` on `localqueues`, `clusterqueues`, `resourceflavors`, and `workloads` in the `kueue.x-k8s.io` API group. Without them, the badput of pending Workloads has no ClusterQueue tag, so group goodput by `kueue_local_queue` instead. The check doesn't add instance tags, including the tags that Autodiscovery adds from the controller pod, so they don't collide with the Workload's tags.
 
-**Cost**: Each Workload active in an hour adds at least two custom metric series, plus one per extra badput reason, so the number of series grows with how many Workloads are created.
+**Cost**: Each Workload active in an hour adds at least two custom metric series, plus one per extra badput reason and per `gpu_type` value it has over its life, so the number of series grows with how many Workloads are created.
 
 ### Service Checks
 

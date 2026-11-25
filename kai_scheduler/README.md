@@ -108,6 +108,20 @@ Set `collect_scheduling_goodput: true` to measure how much of the GPU time that 
 - `gpu.scheduling.badput_time`: the PodGroup waits for quota or for room in the cluster, some of its pods are not running yet, or it was preempted and waits to run again. It is tagged with a `reason` shared with the other scheduler integrations, such as `quota_exhausted`, `no_matching_resources`, or `preempted`, and with the raw KAI `scheduler_reason` when KAI reports one.
 - `gpu.scheduling.fully_admitted_time`: every active pod of the PodGroup runs, with at least `minMember` pods running or completed.
 
+Badput doesn't stop when KAI allocates a PodGroup. It stops once every active pod runs, so a PodGroup that KAI scheduled but whose pods are pending or only partly running, such as when the node can't start them, keeps accumulating badput, with `reason:waiting_for_pods`. After a preemption, the badput is tagged `reason:preempted` until KAI starts the PodGroup again.
+
+The `reason` tag is derived from the PodGroup `status.schedulingConditions[].reasons[]`, and `scheduler_reason` keeps the raw value. KAI doesn't expose a structured reason for other causes, so they have none:
+
+| `reason` | KAI `scheduler_reason` |
+|---|---|
+| `quota_exhausted` | `OverLimit`, `NonPreemptibleOverQuota` |
+| `no_matching_resources` | `PodSchedulingErrors` |
+| `waiting_for_preemption` | `PreemptionDelayNotElapsed` |
+| `misconfigured` | `QueueDoesNotExist` |
+| `waiting_for_pods` | none: KAI scheduled the PodGroup, or created no pods yet |
+| `preempted` | none: KAI evicted the PodGroup and hasn't started it again |
+| `unknown` | any other value |
+
 **Requirements**: The service account of the Agent that runs the check, such as the cluster check runner, needs cluster-wide `list` on `podgroups.scheduling.run.ai` and `pods`, and `get` on `jobs.batch`. The check uses `jobs.batch` to determine whether a PodGroup without pods is waiting for new pods or is done. Every instance with `collect_scheduling_goodput` enabled counts the whole cluster, so enable it on only one instance.
 
 **Querying**: The scheduling goodput of a group, such as a KAI queue, is `fully_admitted_time / (fully_admitted_time + badput_time)` summed over its series:
@@ -118,7 +132,7 @@ sum:gpu.scheduling.fully_admitted_time{*} by {kai_queue}.as_count().fill(zero) /
 
 Use `.fill(zero)` so that a group that stops reporting does not repeat its last value. On every run where a PodGroup is counted, it submits both metrics, with a value of 0 for the metric that doesn't apply. This way, a group's goodput is defined even when all its PodGroups are waiting or all are running. The 0 `badput_time` point has no `reason` tag, so grouping badput by `reason` shows an extra group with no reason. A PodGroup name is unique only within a namespace, so group by `kube_namespace` and `kai_workload` to look at a single PodGroup.
 
-**Tags**: Both metrics are tagged with `kai_workload`, `kai_queue`, `kube_namespace`, and the scheduler tags shared by all batch schedulers: `job_scheduler:kai`, `job_scheduler_queue` (the queue name), and `job_scheduler_workload` (the PodGroup name). The shared tags match the ones on the PodGroup events, so the same queries work for KAI and Kueue. The check doesn't add instance tags, including the tags that Autodiscovery adds from the scraped pods, so they don't collide with the PodGroup's tags.
+**Tags**: Both metrics are tagged with `kai_workload`, `kai_queue`, `kube_namespace`, and the scheduler tags shared by all batch schedulers: `job_scheduler:kai`, `job_scheduler_queue` (the queue name), and `job_scheduler_workload` (the PodGroup name). The shared tags match the ones on the PodGroup events, so the same queries work for KAI and Kueue. Both metrics also carry `gpu_type` (for example `a100`) when the pods of the PodGroup explicitly require a GPU model in their `nodeSelector` or `nodeAffinity` with the `nvidia.com/gpu.product` node label. KAI PodGroups don't expose the GPU model, so the tag is unset otherwise. The check doesn't add instance tags, including the tags that Autodiscovery adds from the scraped pods, so they don't collide with the PodGroup's tags.
 
 **Cost**: Each PodGroup active in an hour adds at least two custom metric series, plus one per extra badput reason, so the number of series grows with how many PodGroups are created.
 
