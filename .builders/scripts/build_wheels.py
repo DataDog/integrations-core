@@ -8,6 +8,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import time
@@ -15,7 +16,7 @@ import tomllib
 from functools import cache
 from hashlib import sha256
 from itertools import accumulate
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from tempfile import TemporaryDirectory
 from typing import TypedDict
 from zipfile import ZipFile
@@ -54,6 +55,8 @@ INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
+ELF_MAGIC = b'\x7fELF'
+ELF_DEBUG_SECTION_RE = re.compile(r'^\s*\[\s*\d+\]\s+(?:\.z?debug_|\.gdb_index\b)')
 
 
 class WheelSizes(TypedDict):
@@ -374,17 +377,72 @@ def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
     return modified
 
 
+def _is_shared_library_name(name: str) -> bool:
+    """Return True if `name` looks like a Linux ELF shared object (`.so` or `.so.*`)."""
+    filename = PurePosixPath(name).name
+    return filename.endswith('.so') or '.so.' in filename
+
+
+def _is_elf_file(path: Path) -> bool:
+    """Return True if `path` is a regular file starting with the ELF magic bytes."""
+    if path.is_symlink() or not path.is_file():
+        return False
+    with path.open('rb') as f:
+        return f.read(len(ELF_MAGIC)) == ELF_MAGIC
+
+
+def _elf_has_debug_sections(path: Path) -> bool:
+    """Return True if the ELF binary at `path` contains DWARF debug sections."""
+    result = subprocess.run(
+        ['readelf', '-SW', str(path)],
+        check=True,
+        capture_output=True,
+        text=True,
+        env={**os.environ, 'LC_ALL': 'C'},
+    )
+    return any(ELF_DEBUG_SECTION_RE.match(line) for line in result.stdout.splitlines())
+
+
+def _strip_debug_info_from_dir(unpacked_dir: Path) -> bool:
+    """Strip DWARF debug sections from Linux ELF shared libraries in an unpacked wheel."""
+    if sys.platform != 'linux':
+        return False
+
+    stripped_any = False
+    for path in sorted(unpacked_dir.rglob('*')):
+        if not _is_shared_library_name(path.name) or not _is_elf_file(path):
+            continue
+        if not _elf_has_debug_sections(path):
+            continue
+
+        orig_mode = stat.S_IMODE(path.stat().st_mode)
+        need_chmod = not (orig_mode & stat.S_IWUSR)
+        if need_chmod:
+            path.chmod(orig_mode | stat.S_IWUSR)
+        try:
+            subprocess.run(['strip', '--strip-debug', '--preserve-dates', str(path)], check=True)
+        finally:
+            if need_chmod:
+                path.chmod(orig_mode)
+        stripped_any = True
+
+    return stripped_any
+
+
 def clean_wheel(wheel_path: Path) -> bool:
     """
-    Unpack the wheel at most once, remove excluded test files and strip
-    matching lines, then repack only if changes were made.
+    Unpack the wheel at most once, remove excluded test files, strip matching
+    lines, and strip ELF debug info on Linux, then repack only if changes were
+    made.
     """
     with ZipFile(wheel_path, 'r') as zf:
-        has_excluded_files = any(is_excluded_from_wheel(name) for name in zf.namelist())
+        member_names = zf.namelist()
+    has_excluded_files = any(is_excluded_from_wheel(name) for name in member_names)
+    has_shared_libs = sys.platform == 'linux' and any(_is_shared_library_name(name) for name in member_names)
 
     line_removal_rules = _get_matching_rules(wheel_path.name)
 
-    if not has_excluded_files and not line_removal_rules:
+    if not has_excluded_files and not line_removal_rules and not has_shared_libs:
         return False
 
     with TemporaryDirectory() as td:
@@ -400,6 +458,10 @@ def clean_wheel(wheel_path: Path) -> bool:
         if line_removal_rules:
             if _strip_lines_from_dir(unpacked_dir, line_removal_rules):
                 print(f'Stripped lines from {wheel_path.name}')
+                modified = True
+        if has_shared_libs:
+            if _strip_debug_info_from_dir(unpacked_dir):
+                print(f'Stripped debug info from {wheel_path.name}')
                 modified = True
 
         if not modified:
