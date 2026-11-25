@@ -1,0 +1,1 @@
+Add the `excluded_host_tags` option to submit selected tags, such as `ntnx_host_name`, as metric tags only.
