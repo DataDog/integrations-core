@@ -51,9 +51,10 @@ files:
         queue, cluster or reason:
 
         - `gpu.scheduling.badput_time`: GPU time that GPU Workloads spent waiting to become fully runnable, tagged with
-          the normalized `reason` and, when Kueue reports one, the raw `scheduler_reason`. It doesn't stop when Kueue
-          admits a Workload, but when its pods are ready. After a preemption it is tagged `reason:preempted` until
-          Kueue admits the Workload again.
+          one of six general `reason` categories (`quota_or_capacity`, `placement_or_topology`,
+          `configuration_or_request`, `preemption_or_reclaim`, `startup_or_system`, `other_or_unknown`) and, when Kueue
+          reports one, the raw `scheduler_reason`. It doesn't stop when Kueue admits a Workload, but when its pods are
+          ready. After a preemption it is tagged `reason:preemption_or_reclaim` until Kueue admits the Workload again.
         - `gpu.scheduling.fully_admitted_time`: GPU time that GPU Workloads spent admitted with all their pods ready.
 
         Goodput is `fully_admitted_time / (fully_admitted_time + badput_time)`. The metrics have no `kueue.` prefix so

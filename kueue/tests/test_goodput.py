@@ -15,6 +15,8 @@ from datadog_checks.kueue import KueueCheck
 from datadog_checks.kueue.goodput import (
     BADPUT_METRIC,
     FULLY_ADMITTED_METRIC,
+    KUEUE_MESSAGE_CATEGORIES,
+    KUEUE_REASON_CATEGORIES,
     Category,
     GoodputTracker,
     QueueKey,
@@ -368,7 +370,7 @@ def test_check_submits_one_series_per_workload(dd_run_check, aggregator, instanc
     # submits the other metric as 0, so that the goodput of any group is defined.
     wait_tags = [*A100_TAGS, 'kueue_workload:wait', 'job_scheduler_workload:wait']
     run_tags = [*A100_TAGS, 'kueue_workload:run', 'job_scheduler_workload:run']
-    badput_tags = [*wait_tags, 'reason:quota_exhausted', 'scheduler_reason:WaitingForQuota']
+    badput_tags = [*wait_tags, 'reason:quota_or_capacity', 'scheduler_reason:WaitingForQuota']
     aggregator.assert_metric(BADPUT_METRIC, value=60 / 3600, tags=badput_tags, metric_type=aggregator.COUNT, count=1)
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=0, tags=wait_tags, count=1)
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=120 / 3600, tags=run_tags, count=1)
@@ -437,13 +439,15 @@ def test_check_follower_tracks_state_without_submitting(dd_run_check, aggregator
 @pytest.mark.parametrize(
     'state, condition, expected',
     [
-        pytest.param(SchedulingState.WAITING, {'reason': 'WaitingForQuota'}, 'quota_exhausted', id='structured_quota'),
-        pytest.param(SchedulingState.WAITING, {'reason': 'ExceedsMaxQuota'}, 'exceeds_max_quota', id='structured_max'),
-        pytest.param(SchedulingState.WAITING, {'reason': 'WaitForStart'}, 'waiting_for_pods', id='pods_not_ready'),
+        pytest.param(
+            SchedulingState.WAITING, {'reason': 'WaitingForQuota'}, 'quota_or_capacity', id='structured_quota'
+        ),
+        pytest.param(SchedulingState.WAITING, {'reason': 'ExceedsMaxQuota'}, 'quota_or_capacity', id='structured_max'),
+        pytest.param(SchedulingState.WAITING, {'reason': 'WaitForStart'}, 'startup_or_system', id='pods_not_ready'),
         pytest.param(
             SchedulingState.WAITING,
             {'reason': 'UnsatisfiedAdmissionChecks'},
-            'admission_checks',
+            'startup_or_system',
             id='admission_checks',
         ),
         # Without the UnadmittedWorkloadsObservability feature gate, Kueue v0.18 only reports `Pending`.
@@ -454,7 +458,7 @@ def test_check_follower_tracks_state_without_submitting(dd_run_check, aggregator
                 'message': "couldn't assign flavors to pod set main: insufficient unused quota for nvidia.com/gpu in "
                 'flavor a100, 2 more needed',
             },
-            'quota_exhausted',
+            'quota_or_capacity',
             id='pending_quota_message',
         ),
         pytest.param(
@@ -464,21 +468,24 @@ def test_check_follower_tracks_state_without_submitting(dd_run_check, aggregator
                 'message': "couldn't assign flavors to pod set main: insufficient quota for nvidia.com/gpu in flavor "
                 'a100, previously considered podsets requests (0) + current podset request (16) > maximum capacity (4)',
             },
-            'exceeds_max_quota',
+            'quota_or_capacity',
             id='pending_max_capacity_message',
         ),
         pytest.param(
-            SchedulingState.WAITING, {'reason': 'Pending', 'message': 'something new'}, 'unknown', id='unknown'
+            SchedulingState.WAITING,
+            {'reason': 'Pending', 'message': 'something new'},
+            'other_or_unknown',
+            id='other_or_unknown',
         ),
-        pytest.param(SchedulingState.WAITING, {'reason': 'UnsatisfiedChecks'}, 'admission_checks', id='checks'),
+        pytest.param(SchedulingState.WAITING, {'reason': 'UnsatisfiedChecks'}, 'startup_or_system', id='checks'),
         pytest.param(
             SchedulingState.WAITING,
             {'reason': 'NoReservationUnsatisfiedChecks'},
-            'admission_checks',
+            'startup_or_system',
             id='checks_without_reservation',
         ),
-        pytest.param(SchedulingState.WAITING, None, 'unknown', id='no_condition'),
-        pytest.param(SchedulingState.PREEMPTED, {'reason': 'InClusterQueue'}, 'preempted', id='preempted'),
+        pytest.param(SchedulingState.WAITING, None, 'other_or_unknown', id='no_condition'),
+        pytest.param(SchedulingState.PREEMPTED, {'reason': 'InClusterQueue'}, 'preemption_or_reclaim', id='preempted'),
         pytest.param(SchedulingState.RUNNABLE, None, None, id='not_badput'),
     ],
 )
@@ -499,10 +506,10 @@ def test_badput_is_split_by_reason():
     clock.t = 10
     reasons = badput_by_reason(tracker.update(snapshot))
     assert reasons[QueueKey('team-a', 'gpu', None)] == {
-        ('quota_exhausted', 'WaitingForQuota'): 40,
-        ('exceeds_max_quota', 'ExceedsMaxQuota'): 160,
+        ('quota_or_capacity', 'WaitingForQuota'): 40,
+        ('quota_or_capacity', 'ExceedsMaxQuota'): 160,
     }
-    assert reasons[QueueKey('team-a', 'gpu', 'a100-cq')] == {('waiting_for_pods', 'WaitForStart'): 20}
+    assert reasons[QueueKey('team-a', 'gpu', 'a100-cq')] == {('startup_or_system', 'WaitForStart'): 20}
 
 
 def test_check_submits_zero_badput_without_reason(dd_run_check, aggregator, instance, mock_http_response):
@@ -578,9 +585,12 @@ def test_evicted_workload_reason_comes_from_the_eviction():
     w['status']['conditions'].append({'type': 'Evicted', 'status': 'True', 'reason': 'PodsReadyTimeout'})
     condition = blocking_condition(w, SchedulingState.WAITING)
     assert condition['reason'] == 'PodsReadyTimeout'
-    assert normalize_reason(SchedulingState.WAITING, condition) == 'waiting_for_pods'
+    assert normalize_reason(SchedulingState.WAITING, condition) == 'startup_or_system'
     w['status']['conditions'][-1]['reason'] = 'ClusterQueueStopped'
-    assert normalize_reason(SchedulingState.WAITING, blocking_condition(w, SchedulingState.WAITING)) == 'queue_stopped'
+    assert (
+        normalize_reason(SchedulingState.WAITING, blocking_condition(w, SchedulingState.WAITING))
+        == 'configuration_or_request'
+    )
 
 
 def test_per_workload_series_sum_to_the_right_totals_for_any_grouping():
@@ -591,7 +601,7 @@ def test_per_workload_series_sum_to_the_right_totals_for_any_grouping():
     """
     queues = ['a100-cq', 'h100-cq', 'l4-cq']
     # Waiting for admission checks, or admitted with pods not ready yet: two different reasons.
-    waiting_states = {'quota_reserved': 'admission_checks', 'admitted_pods_pending': 'waiting_for_pods'}
+    waiting_states = {'quota_reserved': 'startup_or_system', 'admitted_pods_pending': 'startup_or_system'}
     # name -> (queue, GPUs, waiting state, created poll, admitted poll, finished poll), in 10-second polls.
     timelines = {
         f'w{i}': (queues[i % 3], 1 + i % 4, list(waiting_states)[i % 2], i % 5, i % 5 + 1 + i % 3, i % 5 + 3 + i % 4)
@@ -676,7 +686,7 @@ def test_requeued_workload_reason_comes_from_quota_once_it_waits_for_it():
     w = workload('w', 'pending_quota', 1)
     w['status']['conditions'].append({'type': 'Evicted', 'status': 'True', 'reason': 'PodsReadyTimeout'})
     assert (
-        normalize_reason(SchedulingState.WAITING, blocking_condition(w, SchedulingState.WAITING)) == 'quota_exhausted'
+        normalize_reason(SchedulingState.WAITING, blocking_condition(w, SchedulingState.WAITING)) == 'quota_or_capacity'
     )
 
 
@@ -836,7 +846,7 @@ def test_kind_admitted_but_unable_to_run_keeps_badput_until_the_pods_are_ready()
 
     assert (contribution.category, contribution.gpu_seconds) == (Category.BADPUT, 40)
     [tags] = badput_tags([contribution])
-    assert 'reason:waiting_for_pods' in tags
+    assert 'reason:startup_or_system' in tags
     assert 'scheduler_reason:WaitForStart' in tags
 
     ready = copy.deepcopy(admitted)
@@ -861,7 +871,7 @@ def test_kind_preemption_is_tagged_preempted_until_the_scheduler_admits_again():
     [contribution] = tracker.update([preempted])
     [tags] = badput_tags([contribution])
     # The raw reason is the one of the `Preempted` condition, not the `WaitingForQuota` of the requeue.
-    assert {'reason:preempted', 'scheduler_reason:InClusterQueue'} <= set(tags)
+    assert {'reason:preemption_or_reclaim', 'scheduler_reason:InClusterQueue'} <= set(tags)
 
     # Kueue admits it again: `Evicted` becomes False, and the pods are not ready yet, so the badput continues, but it
     # is not a preemption wait any longer.
@@ -877,8 +887,8 @@ def test_kind_preemption_is_tagged_preempted_until_the_scheduler_admits_again():
     [wait] = tracker.update([readmitted])
     clock.t = 30
     [after_admission] = tracker.update([readmitted])
-    assert wait.cause == 'preempted'
-    assert (after_admission.category, after_admission.cause) == (Category.BADPUT, 'waiting_for_pods')
+    assert wait.cause == 'preemption_or_reclaim'
+    assert (after_admission.category, after_admission.cause) == (Category.BADPUT, 'startup_or_system')
 
 
 def test_kind_quota_exhausted_is_tagged_with_the_reason_and_the_gpu_type():
@@ -893,7 +903,7 @@ def test_kind_quota_exhausted_is_tagged_with_the_reason_and_the_gpu_type():
     [contribution] = tracker.update([pending])
 
     [tags] = badput_tags([contribution])
-    assert {'reason:quota_exhausted', 'scheduler_reason:WaitingForQuota', 'gpu_type:a100'} <= set(tags)
+    assert {'reason:quota_or_capacity', 'scheduler_reason:WaitingForQuota', 'gpu_type:a100'} <= set(tags)
 
 
 @pytest.mark.parametrize(
@@ -1022,18 +1032,18 @@ def test_check_tags_the_series_with_the_gpu_type_from_the_tagger(
 @pytest.mark.parametrize(
     ('reason', 'expected'),
     [
-        ('WaitingForQuota', 'quota_exhausted'),
-        ('ExceedsMaxQuota', 'exceeds_max_quota'),
-        ('NoMatchingFlavor', 'no_matching_resources'),
-        ('TopologyPlacementFailed', 'topology'),
-        ('WaitingForPreemptedWorkloads', 'waiting_for_preemption'),
-        ('Misconfigured', 'misconfigured'),
-        ('Suspended', 'suspended'),
-        ('PendingEvaluation', 'admission_checks'),
-        ('WaitingForPodsReady', 'waiting_for_pods'),
-        ('DRAResourcesUnresolved', 'no_matching_resources'),
-        ('UnrecordableResourceUsage', 'misconfigured'),
-        ('SomethingNew', 'unknown'),
+        ('WaitingForQuota', 'quota_or_capacity'),
+        ('ExceedsMaxQuota', 'quota_or_capacity'),
+        ('NoMatchingFlavor', 'placement_or_topology'),
+        ('TopologyPlacementFailed', 'placement_or_topology'),
+        ('WaitingForPreemptedWorkloads', 'preemption_or_reclaim'),
+        ('Misconfigured', 'configuration_or_request'),
+        ('Suspended', 'other_or_unknown'),
+        ('PendingEvaluation', 'other_or_unknown'),
+        ('WaitingForPodsReady', 'startup_or_system'),
+        ('DRAResourcesUnresolved', 'other_or_unknown'),
+        ('UnrecordableResourceUsage', 'other_or_unknown'),
+        ('SomethingNew', 'other_or_unknown'),
     ],
 )
 def test_every_quota_reserved_reason_of_the_design_doc_is_normalized(reason, expected):
@@ -1041,6 +1051,61 @@ def test_every_quota_reserved_reason_of_the_design_doc_is_normalized(reason, exp
         normalize_reason(SchedulingState.WAITING, {'type': 'QuotaReserved', 'status': 'False', 'reason': reason})
         == expected
     )
+
+
+# Every reason of the design doc, with its category, plus the reasons the check derives itself and one unknown.
+KUEUE_CATEGORY_CASES = [
+    ('WaitingForQuota', 'quota_or_capacity'),
+    ('ExceedsMaxQuota', 'quota_or_capacity'),
+    ('NoMatchingFlavor', 'placement_or_topology'),
+    ('TopologyPlacementFailed', 'placement_or_topology'),
+    ('WaitingForPreemptedWorkloads', 'preemption_or_reclaim'),
+    ('Misconfigured', 'configuration_or_request'),
+    ('WaitingForPodsReady', 'startup_or_system'),
+    ('PendingEvaluation', 'other_or_unknown'),
+    ('Suspended', 'other_or_unknown'),
+    ('DRAResourcesUnresolved', 'other_or_unknown'),
+    ('UnrecordableResourceUsage', 'other_or_unknown'),
+    ('UnsatisfiedAdmissionChecks', 'startup_or_system'),
+    ('UnsatisfiedChecks', 'startup_or_system'),
+    ('NoReservationUnsatisfiedChecks', 'startup_or_system'),
+    ('ClusterQueueStopped', 'configuration_or_request'),
+    ('LocalQueueStopped', 'configuration_or_request'),
+    ('PodsReadyTimeout', 'startup_or_system'),
+    ('AdmissionCheck', 'startup_or_system'),
+    ('WaitForStart', 'startup_or_system'),
+    ('SomethingNewInAFutureKueue', 'other_or_unknown'),
+]
+GENERAL_CATEGORIES = {
+    'quota_or_capacity',
+    'placement_or_topology',
+    'configuration_or_request',
+    'preemption_or_reclaim',
+    'startup_or_system',
+    'other_or_unknown',
+}
+
+
+@pytest.mark.parametrize(('reason', 'category'), KUEUE_CATEGORY_CASES)
+def test_badput_is_tagged_with_the_category_and_keeps_the_raw_kueue_reason(reason, category):
+    clock, tracker = make_tracker()
+    w = workload('w', 'pending_quota', 4)
+    for c in w['status']['conditions']:
+        if c['type'] == 'QuotaReserved':
+            c['reason'] = reason
+    tracker.update([w])
+    clock.t = 10
+    [contribution] = tracker.update([w])
+    [tags] = badput_tags([contribution])
+    assert f'reason:{category}' in tags
+    assert f'scheduler_reason:{reason}' in tags
+    assert len([t for t in tags if t.startswith('reason:')]) == 1
+
+
+def test_the_reason_mapping_only_uses_the_six_general_categories():
+    assert set(KUEUE_REASON_CATEGORIES.values()) <= GENERAL_CATEGORIES
+    assert {category for _, category in KUEUE_MESSAGE_CATEGORIES} <= GENERAL_CATEGORIES
+    assert {category for _, category in KUEUE_CATEGORY_CASES} == GENERAL_CATEGORIES
 
 
 def test_observe_without_a_resolver_uses_only_the_workload():

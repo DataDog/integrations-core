@@ -161,27 +161,27 @@ The first collection run seeds the Workload state and does not emit events for a
 
 Set `collect_scheduling_goodput: true` to measure how much of the GPU time that Kueue Workloads request is spent waiting to become fully runnable. A GPU Workload is one whose pods request `nvidia.com/gpu` or `amd.com/gpu`. The check doesn't count MIG profiles or other GPU partitions. On every run, each GPU Workload adds the time since the previous run, multiplied by its requested GPUs, to one of two counts. The check submits both counts in GPU-hours, as one series per Workload:
 
-- `gpu.scheduling.badput_time`: the Workload waits for quota, for admission, or for its pods to be ready, or it was evicted or preempted and waits to be admitted again. It is tagged with a `reason` shared with the other scheduler integrations, such as `quota_exhausted`, `exceeds_max_quota`, or `waiting_for_pods`, and with the raw Kueue `scheduler_reason` when Kueue reports one.
+- `gpu.scheduling.badput_time`: the Workload waits for quota, for admission, or for its pods to be ready, or it was evicted or preempted and waits to be admitted again. It is tagged with a `reason`, one of six general categories shared with the other scheduler integrations, such as `quota_or_capacity` or `startup_or_system`, and with the raw Kueue `scheduler_reason` when Kueue reports one.
 - `gpu.scheduling.fully_admitted_time`: the Workload is admitted and Kueue reports `PodsReady`.
 
-Badput doesn't stop when Kueue admits a Workload. It stops once Kueue reports `PodsReady=True`, so a Workload that is admitted but whose pods are pending or only partly ready keeps accumulating badput, with `reason:waiting_for_pods`. After a preemption, the badput is tagged `reason:preempted` until Kueue admits the Workload again.
+Badput doesn't stop when Kueue admits a Workload. It stops once Kueue reports `PodsReady=True`, so a Workload that is admitted but whose pods are pending or only partly ready keeps accumulating badput, with `reason:startup_or_system`. After a preemption, the badput is tagged `reason:preemption_or_reclaim` until Kueue admits the Workload again.
 
-The `reason` tag is derived from the blocking Workload condition, mostly `QuotaReserved=False`, and `scheduler_reason` keeps the raw value:
+The `reason` tag is derived from the blocking Workload condition, mostly `QuotaReserved=False`. `scheduler_reason` keeps the raw Kueue value for detail, so the `reason` tag has a fixed set of six values:
 
-| `reason` | Kueue `scheduler_reason` |
-|---|---|
-| `quota_exhausted` | `WaitingForQuota` |
-| `exceeds_max_quota` | `ExceedsMaxQuota` |
-| `no_matching_resources` | `NoMatchingFlavor`, `DRAResourcesUnresolved` |
-| `topology` | `TopologyPlacementFailed` |
-| `waiting_for_preemption` | `WaitingForPreemptedWorkloads` |
-| `admission_checks` | `PendingEvaluation`, `UnsatisfiedAdmissionChecks`, `AdmissionCheck` |
-| `waiting_for_pods` | `WaitingForPodsReady`, `WaitForStart`, `PodsReadyTimeout` |
-| `misconfigured` | `Misconfigured`, `UnrecordableResourceUsage` |
-| `suspended` | `Suspended` |
-| `queue_stopped` | `ClusterQueueStopped`, `LocalQueueStopped` |
-| `preempted` | the Workload was preempted and Kueue hasn't admitted it again |
-| `unknown` | any other value |
+| `reason` | What it means | Kueue `scheduler_reason` |
+|---|---|---|
+| `quota_or_capacity` | The Workload waits for capacity because of quota or allocation policies. Compare the declared quota with the fleet to decide whether to rebalance quota or add capacity. | `WaitingForQuota`, `ExceedsMaxQuota` |
+| `placement_or_topology` | Capacity may exist, but it can't satisfy the placement requirements. Investigate placement and fragmentation. `NoMatchingFlavor` can also be a configuration issue. | `TopologyPlacementFailed`, `NoMatchingFlavor` |
+| `configuration_or_request` | The Workload, queue, or resource configuration prevents the admission. Review and correct the request or the configuration. | `Misconfigured`, `ClusterQueueStopped`, `LocalQueueStopped` |
+| `preemption_or_reclaim` | The Workload waits for resources to be reclaimed, or it lost its resources to another Workload. Review the priority and borrowing policies. | `WaitingForPreemptedWorkloads`, and a Workload that Kueue preempted and hasn't admitted again, with the reason of its `Preempted` condition |
+| `startup_or_system` | The Workload can't become runnable because of startup, infrastructure, or control-plane problems. Pod and infrastructure data are needed to find the cause. | `WaitingForPodsReady`, `WaitForStart`, `PodsReadyTimeout`, `UnsatisfiedAdmissionChecks`, `UnsatisfiedChecks`, `NoReservationUnsatisfiedChecks`, `AdmissionCheck` |
+| `other_or_unknown` | Evaluation is pending, the Workload is suspended (which can be intentional), or there isn't enough context to classify it. | `PendingEvaluation`, `Suspended`, `DRAResourcesUnresolved`, `UnrecordableResourceUsage`, and any other value |
+
+To investigate badput:
+
+1. Detect high scheduling badput and use `reason` to find the type of blocking condition. Use `scheduler_reason` for the exact Kueue condition.
+2. Find the Workloads with the highest waiting time, with `job_scheduler_workload`, and group them by `gpu_type`.
+3. Correlate the result with the state of that GPU fleet. For example, if most affected Workloads request A100s, inspect the A100 fleet.
 
 Without the `UnadmittedWorkloadsObservability` feature gate, Kueue reports `Pending` or `Inadmissible`, and the check reads the cause from the condition message.
 

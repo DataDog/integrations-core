@@ -37,8 +37,8 @@ GPU_RESOURCE_NAMES = ('nvidia.com/gpu', 'amd.com/gpu')
 
 SCHEDULER_TAG_VALUE = 'kueue'
 
-# Badput is tagged with why the Workload waits: `reason` holds a value shared with the other schedulers, and
-# `scheduler_reason` the raw Kueue reason it comes from.
+# Badput is tagged with why the Workload waits: `reason` holds one of the general
+# categories shared with the other schedulers, and `scheduler_reason` the raw Kueue reason it comes from.
 REASON_TAG = 'reason'
 SCHEDULER_REASON_TAG = 'scheduler_reason'
 # Every series is per workload, tagged like the Workload lifecycle events.
@@ -47,47 +47,59 @@ WORKLOAD_TAG = 'kueue_workload'
 SCHEDULER_TAG = 'job_scheduler'
 SCHEDULER_QUEUE_TAG = 'job_scheduler_queue'
 SCHEDULER_WORKLOAD_TAG = 'job_scheduler_workload'
-UNKNOWN_REASON = 'unknown'
 # The GPU model, as the Agent tags it on GPU metrics and on pods that Kueue admitted on a GPU flavor.
 GPU_TYPE_TAG = 'gpu_type'
 # Node label that carries the GPU model, which a Workload can require in the `nodeSelector` or `nodeAffinity` of its
 # pods, and a ResourceFlavor in its node labels.
 GPU_PRODUCT_LABELS = ('nvidia.com/gpu.product',)
 
-# Structured Kueue reasons. Most `QuotaReserved` ones need the `UnadmittedWorkloadsObservability` feature gate;
-# without it Kueue reports `Pending` or `Inadmissible`, and the cause is only in the message.
-KUEUE_REASONS = {
-    'WaitingForQuota': 'quota_exhausted',
-    'ExceedsMaxQuota': 'exceeds_max_quota',
-    'NoMatchingFlavor': 'no_matching_resources',
-    'TopologyPlacementFailed': 'topology',
-    'DRAResourcesUnresolved': 'no_matching_resources',
-    'WaitingForPreemptedWorkloads': 'waiting_for_preemption',
-    'UnsatisfiedAdmissionChecks': 'admission_checks',
-    # Without `UnadmittedWorkloadsObservability`, Kueue reports the admission checks on `Admitted` with these reasons.
-    'UnsatisfiedChecks': 'admission_checks',
-    'NoReservationUnsatisfiedChecks': 'admission_checks',
-    'PendingEvaluation': 'admission_checks',
-    'WaitForStart': 'waiting_for_pods',
-    'WaitingForPodsReady': 'waiting_for_pods',
-    'Misconfigured': 'misconfigured',
-    'UnrecordableResourceUsage': 'misconfigured',
-    'Suspended': 'suspended',
-    # `Evicted` reasons other than preemption: the Workload is requeued and waits again.
-    'PodsReadyTimeout': 'waiting_for_pods',
-    'AdmissionCheck': 'admission_checks',
-    'ClusterQueueStopped': 'queue_stopped',
-    'LocalQueueStopped': 'queue_stopped',
+# Badput `reason` values: general categories shared with the other schedulers, whatever the scheduler calls the cause.
+QUOTA_OR_CAPACITY = 'quota_or_capacity'
+PLACEMENT_OR_TOPOLOGY = 'placement_or_topology'
+CONFIGURATION_OR_REQUEST = 'configuration_or_request'
+PREEMPTION_OR_RECLAIM = 'preemption_or_reclaim'
+STARTUP_OR_SYSTEM = 'startup_or_system'
+OTHER_OR_UNKNOWN = 'other_or_unknown'
+
+# The only place that maps Kueue to the categories. Most `QuotaReserved` reasons need the
+# `UnadmittedWorkloadsObservability` feature gate; without it Kueue reports `Pending` or `Inadmissible`, and the cause
+# is only in the message (`KUEUE_MESSAGE_CATEGORIES`). A reason that is not listed is `other_or_unknown`.
+# A Workload evicted by preemption is the `PREEMPTED` state and always `preemption_or_reclaim`.
+KUEUE_REASON_CATEGORIES = {
+    # Reasons of the design doc.
+    'WaitingForQuota': QUOTA_OR_CAPACITY,
+    'ExceedsMaxQuota': QUOTA_OR_CAPACITY,
+    'NoMatchingFlavor': PLACEMENT_OR_TOPOLOGY,
+    'TopologyPlacementFailed': PLACEMENT_OR_TOPOLOGY,
+    'WaitingForPreemptedWorkloads': PREEMPTION_OR_RECLAIM,
+    'Misconfigured': CONFIGURATION_OR_REQUEST,
+    'WaitingForPodsReady': STARTUP_OR_SYSTEM,
+    'PendingEvaluation': OTHER_OR_UNKNOWN,
+    'Suspended': OTHER_OR_UNKNOWN,
+    'DRAResourcesUnresolved': OTHER_OR_UNKNOWN,
+    'UnrecordableResourceUsage': OTHER_OR_UNKNOWN,
+    # Reasons the check derives itself, closest category. Admission checks are controllers outside Kueue (capacity
+    # provisioning, multi-cluster dispatch) that the Workload waits for: system, not a quota decision.
+    'UnsatisfiedAdmissionChecks': STARTUP_OR_SYSTEM,
+    'UnsatisfiedChecks': STARTUP_OR_SYSTEM,
+    'NoReservationUnsatisfiedChecks': STARTUP_OR_SYSTEM,
+    'AdmissionCheck': STARTUP_OR_SYSTEM,
+    # Admitted, but the pods are not all ready yet, or were not ready in time.
+    'WaitForStart': STARTUP_OR_SYSTEM,
+    'PodsReadyTimeout': STARTUP_OR_SYSTEM,
+    # A stopped queue is an administrator decision on the queue configuration.
+    'ClusterQueueStopped': CONFIGURATION_OR_REQUEST,
+    'LocalQueueStopped': CONFIGURATION_OR_REQUEST,
 }
 # Message fragments Kueue writes for `Pending` and `Inadmissible`, checked in order.
-KUEUE_MESSAGE_REASONS = (
-    ('maximum capacity', 'exceeds_max_quota'),
-    ('insufficient unused quota', 'quota_exhausted'),
-    ('insufficient quota', 'quota_exhausted'),
-    ('waiting for workloads to be preempted', 'waiting_for_preemption'),
-    ("couldn't assign flavors", 'no_matching_resources'),
-    ("doesn't exist", 'misconfigured'),
-    ('is inactive', 'misconfigured'),
+KUEUE_MESSAGE_CATEGORIES = (
+    ('maximum capacity', QUOTA_OR_CAPACITY),
+    ('insufficient unused quota', QUOTA_OR_CAPACITY),
+    ('insufficient quota', QUOTA_OR_CAPACITY),
+    ('waiting for workloads to be preempted', PREEMPTION_OR_RECLAIM),
+    ("couldn't assign flavors", PLACEMENT_OR_TOPOLOGY),
+    ("doesn't exist", CONFIGURATION_OR_REQUEST),
+    ('is inactive', CONFIGURATION_OR_REQUEST),
 )
 
 
@@ -118,7 +130,7 @@ class Category(str, Enum):
 STATE_CATEGORY = {
     SchedulingState.WAITING: Category.BADPUT,
     # A preempted Workload waits for GPUs again, like any other wait. Its own state tags that badput with
-    # `reason:preempted`, so that queries can separate it from the other waits.
+    # `reason:preemption_or_reclaim`, `scheduler_reason` telling `Preempted` from the other evictions.
     SchedulingState.PREEMPTED: Category.BADPUT,
     SchedulingState.RUNNABLE: Category.FULLY_ADMITTED,
     # Kueue also reports it while the pods of a completing Workload terminate, which is not a wait.
@@ -147,7 +159,7 @@ class Observation(NamedTuple):
     reason: str | None
     """Raw reason of the blocking condition, submitted as `scheduler_reason`."""
     cause: str | None = None
-    """Reason normalized across schedulers, submitted as `reason`. Only set for badput states."""
+    """General category of the reason, shared across schedulers, submitted as `reason`. Only set for badput states."""
     gpu_type: str | None = None
     """Normalized GPU model, submitted as `gpu_type`, or None when it is not known."""
 
@@ -255,21 +267,21 @@ def blocking_reason(workload: dict, state: SchedulingState) -> str | None:
 
 
 def normalize_reason(state: SchedulingState, condition: dict | None) -> str | None:
-    """Map the blocking condition of a badput state to a reason shared with the other schedulers."""
+    """Map the blocking condition of a badput state to one of the general categories."""
     if state == SchedulingState.PREEMPTED:
-        return 'preempted'
+        return PREEMPTION_OR_RECLAIM
     if state != SchedulingState.WAITING:
         return None
     if not condition:
-        return UNKNOWN_REASON
+        return OTHER_OR_UNKNOWN
     reason = condition.get('reason') or ''
-    if reason in KUEUE_REASONS:
-        return KUEUE_REASONS[reason]
+    if reason in KUEUE_REASON_CATEGORIES:
+        return KUEUE_REASON_CATEGORIES[reason]
     message = (condition.get('message') or '').lower()
-    for fragment, normalized in KUEUE_MESSAGE_REASONS:
+    for fragment, normalized in KUEUE_MESSAGE_CATEGORIES:
         if fragment in message:
             return normalized
-    return UNKNOWN_REASON
+    return OTHER_OR_UNKNOWN
 
 
 def parse_gpu_quantity(value) -> float:
@@ -655,7 +667,7 @@ def badput_by_reason(contributions: Iterable[Contribution]) -> dict[QueueKey, di
     sums: dict[QueueKey, dict[tuple[str, str | None], float]] = defaultdict(lambda: defaultdict(float))
     for contribution in contributions:
         if contribution.category == Category.BADPUT:
-            sums[contribution.queue][(contribution.cause or UNKNOWN_REASON, contribution.reason)] += (
+            sums[contribution.queue][(contribution.cause or OTHER_OR_UNKNOWN, contribution.reason)] += (
                 contribution.gpu_seconds
             )
     return {queue: dict(reasons) for queue, reasons in sums.items()}
@@ -683,7 +695,7 @@ def workload_points(contributions: Iterable[Contribution]) -> list[tuple[str, fl
             tags.append(f'{GPU_TYPE_TAG}:{contribution.gpu_type}')
         hours = contribution.gpu_seconds / SECONDS_PER_HOUR
         if contribution.category == Category.BADPUT:
-            reason = contribution.cause or UNKNOWN_REASON
+            reason = contribution.cause or OTHER_OR_UNKNOWN
             points.append((BADPUT_METRIC, hours, [*tags, *reason_tags(reason, contribution.reason)]))
             points.append((FULLY_ADMITTED_METRIC, 0.0, tags))
         else:
