@@ -12,7 +12,7 @@ datadog-apache==8.0.0
 datadog-appgate-sdp==3.0.0; sys_platform != 'win32'
 datadog-arangodb==4.4.2
 datadog-arctic-wolf-aurora-endpoint-security==1.0.0
-datadog-argo-rollouts==3.5.0
+datadog-argo-rollouts==4.0.0
 datadog-argo-workflows==3.5.0
 datadog-argocd==4.9.0
 datadog-aspdotnet==4.8.0; sys_platform == 'win32'
