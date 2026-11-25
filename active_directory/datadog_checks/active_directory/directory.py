@@ -217,7 +217,7 @@ def build_user_record(
         'employee_id': _first(entry, 'employeeID'),
         'given_name': _first(entry, 'givenName'),
         'surname': _first(entry, 'sn'),
-        'display_name': _first(entry, 'displayName'),
+        'full_name': _first(entry, 'displayName'),
         'domain': domain_from_dn(dn),
         'domain_netbios_name': domain_netbios_name,
         'ou_path': ou_path_from_dn(dn),

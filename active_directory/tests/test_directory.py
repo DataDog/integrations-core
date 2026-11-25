@@ -329,7 +329,7 @@ def test_build_user_record_full():
         'employee_id': 'E1234',
         'given_name': 'John',
         'surname': 'Doe',
-        'display_name': 'John Doe',
+        'full_name': 'John Doe',
         'domain': 'corp.example.com',
         'domain_netbios_name': NETBIOS_NAME,
         'ou_path': 'Users/Engineering',
@@ -360,7 +360,7 @@ def test_build_user_record_minimal_entry():
     assert record['employee_id'] is None
     assert record['given_name'] is None
     assert record['surname'] is None
-    assert record['display_name'] is None
+    assert record['full_name'] is None
     assert record['domain_netbios_name'] is None
     assert record['account']['expires_at'] is None
     assert record['last_logon_at'] is None
