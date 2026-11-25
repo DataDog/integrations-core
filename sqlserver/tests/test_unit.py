@@ -198,8 +198,13 @@ def run_object_query(collector: SQLServerSchemaCollector, object_collector: SQLS
 
 
 def mock_connections(check: mock.Mock, *cursors: mock.Mock) -> None:
-    """Hands out `cursors`, in order, for each managed connection the collector opens."""
-    check.connection.open_managed_default_connection.side_effect = [contextlib.nullcontext() for _ in cursors]
+    """
+    Hands out `cursors`, in order, for each managed cursor the collector opens.
+
+    Per database, the collector opens a cursor to switch the connection to it, then one cursor per object kind, and
+    on the legacy path a detail cursor on a second connection after the first kind's cursor.
+    """
+    check.connection.open_managed_default_connection.side_effect = lambda key_prefix: contextlib.nullcontext()
     check.connection.get_managed_cursor.side_effect = [contextlib.nullcontext(cursor) for cursor in cursors]
 
 
@@ -250,18 +255,57 @@ def test_schema_collector_runs_tables_and_views_on_one_connection_per_database()
     detail_cursor = mock.Mock()
     detail_cursor.fetchall_dict.return_value = []
     detail_cursor.fetchone_dict.return_value = {"partition_count": 1}
-    mock_connections(collector._check, main_cursor, detail_cursor)
+    mock_connections(collector._check, main_cursor, main_cursor, detail_cursor, main_cursor)
 
     collector.collect_schemas()
 
-    assert collector._check.connection.get_managed_cursor.call_args_list == [
+    assert collector._check.connection.open_managed_default_connection.call_args_list == [
         mock.call(KEY_PREFIX),
         mock.call(KEY_PREFIX_PRE_2017),
+    ]
+    assert collector._check.connection.get_managed_cursor.call_args_list == [
+        mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX_PRE_2017),
+        mock.call(KEY_PREFIX),
     ]
     assert main_cursor.execute.call_args_list[0] == mock.call("USE [datadog_test];")
     assert detail_cursor.execute.call_args_list.count(mock.call("USE [datadog_test];")) == 1
     kinds = [json.loads(call.args[0])["kind"] for call in collector._check.database_monitoring_metadata.call_args_list]
     assert kinds == ["sqlserver_databases", "sqlserver_views"]
+
+
+def test_failed_kind_closes_its_cursor_before_the_next_kind_queries():
+    """Rows a failed kind left unread must be discarded before the next kind runs its query on the same connection."""
+    collector = create_schema_collector(
+        {STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 16},
+        collect_views=True,
+    )
+    collector._get_databases = mock.Mock(return_value=[database_info()])
+    events = []
+
+    @contextlib.contextmanager
+    def managed_cursor(key_prefix):
+        index = len(events)
+        cursor = mock.Mock()
+        cursor.execute.side_effect = lambda query, *params: events.append(("execute", index))
+        cursor.fetchone_dict.side_effect = [{"schema_name": "s", "schema_id": 1, "owner_name": "dbo"}, None]
+        try:
+            yield cursor
+        finally:
+            events.append(("close", index))
+
+    collector._check.connection.open_managed_default_connection.side_effect = lambda key_prefix: (
+        contextlib.nullcontext()
+    )
+    collector._check.connection.get_managed_cursor.side_effect = managed_cursor
+    tables = collector._object_collectors[0]
+    tables._map_row = mock.Mock(side_effect=RuntimeError("table mapping failed"))
+
+    collector.collect_schemas()
+
+    use_cursor, tables_cursor, views_cursor = sorted({index for _, index in events})
+    assert events.index(("close", tables_cursor)) < events.index(("execute", views_cursor))
 
 
 def create_metadata_job(instance: dict, schema_config: dict) -> SqlserverMetadata:
@@ -391,7 +435,7 @@ def test_table_collector_uses_database_compatibility_level_for_schema_query(
     tables = collector._object_collectors[0]
     main_cursor = mock.Mock()
     detail_cursor = mock.Mock()
-    mock_connections(collector._check, main_cursor, detail_cursor)
+    mock_connections(collector._check, main_cursor, main_cursor, detail_cursor)
 
     with run_object_query(collector, tables, database_info(compatibility_level=compatibility_level)):
         assert tables._is_2016_or_earlier is expected_legacy
@@ -417,7 +461,7 @@ def test_table_collector_reuses_pre_2017_connection_for_table_detail_queries() -
         [{"foreign_key_name": "fk_table_2"}],
     ]
     detail_cursor.fetchone_dict.side_effect = [{"partition_count": 1}, {"partition_count": 2}]
-    mock_connections(collector._check, main_cursor, detail_cursor)
+    mock_connections(collector._check, main_cursor, main_cursor, detail_cursor)
     database = database_info()
     rows = [
         {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table_1", "table_id": 101},
@@ -432,6 +476,7 @@ def test_table_collector_reuses_pre_2017_connection_for_table_detail_queries() -
         mock.call(KEY_PREFIX_PRE_2017),
     ]
     assert collector._check.connection.get_managed_cursor.call_args_list == [
+        mock.call(KEY_PREFIX),
         mock.call(KEY_PREFIX),
         mock.call(KEY_PREFIX_PRE_2017),
     ]
@@ -460,7 +505,9 @@ def test_table_collector_uses_new_pre_2017_connection_for_each_database() -> Non
     configure_pre_2017_detail_cursor(detail_cursor_1, partition_count=1)
     detail_cursor_2 = mock.Mock()
     configure_pre_2017_detail_cursor(detail_cursor_2, partition_count=2)
-    mock_connections(collector._check, mock.Mock(), detail_cursor_1, mock.Mock(), detail_cursor_2)
+    mock_connections(
+        collector._check, mock.Mock(), mock.Mock(), detail_cursor_1, mock.Mock(), mock.Mock(), detail_cursor_2
+    )
     row = {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table", "table_id": 101}
 
     for database_name in ["datadog_test_1", "datadog_test_2"]:
@@ -470,7 +517,9 @@ def test_table_collector_uses_new_pre_2017_connection_for_each_database() -> Non
 
     assert collector._check.connection.get_managed_cursor.call_args_list == [
         mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX),
         mock.call(KEY_PREFIX_PRE_2017),
+        mock.call(KEY_PREFIX),
         mock.call(KEY_PREFIX),
         mock.call(KEY_PREFIX_PRE_2017),
     ]
@@ -486,7 +535,7 @@ def test_table_collector_does_not_open_pre_2017_connection_for_modern_query() ->
     tables = collector._object_collectors[0]
     cursor = mock.Mock()
     collector._check.connection.open_managed_default_connection.return_value = contextlib.nullcontext()
-    collector._check.connection.get_managed_cursor.return_value = contextlib.nullcontext(cursor)
+    collector._check.connection.get_managed_cursor.side_effect = lambda key_prefix: contextlib.nullcontext(cursor)
     database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
     row = {
         "schema_name": "test_schema",
@@ -504,7 +553,10 @@ def test_table_collector_does_not_open_pre_2017_connection_for_modern_query() ->
         mapped_row = tables._map_row(database, row)
 
     assert collector._check.connection.open_managed_default_connection.call_args_list == [mock.call(KEY_PREFIX)]
-    assert collector._check.connection.get_managed_cursor.call_args_list == [mock.call(KEY_PREFIX)]
+    assert collector._check.connection.get_managed_cursor.call_args_list == [
+        mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX),
+    ]
     assert tables._pre_2017_cursor is None
     assert mapped_row["schemas"][0]["tables"][0]["columns"] == [{"name": "id"}]
 

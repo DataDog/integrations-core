@@ -64,8 +64,19 @@ def open_tables_query(collector: SQLServerSchemaCollector) -> Iterator[tuple[SQL
     tables = collector._object_collectors[0]
     # The listed database carries its compatibility level, which picks the query form.
     [database] = [database for database in collector._get_databases() if database["name"] == SCHEMA_DATABASE]
-    with collector._open_database(database) as session, tables._open_rows(session, database):
-        yield tables, session.cursor
+    with collector._open_database(database) as session:
+        opened = []
+        open_cursor = session.open_cursor
+
+        @contextlib.contextmanager
+        def capture_cursor():
+            with open_cursor() as cursor:
+                opened.append(cursor)
+                yield cursor
+
+        session.open_cursor = capture_cursor
+        with tables._open_rows(session, database):
+            yield tables, opened[0]
 
 
 def test_get_cursor(dbm_instance, integration_check):
@@ -240,6 +251,54 @@ def test_collect_views(aggregator, dbm_instance, integration_check, sa_conn):
         for column in view['columns']:
             assert set(column) == {'name', 'data_type', 'nullable', 'ordinal_position'}
         assert [column['ordinal_position'] for column in view['columns']] == ['1', '2', '3']
+    finally:
+        with sa_conn.cursor() as cursor:
+            cursor.execute('USE {}'.format(SCHEMA_DATABASE))
+            cursor.execute('DROP VIEW IF EXISTS test_schema.{}'.format(view_name))
+
+
+@pytest.mark.parametrize('major_version', [None, 13], ids=['modern', 'pre-2017'])
+def test_failed_table_collection_leaves_the_connection_usable_for_views(
+    aggregator, dbm_instance, integration_check, sa_conn, major_version
+):
+    """
+    A table row that fails mid-query leaves the rest of the query's rows unread. The views query that runs next on
+    the same connection must still succeed, instead of hitting the unread rows.
+    """
+    view_name = 'city_names_after_failure'
+    with sa_conn.cursor() as cursor:
+        cursor.execute('USE {}'.format(SCHEMA_DATABASE))
+        cursor.execute(
+            'CREATE OR ALTER VIEW test_schema.{} AS SELECT id, name FROM test_schema.cities'.format(view_name)
+        )
+
+    dbm_instance['collect_schemas']['collect_views'] = True
+    try:
+        check = integration_check(dbm_instance)
+        if major_version is not None:
+            check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = major_version
+        collector = create_schema_collector(check)
+        collector._get_databases = lambda: [
+            database for database in type(collector)._get_databases(collector) if database['name'] == SCHEMA_DATABASE
+        ]
+        tables = collector._object_collectors[0]
+
+        def fail_on_first_table(database, cursor_row):
+            raise RuntimeError("table mapping failed")
+
+        tables._map_row = fail_on_first_table
+
+        collector.collect_schemas()
+
+        view_names = [
+            view['name']
+            for event in aggregator.get_event_platform_events('dbm-metadata')
+            if event['kind'] == 'sqlserver_views'
+            for database in event['metadata']
+            for schema in database['schemas']
+            for view in schema['views']
+        ]
+        assert view_name in view_names
     finally:
         with sa_conn.cursor() as cursor:
             cursor.execute('USE {}'.format(SCHEMA_DATABASE))

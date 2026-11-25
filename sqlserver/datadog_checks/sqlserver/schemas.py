@@ -8,7 +8,7 @@ import contextlib
 import threading
 from abc import abstractmethod
 from collections.abc import Iterator
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, ContextManager, TypedDict
 
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.utils import (
@@ -87,24 +87,21 @@ class SQLServerDatabaseSession:
     """
     The connection to one database that every object collector runs its catalog query on.
 
-    `database` is the database's entry from `_get_databases`, and `cursor` is already switched to it.
-    `detail_cursor()` opens a second connection on first use, for the per-object queries the legacy (pre-2017) path
-    runs while `cursor` is still streaming rows; it is shared by every object collector for this database and closed
-    with the session.
+    `database` is the database's entry from `_get_databases`, and the connection is already switched to it.
+    `open_cursor()` gives each object collector its own cursor, closed when its query ends, so rows a failed
+    collector left unread are discarded before the next one queries the connection. `detail_cursor()` opens a second
+    connection on first use, for the per-object queries the legacy (pre-2017) path runs while the main cursor is
+    still streaming rows; it is shared by every object collector for this database and closed with the session.
     """
 
-    def __init__(
-        self,
-        check: SQLServer,
-        stack: contextlib.ExitStack,
-        database: DatabaseInfo,
-        cursor,
-    ):
+    def __init__(self, check: SQLServer, stack: contextlib.ExitStack, database: DatabaseInfo):
         self._check = check
         self._stack = stack
         self.database = database
-        self.cursor = cursor
         self._detail_cursor = None
+
+    def open_cursor(self) -> ContextManager:
+        return self._check.connection.get_managed_cursor(KEY_PREFIX)
 
     def detail_cursor(self):
         if self._detail_cursor is None:
@@ -154,9 +151,10 @@ class SQLServerSchemaCollector(DatabaseSchemaCollector):
     def _open_database(self, database: DatabaseInfo) -> Iterator[SQLServerDatabaseSession]:
         with contextlib.ExitStack() as stack:
             stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX))
-            cursor = stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX))
-            cursor.execute(construct_use_statement(database["name"]))
-            yield SQLServerDatabaseSession(self._check, stack, database, cursor)
+            # USE switches the whole connection, so every cursor opened on it afterwards is in this database.
+            with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
+                cursor.execute(construct_use_statement(database["name"]))
+            yield SQLServerDatabaseSession(self._check, stack, database)
 
 
 class SQLServerObjectCollector(SchemaObjectCollector):
@@ -203,10 +201,11 @@ class SQLServerObjectCollector(SchemaObjectCollector):
     def _open_rows(self, session: SQLServerDatabaseSession, database: DatabaseInfo) -> Iterator[Iterator[dict]]:
         self._is_2016_or_earlier = self._should_use_legacy_schema_query(database)
         try:
-            if self._is_2016_or_earlier:
-                self._pre_2017_cursor = session.detail_cursor()
-            session.cursor.execute(self._get_query())
-            yield self._iter_rows(session.cursor)
+            with session.open_cursor() as cursor:
+                if self._is_2016_or_earlier:
+                    self._pre_2017_cursor = session.detail_cursor()
+                cursor.execute(self._get_query())
+                yield self._iter_rows(cursor)
         finally:
             self._pre_2017_cursor = None
 
