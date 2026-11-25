@@ -25,7 +25,7 @@ def instance_force_sha1():
 
 
 def instance_min_collection_interval():
-    return 15
+    return 60
 
 
 def instance_port():

@@ -3,14 +3,20 @@ services:
     image: hermsi/alpine-sshd:latest
     container_name: dd-test-hmc
     ports:
-      - "8022:22"
+      # Loopback only: the container allows root login on a committed password.
+      - "127.0.0.1:8022:22"
     environment:
       - ROOT_PASSWORD=datadog-hmc-e2e
+    # A committed host key, so the check's known_hosts file is deterministic.
+    # It is copied to a writable location first: OpenSSH refuses host keys that
+    # are group or world readable, and a fresh checkout has the file mode 0644.
+    entrypoint: >
+      sh -c 'cp /fixture/ssh_host_ed25519_key /etc/ssh/ssh_host_ed25519_key
+      && chmod 600 /etc/ssh/ssh_host_ed25519_key
+      && exec /entrypoint.sh'
     volumes:
       - ./fake-hmc/lshmc:/usr/local/bin/lshmc:ro
       - ./fake-hmc/lssyscfg:/usr/local/bin/lssyscfg:ro
       - ./fake-hmc/lslparutil:/usr/local/bin/lslparutil:ro
       - ./fake-hmc/monhmc:/usr/local/bin/monhmc:ro
-      # A committed host key, so the check's known_hosts file is deterministic.
-      - ./ssh_host_ed25519_key:/etc/ssh/ssh_host_ed25519_key:ro
-      - ./ssh_host_ed25519_key.pub:/etc/ssh/ssh_host_ed25519_key.pub:ro
+      - ./ssh_host_ed25519_key:/fixture/ssh_host_ed25519_key:ro

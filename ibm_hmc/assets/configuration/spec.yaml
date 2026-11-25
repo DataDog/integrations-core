@@ -76,3 +76,11 @@ files:
         type: boolean
         example: false
     - template: instances/default
+      overrides:
+        min_collection_interval.value.example: 60
+        min_collection_interval.value.display_default: 60
+        min_collection_interval.description: |
+          Changes the collection interval of the check. For more information, see
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
+          60 seconds is recommended: the HMC only produces new `lslparutil` samples at its
+          own configured sample rate, typically 60 seconds or more.

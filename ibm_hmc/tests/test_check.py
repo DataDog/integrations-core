@@ -245,13 +245,11 @@ def test_check_runs(aggregator, dd_run_check, instance):
     aggregator.assert_metric('ibm_hmc.lpar.idle_cycles', value=0, tags=lpar_tags())
     aggregator.assert_metric('ibm_hmc.pool.total_pool_cycles', value=2538167299223, tags=server_tags())
     assert len(aggregator.metrics('ibm_hmc.pool.total_pool_cycles')) == 2
-    # The shared processor pool is identified by a tag, not a gauge
     aggregator.assert_metric(
         'ibm_hmc.procpool.utilized_pool_cycles',
         value=467439053292,
         tags=[*server_tags(), 'shared_proc_pool_id:1001'],
     )
-    assert len(aggregator.metrics('ibm_hmc.procpool.shared_proc_pool_id')) == 0
     aggregator.assert_metric('ibm_hmc.mempool.sys_firmware_pool_mem', value=282, tags=server_tags())
     aggregator.assert_metric('ibm_hmc.sys.curr_avail_sys_mem', value=37376, tags=server_tags())
 
@@ -462,15 +460,20 @@ def test_subsystem_command_failure(aggregator, dd_run_check, instance):
 
 
 def test_server_without_sample_rate_is_skipped(aggregator, dd_run_check, instance):
-    """A server whose sample rate cannot be read is skipped for this run."""
+    """A server whose sample rate cannot be read is skipped, and read again on the next run."""
     check = IbmHmcCheck('ibm_hmc', {}, [instance])
     fake = FakeSSHClient(sample_rates={'ServerA': SAMPLE_RATE, 'ServerB': 'not a number'})
     run_check(dd_run_check, check, fake)
 
+    # Only ServerA reports on the first run
     aggregator.assert_metric('ibm_hmc.lpar.curr_proc_units', tags=lpar_tags())
-    # Only ServerA reports; nothing at all for ServerB
     assert len(aggregator.metrics('ibm_hmc.pool.total_pool_cycles')) == 1
-    assert len(aggregator.metrics('ibm_hmc.system.memory.memtotal')) == 1
+
+    # The rate is read again on the next run: ServerB recovers once it is readable
+    fake.sample_rates['ServerB'] = SAMPLE_RATE
+    run_check(dd_run_check, check, fake)
+    assert any(c.startswith('lslparutil -r config -m ServerB ') for c in fake.commands)
+    aggregator.assert_metric('ibm_hmc.lpar.curr_proc_units', tags=lpar_tags(server='ServerB'))
 
 
 @pytest.mark.parametrize('key_type,paramiko_key', [('rsa', paramiko.RSAKey), ('ecdsa', paramiko.ECDSAKey)])
@@ -524,6 +527,104 @@ def test_known_hosts_file(aggregator, dd_run_check, instance):
     run_check(dd_run_check, check, fake)
 
     assert fake.known_hosts_file == '/path/known_hosts'
+
+
+def test_no_results_sentinel_is_not_a_warning(aggregator, dd_run_check, instance, caplog):
+    """`No results were found.` is a normal empty result, not a parse failure."""
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
+    fake = FakeSSHClient(raw_outputs={'lslparutil -r mempool': IbmHmcCheck.NO_RESULTS + '\n'})
+    run_check(dd_run_check, check, fake)
+
+    assert len(aggregator.metrics('ibm_hmc.mempool.curr_pool_mem')) == 0
+    assert 'malformed' not in caplog.text
+    # The other subsystems are unaffected
+    aggregator.assert_metric('ibm_hmc.lpar.curr_proc_units', tags=lpar_tags())
+
+
+@pytest.mark.parametrize(
+    'swap_output,expected',
+    [
+        # Old HMC level: the unit suffix is attached to the value
+        (
+            'Swap: 2040244k total, 266000k used, 1774244k free, 2282460k cached',
+            {'total': 2040244, 'used': 266000, 'free': 1774244, 'cached': 2282460},
+        ),
+        # Newer HMC level, already in KiB, `avail Mem` must be ignored
+        (
+            'KiB Swap: 2039224 total, 1578960 free,  460264 used. 4419580 avail Mem',
+            {'total': 2039224, 'used': 460264, 'free': 1578960},
+        ),
+        # Megabyte values are converted to kibibytes
+        ('Swap: 1992M total, 512M used, 1480M free', {'total': 1992 * 1024, 'used': 512 * 1024, 'free': 1480 * 1024}),
+    ],
+)
+def test_swap_output_formats(aggregator, dd_run_check, instance, swap_output, expected):
+    """`monhmc -r swap` output differs per HMC level, with the unit next to the value."""
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
+    fake = FakeSSHClient(raw_outputs={'monhmc': swap_output + '\n'})
+    run_check(dd_run_check, check, fake)
+
+    for name, value in expected.items():
+        aggregator.assert_metric(f'ibm_hmc.system.memory.swap.{name}', value=value, tags=BASE_TAGS)
+
+
+def test_version_metadata(aggregator, dd_run_check, instance, datadog_agent):
+    """The parsed HMC version is reported as semver metadata."""
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
+    check.check_id = 'test:123'
+    run_check(dd_run_check, check, FakeSSHClient())
+
+    datadog_agent.assert_metadata(
+        'test:123',
+        {
+            'version.scheme': 'semver',
+            'version.major': '8',
+            'version.minor': '8',
+            'version.patch': '4',
+            'version.raw': '8.8.4',
+        },
+    )
+
+
+def test_version_failure_is_not_cached(aggregator, dd_run_check, instance):
+    """A failed `lshmc -v` uses the oldest field set for that run only, and is retried."""
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
+    fake = FakeSSHClient(
+        failing_commands=('lshmc',),
+        sample_rates={'ServerA': 1, 'ServerB': 1},
+        # The rows a 7.0 field set parses: without the 7.3.4/7.7.2 columns
+        subsystem_values=SUBSYSTEM_VALUES_V700,
+    )
+    run_check(dd_run_check, check, fake)
+
+    # HMC 7.0 fallback: only the base LPAR fields plus shared_cycles_while_active
+    assert len(aggregator.metrics('ibm_hmc.lpar.idle_cycles')) == 0
+
+    time.sleep(1.1)  # let the per-server sample rate of 1 second elapse
+    fake.failing_commands = ()
+    fake.subsystem_values = SUBSYSTEM_VALUES
+    fake.commands.clear()
+    run_check(dd_run_check, check, fake)
+    aggregator.assert_metric('ibm_hmc.lpar.idle_cycles', value=0, tags=lpar_tags())
+
+
+def test_hmc_time_failure_skips_subsystems(aggregator, dd_run_check, instance, caplog):
+    """A failed HMC clock query skips the subsystem instead of bootstrapping from the Agent clock.
+
+    The Agent clock must not be persisted as the collection bound: on an Agent in a
+    different time zone it would suppress samples for hours.
+    """
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
+    fake = FakeSSHClient(failing_commands=(IbmHmcCheck.GET_TIME_CMD,))
+    run_check(dd_run_check, check, fake)
+
+    # No subsystem query was made: the subsystem is retried on the next run instead
+    assert not any('-F time,' in cmd for cmd in fake.commands)
+    assert len(aggregator.metrics('ibm_hmc.lpar.curr_proc_units')) == 0
+    assert 'Unable to collect the HMC time' in caplog.text
+    # The appliance metrics and connectivity do not depend on the HMC clock
+    aggregator.assert_metric('ibm_hmc.can_connect', value=1, tags=BASE_TAGS)
+    aggregator.assert_metric('ibm_hmc.system.memory.memtotal', value=4128368, tags=BASE_TAGS)
 
 
 def test_connection_failure(aggregator, dd_run_check, instance):

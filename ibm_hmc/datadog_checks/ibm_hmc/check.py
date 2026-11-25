@@ -137,6 +137,11 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
     # HMC sample time format: 02/23/2006 12:00:01
     SAMPLE_TIME_FORMAT = '%m/%d/%Y %H:%M:%S'
 
+    # HMC commands print this line and exit 0 when a query matches nothing,
+    # which is a normal state, e.g. `lslparutil -r mempool` without an Active
+    # Memory Sharing pool.
+    NO_RESULTS = 'No results were found.'
+
     GET_VERSION_CMD = 'lshmc -v'
     GET_SERVERS_CMD = 'lssyscfg -r sys -F name,type_model,serial_num'
     GET_SAMPLE_RATE_CMD = 'lslparutil -r config -m {name} -F sample_rate'
@@ -194,8 +199,12 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
 
     def collect_metrics(self, client: paramiko.SSHClient, key: tuple[str, int], tags: list[str]) -> None:
         if key not in self._hmc_versions:
-            self._hmc_versions[key] = self.get_hmc_version(client)
-        version = self._hmc_versions[key]
+            version = self.get_hmc_version(client)
+            # Only cache a version that actually parsed, so a transient `lshmc`
+            # failure does not pin the oldest field set for the check's lifetime.
+            if version is not None:
+                self._hmc_versions[key] = version
+        version = self._hmc_versions.get(key, self.DEFAULT_HMC_VERSION)
 
         now = time.time()
         if now - self._last_refresh.get(key, 0) > self.SERVER_REFRESH_PERIOD:
@@ -209,7 +218,9 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
                 self._last_refresh[key] = now
 
         for server in list(self._managed_servers.get(key, {}).values()):
-            if server.sample_rate is None:
+            if server.sample_rate in (None, 0):
+                # A rate of 0 means sampling is disabled: re-read it every run so
+                # collection recovers once sampling is enabled on the HMC.
                 server.sample_rate = self.get_sample_rate(client, server)
                 if server.sample_rate is None:
                     continue
@@ -240,7 +251,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             if name not in {server.name for server in servers}:
                 del managed[name]
 
-    def get_hmc_version(self, client: paramiko.SSHClient) -> tuple[int, int, int]:
+    def get_hmc_version(self, client: paramiko.SSHClient) -> tuple[int, int, int] | None:
         """Return the HMC version as a (major, minor, patch) tuple, e.g. `V8R8.4.0.0` is (8, 8, 4).
 
         `lshmc -v` prints machine-readable lines such as::
@@ -251,18 +262,28 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
         where the *RM line holds the version, formatted as `V<major>R<minor>.<patch>...`.
         HMC 10 releases have a two-digit major version (e.g. `V10R3.1060.0`), so the
         components must not be collapsed into a single truncated integer.
+
+        Returns None when the version cannot be read, so a transient failure is not
+        cached: a cached fallback would permanently drop the version-gated fields.
         """
-        output, _, _ = self._exec_command(client, self.GET_VERSION_CMD, environment=self.LSLPARUTIL_ENV)
-        for line in output.splitlines():
-            parts = line.split()
-            if len(parts) >= 2 and parts[0] == '*RM':
-                match = re.match(r'^V(\d+)R(\d+)(?:\.(\d+))?', parts[1])
-                if match:
-                    return (int(match.group(1)), int(match.group(2)), int(match.group(3) or 0))
-                break
+        output, _, status = self._exec_command(client, self.GET_VERSION_CMD, environment=self.LSLPARUTIL_ENV)
+        if status == 0:
+            for line in output.splitlines():
+                parts = line.split()
+                if len(parts) >= 2 and parts[0] == '*RM':
+                    match = re.match(r'^V(\d+)R(\d+)(?:\.(\d+))?', parts[1])
+                    if match:
+                        version = (int(match.group(1)), int(match.group(2)), int(match.group(3) or 0))
+                        self.set_metadata(
+                            'version',
+                            '.'.join(str(part) for part in version),
+                            scheme='semver',
+                            part_map={'major': version[0], 'minor': version[1], 'patch': version[2]},
+                        )
+                        return version
 
         self.log.debug('Unable to parse HMC version from `lshmc -v` output, assuming %s', self.DEFAULT_HMC_VERSION)
-        return self.DEFAULT_HMC_VERSION
+        return None
 
     def get_managed_servers(self, client: paramiko.SSHClient) -> list[ManagedServer]:
         """Return the POWER systems managed by the HMC."""
@@ -301,16 +322,17 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
         first collection window must come from the HMC's clock: the Agent's
         local time may be in a different time zone, which would place the
         window past every sample and prevent collection from ever starting.
+        The Agent clock must not be used as a fallback: cached as the collection
+        bound, it would suppress samples for hours on an Agent in another time
+        zone. Failing lets the next run retry the HMC clock instead.
         """
         output, _, status = self._exec_command(client, self.GET_TIME_CMD, environment=self.C_ENV)
         if status == 0:
             try:
                 return time.strptime(output.strip(), self.SAMPLE_TIME_FORMAT)
             except ValueError:
-                self.log.warning('Unable to parse HMC time %r, falling back to the Agent clock', output.strip())
-        else:
-            self.log.warning('Unable to collect the HMC time, falling back to the Agent clock')
-        return time.localtime()
+                raise RuntimeError(f'Unable to parse HMC time {output.strip()!r}') from None
+        raise RuntimeError('Unable to collect the HMC time')
 
     def collect_subsystem(
         self,
@@ -447,17 +469,14 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             self.log.warning('Unable to collect swap statistics from the HMC: exit status %d', status)
             return
 
-        # Swap: 2040244k total, 266000k used, 1774244k free, 2282460k cached
-        stats = ' '.join(output.split()[1:])
-        for stat in stats.split(','):
-            fields = stat.split()
-            if len(fields) != 2:
-                continue
-            value, name = fields
-            digits = re.sub(r'\D', '', value)
-            if not digits:
-                continue
-            self.gauge(f'system.memory.swap.{name}', float(digits), tags=tags)
+        # The output varies with the HMC level, the value and its unit go together:
+        #   Swap: 2040244k total, 266000k used, ...
+        #   KiB Swap: 2039224 total, 1578960 free, 460264 used. ...
+        #   Swap: 1992M total, ...
+        swap_stat = re.compile(r'([\d.]+)\s*([kKmMgG]?)\s+(total|used|free|cached)\b')
+        unit_to_kb = {'': 1, 'k': 1, 'm': 1024, 'g': 1024 * 1024}
+        for value, unit, name in swap_stat.findall(output):
+            self.gauge(f'system.memory.swap.{name}', float(value) * unit_to_kb[unit.lower()], tags=tags)
 
     def _fields_for(self, subsys: str, version: tuple[int, int, int]) -> list[tuple[str, str]]:
         fields = list(SAMPLE_FIELDS[subsys])
@@ -516,6 +535,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             output = output.decode('utf-8', errors='replace')
         if isinstance(err, bytes):
             err = err.decode('utf-8', errors='replace')
+        output = '\n'.join(line for line in output.splitlines() if line.strip() != self.NO_RESULTS)
         if not output and err:
             self.log.debug('Command %r produced no output, stderr: %s', command, err.strip())
         return output, err, stdout.channel.recv_exit_status()
