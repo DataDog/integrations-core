@@ -265,6 +265,10 @@ integration/cisco_catalyst_center:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_catalyst_center/**/*
+integration/cisco_ise:
+- changed-files:
+  - any-glob-to-any-file:
+    - cisco_ise/**/*
 integration/cisco_sdwan:
 - changed-files:
   - any-glob-to-any-file:
@@ -829,6 +833,10 @@ integration/litellm:
 - changed-files:
   - any-glob-to-any-file:
     - litellm/**/*
+integration/llm_d:
+- changed-files:
+  - any-glob-to-any-file:
+    - llm_d/**/*
 integration/lparstats:
 - changed-files:
   - any-glob-to-any-file:
@@ -1029,10 +1037,6 @@ integration/podman:
 - changed-files:
   - any-glob-to-any-file:
     - podman/**/*
-integration/powershell:
-- changed-files:
-  - any-glob-to-any-file:
-    - powershell/**/*
 integration/postfix:
 - changed-files:
   - any-glob-to-any-file:
@@ -1049,6 +1053,10 @@ integration/powerdns_recursor:
 - changed-files:
   - any-glob-to-any-file:
     - powerdns_recursor/**/*
+integration/powershell:
+- changed-files:
+  - any-glob-to-any-file:
+    - powershell/**/*
 integration/prefect:
 - changed-files:
   - any-glob-to-any-file:
@@ -1305,6 +1313,10 @@ integration/tenable:
 - changed-files:
   - any-glob-to-any-file:
     - tenable/**/*
+integration/tensorrt_llm:
+- changed-files:
+  - any-glob-to-any-file:
+    - tensorrt_llm/**/*
 integration/teradata:
 - changed-files:
   - any-glob-to-any-file:

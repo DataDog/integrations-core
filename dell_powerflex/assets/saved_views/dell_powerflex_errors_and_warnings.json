@@ -11,7 +11,7 @@
       "host",
       "status",
       "@powerflex.object_id",
-      "@logger.method_name"
+      "@powerflex.function"
     ],
     "show_date_column": true,
     "show_message_column": true,

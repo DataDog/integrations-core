@@ -1,0 +1,1 @@
+Define the fields of `kube_config_dict` and make it configurable through Fleet Automation, with its credentials handled as secrets.

@@ -1,0 +1,7 @@
+# Appended to Corefile mid-run by workload.py after Corefile.broken: a valid
+# config with one more server block, so the reload succeeds and
+# coredns_plugin_enabled gains two series (prometheus, whoami for extra.test.).
+extra.test:53 {
+    prometheus :9153
+    whoami
+}

@@ -110,6 +110,7 @@ class InstanceConfig(BaseModel):
     client_token_path: Optional[str] = None
     collect_counters_with_distributions: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_histograms_as_distributions: Optional[bool] = None
     collect_secondary_dr: Optional[bool] = None
     connect_timeout: Optional[float] = None
     detect_leader: Optional[bool] = None

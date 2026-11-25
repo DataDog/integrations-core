@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from contextlib import suppress
 
 import mock
 import pytest
@@ -115,6 +116,27 @@ def test_request_failure_reports_critical(instance, check, aggregator, caplog, e
     # The URL rather than the phrasing, so this pins that operators are told which endpoint failed
     # without freezing the wording.
     assert instance['servlet_url'] in caplog.text
+
+
+@pytest.mark.parametrize(
+    'request_result',
+    [
+        pytest.param({'return_value': mock_data('server.xml')}, id='successful run'),
+        pytest.param({'side_effect': requests.ConnectionError}, id='failed run'),
+    ],
+)
+def test_malloc_trim_runs_after_every_run(instance, check, request_result):
+    # Trimming only after a successful run would leave RSS growing whenever the servlet is
+    # unreachable.
+    with (
+        mock.patch('datadog_checks.ibm_was.ibm_was.malloc_trim') as trim,
+        mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', **request_result),
+    ):
+        check = check(instance)
+        with suppress(requests.ConnectionError):
+            check.check(instance)
+
+    trim.assert_called_once_with()
 
 
 def test_error_status_reports_critical(instance, check, aggregator):

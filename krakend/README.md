@@ -126,10 +126,13 @@ The KrakenD integration does not include any events.
 
 See [service_checks.json][15] for a list of service checks provided by this integration.
 
-## Troubleshooting
+## Uninstallation
+
+To disable the integration, rename the configuration file from `krakend.d/conf.yaml` to `krakend.d/conf.yaml.example`. Alternatively, if you are running a containerized environment, you can remove the annotation used to enable the integration.
+
+## Support
 
 Need help? Contact [Datadog support][16].
-
 
 [1]: https://www.krakend.io/
 [2]: https://www.krakend.io/docs/telemetry/prometheus/

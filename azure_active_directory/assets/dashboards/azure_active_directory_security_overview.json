@@ -1,0 +1,1539 @@
+{
+    "author_name": "Datadog",
+    "title": "Microsoft Entra ID - Security Overview",
+    "description": "Investigate Microsoft Entra ID sign-in and audit logs: failed and flagged sign-ins, failing service principals, and changes to roles, app credentials, consents, and authentication methods, with the Cloud SIEM signals they raise.\n\n- [Microsoft Entra ID integration](https://docs.datadoghq.com/integrations/azure-active-directory/)\n- [Datadog Cloud SIEM](https://docs.datadoghq.com/security/cloud_siem/)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "name": "User",
+            "prefix": "@usr.id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Actor",
+            "prefix": "@ocsf.actor.user.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "ClientIP",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Application",
+            "prefix": "@properties.appDisplayName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Country",
+            "prefix": "@network.client.geoip.country.iso_code",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "LogCategory",
+            "prefix": "@evt.category",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "widgets": [
+        {
+            "id": 1651018542269765,
+            "definition": {
+                "title": "New group",
+                "show_title": false,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6806324622707781,
+                        "definition": {
+                            "type": "note",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true,
+                            "content": "Use this dashboard to investigate Microsoft Entra ID sign-in and audit activity: who is failing to sign in and from where, sign-ins from flagged IPs, failing service principals, and changes to roles, application credentials, consents, and authentication methods.\n\nFilter by user, actor, client IP, application, country, or log category with the template variables.\n\nFor further reading, see:\n\n- [Microsoft Entra ID integration](https://docs.datadoghq.com/integrations/azure-active-directory/)\n- [Entra ID audit logs](https://learn.microsoft.com/en-us/entra/identity/monitoring-health/concept-audit-logs)\n- [Entra ID sign-in logs](https://learn.microsoft.com/en-us/entra/identity/monitoring-health/concept-sign-ins)\n- [Datadog Cloud SIEM](https://docs.datadoghq.com/security/cloud_siem/)"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ],
+                "banner_img": "/static/images/integration_dashboard/azure-active-directory_hero_1.png"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 7
+            }
+        },
+        {
+            "id": 3760890861911333,
+            "definition": {
+                "title": "Microsoft Entra ID overview",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6100815577627202,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Log volume by log category",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "value",
+                                "sum"
+                            ],
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "display_type": "line",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@evt.category",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    }
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7465376787809728,
+                        "definition": {
+                            "type": "toplist",
+                            "title": "Top events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@evt.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5244504540662117,
+                        "definition": {
+                            "type": "toplist",
+                            "title": "Top client IPs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    }
+                ],
+                "background_color": "white"
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 7
+            }
+        },
+        {
+            "id": 5342134344663769,
+            "definition": {
+                "title": "Datadog Cloud SIEM",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6955821388546114,
+                        "definition": {
+                            "type": "note",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true,
+                            "content": "Datadog Cloud SIEM analyzes and correlates Microsoft Entra ID logs to detect threats to your environment in real time. If you don't see signals, make sure you've enabled and configured [Datadog Cloud SIEM](/security/siem)."
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3874631803760662,
+                        "definition": {
+                            "title": "Critical signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:azure.activedirectory status:critical $User"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "custom_bg_color": "#bc303c",
+                                            "comparator": ">=",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "custom_links": [
+                                {
+                                    "label": "View related security signals",
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Acritical&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6041021068351281,
+                        "definition": {
+                            "title": "High signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:azure.activedirectory status:high $User"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "custom_bg_color": "#d33043",
+                                            "comparator": ">=",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "custom_links": [
+                                {
+                                    "label": "View related security signals",
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Ahigh&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 9715726999467385,
+                        "definition": {
+                            "title": "Security signals by rule",
+                            "type": "toplist",
+                            "style": {},
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:azure.activedirectory $User"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related security signals",
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20%40workflow.rule.name%3A%22{{@workflow.rule.name.value}}%22&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8257714028344607,
+                        "definition": {
+                            "title": "Security signals by user",
+                            "type": "toplist",
+                            "style": {},
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.id",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:azure.activedirectory $User"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related security signals",
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20%40usr.id%3A%22{{@usr.id.value}}%22&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 1,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5788258583119805,
+                        "definition": {
+                            "title": "Medium signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:azure.activedirectory status:medium $User"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "custom_bg_color": "#e5a21c",
+                                            "comparator": ">=",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "custom_links": [
+                                {
+                                    "label": "View related security signals",
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Amedium&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4625981237303137,
+                        "definition": {
+                            "title": "Low signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:azure.activedirectory status:low $User"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "custom_bg_color": "#ffb52b",
+                                            "comparator": ">=",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "custom_links": [
+                                {
+                                    "label": "View related security signals",
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Alow&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2265398439906149,
+                        "definition": {
+                            "title": "Info signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:azure.activedirectory status:info $User"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "custom_bg_color": "#84c1e0",
+                                            "comparator": ">=",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "custom_links": [
+                                {
+                                    "label": "View related security signals",
+                                    "link": "/security/signals?query=source%3Aazure.activedirectory%20status%3Ainfo&start={{timestamp_start}}&end={{timestamp_end}}&paused=true"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 4,
+                            "width": 2,
+                            "height": 1
+                        }
+                    }
+                ],
+                "background_color": "vivid_blue"
+            },
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 12,
+                "height": 6
+            }
+        },
+        {
+            "id": 1736647240023856,
+            "definition": {
+                "title": "Microsoft Entra ID sign-in activity",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 9564280524536154,
+                        "definition": {
+                            "type": "toplist",
+                            "title": "Users with the most failed sign-ins",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:SignInLogs @evt.outcome:failure $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.id",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related logs",
+                                    "link": "/logs?query=source%3Aazure.activedirectory%20%40evt.category%3ASignInLogs%20%40evt.outcome%3Afailure%20%40usr.id%3A%22{{@usr.id.value}}%22&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7304957667461354,
+                        "definition": {
+                            "type": "toplist",
+                            "title": "Client IPs with the most failed sign-ins",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:SignInLogs @evt.outcome:failure $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related logs",
+                                    "link": "/logs?query=source%3Aazure.activedirectory%20%40evt.category%3ASignInLogs%20%40evt.outcome%3Afailure%20%40network.client.ip%3A%22{{@network.client.ip.value}}%22&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5033346206789245,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Interactive sign-ins by outcome",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "value",
+                                "sum"
+                            ],
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:SignInLogs $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@evt.outcome",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    }
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4609304672003899,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Interactive sign-ins by country",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "value",
+                                "sum"
+                            ],
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:SignInLogs $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.geoip.country.iso_code",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    }
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7563795849818389,
+                        "definition": {
+                            "type": "toplist",
+                            "title": "Sign-ins from Tor, botnet, and hosting IPs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:(SignInLogs OR NonInteractiveUserSignInLogs) @threat_intel.results.category:* -@threat_intel.results.category:(residential_proxy OR corp_vpn) $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.id",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related logs",
+                                    "link": "/logs?query=source%3Aazure.activedirectory%20%40evt.category%3A%28SignInLogs%20OR%20NonInteractiveUserSignInLogs%29%20%40threat_intel.results.category%3A%2A%20-%40threat_intel.results.category%3A%28residential_proxy%20OR%20corp_vpn%29%20%40usr.id%3A%22{{@usr.id.value}}%22&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2572770736202083,
+                        "definition": {
+                            "type": "toplist",
+                            "title": "Service principals failing to sign in",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:ServicePrincipalSignInLogs @ocsf.status:Failure $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@properties.servicePrincipalName",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 12,
+                            "width": 3,
+                            "height": 4
+                        }
+                    }
+                ],
+                "background_color": "vivid_blue"
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 6,
+                "height": 17
+            }
+        },
+        {
+            "id": 7443757409087164,
+            "definition": {
+                "title": "Microsoft Entra ID directory and role changes",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7166123763532491,
+                        "definition": {
+                            "type": "toplist",
+                            "title": "Role assignments by actor",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:AuditLogs @evt.name:(\"Add member to role\" OR \"Add eligible member to role in PIM completed (permanent)\" OR \"Add eligible member to role in PIM completed (timebound)\" OR \"Add member to role in PIM completed (permanent)\" OR \"Add member to role in PIM completed (timebound)\" OR \"Add member to role completed (PIM activation)\" OR \"Add scoped member to role\") $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ocsf.actor.user.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related logs",
+                                    "link": "/logs?query=source%3Aazure.activedirectory%20%40evt.category%3AAuditLogs%20%40evt.name%3A%28%22Add%20member%20to%20role%22%20OR%20%22Add%20eligible%20member%20to%20role%20in%20PIM%20completed%20%28permanent%29%22%20OR%20%22Add%20eligible%20member%20to%20role%20in%20PIM%20completed%20%28timebound%29%22%20OR%20%22Add%20member%20to%20role%20in%20PIM%20completed%20%28permanent%29%22%20OR%20%22Add%20member%20to%20role%20in%20PIM%20completed%20%28timebound%29%22%20OR%20%22Add%20member%20to%20role%20completed%20%28PIM%20activation%29%22%20OR%20%22Add%20scoped%20member%20to%20role%22%29%20%40ocsf.actor.user.name%3A%22{{@ocsf.actor.user.name.value}}%22&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5877886686474204,
+                        "definition": {
+                            "type": "toplist",
+                            "title": "Credentials added to applications by actor",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:AuditLogs @evt.name:(\"Add service principal credentials\" OR \"Update application – Certificates and secrets management\" OR \"Update application – Certificates and secrets management \" OR \"Create application – Certificates and secrets management\" OR \"Create application – Certificates and secrets management \") $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ocsf.actor.user.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related logs",
+                                    "link": "/logs?query=source%3Aazure.activedirectory%20%40evt.category%3AAuditLogs%20%40evt.name%3A%28%22Add%20service%20principal%20credentials%22%20OR%20%22Update%20application%20%E2%80%93%20Certificates%20and%20secrets%20management%22%20OR%20%22Update%20application%20%E2%80%93%20Certificates%20and%20secrets%20management%20%22%20OR%20%22Create%20application%20%E2%80%93%20Certificates%20and%20secrets%20management%22%20OR%20%22Create%20application%20%E2%80%93%20Certificates%20and%20secrets%20management%20%22%29%20%40ocsf.actor.user.name%3A%22{{@ocsf.actor.user.name.value}}%22&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2385235210738916,
+                        "definition": {
+                            "type": "timeseries",
+                            "title": "Directory changes by actor",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "value",
+                                "sum"
+                            ],
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "display_type": "bars",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:AuditLogs $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ocsf.actor.user.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    }
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2462058192728209,
+                        "definition": {
+                            "type": "geomap",
+                            "title": "Directory changes by country",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "style": {
+                                "palette": "hostmap_blues",
+                                "palette_flip": false
+                            },
+                            "view": {
+                                "focus": "WORLD"
+                            },
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:AuditLogs $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.geoip.country.iso_code",
+                                                    "limit": 250,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3383183749477915,
+                        "definition": {
+                            "type": "toplist",
+                            "title": "App consents, owners, and guest invites by actor",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:AuditLogs @evt.name:(\"Consent to application\" OR \"Add app role assignment grant to user\" OR \"Add delegated permission grant\" OR \"Invite external user\" OR \"Add owner to application\" OR \"Add owner to service principal\") $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ocsf.actor.user.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related logs",
+                                    "link": "/logs?query=source%3Aazure.activedirectory%20%40evt.category%3AAuditLogs%20%40evt.name%3A%28%22Consent%20to%20application%22%20OR%20%22Add%20app%20role%20assignment%20grant%20to%20user%22%20OR%20%22Add%20delegated%20permission%20grant%22%20OR%20%22Invite%20external%20user%22%20OR%20%22Add%20owner%20to%20application%22%20OR%20%22Add%20owner%20to%20service%20principal%22%29%20%40ocsf.actor.user.name%3A%22{{@ocsf.actor.user.name.value}}%22&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 9981140578089226,
+                        "definition": {
+                            "type": "toplist",
+                            "title": "MFA, security info, and password changes by actor",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "storage": "hot",
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "search": {
+                                                "query": "source:azure.activedirectory @evt.category:AuditLogs @evt.name:(\"Disable Strong Authentication\" OR \"User registered security info\" OR \"Admin registered security info\" OR \"Admin updated security info\" OR \"Admin deleted security info\" OR \"User deleted security info\" OR \"Update PasswordProfile\" OR \"Reset password (by admin)\" OR \"Reset user password\" OR \"Change user password\" OR \"Authentication Methods Policy Update\" OR \"Authentication Methods Policy Create\") $User $Actor $ClientIP $Application $Country $LogCategory"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@ocsf.actor.user.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related logs",
+                                    "link": "/logs?query=source%3Aazure.activedirectory%20%40evt.category%3AAuditLogs%20%40evt.name%3A%28%22Disable%20Strong%20Authentication%22%20OR%20%22User%20registered%20security%20info%22%20OR%20%22Admin%20registered%20security%20info%22%20OR%20%22Admin%20updated%20security%20info%22%20OR%20%22Admin%20deleted%20security%20info%22%20OR%20%22User%20deleted%20security%20info%22%20OR%20%22Update%20PasswordProfile%22%20OR%20%22Reset%20password%20%28by%20admin%29%22%20OR%20%22Reset%20user%20password%22%20OR%20%22Change%20user%20password%22%20OR%20%22Authentication%20Methods%20Policy%20Update%22%20OR%20%22Authentication%20Methods%20Policy%20Create%22%29%20%40ocsf.actor.user.name%3A%22{{@ocsf.actor.user.name.value}}%22&from_ts={{timestamp_start}}&to_ts={{timestamp_end}}&live=false"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 12,
+                            "width": 3,
+                            "height": 4
+                        }
+                    }
+                ],
+                "background_color": "vivid_blue"
+            },
+            "layout": {
+                "x": 6,
+                "y": 13,
+                "width": 6,
+                "height": 17
+            }
+        }
+    ]
+}

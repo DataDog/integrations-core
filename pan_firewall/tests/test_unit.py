@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import collections
+import datetime
+import functools
 import re
 from xml.etree import ElementTree as ET
 
@@ -9,9 +11,11 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck
+from datadog_checks.pan_firewall.collectors import COLLECTORS
 from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD, HA_INTERFACE_CMD
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
+from datadog_checks.pan_firewall.collectors.licenses import collect_licenses
 from datadog_checks.pan_firewall.collectors.routing import OSPF_NEIGHBOR_CMD
 from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError
@@ -193,7 +197,9 @@ HARDWARE_ANSWERS = {
 }
 
 
-def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, schedule_clock):
+def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, schedule_clock, monkeypatch):
+    # The captured licenses expire on October 22, 2026: date the run before that so `license.days_left` is sent.
+    monkeypatch.setitem(COLLECTORS, 'licenses', functools.partial(collect_licenses, today=datetime.date(2026, 10, 9)))
     for ip in FIREWALLS.values():
         for cmd, path in HARDWARE_ANSWERS.items():
             fake_panos.answer_op(ip, cmd, (200, path.read_bytes()))

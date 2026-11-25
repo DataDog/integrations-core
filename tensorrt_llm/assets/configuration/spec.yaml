@@ -1,0 +1,52 @@
+name: TensorRT-LLM
+fleet_configurable: true
+files:
+- name: tensorrt_llm.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: true
+        openmetrics_endpoint.value.example: http://localhost:8000/prometheus/metrics
+        openmetrics_endpoint.description: |
+          Endpoint exposing TensorRT-LLM's Prometheus metrics. The `trtllm-serve` server mounts
+          `/prometheus/metrics` on its HTTP port only when `return_perf_metrics: true` (or
+          `perf_metrics_output_dir`) is set in the file passed to `--config` (`--extra_llm_api_options` in older
+          releases). Also set `enable_iter_perf_stats: true` to
+          expose the scheduler, batching, memory, and KV cache metrics.
+
+          This integration is part of GPU Monitoring and only runs when GPU Monitoring is enabled
+          in the Agent configuration (`gpu.enabled: true`, or `DD_GPU_ENABLED=true`). When GPU
+          Monitoring is off, every instance configured here is skipped.
+
+          For more information, see:
+          https://nvidia.github.io/TensorRT-LLM/commands/trtllm-serve/trtllm-serve.html
+        histogram_buckets_as_distributions.value.example: true
+        histogram_buckets_as_distributions.description: |
+          Whether to send histogram buckets as Datadog distribution metrics. This implicitly
+          enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options,
+          making percentile aggregations available for TensorRT-LLM latency metrics.
+
+          This integration enables this option by default. Because `collect_counters_with_distributions`
+          also turns it on, set both options to `false` to send histograms as `.bucket`, `.count`, and `.sum`
+          counters instead.
+
+          Learn more about distribution metrics:
+          https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+        collect_counters_with_distributions.value.example: true
+        collect_counters_with_distributions.description: |
+          Whether to also collect observation counter metrics ending in `.sum` and `.count` when
+          sending histogram buckets as Datadog distribution metrics. Enabling it also enables
+          `histogram_buckets_as_distributions`.
+
+          This integration enables this option by default.
+        exclude_labels.value.example:
+        - dp_rank
+        exclude_labels.description: |
+          A list of TensorRT-LLM labels to exclude. The integration always drops the `pid` label that Prometheus
+          multiprocess mode adds, because it changes every time the server restarts. Labels listed here are
+          excluded in addition to `pid`.

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 13.6.0 / 2026-11-16 / Agent 7.86.0
+
+***Security***:
+
+* Bump `pyasn1` to 0.6.5 to address CVE-2026-119194, CVE-2026-119195, CVE-2026-119196, and CVE-2026-119197. ([#25968](https://github.com/DataDog/integrations-core/pull/25968))
+
 ## 13.5.0 / 2026-10-29
 
 ***Added***:
