@@ -65,6 +65,8 @@ class InfrastructureMonitor:
     def __init__(self, check: NutanixCheck):
         self.check = check
         self._pc_label = f"PC:{self.check.pc_ip}"
+        # Datadog lowercases tag keys, so users copy them from the UI in lowercase.
+        self._excluded_host_tags = frozenset(key.lower() for key in self.check.config.excluded_host_tags or ())
         self.external_tags = []
         self.cluster_names = {}  # cluster_id -> cluster_name
         self.host_names = {}  # host_id -> host_name
@@ -583,7 +585,9 @@ class InfrastructureMonitor:
         return tags
 
     def _set_external_tags_for_host(self, hostname: str, tags: list[str]) -> None:
-        """Set or update external tags for a host."""
+        """Set or update external tags for a host, leaving out tag keys listed in `excluded_host_tags`."""
+        if self._excluded_host_tags:
+            tags = [tag for tag in tags if tag.split(":", 1)[0].lower() not in self._excluded_host_tags]
         for i, entry in enumerate(self.external_tags):
             if entry[0] == hostname:
                 self.external_tags[i] = (hostname, {self.check.__NAMESPACE__: tags})

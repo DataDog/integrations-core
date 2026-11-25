@@ -145,6 +145,23 @@ instances:
     #
     # collect_resource_ids_as_tags: false
 
+    ## @param excluded_host_tags - list of strings - optional - default: []
+    ## Tag keys to submit only as metric tags, not as host tags.
+    ## By default, every tag collected for a Nutanix host or VM is attached to its metrics and also
+    ## submitted as a host tag. Host tags are updated less often than metric tags, so when a tag value
+    ## changes, the old and new values can appear together on the same series until the host tags catch up.
+    ## Tag keys listed here are removed from the host tags of both Nutanix hosts and VMs. Keys are matched
+    ## case-insensitively. The tags still appear on Nutanix metrics, but you can no longer filter hosts by
+    ## them, and they are not added to metrics from an Agent running on the VM.
+    ## A good use case is `[ntnx_host_name, ntnx_host_id]`: these tags change when a VM migrates to
+    ## another host, and listing them removes spikes from `count by {ntnx_host_name}` queries.
+    ## The `ntnx_host_id` tag is only collected when `collect_resource_ids_as_tags` is true.
+    ## Default is an empty list.
+    #
+    # excluded_host_tags:
+    #   - ntnx_host_name
+    #   - ntnx_host_id
+
     ## @param collect_events - boolean - optional - default: true
     ## Whether to collect events from Prism Central.
     ## Default is true.

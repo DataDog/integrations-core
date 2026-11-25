@@ -170,6 +170,34 @@ def test_resource_ids_collected_when_enabled(dd_run_check, aggregator, mock_inst
     )
 
 
+def test_excluded_host_tags_stay_on_metrics_only(dd_run_check, aggregator, mock_instance, mock_http_get, datadog_agent):
+    instance = mock_instance.copy()
+    instance['collect_resource_ids_as_tags'] = True
+    # `team` is how Datadog displays the `Team` category key, since tag keys are lowercased.
+    instance['excluded_host_tags'] = ['ntnx_host_name', 'ntnx_host_id', 'team']
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    excluded = {f"ntnx_host_name:{HOST_NAME}", "Team:agent-integrations"}
+    for metric_name in ("nutanix.host.count", "nutanix.vm.count"):
+        for tag in excluded | {f"ntnx_host_id:{HOST_ID}"}:
+            aggregator.assert_metric_has_tag(metric_name, tag)
+
+    # The full host tag list is compared, so dropping anything beyond the listed keys also fails.
+    datadog_agent.assert_external_tags(
+        HOST_NAME,
+        {'nutanix': [t for t in HOST_TAGS if t not in excluded] + [f"ntnx_cluster_id:{CLUSTER_ID}"]},
+    )
+    datadog_agent.assert_external_tags(
+        UBUNTU_VM_NAME,
+        {
+            'nutanix': [t for t in UBUNTU_VM_TAGS if t not in excluded]
+            + [f"ntnx_vm_id:{UBUNTU_VM_ID}", f"ntnx_cluster_id:{CLUSTER_ID}"]
+        },
+    )
+
+
 def test_invalid_hostname_transform_raises_error(dd_run_check, mock_instance):
     instance = mock_instance.copy()
     instance['hostname_transform'] = 'INVALID'

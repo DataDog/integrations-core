@@ -89,6 +89,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
     exclude_filtered_resources_from_cluster_capacity: Optional[bool] = None
+    excluded_host_tags: Optional[tuple[str, ...]] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
     hostname_transform: Optional[Literal['upper', 'lower', 'default']] = None
