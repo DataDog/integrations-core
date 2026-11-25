@@ -1,1 +1,0 @@
-Stop deriving the `inference_pool` tag from EPP pool labels; report them as `llm_d_pool` instead.
