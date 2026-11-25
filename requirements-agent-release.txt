@@ -170,7 +170,7 @@ datadog-microsoft-sysmon==1.2.0; sys_platform == 'win32'
 datadog-milvus==3.0.0
 datadog-mongo==11.2.0
 datadog-mysql==15.25.0
-datadog-n8n==2.1.1
+datadog-n8n==2.1.2
 datadog-nagios==3.4.0
 datadog-network==5.8.0
 datadog-nfsstat==3.5.1; sys_platform == 'linux2'
