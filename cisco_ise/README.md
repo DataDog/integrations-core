@@ -130,7 +130,7 @@ In ISE, remove the Datadog target from the Logging Categories, or delete the Rem
 
 **Fields are missing, or many logs have only the header parsed:**
 
-ISE splits an event longer than the Remote Logging Target's **Maximum Length** into several syslog messages (`@cisco_ise.segment.number:>0`), and only the first one is parsed. Set **Maximum Length** to 8192, or to the highest value your ISE version accepts.
+ISE splits an event longer than the Remote Logging Target's **Maximum Length** into several syslog messages, and only the first one is parsed. To find the other parts, search for `source:cisco-ise -@cisco_ise.segment.number:0`. Set **Maximum Length** to 8192, or to the highest value your ISE version accepts.
 
 **Only some events arrive over UDP:**
 
