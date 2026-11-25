@@ -90,8 +90,8 @@ jira_statuses = [
   "In Progress",
   "Done",
 ]
-github_team = "ndm-integrations"
-github_labels = ["team/ndm-integrations"]
+github_team = "network-device-monitoring-integrations"
+github_labels = ["team/network-device-monitoring-integrations"]
 
 [teams."Network Path"]
 jira_project = "NETPATH"
