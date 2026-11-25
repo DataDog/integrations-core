@@ -145,7 +145,7 @@ datadog-kubernetes-cluster-autoscaler==3.5.1
 datadog-kubernetes-state==10.5.0
 datadog-kubevirt-api==2.5.2
 datadog-kubevirt-controller==3.0.0
-datadog-kubevirt-handler==2.5.1
+datadog-kubevirt-handler==3.0.0
 datadog-kueue==3.0.0
 datadog-kuma==2.5.0
 datadog-kyototycoon==4.5.0
