@@ -4,7 +4,6 @@
 
 import os
 
-import mock
 import pytest
 import requests
 
@@ -45,22 +44,6 @@ def check_status_page_ready():
     data = resp.content.decode('utf-8')
     assert 'ReqPerSec: ' in data
     assert 'CPULoad: ' in data
-
-
-@pytest.fixture
-def mock_hide_server_version():
-    req = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
-
-        def mock_requests_get_headers(*args, **kwargs):
-            r = requests.get(*args, **kwargs)
-            old_iter = r.iter_lines
-            r.iter_lines = mock.MagicMock()
-            r.iter_lines.return_value = (l for l in old_iter(decode_unicode=True) if 'ServerVersion' not in l)
-            return r
-
-        req.get = mock_requests_get_headers
-        yield
 
 
 @pytest.fixture

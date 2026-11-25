@@ -9,6 +9,7 @@ from datadog_checks.quarkus.metrics import METRIC_MAP
 class QuarkusCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'quarkus'
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def get_default_config(self):
         return {

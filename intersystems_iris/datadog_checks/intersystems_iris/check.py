@@ -40,6 +40,7 @@ class IrisCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     """
 
     __NAMESPACE__ = 'intersystems_iris'
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     METRICS_MAP = (MetricsMapping(Path('metrics/default.yaml')),)

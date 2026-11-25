@@ -10,6 +10,7 @@ from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 class KarpenterCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'karpenter'
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances=None):
         super(KarpenterCheck, self).__init__(
