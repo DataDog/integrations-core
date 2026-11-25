@@ -12,7 +12,7 @@
       "notify_audit": false,
       "notify_no_data": false,
       "renotify_interval": 0,
-      "require_full_window": true,
+      "require_full_window": false,
       "thresholds": {
         "critical": 0
       },
