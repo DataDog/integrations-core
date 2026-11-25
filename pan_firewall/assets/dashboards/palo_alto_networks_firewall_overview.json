@@ -448,8 +448,7 @@
               ],
               "style": {
                 "display": {
-                  "legend": "automatic",
-                  "type": "stacked"
+                  "type": "flat"
                 }
               },
               "time": {
