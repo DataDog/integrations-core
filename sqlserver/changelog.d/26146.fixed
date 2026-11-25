@@ -1,1 +1,0 @@
-Fix query metrics that reported a cached plan's lifetime counters as one interval when the plan ran again after being idle.
