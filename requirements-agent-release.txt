@@ -132,7 +132,7 @@ datadog-karpenter==4.0.0
 datadog-keda==3.0.0
 datadog-keycloak==1.2.0
 datadog-kong==7.0.0
-datadog-krakend==2.1.0
+datadog-krakend==3.0.0
 datadog-kube-apiserver-metrics==7.5.0
 datadog-kube-controller-manager==8.4.1
 datadog-kube-dns==7.4.0
