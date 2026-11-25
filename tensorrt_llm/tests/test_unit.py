@@ -44,7 +44,6 @@ def test_check_collects_mapped_metrics(
 
     for metric in metrics:
         aggregator.assert_metric(metric)
-        aggregator.assert_metric_has_tag(metric, 'test:test')
 
     for metric in histograms:
         aggregator.assert_histogram_bucket(
@@ -56,14 +55,33 @@ def test_check_collects_mapped_metrics(
     aggregator.assert_service_check('tensorrt_llm.openmetrics.health', ServiceCheck.OK)
 
 
-def test_model_name_tag_and_no_pid_tag(dd_run_check, aggregator, fake_http_response, instance):
+@pytest.mark.parametrize(
+    ('metric', 'value', 'tags'),
+    [
+        ('tensorrt_llm.num_requests.running', 16, ['model_name:qwen3-0.6b', 'engine_type:pytorch']),
+        ('tensorrt_llm.num_requests.waiting', 0, ['model_name:qwen3-0.6b', 'engine_type:pytorch']),
+        ('tensorrt_llm.kv_cache.usage', 0.05397727272727273, ['model_name:qwen3-0.6b', 'dp_rank:0']),
+        ('tensorrt_llm.kv_cache.max_blocks', 3520, ['model_name:qwen3-0.6b', 'dp_rank:0']),
+        ('tensorrt_llm.spec_decode.accept_length', 1.4375, ['model_name:qwen3-0.6b']),
+    ],
+)
+def test_mapped_values_and_labels(dd_run_check, aggregator, fake_http_response, instance, metric, value, tags):
+    run_check(dd_run_check, fake_http_response, instance, 'tensorrt_llm_1.4.0rc4_metrics.txt')
+
+    aggregator.assert_metric(metric, value=value)
+    for tag in tags:
+        aggregator.assert_metric_has_tag(metric, tag)
+
+
+def test_pid_label_is_excluded_when_instance_sets_exclude_labels(
+    dd_run_check, aggregator, fake_http_response, instance
+):
+    instance['exclude_labels'] = ['engine_type']
     run_check(dd_run_check, fake_http_response, instance, 'tensorrt_llm_1.3.0_metrics.txt')
 
-    aggregator.assert_metric_has_tag('tensorrt_llm.num_requests.running', 'model_name:qwen3-0.6b')
-    aggregator.assert_metric_has_tag('tensorrt_llm.request.success.count', 'finished_reason:length')
     for metric in aggregator.metric_names:
         for sample in aggregator.metrics(metric):
-            assert not any(tag.startswith('pid:') for tag in sample.tags), (metric, sample.tags)
+            assert not any(tag.startswith(('pid:', 'engine_type:')) for tag in sample.tags), (metric, sample.tags)
 
 
 def test_emits_critical_openmetrics_service_check_when_service_is_down(

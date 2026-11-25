@@ -25,7 +25,7 @@ E2E_METADATA = {'env_vars': {'DD_GPU_ENABLED': 'true'}}
 @pytest.fixture(scope='session')
 def dd_environment():
     conditions = [
-        CheckDockerLogs(identifier='caddy', patterns=['server running']),
+        CheckDockerLogs(identifier=COMPOSE_FILE, service='caddy', patterns=['server running']),
         CheckEndpoints(INSTANCE['openmetrics_endpoint']),
     ]
     with docker_run(COMPOSE_FILE, conditions=conditions):

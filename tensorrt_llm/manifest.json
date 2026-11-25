@@ -32,7 +32,7 @@
       },
       "metrics": {
         "prefix": "tensorrt_llm.",
-        "check": "tensorrt_llm.num_requests.running",
+        "check": "tensorrt_llm.request.success.count",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

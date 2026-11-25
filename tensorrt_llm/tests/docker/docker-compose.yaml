@@ -1,7 +1,6 @@
 services:
   caddy:
     image: caddy:2.7
-    container_name: caddy
     ports:
       - "8000:8000"
     volumes:
