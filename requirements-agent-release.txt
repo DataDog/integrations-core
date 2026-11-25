@@ -241,6 +241,7 @@ datadog-tekton==3.5.0
 datadog-teleport==3.5.0
 datadog-temporal==4.7.1
 datadog-tenable==3.2.0
+datadog-tensorrt-llm==1.0.0; sys_platform == 'linux2'
 datadog-teradata==4.3.0; sys_platform != 'darwin'
 datadog-tibco-ems==2.6.1; sys_platform != 'win32'
 datadog-tls==6.0.0
