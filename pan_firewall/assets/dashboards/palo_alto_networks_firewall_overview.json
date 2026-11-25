@@ -2577,7 +2577,7 @@
           {
             "definition": {
               "background_color": "orange",
-              "content": "Firewall logs forwarded from PAN-OS: critical-severity entries and log volume by status.",
+              "content": "Firewall logs forwarded from PAN-OS: critical-severity entries and log volume by status. For traffic, threat, and authentication log views, open the Palo Alto Networks Firewall Logs dashboard.",
               "text_align": "center",
               "type": "note",
               "vertical_align": "center"
