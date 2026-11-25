@@ -51,7 +51,8 @@ PODGROUP_ANNOTATION = 'pod-group-name'
 
 SCHEDULER_TAG_VALUE = 'kai'
 
-# Badput is tagged with why the PodGroup waits: `reason` holds a value shared with the other schedulers, and
+# Badput is tagged with why the PodGroup waits: `reason` holds one of the general
+# categories shared with the other schedulers, and
 # `scheduler_reason` the raw KAI reason it comes from, when KAI reports one.
 REASON_TAG = 'reason'
 SCHEDULER_REASON_TAG = 'scheduler_reason'
@@ -61,20 +62,39 @@ WORKLOAD_TAG = 'kai_workload'
 SCHEDULER_TAG = 'job_scheduler'
 SCHEDULER_QUEUE_TAG = 'job_scheduler_queue'
 SCHEDULER_WORKLOAD_TAG = 'job_scheduler_workload'
-UNKNOWN_REASON = 'unknown'
 # The GPU model, as the Agent tags it on GPU metrics.
 GPU_TYPE_TAG = 'gpu_type'
 # Node label that carries the GPU model, which a pod can require in its `nodeSelector` or `nodeAffinity`.
 GPU_PRODUCT_LABELS = ('nvidia.com/gpu.product',)
-KAI_REASONS = {
-    'OverLimit': 'quota_exhausted',
-    'NonPreemptibleOverQuota': 'quota_exhausted',
-    'PodSchedulingErrors': 'no_matching_resources',
-    'PreemptionDelayNotElapsed': 'waiting_for_preemption',
-    'QueueDoesNotExist': 'misconfigured',
+
+# Badput `reason` values: general categories shared with the other schedulers, whatever the scheduler calls the cause.
+QUOTA_OR_CAPACITY = 'quota_or_capacity'
+PLACEMENT_OR_TOPOLOGY = 'placement_or_topology'
+CONFIGURATION_OR_REQUEST = 'configuration_or_request'
+PREEMPTION_OR_RECLAIM = 'preemption_or_reclaim'
+STARTUP_OR_SYSTEM = 'startup_or_system'
+OTHER_OR_UNKNOWN = 'other_or_unknown'
+
+# The only place that maps KAI to the categories. A reason that is not listed is `other_or_unknown`: that includes
+# `PodSchedulingErrors`, which covers both missing capacity and unsatisfied placement, and which the design doc does
+# not map to a category, and the generic `Unschedulable` reported when KAI gives no explanation.
+KAI_REASON_CATEGORIES = {
+    # Reasons of the design doc.
+    'NonPreemptibleOverQuota': QUOTA_OR_CAPACITY,
+    'OverLimit': QUOTA_OR_CAPACITY,
+    'PreemptionDelayNotElapsed': PREEMPTION_OR_RECLAIM,
+    'QueueDoesNotExist': CONFIGURATION_OR_REQUEST,
+    'PodSchedulingErrors': OTHER_OR_UNKNOWN,
 }
-# Reasons the check derives itself when KAI reports none. They are normalized but not submitted as KAI reasons.
-DERIVED_REASONS = {'PodsPending': 'waiting_for_pods', 'NoPods': 'waiting_for_pods', 'Evicted': 'preempted'}
+# Reasons the check derives itself when KAI reports none. They are categorized but not submitted as KAI reasons.
+DERIVED_REASON_CATEGORIES = {
+    # KAI scheduled the PodGroup, but its pods are not all running yet (image pull, node or kubelet startup).
+    'PodsPending': STARTUP_OR_SYSTEM,
+    # The PodGroup has no pods: the Job controller has not created them yet, or created them again after an eviction.
+    'NoPods': STARTUP_OR_SYSTEM,
+    # KAI evicted the PodGroup (state `PREEMPTED`): it lost its resources to another workload.
+    'Evicted': PREEMPTION_OR_RECLAIM,
+}
 # `Unknown` means the node stopped reporting the pod, which still holds its GPUs and is not running as far as we know.
 ACTIVE_PHASES = ('Pending', 'Running', 'Unknown')
 # Seconds an active or suspended owning Job status is reused before it is read again.
@@ -106,7 +126,8 @@ class Category(str, Enum):
 
 STATE_CATEGORY = {
     SchedulingState.WAITING: Category.BADPUT,
-    # As for Kueue, a preempted PodGroup waits for GPUs again: its own state tags that badput with `reason:preempted`.
+    # As for Kueue, a preempted PodGroup waits for GPUs again: its own state tags that badput with
+    # `reason:preemption_or_reclaim`.
     SchedulingState.PREEMPTED: Category.BADPUT,
     SchedulingState.RUNNABLE: Category.FULLY_ADMITTED,
     SchedulingState.INACTIVE: Category.NONE,
@@ -138,9 +159,9 @@ class Observation(NamedTuple):
     finished_at: float | None
     """Unix time the last pod terminated, once no pod is active: running stops then, even if the Job retries."""
     reason: str | None
-    """Raw reason the PodGroup waits, as KAI reports it, or derived by the check (see `DERIVED_REASONS`)."""
+    """Raw reason the PodGroup waits, as KAI reports it, or derived by the check (see `DERIVED_REASON_CATEGORIES`)."""
     cause: str | None = None
-    """Reason normalized across schedulers, submitted as `reason`. Only set for badput states."""
+    """General category of the reason, shared across schedulers, submitted as `reason`. Only set for badput states."""
     gpu_type: str | None = None
     """Normalized GPU model that the active pods explicitly require, submitted as `gpu_type`, or None."""
     owner_finished_at: float | None = None
@@ -354,12 +375,12 @@ def classify(podgroup: dict, pods: list[dict], owner: OwnerStatus | None = None)
 
 
 def normalize_reason(state: SchedulingState, reason: str | None) -> str | None:
-    """Map the reason of a badput state to a value shared with the other schedulers."""
+    """Map the reason of a badput state to one of the general categories."""
     if state == SchedulingState.PREEMPTED:
-        return 'preempted'
+        return PREEMPTION_OR_RECLAIM
     if state != SchedulingState.WAITING:
         return None
-    return KAI_REASONS.get(reason or '') or DERIVED_REASONS.get(reason or '') or UNKNOWN_REASON
+    return KAI_REASON_CATEGORIES.get(reason or '') or DERIVED_REASON_CATEGORIES.get(reason or '') or OTHER_OR_UNKNOWN
 
 
 def group_pods(pods: Iterable[dict]) -> dict[tuple[str | None, str | None], list[dict]]:
@@ -595,8 +616,8 @@ def badput_by_reason(contributions: Iterable[Contribution]) -> dict[QueueKey, di
     for contribution in contributions:
         if contribution.category == Category.BADPUT:
             # Reasons the check derived itself are not KAI reasons, so only the normalized one is kept.
-            raw = None if contribution.reason in DERIVED_REASONS else contribution.reason
-            sums[contribution.queue][(contribution.cause or UNKNOWN_REASON, raw)] += contribution.gpu_seconds
+            raw = None if contribution.reason in DERIVED_REASON_CATEGORIES else contribution.reason
+            sums[contribution.queue][(contribution.cause or OTHER_OR_UNKNOWN, raw)] += contribution.gpu_seconds
     return {queue: dict(reasons) for queue, reasons in sums.items()}
 
 
@@ -622,14 +643,16 @@ def workload_points(contributions: Iterable[Contribution]) -> list[tuple[str, fl
             tags.append(f'{GPU_TYPE_TAG}:{contribution.gpu_type}')
         hours = contribution.gpu_seconds / SECONDS_PER_HOUR
         if contribution.category == Category.BADPUT:
-            reason = contribution.cause or UNKNOWN_REASON
+            reason = contribution.cause or OTHER_OR_UNKNOWN
             points.append(
                 (
                     BADPUT_METRIC,
                     hours,
                     [
                         *tags,
-                        *reason_tags(reason, None if contribution.reason in DERIVED_REASONS else contribution.reason),
+                        *reason_tags(
+                            reason, None if contribution.reason in DERIVED_REASON_CATEGORIES else contribution.reason
+                        ),
                     ],
                 )
             )

@@ -13,8 +13,10 @@ import pytest
 from datadog_checks.kai_scheduler import KaiSchedulerCheck
 from datadog_checks.kai_scheduler.goodput import (
     BADPUT_METRIC,
+    DERIVED_REASON_CATEGORIES,
     FULLY_ADMITTED_METRIC,
     GPU_FRACTION_ANNOTATION,
+    KAI_REASON_CATEGORIES,
     PODGROUP_ANNOTATION,
     Category,
     GoodputCollector,
@@ -310,7 +312,7 @@ def test_collector_submits_one_series_per_podgroup(aggregator, instance, mocker)
         'kai_workload:pg',
         'job_scheduler_workload:pg',
     ]
-    aggregator.assert_metric(BADPUT_METRIC, value=30 / 3600, tags=[*tags, 'reason:waiting_for_pods'], count=1)
+    aggregator.assert_metric(BADPUT_METRIC, value=30 / 3600, tags=[*tags, 'reason:startup_or_system'], count=1)
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=0, tags=tags, count=1)
     # Nothing else: one series per PodGroup and metric.
     assert len(aggregator.metrics(BADPUT_METRIC)) == 1
@@ -411,17 +413,71 @@ def test_collector_does_not_look_up_non_job_owners(instance, mocker):
     client.read_job.assert_not_called()
 
 
+# Every KAI reason of the design doc, with its category, plus one unknown reason.
+KAI_CATEGORY_CASES = [
+    ('NonPreemptibleOverQuota', 'quota_or_capacity'),
+    ('OverLimit', 'quota_or_capacity'),
+    ('PreemptionDelayNotElapsed', 'preemption_or_reclaim'),
+    ('QueueDoesNotExist', 'configuration_or_request'),
+    # The doc has no KAI reason for the placement and startup categories, and `PodSchedulingErrors` is not mapped.
+    ('PodSchedulingErrors', 'other_or_unknown'),
+    ('SomethingNewInAFutureKAI', 'other_or_unknown'),
+]
+
+
+@pytest.mark.parametrize(('reason', 'category'), KAI_CATEGORY_CASES)
+def test_badput_is_tagged_with_the_category_and_keeps_the_raw_kai_reason(reason, category):
+    t, clock = tracker()
+    pg = podgroup('blocked', unschedulable=reason)
+    pods = [pod('blocked', phase='Pending', gpus=2)]
+    t.update([pg], pods)
+    clock.now = 10
+    [tags] = badput_tags(t.update([pg], pods))
+    assert f'reason:{category}' in tags
+    assert f'scheduler_reason:{reason}' in tags
+    assert len([tag for tag in tags if tag.startswith('reason:')]) == 1
+
+
+def test_states_the_check_derives_are_categorized_without_a_kai_reason():
+    t, clock = tracker()
+    # KAI scheduled the PodGroup but its pod is not running, and a PodGroup that has no pod yet.
+    pending, empty = podgroup('pending'), podgroup('empty')
+    pods = [pod('pending', phase='Pending', gpus=2)]
+    t.update([pending, empty], pods)
+    clock.now = 10
+    contributions = t.update([pending, empty], pods)
+    tags = badput_tags(contributions)
+    assert [c.cause for c in contributions] == ['startup_or_system'] * len(contributions)
+    assert all(
+        'reason:startup_or_system' in tags_ and not any(x.startswith('scheduler_reason') for x in tags_)
+        for tags_ in tags
+    )
+
+
+def test_the_reason_mapping_only_uses_the_six_general_categories():
+    general = {
+        'quota_or_capacity',
+        'placement_or_topology',
+        'configuration_or_request',
+        'preemption_or_reclaim',
+        'startup_or_system',
+        'other_or_unknown',
+    }
+    assert set(KAI_REASON_CATEGORIES.values()) <= general
+    assert set(DERIVED_REASON_CATEGORIES.values()) <= general
+
+
 @pytest.mark.parametrize(
     'state, reason, expected',
     [
-        pytest.param(SchedulingState.WAITING, 'OverLimit', 'quota_exhausted', id='over_limit'),
-        pytest.param(SchedulingState.WAITING, 'NonPreemptibleOverQuota', 'quota_exhausted', id='over_quota'),
-        pytest.param(SchedulingState.WAITING, 'PodSchedulingErrors', 'no_matching_resources', id='no_room'),
-        pytest.param(SchedulingState.WAITING, 'PreemptionDelayNotElapsed', 'waiting_for_preemption', id='delay'),
-        pytest.param(SchedulingState.WAITING, 'QueueDoesNotExist', 'misconfigured', id='no_queue'),
-        pytest.param(SchedulingState.WAITING, 'PodsPending', 'waiting_for_pods', id='pods_pending'),
-        pytest.param(SchedulingState.WAITING, 'SomethingNew', 'unknown', id='unknown'),
-        pytest.param(SchedulingState.PREEMPTED, 'Evicted', 'preempted', id='preempted'),
+        pytest.param(SchedulingState.WAITING, 'OverLimit', 'quota_or_capacity', id='over_limit'),
+        pytest.param(SchedulingState.WAITING, 'NonPreemptibleOverQuota', 'quota_or_capacity', id='over_quota'),
+        pytest.param(SchedulingState.WAITING, 'PodSchedulingErrors', 'other_or_unknown', id='no_room'),
+        pytest.param(SchedulingState.WAITING, 'PreemptionDelayNotElapsed', 'preemption_or_reclaim', id='delay'),
+        pytest.param(SchedulingState.WAITING, 'QueueDoesNotExist', 'configuration_or_request', id='no_queue'),
+        pytest.param(SchedulingState.WAITING, 'PodsPending', 'startup_or_system', id='pods_pending'),
+        pytest.param(SchedulingState.WAITING, 'SomethingNew', 'other_or_unknown', id='other_or_unknown'),
+        pytest.param(SchedulingState.PREEMPTED, 'Evicted', 'preemption_or_reclaim', id='preempted'),
         pytest.param(SchedulingState.RUNNABLE, None, None, id='not_badput'),
     ],
 )
@@ -441,9 +497,9 @@ def test_badput_is_split_by_reason_and_derived_reasons_are_not_kai_reasons():
     clock.now = 10
     assert badput_by_reason(t.update(pgs, pods)) == {
         QueueKey('ns', 'team-a'): {
-            ('quota_exhausted', 'OverLimit'): 20,
-            ('no_matching_resources', 'PodSchedulingErrors'): 320,
-            ('waiting_for_pods', None): 10,
+            ('quota_or_capacity', 'OverLimit'): 20,
+            ('other_or_unknown', 'PodSchedulingErrors'): 320,
+            ('startup_or_system', None): 10,
         }
     }
 
@@ -509,7 +565,7 @@ def test_per_podgroup_series_sum_to_the_right_totals_for_any_grouping():
     """
     queues = ['team-a', 'team-b', 'team-c']
     # Waiting for quota, as KAI reports it, or bound with its pods not running yet: two different reasons.
-    waiting_reasons = {'OverLimit': 'quota_exhausted', None: 'waiting_for_pods'}
+    waiting_reasons = {'OverLimit': 'quota_or_capacity', None: 'startup_or_system'}
     # name -> (queue, GPUs, KAI reason, created poll, running poll, finished poll), in 10-second polls.
     timelines = {
         f'pg{i}': (queues[i % 3], 1 + i % 4, list(waiting_reasons)[i % 2], i % 5, i % 5 + 1 + i % 3, i % 5 + 3 + i % 4)
@@ -771,7 +827,7 @@ def test_kind_admitted_but_unable_to_run_keeps_badput_until_all_pods_run():
     contributions = t.update([pg], partial)
     [tags] = badput_tags(contributions)
     assert [(c.category, c.gpu_seconds) for c in contributions] == [(Category.BADPUT, 40)]
-    assert 'reason:waiting_for_pods' in tags
+    assert 'reason:startup_or_system' in tags
     # `PodsPending` is derived by the check, not a KAI reason.
     assert not any(tag.startswith('scheduler_reason:') for tag in tags)
 
@@ -793,16 +849,16 @@ def test_kind_preemption_is_tagged_preempted_until_the_scheduler_starts_it_again
     clock.now = 20
     contributions = t.update([evicted], [kind_pod(pg, phase='Pending')])
     [tags] = badput_tags(contributions)
-    assert 'reason:preempted' in tags
+    assert 'reason:preemption_or_reclaim' in tags
 
     # KAI starts it again, but its pod is not running yet: still badput, no longer a preemption wait.
     restarted = copy.deepcopy(evicted)
     restarted['metadata']['annotations'][LAST_START_ANNOTATION] = '2026-11-24T13:46:00Z'
     clock.now = 30
-    assert [c.cause for c in t.update([restarted], [kind_pod(pg, phase='Pending')])] == ['preempted']
+    assert [c.cause for c in t.update([restarted], [kind_pod(pg, phase='Pending')])] == ['preemption_or_reclaim']
     clock.now = 40
     contributions = t.update([restarted], [kind_pod(pg, phase='Pending')])
-    assert [(c.category, c.cause) for c in contributions] == [(Category.BADPUT, 'waiting_for_pods')]
+    assert [(c.category, c.cause) for c in contributions] == [(Category.BADPUT, 'startup_or_system')]
 
 
 def test_quota_exhausted_badput_is_tagged_while_running_workloads_stay_fully_admitted():
@@ -819,7 +875,7 @@ def test_quota_exhausted_badput_is_tagged_while_running_workloads_stay_fully_adm
         'blocked': (Category.BADPUT, 40),
     }
     [tags] = badput_tags(contributions)
-    assert {'reason:quota_exhausted', 'scheduler_reason:OverLimit'} <= set(tags)
+    assert {'reason:quota_or_capacity', 'scheduler_reason:OverLimit'} <= set(tags)
 
 
 @pytest.mark.parametrize(

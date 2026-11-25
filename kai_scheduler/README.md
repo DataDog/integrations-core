@@ -105,22 +105,27 @@ Collecting events requires `list` role-based access control (RBAC) permission on
 
 Set `collect_scheduling_goodput: true` to measure how much of the GPU time that KAI PodGroups request is spent waiting to become fully runnable. A GPU PodGroup is one whose pods request `nvidia.com/gpu`, `amd.com/gpu`, or a KAI GPU fraction with the `gpu-fraction` annotation. The check doesn't count MIG profiles. On every run, each GPU PodGroup adds the time since the previous run, multiplied by the GPUs that its active pods request, to one of two counts. The check submits both counts in GPU-hours, as one series per PodGroup:
 
-- `gpu.scheduling.badput_time`: the PodGroup waits for quota or for room in the cluster, some of its pods are not running yet, or it was preempted and waits to run again. It is tagged with a `reason` shared with the other scheduler integrations, such as `quota_exhausted`, `no_matching_resources`, or `preempted`, and with the raw KAI `scheduler_reason` when KAI reports one.
+- `gpu.scheduling.badput_time`: the PodGroup waits for quota or for room in the cluster, some of its pods are not running yet, or it was preempted and waits to run again. It is tagged with a `reason`, one of six general categories shared with the other scheduler integrations, such as `quota_or_capacity` or `startup_or_system`, and with the raw KAI `scheduler_reason` when KAI reports one.
 - `gpu.scheduling.fully_admitted_time`: every active pod of the PodGroup runs, with at least `minMember` pods running or completed.
 
-Badput doesn't stop when KAI allocates a PodGroup. It stops once every active pod runs, so a PodGroup that KAI scheduled but whose pods are pending or only partly running, such as when the node can't start them, keeps accumulating badput, with `reason:waiting_for_pods`. After a preemption, the badput is tagged `reason:preempted` until KAI starts the PodGroup again.
+Badput doesn't stop when KAI allocates a PodGroup. It stops once every active pod runs, so a PodGroup that KAI scheduled but whose pods are pending or only partly running, such as when the node can't start them, keeps accumulating badput, with `reason:startup_or_system`. After a preemption, the badput is tagged `reason:preemption_or_reclaim` until KAI starts the PodGroup again.
 
-The `reason` tag is derived from the PodGroup `status.schedulingConditions[].reasons[]`, and `scheduler_reason` keeps the raw value. KAI doesn't expose a structured reason for other causes, so they have none:
+The `reason` tag is derived from the PodGroup `status.schedulingConditions[].reasons[]`. `scheduler_reason` keeps the raw KAI value for detail, so the `reason` tag has a fixed set of six values. KAI doesn't expose a structured reason for other causes, so the check derives the category from the state of the PodGroup and its pods, and `scheduler_reason` isn't set:
 
-| `reason` | KAI `scheduler_reason` |
-|---|---|
-| `quota_exhausted` | `OverLimit`, `NonPreemptibleOverQuota` |
-| `no_matching_resources` | `PodSchedulingErrors` |
-| `waiting_for_preemption` | `PreemptionDelayNotElapsed` |
-| `misconfigured` | `QueueDoesNotExist` |
-| `waiting_for_pods` | none: KAI scheduled the PodGroup, or created no pods yet |
-| `preempted` | none: KAI evicted the PodGroup and hasn't started it again |
-| `unknown` | any other value |
+| `reason` | What it means | KAI `scheduler_reason` |
+|---|---|---|
+| `quota_or_capacity` | The PodGroup waits for capacity because of quota or allocation policies. Compare the quota with the fleet to decide whether to rebalance quota or add capacity. | `OverLimit`, `NonPreemptibleOverQuota` |
+| `placement_or_topology` | Capacity may exist, but it can't satisfy the placement requirements. KAI has no structured reason for it, so this value is not used yet. | none |
+| `configuration_or_request` | The PodGroup, queue, or resource configuration prevents the scheduling. Review and correct the request or the configuration. | `QueueDoesNotExist` |
+| `preemption_or_reclaim` | The PodGroup waits for resources to be reclaimed, or KAI evicted it and hasn't started it again. Review the priority and borrowing policies. | `PreemptionDelayNotElapsed`, and none for an evicted PodGroup |
+| `startup_or_system` | KAI scheduled the PodGroup, or it has no pods yet, but its pods are not all running. Pod and infrastructure data are needed to find the cause. | none |
+| `other_or_unknown` | There isn't enough context to classify the cause. | `PodSchedulingErrors`, and any other value |
+
+To investigate badput:
+
+1. Detect high scheduling badput and use `reason` to find the type of blocking condition. Use `scheduler_reason` for the exact KAI reason.
+2. Find the PodGroups with the highest waiting time, with `job_scheduler_workload`, and group them by `gpu_type`.
+3. Correlate the result with the state of that GPU fleet. For example, if most affected PodGroups request A100s, inspect the A100 fleet.
 
 **Requirements**: The service account of the Agent that runs the check, such as the cluster check runner, needs cluster-wide `list` on `podgroups.scheduling.run.ai` and `pods`, and `get` on `jobs.batch`. The check uses `jobs.batch` to determine whether a PodGroup without pods is waiting for new pods or is done. Every instance with `collect_scheduling_goodput` enabled counts the whole cluster, so enable it on only one instance.
 
