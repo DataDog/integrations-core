@@ -128,7 +128,7 @@ datadog-kafka-actions==2.12.0
 datadog-kafka-consumer==9.4.1
 datadog-kafka==4.6.0
 datadog-kai-scheduler==1.1.0; sys_platform == 'linux2'
-datadog-karpenter==3.5.0
+datadog-karpenter==4.0.0
 datadog-keda==2.5.0
 datadog-keycloak==1.2.0
 datadog-kong==6.5.0
