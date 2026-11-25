@@ -238,7 +238,7 @@ datadog-system-swap==3.3.0
 datadog-tcp-check==6.3.0
 datadog-teamcity==7.4.3
 datadog-tekton==4.0.0
-datadog-teleport==3.5.0
+datadog-teleport==3.5.1
 datadog-temporal==4.7.1
 datadog-tenable==3.2.0
 datadog-tensorrt-llm==1.0.0; sys_platform == 'linux2'
