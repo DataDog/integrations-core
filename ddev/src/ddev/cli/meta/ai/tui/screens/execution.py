@@ -21,6 +21,7 @@ from textual.worker import Worker
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
+from ddev.ai.runtime.errors import CredentialRefreshError
 from ddev.cli.meta.ai.rendering import (
     render_agent_error_line,
     render_agent_finish_line,
@@ -57,6 +58,7 @@ from ddev.cli.meta.ai.tui.messages import (
 )
 from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug, resume_completed_phases
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
+from ddev.cli.meta.ai.tui.screens.credential_refresh_modal import CredentialRefreshModal
 from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
 from ddev.cli.meta.ai.tui.screens.phase_error_modal import PhaseErrorModal
 from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogEntry, PhaseLogScreen
@@ -197,7 +199,7 @@ class ExecutionScreen(TogoScreen):
                 self.togo_app.execution_status = ExecutionStatus.IDLE
             raise
         except Exception as error:
-            if orchestrator is None or orchestrator.failed_phase is None:
+            if isinstance(error, CredentialRefreshError) or orchestrator is None or orchestrator.failed_phase is None:
                 self.post_message(ExecutionFailed(error))
 
     def _build_real_orchestrator(self, callbacks: Callbacks) -> PhaseOrchestrator:
@@ -388,6 +390,10 @@ class ExecutionScreen(TogoScreen):
 
     def on_execution_failed(self, msg: ExecutionFailed) -> None:
         self.togo_app.execution_status = ExecutionStatus.FAILED
+        if isinstance(msg.error, CredentialRefreshError):
+            self.app.push_screen(CredentialRefreshModal(msg.error))
+            if self._phase_errors:
+                return
         self._show_run_error(msg.error)
 
     def on_phase_selected(self, msg: PhaseSelected) -> None:

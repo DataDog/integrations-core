@@ -6,9 +6,12 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
+import pytest
+
 from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
-from ddev.ai.agent.types import StopReason
+from ddev.ai.agent.types import AgentResponse, StopReason, ToolResultMessage
+from ddev.ai.errors import RunAbortError
 from ddev.ai.tools.agents.spawn_identical_subagents import (
     CONCISE_DIRECTIVE,
     Assignment,
@@ -120,6 +123,40 @@ async def test_partial_failure(
     )
     assert result.success is True
     assert result.data.count("— ok") == 2
+
+
+async def test_child_run_abort_error_cancels_sibling(
+    process_factory: ProcessFactoryBuilder, mock_agent: type[MockAgent]
+):
+    started = asyncio.Event()
+    stopped = asyncio.Event()
+    error = RunAbortError("the run cannot continue")
+
+    class ChildAgent(mock_agent):
+        def __init__(self) -> None:
+            super().__init__([])
+
+        async def send(
+            self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
+        ) -> AgentResponse:
+            if content == "do fatal":
+                await started.wait()
+                raise error
+            started.set()
+            try:
+                return await asyncio.Future[AgentResponse]()
+            finally:
+                stopped.set()
+
+    tool = make_tool(process_factory(ChildAgent))
+    tool_input = SpawnIdenticalSubagentsInput(system_prompt="s", assignments=assignments("slow", "fatal"))
+
+    async with asyncio.timeout(2):
+        with pytest.raises(RunAbortError) as raised:
+            await tool(tool_input)
+
+    assert raised.value is error
+    assert stopped.is_set()
 
 
 async def test_flow_stop_requested_child_tokens_counted_in_aggregate(

@@ -191,6 +191,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                 PhaseFailedMessage(
                     id=f"{self._phase_id}_failed",
                     phase_id=self._phase_id,
-                    error=str(original_error),
+                    error=original_error,
                 )
             )

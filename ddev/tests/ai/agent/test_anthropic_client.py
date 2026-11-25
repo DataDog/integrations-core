@@ -9,7 +9,8 @@ import httpx2
 import pytest
 
 from ddev.ai.agent.anthropic_client import SDK_AUTH_DISABLED, check_messages_access, messages_client
-from ddev.ai.agent.exceptions import ModelAccessError
+from ddev.ai.agent.exceptions import AgentConnectionError, ModelAccessError
+from ddev.ai.errors import RunAbortError
 from ddev.ai.model_catalog import ModelResolver, Route
 from ddev.ai.runtime.connections import DirectConnection, GatewayConnection
 from ddev.ai.runtime.tokens import DirectTokenProducer, TokenProducer
@@ -102,6 +103,32 @@ async def test_messages_only_sends_the_routes_credential(monkeypatch, tmp_path, 
 
     assert result.status == 200
     assert result.model_confirmed
+
+
+@pytest.mark.parametrize(
+    ("transport_error", "expected_type", "expected_message"),
+    [
+        (RunAbortError("run cannot continue"), RunAbortError, "run cannot continue"),
+        (ValueError("private diagnostic"), AgentConnectionError, "Model access check could not connect."),
+    ],
+    ids=["run-abort", "unknown-cause"],
+)
+async def test_access_probe_only_unwraps_known_transport_errors(transport_error, expected_type, expected_message):
+    def fail(_: httpx2.Request) -> httpx2.Response:
+        raise transport_error
+
+    tokens = Mock(spec=TokenProducer)
+    tokens.token_for.return_value = "ddpat_gateway_secret"
+    connection = GatewayConnection(tokens, transport=httpx2.MockTransport(fail))
+    model = ModelResolver().resolve("haiku", route=Route.AI_GATEWAY)
+    try:
+        async with messages_client(connection) as client:
+            with pytest.raises(expected_type) as caught:
+                await check_messages_access(client, model)
+    finally:
+        await connection.aclose()
+
+    assert str(caught.value) == expected_message
 
 
 @pytest.mark.parametrize(

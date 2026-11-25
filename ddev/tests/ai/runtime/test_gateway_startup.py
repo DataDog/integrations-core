@@ -4,6 +4,7 @@
 
 import asyncio
 import json
+from collections.abc import AsyncIterator
 from functools import partial
 from pathlib import Path
 from types import SimpleNamespace
@@ -16,14 +17,17 @@ import yaml
 
 from ddev.ai.agent.provider import AgentProvider, ModelAccessCheck
 from ddev.ai.agent.registry import AgentProviderRegistry, build_agent_provider_registry
-from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.agent.scope import AgentRole, AgentScope
+from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.config.models import AgentConfig, FlowEntry, PhaseConfig, ResolvedFlow, TaskConfig
 from ddev.ai.model_catalog import Route
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.registry import PhaseRegistry
+from ddev.ai.runtime import gateway_auth
 from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus
 from ddev.ai.runtime.connections import DirectConnection, GatewayConnection
-from ddev.ai.runtime.gateway_auth import LOGIN_HELP, GatewayAuthError
+from ddev.ai.runtime.errors import CredentialRefreshError, RefreshFailureCause
+from ddev.ai.runtime.gateway_auth import LOGIN_HELP, GatewayAuthError, GatewayTokenProducer, gateway_refresh_error
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -143,6 +147,7 @@ def _orchestrator(
     has_dd_auth: bool = True,
     flow: ResolvedFlow | None = None,
     resume: bool = False,
+    callbacks: Callbacks | None = None,
 ) -> PhaseOrchestrator:
     _stub_dd_auth(monkeypatch, available=has_dd_auth)
     monkeypatch.setattr("ddev.ai.runtime.resources.GatewayConnection", partial(GatewayConnection, transport=transport))
@@ -165,6 +170,7 @@ def _orchestrator(
         runtime_variables={},
         provider_registry=registry,
         file_access_policy=FileAccessPolicy(tmp_path, "demo"),
+        callbacks=callbacks,
         prepare_run_directory=None if resume else lambda: (tmp_path / "checkpoints.yaml").unlink(missing_ok=True),
         grace_period=0,
         resume=resume,
@@ -184,44 +190,140 @@ def _message(model: str) -> dict:
     }
 
 
+def _stream_message(message: dict, *, tool_call: dict | None = None) -> httpx2.Response:
+    events = [("message_start", {"message": message})]
+    if tool_call is None:
+        events.append(("content_block_start", {"index": 0, "content_block": {"type": "text", "text": "Done"}}))
+    else:
+        block = {"type": "tool_use", "id": "toolu_test", "name": tool_call["name"], "input": {}}
+        events.append(("content_block_start", {"index": 0, "content_block": block}))
+        delta = {"type": "input_json_delta", "partial_json": json.dumps(tool_call["input"])}
+        events.append(("content_block_delta", {"index": 0, "delta": delta}))
+    stop_reason = "end_turn" if tool_call is None else "tool_use"
+    events.extend(
+        [
+            ("content_block_stop", {"index": 0}),
+            ("message_delta", {"delta": {"stop_reason": stop_reason}, "usage": {"output_tokens": 1}}),
+            ("message_stop", {}),
+        ]
+    )
+    stream = "".join(f"event: {name}\ndata: {json.dumps({'type': name, **data})}\n\n" for name, data in events)
+    return httpx2.Response(200, text=stream, headers={"content-type": "text/event-stream"})
+
+
 @pytest.mark.parametrize("has_dd_auth", [True, False], ids=["gateway", "direct-fallback"])
-async def test_phase_uses_the_route_and_credential_selected_at_startup(tmp_path, monkeypatch, has_dd_auth):
+async def test_phase_keeps_startup_route_and_model_across_credential_refresh(tmp_path, monkeypatch, has_dd_auth):
     requests = []
     model = "claude-haiku-4-5-20251001"
     message = _message(model)
+    clock = SimpleNamespace(now=100.0)
+    monkeypatch.setattr(gateway_auth, "time", SimpleNamespace(time=lambda: clock.now))
 
     def handle(request: httpx2.Request) -> httpx2.Response:
         body = json.loads(request.content)
         expected_model = f"anthropic/{model}" if has_dd_auth else "claude-haiku-4-5"
-        expected_token = "ddpat_testing_secret" if has_dd_auth else "direct-secret"
+        stream_request = body.get("stream", False)
+        expected_token = "direct-secret"
+        if has_dd_auth:
+            expected_token = "ddpat_refreshed" if stream_request else "ddpat_testing_secret"
         assert body["model"] == expected_model
         assert request.headers["authorization"] == f"Bearer {expected_token}"
-        requests.append(body.get("stream", False))
-        if not body.get("stream"):
+        requests.append(stream_request)
+        if not stream_request:
+            clock.now += gateway_auth.TOKEN_USE_WINDOW
             return httpx2.Response(200, json=message)
 
-        events = [
-            ("message_start", {"message": message}),
-            ("content_block_start", {"index": 0, "content_block": {"type": "text", "text": "Done"}}),
-            ("content_block_stop", {"index": 0}),
-            ("message_delta", {"delta": {"stop_reason": "end_turn"}, "usage": {"output_tokens": 1}}),
-            ("message_stop", {}),
-        ]
-        stream = "".join(f"event: {name}\ndata: {json.dumps({'type': name, **data})}\n\n" for name, data in events)
-        return httpx2.Response(200, text=stream, headers={"content-type": "text/event-stream"})
+        return _stream_message(message)
 
     transport = TrackingTransport(handle)
     orchestrator = _orchestrator(
         tmp_path, transport, monkeypatch, has_direct_key=not has_dd_auth, has_dd_auth=has_dd_auth
     )
+    acquire_pat = AsyncMock(side_effect=["ddpat_testing_secret", "ddpat_refreshed"])
+    monkeypatch.setattr(dd_auth, "acquire_datadog_pat", acquire_pat)
     await orchestrator.run_async()
 
     if has_dd_auth:
         assert requests[0] is False
         requests = requests[1:]
     assert requests and all(requests)
+    assert acquire_pat.await_count == (2 if has_dd_auth else 0)
     assert CheckpointManager(tmp_path / "checkpoints.yaml").read()["run"].status is CheckpointStatus.SUCCESS
     assert transport.closed
+
+
+@pytest.mark.parametrize(
+    ("denial", "expected_error", "expected_message"),
+    [
+        ("refresh", CredentialRefreshError, "could not be refreshed"),
+        ("http-403", GatewayAuthError, r"denied access \(HTTP 403\)"),
+    ],
+)
+async def test_subagent_gateway_denial_ends_run_and_keeps_completed_phase_checkpoint(
+    tmp_path, monkeypatch, caplog, denial, expected_error, expected_message
+):
+    registry = _gateway_registry()
+    tool_name = "spawn_identical_subagents"
+    writer = _agent(registry, "haiku").model_copy(update={"tools": [tool_name]})
+    flow = ResolvedFlow(
+        name="demo",
+        agents={"writer": writer},
+        flow=[FlowEntry(phase="plan"), FlowEntry(phase="write", dependencies=["plan"])],
+        phases={
+            name: PhaseConfig(name=name, agent="writer", tasks=[TaskConfig(name=name, prompt=name)])
+            for name in ("plan", "write")
+        },
+        variables={},
+    )
+    checkpoints = CheckpointManager(tmp_path / "checkpoints.yaml")
+    completed_checkpoint = None
+    subagent_running = False
+    callback_set = CallbackSet()
+
+    @callback_set.on_agent_start
+    async def mark_subagent(scope: AgentScope, _prompt: str, _tools: list[str]) -> None:
+        nonlocal subagent_running
+        subagent_running = scope.role is AgentRole.SUBAGENT
+
+    async def token_for(provider: str) -> str:
+        if denial == "refresh" and subagent_running:
+            raise gateway_refresh_error(RefreshFailureCause.LOGIN_TIMED_OUT)
+        return "ddpat_testing_secret"
+
+    producer = Mock(spec=GatewayTokenProducer, available=True)
+    producer.token_for.side_effect = token_for
+    monkeypatch.setattr("ddev.ai.runtime.resources.GatewayTokenProducer", lambda: producer)
+    message = _message("claude-haiku-4-5-20251001")
+
+    def handle(request: httpx2.Request) -> httpx2.Response:
+        nonlocal completed_checkpoint
+        if not json.loads(request.content).get("stream"):
+            return httpx2.Response(200, json=message)
+        if completed_checkpoint is None and (completed_checkpoint := checkpoints.read().get("plan")) is not None:
+            return _stream_message(
+                message,
+                tool_call={
+                    "name": tool_name,
+                    "input": {
+                        "system_prompt": "Help the writer",
+                        "assignments": [{"name": "review", "prompt": "Review the plan"}],
+                    },
+                },
+            )
+        if denial == "http-403" and subagent_running:
+            return httpx2.Response(403, text="ddpat_testing_secret")
+        return _stream_message(message)
+
+    orchestrator = _orchestrator(
+        tmp_path, TrackingTransport(handle), monkeypatch, flow=flow, callbacks=Callbacks([callback_set])
+    )
+    with pytest.raises(expected_error, match=expected_message) as caught:
+        await orchestrator.run_async()
+
+    assert str(caught.value) in caplog.text
+    assert "ddpat_testing_secret" not in str(caught.value) + caplog.text
+    assert checkpoints.successful_phases() == {"plan"}
+    assert checkpoints.read()["plan"] == completed_checkpoint
 
 
 @pytest.mark.parametrize("status", [401, 403])
@@ -233,10 +335,13 @@ async def test_gateway_denial_stops_startup_and_does_not_expose_tokens(tmp_path,
     handle = AsyncMock(return_value=httpx2.Response(status, text="ddpat_testing_secret"))
     transport = TrackingTransport(handle)
     orchestrator = _orchestrator(run_dir, transport, monkeypatch)
-    with pytest.raises(FatalProcessingError, match=rf"denied access \(HTTP {status}\).*dd-auth") as caught:
+    message = "returned the same unusable credential" if status == 401 else r"denied access \(HTTP 403\)"
+    with pytest.raises(FatalProcessingError, match=message) as caught:
         await orchestrator.run_async()
 
     assert "ddpat_testing_secret" not in str(caught.value) + caplog.text
+    if status == 401:
+        assert "dd-auth --no-cache" in str(caught.value)
     assert list(run_dir.iterdir()) == [checkpoint]
     assert checkpoint.read_text() == "previous run"
     handle.assert_awaited_once()
@@ -300,11 +405,11 @@ async def test_gateway_probes_first_pending_agent_in_dependency_order(tmp_path, 
     assert checkpoint.read_text() == previous_state
 
 
-@pytest.mark.parametrize("cancel_at", ["acquisition", "probe"])
+@pytest.mark.parametrize("cancel_at", ["acquisition", "probe", "refresh"])
 async def test_gateway_startup_cancellation_leaves_run_state_untouched(tmp_path, monkeypatch, cancel_at):
     started = asyncio.Event()
 
-    async def wait_until_cancelled(_: object) -> Never:
+    async def wait_until_cancelled(_: object, *, rejected_pat: str | None = None) -> Never:
         started.set()
         await asyncio.Future()
         raise AssertionError("Startup should have been cancelled")
@@ -316,6 +421,16 @@ async def test_gateway_startup_cancellation_leaves_run_state_untouched(tmp_path,
     orchestrator = _orchestrator(tmp_path, transport, monkeypatch)
     if cancel_at == "acquisition":
         monkeypatch.setattr(dd_auth, "acquire_datadog_pat", wait_until_cancelled)
+    elif cancel_at == "refresh":
+        handle.side_effect = None
+        handle.return_value = httpx2.Response(401)
+
+        async def acquire_pat(_: str, *, rejected_pat: str | None) -> str:
+            if not handle.await_count:
+                return "ddpat_old"
+            return await wait_until_cancelled(None)
+
+        monkeypatch.setattr(dd_auth, "acquire_datadog_pat", acquire_pat)
     run = asyncio.create_task(orchestrator.run_async())
     async with asyncio.timeout(1):
         await started.wait()
@@ -328,3 +443,30 @@ async def test_gateway_startup_cancellation_leaves_run_state_untouched(tmp_path,
         handle.assert_not_awaited()
     else:
         assert transport.closed
+
+
+async def test_gateway_stream_failure_closes_connection_without_replaying_generation(tmp_path, monkeypatch):
+    model = "claude-haiku-4-5-20251001"
+    message = _message(model)
+    requests = []
+
+    class InterruptedStream(httpx2.AsyncByteStream):
+        async def __aiter__(self) -> AsyncIterator[bytes]:
+            event = {"type": "message_start", "message": message}
+            yield f"event: message_start\ndata: {json.dumps(event)}\n\n".encode()
+            raise httpx2.ReadError("connection interrupted")
+
+    def handle(request: httpx2.Request) -> httpx2.Response:
+        stream = json.loads(request.content).get("stream", False)
+        requests.append(stream)
+        if stream:
+            return httpx2.Response(200, stream=InterruptedStream(), headers={"content-type": "text/event-stream"})
+        return httpx2.Response(200, json=message)
+
+    transport = TrackingTransport(handle)
+    orchestrator = _orchestrator(tmp_path, transport, monkeypatch)
+    with pytest.raises(httpx2.ReadError, match="connection interrupted"):
+        await orchestrator.run_async()
+
+    assert requests == [False, True]
+    assert transport.closed

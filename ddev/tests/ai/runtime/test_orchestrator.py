@@ -110,16 +110,6 @@ def make_orchestrator(file_access_policy, provider_registry, tmp_path):
 # ---------------------------------------------------------------------------
 
 
-async def test_on_message_received_fatal_on_phase_failed(core_dir, make_orchestrator):
-    orchestrator, _, _ = make_orchestrator(core_dir)
-    msg = PhaseFailedMessage(id="f1", phase_id="p1", error="something broke")
-
-    with pytest.raises(FatalProcessingError, match="Phase 'p1' failed"):
-        await orchestrator.on_message_received(msg)
-
-    assert orchestrator.failed_phase == "p1"
-
-
 async def test_on_message_received_ignores_other_messages(core_dir, make_orchestrator):
     orchestrator, _, _ = make_orchestrator(core_dir)
     await orchestrator.on_message_received(PhaseTrigger(id="start", phase_id=None))
@@ -135,10 +125,9 @@ async def test_on_message_received_fires_run_error_callback(core_dir, make_orche
         received.append(True)
 
     orchestrator, _, _ = make_orchestrator(core_dir, callbacks=Callbacks([callback_set]))
-    msg = PhaseFailedMessage(id="f1", phase_id="p1", error="something broke")
+    msg = PhaseFailedMessage(id="f1", phase_id="p1", error=RuntimeError("something broke"))
 
-    with pytest.raises(FatalProcessingError):
-        await orchestrator.on_message_received(msg)
+    await orchestrator.on_message_received(msg)
 
     assert received == [True]
 
@@ -212,22 +201,19 @@ async def test_on_finalize_no_failure_is_noop(core_dir, make_orchestrator):
 
 async def test_on_finalize_after_phase_failed_logs(core_dir, make_orchestrator, caplog):
     orchestrator, _, _ = make_orchestrator(core_dir)
-    msg = PhaseFailedMessage(id="f1", phase_id="p1", error="boom")
-    exc = FatalProcessingError("Phase 'p1' failed: boom")
-    with pytest.raises(FatalProcessingError):
-        await orchestrator.on_message_received(msg)
+    msg = PhaseFailedMessage(id="f1", phase_id="p1", error=RuntimeError("boom"))
+    await orchestrator.on_message_received(msg)
 
     with caplog.at_level(logging.ERROR):
-        await orchestrator.on_finalize(exc)  # must not raise
+        await orchestrator.on_finalize(RuntimeError("boom"))  # must not raise
 
     assert any("Pipeline aborted" in r.message and "p1" in r.message and "boom" in r.message for r in caplog.records)
 
 
 async def test_on_finalize_no_exception_no_log(core_dir, make_orchestrator, caplog):
     orchestrator, _, _ = make_orchestrator(core_dir)
-    msg = PhaseFailedMessage(id="f1", phase_id="p1", error="boom")
-    with pytest.raises(FatalProcessingError):
-        await orchestrator.on_message_received(msg)
+    msg = PhaseFailedMessage(id="f1", phase_id="p1", error=RuntimeError("boom"))
+    await orchestrator.on_message_received(msg)
 
     with caplog.at_level(logging.ERROR):
         await orchestrator.on_finalize(None)  # exception=None means clean exit — no log
@@ -276,12 +262,7 @@ def test_run_executes_phases_in_dependency_order(tmp_path, make_orchestrator):
     assert checkpoints["b"].status == CheckpointStatus.SUCCESS
 
 
-def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator):
-    """Full pipeline: a failing phase must cause run() to raise FatalProcessingError.
-
-    A custom ``FailingPhase`` is discovered and registered by the composition root, validated by
-    the engine, then driven by the orchestrator.
-    """
+def test_run_raises_original_error_when_phase_fails(tmp_path, make_orchestrator):
     failing_core = tmp_path / "failing_core"
     write(
         failing_core / "agents" / "writer.md",
@@ -294,16 +275,21 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator):
         "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: failing\n",
     )
 
+    failure = RuntimeError("intentional failure")
+
     class FailingPhase(Phase):
         async def execute(self, context):
-            raise RuntimeError("intentional failure")
+            raise failure
 
     orchestrator, _, _ = make_orchestrator(
         failing_core, grace_period=0.1, register_phases={"FailingPhase": FailingPhase}
     )
 
-    with pytest.raises(FatalProcessingError, match="Phase 'failing' failed"):
+    with pytest.raises(RuntimeError) as caught:
         orchestrator.run()
+
+    assert caught.value is failure
+    assert orchestrator.failed_phase == "failing"
 
 
 # ---------------------------------------------------------------------------

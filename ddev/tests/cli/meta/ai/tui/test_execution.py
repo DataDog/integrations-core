@@ -1665,6 +1665,60 @@ async def test_phase_error_callback_only_marks_reported_failed_phase() -> None:
         assert "Run failed in phase_1: phase 1 crashed" in str(screen.query_one("#execution-error", Static).render())
 
 
+@pytest.mark.parametrize(
+    ("startup", "title"),
+    [(True, "AI Gateway login failed"), (False, "Credential refresh failed")],
+    ids=["startup", "mid-run"],
+)
+async def test_gateway_credential_failure_opens_recovery_modal(startup, title):
+    from textual.widgets import Static
+
+    from ddev.ai.callbacks.callbacks import Callbacks
+    from ddev.ai.model_catalog import Route
+    from ddev.ai.runtime.errors import CredentialRefreshError, RefreshFailureCause
+    from ddev.ai.runtime.gateway_auth import gateway_refresh_error
+    from ddev.cli.meta.ai.tui.screens.credential_refresh_modal import CredentialRefreshModal
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    class FailedCredentialAcquisition:
+        failed_phase = None if startup else "phase_1"
+
+        def __init__(self, callbacks: Callbacks) -> None:
+            self.callbacks = callbacks
+
+        async def run_async(self) -> None:
+            cause = RefreshFailureCause.LOGIN_TIMED_OUT
+            if self.failed_phase is None:
+                raise CredentialRefreshError(Route.AI_GATEWAY, cause, "AI Gateway startup failed.", (), startup=True)
+            await self.callbacks.fire_phase_start(self.failed_phase)
+            error = gateway_refresh_error(cause)
+            await self.callbacks.fire_phase_error(self.failed_phase, error)
+            await self.callbacks.fire_run_error()
+            raise error
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        screen = ExecutionScreen(flow, orchestrator_builder=FailedCredentialAcquisition)
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        assert isinstance(app.screen, CredentialRefreshModal)
+        assert str(app.screen.query_one("#dialog").border_title) == title
+        if not startup:
+            message = str(app.screen.query_one("#credential-refresh-message", Static).render())
+            assert "This run uses the AI Gateway" in message
+            assert "could not be refreshed" in message
+            assert "Run dd-auth -- true in a terminal" in message
+            assert "browser" in message and "curl instructions" in message
+            assert "ddev meta ai, select the flow, then choose Resume" in message
+            assert "Completed phases are kept" in message
+            assert "starts again from its first task and may redo work" in message
+
+        await pilot.click("#btn-close")
+        assert app.screen is screen
+
+
 async def test_orchestrator_exception_without_failed_phase_is_not_attributed() -> None:
     """An unknown orchestration failure is visible without failing concurrent phases."""
     from textual.widgets import Static
