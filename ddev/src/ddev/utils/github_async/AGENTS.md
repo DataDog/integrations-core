@@ -116,8 +116,9 @@ exists to prevent.
 - **Rate limiting** (`_rate_limited_request`, with `ddev.utils.rate_limiting`) owns 403 and 429
   responses that the headers confirm are rate limiting. Re-acquiring the limiter *is* the backoff, so
   there is no sleeping or arithmetic there. Never add a sleep or a wait to this layer.
-- **The retry strategy** (`_request`, with `retry.py`) owns everything else: transport failures and
-  5xx. stamina executes it, so there is no backoff arithmetic here either.
+- **The retry strategy** (`_request`, with `retry.py`) owns transport failures, 5xx and malformed
+  response bodies. Only the safe policy retries malformed bodies. stamina executes the strategy, so
+  there is no backoff arithmetic here either.
 
 The strategy wraps the rate-limit layer, never the reverse, so every attempt re-acquires the limiter
 and waits out any pause the governor holds.
