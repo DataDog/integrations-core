@@ -323,11 +323,16 @@ def test_schema_collector_skips_malformed_database_entry(aggregator):
 
 
 class FakeSession:
-    """Stands in for a per-database connection and records the queries run on it."""
+    """
+    Stands in for a per-database connection and records the queries run on it.
+
+    Like a real connection without multiple active result sets, it allows one open query at a time.
+    """
 
     def __init__(self, database_name: str):
         self.database_name = database_name
         self.queries: list[str] = []
+        self.open_query: str | None = None
 
 
 class FakeTablesCollector(SchemaObjectCollector):
@@ -348,8 +353,13 @@ class FakeTablesCollector(SchemaObjectCollector):
 
     @contextmanager
     def _open_rows(self, session: FakeSession, database: dict[str, Any]) -> Iterator[Iterator[str]]:
+        assert session.open_query is None, f"{self.kind} started while the {session.open_query} query was open"
         session.queries.append(self.kind)
-        yield self._iter_rows(database["name"])
+        session.open_query = self.kind
+        try:
+            yield self._iter_rows(database["name"])
+        finally:
+            session.open_query = None
 
     def _iter_rows(self, database_name: str) -> Iterator[str]:
         for row in self._rows_by_database.get(database_name, []):
