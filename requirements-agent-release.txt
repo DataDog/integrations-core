@@ -246,7 +246,7 @@ datadog-teradata==4.3.0; sys_platform != 'darwin'
 datadog-tibco-ems==2.6.1; sys_platform != 'win32'
 datadog-tls==6.0.0
 datadog-tomcat==4.3.0
-datadog-torchserve==4.4.1
+datadog-torchserve==4.4.2
 datadog-traefik-mesh==3.5.1
 datadog-traffic-server==3.7.0
 datadog-twemproxy==3.3.0
