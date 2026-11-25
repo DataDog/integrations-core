@@ -1,0 +1,1 @@
+Fix `cpu.usage` in the `opengear-console-manager` profile to use `hrProcessorLoad` instead of the UCD load average, which reported values above 100%.
