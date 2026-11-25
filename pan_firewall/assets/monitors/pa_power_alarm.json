@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nPower sensor **{{sensor.name}}** in slot {{slot.name}} on firewall **{{device_ip.name}}** is in alarm.\n{{/is_alert}}\n\n{{#is_recovery}}\n## Recovered\n\nPower sensor {{sensor.name}} in slot {{slot.name}} on firewall {{device_ip.name}} is no longer in alarm.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nAn unstable power supply can cause the firewall to reboot or shut down.\n\n---\n\n## Why?\n\nPossible causes:\n* **A failing power supply.**\n* **An unstable or lost power feed.**\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Run `show system environmentals` on the firewall to see the sensor's reading and thresholds.\n2. Check the power supply and its feed.\n3. Replace the power supply if the alarm persists.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Metrics Explorer](/metric/explorer?exp_metric=pan_firewall.power.voltage&exp_scope=device_ip:{{device_ip.name}},sensor:{{sensor.name}}&exp_agg=max&exp_type=line)\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Power sensor {{sensor.name}} is in alarm on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 1
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_15m):default_zero(max:pan_firewall.power.alarm{*} by {device_namespace,device_ip,slot,sensor}) + default_zero(max:pan_firewall.power.alarm.high{*} by {device_namespace,device_ip,slot,sensor}) + default_zero(max:pan_firewall.power.alarm.low{*} by {device_namespace,device_ip,slot,sensor}) >= 1",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks whether PAN-OS reports any power sensor on the firewall in alarm, usually because its voltage is above its maximum or below its minimum. A power alarm points to a failing power supply or an unstable feed that can take the device down.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Power sensor is in alarm",
+  "version": 2
+}
