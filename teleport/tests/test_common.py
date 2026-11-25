@@ -20,9 +20,7 @@ def test_connect_exception(dd_run_check, aggregator, caplog):
     assert "Cannot connect to Teleport HTTP diagnostic health endpoint" in caplog.text
 
 
-def test_common_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
-    mock_http_response(file_path=metrics_path)
-
+def test_common_teleport_metrics(dd_run_check, aggregator, instance, mock_teleport_endpoints):
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
