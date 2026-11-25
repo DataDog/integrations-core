@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2026-11-25
+
+***Added***:
+
+* Add a direction-free `power.alarm` metric. ([#26134](https://github.com/DataDog/integrations-core/pull/26134))
+
+***Fixed***:
+
+* Stop sending `license.days_left` for expired licenses. ([#26129](https://github.com/DataDog/integrations-core/pull/26129))
+
 ## 4.0.0 / 2026-11-04 / Agent 7.86.0
 
 ***Removed***:
