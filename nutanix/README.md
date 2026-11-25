@@ -121,6 +121,18 @@ Cluster-level capacity metrics (such as `cluster.cpu.total_cores`, `cluster.cpu.
 
 The Nutanix API does not expose the real hostname of VMs. VM metrics use the VM name from Prism Central as the hostname. If the Datadog Agent is installed on a Nutanix VM, its auto-detected hostname may differ from the VM name, causing duplicate hosts in Datadog. To fix this, set `hostname` in `datadog.yaml` (or the `DD_HOSTNAME` environment variable) to match the VM name in Prism Central.
 
+### Two host values after a VM migration
+
+The integration attaches each tag to the metrics and also submits it as a host tag. Host tags are updated less often than metric tags, so after a VM migrates, its series can briefly carry both the old and new `ntnx_host_name` values, and `ntnx_host_id` values when `collect_resource_ids_as_tags` is enabled. This splits `count by {ntnx_host_name}` queries for several minutes. To submit those tags as metric tags only, set:
+
+```yaml
+excluded_host_tags:
+  - ntnx_host_name
+  - ntnx_host_id
+```
+
+You can no longer filter hosts by the listed tags, and they are not added to metrics from an Agent running on the VM.
+
 ### Filtering resources
 
 Use the `resource_filters` option to control which resources are collected. Each filter requires a `resource` type, a `property` (the API field name to match against), and a list of regex `patterns`. Optionally, set `type` (`include` or `exclude`, default: `include`). Exclude filters take precedence over include filters.
