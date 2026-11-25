@@ -75,7 +75,7 @@ datadog-dynamo==2.0.0
 datadog-ecs-fargate==7.4.0
 datadog-eks-fargate==6.5.0
 datadog-elastic==9.6.0
-datadog-envoy==6.8.0
+datadog-envoy==6.8.1
 datadog-eset-protect==1.2.0
 datadog-esxi==4.4.1
 datadog-etcd==9.5.0
