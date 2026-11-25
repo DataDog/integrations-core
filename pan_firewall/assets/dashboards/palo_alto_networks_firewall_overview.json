@@ -530,7 +530,7 @@
           },
           {
             "definition": {
-              "description": "Management-plane CPU used per firewall. The management plane runs the web UI, API, logging and commits; high values slow management tasks but not traffic forwarding.",
+              "description": "Management-plane CPU used per firewall. The management plane runs the web UI, API, logging, and commits; high values slow management tasks but not traffic forwarding.",
               "legend_columns": [
                 "avg",
                 "max",
@@ -1689,7 +1689,7 @@
           },
           {
             "definition": {
-              "description": "Interfaces with the most receive errors, receive drops, forwarding errors and flow-state drops in the selected time range, combined.",
+              "description": "Interfaces with the most receive errors, receive drops, forwarding errors, and flow-state drops in the selected time range, combined.",
               "requests": [
                 {
                   "conditional_formats": [
@@ -1753,7 +1753,7 @@
           },
           {
             "definition": {
-              "description": "Data-plane packet drops by cause (aspect), such as session, resource or tunnel. A growing resource or session aspect means the firewall is running out of capacity. Requires `collect_global_counters: true` in the integration configuration; shows No data while global counter collection is off (the default).",
+              "description": "Data-plane packet drops by cause (aspect), such as session, resource, or tunnel. A growing resource or session aspect means the firewall is running out of capacity. Requires `collect_global_counters: true` in the integration configuration; shows No data while global counter collection is off (the default).",
               "legend_columns": [
                 "avg",
                 "max",
@@ -1864,7 +1864,7 @@
           },
           {
             "definition": {
-              "description": "Packets dropped by zone protection as IP spoofing, MAC spoofing, LAND, ping-of-death or teardrop attacks. Empty is normal. Requires zone protection profiles on the zones; without them these counters stay at 0 even under attack.",
+              "description": "Packets dropped by zone protection as IP spoofing, MAC spoofing, LAND, ping-of-death, or teardrop attacks. Empty is normal. Requires zone protection profiles on the zones; without them these counters stay at 0 even under attack.",
               "legend_columns": [
                 "sum",
                 "value"
@@ -2451,7 +2451,7 @@
           },
           {
             "definition": {
-              "description": "Most frequent threat log subtypes, such as virus, spyware or vulnerability. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_hostname attribute; the Panorama filter does not apply to logs.",
+              "description": "Most frequent threat log subtypes, such as virus, spyware, or vulnerability. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_hostname attribute; the Panorama filter does not apply to logs.",
               "requests": [
                 {
                   "formulas": [

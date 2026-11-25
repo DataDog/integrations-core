@@ -1,6 +1,6 @@
 {
   "title": "Palo Alto Networks Firewall Logs",
-  "description": "## Title\n\nThis dashboard displays an overview of the logs forwarded by panos server profile.  The dashboard displays data points captured in each log type. ",
+  "description": "This dashboard displays an overview of the logs forwarded by a PAN-OS server profile, with data points captured in each log type.",
   "widgets": [
     {
       "id": 2258586113552824,
