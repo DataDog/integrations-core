@@ -199,7 +199,7 @@ datadog-powerdns-recursor==6.0.0
 datadog-prefect==2.2.0
 datadog-presto==3.4.0
 datadog-process==6.0.0
-datadog-prometheus==6.4.0
+datadog-prometheus==7.0.0
 datadog-proxmox==2.7.0
 datadog-proxysql==7.7.0
 datadog-pulsar==3.7.1
