@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
-dependencies = ["datadog-checks-base"]
+dependencies = ["datadog-checks-base>=38.3.0"]
 dynamic = ["version"]
 license = "BSD-3-Clause"
 

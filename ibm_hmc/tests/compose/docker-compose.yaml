@@ -1,0 +1,16 @@
+services:
+  hmc:
+    image: hermsi/alpine-sshd:latest
+    container_name: dd-test-hmc
+    ports:
+      - "8022:22"
+    environment:
+      - ROOT_PASSWORD=datadog-hmc-e2e
+    volumes:
+      - ./fake-hmc/lshmc:/usr/local/bin/lshmc:ro
+      - ./fake-hmc/lssyscfg:/usr/local/bin/lssyscfg:ro
+      - ./fake-hmc/lslparutil:/usr/local/bin/lslparutil:ro
+      - ./fake-hmc/monhmc:/usr/local/bin/monhmc:ro
+      # A committed host key, so the check's known_hosts file is deterministic.
+      - ./ssh_host_ed25519_key:/etc/ssh/ssh_host_ed25519_key:ro
+      - ./ssh_host_ed25519_key.pub:/etc/ssh/ssh_host_ed25519_key.pub:ro

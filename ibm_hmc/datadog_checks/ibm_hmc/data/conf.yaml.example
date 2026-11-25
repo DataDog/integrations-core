@@ -47,6 +47,18 @@ instances:
     #
     # private_key_type: rsa
 
+    ## @param known_hosts_file - string - optional
+    ## Path to a known hosts file containing the HMC's host key. The check rejects connections
+    ## to hosts whose key is unknown. Defaults to the Agent user's `~/.ssh/known_hosts`.
+    #
+    # known_hosts_file: <KNOWN_HOSTS_FILE>
+
+    ## @param timeout - number - optional - default: 10
+    ## Timeout in seconds for connecting to the HMC and for each command it runs. A stalled
+    ## HMC otherwise blocks the collection indefinitely.
+    #
+    # timeout: 10
+
     ## @param force_sha1 - boolean - optional - default: false
     ## Some older HMC appliances only support SHA1 encryption and do not advertise it
     ## to SSH clients, which assume SHA2 and fail to connect. Enable this to force the

@@ -34,3 +34,7 @@ def instance_port():
 
 def instance_private_key_type():
     return 'rsa'
+
+
+def instance_timeout():
+    return 10

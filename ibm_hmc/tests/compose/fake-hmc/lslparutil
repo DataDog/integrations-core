@@ -1,0 +1,42 @@
+#!/bin/sh
+# Fake HMC `lslparutil` for e2e tests: ignores the selection options and prints
+# one sample per series, timestamped relative to the current time so the check's
+# "newer than last collection" filtering always sees it. The cycle values grow
+# with the clock, as cumulative counters do on a real HMC.
+resource=''
+prev=''
+for arg in "$@"; do
+    [ "$prev" = '-r' ] && resource="$arg"
+    prev="$arg"
+done
+
+# Timestamped slightly in the future of the check's `date` bootstrap query, like
+# a sample that arrived after the first collection window was opened.
+when=$(date -d @$(( $(date +%s) + 30 )) '+%m/%d/%Y %H:%M:%S')
+cycles=$(( $(date +%s) * 250000000 ))
+
+case "$resource" in
+    config)
+        # The `agent check --check-rate` double run pauses only 1s between runs,
+        # so a 1s sample rate lets the second run collect a newer cumulative
+        # sample and exercise the monotonic counters.
+        echo 1
+        ;;
+    lpar)
+        echo "$when,lparA,0.5,1,cap,$cycles,$cycles,$cycles,0,ded,2048,2048,96,128,10,0"
+        echo "$when,lparB,2.0,4,uncap,$((cycles + 1000)),$((cycles + 1000)),$((cycles + 1000)),0,shared,4096,4096,96,128,10,42"
+        ;;
+    pool)
+        echo "$when,$cycles,$cycles,3.00,1.00,1.10"
+        ;;
+    procpool)
+        echo "$when,1001,$cycles,$cycles"
+        echo "$when,1002,$((cycles + 500)),$((cycles + 500))"
+        ;;
+    mempool)
+        echo "$when,24576,308,24,34816,282"
+        ;;
+    sys)
+        echo "$when,37376,65536,1546"
+        ;;
+esac

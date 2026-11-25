@@ -22,6 +22,10 @@ Metrics collected:
 - **HMC appliance statistics** (`ibm_hmc.system.memory.*`): memory and swap usage
   of the HMC appliance itself, from `/proc/meminfo` and `monhmc`.
 
+The `*_cycles` metrics are cumulative counters since the managed system started,
+submitted as monotonic counts; IBM computes processor utilization from the change
+between two samples.
+
 ## Setup
 
 ### Installation
@@ -53,6 +57,8 @@ installation is needed on the HMC.
    ```shell
    ssh-keyscan <HMC_HOSTNAME> >> ~/.ssh/known_hosts
    ```
+
+   A separate known hosts file can be set with the `known_hosts_file` option.
 
 3. [Restart the Agent][3].
 

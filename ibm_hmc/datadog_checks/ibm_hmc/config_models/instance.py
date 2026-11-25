@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -42,14 +43,16 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     force_sha1: Optional[bool] = None
     host: str
+    known_hosts_file: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     password: Optional[str] = None
     port: Optional[int] = None
     private_key_file: Optional[str] = None
-    private_key_type: Optional[str] = None
+    private_key_type: Optional[Literal['rsa', 'ecdsa']] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    timeout: Optional[float] = None
     username: str
 
     @model_validator(mode='before')

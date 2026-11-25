@@ -10,6 +10,7 @@ from unittest.mock import patch
 import paramiko
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_hmc import IbmHmcCheck
 
 LSHMC_OUTPUT = """\
@@ -37,20 +38,39 @@ SERVERS = (
 
 SAMPLE_RATE = 60
 
+# One /proc/meminfo line per collected field (see MEMINFO_FIELDS), with kB values.
 MEMINFO_OUTPUT = """\
-MemTotal:      4128368 kB
-MemFree:        161392 kB
-Buffers:        397776 kB
-Cached:        1457064 kB
-Active(anon):    65536 kB
-SwapTotal:      2040244 kB
-SwapFree:       1774244 kB
+MemTotal:       4128368 kB
+MemFree:         161392 kB
+Buffers:         397776 kB
+Cached:         1457064 kB
+SwapTotal:       2040244 kB
+SwapFree:        1774244 kB
+Active:          921600 kB
+Inactive:        524288 kB
+Active(anon):     65536 kB
+Inactive(anon):   32768 kB
+Active(file):    856064 kB
+Inactive(file):  491520 kB
+AnonPages:       131072 kB
+Mapped:           65536 kB
+Shmem:            16384 kB
+Slab:            131072 kB
+PageTables:       20480 kB
+CommitLimit:     4128368 kB
+Committed_AS:    2097152 kB
+Dirty:             1024 kB
+Writeback:           512 kB
+VmallocUsed:      40960 kB
+AnonHugePages:         0 kB
 """
 
 SWAP_OUTPUT = 'Swap: 2040244k total, 266000k used, 1774244k free, 2282460k cached'
 
 # One row of values per lslparutil resource, matching the fields the check
 # requests for an HMC version of 884 (8.8.4): all optional LPAR fields included.
+# Cycle values are cumulative counters on a real HMC; the first field of every
+# row is the series identifier.
 SUBSYSTEM_VALUES = {
     'lpar': 'lparA,0.5,1,cap,13487973395246,353524992184,93964052971,0,ded,2048,2048,96,128,10,0',
     'pool': '2538167299223,187829506335722,3.00,1.00,1.10',
@@ -94,6 +114,7 @@ class FakeSSHClient:
         num_samples=3,
         failing_commands=(),
         hmc_clock_offset=0.0,
+        raw_outputs=None,
     ):
         self.lshmc_output = lshmc_output
         self.servers = servers
@@ -104,12 +125,16 @@ class FakeSSHClient:
         self.num_samples = num_samples
         self.failing_commands = failing_commands
         self.hmc_clock_offset = hmc_clock_offset
+        self.raw_outputs = raw_outputs or {}
         self.commands = []
+        self.connect_calls = []
+        self.exec_calls = []
+        self.generated_times = {}
 
     # paramiko.SSHClient interface
 
     def connect(self, host, port=22, username=None, password=None, **kwargs):
-        pass
+        self.connect_calls.append(dict(port=port, username=username, password=password, **kwargs))
 
     def close(self):
         pass
@@ -117,16 +142,20 @@ class FakeSSHClient:
     def set_missing_host_key_policy(self, policy):
         pass
 
-    def load_system_host_keys(self):
-        pass
+    def load_system_host_keys(self, filename=None):
+        self.known_hosts_file = filename
 
     def exec_command(self, cmd, environment=None, **kwargs):
         self.commands.append(cmd)
+        self.exec_calls.append((cmd, kwargs))
         output = self._output_for(cmd)
         status = 1 if any(cmd.startswith(prefix) for prefix in self.failing_commands) else 0
         return None, FakeStdout(output.encode('utf-8'), status), io.BytesIO(b'')
 
     def _output_for(self, cmd):
+        for prefix, output in self.raw_outputs.items():
+            if cmd.startswith(prefix):
+                return output
         if cmd == 'lshmc -v':
             return self.lshmc_output
         if cmd.startswith('lssyscfg -r sys'):
@@ -137,7 +166,7 @@ class FakeSSHClient:
             return self._format_hmc_time(self._hmc_now()) + '\n'
         for resource, values in self.subsystem_values.items():
             if cmd.startswith(f'lslparutil -r {resource} '):
-                return self._samples(values)
+                return self._samples(resource, values)
         if cmd == 'cat /proc/meminfo':
             return MEMINFO_OUTPUT
         if cmd == 'monhmc -r swap -n 0':
@@ -152,18 +181,26 @@ class FakeSSHClient:
 
     def _server_of(self, cmd):
         for server in self.sample_rates:
-            if f'-m {server} ' in cmd or cmd.endswith(f'-m {server}'):
+            if (
+                f'-m {server} ' in cmd
+                or cmd.endswith(f'-m {server}')
+                or f"-m '{server}' " in cmd
+                or cmd.endswith(f"-m '{server}'")
+            ):
                 return server
         raise AssertionError(f'Unknown server for command: {cmd}')
 
-    def _samples(self, values):
+    def _samples(self, resource, values):
         # Newest sample first, like the real lslparutil. The last two lines are
         # malformed on purpose: a truncated row and an unparsable timestamp.
         rows = values if isinstance(values, (list, tuple)) else [values]
         lines = ['truncated', '13/45/2018 99:99:99,' + rows[0]]
+        timestamps = []
         for i in range(self.num_samples):
             when = self._format_hmc_time(self._hmc_now() - (i + 1) * SAMPLE_RATE)
+            timestamps.append(when)
             lines.extend(f'{when},{row}' for row in rows)
+        self.generated_times.setdefault(resource, []).extend(timestamps)
         return '\n'.join(lines) + '\n'
 
 
@@ -196,7 +233,10 @@ def test_check_runs(aggregator, dd_run_check, instance):
 
     # Connectivity is reported as a metric, not a service check
     aggregator.assert_metric('ibm_hmc.can_connect', value=1, tags=BASE_TAGS)
-    assert len(aggregator.service_checks('ibm_hmc.can_connect')) == 0
+
+    # Commands and connection are bounded by the configured timeout
+    assert fake.connect_calls[0]['timeout'] == 10
+    assert all(kwargs.get('timeout') == 10 for _, kwargs in fake.exec_calls)
 
     # Managed system metrics: one set per server, tagged with the instance tags and
     # the LPAR sample's series fields
@@ -218,14 +258,12 @@ def test_check_runs(aggregator, dd_run_check, instance):
     # HMC appliance metrics
     aggregator.assert_metric('ibm_hmc.system.memory.memtotal', value=4128368, tags=BASE_TAGS)
     aggregator.assert_metric('ibm_hmc.system.memory.active_anon', value=65536, tags=BASE_TAGS)
-    aggregator.assert_metric('ibm_hmc.system.memory.swaptotal', value=2040244, tags=BASE_TAGS)
     aggregator.assert_metric('ibm_hmc.system.memory.swap.total', value=2040244, tags=BASE_TAGS)
-    aggregator.assert_metric('ibm_hmc.system.memory.swap.used', value=266000, tags=BASE_TAGS)
 
-    # The lslparutil command resumes from the collection window, not the last sample
-    sample_cmd = next(cmd for cmd in fake.commands if cmd.startswith('lslparutil -r lpar '))
-    assert '--startyear' in sample_cmd
-    assert '--filter "event_types=sample"' in sample_cmd
+    # Everything submitted matches metadata.csv, in type and in both directions
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_symmetric_inclusion=True, check_submission_type=True
+    )
 
 
 def test_multi_lpar_and_multi_pool(aggregator, dd_run_check, instance):
@@ -242,10 +280,14 @@ def test_multi_lpar_and_multi_pool(aggregator, dd_run_check, instance):
 
     aggregator.assert_metric('ibm_hmc.lpar.curr_proc_units', value=0.5, tags=lpar_tags())
     aggregator.assert_metric(
-        'ibm_hmc.lpar.curr_proc_units', value=2.0, tags=lpar_tags(lpar='lparB', sharing_mode='uncap', mem_mode='shared')
+        'ibm_hmc.lpar.curr_proc_units',
+        value=2.0,
+        tags=lpar_tags(lpar='lparB', sharing_mode='uncap', mem_mode='shared'),
     )
     aggregator.assert_metric(
-        'ibm_hmc.lpar.idle_cycles', value=42, tags=lpar_tags(lpar='lparB', sharing_mode='uncap', mem_mode='shared')
+        'ibm_hmc.lpar.idle_cycles',
+        value=42,
+        tags=lpar_tags(lpar='lparB', sharing_mode='uncap', mem_mode='shared'),
     )
     aggregator.assert_metric(
         'ibm_hmc.procpool.utilized_pool_cycles',
@@ -270,6 +312,61 @@ def test_sampling_throttled_by_sample_rate(aggregator, dd_run_check, instance):
     aggregator.assert_metric('ibm_hmc.lpar.curr_proc_units', count=2)  # one per server, first run only
     assert len(aggregator.metrics('ibm_hmc.system.memory.memtotal')) == 2  # both runs
     assert len(aggregator.metrics('ibm_hmc.can_connect')) == 2  # both runs
+
+
+def test_resumes_from_last_sample(aggregator, dd_run_check, instance):
+    """A second collection resumes from the newest sample time and only submits new samples."""
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
+    fake = FakeSSHClient(sample_rates={'ServerA': 1, 'ServerB': 1}, num_samples=1)
+    run_check(dd_run_check, check, fake)
+    first_run_newest = max(time.strptime(when, IbmHmcCheck.SAMPLE_TIME_FORMAT) for when in fake.generated_times['lpar'])
+    fake.commands.clear()
+    time.sleep(1.1)  # let the per-server sample rate of 1 second elapse
+    run_check(dd_run_check, check, fake)
+
+    # The second query starts at the newest sample collected by the first run
+    cmd = next(c for c in fake.commands if c.startswith('lslparutil -r lpar ') and '-m ServerA ' in c)
+    assert f'--startyear {first_run_newest.tm_year}' in cmd
+    assert f'--startmonth {first_run_newest.tm_mon}' in cmd
+    assert f'--startday {first_run_newest.tm_mday}' in cmd
+    assert f'--starthour {first_run_newest.tm_hour}' in cmd
+    assert f'--startminute {first_run_newest.tm_min}' in cmd
+    # Both runs submitted one sample per server, and nothing twice
+    assert len(aggregator.metrics('ibm_hmc.lpar.curr_proc_units')) == 4
+
+
+def test_sampling_disabled(aggregator, dd_run_check, instance, caplog):
+    """A managed system with utilization sampling disabled (sample rate 0) is skipped with a warning."""
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
+    fake = FakeSSHClient(sample_rates={'ServerA': 0, 'ServerB': 60})
+    run_check(dd_run_check, check, fake)
+
+    assert not any('-F time,' in cmd and '-m ServerA ' in cmd for cmd in fake.commands)
+    assert len(aggregator.metrics('ibm_hmc.lpar.curr_proc_units')) == 1  # ServerB only
+    assert 'Utilization sampling is disabled' in caplog.text
+    aggregator.assert_metric('ibm_hmc.can_connect', value=1, tags=BASE_TAGS)
+
+
+def test_managed_system_name_with_space(aggregator, dd_run_check, instance):
+    """Managed system names are quoted in the commands the HMC runs through its shell."""
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
+    fake = FakeSSHClient(servers=('Server A,9119-MHE,1001CFD',))
+    run_check(dd_run_check, check, fake)
+
+    sample_cmd = next(c for c in fake.commands if '-F time,' in c)
+    assert "-m 'Server A'" in sample_cmd
+    rate_cmd = next(c for c in fake.commands if c.startswith('lslparutil -r config'))
+    assert "-m 'Server A'" in rate_cmd
+
+
+def test_malformed_samples_warn(aggregator, dd_run_check, instance, caplog):
+    """Rows that all fail to parse surface a warning instead of silently dropping the subsystem."""
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
+    fake = FakeSSHClient(raw_outputs={'lslparutil -r lpar': '12/13/2026 10:00:00,x,y'})
+    run_check(dd_run_check, check, fake)
+
+    assert len(aggregator.metrics('ibm_hmc.lpar.curr_proc_units')) == 0
+    assert 'malformed LPAR samples' in caplog.text
 
 
 def test_version_fallback_disables_newer_fields(aggregator, dd_run_check, instance):
@@ -333,12 +430,16 @@ def test_discovery_failure_keeps_inventory(aggregator, dd_run_check, instance):
     """A failed managed-server discovery keeps the known inventory instead of dropping it for an hour."""
     check = IbmHmcCheck('ibm_hmc', {}, [instance])
     check.SERVER_REFRESH_PERIOD = 0  # refresh on every run
-    # A sample rate of 0 disables the per-subsystem throttling, so both runs sample
-    fake = FakeSSHClient(sample_rates={'ServerA': 0, 'ServerB': 0})
+    # A sample rate of 1 second lets the second run query without sleeping for a minute
+    fake = FakeSSHClient(sample_rates={'ServerA': 1, 'ServerB': 1})
     run_check(dd_run_check, check, fake)
     first_run_samples = [cmd for cmd in fake.commands if '-F time,' in cmd]
-    fake.failing_commands = ('lssyscfg -r sys',)
     fake.commands.clear()
+    # The failed attempt must also return an empty listing: a non-empty one would
+    # keep the inventory even without the exit status guard
+    fake.servers = ()
+    fake.failing_commands = ('lssyscfg -r sys',)
+    time.sleep(1.1)
     run_check(dd_run_check, check, fake)
 
     # The second run still samples every known server: the failed discovery
@@ -370,6 +471,59 @@ def test_server_without_sample_rate_is_skipped(aggregator, dd_run_check, instanc
     # Only ServerA reports; nothing at all for ServerB
     assert len(aggregator.metrics('ibm_hmc.pool.total_pool_cycles')) == 1
     assert len(aggregator.metrics('ibm_hmc.system.memory.memtotal')) == 1
+
+
+@pytest.mark.parametrize('key_type,paramiko_key', [('rsa', paramiko.RSAKey), ('ecdsa', paramiko.ECDSAKey)])
+def test_private_key_auth(aggregator, dd_run_check, instance, key_type, paramiko_key):
+    """The configured key is loaded and sent as pkey, with the password as its passphrase."""
+    config = {
+        **instance,
+        'private_key_file': '/keys/id_' + key_type,
+        'private_key_type': key_type,
+        'password': 'hunter2',
+    }
+    check = IbmHmcCheck('ibm_hmc', {}, [config])
+    fake = FakeSSHClient()
+    key = object()
+    with patch.object(paramiko_key, 'from_private_key_file', return_value=key) as load:
+        run_check(dd_run_check, check, fake)
+
+    load.assert_called_once_with('/keys/id_' + key_type, password='hunter2')
+    assert fake.connect_calls[0]['pkey'] is key
+    assert fake.connect_calls[0]['passphrase'] == 'hunter2'
+
+
+def test_private_key_failure_falls_back_to_password(aggregator, dd_run_check, instance, caplog):
+    """An unreadable key file warns and the connection falls back to password auth."""
+    config = {**instance, 'private_key_file': '/keys/missing', 'password': 'hunter2'}
+    check = IbmHmcCheck('ibm_hmc', {}, [config])
+    fake = FakeSSHClient()
+    with patch.object(paramiko.RSAKey, 'from_private_key_file', side_effect=IOError('nope')):
+        run_check(dd_run_check, check, fake)
+
+    assert 'Unable to find private key file' in caplog.text
+    assert fake.connect_calls[0]['password'] == 'hunter2'
+    assert 'pkey' not in fake.connect_calls[0]
+
+
+def test_force_sha1(aggregator, dd_run_check, instance):
+    """force_sha1 disables the SHA2 pubkeys on the SSH client."""
+    config = {**instance, 'force_sha1': True}
+    check = IbmHmcCheck('ibm_hmc', {}, [config])
+    fake = FakeSSHClient()
+    run_check(dd_run_check, check, fake)
+
+    assert fake.connect_calls[0]['disabled_algorithms'] == {'pubkeys': ['rsa-sha2-512', 'rsa-sha2-256']}
+
+
+def test_known_hosts_file(aggregator, dd_run_check, instance):
+    """A custom known hosts file is used for host key verification."""
+    config = {**instance, 'known_hosts_file': '/path/known_hosts'}
+    check = IbmHmcCheck('ibm_hmc', {}, [config])
+    fake = FakeSSHClient()
+    run_check(dd_run_check, check, fake)
+
+    assert fake.known_hosts_file == '/path/known_hosts'
 
 
 def test_connection_failure(aggregator, dd_run_check, instance):

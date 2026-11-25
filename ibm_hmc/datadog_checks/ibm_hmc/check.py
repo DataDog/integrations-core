@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import re
+import shlex
 import time
 
 import paramiko
@@ -16,60 +17,89 @@ from datadog_checks.base import AgentCheck
 
 from .config_models import ConfigMixin
 
-# Sample fields per `lslparutil` resource. Each entry is (field, is_gauge): fields
-# with is_gauge=False are not metrics, their value identifies the sample's series
-# and is attached as a tag to every metric of that sample instead.
-SAMPLE_FIELDS: dict[str, tuple[tuple[str, bool], ...]] = {
+# Sample fields per `lslparutil` resource. Each entry is (field, kind) where kind is
+# `tag` (identifies the series and is attached as a tag), `gauge` (a level) or
+# `counter` (a cumulative value since the managed system started, submitted as a
+# monotonic count; IBM computes utilization from the change between samples).
+SAMPLE_FIELDS: dict[str, tuple[tuple[str, str], ...]] = {
     'LPAR': (
-        ('lpar_name', False),
-        ('curr_proc_units', True),
-        ('curr_procs', True),
-        ('curr_sharing_mode', False),
-        ('entitled_cycles', True),
-        ('capped_cycles', True),
-        ('uncapped_cycles', True),
+        ('lpar_name', 'tag'),
+        ('curr_proc_units', 'gauge'),
+        ('curr_procs', 'gauge'),
+        ('curr_sharing_mode', 'tag'),
+        ('entitled_cycles', 'counter'),
+        ('capped_cycles', 'counter'),
+        ('uncapped_cycles', 'counter'),
     ),
     'POOL': (
-        ('total_pool_cycles', True),
-        ('utilized_pool_cycles', True),
-        ('configurable_pool_proc_units', True),
-        ('borrowed_pool_proc_units', True),
-        ('curr_avail_pool_proc_units', True),
+        ('total_pool_cycles', 'counter'),
+        ('utilized_pool_cycles', 'counter'),
+        ('configurable_pool_proc_units', 'gauge'),
+        ('borrowed_pool_proc_units', 'gauge'),
+        ('curr_avail_pool_proc_units', 'gauge'),
     ),
     'PROCPOOL': (
-        ('shared_proc_pool_id', False),
-        ('total_pool_cycles', True),
-        ('utilized_pool_cycles', True),
+        ('shared_proc_pool_id', 'tag'),
+        ('total_pool_cycles', 'counter'),
+        ('utilized_pool_cycles', 'counter'),
     ),
     'MEMPOOL': (
-        ('curr_pool_mem', True),
-        ('lpar_curr_io_entitled_mem', True),
-        ('lpar_mapped_io_entitled_mem', True),
-        ('lpar_run_mem', True),
-        ('sys_firmware_pool_mem', True),
+        ('curr_pool_mem', 'gauge'),
+        ('lpar_curr_io_entitled_mem', 'gauge'),
+        ('lpar_mapped_io_entitled_mem', 'gauge'),
+        ('lpar_run_mem', 'gauge'),
+        ('sys_firmware_pool_mem', 'gauge'),
     ),
     'SYS': (
-        ('curr_avail_sys_mem', True),
-        ('configurable_sys_mem', True),
-        ('sys_firmware_mem', True),
+        ('curr_avail_sys_mem', 'gauge'),
+        ('configurable_sys_mem', 'gauge'),
+        ('sys_firmware_mem', 'gauge'),
     ),
 }
 
+# /proc/meminfo fields collected on the HMC appliance; all report in kB and map
+# one-to-one to the ibm_hmc.system.memory.* rows in metadata.csv.
+MEMINFO_FIELDS = (
+    'MemTotal',
+    'MemFree',
+    'Buffers',
+    'Cached',
+    'SwapTotal',
+    'SwapFree',
+    'Active',
+    'Inactive',
+    'Active(anon)',
+    'Inactive(anon)',
+    'Active(file)',
+    'Inactive(file)',
+    'AnonPages',
+    'Mapped',
+    'Shmem',
+    'Slab',
+    'PageTables',
+    'CommitLimit',
+    'Committed_AS',
+    'Dirty',
+    'Writeback',
+    'VmallocUsed',
+    'AnonHugePages',
+)
+
 # LPAR fields that only exist from the given HMC version onward (7.0, 7.3.4, 7.7.2).
 LPAR_EXTRA_FIELDS = (
-    ((7, 0, 0), (('shared_cycles_while_active', True),)),
+    ((7, 0, 0), (('shared_cycles_while_active', 'counter'),)),
     (
         (7, 3, 4),
         (
-            ('mem_mode', False),
-            ('curr_mem', True),
-            ('phys_run_mem', True),
-            ('curr_io_entitled_mem', True),
-            ('mapped_io_entitled_mem', True),
-            ('mem_overage_cooperation', True),
+            ('mem_mode', 'tag'),
+            ('curr_mem', 'gauge'),
+            ('phys_run_mem', 'gauge'),
+            ('curr_io_entitled_mem', 'gauge'),
+            ('mapped_io_entitled_mem', 'gauge'),
+            ('mem_overage_cooperation', 'gauge'),
         ),
     ),
-    ((7, 7, 2), (('idle_cycles', True),)),
+    ((7, 7, 2), (('idle_cycles', 'counter'),)),
 )
 
 
@@ -83,10 +113,11 @@ class ManagedServer:
         self.sample_rate: int | None = None
         # Local wall-clock time of the last collection per subsystem, used to
         # avoid querying a subsystem more often than the HMC's own sample rate.
-        self.last_collection = dict.fromkeys(SAMPLE_FIELDS)
+        self.last_collection: dict[str, float | None] = dict.fromkeys(SAMPLE_FIELDS)
         # HMC-side time of the newest sample already collected per subsystem,
         # used to only submit samples that were not seen before.
         self.last_sample_time: dict[str, time.struct_time | None] = dict.fromkeys(SAMPLE_FIELDS)
+        self.sampling_disabled_warned = False
 
 
 class IbmHmcCheck(AgentCheck, ConfigMixin):
@@ -131,7 +162,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
         self._managed_servers: dict[tuple[str, int], dict[str, ManagedServer]] = {}
         self._last_refresh: dict[tuple[str, int], float] = {}
 
-    def check(self, instance):
+    def check(self, instance: dict) -> None:
         host = self.config.host
         port = self.config.port or 22
         key = (host, port)
@@ -140,11 +171,17 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
 
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.RejectPolicy())
-        client.load_system_host_keys()
+        client.load_system_host_keys(self.config.known_hosts_file)
 
         try:
             try:
-                client.connect(host, port=port, username=self.config.username, **self._connect_kwargs())
+                client.connect(
+                    host,
+                    port=port,
+                    username=self.config.username,
+                    timeout=self.config.timeout,
+                    **self._connect_kwargs(),
+                )
                 self.gauge(self.CONNECTIVITY_METRIC, 1, tags=tags)
             except Exception:
                 self.gauge(self.CONNECTIVITY_METRIC, 0, tags=tags)
@@ -155,7 +192,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             # Always close the client, failure to do so leaks one thread per connection left open.
             client.close()
 
-    def collect_metrics(self, client, key, tags):
+    def collect_metrics(self, client: paramiko.SSHClient, key: tuple[str, int], tags: list[str]) -> None:
         if key not in self._hmc_versions:
             self._hmc_versions[key] = self.get_hmc_version(client)
         version = self._hmc_versions[key]
@@ -176,6 +213,13 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
                 server.sample_rate = self.get_sample_rate(client, server)
                 if server.sample_rate is None:
                     continue
+            if server.sample_rate == 0:
+                # A sample rate of 0 means utilization sampling is disabled on the HMC:
+                # there is never anything to collect for this managed system.
+                if not server.sampling_disabled_warned:
+                    self.warning('Utilization sampling is disabled on the HMC for %s', server.name)
+                    server.sampling_disabled_warned = True
+                continue
             server_tags = [*tags, f'server:{server.name}']
             for subsys in SAMPLE_FIELDS:
                 try:
@@ -186,7 +230,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
         self.collect_meminfo(client, tags)
         self.collect_swap(client, tags)
 
-    def refresh_managed_servers(self, client, key):
+    def refresh_managed_servers(self, client: paramiko.SSHClient, key: tuple[str, int]) -> None:
         servers = self.get_managed_servers(client)
         managed = self._managed_servers.setdefault(key, {})
         for server in servers:
@@ -196,7 +240,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             if name not in {server.name for server in servers}:
                 del managed[name]
 
-    def get_hmc_version(self, client):
+    def get_hmc_version(self, client: paramiko.SSHClient) -> tuple[int, int, int]:
         """Return the HMC version as a (major, minor, patch) tuple, e.g. `V8R8.4.0.0` is (8, 8, 4).
 
         `lshmc -v` prints machine-readable lines such as::
@@ -220,7 +264,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
         self.log.debug('Unable to parse HMC version from `lshmc -v` output, assuming %s', self.DEFAULT_HMC_VERSION)
         return self.DEFAULT_HMC_VERSION
 
-    def get_managed_servers(self, client):
+    def get_managed_servers(self, client: paramiko.SSHClient) -> list[ManagedServer]:
         """Return the POWER systems managed by the HMC."""
         output, _, status = self._exec_command(client, self.GET_SERVERS_CMD, environment=self.LSLPARUTIL_ENV)
         if status != 0:
@@ -237,20 +281,20 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
                 self.log.debug('Skipping malformed managed server line: %r', line)
         return servers
 
-    def get_sample_rate(self, client, server):
+    def get_sample_rate(self, client: paramiko.SSHClient, server: ManagedServer) -> int | None:
         """Return the lslparutil sample rate in seconds, or None if it cannot be read."""
-        cmd = self.GET_SAMPLE_RATE_CMD.format(name=server.name)
+        cmd = self.GET_SAMPLE_RATE_CMD.format(name=shlex.quote(server.name))
         output, _, status = self._exec_command(client, cmd, environment=self.LSLPARUTIL_ENV)
         if status != 0:
-            self.log.error('Unable to collect sample rate for %s: exit status %d', server.name, status)
+            self.warning('Unable to collect sample rate for %s: exit status %d', server.name, status)
             return None
         try:
             return int(output.strip())
         except ValueError:
-            self.log.error('Unable to collect sample rate for %s: %r', server.name, output.strip())
+            self.warning('Unable to collect sample rate for %s: %r', server.name, output.strip())
             return None
 
-    def get_hmc_time(self, client):
+    def get_hmc_time(self, client: paramiko.SSHClient) -> time.struct_time:
         """Return the HMC's current local time as a struct_time.
 
         The `lslparutil` start options are expressed in HMC-local time, so the
@@ -268,22 +312,40 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             self.log.warning('Unable to collect the HMC time, falling back to the Agent clock')
         return time.localtime()
 
-    def collect_subsystem(self, client, subsys, server, version, tags):
+    def collect_subsystem(
+        self,
+        client: paramiko.SSHClient,
+        subsys: str,
+        server: ManagedServer,
+        version: tuple[int, int, int],
+        tags: list[str],
+    ) -> None:
         """Collect and submit the newest unseen `lslparutil` sample of every series."""
         last_collection = server.last_collection[subsys]
-        if last_collection is not None and time.time() - last_collection < server.sample_rate:
+        sample_rate = server.sample_rate
+        if sample_rate and last_collection is not None and time.time() - last_collection < sample_rate:
             self.log.debug(
                 'Skipping %s sampling for %s, not enough time has passed for new samples',
                 subsys,
                 server.name,
             )
             return
+        # Query at most once per HMC sample rate, whether or not the query
+        # returned new samples, so an empty subsystem is not re-queried every run.
+        server.last_collection[subsys] = time.time()
 
         fields = self._fields_for(subsys, version)
         # Resume from the HMC-side time of the newest sample already collected,
         # or from the HMC's own clock on the first collection of the subsystem.
         last_seen = server.last_sample_time[subsys]
-        start_tm = last_seen if last_seen is not None else self.get_hmc_time(client)
+        if last_seen is None:
+            start_tm = self.get_hmc_time(client)
+            # Keep the bootstrap window until a sample arrives: the start options
+            # have minute granularity, so re-querying from the current minute can
+            # step over every upcoming sample and never collect anything.
+            server.last_sample_time[subsys] = start_tm
+        else:
+            start_tm = last_seen
 
         cmd = self.SAMPLES_CMD_TEMPLATE.format(
             resource=subsys.lower(),
@@ -292,7 +354,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             day=start_tm.tm_mday,
             hour=start_tm.tm_hour,
             minute=start_tm.tm_min,
-            name=server.name,
+            name=shlex.quote(server.name),
             fields=','.join(field for field, _ in fields),
         )
         output, _, status = self._exec_command(client, cmd, environment=self.LSLPARUTIL_ENV)
@@ -301,52 +363,61 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             return
 
         samples = []
+        unparsed = 0
         for line in output.splitlines():
             sample = line.split(',')
             if len(sample) != len(fields) + 1:
+                unparsed += 1
                 self.log.debug('Skipping malformed %s sample for %s: %r', subsys, server.name, line)
                 continue
             try:
                 sample_time = time.strptime(sample[0], self.SAMPLE_TIME_FORMAT)
             except ValueError:
+                unparsed += 1
                 self.log.debug('Skipping %s sample with unparsable time %r for %s', subsys, sample[0], server.name)
                 continue
             if last_seen is None or sample_time > last_seen:
                 samples.append((sample_time, sample))
 
         if not samples:
-            self.log.debug('No new %s samples were collected for %s', subsys, server.name)
+            if unparsed:
+                # Rows exist but none could be parsed: most often a locale the
+                # restricted shell ignored (comma decimal separators), which
+                # would otherwise silently suppress all managed-system metrics.
+                self.warning('Skipped %d malformed %s samples for %s', unparsed, subsys, server.name)
+            else:
+                self.log.debug('No new %s samples were collected for %s', subsys, server.name)
             return
 
         # `lslparutil` returns one row per series and timestamp (e.g. one row per
         # LPAR, or per shared processor pool): keep the newest sample of every
         # series, not just the single newest row overall.
-        by_series = {}
+        by_series: dict[tuple[str, ...], tuple[time.struct_time, list[str]]] = {}
         for sample_time, sample in samples:
-            series = tuple(sample[i + 1] for i, (_, is_gauge) in enumerate(fields) if not is_gauge)
+            series = tuple(sample[i + 1] for i, (_, kind) in enumerate(fields) if kind == 'tag')
             current = by_series.get(series)
             if current is None or sample_time > current[0]:
                 by_series[series] = (sample_time, sample)
 
-        server.last_collection[subsys] = time.time()
         server.last_sample_time[subsys] = max(sample_time for sample_time, _ in samples)
 
         for _, sample in by_series.values():
             # Fields that are not metrics are attached as tags to the sample metrics.
             sample_tags = list(tags)
-            for i, (field, is_gauge) in enumerate(fields):
-                if not is_gauge:
+            for i, (field, kind) in enumerate(fields):
+                if kind == 'tag':
                     sample_tags.append(f'{field}:{sample[i + 1]}')
 
-            for i, (field, is_gauge) in enumerate(fields):
-                if not is_gauge:
+            for i, (field, kind) in enumerate(fields):
+                if kind == 'tag':
                     continue
+                submit = self.monotonic_count if kind == 'counter' else self.gauge
                 try:
-                    self.gauge(f'{subsys.lower()}.{field}', float(sample[i + 1]), tags=sample_tags)
+                    submit(f'{subsys.lower()}.{field}', float(sample[i + 1]), tags=sample_tags)
                 except ValueError:
                     self.log.exception('Unable to submit metric %s for %s', field, server.name)
 
-    def collect_meminfo(self, client, tags):
+    def collect_meminfo(self, client: paramiko.SSHClient, tags: list[str]) -> None:
         """Collect the HMC appliance's own memory statistics from /proc/meminfo."""
         output, _, status = self._exec_command(client, self.MEMINFO_CMD, environment=self.C_ENV)
         if status != 0:
@@ -358,16 +429,18 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             parts = line.split()
             if len(parts) < 2 or not parts[0].endswith(':'):
                 continue
+            field = parts[0][:-1]
+            if field not in MEMINFO_FIELDS:
+                continue
             try:
                 value = float(parts[1])
             except ValueError:
                 self.log.debug('Skipping malformed /proc/meminfo line: %r', line)
                 continue
-            # Normalize names like `HugePages_Total` or `Active(anon)` to valid metric names.
-            name = re.sub(r'[^a-z0-9_]+', '_', parts[0][:-1].lower()).strip('_')
+            name = re.sub(r'[^a-z0-9_]+', '_', field.lower()).strip('_')
             self.gauge(f'system.memory.{name}', value, tags=tags)
 
-    def collect_swap(self, client, tags):
+    def collect_swap(self, client: paramiko.SSHClient, tags: list[str]) -> None:
         """Collect the HMC appliance's swap statistics via `monhmc -r swap`."""
         output, _, status = self._exec_command(client, self.SWAP_CMD, environment=self.C_ENV)
         if status != 0:
@@ -386,7 +459,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
                 continue
             self.gauge(f'system.memory.swap.{name}', float(digits), tags=tags)
 
-    def _fields_for(self, subsys, version):
+    def _fields_for(self, subsys: str, version: tuple[int, int, int]) -> list[tuple[str, str]]:
         fields = list(SAMPLE_FIELDS[subsys])
         if subsys == 'LPAR':
             for min_version, extras in LPAR_EXTRA_FIELDS:
@@ -394,26 +467,24 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
                     fields.extend(extras)
         return fields
 
-    def _connect_kwargs(self):
+    def _connect_kwargs(self) -> dict[str, object]:
         private_key = self._load_private_key()
-        # If the private key is not valid and a password is passed as well,
-        # paramiko attempts to use the password for the key, so only one of the
-        # two is given at a time.
-        connect_kwargs = (
-            {'password': self.config.password}
-            if private_key is None
-            else {
+        connect_kwargs: dict[str, object] = {'password': self.config.password}
+        if private_key is not None:
+            # If the private key is not valid and a password is passed as well,
+            # paramiko attempts to use the password for the key, so only one of
+            # the two is given at a time.
+            connect_kwargs = {
                 'passphrase': self.config.password,
                 'pkey': private_key,
             }
-        )
         if self.config.force_sha1:
             # Some old HMC firmware only supports SHA1 signatures and does not
             # advertise the limitation, so the client has to be told explicitly.
             connect_kwargs['disabled_algorithms'] = {'pubkeys': ['rsa-sha2-512', 'rsa-sha2-256']}
         return connect_kwargs
 
-    def _load_private_key(self):
+    def _load_private_key(self) -> paramiko.PKey | None:
         key_file = self.config.private_key_file
         if key_file is None:
             return None
@@ -429,9 +500,16 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             self.warning('Private key file is invalid')
         return None
 
-    def _exec_command(self, client, command, environment=None):
+    def _exec_command(
+        self,
+        client: paramiko.SSHClient,
+        command: str,
+        environment: dict[str, str] | None = None,
+    ) -> tuple[str, str, int]:
         """Run a command on the HMC, returning (stdout, stderr, exit status)."""
-        _, stdout, stderr = client.exec_command(command, environment=environment)
+        # A stalled HMC would otherwise block the check forever, and even
+        # can_connect=0 would never be submitted.
+        _, stdout, stderr = client.exec_command(command, environment=environment, timeout=self.config.timeout)
         output = stdout.read()
         err = stderr.read()
         if isinstance(output, bytes):

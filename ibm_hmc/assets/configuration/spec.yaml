@@ -50,6 +50,22 @@ files:
       value:
         type: string
         example: rsa
+        enum: [rsa, ecdsa]
+    - name: known_hosts_file
+      description: |
+        Path to a known hosts file containing the HMC's host key. The check rejects connections
+        to hosts whose key is unknown. Defaults to the Agent user's `~/.ssh/known_hosts`.
+      required: false
+      value:
+        type: string
+    - name: timeout
+      description: |
+        Timeout in seconds for connecting to the HMC and for each command it runs. A stalled
+        HMC otherwise blocks the collection indefinitely.
+      required: false
+      value:
+        type: number
+        example: 10
     - name: force_sha1
       description: |
         Some older HMC appliances only support SHA1 encryption and do not advertise it
