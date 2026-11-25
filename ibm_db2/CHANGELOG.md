@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.6.0 / 2026-11-25
+
+***Added***:
+
+* Add opt-in Query Activity collection for IBM Db2 Database Monitoring, with obfuscated running-query snapshots, execution identifiers, elapsed time, session context, SQL comments, and truncation indicators. ([#26078](https://github.com/DataDog/integrations-core/pull/26078))
+
 ## 4.5.0 / 2026-10-29 / Agent 7.86.0
 
 ***Added***:
