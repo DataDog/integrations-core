@@ -214,7 +214,7 @@ datadog-sap-hana==5.7.0
 datadog-scylla==6.0.0
 datadog-sglang==1.1.0; sys_platform == 'linux2'
 datadog-sidekiq==3.2.0
-datadog-silk==4.5.0
+datadog-silk==5.0.0
 datadog-silverstripe-cms==1.9.0
 datadog-singlestore==4.6.0
 datadog-slurm==2.5.3; sys_platform == 'linux2'
