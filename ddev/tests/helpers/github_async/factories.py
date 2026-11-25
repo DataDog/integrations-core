@@ -379,6 +379,7 @@ def make_workflow_run(
     created_at: str | None = None,
     updated_at: str | None = DEFAULT_COMPLETED_AT,
     run_started_at: str | None = DEFAULT_STARTED_AT,
+    run_attempt: int | None = 1,
 ) -> WorkflowRun:
     if conclusion is UNSET:
         conclusion = 'success' if status == 'completed' else None
@@ -394,6 +395,7 @@ def make_workflow_run(
         created_at=created_at,
         updated_at=updated_at,
         run_started_at=run_started_at,
+        run_attempt=run_attempt,
     )
 
 
@@ -424,6 +426,7 @@ def make_workflow_job(
     *,
     id: int = 1,
     run_id: int = 123,
+    run_attempt: int | None = 1,
     name: str = 'test-job',
     status: WorkflowJobStatus = WorkflowJobStatus.COMPLETED,
     conclusion: WorkflowJobConclusion | None | Unset = UNSET,
@@ -451,6 +454,7 @@ def make_workflow_job(
     return WorkflowJob(
         id=id,
         run_id=run_id,
+        run_attempt=run_attempt,
         name=name,
         status=status,
         conclusion=conclusion,

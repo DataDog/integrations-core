@@ -485,10 +485,9 @@ def _batch_link(batch: BatchProgress) -> str:
 def _batch_chip(batch: BatchProgress) -> str:
     """The batch's state, in one glyph.
 
-    `status` is the workflow's own conclusion and is not re-derived from `jobs_progress`: a batch
-    can fail while every job inside it passed (a setup or upload step). The exception is a failed
-    batch where no job confirmed a failure and some job is inconclusive: that job may be the
-    failure, so the batch is a warning rather than a confirmed failure.
+    `status` comes from the runner and is not re-derived from `jobs_progress`. A failed batch
+    where no job confirmed a failure and some job is inconclusive shows a warning: that job may
+    have failed, but we can't confirm it.
     """
     if batch.state is ExecutionState.ARTIFACT_DOWNLOAD:
         return "📥"

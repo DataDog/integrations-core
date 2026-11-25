@@ -28,6 +28,7 @@ from ddev.cli.ci.tests.progress import ExecutionState
 from ddev.cli.ci.tests.status import (
     Status,
     batch_status,
+    final_batch_status,
     has_started_running,
     is_queued,
     job_status,
@@ -377,7 +378,14 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         )
         jobs = await self._reconcile_final_jobs(run_id, message, jobs)
         batch_jobs = BatchJobResult.correlate(message.job_list, jobs, artifact_dirs)
-        status = batch_status(conclusion, jobs)
+        status = final_batch_status(
+            conclusion,
+            jobs,
+            batch_id=message.batch_id,
+            run_attempt=run.run_attempt,
+            test_job_names={job.name for job in message.job_list},
+            logger=self._logger,
+        )
         self.submit_message(
             BatchFinished(
                 id=message.id,
