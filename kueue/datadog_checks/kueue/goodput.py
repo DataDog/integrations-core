@@ -20,6 +20,7 @@ This module only depends on the Workload JSON, so it can be tested without the K
 
 from __future__ import annotations
 
+import re
 import time
 from collections import defaultdict
 from collections.abc import Callable, Iterable
@@ -47,6 +48,11 @@ SCHEDULER_TAG = 'job_scheduler'
 SCHEDULER_QUEUE_TAG = 'job_scheduler_queue'
 SCHEDULER_WORKLOAD_TAG = 'job_scheduler_workload'
 UNKNOWN_REASON = 'unknown'
+# The GPU model, as the Agent tags it on GPU metrics and on pods that Kueue admitted on a GPU flavor.
+GPU_TYPE_TAG = 'gpu_type'
+# Node label that carries the GPU model, which a Workload can require in the `nodeSelector` or `nodeAffinity` of its
+# pods, and a ResourceFlavor in its node labels.
+GPU_PRODUCT_LABELS = ('nvidia.com/gpu.product',)
 
 # Structured Kueue reasons. Most `QuotaReserved` ones need the `UnadmittedWorkloadsObservability` feature gate;
 # without it Kueue reports `Pending` or `Inadmissible`, and the cause is only in the message.
@@ -54,7 +60,7 @@ KUEUE_REASONS = {
     'WaitingForQuota': 'quota_exhausted',
     'ExceedsMaxQuota': 'exceeds_max_quota',
     'NoMatchingFlavor': 'no_matching_resources',
-    'TopologyPlacementFailed': 'no_matching_resources',
+    'TopologyPlacementFailed': 'topology',
     'DRAResourcesUnresolved': 'no_matching_resources',
     'WaitingForPreemptedWorkloads': 'waiting_for_preemption',
     'UnsatisfiedAdmissionChecks': 'admission_checks',
@@ -65,6 +71,8 @@ KUEUE_REASONS = {
     'WaitForStart': 'waiting_for_pods',
     'WaitingForPodsReady': 'waiting_for_pods',
     'Misconfigured': 'misconfigured',
+    'UnrecordableResourceUsage': 'misconfigured',
+    'Suspended': 'suspended',
     # `Evicted` reasons other than preemption: the Workload is requeued and waits again.
     'PodsReadyTimeout': 'waiting_for_pods',
     'AdmissionCheck': 'admission_checks',
@@ -140,6 +148,8 @@ class Observation(NamedTuple):
     """Raw reason of the blocking condition, submitted as `scheduler_reason`."""
     cause: str | None = None
     """Reason normalized across schedulers, submitted as `reason`. Only set for badput states."""
+    gpu_type: str | None = None
+    """Normalized GPU model, submitted as `gpu_type`, or None when it is not known."""
 
 
 class Contribution(NamedTuple):
@@ -152,6 +162,7 @@ class Contribution(NamedTuple):
     seconds: float
     cause: str | None = None
     reason: str | None = None
+    gpu_type: str | None = None
 
     @property
     def gpu_seconds(self) -> float:
@@ -328,6 +339,68 @@ def requested_gpus(workload: dict, resource_names: Iterable[str] = GPU_RESOURCE_
     return total
 
 
+GPU_TYPE_PATTERN = re.compile(r'^(?:nvidia|tesla)_(?:geforce_)?(rtx_pro_|rtx_)?([a-z\d]+)')
+AMD_GPU_TYPE_PATTERN = re.compile(r'^amd_(?:radeon_)?instinct_([a-z]+\d+[a-z]*)')
+GPU_TYPE_VARIANTS = {'a10g': 'a10', 'l40s': 'l40'}
+
+
+def extract_gpu_type(device_name: str | None) -> str | None:
+    """Return the normalized GPU model of a device name or `nvidia.com/gpu.product` label value, such as `a100` for
+    `NVIDIA-A100-SXM4-80GB`. It follows the Agent, so that the values match the `gpu_type` tag of its GPU metrics."""
+    if not device_name:
+        return None
+    name = re.sub(r'[^a-z\d]+', '_', device_name.strip().lower()).strip('_')
+    if match := GPU_TYPE_PATTERN.match(name):
+        gpu_type = (match.group(1) or '') + match.group(2)
+        return GPU_TYPE_VARIANTS.get(gpu_type, gpu_type)
+    if match := AMD_GPU_TYPE_PATTERN.match(name):
+        return match.group(1)
+    return None
+
+
+def _single(types: Iterable[str | None]) -> str | None:
+    """Return the only type of a collection, or None when it is empty, has an unknown value, or is ambiguous."""
+    types = list(types)
+    return types[0] if types and None not in types and len(set(types)) == 1 else None
+
+
+def pod_gpu_type(pod_spec: dict) -> str | None:
+    """Return the GPU model that a pod explicitly requires, or None.
+
+    It comes from a `nodeSelector`, or from a `nodeAffinity` whose terms all require a single GPU model with `In`. A
+    pod that does not constrain the model, or that allows several, has no type: it is not guessed.
+    """
+    selector = pod_spec.get('nodeSelector') or {}
+    for label in GPU_PRODUCT_LABELS:
+        if label in selector:
+            return extract_gpu_type(str(selector[label]))
+    required = (
+        ((pod_spec.get('affinity') or {}).get('nodeAffinity') or {}).get(
+            'requiredDuringSchedulingIgnoredDuringExecution'
+        )
+    ) or {}
+    # Terms are alternatives, so each one must require the same single model.
+    term_types = []
+    for term in required.get('nodeSelectorTerms') or []:
+        values = [
+            expression.get('values') or []
+            for expression in term.get('matchExpressions') or []
+            if expression.get('key') in GPU_PRODUCT_LABELS and expression.get('operator') == 'In'
+        ]
+        term_types.append(_single(extract_gpu_type(value) for value in values[0]) if values else None)
+    return _single(term_types)
+
+
+def requested_gpu_type(workload: dict) -> str | None:
+    """Return the GPU model that the GPU PodSets of a Workload explicitly require, or None."""
+    types = []
+    for pod_set in (workload.get('spec') or {}).get('podSets') or []:
+        pod_spec = (pod_set.get('template') or {}).get('spec') or {}
+        if pod_gpus(pod_spec, GPU_RESOURCE_NAMES) > 0:
+            types.append(pod_gpu_type(pod_spec))
+    return _single(types)
+
+
 def parse_timestamp(value: str | None) -> float | None:
     if not value:
         return None
@@ -339,7 +412,11 @@ def parse_timestamp(value: str | None) -> float | None:
         return None
 
 
-def observe(workload: dict, cluster_queue_resolver: Callable[[str, str], str | None] | None = None) -> Observation:
+def observe(
+    workload: dict,
+    cluster_queue_resolver: Callable[[str, str], str | None] | None = None,
+    gpu_type_resolver: Callable[[str, str], str | None] | None = None,
+) -> Observation:
     metadata = workload.get('metadata') or {}
     spec = workload.get('spec') or {}
     namespace = metadata.get('namespace')
@@ -348,6 +425,13 @@ def observe(workload: dict, cluster_queue_resolver: Callable[[str, str], str | N
     if not cluster_queue and cluster_queue_resolver and namespace and local_queue:
         # Unadmitted Workloads have no admission, so their ClusterQueue comes from their LocalQueue.
         cluster_queue = cluster_queue_resolver(namespace, local_queue)
+
+    # Once Kueue assigned a flavor, the Agent knows the GPU model from the flavor's node labels. Before that, the only
+    # source is what the Workload explicitly requires.
+    gpu_type = None
+    if gpu_type_resolver and namespace and metadata.get('name') and (workload.get('status') or {}).get('admission'):
+        gpu_type = gpu_type_resolver(namespace, metadata['name'])
+    gpu_type = gpu_type or requested_gpu_type(workload)
 
     state = classify(workload)
     finished = conditions_by_type(workload).get('Finished')
@@ -359,6 +443,7 @@ def observe(workload: dict, cluster_queue_resolver: Callable[[str, str], str | N
         finished_at=parse_timestamp(finished.get('lastTransitionTime')) if is_true(finished) else None,
         reason=blocking_reason(workload, state),
         cause=normalize_reason(state, blocking_condition(workload, state)),
+        gpu_type=gpu_type,
     )
 
 
@@ -413,6 +498,7 @@ class GoodputTracker:
         self,
         workloads: Iterable[dict],
         cluster_queue_resolver: Callable[[str, str], str | None] | None = None,
+        gpu_type_resolver: Callable[[str, str], str | None] | None = None,
     ) -> list[Contribution]:
         """Record a successful poll and return the contributions of the interval since the previous one."""
         now = self.monotonic()
@@ -427,7 +513,7 @@ class GoodputTracker:
             if not uid:
                 continue
             try:
-                observation = observe(workload, cluster_queue_resolver)
+                observation = observe(workload, cluster_queue_resolver, gpu_type_resolver)
             except Exception as e:
                 # Not tracking it means it re-baselines once it can be parsed, instead of contributing a guess.
                 self.skipped += 1
@@ -450,6 +536,10 @@ class GoodputTracker:
                 # Keep the ClusterQueue once known, so that the series of a Workload keep the same queue tags when the
                 # tagger briefly cannot resolve its LocalQueue.
                 observation = observation._replace(queue=previous.queue)
+            if observation.gpu_type is None and previous is not None and previous.gpu_type:
+                # Keep the GPU model once known, so that the series of a Workload do not change when the tagger
+                # briefly cannot resolve it.
+                observation = observation._replace(gpu_type=previous.gpu_type)
             if observation.state == SchedulingState.READINESS_UNKNOWN and previous is None:
                 # Without `PodsReady`, the time the Workload runs cannot be told apart from its waits: counting only
                 # the waits would report a goodput of 0, however short the Workload is. Kueue sets no condition at all
@@ -512,6 +602,7 @@ class GoodputTracker:
                     seconds=seconds,
                     cause=previous.cause,
                     reason=previous.reason,
+                    gpu_type=previous.gpu_type,
                 )
             )
         return contributions
@@ -588,6 +679,8 @@ def workload_points(contributions: Iterable[Contribution]) -> list[tuple[str, fl
     for contribution in contributions:
         name = workload_name(contribution.name)
         tags = [*queue_tags(contribution.queue), f'{WORKLOAD_TAG}:{name}', f'{SCHEDULER_WORKLOAD_TAG}:{name}']
+        if contribution.gpu_type:
+            tags.append(f'{GPU_TYPE_TAG}:{contribution.gpu_type}')
         hours = contribution.gpu_seconds / SECONDS_PER_HOUR
         if contribution.category == Category.BADPUT:
             reason = contribution.cause or UNKNOWN_REASON

@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import csv
+import json
 import os
 from collections import defaultdict
 
@@ -21,8 +23,12 @@ from datadog_checks.kueue.goodput import (
     badput_by_reason,
     blocking_condition,
     classify,
+    extract_gpu_type,
     normalize_reason,
+    observe,
+    pod_gpu_type,
     queue_tags,
+    requested_gpu_type,
     requested_gpus,
     workload_points,
 )
@@ -804,3 +810,238 @@ def test_check_leaves_instance_tags_off(dd_run_check, aggregator, instance, mock
         tags=[*A100_TAGS, 'kueue_workload:run', 'job_scheduler_workload:run'],
         count=1,
     )
+
+
+# The Workloads below are the ones of a kind cluster running Kueue v0.20.7 with `waitForPodsReady`, with GPU requests
+# instead of the CPU ones of the cluster. `job-r-high` is admitted and waits for its pod; `job-r-low` was preempted
+# and waits for quota again (`Evicted=True`, `QuotaReserved=False` with `WaitingForQuota`).
+def kind_workloads():
+    with open(get_fixture_path('workloads/kind_v0_20.json')) as f:
+        return {w['metadata']['name'].rsplit('-', 1)[0]: w for w in json.load(f)}
+
+
+def badput_tags(contributions):
+    """Return the tags of the badput points, which hold the reason and GPU type."""
+    return [tags for metric, value, tags in workload_points(contributions) if metric == BADPUT_METRIC and value]
+
+
+def test_kind_admitted_but_unable_to_run_keeps_badput_until_the_pods_are_ready():
+    # Kueue admitted the Workload, but its pod is not ready yet: `Admitted=True`, `PodsReady=False/WaitForStart`.
+    clock, tracker = make_tracker()
+    admitted = kind_workloads()['job-r-high']
+    assert classify(admitted) == SchedulingState.WAITING
+    tracker.update([admitted])
+    clock.t = 10
+    [contribution] = tracker.update([admitted])
+
+    assert (contribution.category, contribution.gpu_seconds) == (Category.BADPUT, 40)
+    [tags] = badput_tags([contribution])
+    assert 'reason:waiting_for_pods' in tags
+    assert 'scheduler_reason:WaitForStart' in tags
+
+    ready = copy.deepcopy(admitted)
+    ready['status']['conditions'] = [
+        c if c['type'] != 'PodsReady' else {**c, 'status': 'True', 'reason': 'Started'}
+        for c in ready['status']['conditions']
+    ]
+    clock.t = 20
+    [still_waiting] = tracker.update([ready])
+    clock.t = 30
+    [running] = tracker.update([ready])
+    assert still_waiting.category == Category.BADPUT
+    assert (running.category, running.gpu_seconds) == (Category.FULLY_ADMITTED, 40)
+
+
+def test_kind_preemption_is_tagged_preempted_until_the_scheduler_admits_again():
+    clock, tracker = make_tracker()
+    preempted = kind_workloads()['job-r-low']
+    assert classify(preempted) == SchedulingState.PREEMPTED
+    tracker.update([preempted])
+    clock.t = 10
+    [contribution] = tracker.update([preempted])
+    [tags] = badput_tags([contribution])
+    # The raw reason is the one of the `Preempted` condition, not the `WaitingForQuota` of the requeue.
+    assert {'reason:preempted', 'scheduler_reason:InClusterQueue'} <= set(tags)
+
+    # Kueue admits it again: `Evicted` becomes False, and the pods are not ready yet, so the badput continues, but it
+    # is not a preemption wait any longer.
+    readmitted = copy.deepcopy(preempted)
+    readmitted['status']['admission'] = {'clusterQueue': 'cq-main', 'podSetAssignments': []}
+    readmitted['status']['conditions'] = [
+        {'type': 'QuotaReserved', 'status': 'True', 'reason': 'QuotaReserved'},
+        {'type': 'Evicted', 'status': 'False', 'reason': 'QuotaReserved'},
+        {'type': 'Admitted', 'status': 'True', 'reason': 'Admitted'},
+        {'type': 'PodsReady', 'status': 'False', 'reason': 'WaitForStart'},
+    ]
+    clock.t = 20
+    [wait] = tracker.update([readmitted])
+    clock.t = 30
+    [after_admission] = tracker.update([readmitted])
+    assert wait.cause == 'preempted'
+    assert (after_admission.category, after_admission.cause) == (Category.BADPUT, 'waiting_for_pods')
+
+
+def test_kind_quota_exhausted_is_tagged_with_the_reason_and_the_gpu_type():
+    clock, tracker = make_tracker()
+    pending = copy.deepcopy(kind_workloads()['job-r-low'])
+    # A new Workload, not an evicted one: Kueue only reports that it cannot reserve quota.
+    pending['status']['conditions'] = [
+        c for c in pending['status']['conditions'] if c['type'] in ('QuotaReserved', 'PodsReady')
+    ]
+    tracker.update([pending])
+    clock.t = 10
+    [contribution] = tracker.update([pending])
+
+    [tags] = badput_tags([contribution])
+    assert {'reason:quota_exhausted', 'scheduler_reason:WaitingForQuota', 'gpu_type:a100'} <= set(tags)
+
+
+@pytest.mark.parametrize(
+    ('label', 'expected'),
+    [
+        ('NVIDIA-A100-SXM4-80GB', 'a100'),
+        ('NVIDIA-H100-80GB-HBM3', 'h100'),
+        ('NVIDIA-A10G', 'a10'),
+        ('NVIDIA-L40S', 'l40'),
+        ('Tesla-T4', 't4'),
+        ('NVIDIA-GeForce-RTX-4090', 'rtx_4090'),
+        ('AMD-Instinct-MI300X', 'mi300x'),
+        ('something-else', None),
+        ('', None),
+        (None, None),
+    ],
+)
+def test_extract_gpu_type(label, expected):
+    assert extract_gpu_type(label) == expected
+
+
+def affinity(*terms):
+    return {
+        'affinity': {
+            'nodeAffinity': {
+                'requiredDuringSchedulingIgnoredDuringExecution': {
+                    'nodeSelectorTerms': [
+                        {'matchExpressions': [{'key': 'nvidia.com/gpu.product', 'operator': 'In', 'values': values}]}
+                        for values in terms
+                    ]
+                }
+            }
+        }
+    }
+
+
+@pytest.mark.parametrize(
+    ('pod_spec', 'expected'),
+    [
+        pytest.param({}, None, id='unconstrained'),
+        pytest.param({'nodeSelector': {'nvidia.com/gpu.product': 'NVIDIA-A100-SXM4-80GB'}}, 'a100', id='selector'),
+        pytest.param({'nodeSelector': {'disktype': 'ssd'}}, None, id='other_selector'),
+        pytest.param(affinity(['NVIDIA-H100-80GB-HBM3']), 'h100', id='affinity'),
+        pytest.param(affinity(['NVIDIA-A100-SXM4-40GB', 'NVIDIA-A100-SXM4-80GB']), 'a100', id='same_model_values'),
+        pytest.param(affinity(['NVIDIA-A100-SXM4-80GB'], ['NVIDIA-A100-SXM4-40GB']), 'a100', id='same_model_terms'),
+        pytest.param(affinity(['NVIDIA-A100-SXM4-80GB', 'NVIDIA-H100-80GB-HBM3']), None, id='several_models'),
+        pytest.param(affinity(['NVIDIA-A100-SXM4-80GB'], ['NVIDIA-H100-80GB-HBM3']), None, id='different_terms'),
+    ],
+)
+def test_pod_gpu_type(pod_spec, expected):
+    assert pod_gpu_type(pod_spec) == expected
+
+
+def test_requested_gpu_type_ignores_non_gpu_pod_sets():
+    gpu = {
+        'containers': [{'resources': {'limits': {'nvidia.com/gpu': 1}}}],
+        'nodeSelector': {'nvidia.com/gpu.product': 'NVIDIA-H100'},
+    }
+    cpu = {'containers': [{'resources': {'requests': {'cpu': 1}}}]}
+    other = {
+        'containers': [{'resources': {'limits': {'nvidia.com/gpu': 1}}}],
+        'nodeSelector': {'nvidia.com/gpu.product': 'NVIDIA-A100'},
+    }
+
+    def with_pod_sets(*specs):
+        return {
+            'spec': {'podSets': [{'name': f'ps{i}', 'count': 1, 'template': {'spec': s}} for i, s in enumerate(specs)]}
+        }
+
+    assert requested_gpu_type(with_pod_sets(gpu, cpu)) == 'h100'
+    assert requested_gpu_type(with_pod_sets(gpu, other)) is None
+    assert requested_gpu_type(with_pod_sets(cpu)) is None
+
+
+def test_gpu_type_comes_from_the_tagger_once_admitted_and_is_kept():
+    workload_without_constraint = workload('w', 'running', 4)
+    resolved = {}
+    clock, tracker = make_tracker()
+    # Pending: nothing says the model, so the tag is unset.
+    pending = workload('w', 'pending_quota', 4)
+    tracker.update([pending], None, lambda namespace, name: resolved.get((namespace, name)))
+    clock.t = 10
+    [unset] = tracker.update([pending], None, lambda namespace, name: resolved.get((namespace, name)))
+    assert unset.gpu_type is None
+    assert not any(tag.startswith('gpu_type:') for tag in badput_tags([unset])[0])
+
+    # Admitted on an A100 flavor: the tagger knows the model from the flavor.
+    resolved[('team-a', 'w')] = 'a100'
+    clock.t = 20
+    tracker.update([workload_without_constraint], None, lambda namespace, name: resolved.get((namespace, name)))
+    clock.t = 30
+    [admitted] = tracker.update(
+        [workload_without_constraint], None, lambda namespace, name: resolved.get((namespace, name))
+    )
+    assert admitted.gpu_type == 'a100'
+
+    # The tagger briefly loses it: the series keep the model.
+    resolved.clear()
+    clock.t = 40
+    [kept] = tracker.update(
+        [workload_without_constraint], None, lambda namespace, name: resolved.get((namespace, name))
+    )
+    assert kept.gpu_type == 'a100'
+    fully_admitted = [
+        tags for metric, value, tags in workload_points([kept]) if metric == FULLY_ADMITTED_METRIC and value
+    ]
+    assert 'gpu_type:a100' in fully_admitted[0]
+
+
+def test_check_tags_the_series_with_the_gpu_type_from_the_tagger(
+    dd_run_check, aggregator, instance, mock_http_response
+):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    tagger.set_tags({'kueue_workload://team-a/run': ['kueue_workload:run', 'gpu_type:a100']})
+    snapshot = [workload('run', 'running', 8)]
+    check, clock = goodput_check(instance, snapshot, snapshot)
+    dd_run_check(check)
+    clock.t = 15
+    dd_run_check(check)
+
+    run_tags = [*A100_TAGS, 'kueue_workload:run', 'job_scheduler_workload:run', 'gpu_type:a100']
+    aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=120 / 3600, tags=run_tags, count=1)
+    aggregator.assert_metric(BADPUT_METRIC, value=0, tags=run_tags, count=1)
+
+
+@pytest.mark.parametrize(
+    ('reason', 'expected'),
+    [
+        ('WaitingForQuota', 'quota_exhausted'),
+        ('ExceedsMaxQuota', 'exceeds_max_quota'),
+        ('NoMatchingFlavor', 'no_matching_resources'),
+        ('TopologyPlacementFailed', 'topology'),
+        ('WaitingForPreemptedWorkloads', 'waiting_for_preemption'),
+        ('Misconfigured', 'misconfigured'),
+        ('Suspended', 'suspended'),
+        ('PendingEvaluation', 'admission_checks'),
+        ('WaitingForPodsReady', 'waiting_for_pods'),
+        ('DRAResourcesUnresolved', 'no_matching_resources'),
+        ('UnrecordableResourceUsage', 'misconfigured'),
+        ('SomethingNew', 'unknown'),
+    ],
+)
+def test_every_quota_reserved_reason_of_the_design_doc_is_normalized(reason, expected):
+    assert (
+        normalize_reason(SchedulingState.WAITING, {'type': 'QuotaReserved', 'status': 'False', 'reason': reason})
+        == expected
+    )
+
+
+def test_observe_without_a_resolver_uses_only_the_workload():
+    assert observe(workload('w', 'running', 4)).gpu_type is None

@@ -249,7 +249,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         Only the leader submits, so that one instance per Kueue replica does not count each interval several times.
         """
         # Several Workloads share a LocalQueue, so the tagger is asked once per LocalQueue and poll.
-        contributions = self.goodput.update(workloads, functools.cache(self.resolve_cluster_queue))
+        contributions = self.goodput.update(
+            workloads, functools.cache(self.resolve_cluster_queue), self.resolve_gpu_type
+        )
         if self.goodput.skipped and not self.skipping_workloads:
             self.log.warning(
                 'Scheduling goodput: %d Kueue Workloads could not be parsed and are not counted; enable debug logs '
@@ -300,6 +302,15 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         entity = f'{KUEUE_QUEUE_ENTITY_PREFIX}localqueue/{namespace}/{local_queue}'
         for tag in tagger.tag(entity, tagger.ORCHESTRATOR) or []:
             if tag.startswith('kueue_cluster_queue:'):
+                return tag.split(':', 1)[1]
+        return None
+
+    @staticmethod
+    def resolve_gpu_type(namespace: str, name: str) -> str | None:
+        """Return the GPU model of an admitted Workload from the Agent tagger, which knows it from the node labels of
+        the ResourceFlavor that Kueue assigned."""
+        for tag in tagger.tag(f'{KUEUE_WORKLOAD_ENTITY_PREFIX}{namespace}/{name}', tagger.ORCHESTRATOR) or []:
+            if tag.startswith('gpu_type:'):
                 return tag.split(':', 1)[1]
         return None
 
