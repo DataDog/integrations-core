@@ -603,6 +603,8 @@ pipeline:
           source: cisco_ise.attributes.Location
           samples:
             - Location#All Locations#Spain#Madrid
+            - Location#All Locations#Spain
+            - Location#All Locations#Spain#Madrid#Campus1#Building2#Floor3#Room4
           grok:
             supportRules: ""
             matchRules: >-
@@ -636,6 +638,7 @@ pipeline:
           samples:
             - AA:BB:CC:04:60:01
             - 3C:A9:F4:10:61:01
+            - aabb.cc04.6001
           grok:
             supportRules: ""
             matchRules: >-

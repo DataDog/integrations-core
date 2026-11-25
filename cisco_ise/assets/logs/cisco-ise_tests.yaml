@@ -133,6 +133,681 @@ tests:
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1793712220472
+  # Constructed (TEST ONLY, no real sample of this form yet): real 5200 of 2026-11-03, Location (and its NetworkDeviceGroups entry) cut to 1 level.
+  - sample: "<181>Nov  3 13:23:40 ise-1 CISE_Passed_Authentications 0000000128 1 0 2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
+    result:
+      custom:
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/50"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "PAP_ASCII"
+            AuthenticationStatus: "AuthenticationPassed"
+            AuthorizationPolicyMatchedRule: "Basic_Authenticated_Access"
+            CPMSessionID: "luise6001"
+            Calling-Station-ID: "AA:BB:CC:04:60:01"
+            ClientLatency: 0
+            ConfigVersionId: 124
+            DTLSSupport: "Unknown"
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 1812
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            EndPointMACAddress: "AA-BB-CC-04-60-01"
+            Framed-IP-Address: "10.99.0.61"
+            Framed-IP-Netmask: "255.255.255.0"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentityPolicyMatchedRule: "Default"
+            IdentitySelectionMatchedRule: "Default"
+            IsThirdPartyDeviceFlow: false
+            Location: "Location#All Locations#Spain"
+            NAS-IP-Address: "10.0.0.1"
+            NAS-Port: 50161
+            NAS-Port-Id: "GigabitEthernet1/0/61"
+            NAS-Port-Type: "Ethernet"
+            Name: "User Identity Groups:Employee"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            NetworkDeviceProfileName: "Cisco"
+            OriginalUserName: "luis_test"
+            PostureAssessmentStatus: "NotApplicable"
+            Protocol: "Radius"
+            RequestLatency: 15
+            SelectedAccessService: "Default Network Access"
+            SelectedAuthenticationIdentityStores:
+              - "Internal Users"
+              - "All_AD_Join_Points"
+              - "Guest Users"
+            SelectedAuthorizationProfiles: "PermitAccess"
+            Step:
+              - 11001
+              - 11017
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 22072
+              - 15013
+              - 24210
+              - 24212
+              - 22037
+              - 24715
+              - 15036
+              - 24209
+              - 24217
+              - 15048
+              - 15048
+              - 15048
+              - 15016
+              - 22081
+              - 22080
+              - 11002
+            StepData=15: "Radius.NAS-Port-Type"
+            StepData=16: "EndPoints.LogicalProfile"
+            StepData=17: "Network Access.AuthenticationStatus"
+            StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
+            StepData=6: "All_User_ID_Stores"
+            StepData=7: "Internal Users"
+            TotalAuthenLatency: 15
+            User-Name: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+            allowEasyWiredSession: false
+            cisco-av-pair=AuthenticationIdentityStore: "Internal Users"
+            cisco-av-pair=FQSubjectName: "9273fe30-8c01-11e6-996c-525400b48521#luis_test"
+            cisco-av-pair=UniqueSubjectID: "237198dd9352df10277534c78aacf3ef916b3dc4"
+            cisco-av-pair=audit-session-id: "luise6001"
+          category: "Passed_Authentications"
+          endpoint:
+            mac: "aa:bb:cc:04:60:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "04"
+              o5: "60"
+              o6: "01"
+            mac_raw: "AA:BB:CC:04:60:01"
+          message_class: "Passed-Authentication"
+          message_code: "5200"
+          message_id: "0000000128"
+          message_text: "Authentication succeeded"
+          node: "ise-1"
+          response:
+            Class: "CACS:luise6001:ise-1/583071475/50"
+            LicenseTypes: 1
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001415"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+        evt:
+          name: "Passed-Authentication"
+        network:
+          client:
+            ip: "10.99.0.61"
+        syslog:
+          hostname: "ise-1"
+          priority: 181
+          severity: "notice"
+        timestamp: 1793712220472
+        usr:
+          name: "luis_test"
+      message: "2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1793712220472
+  # Constructed (TEST ONLY, no real sample of this form yet): real 5200 of 2026-11-03, Location (and its NetworkDeviceGroups entry) given 3 levels.
+  - sample: "<181>Nov  3 13:23:40 ise-1 CISE_Passed_Authentications 0000000128 1 0 2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid#Campus1, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid#Campus1, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
+    result:
+      custom:
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/50"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "PAP_ASCII"
+            AuthenticationStatus: "AuthenticationPassed"
+            AuthorizationPolicyMatchedRule: "Basic_Authenticated_Access"
+            CPMSessionID: "luise6001"
+            Calling-Station-ID: "AA:BB:CC:04:60:01"
+            ClientLatency: 0
+            ConfigVersionId: 124
+            DTLSSupport: "Unknown"
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 1812
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            EndPointMACAddress: "AA-BB-CC-04-60-01"
+            Framed-IP-Address: "10.99.0.61"
+            Framed-IP-Netmask: "255.255.255.0"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentityPolicyMatchedRule: "Default"
+            IdentitySelectionMatchedRule: "Default"
+            IsThirdPartyDeviceFlow: false
+            Location: "Location#All Locations#Spain#Madrid#Campus1"
+            NAS-IP-Address: "10.0.0.1"
+            NAS-Port: 50161
+            NAS-Port-Id: "GigabitEthernet1/0/61"
+            NAS-Port-Type: "Ethernet"
+            Name: "User Identity Groups:Employee"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid#Campus1"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            NetworkDeviceProfileName: "Cisco"
+            OriginalUserName: "luis_test"
+            PostureAssessmentStatus: "NotApplicable"
+            Protocol: "Radius"
+            RequestLatency: 15
+            SelectedAccessService: "Default Network Access"
+            SelectedAuthenticationIdentityStores:
+              - "Internal Users"
+              - "All_AD_Join_Points"
+              - "Guest Users"
+            SelectedAuthorizationProfiles: "PermitAccess"
+            Step:
+              - 11001
+              - 11017
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 22072
+              - 15013
+              - 24210
+              - 24212
+              - 22037
+              - 24715
+              - 15036
+              - 24209
+              - 24217
+              - 15048
+              - 15048
+              - 15048
+              - 15016
+              - 22081
+              - 22080
+              - 11002
+            StepData=15: "Radius.NAS-Port-Type"
+            StepData=16: "EndPoints.LogicalProfile"
+            StepData=17: "Network Access.AuthenticationStatus"
+            StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
+            StepData=6: "All_User_ID_Stores"
+            StepData=7: "Internal Users"
+            TotalAuthenLatency: 15
+            User-Name: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+            allowEasyWiredSession: false
+            cisco-av-pair=AuthenticationIdentityStore: "Internal Users"
+            cisco-av-pair=FQSubjectName: "9273fe30-8c01-11e6-996c-525400b48521#luis_test"
+            cisco-av-pair=UniqueSubjectID: "237198dd9352df10277534c78aacf3ef916b3dc4"
+            cisco-av-pair=audit-session-id: "luise6001"
+          category: "Passed_Authentications"
+          endpoint:
+            mac: "aa:bb:cc:04:60:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "04"
+              o5: "60"
+              o6: "01"
+            mac_raw: "AA:BB:CC:04:60:01"
+          message_class: "Passed-Authentication"
+          message_code: "5200"
+          message_id: "0000000128"
+          message_text: "Authentication succeeded"
+          node: "ise-1"
+          response:
+            Class: "CACS:luise6001:ise-1/583071475/50"
+            LicenseTypes: 1
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001415"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
+            level3: "Campus1"
+        evt:
+          name: "Passed-Authentication"
+        network:
+          client:
+            ip: "10.99.0.61"
+        syslog:
+          hostname: "ise-1"
+          priority: 181
+          severity: "notice"
+        timestamp: 1793712220472
+        usr:
+          name: "luis_test"
+      message: "2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid#Campus1, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid#Campus1, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1793712220472
+  # Constructed (TEST ONLY, no real sample of this form yet): real 5200 of 2026-11-03, Location (and its NetworkDeviceGroups entry) given 4 levels.
+  - sample: "<181>Nov  3 13:23:40 ise-1 CISE_Passed_Authentications 0000000128 1 0 2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid#Campus1#Building2, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid#Campus1#Building2, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
+    result:
+      custom:
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/50"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "PAP_ASCII"
+            AuthenticationStatus: "AuthenticationPassed"
+            AuthorizationPolicyMatchedRule: "Basic_Authenticated_Access"
+            CPMSessionID: "luise6001"
+            Calling-Station-ID: "AA:BB:CC:04:60:01"
+            ClientLatency: 0
+            ConfigVersionId: 124
+            DTLSSupport: "Unknown"
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 1812
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            EndPointMACAddress: "AA-BB-CC-04-60-01"
+            Framed-IP-Address: "10.99.0.61"
+            Framed-IP-Netmask: "255.255.255.0"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentityPolicyMatchedRule: "Default"
+            IdentitySelectionMatchedRule: "Default"
+            IsThirdPartyDeviceFlow: false
+            Location: "Location#All Locations#Spain#Madrid#Campus1#Building2"
+            NAS-IP-Address: "10.0.0.1"
+            NAS-Port: 50161
+            NAS-Port-Id: "GigabitEthernet1/0/61"
+            NAS-Port-Type: "Ethernet"
+            Name: "User Identity Groups:Employee"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid#Campus1#Building2"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            NetworkDeviceProfileName: "Cisco"
+            OriginalUserName: "luis_test"
+            PostureAssessmentStatus: "NotApplicable"
+            Protocol: "Radius"
+            RequestLatency: 15
+            SelectedAccessService: "Default Network Access"
+            SelectedAuthenticationIdentityStores:
+              - "Internal Users"
+              - "All_AD_Join_Points"
+              - "Guest Users"
+            SelectedAuthorizationProfiles: "PermitAccess"
+            Step:
+              - 11001
+              - 11017
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 22072
+              - 15013
+              - 24210
+              - 24212
+              - 22037
+              - 24715
+              - 15036
+              - 24209
+              - 24217
+              - 15048
+              - 15048
+              - 15048
+              - 15016
+              - 22081
+              - 22080
+              - 11002
+            StepData=15: "Radius.NAS-Port-Type"
+            StepData=16: "EndPoints.LogicalProfile"
+            StepData=17: "Network Access.AuthenticationStatus"
+            StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
+            StepData=6: "All_User_ID_Stores"
+            StepData=7: "Internal Users"
+            TotalAuthenLatency: 15
+            User-Name: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+            allowEasyWiredSession: false
+            cisco-av-pair=AuthenticationIdentityStore: "Internal Users"
+            cisco-av-pair=FQSubjectName: "9273fe30-8c01-11e6-996c-525400b48521#luis_test"
+            cisco-av-pair=UniqueSubjectID: "237198dd9352df10277534c78aacf3ef916b3dc4"
+            cisco-av-pair=audit-session-id: "luise6001"
+          category: "Passed_Authentications"
+          endpoint:
+            mac: "aa:bb:cc:04:60:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "04"
+              o5: "60"
+              o6: "01"
+            mac_raw: "AA:BB:CC:04:60:01"
+          message_class: "Passed-Authentication"
+          message_code: "5200"
+          message_id: "0000000128"
+          message_text: "Authentication succeeded"
+          node: "ise-1"
+          response:
+            Class: "CACS:luise6001:ise-1/583071475/50"
+            LicenseTypes: 1
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001415"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
+            level3: "Campus1"
+            level4: "Building2"
+        evt:
+          name: "Passed-Authentication"
+        network:
+          client:
+            ip: "10.99.0.61"
+        syslog:
+          hostname: "ise-1"
+          priority: 181
+          severity: "notice"
+        timestamp: 1793712220472
+        usr:
+          name: "luis_test"
+      message: "2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid#Campus1#Building2, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid#Campus1#Building2, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1793712220472
+  # Constructed (TEST ONLY, no real sample of this form yet): real 5200 of 2026-11-03, Location (and its NetworkDeviceGroups entry) given 6 levels.
+  - sample: "<181>Nov  3 13:23:40 ise-1 CISE_Passed_Authentications 0000000128 1 0 2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid#Campus1#Building2#Floor3#Room4, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid#Campus1#Building2#Floor3#Room4, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
+    result:
+      custom:
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/50"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "PAP_ASCII"
+            AuthenticationStatus: "AuthenticationPassed"
+            AuthorizationPolicyMatchedRule: "Basic_Authenticated_Access"
+            CPMSessionID: "luise6001"
+            Calling-Station-ID: "AA:BB:CC:04:60:01"
+            ClientLatency: 0
+            ConfigVersionId: 124
+            DTLSSupport: "Unknown"
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 1812
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            EndPointMACAddress: "AA-BB-CC-04-60-01"
+            Framed-IP-Address: "10.99.0.61"
+            Framed-IP-Netmask: "255.255.255.0"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentityPolicyMatchedRule: "Default"
+            IdentitySelectionMatchedRule: "Default"
+            IsThirdPartyDeviceFlow: false
+            Location: "Location#All Locations#Spain#Madrid#Campus1#Building2#Floor3#Room4"
+            NAS-IP-Address: "10.0.0.1"
+            NAS-Port: 50161
+            NAS-Port-Id: "GigabitEthernet1/0/61"
+            NAS-Port-Type: "Ethernet"
+            Name: "User Identity Groups:Employee"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid#Campus1#Building2#Floor3#Room4"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            NetworkDeviceProfileName: "Cisco"
+            OriginalUserName: "luis_test"
+            PostureAssessmentStatus: "NotApplicable"
+            Protocol: "Radius"
+            RequestLatency: 15
+            SelectedAccessService: "Default Network Access"
+            SelectedAuthenticationIdentityStores:
+              - "Internal Users"
+              - "All_AD_Join_Points"
+              - "Guest Users"
+            SelectedAuthorizationProfiles: "PermitAccess"
+            Step:
+              - 11001
+              - 11017
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 22072
+              - 15013
+              - 24210
+              - 24212
+              - 22037
+              - 24715
+              - 15036
+              - 24209
+              - 24217
+              - 15048
+              - 15048
+              - 15048
+              - 15016
+              - 22081
+              - 22080
+              - 11002
+            StepData=15: "Radius.NAS-Port-Type"
+            StepData=16: "EndPoints.LogicalProfile"
+            StepData=17: "Network Access.AuthenticationStatus"
+            StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
+            StepData=6: "All_User_ID_Stores"
+            StepData=7: "Internal Users"
+            TotalAuthenLatency: 15
+            User-Name: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+            allowEasyWiredSession: false
+            cisco-av-pair=AuthenticationIdentityStore: "Internal Users"
+            cisco-av-pair=FQSubjectName: "9273fe30-8c01-11e6-996c-525400b48521#luis_test"
+            cisco-av-pair=UniqueSubjectID: "237198dd9352df10277534c78aacf3ef916b3dc4"
+            cisco-av-pair=audit-session-id: "luise6001"
+          category: "Passed_Authentications"
+          endpoint:
+            mac: "aa:bb:cc:04:60:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "04"
+              o5: "60"
+              o6: "01"
+            mac_raw: "AA:BB:CC:04:60:01"
+          message_class: "Passed-Authentication"
+          message_code: "5200"
+          message_id: "0000000128"
+          message_text: "Authentication succeeded"
+          node: "ise-1"
+          response:
+            Class: "CACS:luise6001:ise-1/583071475/50"
+            LicenseTypes: 1
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001415"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
+            level3: "Campus1"
+            level4: "Building2"
+            level5: "Floor3"
+        evt:
+          name: "Passed-Authentication"
+        network:
+          client:
+            ip: "10.99.0.61"
+        syslog:
+          hostname: "ise-1"
+          priority: 181
+          severity: "notice"
+        timestamp: 1793712220472
+        usr:
+          name: "luis_test"
+      message: "2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=AA:BB:CC:04:60:01, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid#Campus1#Building2#Floor3#Room4, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid#Campus1#Building2#Floor3#Room4, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1793712220472
+  # Constructed (TEST ONLY, no real sample of this form yet): real 5200 of 2026-11-03, Calling-Station-ID in dotted form (was AA:BB:CC:04:60:01).
+  - sample: "<181>Nov  3 13:23:40 ise-1 CISE_Passed_Authentications 0000000128 1 0 2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=aabb.cc04.6001, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
+    result:
+      custom:
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583071475/50"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "PAP_ASCII"
+            AuthenticationStatus: "AuthenticationPassed"
+            AuthorizationPolicyMatchedRule: "Basic_Authenticated_Access"
+            CPMSessionID: "luise6001"
+            Calling-Station-ID: "aabb.cc04.6001"
+            ClientLatency: 0
+            ConfigVersionId: 124
+            DTLSSupport: "Unknown"
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 1812
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            EndPointMACAddress: "AA-BB-CC-04-60-01"
+            Framed-IP-Address: "10.99.0.61"
+            Framed-IP-Netmask: "255.255.255.0"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup: "User Identity Groups:Employee"
+            IdentityPolicyMatchedRule: "Default"
+            IdentitySelectionMatchedRule: "Default"
+            IsThirdPartyDeviceFlow: false
+            Location: "Location#All Locations#Spain#Madrid"
+            NAS-IP-Address: "10.0.0.1"
+            NAS-Port: 50161
+            NAS-Port-Id: "GigabitEthernet1/0/61"
+            NAS-Port-Type: "Ethernet"
+            Name: "User Identity Groups:Employee"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            NetworkDeviceProfileName: "Cisco"
+            OriginalUserName: "luis_test"
+            PostureAssessmentStatus: "NotApplicable"
+            Protocol: "Radius"
+            RequestLatency: 15
+            SelectedAccessService: "Default Network Access"
+            SelectedAuthenticationIdentityStores:
+              - "Internal Users"
+              - "All_AD_Join_Points"
+              - "Guest Users"
+            SelectedAuthorizationProfiles: "PermitAccess"
+            Step:
+              - 11001
+              - 11017
+              - 15049
+              - 15008
+              - 15041
+              - 15048
+              - 22072
+              - 15013
+              - 24210
+              - 24212
+              - 22037
+              - 24715
+              - 15036
+              - 24209
+              - 24217
+              - 15048
+              - 15048
+              - 15048
+              - 15016
+              - 22081
+              - 22080
+              - 11002
+            StepData=15: "Radius.NAS-Port-Type"
+            StepData=16: "EndPoints.LogicalProfile"
+            StepData=17: "Network Access.AuthenticationStatus"
+            StepData=5: "Normalised Radius.RadiusFlowType (4 times)"
+            StepData=6: "All_User_ID_Stores"
+            StepData=7: "Internal Users"
+            TotalAuthenLatency: 15
+            User-Name: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+            allowEasyWiredSession: false
+            cisco-av-pair=AuthenticationIdentityStore: "Internal Users"
+            cisco-av-pair=FQSubjectName: "9273fe30-8c01-11e6-996c-525400b48521#luis_test"
+            cisco-av-pair=UniqueSubjectID: "237198dd9352df10277534c78aacf3ef916b3dc4"
+            cisco-av-pair=audit-session-id: "luise6001"
+          category: "Passed_Authentications"
+          endpoint:
+            mac: "aa:bb:cc:04:60:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "04"
+              o5: "60"
+              o6: "01"
+            mac_raw: "aabb.cc04.6001"
+          message_class: "Passed-Authentication"
+          message_code: "5200"
+          message_id: "0000000128"
+          message_text: "Authentication succeeded"
+          node: "ise-1"
+          response:
+            Class: "CACS:luise6001:ise-1/583071475/50"
+            LicenseTypes: 1
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000001415"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
+        evt:
+          name: "Passed-Authentication"
+        network:
+          client:
+            ip: "10.99.0.61"
+        syslog:
+          hostname: "ise-1"
+          priority: 181
+          severity: "notice"
+        timestamp: 1793712220472
+        usr:
+          name: "luis_test"
+      message: "2026-11-03 13:23:40.472 +00:00 0000001415 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=124, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, NAS-IP-Address=10.0.0.1, NAS-Port=50161, Framed-IP-Address=10.99.0.61, Framed-IP-Netmask=255.255.255.0, Calling-Station-ID=aabb.cc04.6001, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/61, cisco-av-pair=audit-session-id=luise6001, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/50, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=PermitAccess, RequestLatency=15, IdentityGroup=User Identity Groups:Employee, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24217, Step=15048, Step=15048, Step=15048, Step=15016, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, AuthorizationPolicyMatchedRule=Basic_Authenticated_Access, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luise6001, EndPointMACAddress=AA-BB-CC-04-60-01, PostureAssessmentStatus=NotApplicable, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=15= Radius.NAS-Port-Type, StepData=16= EndPoints.LogicalProfile, StepData=17= Network Access.AuthenticationStatus, TotalAuthenLatency=15, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, EnableFlag=Enabled, Response={Class=CACS:luise6001:ise-1/583071475/50; LicenseTypes=1; },"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1793712220472
   - sample: "<181>Nov  3 13:24:04 ise-1 CISE_Failed_Attempts 0000000131 1 0 2026-11-03 13:24:04.327 +00:00 0000001467 5400 NOTICE Failed-Attempt: Authentication failed, ConfigVersionId=124, Device IP Address=192.168.254.11, Device Port=55433, DestinationIPAddress=10.10.20.77, DestinationPort=1812, RadiusPacketType=AccessRequest, UserName=INVALID, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=INVALID, NAS-IP-Address=10.0.0.1, Calling-Station-ID=AA:BB:CC:04:20:01, cisco-av-pair=audit-session-id=luise2001, OriginalUserName=INVALID, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, AcsSessionID=ise-1/583071475/53, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, RequestLatency=10, FailureReason=22056 Subject not found in the applicable identity store(s), Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=15048, Step=22072, Step=15013, Step=24210, Step=24216, Step=15013, Step=24430, Step=24325, Step=24313, Step=24366, Step=24322, Step=24352, Step=24412, Step=15013, Step=24631, Step=24633, Step=22016, Step=22056, Step=22058, Step=22061, Step=11003, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Default, CPMSessionID=luise2001, EndPointMACAddress=AA-BB-CC-04-20-01, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Default, StepData=5= Normalised Radius.RadiusFlowType (4 times), StepData=6=All_User_ID_Stores, StepData=7=Internal Users, StepData=10=All_AD_Join_Points, StepData=11=All_AD_Join_Points, StepData=12=INVALID, StepData=13=lab.devnetsandbox.local, StepData=14=lab.devnetsandbox.local, StepData=16=ERROR_NO_SUCH_USER, StepData=17=All_AD_Join_Points, StepData=18=Guest Users, TotalAuthenLatency=10, ClientLatency=0, IsMachineIdentity=false, DTLSSupport=Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Response={RadiusPacketType=AccessReject; AuthenticationResult=UnknownUser; },"
     result:
       custom:
@@ -2228,6 +2903,146 @@ tests:
         usr:
           name: "luis_test"
       message: "2026-11-12 09:30:04.211 +00:00 0000054812 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=430, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, Service-Type=Framed, Calling-Station-ID=AA-BB-CC-10-51-01, NAS-Identifier=luis-eap-nad, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/51, cisco-av-pair=audit-session-id=luisx105101, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, RadiusFlowType=Wired802_1x, AcsSessionID=ise-1/583701566/16, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=LUIS_VLAN_DACL, RequestLatency=60, IdentityGroup=User Identity Groups:Employee, IdentityGroup=Endpoint Identity Groups:Unknown, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24211, Step=15048, Step=15048, Step=15048, Step=15016, Step=11022, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Dot1X, AuthorizationPolicyMatchedRule=luis_vlan_dacl_sgt, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luisx105101, EndPointMACAddress=AA-BB-CC-10-51-01, PostureAssessmentStatus=NotApplicable, EndPointMatchedProfile=Unknown, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Dot1X, StepData=5=All_User_ID_Stores, StepData=6=Internal Users, StepData=14= Radius.NAS-Port-Type, StepData=15= EndPoints.LogicalProfile, StepData=16= Network Access.UserName, TotalAuthenLatency=60, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, HostIdentityGroup=Endpoint Identity Groups:Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, Name=Endpoint Identity Groups:Unknown, EnableFlag=Enabled, Response={Class=CACS:luisx105101:ise-1/583701566/16; Tunnel-Type=(tag=1) VLAN; Tunnel-Medium-Type=(tag=1) 802; Tunnel-Private-Group-ID=(tag=1) 100; cisco-av-pair=ACS:CiscoSecure-Defined-ACL=#ACSACL#-IP-LUIS_DACL-6af5820f; cisco-av-pair=cts:security-group-tag=0004-00; cisco-av-pair=profile-name=Unknown; LicenseTypes=1; },"
+      status: "notice"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1794475804211
+  # Constructed (TEST ONLY, no real sample of this form yet): real 5200 of 2026-11-12, Response Tunnel-Private-Group-ID untagged (was "(tag=1) 100").
+  - sample: "<181>Nov 12 09:30:04 ise-1 CISE_Passed_Authentications 0000052517 1 0 2026-11-12 09:30:04.211 +00:00 0000054812 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=430, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, Service-Type=Framed, Calling-Station-ID=AA-BB-CC-10-51-01, NAS-Identifier=luis-eap-nad, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/51, cisco-av-pair=audit-session-id=luisx105101, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, RadiusFlowType=Wired802_1x, AcsSessionID=ise-1/583701566/16, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=LUIS_VLAN_DACL, RequestLatency=60, IdentityGroup=User Identity Groups:Employee, IdentityGroup=Endpoint Identity Groups:Unknown, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24211, Step=15048, Step=15048, Step=15048, Step=15016, Step=11022, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Dot1X, AuthorizationPolicyMatchedRule=luis_vlan_dacl_sgt, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luisx105101, EndPointMACAddress=AA-BB-CC-10-51-01, PostureAssessmentStatus=NotApplicable, EndPointMatchedProfile=Unknown, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Dot1X, StepData=5=All_User_ID_Stores, StepData=6=Internal Users, StepData=14= Radius.NAS-Port-Type, StepData=15= EndPoints.LogicalProfile, StepData=16= Network Access.UserName, TotalAuthenLatency=60, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, HostIdentityGroup=Endpoint Identity Groups:Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, Name=Endpoint Identity Groups:Unknown, EnableFlag=Enabled, Response={Class=CACS:luisx105101:ise-1/583701566/16; Tunnel-Type=(tag=1) VLAN; Tunnel-Medium-Type=(tag=1) 802; Tunnel-Private-Group-ID=100; cisco-av-pair=ACS:CiscoSecure-Defined-ACL=#ACSACL#-IP-LUIS_DACL-6af5820f; cisco-av-pair=cts:security-group-tag=0004-00; cisco-av-pair=profile-name=Unknown; LicenseTypes=1; },"
+    result:
+      custom:
+        cisco_ise:
+          attributes:
+            AcsSessionID: "ise-1/583701566/16"
+            AuthenticationIdentityStore: "Internal Users"
+            AuthenticationMethod: "PAP_ASCII"
+            AuthenticationStatus: "AuthenticationPassed"
+            AuthorizationPolicyMatchedRule: "luis_vlan_dacl_sgt"
+            CPMSessionID: "luisx105101"
+            Calling-Station-ID: "AA-BB-CC-10-51-01"
+            ClientLatency: 0
+            ConfigVersionId: 430
+            DTLSSupport: "Unknown"
+            DestinationIPAddress: "10.10.20.77"
+            DestinationPort: 1812
+            DeviceIPAddress: "192.168.254.11"
+            EnableFlag: "Enabled"
+            EndPointMACAddress: "AA-BB-CC-10-51-01"
+            EndPointMatchedProfile: "Unknown"
+            HostIdentityGroup: "Endpoint Identity Groups:Unknown"
+            IPSEC: "IPSEC#Is IPSEC Device#No"
+            ISEPolicySetName: "Default"
+            IdentityGroup:
+              - "User Identity Groups:Employee"
+              - "Endpoint Identity Groups:Unknown"
+            IdentityPolicyMatchedRule: "Dot1X"
+            IdentitySelectionMatchedRule: "Dot1X"
+            IsThirdPartyDeviceFlow: false
+            Location: "Location#All Locations#Spain#Madrid"
+            NAS-Identifier: "luis-eap-nad"
+            NAS-Port-Id: "GigabitEthernet1/0/51"
+            NAS-Port-Type: "Ethernet"
+            Name:
+              - "User Identity Groups:Employee"
+              - "Endpoint Identity Groups:Unknown"
+            NetworkDeviceGroups:
+              - "IPSEC#Is IPSEC Device#No"
+              - "Location#All Locations#Spain#Madrid"
+              - "Device Type#All Device Types#RadiusSimulator"
+            NetworkDeviceName: "luis_mac_radius_sim"
+            NetworkDeviceProfileId: "b0699505-3150-4215-a80e-6753d45bf56c"
+            NetworkDeviceProfileName: "Cisco"
+            OriginalUserName: "luis_test"
+            PostureAssessmentStatus: "NotApplicable"
+            Protocol: "Radius"
+            RadiusFlowType: "Wired802_1x"
+            RequestLatency: 60
+            SelectedAccessService: "Default Network Access"
+            SelectedAuthenticationIdentityStores:
+              - "Internal Users"
+              - "All_AD_Join_Points"
+              - "Guest Users"
+            SelectedAuthorizationProfiles: "LUIS_VLAN_DACL"
+            Service-Type: "Framed"
+            Step:
+              - 11001
+              - 11017
+              - 15049
+              - 15008
+              - 15041
+              - 22072
+              - 15013
+              - 24210
+              - 24212
+              - 22037
+              - 24715
+              - 15036
+              - 24209
+              - 24211
+              - 15048
+              - 15048
+              - 15048
+              - 15016
+              - 11022
+              - 22081
+              - 22080
+              - 11002
+            StepData=14: "Radius.NAS-Port-Type"
+            StepData=15: "EndPoints.LogicalProfile"
+            StepData=16: "Network Access.UserName"
+            StepData=5: "All_User_ID_Stores"
+            StepData=6: "Internal Users"
+            TotalAuthenLatency: 60
+            User-Name: "luis_test"
+            UserName: "luis_test"
+            UserType: "User"
+            allowEasyWiredSession: false
+            cisco-av-pair=AuthenticationIdentityStore: "Internal Users"
+            cisco-av-pair=FQSubjectName: "9273fe30-8c01-11e6-996c-525400b48521#luis_test"
+            cisco-av-pair=UniqueSubjectID: "237198dd9352df10277534c78aacf3ef916b3dc4"
+            cisco-av-pair=audit-session-id: "luisx105101"
+          authorization:
+            dacl: "#ACSACL#-IP-LUIS_DACL-6af5820f"
+            sgt: "0004-00"
+            vlan: "100"
+          category: "Passed_Authentications"
+          endpoint:
+            mac: "aa:bb:cc:10:51:01"
+            mac_octets:
+              o1: "aa"
+              o2: "bb"
+              o3: "cc"
+              o4: "10"
+              o5: "51"
+              o6: "01"
+            mac_raw: "AA-BB-CC-10-51-01"
+          message_class: "Passed-Authentication"
+          message_code: "5200"
+          message_id: "0000052517"
+          message_text: "Authentication succeeded"
+          node: "ise-1"
+          response:
+            Class: "CACS:luisx105101:ise-1/583701566/16"
+            LicenseTypes: 1
+            Tunnel-Private-Group-ID: 100
+          segment:
+            number: 0
+            total: 1
+          sequence: "0000054812"
+          severity: "NOTICE"
+          site:
+            level1: "Spain"
+            level2: "Madrid"
+        evt:
+          name: "Passed-Authentication"
+        syslog:
+          hostname: "ise-1"
+          priority: 181
+          severity: "notice"
+        timestamp: 1794475804211
+        usr:
+          name: "luis_test"
+      message: "2026-11-12 09:30:04.211 +00:00 0000054812 5200 NOTICE Passed-Authentication: Authentication succeeded, ConfigVersionId=430, Device IP Address=192.168.254.11, DestinationIPAddress=10.10.20.77, DestinationPort=1812, UserName=luis_test, Protocol=Radius, NetworkDeviceName=luis_mac_radius_sim, User-Name=luis_test, Service-Type=Framed, Calling-Station-ID=AA-BB-CC-10-51-01, NAS-Identifier=luis-eap-nad, NAS-Port-Type=Ethernet, NAS-Port-Id=GigabitEthernet1/0/51, cisco-av-pair=audit-session-id=luisx105101, OriginalUserName=luis_test, NetworkDeviceProfileName=Cisco, NetworkDeviceProfileId=b0699505-3150-4215-a80e-6753d45bf56c, IsThirdPartyDeviceFlow=false, RadiusFlowType=Wired802_1x, AcsSessionID=ise-1/583701566/16, AuthenticationIdentityStore=Internal Users, AuthenticationMethod=PAP_ASCII, SelectedAccessService=Default Network Access, SelectedAuthorizationProfiles=LUIS_VLAN_DACL, RequestLatency=60, IdentityGroup=User Identity Groups:Employee, IdentityGroup=Endpoint Identity Groups:Unknown, Step=11001, Step=11017, Step=15049, Step=15008, Step=15041, Step=22072, Step=15013, Step=24210, Step=24212, Step=22037, Step=24715, Step=15036, Step=24209, Step=24211, Step=15048, Step=15048, Step=15048, Step=15016, Step=11022, Step=22081, Step=22080, Step=11002, SelectedAuthenticationIdentityStores=Internal Users, SelectedAuthenticationIdentityStores=All_AD_Join_Points, SelectedAuthenticationIdentityStores=Guest Users, AuthenticationStatus=AuthenticationPassed, NetworkDeviceGroups=IPSEC#Is IPSEC Device#No, NetworkDeviceGroups=Location#All Locations#Spain#Madrid, NetworkDeviceGroups=Device Type#All Device Types#RadiusSimulator, IdentityPolicyMatchedRule=Dot1X, AuthorizationPolicyMatchedRule=luis_vlan_dacl_sgt, cisco-av-pair=AuthenticationIdentityStore=Internal Users, cisco-av-pair=FQSubjectName=9273fe30-8c01-11e6-996c-525400b48521#luis_test, cisco-av-pair=UniqueSubjectID=237198dd9352df10277534c78aacf3ef916b3dc4, UserType=User, CPMSessionID=luisx105101, EndPointMACAddress=AA-BB-CC-10-51-01, PostureAssessmentStatus=NotApplicable, EndPointMatchedProfile=Unknown, ISEPolicySetName=Default, IdentitySelectionMatchedRule=Dot1X, StepData=5=All_User_ID_Stores, StepData=6=Internal Users, StepData=14= Radius.NAS-Port-Type, StepData=15= EndPoints.LogicalProfile, StepData=16= Network Access.UserName, TotalAuthenLatency=60, ClientLatency=0, allowEasyWiredSession=false, DTLSSupport=Unknown, HostIdentityGroup=Endpoint Identity Groups:Unknown, Network Device Profile=Cisco, Location=Location#All Locations#Spain#Madrid, Device Type=Device Type#All Device Types#RadiusSimulator, IPSEC=IPSEC#Is IPSEC Device#No, Name=User Identity Groups:Employee, Name=Endpoint Identity Groups:Unknown, EnableFlag=Enabled, Response={Class=CACS:luisx105101:ise-1/583701566/16; Tunnel-Type=(tag=1) VLAN; Tunnel-Medium-Type=(tag=1) 802; Tunnel-Private-Group-ID=100; cisco-av-pair=ACS:CiscoSecure-Defined-ACL=#ACSACL#-IP-LUIS_DACL-6af5820f; cisco-av-pair=cts:security-group-tag=0004-00; cisco-av-pair=profile-name=Unknown; LicenseTypes=1; },"
       status: "notice"
       tags:
         - "source:LOGS_SOURCE"
