@@ -15,6 +15,12 @@ from . import AgentCheck
 if TYPE_CHECKING:
     from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
+RESERVED_TAG_DOCS_URL = "https://docs.datadoghq.com/getting_started/tagging/#overview"
+
+#: Reserved tag keys that conflict with values DBM payloads already carry, such as the
+#: integration's ``ddsource`` and the resolved host.
+RESERVED_INSTANCE_TAG_KEYS = frozenset({'source', 'host', 'hostname', 'host_name', 'device'})
+
 
 class DatabaseCheck(AgentCheck):
     """
@@ -32,6 +38,7 @@ class DatabaseCheck(AgentCheck):
         self._agent_version = None
         self._database_identifier = None
         self._dbms_fallback_warning_logged = False
+        self._reserved_instance_tag_keys = self._find_reserved_instance_tag_keys()
         self.tag_manager = TagManager()
         #: Async jobs owned by this check, keyed by job name, populated via
         #: :meth:`register_async_job`.
@@ -66,8 +73,49 @@ class DatabaseCheck(AgentCheck):
         if self._cancelled:
             self.log.debug("Not running async jobs, check has been cancelled")
             return
+        self.warn_on_reserved_instance_tags()
         for job in self._async_job_registry.values():
             job.run_job_loop(tags)
+
+    def _find_reserved_instance_tag_keys(self) -> List[str]:
+        """
+        Return the reserved tag keys this instance configures, lowercased and sorted.
+
+        Keys are matched case-insensitively because Datadog lowercases them on ingestion.
+        """
+        if not self.instance:
+            return []
+
+        keys = set()
+        for tag in self.instance.get('tags') or []:
+            if not isinstance(tag, str):
+                continue
+            key, separator, _ = tag.partition(':')
+            if not separator:
+                continue
+            key = key.strip().lower()
+            if key in RESERVED_INSTANCE_TAG_KEYS:
+                keys.add(key)
+
+        return sorted(keys)
+
+    def warn_on_reserved_instance_tags(self) -> None:
+        """
+        Surface a check warning when this instance sets a reserved tag key.
+
+        Repeats every run because ``self.warning`` collects warnings per run, and the warning
+        needs to stay visible in ``agent status`` and flares.
+        """
+        if not self._reserved_instance_tag_keys:
+            return
+
+        self.warning(
+            "This instance sets reserved tag keys in its configuration: %s. Reserved tag keys are "
+            "owned by Datadog and setting your own values can cause unexpected behavior, including "
+            "missing Database Monitoring data. Consider renaming them. See %s",
+            ', '.join('`{}`'.format(key) for key in self._reserved_instance_tag_keys),
+            RESERVED_TAG_DOCS_URL,
+        )
 
     def cancel_async_jobs(self) -> None:
         """
