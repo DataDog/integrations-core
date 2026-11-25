@@ -83,7 +83,7 @@ instances:
 
     ## @param collect_scheduling_goodput - boolean - optional - default: false
     ## Experimental. Submit the scheduling goodput metrics, in GPU-hours since the previous run, as one series per
-    ## PodGroup tagged with `kai_workload`, `job_scheduler_workload` and its KAI queue, so that they can be summed by
+    ## PodGroup tagged with `kai_pod_group`, `job_scheduler_workload` and its KAI queue, so that they can be summed by
     ## queue, cluster or reason:
     ##
     ## - `gpu.scheduling.badput_time`: GPU time that GPU PodGroups spent waiting to become fully runnable, tagged with

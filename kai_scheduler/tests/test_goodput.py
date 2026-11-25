@@ -309,7 +309,7 @@ def test_collector_submits_one_series_per_podgroup(aggregator, instance, mocker)
         'kube_namespace:ns',
         'kai_queue:team-a',
         'job_scheduler_queue:team-a',
-        'kai_workload:pg',
+        'kai_pod_group:pg',
         'job_scheduler_workload:pg',
     ]
     aggregator.assert_metric(BADPUT_METRIC, value=30 / 3600, tags=[*tags, 'reason:startup_or_system'], count=1)
@@ -522,7 +522,7 @@ def test_collector_submits_zero_badput_without_reason(aggregator, instance, mock
         'kube_namespace:ns',
         'kai_queue:team-a',
         'job_scheduler_queue:team-a',
-        'kai_workload:pg',
+        'kai_pod_group:pg',
         'job_scheduler_workload:pg',
     ]
     aggregator.assert_metric(BADPUT_METRIC, value=0, tags=tags, count=1)
@@ -589,11 +589,11 @@ def test_per_podgroup_series_sum_to_the_right_totals_for_any_grouping():
             else:
                 pods.append(pod(name, phase='Pending', gpus=gpus))
         for metric, value, tags in workload_points(t.update(pgs, pods)):
-            assert sum(tag.startswith('kai_workload:') for tag in tags) == 1
+            assert sum(tag.startswith('kai_pod_group:') for tag in tags) == 1
             tag = dict(tag.split(':', 1) for tag in tags)
             sums[(metric, 'queue', tag['kai_queue'])] += value
-            assert tag['job_scheduler_workload'] == tag['kai_workload']
-            sums[(metric, 'workload', tag['kai_workload'])] += value
+            assert tag['job_scheduler_workload'] == tag['kai_pod_group']
+            sums[(metric, 'workload', tag['kai_pod_group'])] += value
             sums[(metric, 'total', None)] += value
             if 'reason' in tag:
                 sums[(metric, 'reason', tag['reason'])] += value

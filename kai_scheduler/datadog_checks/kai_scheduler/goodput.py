@@ -57,7 +57,7 @@ SCHEDULER_TAG_VALUE = 'kai'
 REASON_TAG = 'reason'
 SCHEDULER_REASON_TAG = 'scheduler_reason'
 # Every series is per PodGroup, tagged like the PodGroup lifecycle events.
-WORKLOAD_TAG = 'kai_workload'
+WORKLOAD_TAG = 'kai_pod_group'
 # Scheduler tags shared by all batch schedulers, as on the PodGroup events and the pods the Agent tags.
 SCHEDULER_TAG = 'job_scheduler'
 SCHEDULER_QUEUE_TAG = 'job_scheduler_queue'
