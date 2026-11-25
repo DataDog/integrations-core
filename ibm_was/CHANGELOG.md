@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 5.5.2 / 2026-11-25
+
+***Fixed***:
+
+* Report the can_connect service check when the PerfServlet request times out or returns malformed XML. ([#25712](https://github.com/DataDog/integrations-core/pull/25712))
+* Call malloc_trim after each run to return the parsed XML tree's per-arena free memory to the OS and curb agent memory growth. ([#26079](https://github.com/DataDog/integrations-core/pull/26079))
+
 ## 5.5.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
