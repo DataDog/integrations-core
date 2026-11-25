@@ -555,11 +555,6 @@ pipeline:
           enabled: true
           sources:
             - timestamp
-        - type: status-remapper
-          name: Define status
-          enabled: true
-          sources:
-            - cisco_ise.severity
         - type: grok-parser
           name: Extract Device IP Address
           enabled: true
