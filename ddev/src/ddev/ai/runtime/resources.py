@@ -13,11 +13,11 @@ from ddev.ai.agent.build import AgentRuntimeFactory, AgentRuntimeFactoryProtocol
 from ddev.ai.agent.exceptions import AgentConnectionError, ModelAccessError
 from ddev.ai.agent.provider import ModelAccessCheck
 from ddev.ai.agent.registry import AgentProviderRegistry
-from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.model_catalog import Route
 from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.react.factory import ReActProcessFactory
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.connections import DirectConnection, GatewayConnection, RouteConnection
 from ddev.ai.runtime.errors import CredentialRefreshError
 from ddev.ai.runtime.gateway_auth import (
@@ -60,13 +60,13 @@ class RunResources:
         provider_registry: AgentProviderRegistry,
         file_access_policy: FileAccessPolicy,
         agents: dict[str, AgentConfig],
-        callbacks: Callbacks,
+        events: RunEvents,
     ) -> None:
         self._configured_registry = provider_registry
         self._run_registry: AgentProviderRegistry | None = None
         self._file_access_policy = file_access_policy
         self._agents = agents
-        self._callbacks = callbacks
+        self._events = events
         self._tokens: TokenProducer | None = None
         self._connection: RouteConnection | None = None
         self._route: RunRoute | None = None
@@ -173,5 +173,5 @@ class RunResources:
         """Run-wide factory that creates scoped ReActProcesses."""
         return ReActProcessFactory(
             self.agent_runtime_factory.build_runtime,
-            self._callbacks,
+            self._events,
         )

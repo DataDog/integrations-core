@@ -17,7 +17,9 @@ from ddev.ai.agent.types import (
     WebFetchCall,
     WebSearchCall,
 )
+from ddev.ai.react import notices
 from ddev.ai.react.types import ReActResult
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.core.types import ToolResult
 
@@ -52,10 +54,11 @@ SUB = AgentScope(owner_id="p1.sub.001-x", role=AgentRole.SUBAGENT, phase_id="p1"
 
 async def test_demultiplexes_by_scope_into_separate_files(tmp_path):
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
-    await cb.fire_agent_start(PHASE, "sys", [])
-    await cb.fire_agent_start(SUB, "sys2", ["read_file"])
+    await pipe.notify(notices.AgentStarted(PHASE, "sys", []))
+    await pipe.notify(notices.AgentStarted(SUB, "sys2", ["read_file"]))
 
     phase_path = tmp_path / "phase" / "p1.jsonl"
     sub_path = tmp_path / "subagent" / "p1.sub.001-x.jsonl"
@@ -67,13 +70,16 @@ async def test_demultiplexes_by_scope_into_separate_files(tmp_path):
 
 async def test_full_sequence_writes_start_and_finish_with_timestamps(tmp_path):
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
-    await cb.fire_agent_start(PHASE, "sys", ["read_file"])
-    await cb.fire_before_agent_send(PHASE, "do", 1)
-    await cb.fire_agent_response(PHASE, make_response("hi"), 1)
-    await cb.fire_tool_call(PHASE, ToolCall(id="t1", name="read_file", input={}), ToolResult(success=True, data="x"), 1)
-    await cb.fire_agent_finish(PHASE, make_result())
+    await pipe.notify(notices.AgentStarted(PHASE, "sys", ["read_file"]))
+    await pipe.notify(notices.AgentBeforeSend(PHASE, "do", 1))
+    await pipe.notify(notices.AgentResponded(PHASE, make_response("hi"), 1))
+    await pipe.notify(
+        notices.ToolCalled(PHASE, ToolCall(id="t1", name="read_file", input={}), ToolResult(success=True, data="x"), 1)
+    )
+    await pipe.notify(notices.AgentFinished(PHASE, make_result()))
 
     events = read_events(tmp_path / "phase" / "p1.jsonl")
     assert [e["event"] for e in events] == ["start", "before_agent_send", "agent_response", "tool_call", "finish"]
@@ -85,10 +91,11 @@ async def test_full_sequence_writes_start_and_finish_with_timestamps(tmp_path):
 
 async def test_error_emits_error_then_failed_finish(tmp_path):
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
-    await cb.fire_agent_start(PHASE, "sys", [])
-    await cb.fire_agent_error(PHASE, ValueError("boom"))
+    await pipe.notify(notices.AgentStarted(PHASE, "sys", []))
+    await pipe.notify(notices.AgentErrored(PHASE, ValueError("boom")))
 
     events = read_events(tmp_path / "phase" / "p1.jsonl")
     names = [e["event"] for e in events]
@@ -99,9 +106,10 @@ async def test_error_emits_error_then_failed_finish(tmp_path):
 
 async def test_timeout_cancellation_has_meaningful_error(tmp_path):
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
-    await cb.fire_agent_error(PHASE, asyncio.CancelledError("Orchestrator exceeded max_timeout of 10s"))
+    await pipe.notify(notices.AgentErrored(PHASE, asyncio.CancelledError("Orchestrator exceeded max_timeout of 10s")))
 
     events = read_events(tmp_path / "phase" / "p1.jsonl")
     assert events[0]["exception"] == "Timed out: Orchestrator exceeded max_timeout of 10s"
@@ -110,10 +118,11 @@ async def test_timeout_cancellation_has_meaningful_error(tmp_path):
 
 async def test_compact_events_recorded(tmp_path):
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
-    await cb.fire_before_compact(PHASE)
-    await cb.fire_after_compact(PHASE)
+    await pipe.notify(notices.BeforeCompact(PHASE))
+    await pipe.notify(notices.AfterCompact(PHASE))
 
     events = read_events(tmp_path / "phase" / "p1.jsonl")
     assert [e["event"] for e in events] == ["before_compact", "after_compact"]
@@ -121,9 +130,10 @@ async def test_compact_events_recorded(tmp_path):
 
 async def test_context_cleared_event_recorded(tmp_path):
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
-    await cb.fire_context_cleared(PHASE)
+    await pipe.notify(notices.ContextCleared(PHASE))
 
     events = read_events(tmp_path / "phase" / "p1.jsonl")
     assert [e["event"] for e in events] == ["context_cleared"]
@@ -131,10 +141,11 @@ async def test_context_cleared_event_recorded(tmp_path):
 
 async def test_reused_scope_appends_to_same_file(tmp_path):
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
-    await cb.fire_before_agent_send(PHASE, "first", 1)
-    await cb.fire_before_agent_send(PHASE, "second", 2)
+    await pipe.notify(notices.AgentBeforeSend(PHASE, "first", 1))
+    await pipe.notify(notices.AgentBeforeSend(PHASE, "second", 2))
 
     events = read_events(tmp_path / "phase" / "p1.jsonl")
     assert [e["prompt"] for e in events] == ["first", "second"]
@@ -142,8 +153,9 @@ async def test_reused_scope_appends_to_same_file(tmp_path):
 
 async def test_close_is_idempotent(tmp_path):
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
-    await cb.fire_agent_start(PHASE, "sys", [])
+    pipe = RunEvents()
+    logger.subscribe(pipe)
+    await pipe.notify(notices.AgentStarted(PHASE, "sys", []))
 
     logger.close()
     logger.close()  # must not raise
@@ -153,8 +165,9 @@ async def test_emit_after_close_is_silently_dropped(tmp_path):
     logger = AgentLogger(tmp_path)
     scope = AgentScope(owner_id="p1", role=AgentRole.PHASE, phase_id="p1")
     logger.close()
-    cb = logger.as_callback_set()
-    await cb.fire_agent_start(scope, "sys", [])
+    pipe = RunEvents()
+    logger.subscribe(pipe)
+    await pipe.notify(notices.AgentStarted(scope, "sys", []))
     assert not (tmp_path / AgentRole.PHASE.value / "p1.jsonl").exists()
 
 
@@ -171,9 +184,10 @@ async def test_agent_response_logs_web_searches_and_citations(tmp_path):
         web_activity=activity,
     )
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
-    await cb.fire_agent_response(PHASE, response, 1)
+    await pipe.notify(notices.AgentResponded(PHASE, response, 1))
 
     events = read_events(tmp_path / "phase" / "p1.jsonl")
     ev = events[0]
@@ -199,9 +213,10 @@ async def test_agent_response_logs_web_fetches(tmp_path):
         web_activity=activity,
     )
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
-    await cb.fire_agent_response(PHASE, response, 1)
+    await pipe.notify(notices.AgentResponded(PHASE, response, 1))
 
     ev = read_events(tmp_path / "phase" / "p1.jsonl")[0]
     assert ev["web_fetches"] == [
@@ -212,9 +227,10 @@ async def test_agent_response_logs_web_fetches(tmp_path):
 
 async def test_agent_response_logs_empty_web_activity(tmp_path):
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
-    await cb.fire_agent_response(PHASE, make_response("hi"), 1)
+    await pipe.notify(notices.AgentResponded(PHASE, make_response("hi"), 1))
 
     events = read_events(tmp_path / "phase" / "p1.jsonl")
     assert events[0]["web_searches"] == []
@@ -224,14 +240,15 @@ async def test_agent_response_logs_empty_web_activity(tmp_path):
 
 async def test_non_serializable_values_fall_back_to_str(tmp_path):
     logger = AgentLogger(tmp_path)
-    cb = logger.as_callback_set()
+    pipe = RunEvents()
+    logger.subscribe(pipe)
 
     class Weird:
         def __repr__(self) -> str:
             return "WEIRD"
 
     tool_call = ToolCall(id="t1", name="x", input={"obj": Weird()})
-    await cb.fire_tool_call(PHASE, tool_call, ToolResult(success=True, data="ok"), 1)
+    await pipe.notify(notices.ToolCalled(PHASE, tool_call, ToolResult(success=True, data="ok"), 1))
 
     events = read_events(tmp_path / "phase" / "p1.jsonl")
     assert "WEIRD" in events[0]["input"]["obj"]

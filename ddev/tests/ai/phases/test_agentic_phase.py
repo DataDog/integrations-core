@@ -11,13 +11,13 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
-from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.models import CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
@@ -37,11 +37,11 @@ def read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReActProcess:
+def _memory_process(agent: MockAgent) -> ReActProcess:
     """Wrap a mock agent in a ReActProcess for direct _run_memory_step tests."""
     return ReActProcess(
         AgentRuntime(agent=agent, tool_registry=ToolRegistry([])),
-        callbacks=callbacks,
+        events=RunEvents(),
         scope=AgentScope(owner_id="p1", role=AgentRole.PHASE, phase_id="p1"),
     )
 
@@ -386,14 +386,15 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
     from ddev.ai.runtime.resources import RunResources
 
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    run_callbacks = Callbacks([AgentLogger(checkpoint_manager.root).as_callback_set()])
+    pipe = RunEvents()
+    AgentLogger(checkpoint_manager.root).subscribe(pipe)
     resources = RunResources(
         provider_registry=build_agent_provider_registry(
             SimpleNamespace(anthropic_api_key="secret", use_ai_gateway=False, models_catalog=None)
         ),
         file_access_policy=FileAccessPolicy(write_root=flow_dir, integration_name="my_integration"),
         agents={"writer": make_agent_config(tools=["spawn_subagent"])},
-        callbacks=run_callbacks,
+        events=pipe,
     )
     try:
         await resources.prepare(lambda _: None, initial_agent=resources.agent_config("writer"))

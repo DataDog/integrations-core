@@ -13,10 +13,11 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import AgentConnectionError, AgentError, FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
-from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.errors import RunAbortError
+from ddev.ai.react import notices
 from ddev.ai.react.process import GENERIC_TRUNCATED_TOOL_CALL_HINT, ReActProcess
 from ddev.ai.react.types import ReActResult
+from ddev.ai.run_events import RunEvents
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.create_file import CreateFileTool
 from ddev.ai.tools.fs.edit_file import EditFileTool
@@ -77,8 +78,8 @@ def real_fs_tool_registry(tmp_path) -> ToolRegistry:
     return ToolRegistry([EditFileTool(file_registry, owner_id), CreateFileTool(file_registry, owner_id)])
 
 
-class CallbackRecorder:
-    """Test helper that wires a CallbackSet to record all lifecycle events."""
+class NoticeRecorder:
+    """Record notices emitted by the process."""
 
     def __init__(self) -> None:
         self.agent_starts: list[tuple[AgentScope, str, list[str]]] = []
@@ -91,43 +92,52 @@ class CallbackRecorder:
         self.after_compacts: int = 0
         self.context_clears: list[AgentScope] = []
 
-        self.callback_set = CallbackSet()
+        self.events = RunEvents()
 
-        @self.callback_set.on_agent_start
-        async def _record_start(scope: AgentScope, system_prompt: str, tools: list[str]) -> None:
-            self.agent_starts.append((scope, system_prompt, tools))
+        async def _record_start(notice: notices.AgentStarted) -> None:
+            self.agent_starts.append((notice.scope, notice.system_prompt, notice.tools))
 
-        @self.callback_set.on_before_agent_send
-        async def _record_before_send(scope: AgentScope, prompt: str, iteration: int) -> None:
-            self.before_sends.append((prompt, iteration))
+        self.events.subscribe(notices.AgentStarted, _record_start)
 
-        @self.callback_set.on_agent_response
-        async def _record_response(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
-            self.agent_responses.append((response, iteration))
+        async def _record_before_send(notice: notices.AgentBeforeSend) -> None:
+            self.before_sends.append((notice.prompt, notice.iteration))
 
-        @self.callback_set.on_tool_call
-        async def _record_tool_call(scope: AgentScope, tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
-            self.tool_calls_seen.append((scope, tool_call, result, iteration))
+        self.events.subscribe(notices.AgentBeforeSend, _record_before_send)
 
-        @self.callback_set.on_agent_finish
-        async def _record_complete(scope: AgentScope, result: ReActResult) -> None:
-            self.complete_results.append(result)
+        async def _record_response(notice: notices.AgentResponded) -> None:
+            self.agent_responses.append((notice.response, notice.iteration))
 
-        @self.callback_set.on_agent_error
-        async def _record_error(scope: AgentScope, error: BaseException) -> None:
-            self.errors.append(error)
+        self.events.subscribe(notices.AgentResponded, _record_response)
 
-        @self.callback_set.on_before_compact
-        async def _record_before_compact(scope: AgentScope) -> None:
+        async def _record_tool_call(notice: notices.ToolCalled) -> None:
+            self.tool_calls_seen.append((notice.scope, notice.tool_call, notice.result, notice.iteration))
+
+        self.events.subscribe(notices.ToolCalled, _record_tool_call)
+
+        async def _record_complete(notice: notices.AgentFinished) -> None:
+            self.complete_results.append(notice.result)
+
+        self.events.subscribe(notices.AgentFinished, _record_complete)
+
+        async def _record_error(notice: notices.AgentErrored) -> None:
+            self.errors.append(notice.error)
+
+        self.events.subscribe(notices.AgentErrored, _record_error)
+
+        async def _record_before_compact(notice: notices.BeforeCompact) -> None:
             self.before_compacts += 1
 
-        @self.callback_set.on_after_compact
-        async def _record_after_compact(scope: AgentScope) -> None:
+        self.events.subscribe(notices.BeforeCompact, _record_before_compact)
+
+        async def _record_after_compact(notice: notices.AfterCompact) -> None:
             self.after_compacts += 1
 
-        @self.callback_set.on_context_cleared
-        async def _record_context_cleared(scope: AgentScope) -> None:
-            self.context_clears.append(scope)
+        self.events.subscribe(notices.AfterCompact, _record_after_compact)
+
+        async def _record_context_cleared(notice: notices.ContextCleared) -> None:
+            self.context_clears.append(notice.scope)
+
+        self.events.subscribe(notices.ContextCleared, _record_context_cleared)
 
 
 def make_response(
@@ -165,13 +175,13 @@ DEFAULT_SCOPE = AgentScope(owner_id="test", role=AgentRole.PHASE, phase_id="test
 def make_process(
     agent: MockAgent,
     registry: ToolRegistry | None = None,
-    callbacks: Callbacks | None = None,
+    events: RunEvents | None = None,
     compact_threshold_pct: float | None = None,
     scope: AgentScope = DEFAULT_SCOPE,
 ) -> ReActProcess:
     return ReActProcess(
         AgentRuntime(agent=agent, tool_registry=registry or ToolRegistry([])),
-        callbacks=callbacks,
+        events=events or RunEvents(),
         scope=scope,
         compact_threshold_pct=compact_threshold_pct,
     )
@@ -303,7 +313,7 @@ async def test_tool_exception_loop_continues_with_failure_result(fake_tool: Fake
     assert sent_back[0].result.success is False
 
 
-async def test_tool_exception_on_tool_call_callback_fires_with_error_result(fake_tool: FakeToolFactory) -> None:
+async def test_tool_exception_emits_tool_notice_with_error_result(fake_tool: FakeToolFactory) -> None:
     """(c) on_tool_call must fire even when the tool raised, carrying the failure ToolResult."""
     tc = make_tool_call("tc_01", "read_file")
     agent = MockAgent(
@@ -312,13 +322,13 @@ async def test_tool_exception_on_tool_call_callback_fires_with_error_result(fake
             make_response(StopReason.END_TURN),
         ]
     )
-    recorder = CallbackRecorder()
+    recorder = NoticeRecorder()
     registry = ToolRegistry([fake_tool("read_file", error=ValueError("oops"))])
 
     await make_process(
         agent,
         registry=registry,
-        callbacks=Callbacks([recorder.callback_set]),
+        events=recorder.events,
     ).start("x")
 
     assert len(recorder.tool_calls_seen) == 1
@@ -466,7 +476,7 @@ async def test_truncated_tool_call_is_not_executed_but_answered(fake_tool: FakeT
     assert sent_back[0].result.success is False
 
 
-async def test_truncated_tool_call_fires_tool_call_callback() -> None:
+async def test_truncated_tool_call_emits_tool_notice() -> None:
     tc = make_tool_call("tc_01", "edit_file")
     agent = MockAgent(
         [
@@ -474,9 +484,9 @@ async def test_truncated_tool_call_fires_tool_call_callback() -> None:
             make_response(StopReason.END_TURN),
         ]
     )
-    recorder = CallbackRecorder()
+    recorder = NoticeRecorder()
 
-    await make_process(agent, callbacks=Callbacks([recorder.callback_set])).start("x")
+    await make_process(agent, events=recorder.events).start("x")
 
     assert len(recorder.tool_calls_seen) == 1
     _, seen_call, seen_result, _ = recorder.tool_calls_seen[0]
@@ -590,7 +600,7 @@ async def test_truncated_tool_calls_get_independent_hints_per_call(tmp_path) -> 
 # ---------------------------------------------------------------------------
 
 
-async def test_callbacks_invoked_correct_counts(fake_tool: FakeToolFactory) -> None:
+async def test_agent_loop_notices_include_scope_and_iteration(fake_tool: FakeToolFactory) -> None:
     tool_calls = [make_tool_call("tc_01"), make_tool_call("tc_02", "grep")]
     responses = [
         make_response(StopReason.TOOL_USE, tool_calls=tool_calls),
@@ -603,20 +613,18 @@ async def test_callbacks_invoked_correct_counts(fake_tool: FakeToolFactory) -> N
             fake_tool("grep", result=expected_result),
         ]
     )
-    recorder = CallbackRecorder()
+    recorder = NoticeRecorder()
     agent = MockAgent(responses)
     scope = AgentScope(owner_id="owner-loop", role=AgentRole.SUBAGENT, phase_id="phase")
 
-    result = await make_process(
-        agent, registry=registry, callbacks=Callbacks([recorder.callback_set]), scope=scope
-    ).start("Run tools")
+    result = await make_process(agent, registry=registry, events=recorder.events, scope=scope).start("Run tools")
 
     assert len(recorder.agent_responses) == 2
     assert recorder.agent_responses[0][1] == 1
     assert recorder.agent_responses[1][1] == 2
     assert len(recorder.tool_calls_seen) == 2
     assert all(iteration == 1 for *_, iteration in recorder.tool_calls_seen)
-    # In-loop callbacks must carry the process's scope, not a default or stale one.
+    # In-loop notices must carry the process's scope, not a default or stale one.
     assert all(seen_scope is scope for seen_scope, *_ in recorder.tool_calls_seen)
     assert recorder.tool_calls_seen[0][1] is tool_calls[0]
     assert recorder.tool_calls_seen[1][1] is tool_calls[1]
@@ -627,21 +635,13 @@ async def test_callbacks_invoked_correct_counts(fake_tool: FakeToolFactory) -> N
     assert len(recorder.errors) == 0
 
 
-async def test_two_callback_sets_both_notified() -> None:
-    agent = MockAgent([make_response(StopReason.END_TURN)])
-    rec_a, rec_b = CallbackRecorder(), CallbackRecorder()
-    await make_process(agent, callbacks=Callbacks([rec_a.callback_set, rec_b.callback_set])).start("x")
-    assert len(rec_a.complete_results) == 1
-    assert len(rec_b.complete_results) == 1
-
-
 async def test_agent_start_fires_first_with_scope_and_metadata() -> None:
     agent = MockAgent([make_response(StopReason.END_TURN)])
     agent._system_prompt = "you are a tester"
-    recorder = CallbackRecorder()
+    recorder = NoticeRecorder()
     scope = AgentScope(owner_id="owner-1", role=AgentRole.SUBAGENT, phase_id="phase")
 
-    await make_process(agent, callbacks=Callbacks([recorder.callback_set]), scope=scope).start("do it")
+    await make_process(agent, events=recorder.events, scope=scope).start("do it")
 
     assert len(recorder.agent_starts) == 1
     fired_scope, system_prompt, tools = recorder.agent_starts[0]
@@ -656,12 +656,12 @@ async def test_agent_start_fires_first_with_scope_and_metadata() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_run_once_sends_with_no_tools_and_fires_scoped_callbacks() -> None:
+async def test_run_once_sends_with_no_tools_and_emits_scoped_notices() -> None:
     agent = MockAgent([make_response(StopReason.END_TURN, input_tokens=7, output_tokens=3)])
-    recorder = CallbackRecorder()
+    recorder = NoticeRecorder()
     scope = AgentScope(owner_id="owner-1", role=AgentRole.PHASE, phase_id="owner-1")
 
-    process = make_process(agent, callbacks=Callbacks([recorder.callback_set]), scope=scope)
+    process = make_process(agent, events=recorder.events, scope=scope)
     response = await process.run_once("summarize")
 
     assert response.usage.input_tokens == 7
@@ -675,12 +675,12 @@ async def test_run_once_sends_with_no_tools_and_fires_scoped_callbacks() -> None
 
 
 async def test_run_once_error_notifies_and_reraises() -> None:
-    recorder = CallbackRecorder()
+    recorder = NoticeRecorder()
     scope = AgentScope(owner_id="owner-1", role=AgentRole.PHASE, phase_id="owner-1")
     process = ReActProcess(
         AgentRuntime(agent=ErrorAgent(), tool_registry=ToolRegistry([])),
         scope=scope,
-        callbacks=Callbacks([recorder.callback_set]),
+        events=recorder.events,
     )
 
     with pytest.raises(AgentConnectionError):
@@ -709,11 +709,11 @@ class ErrorAgent(BaseAgent[Any]):
 
 
 async def test_agent_error_notifies_and_reraises() -> None:
-    recorder = CallbackRecorder()
+    recorder = NoticeRecorder()
     process = ReActProcess(
         AgentRuntime(agent=ErrorAgent(), tool_registry=ToolRegistry([])),
         scope=AgentScope(owner_id="test", role=AgentRole.PHASE, phase_id="test"),
-        callbacks=Callbacks([recorder.callback_set]),
+        events=recorder.events,
     )
 
     with pytest.raises(AgentConnectionError):
@@ -736,11 +736,11 @@ class InterruptAgent(BaseAgent[Any]):
 
 
 async def test_keyboard_interrupt_notifies_and_reraises() -> None:
-    recorder = CallbackRecorder()
+    recorder = NoticeRecorder()
     process = ReActProcess(
         AgentRuntime(agent=InterruptAgent(), tool_registry=ToolRegistry([])),
         scope=AgentScope(owner_id="test", role=AgentRole.PHASE, phase_id="test"),
-        callbacks=Callbacks([recorder.callback_set]),
+        events=recorder.events,
     )
 
     with pytest.raises(KeyboardInterrupt):
@@ -762,11 +762,11 @@ class CancelledAgent(BaseAgent[Any]):
 
 
 async def test_cancelled_error_notifies_and_reraises() -> None:
-    recorder = CallbackRecorder()
+    recorder = NoticeRecorder()
     process = ReActProcess(
         AgentRuntime(agent=CancelledAgent(), tool_registry=ToolRegistry([])),
         scope=AgentScope(owner_id="test", role=AgentRole.PHASE, phase_id="test"),
-        callbacks=Callbacks([recorder.callback_set]),
+        events=recorder.events,
     )
 
     with pytest.raises(asyncio.CancelledError):
@@ -855,10 +855,10 @@ async def test_context_usage_propagated(context_usage: ContextUsage | None) -> N
 # ---------------------------------------------------------------------------
 
 
-async def test_reset_delegates_to_agent_and_fires_callback() -> None:
+async def test_reset_delegates_to_agent_and_notifies_observers() -> None:
     agent = MockAgent([])
-    recorder = CallbackRecorder()
-    await make_process(agent, callbacks=Callbacks([recorder.callback_set])).reset()
+    recorder = NoticeRecorder()
+    await make_process(agent, events=recorder.events).reset()
     assert agent.reset_calls == 1
     assert agent.history == []
     assert recorder.context_clears == [DEFAULT_SCOPE]
@@ -886,10 +886,10 @@ async def test_compact_returns_tokens_when_compaction_occurs() -> None:
     assert compact_out == 15
 
 
-async def test_compact_fires_before_and_after_callbacks() -> None:
+async def test_compact_notifies_before_and_after() -> None:
     agent = MockAgent([])
-    recorder = CallbackRecorder()
-    await make_process(agent, callbacks=Callbacks([recorder.callback_set])).compact()
+    recorder = NoticeRecorder()
+    await make_process(agent, events=recorder.events).compact()
     assert recorder.before_compacts == 1
     assert recorder.after_compacts == 1
 
@@ -914,15 +914,15 @@ async def test_auto_compact_triggers_when_threshold_exceeded() -> None:
     assert agent.compact_calls == 1
 
 
-async def test_auto_compact_fires_callbacks() -> None:
+async def test_auto_compact_notifies_observerss() -> None:
     tc = make_tool_call()
     responses = [
         make_response(StopReason.TOOL_USE, tool_calls=[tc]),
         make_response(StopReason.END_TURN, context_usage=make_context_usage(80.0)),
     ]
     agent = MockAgent(responses)
-    recorder = CallbackRecorder()
-    await make_process(agent, callbacks=Callbacks([recorder.callback_set]), compact_threshold_pct=75.0).start("task")
+    recorder = NoticeRecorder()
+    await make_process(agent, events=recorder.events, compact_threshold_pct=75.0).start("task")
     assert recorder.before_compacts == 1
     assert recorder.after_compacts == 1
 

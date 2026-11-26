@@ -25,6 +25,7 @@ from ddev.ai.phases.goal import (
 )
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.registry import ToolRegistry
 from tests.ai.config.utils import make_agent_config
@@ -188,16 +189,18 @@ def _make_worker_process(responses):
     """ReActProcess wired to a MockAgent — used as the worker."""
     agent = MockAgent(list(responses))
     scope = AgentScope(owner_id="worker", role=AgentRole.PHASE, phase_id="worker")
-    return ReActProcess(AgentRuntime(agent=agent, tool_registry=ToolRegistry([])), scope=scope), agent
+    return ReActProcess(
+        AgentRuntime(agent=agent, tool_registry=ToolRegistry([])), scope=scope, events=RunEvents()
+    ), agent
 
 
 class ReviewerProcessFactory:
     """Process factory returning a fixed reviewer agent wrapped in a ReActProcess."""
 
-    def __init__(self, responses, callbacks: Callbacks | None = None) -> None:
+    def __init__(self, responses, events: RunEvents | None = None) -> None:
         self.agent = MockAgent(list(responses))
         self.calls: list[dict[str, object]] = []
-        self._callbacks = callbacks or Callbacks()
+        self._events = events or RunEvents()
 
     def create(self, *, scope, agent_config: AgentConfig, system_prompt: str) -> ReActProcess:
         self.calls.append(
@@ -210,16 +213,16 @@ class ReviewerProcessFactory:
         )
         return ReActProcess(
             AgentRuntime(agent=self.agent, tool_registry=ToolRegistry([])),
-            callbacks=self._callbacks,
+            events=self._events,
             scope=scope,
         )
 
 
 def _reviewer_factory(
-    responses, callbacks: Callbacks | None = None
+    responses, events: RunEvents | None = None
 ) -> tuple[ReviewerProcessFactory, list[dict[str, object]], MockAgent]:
     """Return a reviewer process factory plus its captured calls and agent."""
-    factory = ReviewerProcessFactory(responses, callbacks)
+    factory = ReviewerProcessFactory(responses, events)
     return factory, factory.calls, factory.agent
 
 
@@ -242,9 +245,11 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
         context_usage=None,
     )
     run_logger = AgentLogger(tmp_path)
+    events = RunEvents()
+    run_logger.subscribe(events)
     factory, builder_calls, _ = _reviewer_factory(
         [make_response(make_goal_verdict(True), 20, 10)],
-        callbacks=Callbacks([run_logger.as_callback_set()]),
+        events=events,
     )
 
     outcome = await run_goal_loop(

@@ -18,6 +18,7 @@ from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -98,6 +99,7 @@ def make_orchestrator(file_access_policy, provider_registry, tmp_path):
             "runtime_variables": {},
             "provider_registry": provider_registry,
             "file_access_policy": file_access_policy,
+            "events": RunEvents(),
             **overrides,
         }
         return PhaseOrchestrator(**kwargs), registry, engine

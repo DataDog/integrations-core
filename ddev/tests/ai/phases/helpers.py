@@ -15,6 +15,7 @@ from ddev.ai.config.models import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import FlowContext
 from ddev.ai.react.process import ReActProcess
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.tools.registry import ToolRegistry
@@ -114,12 +115,12 @@ class MockProcessFactory:
     def __init__(
         self,
         mock_agent: MockAgent,
-        callbacks: Callbacks,
+        events: RunEvents,
         captured_kwargs: dict[str, Any] | None = None,
         goal_runtime_builder: Callable[[str], AgentRuntime] | None = None,
     ) -> None:
         self._mock_agent = mock_agent
-        self._callbacks = callbacks
+        self._events = events
         self._captured = captured_kwargs
         self._goal_runtime_builder = goal_runtime_builder
 
@@ -134,7 +135,7 @@ class MockProcessFactory:
             self._mock_agent.name = scope.owner_id
             self._mock_agent._system_prompt = system_prompt
             runtime = AgentRuntime(agent=self._mock_agent, tool_registry=ToolRegistry([]))
-        return ReActProcess(runtime, callbacks=self._callbacks, scope=scope)
+        return ReActProcess(runtime, events=self._events, scope=scope)
 
 
 def make_agent_phase(
@@ -167,17 +168,18 @@ def make_agent_phase(
     )
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
     run_logger = AgentLogger(checkpoint_manager.root)
-    effective_callbacks = (callbacks or Callbacks()).with_set(run_logger.as_callback_set())
+    events = RunEvents()
+    run_logger.subscribe(events)
     context = FlowContext(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
-        callbacks=effective_callbacks,
+        callbacks=callbacks or Callbacks(),
         resume_frontier=resume_frontier,
     )
 
     process_factory = MockProcessFactory(
         mock_agent=mock_agent,
-        callbacks=effective_callbacks,
+        events=events,
         captured_kwargs=captured_worker_kwargs,
         goal_runtime_builder=goal_runtime_builder,
     )

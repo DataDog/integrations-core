@@ -13,6 +13,7 @@ from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
 from ddev.ai.runtime.resources import RunResources, RunRoute
@@ -22,6 +23,7 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 from ddev.event_bus.shutdown import ShutdownRequest
 
 DEFAULT_GRACE_PERIOD = 10.0
+RUN_LOGGER = logging.getLogger(__name__)
 
 
 class PhaseOrchestrator(EventBusOrchestrator):
@@ -38,6 +40,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         grace_period: float = DEFAULT_GRACE_PERIOD,
         logger: logging.Logger | None = None,
         *,
+        events: RunEvents,
         report_route: Callable[[RunRoute], None] | None = None,
         prepare_run_directory: Callable[[], None] | None = None,
     ) -> None:
@@ -61,7 +64,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         if max_timeout is not None and not isinstance(max_timeout, str):
             raise ValueError(f"'max_timeout' must be a scalar value, got {type(max_timeout).__name__}")
         super().__init__(
-            logger=logger or logging.getLogger(__name__),
+            logger=logger if logger is not None else RUN_LOGGER,
             grace_period=grace_period,
             max_timeout=float(max_timeout) if max_timeout is not None else None,
         )
@@ -72,6 +75,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._provider_registry = provider_registry
         self._file_access_policy = file_access_policy
         self._callbacks: Callbacks = callbacks or Callbacks()
+        self._events = events
         self._resume = resume
         self._report_route = report_route
         self._prepare_run_directory = prepare_run_directory
@@ -107,12 +111,12 @@ class PhaseOrchestrator(EventBusOrchestrator):
             None,
         )
         self._agent_logger = AgentLogger(checkpoint_manager.root)
-        run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
+        self._agent_logger.subscribe(self._events)
         self._resources = RunResources(
             provider_registry=self._provider_registry,
             file_access_policy=self._file_access_policy,
             agents=self._resolved_flow.agents,
-            callbacks=run_callbacks,
+            events=self._events,
         )
         try:
             check = await self._resources.prepare(self._announce_route, initial_agent=initial_agent)
@@ -139,7 +143,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         context = FlowContext(
             runtime_variables=self._runtime_variables,
             flow_variables=self._resolved_flow.variables,
-            callbacks=run_callbacks,
+            callbacks=self._callbacks,
             logger=self._logger,
             resume_frontier=frozenset(frontier),
         )
