@@ -68,4 +68,4 @@ tuf==4.0.0
 urllib3==2.8.0
 vertica-python==1.4.0
 voltdbclient==15.3.1
-wrapt==2.3.0
+wrapt==2.3.1
