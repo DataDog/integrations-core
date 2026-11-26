@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.sqlserver.const import (
+    ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_AZURE_SYNAPSE_ANALYTICS,
     ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL,
     ENGINE_EDITION_SQL_DATABASE,
@@ -54,7 +55,10 @@ class SqlserverCpuMetrics(SqlserverDatabaseMetricsBase):
             return False
         if self.engine_edition in UNSUPPORTED_ENGINE_EDITIONS:
             return False
-        return self.major_version >= SQLSERVER_2016_MAJOR_VERSION
+        return (
+            self.engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE
+            or self.major_version >= SQLSERVER_2016_MAJOR_VERSION
+        )
 
     @property
     def queries(self) -> list[dict]:

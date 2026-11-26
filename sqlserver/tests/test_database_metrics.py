@@ -2349,7 +2349,7 @@ def test_cpu_metrics_enabled_by_default_only_with_dbm(init_config, instance_dock
         (ENGINE_EDITION_STANDARD, 13, True),
         (ENGINE_EDITION_ENTERPRISE, 16, True),
         (ENGINE_EDITION_EXPRESS, 15, True),
-        (ENGINE_EDITION_AZURE_MANAGED_INSTANCE, 16, True),
+        (ENGINE_EDITION_AZURE_MANAGED_INSTANCE, 12, True),
         (ENGINE_EDITION_ENTERPRISE, 12, False),
         (ENGINE_EDITION_SQL_DATABASE, 12, False),
         (ENGINE_EDITION_SQL_DATABASE, 16, False),
