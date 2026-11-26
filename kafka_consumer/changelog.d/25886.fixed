@@ -1,0 +1,1 @@
+Tag consumer offsets with the detected Kafka cluster ID when highwater offsets are skipped at the context limit or only internal topics are consumed.

@@ -674,6 +674,56 @@ def test_highwater_collection_reads_cluster_id_without_a_consumer(kafka_instance
     )
 
 
+@pytest.mark.parametrize('override', [None, 'configured-id'], ids=['no override', 'override'])
+@pytest.mark.parametrize(
+    'sharded, monitor_all, topic, regular_topic, context_limit',
+    [
+        pytest.param(True, True, '_schema', True, 500, id='non-zero shard with monitor_all'),
+        pytest.param(False, False, '_schema', True, 500, id='only internal topics selected'),
+        pytest.param(False, True, '_schema', False, 500, id='only internal topics in cluster'),
+        pytest.param(False, True, 'regular', True, 1, id='context limit reached'),
+    ],
+)
+def test_consumer_offsets_keep_cluster_id_without_highwater_offsets(
+    check, kafka_instance, dd_run_check, aggregator, sharded, monitor_all, topic, regular_topic, context_limit, override
+):
+    """
+    Consumer offsets are tagged with the detected cluster ID even when no highwater offsets were queried.
+    Regression test for https://github.com/DataDog/integrations-core/pull/25886.
+    """
+    topics = {'_schema': mock.Mock(partitions={0: None})}
+    if regular_topic:
+        topics['regular'] = mock.Mock(partitions={0: None})
+    admin = FakeAdminClient(mock.Mock(cluster_id='detected-id', topics=topics))
+    kafka_instance.update(
+        {
+            'consumer_groups': {'group-b': {topic: [0]}},
+            'monitor_all_broker_highwatermarks': monitor_all,
+            'kafka_cluster_id_override': override,
+        }
+    )
+    if sharded:
+        # group-b hashes to shard 1 of 3, so this instance fetches only its own groups' partitions.
+        kafka_instance.update({'consumer_groups_shard_count': 3, 'consumer_groups_shard_index': 1})
+
+    with mock.patch('datadog_checks.kafka_consumer.client.AdminClient', return_value=admin):
+        dd_run_check(check(kafka_instance, {'max_partition_contexts': context_limit}))
+
+    tags = [
+        f'topic:{topic}',
+        'partition:0',
+        'consumer_group:group-b',
+        f'kafka_cluster_id:{override or "detected-id"}',
+        'optional:tag1',
+    ]
+    if override:
+        tags.append('original_kafka_cluster_id:detected-id')
+    aggregator.assert_metric('kafka.consumer_offset', value=5, tags=tags, count=1)
+    aggregator.assert_metric('kafka.broker_offset', count=0)
+    aggregator.assert_metric('kafka.consumer_lag', count=0)
+    assert admin.list_topics_calls == 1, "the cluster ID must come from the metadata fetched at the start of the run"
+
+
 def test_check_clears_cache_on_partial_reset(kafka_instance, check, dd_run_check):
     # When the highwater drops, all cached entries are cleared — including those below the new
     # highwater that belong to the previous topic generation and would otherwise poison interpolation.
