@@ -6,6 +6,7 @@ import json
 import logging
 import marshal
 from collections import defaultdict
+from collections.abc import Callable
 from concurrent.futures import Future
 from contextlib import nullcontext as does_not_raise
 from contextlib import suppress
@@ -1628,6 +1629,8 @@ def test_offsets_are_only_fetched_for_consumer_groups_in_shard(check, kafka_inst
         pytest.param(3, False, id='index bool'),
         pytest.param(2.5, 0, id='count fractional'),
         pytest.param('3', 0, id='count string'),
+        pytest.param(None, 1, id='empty count with index'),
+        pytest.param(3, None, id='empty index with count'),
     ],
 )
 def test_invalid_consumer_groups_shard_settings_raise(check, kafka_instance, shard_count, shard_index):
@@ -1637,32 +1640,80 @@ def test_invalid_consumer_groups_shard_settings_raise(check, kafka_instance, sha
         check(instance)
 
 
-@pytest.mark.parametrize('shard_index, shard_zero', [(0, True), (1, False)])
-def test_only_shard_zero_fetches_and_reports_all_broker_highwatermarks(
-    check, kafka_instance, dd_run_check, aggregator, shard_index, shard_zero
-):
-    # Shard 0 covers every partition, so a second report from another shard would duplicate the series.
+def run_monitor_all_shard(
+    check: Callable[..., KafkaCheck],
+    kafka_instance: dict[str, Any],
+    dd_run_check: Callable[[KafkaCheck], Any],
+    shard_index: int,
+    partitions: list[str],
+    init_config: dict[str, Any] | None = None,
+) -> tuple[mock.MagicMock, str]:
+    """Run one shard with monitor_all_broker_highwatermarks, its first group consuming `partitions` at offset 4."""
     mock_client = seed_mock_client()
     mock_client.list_consumer_groups.return_value = SHARDED_GROUPS
+    mock_client.get_partitions_for_topic.return_value = partitions
     group = GROUPS_BY_SHARD[shard_index][0]
-    mock_client.list_consumer_group_offsets.return_value = [(group, [('topic1', 'partition1', 4)])]
+    mock_client.list_consumer_group_offsets.return_value = [(group, [('topic1', p, 4) for p in partitions])]
     instance = sharded_instance(
         kafka_instance, shard_index, monitor_unlisted_consumer_groups=True, monitor_all_broker_highwatermarks=True
     )
-    kafka_consumer_check = check(instance)
+    kafka_consumer_check = check(instance, init_config)
     kafka_consumer_check.client = mock_client
-
-    with mock.patch.object(
-        kafka_consumer_check, 'get_highwater_offsets', return_value=({('topic1', 'partition1'): 10}, 'cluster_id')
-    ) as get_highwater:
+    highwater = ({('topic1', p): 10 for p in partitions}, 'cluster_id')
+    with mock.patch.object(kafka_consumer_check, 'get_highwater_offsets', return_value=highwater) as get_highwater:
         dd_run_check(kafka_consumer_check)
+    return get_highwater, group
 
-    (partitions,), _ = get_highwater.call_args
-    assert (partitions is None) == shard_zero
-    aggregator.assert_metric('kafka.broker_offset', count=1 if shard_zero else 0)
-    # Every shard still computes its own groups' lag from the highwater offsets.
+
+@pytest.mark.parametrize('shard_index', [0, 1])
+def test_monitor_all_broker_highwatermarks_fetch_scope_per_shard(
+    check, kafka_instance, dd_run_check, aggregator, shard_index
+):
+    get_highwater, group = run_monitor_all_shard(check, kafka_instance, dd_run_check, shard_index, ['partition1'])
+
+    # Only shard 0 scans the whole cluster; the others request exactly their own groups' partitions.
+    get_highwater.assert_called_once_with(None if shard_index == 0 else {('topic1', 'partition1')})
+    # Every shard reports what it fetched, as in the default mode.
+    aggregator.assert_metric('kafka.broker_offset', value=10, count=1)
     aggregator.assert_metric('kafka.consumer_lag', value=6, count=1)
     aggregator.assert_metric_has_tag('kafka.consumer_lag', f'consumer_group:{group}')
+
+
+def test_other_shards_report_broker_offsets_when_shard_zero_hits_the_context_limit(
+    check, kafka_instance, dd_run_check, aggregator
+):
+    partitions = ['partition1', 'partition2', 'partition3']
+    init_config = {'max_partition_contexts': 3}
+
+    # Shard 0's own consumer contexts reach the limit, so it skips the cluster-wide scan.
+    get_highwater, _ = run_monitor_all_shard(check, kafka_instance, dd_run_check, 0, partitions, init_config)
+    get_highwater.assert_not_called()
+    aggregator.assert_metric('kafka.broker_offset', count=0)
+
+    # Shard 1 is under the limit and still reports the broker offsets of the partitions it fetched.
+    aggregator.reset()
+    get_highwater, _ = run_monitor_all_shard(check, kafka_instance, dd_run_check, 1, partitions[:1], init_config)
+    get_highwater.assert_called_once_with({('topic1', 'partition1')})
+    aggregator.assert_metric('kafka.broker_offset', value=10, count=1)
+
+
+def test_shard_broker_and_consumer_contexts_share_the_context_limit(check, kafka_instance, dd_run_check, aggregator):
+    # 2 consumer contexts are under the limit of 3, so highwater offsets are fetched; the 2 broker offsets
+    # reported then leave room for only 1 consumer offset.
+    run_monitor_all_shard(
+        check, kafka_instance, dd_run_check, 1, ['partition1', 'partition2'], {'max_partition_contexts': 3}
+    )
+
+    aggregator.assert_metric('kafka.broker_offset', count=2)
+    aggregator.assert_metric('kafka.consumer_offset', count=1)
+
+
+def test_empty_shard_settings_mean_not_set(check, kafka_instance):
+    kafka_instance.update({'consumer_groups_shard_count': None, 'consumer_groups_shard_index': None})
+    config = check(kafka_instance).config
+
+    assert (config._consumer_groups_shard_count, config._consumer_groups_shard_index) == (1, 0)
+    assert all(config.in_consumer_groups_shard(group) for group in SHARDED_GROUPS)
 
 
 def test_shard_count_without_shard_index_raises(check, kafka_instance):

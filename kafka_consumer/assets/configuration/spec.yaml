@@ -125,10 +125,10 @@ files:
       - name: consumer_groups_shard_count
         description: |
           Split the consumer groups selected by `monitor_unlisted_consumer_groups`, `consumer_groups`, or
-          `consumer_groups_regex` into this many shards, and only collect the shard set by
-          `consumer_groups_shard_index`. To spread a cluster with many consumer groups across several cluster
-          check runners, configure one instance per shard with identical settings and a different
-          `consumer_groups_shard_index`.
+          the `consumer_groups_regex` option into this many shards, and only collect the shard set by
+          the `consumer_groups_shard_index` option. To spread a cluster with many consumer groups across
+          several cluster check runners, configure one instance per shard with identical settings and a
+          different shard index. Leave it unset, or empty, to collect every selected group in one instance.
 
           Groups are assigned to shards by a stable hash of the group ID before their offsets are fetched,
           so each instance only requests offsets for its own groups. Changing the shard count reassigns
@@ -142,10 +142,11 @@ files:
           Sharding only spreads the load when the shards run on different cluster check runners. Size each
           runner to handle all of the shards that may be scheduled on it at the same time.
 
-          With `monitor_all_broker_highwatermarks`, only shard 0 reports `kafka.broker_offset`, for every
-          partition. The other shards use highwater offsets only to compute consumer lag. Like an unsharded
-          instance, shard 0 counts every partition against `max_partition_contexts`, so on a cluster with
-          more partitions than that limit, the lag of shard 0's groups is cut off.
+          With `monitor_all_broker_highwatermarks`, shard 0 fetches the highwater offsets of every partition,
+          and the other shards fetch them only for the partitions consumed by their own groups. Each shard
+          reports what it fetched within `max_partition_contexts`, like an unsharded instance: shard 0 skips
+          the cluster-wide scan when its own consumer contexts reach that limit, and when the cluster has more
+          partitions than the limit, shard 0 reports only part of them and can drop its groups' lag.
 
           Sharding cannot be combined with `enable_kafka_console`, which collects cluster-wide metadata.
         fleet_configurable: true

@@ -4,6 +4,7 @@
 import os
 import re
 import zlib
+from typing import Any
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
@@ -307,11 +308,12 @@ class KafkaConfig:
         return patterns
 
     @staticmethod
-    def _shard_setting(instance, name, default=None):
+    def _shard_setting(instance: dict[str, Any], name: str, default: int | None = None) -> int | None:
+        # An empty YAML value arrives as None and is treated as not set.
         value = instance.get(name)
         if value is None:
             return default
-        # int() would turn "" or -0.5 into shard 0 and truncate 1.9; bool is an int subclass.
+        # int() would accept numeric strings and truncate -0.5 or 1.9; bool is an int subclass.
         if type(value) is not int:
             raise ConfigurationError(f"`{name}` must be an integer")
         return value
