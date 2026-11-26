@@ -42,6 +42,9 @@
         "sglang.launch_server",
         "sglang serve"
       ]
+    },
+    "dashboards": {
+      "SGLang Overview": "assets/dashboards/overview.json"
     }
   },
   "author": {
