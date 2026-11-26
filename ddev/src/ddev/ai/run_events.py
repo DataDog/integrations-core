@@ -61,7 +61,7 @@ class NotAnswered:
 
 
 class RunEvents:
-    """Dispatch one run's messages to subscribers of their exact type.
+    """Dispatch one run's notices and questions.
 
     For background notices, the caller supplies an active `notice_task_group`
     that stays open for the run and outlives each `notify()` call. A group
@@ -73,14 +73,17 @@ class RunEvents:
     ) -> None:
         self._logger = logger if logger is not None else logging.getLogger(__name__)
         self._notice_task_group = notice_task_group
-        self._subscribers: dict[type, list[Callable[[Any], Awaitable[None]]]] = {}
+        self._subscribers: list[tuple[type, Callable[[Any], Awaitable[None]], bool]] = []
         self._responders: dict[type, Callable[[Any], Awaitable[Any]]] = {}
         self._response_lock = asyncio.Lock()
         self._active_response: object | None = None
         self._response_context: ContextVar[object | None] = ContextVar("response_context", default=None)
 
-    def subscribe[M: Notice | Question[Any]](self, kind: type[M], handler: Callable[[M], Awaitable[None]]) -> None:
-        self._subscribers.setdefault(kind, []).append(handler)
+    def subscribe[M: Notice | Question[Any]](
+        self, kind: type[M], handler: Callable[[M], Awaitable[None]], *, exact: bool = True
+    ) -> None:
+        """Subscribe to `kind`. Pass `exact=False` to also receive subclasses of `kind`."""
+        self._subscribers.append((kind, handler, exact))
 
     def respond[R](self, responder: Responder[R]) -> None:
         """Register a responder for a question type.
@@ -97,9 +100,9 @@ class RunEvents:
         self._responders[responder.kind] = responder.handler
 
     async def notify(self, notice: Notice, *, block: bool = True) -> None:
-        """Wait for subscribers in order by default.
+        """Deliver inline by default, so each subscriber sees sequential sends in order.
 
-        With `block=False`, schedule them on the run's active task group and return.
+        With `block=False`, schedule delivery on the run's active task group and return.
         Background deliveries have no ordering guarantee, even relative to inline ones.
         """
         if block:
@@ -151,7 +154,11 @@ class RunEvents:
                 self._active_response = None
 
     async def _dispatch(self, message: Notice | Question[Any], *, tasks: asyncio.TaskGroup | None = None) -> None:
-        for handler in tuple(self._subscribers.get(type(message), ())):
+        kind = type(message)
+        for subscribed_kind, handler, exact in tuple(self._subscribers):
+            matches = kind is subscribed_kind if exact else issubclass(kind, subscribed_kind)
+            if not matches:
+                continue
             if tasks is None:
                 await self._deliver(handler, message)
             else:

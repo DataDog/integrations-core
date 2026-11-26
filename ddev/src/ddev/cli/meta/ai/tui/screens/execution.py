@@ -19,9 +19,21 @@ from textual.widgets import Static
 from textual.worker import Worker
 
 from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
+from ddev.ai.phases.notices import AfterGoalCheck, BeforeGoalCheck, PhaseErrored, PhaseFinished, PhaseStarted
+from ddev.ai.react.notices import (
+    AgentBeforeSend,
+    AgentErrored,
+    AgentFinished,
+    AgentResponded,
+    AgentStarted,
+    BeforeCompact,
+    ContextCleared,
+    ToolCalled,
+)
 from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
 from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.errors import CredentialRefreshError
+from ddev.ai.runtime.notices import RunErrored
 from ddev.cli.meta.ai.rendering import (
     render_agent_error_line,
     render_agent_finish_line,
@@ -39,23 +51,7 @@ from ddev.cli.meta.ai.rendering import (
     render_web_search_line,
 )
 from ddev.cli.meta.ai.tui.app import OrchestratorLike
-from ddev.cli.meta.ai.tui.messages import (
-    AfterGoalCheck,
-    AgentBeforeSend,
-    AgentErrored,
-    AgentFinished,
-    AgentResponseReceived,
-    AgentStarted,
-    AgentToolCalled,
-    BeforeCompact,
-    BeforeGoalCheck,
-    ContextCleared,
-    ExecutionFailed,
-    PhaseErrored,
-    PhaseFinished,
-    PhaseStarted,
-    RunErrored,
-)
+from ddev.cli.meta.ai.tui.messages import ExecutionFailed, NoticeMessage
 from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug, resume_completed_phases
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
 from ddev.cli.meta.ai.tui.screens.credential_refresh_modal import CredentialRefreshModal
@@ -357,16 +353,45 @@ class ExecutionScreen(TogoScreen):
         for key in list(self._active_thinking.setdefault(phase_id, {})):
             self._stop_thinking(phase_id, key)
 
-    # ── Bridge message handlers ──────────────────────────────────────────
+    def on_notice_message(self, message: NoticeMessage) -> None:
+        match message.notice:
+            case PhaseStarted() as notice:
+                self._on_phase_started(notice)
+            case PhaseFinished() as notice:
+                self._on_phase_finished(notice)
+            case PhaseErrored() as notice:
+                self._on_phase_errored(notice)
+            case RunErrored():
+                self._on_run_errored()
+            case AgentStarted() as notice:
+                self._on_agent_started(notice)
+            case AgentBeforeSend() as notice:
+                self._on_agent_before_send(notice)
+            case AgentResponded() as notice:
+                self._on_agent_responded(notice)
+            case ToolCalled() as notice:
+                self._on_tool_called(notice)
+            case BeforeCompact() as notice:
+                self._on_before_compact(notice)
+            case ContextCleared() as notice:
+                self._on_context_cleared(notice)
+            case AgentFinished() as notice:
+                self._on_agent_finished(notice)
+            case AgentErrored() as notice:
+                self._on_agent_errored(notice)
+            case BeforeGoalCheck() as notice:
+                self._on_before_goal_check(notice)
+            case AfterGoalCheck() as notice:
+                self._on_after_goal_check(notice)
 
-    def on_phase_started(self, msg: PhaseStarted) -> None:
-        self._phase_statuses[msg.phase_id] = RunStatus.RUNNING
+    def _on_phase_started(self, notice: PhaseStarted) -> None:
+        self._phase_statuses[notice.phase_id] = RunStatus.RUNNING
         self._update_display()
 
-    def on_phase_finished(self, msg: PhaseFinished) -> None:
-        self._phase_statuses[msg.phase_id] = RunStatus.DONE
+    def _on_phase_finished(self, notice: PhaseFinished) -> None:
+        self._phase_statuses[notice.phase_id] = RunStatus.DONE
         for (p, t), status in list(self._task_statuses.items()):
-            if p == msg.phase_id and status in (RunStatus.RUNNING, RunStatus.PENDING):
+            if p == notice.phase_id and status in (RunStatus.RUNNING, RunStatus.PENDING):
                 self._task_statuses[(p, t)] = RunStatus.DONE
         self._update_display()
         self._transition_to_finishing_if_phases_done()
@@ -377,16 +402,16 @@ class ExecutionScreen(TogoScreen):
         ):
             self.togo_app.execution_status = ExecutionStatus.FINISHING
 
-    def on_phase_errored(self, msg: PhaseErrored) -> None:
-        self._phase_errors[msg.phase_id] = msg.error
-        self._stop_phase_thinking(msg.phase_id)
-        self._write_output(render_phase_error_line(msg.phase_id, msg.error), phase_id=msg.phase_id)
-        if msg.phase_id in self._phase_statuses:
-            self._mark_phase_failed(msg.phase_id)
+    def _on_phase_errored(self, notice: PhaseErrored) -> None:
+        self._phase_errors[notice.phase_id] = notice.error
+        self._stop_phase_thinking(notice.phase_id)
+        self._write_output(render_phase_error_line(notice.phase_id, notice.error), phase_id=notice.phase_id)
+        if notice.phase_id in self._phase_statuses:
+            self._mark_phase_failed(notice.phase_id)
         self._show_phase_error_summary()
         self._update_display()
 
-    def on_run_errored(self, msg: RunErrored) -> None:
+    def _on_run_errored(self) -> None:
         self.togo_app.execution_status = ExecutionStatus.FAILED
         if self._phase_errors:
             self._show_phase_error_summary()
@@ -410,63 +435,63 @@ class ExecutionScreen(TogoScreen):
         else:
             self.app.push_screen(PhaseConfigScreen(self.flow, msg.phase_id))
 
-    def on_agent_started(self, msg: AgentStarted) -> None:
-        phase_id = msg.scope.phase_id
-        self._write_output(render_agent_start_header(msg.scope), phase_id=phase_id)
-        if msg.tools:
-            self._write_output(render_agent_tools_line(msg.tools), phase_id=phase_id)
+    def _on_agent_started(self, notice: AgentStarted) -> None:
+        phase_id = notice.scope.phase_id
+        self._write_output(render_agent_start_header(notice.scope), phase_id=phase_id)
+        if notice.tools:
+            self._write_output(render_agent_tools_line(notice.tools), phase_id=phase_id)
 
-    def on_agent_before_send(self, msg: AgentBeforeSend) -> None:
-        phase_id = msg.scope.phase_id
-        if msg.prompt != TOOL_RESULTS_SENTINEL:
-            self._write_output(render_prompt_panel(msg.scope, msg.prompt, "run artifacts"), phase_id=phase_id)
-        key = self._thinking_key(msg.scope.owner_id, msg.scope.role.value, msg.iteration)
-        self._start_thinking(phase_id, key, f"{msg.scope.owner_id} · {msg.scope.role.value}")
+    def _on_agent_before_send(self, notice: AgentBeforeSend) -> None:
+        phase_id = notice.scope.phase_id
+        if notice.prompt != TOOL_RESULTS_SENTINEL:
+            self._write_output(render_prompt_panel(notice.scope, notice.prompt, "run artifacts"), phase_id=phase_id)
+        key = self._thinking_key(notice.scope.owner_id, notice.scope.role.value, notice.iteration)
+        self._start_thinking(phase_id, key, f"{notice.scope.owner_id} · {notice.scope.role.value}")
 
-    def on_agent_response_received(self, msg: AgentResponseReceived) -> None:
-        phase_id = msg.scope.phase_id
-        key = self._thinking_key(msg.scope.owner_id, msg.scope.role.value, msg.iteration)
+    def _on_agent_responded(self, notice: AgentResponded) -> None:
+        phase_id = notice.scope.phase_id
+        key = self._thinking_key(notice.scope.owner_id, notice.scope.role.value, notice.iteration)
         self._stop_thinking(phase_id, key)
-        self._write_output(render_response_header(msg.scope), phase_id=phase_id)
-        if msg.response.text.strip():
-            self._write_output(render_response_text(msg.response.text), phase_id=phase_id)
-        for tool_call in msg.response.tool_calls:
+        self._write_output(render_response_header(notice.scope), phase_id=phase_id)
+        if notice.response.text.strip():
+            self._write_output(render_response_text(notice.response.text), phase_id=phase_id)
+        for tool_call in notice.response.tool_calls:
             self._write_output(render_tool_call_line(tool_call), phase_id=phase_id)
-        for search in msg.response.web_activity.searches:
+        for search in notice.response.web_activity.searches:
             self._write_output(render_web_search_line(search), phase_id=phase_id)
-        for fetch in msg.response.web_activity.fetches:
+        for fetch in notice.response.web_activity.fetches:
             self._write_output(render_web_fetch_line(fetch), phase_id=phase_id)
 
-    def on_agent_tool_called(self, msg: AgentToolCalled) -> None:
-        self._write_output(render_tool_result_line(msg.tool_call, msg.result), phase_id=msg.scope.phase_id)
+    def _on_tool_called(self, notice: ToolCalled) -> None:
+        self._write_output(render_tool_result_line(notice.tool_call, notice.result), phase_id=notice.scope.phase_id)
 
-    def on_before_compact(self, msg: BeforeCompact) -> None:
-        self._write_output(render_compact_notice(), phase_id=msg.scope.phase_id)
+    def _on_before_compact(self, notice: BeforeCompact) -> None:
+        self._write_output(render_compact_notice(), phase_id=notice.scope.phase_id)
 
-    def on_context_cleared(self, msg: ContextCleared) -> None:
-        self._write_output(render_context_cleared_notice(), phase_id=msg.scope.phase_id)
+    def _on_context_cleared(self, notice: ContextCleared) -> None:
+        self._write_output(render_context_cleared_notice(), phase_id=notice.scope.phase_id)
 
-    def on_agent_finished(self, msg: AgentFinished) -> None:
-        phase_id = msg.scope.phase_id
-        self._stop_agent_thinking(phase_id, msg.scope.owner_id, msg.scope.role.value)
-        self._write_output(render_agent_finish_line(msg.scope, msg.result), phase_id=phase_id)
+    def _on_agent_finished(self, notice: AgentFinished) -> None:
+        phase_id = notice.scope.phase_id
+        self._stop_agent_thinking(phase_id, notice.scope.owner_id, notice.scope.role.value)
+        self._write_output(render_agent_finish_line(notice.scope, notice.result), phase_id=phase_id)
 
-    def on_agent_errored(self, msg: AgentErrored) -> None:
-        phase_id = msg.scope.phase_id
-        self._stop_agent_thinking(phase_id, msg.scope.owner_id, msg.scope.role.value)
-        self._write_output(render_agent_error_line(msg.scope, msg.error), phase_id=phase_id)
+    def _on_agent_errored(self, notice: AgentErrored) -> None:
+        phase_id = notice.scope.phase_id
+        self._stop_agent_thinking(phase_id, notice.scope.owner_id, notice.scope.role.value)
+        self._write_output(render_agent_error_line(notice.scope, notice.error), phase_id=phase_id)
         if phase_id is not None:
             self._mark_phase_failed(phase_id)
         self._update_display()
 
-    def on_before_goal_check(self, msg: BeforeGoalCheck) -> None:
-        key = (msg.phase_id, msg.task_name)
+    def _on_before_goal_check(self, notice: BeforeGoalCheck) -> None:
+        key = (notice.phase_id, notice.task_name)
         if key in self._task_statuses:
             self._task_statuses[key] = RunStatus.RUNNING
             self._update_display()
 
-    def on_after_goal_check(self, msg: AfterGoalCheck) -> None:
-        key = (msg.phase_id, msg.task_name)
+    def _on_after_goal_check(self, notice: AfterGoalCheck) -> None:
+        key = (notice.phase_id, notice.task_name)
         if key in self._task_statuses:
-            self._task_statuses[key] = RunStatus.DONE if msg.valid else RunStatus.FAILED
+            self._task_statuses[key] = RunStatus.DONE if notice.valid else RunStatus.FAILED
             self._update_display()

@@ -13,30 +13,13 @@ from typing import TYPE_CHECKING, Protocol
 from textual import events, on, work
 from textual.app import App
 from textual.binding import Binding
-from textual.message import Message
 from textual.message_pump import MessagePump
 from textual.reactive import reactive
 
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.cli.meta.ai.palette import STATUS_DONE, STATUS_FAILED, STATUS_PENDING, STATUS_RUNNING
-from ddev.cli.meta.ai.tui.messages import (
-    AfterCompact,
-    AfterGoalCheck,
-    AgentBeforeSend,
-    AgentErrored,
-    AgentFinished,
-    AgentResponseReceived,
-    AgentStarted,
-    AgentToolCalled,
-    BeforeCompact,
-    BeforeGoalCheck,
-    ContextCleared,
-    PhaseErrored,
-    PhaseFinished,
-    PhaseStarted,
-    RunErrored,
-)
+from ddev.cli.meta.ai.tui.messages import NoticeMessage
 from ddev.cli.meta.ai.tui.status import ExecutionStatus
 from ddev.cli.meta.ai.tui.theme import togo_markdown_theme, togo_theme
 
@@ -90,7 +73,7 @@ class TogoApp(App):
         self.engine = engine
         self.phase_registry = phase_registry
         self.provider_registry = provider_registry
-        self.received: list[Message] = []
+        self.received: list[NoticeMessage] = []
         self.bridge_target: MessagePump = self
         self.ddev_app: Application = ddev_app
         self.console.push_theme(togo_markdown_theme)
@@ -134,59 +117,10 @@ class TogoApp(App):
         if selection:
             self.copy_to_clipboard(selection)
 
-    def _record(self, msg: Message) -> None:
-        self.received.append(msg)
-
     @work
     async def run_flow(self, orchestrator: OrchestratorLike) -> None:
         """Run the orchestrator on the app's event loop."""
         await orchestrator.run_async()
 
-    # ------------------------------------------------------------------
-    # Sink handlers — record every bridge message for headless assertions
-    # ------------------------------------------------------------------
-
-    async def on_agent_before_send(self, msg: AgentBeforeSend) -> None:
-        self._record(msg)
-
-    async def on_phase_started(self, msg: PhaseStarted) -> None:
-        self._record(msg)
-
-    async def on_phase_finished(self, msg: PhaseFinished) -> None:
-        self._record(msg)
-
-    async def on_phase_errored(self, msg: PhaseErrored) -> None:
-        self._record(msg)
-
-    async def on_run_errored(self, msg: RunErrored) -> None:
-        self._record(msg)
-
-    async def on_agent_started(self, msg: AgentStarted) -> None:
-        self._record(msg)
-
-    async def on_agent_response_received(self, msg: AgentResponseReceived) -> None:
-        self._record(msg)
-
-    async def on_agent_tool_called(self, msg: AgentToolCalled) -> None:
-        self._record(msg)
-
-    async def on_agent_finished(self, msg: AgentFinished) -> None:
-        self._record(msg)
-
-    async def on_agent_errored(self, msg: AgentErrored) -> None:
-        self._record(msg)
-
-    async def on_before_compact(self, msg: BeforeCompact) -> None:
-        self._record(msg)
-
-    async def on_after_compact(self, msg: AfterCompact) -> None:
-        self._record(msg)
-
-    async def on_context_cleared(self, msg: ContextCleared) -> None:
-        self._record(msg)
-
-    async def on_before_goal_check(self, msg: BeforeGoalCheck) -> None:
-        self._record(msg)
-
-    async def on_after_goal_check(self, msg: AfterGoalCheck) -> None:
-        self._record(msg)
+    def on_notice_message(self, message: NoticeMessage) -> None:
+        self.received.append(message)
