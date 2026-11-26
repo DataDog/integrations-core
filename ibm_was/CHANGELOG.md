@@ -2,7 +2,11 @@
 
 <!-- towncrier release notes start -->
 
-## 5.5.2 / 2026-11-25
+## 6.0.0 / 2026-11-25
+
+***Changed***:
+
+* Bump minimum version of base check to 38.11.0. ([#26079](https://github.com/DataDog/integrations-core/pull/26079))
 
 ***Fixed***:
 
