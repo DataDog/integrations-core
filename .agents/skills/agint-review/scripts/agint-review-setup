@@ -12,6 +12,8 @@ the scout, reviewers, challenger, and synthesis steps. Per-agent filtered diffs 
 written to <review-dir>/diffs/<agent>.diff so prompts don't have to carry full diffs.
 When the github-actions reviewer runs on integrations-core, the workflow files of the
 other repos that call its workflows @master are downloaded to <review-dir>/callers/.
+When the integrations reviewer runs on integrations-core, dd-analytics' standard metric
+allowlist is downloaded to <review-dir>/standard_metric_allowlist.json.
 
 The last line of stdout is the absolute path to context.json. Human-readable progress
 goes to stderr.
@@ -26,6 +28,7 @@ observable behavior do not need a README update.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -114,6 +117,18 @@ MASTER_CALL_RE = re.compile(
 CALLERS_DIRNAME = "callers"
 CALLERS_INDEX = "index.md"
 CALLERS_LABEL = "Callers of integrations-core workflows @master in other repos (downloaded at setup)"
+
+# A metric no prefix in dd-analytics' standard metric allowlist covers is billed
+# to the customer as a custom metric. The integrations reviewer can't read
+# another org's repo, so on integrations-core setup downloads the allowlist for
+# it. ddoghq/dd-analytics needs a ddoghq account; without one it's skipped with
+# a warning, and the reviewer asks instead of checking.
+INTEGRATIONS_AGENT = "integrations"
+METRIC_ALLOWLIST_OF_REPO = "integrations-core"
+METRIC_ALLOWLIST_REPO = "ddoghq/dd-analytics"
+METRIC_ALLOWLIST_REF = "master"
+METRIC_ALLOWLIST_PATH = "luigiscripts/billing/usage/standard_metric_allowlist.json"
+METRIC_ALLOWLIST_FILENAME = "standard_metric_allowlist.json"
 
 def log(msg: str):
     print(msg, file=sys.stderr, flush=True)
@@ -901,6 +916,82 @@ def fetch_master_callers(
     return index_path, warnings
 
 
+def git_blob_sha(text: str) -> str:
+    """The git blob SHA of text, as GitHub reports it for a file with that content."""
+    data = text.encode()
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def fetch_metric_allowlist(
+    review_dir: Path,
+    tokens: list[tuple[str, str | None]],
+    gh_api: GhApi = gh_api_raw,
+) -> tuple[InstructionEntry | None, list[str]]:
+    """Download dd-analytics' standard metric allowlist to <review_dir>.
+
+    The first token that can read the file is used. Returns its instruction
+    entry, labelled with the source, the blob SHA and the account, or None plus
+    a warning when no token can read it or the content isn't the expected list
+    of {"prefix": ...} entries.
+    """
+    body, account = None, None
+    for label, token in tokens:
+        body = gh_api(
+            f"repos/{METRIC_ALLOWLIST_REPO}/contents/{METRIC_ALLOWLIST_PATH}?ref={METRIC_ALLOWLIST_REF}", token
+        )
+        if body is not None:
+            account = label
+            break
+    source = f"{METRIC_ALLOWLIST_REPO}@{METRIC_ALLOWLIST_REF}:{METRIC_ALLOWLIST_PATH}"
+    if body is None or account is None:
+        tried = ", ".join(label for label, _ in tokens) or "none"
+        return None, [
+            f"could not read {source} with any gh account (tried: {tried}); integrations can't check that metrics "
+            "are covered by the standard metric allowlist. Log in with a ddoghq account (gh auth login) to include it."
+        ]
+    try:
+        entries = json.loads(body)
+        valid = isinstance(entries, list) and all(isinstance(e.get("prefix"), str) for e in entries)
+    except (ValueError, AttributeError):
+        valid = False
+    if not valid:
+        return None, [
+            f"{source} is not a JSON list of entries with a `prefix`; integrations can't check that metrics "
+            "are covered by the standard metric allowlist."
+        ]
+    out = review_dir / METRIC_ALLOWLIST_FILENAME
+    out.write_text(body)
+    label = (
+        f"Standard metric allowlist ({source}, blob {git_blob_sha(body)}, read with {account}; downloaded at setup)"
+    )
+    return {"label": label, "path": str(out.resolve())}, []
+
+
+def add_metric_allowlist(
+    review_dir: Path,
+    repo_name: str,
+    selected: list[SelectedEntry],
+    per_agent: dict[str, InstructionList],
+    challenger: InstructionList,
+    tokens: Callable[[], list[tuple[str, str | None]]] = gh_tokens,
+    gh_api: GhApi = gh_api_raw,
+) -> list[str]:
+    """When integrations runs on integrations-core, give it and the challenger the allowlist.
+
+    Best effort: returns the warnings to show in the setup summary, and the run
+    continues without the file when it can't be downloaded. Tokens are only
+    looked up when the file is needed.
+    """
+    if repo_name != METRIC_ALLOWLIST_OF_REPO or not any(e["agent"]["name"] == INTEGRATIONS_AGENT for e in selected):
+        return []
+    log("  downloading the standard metric allowlist from dd-analytics…")
+    entry, warnings = fetch_metric_allowlist(review_dir, tokens(), gh_api)
+    if entry is not None:
+        per_agent[INTEGRATIONS_AGENT].append(entry)
+        challenger.append(entry)
+    return warnings
+
+
 def ensure_gitignore(repo_root_path: Path, review_dir_base: str) -> bool:
     """Append the review dir to .gitignore if not already covered. Returns True if added."""
     gi = repo_root_path / ".gitignore"
@@ -1209,6 +1300,12 @@ def main():
         per_agent_instructions[GITHUB_ACTIONS_AGENT].append(entry)
         challenger_instructions.append(entry)
 
+    # integrations on integrations-core: download the standard metric allowlist.
+    # Best effort, like the callers: without it the reviewer asks instead of checking.
+    allowlist_warnings = add_metric_allowlist(
+        review_dir, current_repo.split("/")[-1], selected, per_agent_instructions, challenger_instructions
+    )
+
     jira_key = detect_jira_key(pr.get("title"), pr.get("headRefName"))
 
     context = {
@@ -1283,7 +1380,7 @@ def main():
         log(f"  reviewed by {reviewer}: {len(only_conventions)} file"
             f"{'s' if len(only_conventions) != 1 else ''} ({', '.join(only_conventions[:5])}"
             + (", …" if len(only_conventions) > 5 else "") + ")")
-    for w in caller_warnings:
+    for w in caller_warnings + allowlist_warnings:
         log(f"  warning: {w}")
     if jira_key:
         log(f"  jira: {jira_key}")

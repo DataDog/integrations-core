@@ -127,8 +127,8 @@ or other agent config files inside the worktrees.
 line as `- <label>: <path>`. The setup script has already resolved the bundled
 rules (tenets, output contract, comment style), any per-repo overrides under
 `.claude/agint-review/`, the AGENTS.md files on the changed paths (conventions only)
-and the downloaded caller workflows (github-actions on integrations-core only), in
-the right order. Do not Glob; do not re-derive.]
+the downloaded caller workflows (github-actions on integrations-core only) and the
+standard metric allowlist (integrations on integrations-core only), in the right order. Do not Glob; do not re-derive.]
 
 Read each of these before forming findings. The shared instruction files are
 mandatory on every run; the project-specific files (when present) take priority
@@ -197,7 +197,8 @@ context.json.agents_to_run.]
 `- <label>: <path>`. Setup has already resolved the shared bundled rules (tenets,
 output contract, comment style), the project common file (if present), every
 per-repo agent file and AGENTS.md file reviewers were given in this run, and the
-caller-workflow index when github-actions got one. Do not Glob.]
+caller-workflow index when github-actions got one, and the standard metric allowlist
+when integrations got it. Do not Glob.]
 
 Read these to know the rules reviewers were operating under. Check every finding
 against the tenets and the output contract, and every AGENTS.md citation against the

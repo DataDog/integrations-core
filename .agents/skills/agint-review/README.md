@@ -136,6 +136,7 @@ All three scripts are pure Python 3.11+ (stdlib only) and live under [`scripts/`
 | [`output-format.md`](./references/output-format.md) | Final review markdown layout, JSON `comments` schema, anchoring guidance for off-diff findings. Used by the orchestrator at synthesis time. |
 | [`prompt-templates.md`](./references/prompt-templates.md) | The scout, reviewer and challenger prompt templates. Also documents the pass-by-reference principle. |
 | [`integrations/lifecycle.md`](./references/integrations/lifecycle.md), [`integrations/persistent-cache.md`](./references/integrations/persistent-cache.md), [`integrations/tests.md`](./references/integrations/tests.md), [`integrations/datadog-checks-base.md`](./references/integrations/datadog-checks-base.md), [`integrations/datadog-checks-dev.md`](./references/integrations/datadog-checks-dev.md) | Rules the integrations reviewer reads by what the PR touches. |
+| [`integrations/metric-allowlist.md`](./references/integrations/metric-allowlist.md) | Every new metric covered by a prefix in dd-analytics' standard metric allowlist, or it's billed as a custom metric. integrations-core only; setup downloads the allowlist from ddoghq/dd-analytics for the integrations reviewer. |
 | [`integrations/metric-types.md`](./references/integrations/metric-types.md) | The `metadata.csv` metric-type rule. Setup gives it to the integrations reviewer only on repos without `AGENTS.md`; on integrations-core it's in the root `AGENTS.md`, for `conventions`. |
 | [`logs/hard-checks.md`](./references/logs/hard-checks.md), [`logs/collection.md`](./references/logs/collection.md) | The logs reviewer's local overrides and fallback for when the guide can't be read, and the config and README log source cross-check. |
 | [`ddev/imports.md`](./references/ddev/imports.md), [`ddev/output.md`](./references/ddev/output.md), [`ddev/commands.md`](./references/ddev/commands.md), [`ddev/testing.md`](./references/ddev/testing.md) | Rules the ddev reviewer reads by what the PR touches. |
@@ -181,6 +182,7 @@ Every review run lives under a `round-<N>/` subdirectory — round 1 is the natu
 ├── diffs/<agent>.diff            # per-agent filtered diffs. Kept.
 ├── findings/<agent>.md           # one file per reviewer's raw output. Kept.
 ├── callers/                      # workflows of other repos calling integrations-core @master, plus index.md; only for github-actions on integrations-core. Kept.
+├── standard_metric_allowlist.json # dd-analytics' standard metric allowlist; only for integrations on integrations-core. Kept.
 ├── challenger.md                 # full challenger report. Kept.
 ├── review.json                   # final synthesized review. Kept.
 ├── head/                         # read-only worktree with the PR applied. Removed right after synthesis.
