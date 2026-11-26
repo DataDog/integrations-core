@@ -1,0 +1,1 @@
+Add the `collect_column_statistics.function` option to override the function used to read column statistics.

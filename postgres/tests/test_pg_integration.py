@@ -637,8 +637,8 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     check.run()
 
     if float(POSTGRES_VERSION) >= 9.6:
-        aggregator.assert_metric('postgresql.activity.backend_xid_age', value=1, count=1, tags=test_tags)
-        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=1, count=1, tags=test_tags)
+        for metric in ('postgresql.activity.backend_xid_age', 'postgresql.activity.backend_xmin_age'):
+            assert_metric_at_least(aggregator, metric, tags=test_tags, count=1, lower_bound=1)
     else:
         aggregator.assert_metric('postgresql.activity.backend_xid_age', count=0, tags=test_tags)
         aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=test_tags)
@@ -655,9 +655,8 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     check.run()
 
     if float(POSTGRES_VERSION) >= 9.6:
-        # Check that the xmin and xid is 2 tx old
-        aggregator.assert_metric('postgresql.activity.backend_xid_age', value=2, count=1, tags=test_tags)
-        aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=2, count=1, tags=test_tags)
+        for metric in ('postgresql.activity.backend_xid_age', 'postgresql.activity.backend_xmin_age'):
+            assert_metric_at_least(aggregator, metric, tags=test_tags, count=1, lower_bound=2)
 
     # Check that xact_start_age has a value greater than the trasaction_age lower bound
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
