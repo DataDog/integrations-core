@@ -1,1 +1,0 @@
-Add the `job_scheduler`, `job_scheduler_queue`, and `job_scheduler_workload` tags to Kueue Workload events.

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.10.0 / 2026-11-25
+
+***Added***:
+
+* Adding `windows_service.status` metric for service state representation. ([#25290](https://github.com/DataDog/integrations-core/pull/25290))
+
 ## 6.9.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:

@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 23.8.0 / 2026-11-25
+
+***Added***:
+
+* Collect `context_info` from XE query completion and query error events to correlate them with APM traces. ([#25838](https://github.com/DataDog/integrations-core/pull/25838))
+* Collect real execution plans, with their runtime parameter values, from the `datadog_query_plans` Extended Events session with `collect_xe.query_plans`. ([#25976](https://github.com/DataDog/integrations-core/pull/25976))
+* Send column `max_length`, `precision` and `scale` in schema collection for the types that use them. ([#26055](https://github.com/DataDog/integrations-core/pull/26055))
+
+***Fixed***:
+
+* Honor `exclude_hostname` in SQL Server XE event payloads. ([#25064](https://github.com/DataDog/integrations-core/pull/25064))
+* Preserve SQL Server table object IDs in modern schema collection payloads. ([#25839](https://github.com/DataDog/integrations-core/pull/25839))
+* Fix Query Samples missing the calling APM service for queries longer than `stored_procedure_characters_limit` with an appended SQL comment. ([#25884](https://github.com/DataDog/integrations-core/pull/25884))
+* Obfuscate `ParameterRuntimeValue` in XML plans and compute `db.plan.raw_signature` from the raw plan instead of `query_plan_hash`. ([#25951](https://github.com/DataDog/integrations-core/pull/25951))
+* Fix metric collection for full database-name and table-name batches by leaving headroom for driver parameters. ([#26017](https://github.com/DataDog/integrations-core/pull/26017))
+* Recover Datadog Agent service comments omitted from SQL Server activity samples and statement metrics. ([#26091](https://github.com/DataDog/integrations-core/pull/26091))
+* Fix query metrics that reported a cached plan's lifetime counters as one interval when the plan ran again after being idle. ([#26146](https://github.com/DataDog/integrations-core/pull/26146))
+
 ## 23.7.0 / 2026-10-29 / Agent 7.86.0
 
 ***Added***:

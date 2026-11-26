@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 10.0.0 / 2026-11-25
+
+***Changed***:
+
+* Bump minimum version of base check to 38.11.0. ([#26073](https://github.com/DataDog/integrations-core/pull/26073))
+
+***Added***:
+
+* If CouchDB times out while sending the response body, the `couchdb.can_connect` service check message now starts with `Request timeout:` instead of showing only the error text. ([#26073](https://github.com/DataDog/integrations-core/pull/26073))
+* Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. ([#26073](https://github.com/DataDog/integrations-core/pull/26073))
+
 ## 9.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

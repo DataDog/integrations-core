@@ -1,1 +1,0 @@
-Fix unbounded memory growth in query metrics caused by retaining rows of deallocated prepared statements.

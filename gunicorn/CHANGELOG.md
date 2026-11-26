@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.5.1 / 2026-11-25
+
+***Fixed***:
+
+* Fix a crash when a process exits during the scan for the Gunicorn master process. ([#26087](https://github.com/DataDog/integrations-core/pull/26087))
+
 ## 4.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
