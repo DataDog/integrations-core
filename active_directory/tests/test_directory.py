@@ -193,6 +193,8 @@ def test_sid_conversion_matches_windows_string_form():
         pytest.param(0x7FFFFFFFFFFFFFFF, None, id='never_max'),
         pytest.param(116444736000000000, '1970-01-01T00:00:00Z', id='unix_epoch'),
         pytest.param(134380845000000000, '2026-11-02T09:15:00Z', id='recent'),
+        # Past year 9999: unrepresentable, and one such account must not fail the whole crawl.
+        pytest.param(0x7FFFFFFFFFFFFFFE, None, id='beyond_year_9999'),
     ],
 )
 def test_filetime_to_iso(value, expected):
@@ -266,20 +268,24 @@ class FakeSearcher:
 
 def test_adsi_search_reads_every_value_range(mocker):
     # Past AD's per-attribute limit, values arrive as `memberOf;range=0-1499`; reading only `memberOf` drops them all.
+    # Large attributes take several follow-up reads, each returning the next range, until one ends in `*`.
     dn = 'CN=big/user,OU=Users,DC=corp'
     searchers = {
-        'LDAP://dc1/DC=corp': FakeSearcher(
-            [{'ADsPath': ['LDAP://dc1/x'], 'distinguishedName': [dn], 'memberOf;range=0-1': ['g1', 'g2']}]
-        ),
+        'LDAP://dc1/DC=corp': [
+            FakeSearcher([{'ADsPath': ['LDAP://dc1/x'], 'distinguishedName': [dn], 'memberOf;range=0-1': ['g1', 'g2']}])
+        ],
         # The rest is read from the object itself; `/` must be escaped in an ADsPath.
-        'LDAP://dc1/CN=big\\/user,OU=Users,DC=corp': FakeSearcher([{'memberOf;range=2-*': ['g3']}]),
+        'LDAP://dc1/CN=big\\/user,OU=Users,DC=corp': [
+            FakeSearcher([{'distinguishedName': [dn], 'memberOf;range=2-3': ['g3', 'g4']}]),
+            FakeSearcher([{'distinguishedName': [dn], 'memberOf;range=4-*': ['g5']}]),
+        ],
     }
     mocker.patch('win32api.GetComputerNameEx', return_value='dc1')
-    mocker.patch('win32com.adsi.ADsGetObject', side_effect=lambda path, iid: searchers[path])
+    mocker.patch('win32com.adsi.ADsGetObject', side_effect=lambda path, iid: searchers[path].pop(0))
 
     entries = list(AdsiDirectory().search('DC=corp', '(objectClass=user)', ['distinguishedName', 'memberOf']))
 
-    assert entries == [{'distinguishedName': [dn], 'memberOf': ['g1', 'g2', 'g3']}]
+    assert entries == [{'distinguishedName': [dn], 'memberOf': ['g1', 'g2', 'g3', 'g4', 'g5']}]
 
 
 def test_column_values_normalizes_adsi_buffers():
@@ -634,6 +640,37 @@ def test_primary_group_counts_as_privileged_membership(aggregator, dd_run_check,
     assert records[guid_str(2)]['privilege']['is_privileged'] is False
 
 
+def test_unreadable_entry_is_skipped_without_stopping_the_snapshot(
+    aggregator, dd_run_check, fake_directory, clock, caplog
+):
+    # An attribute hidden by an ACL must cost one record, not the rest of the snapshot, which would then expire.
+    unreadable = user_entry(1, JDOE_DN)
+    del unreadable['userAccountControl']
+    fake_directory(
+        FakeDirectory(
+            users=[unreadable, user_entry(2, BOSS_DN)],
+            computers=[computer_entry(3, 'WEB1', objectSid=[]), computer_entry(4, 'WEB2')],
+        )
+    )
+    dd_run_check(ActiveDirectoryDirectoryCheck('active_directory', {}, [{'collect_directory': True}]))
+
+    assert sorted(r.key for r in decode_resources(aggregator)) == sorted([guid_str(2), guid_str(4)])
+    aggregator.assert_metric('active_directory.directory.records', 1, tags=['record_type:active_directory_user'])
+    aggregator.assert_metric('active_directory.directory.records', 1, tags=['record_type:active_directory_computer'])
+    assert f'Skipping active_directory_user {JDOE_DN}' in caplog.text
+    assert f'Skipping active_directory_computer CN=WEB1,CN=Computers,{DOMAIN_DN}' in caplog.text
+
+
+def test_unreadable_pdc_role_owner_is_reported(aggregator, dd_run_check, fake_directory, clock, caplog):
+    # Every DC would then skip collection, so it must be visible rather than look like the normal non-PDC case.
+    directory = fake_directory(FakeDirectory(pdc=None, users=[user_entry(1, JDOE_DN)]))
+    dd_run_check(ActiveDirectoryDirectoryCheck('active_directory', {}, [{'collect_directory': True}]))
+
+    assert directory.searches == []
+    aggregator.assert_metric('active_directory.directory.is_pdc_emulator', 0)
+    assert 'Cannot read fSMORoleOwner' in caplog.text
+
+
 def test_crawls_once_per_interval(aggregator, dd_run_check, fake_directory, clock):
     # Without min_collection_interval the Agent runs the check every 15s; the PDC must not be crawled each time.
     directory = fake_directory(FakeDirectory(users=[user_entry(1, JDOE_DN)]))
@@ -650,16 +687,59 @@ def test_crawls_once_per_interval(aggregator, dd_run_check, fake_directory, cloc
     assert directory.searches.count(USER_FILTER) == 2
 
 
-def test_failed_crawl_is_retried_next_interval(dd_run_check, fake_directory, clock):
-    # A failing crawl must surface as a check error but not be retried against the PDC on every 15s run.
+def test_scheduled_interval_is_not_gated_again(dd_run_check, fake_directory, clock):
+    # With min_collection_interval set the Agent schedules each run; one starting a second early must still crawl.
     directory = fake_directory(FakeDirectory(users=[user_entry(1, JDOE_DN)]))
-    directory.search = lambda *args: (_ for _ in ()).throw(RuntimeError('LDAP unavailable'))
+    check = ActiveDirectoryDirectoryCheck(
+        'active_directory', {}, [{'collect_directory': True, 'min_collection_interval': 3600}]
+    )
+
+    dd_run_check(check)
+    clock.return_value += 3599
+    dd_run_check(check)
+    assert directory.searches.count(USER_FILTER) == 2
+
+
+@pytest.mark.parametrize('interval', [pytest.param(15, id='agent_default'), pytest.param(1799, id='just_below')])
+def test_interval_below_minimum_is_raised_to_30_minutes(
+    aggregator, dd_run_check, fake_directory, clock, caplog, interval
+):
+    # Every crawl reads the whole directory from the PDC emulator; a short interval would load it continuously.
+    directory = fake_directory(FakeDirectory(users=[user_entry(1, JDOE_DN)]))
+    check = ActiveDirectoryDirectoryCheck(
+        'active_directory', {}, [{'collect_directory': True, 'min_collection_interval': interval}]
+    )
+
+    dd_run_check(check)
+    assert 'below the minimum of 1800' in caplog.text
+    assert [r.expire_at.seconds for r in decode_resources(aggregator)] == [1_800_000_000 + 3 * 1800]
+
+    clock.return_value += 1799
+    dd_run_check(check)
+    assert directory.searches.count(USER_FILTER) == 1
+
+    clock.return_value += 1
+    dd_run_check(check)
+    assert directory.searches.count(USER_FILTER) == 2
+
+
+def test_failed_crawl_is_retried_next_interval(dd_run_check, fake_directory, clock, mocker):
+    # A failing crawl must surface as a check error, not be retried against the PDC on every 15s run, and be
+    # retried once the interval has passed.
+    directory = fake_directory(FakeDirectory(users=[user_entry(1, JDOE_DN)]))
+    search = mocker.patch.object(directory, 'search', side_effect=RuntimeError('LDAP unavailable'))
     check = ActiveDirectoryDirectoryCheck('active_directory', {}, [{'collect_directory': True}])
 
     with pytest.raises(Exception, match='LDAP unavailable'):
         dd_run_check(check)
     clock.return_value += 15
     dd_run_check(check)
+    assert search.call_count == 1
+
+    clock.return_value += 3600
+    with pytest.raises(Exception, match='LDAP unavailable'):
+        dd_run_check(check)
+    assert search.call_count == 2
 
 
 def test_pdc_role_moving_moves_collection(aggregator, dd_run_check, fake_directory, clock):

@@ -13,13 +13,15 @@ import struct
 import time
 import uuid
 from collections import defaultdict
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from datetime import datetime, timezone
+from typing import Protocol
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.genresources import INCLUDE_ALL
 
 DEFAULT_CRAWL_INTERVAL = 3600
+MIN_CRAWL_INTERVAL = 1800
 EXPIRY_INTERVALS = 3
 PAGE_SIZE = 1000
 
@@ -104,6 +106,17 @@ IN_CHAIN_RULE = '1.2.840.113556.1.4.1941'
 FILETIME_NEVER = (0, 0x7FFFFFFFFFFFFFFF)
 FILETIME_EPOCH_OFFSET = 116444736000000000  # 100ns intervals between 1601-01-01 and 1970-01-01
 
+# A directory entry: attribute name to its values.
+Entry = dict[str, list]
+
+
+class Directory(Protocol):
+    def read_root_dse(self, attribute: str) -> str: ...
+
+    def read_object(self, dn: str, attributes: list[str]) -> Entry: ...
+
+    def search(self, base_dn: str, ldap_filter: str, attributes: list[str]) -> Iterator[Entry]: ...
+
 
 def guid_to_str(value: bytes) -> str:
     return str(uuid.UUID(bytes_le=value))
@@ -129,7 +142,11 @@ def filetime_to_iso(value: int | None) -> str | None:
     if value is None or value in FILETIME_NEVER:
         return None
     seconds = (value - FILETIME_EPOCH_OFFSET) // 10_000_000
-    return datetime.fromtimestamp(seconds, timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    try:
+        return datetime.fromtimestamp(seconds, timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    except (ValueError, OverflowError, OSError):
+        # Dates that tools can set but Python can't represent, such as past year 9999.
+        return None
 
 
 def datetime_to_iso(value: datetime | None) -> str | None:
@@ -191,13 +208,13 @@ def column_values(values: list[tuple[object, int]]) -> list:
     return [bytes(value) if isinstance(value, memoryview) else value for value, _ in values]
 
 
-def _first(entry: dict, attribute: str):
+def _first(entry: Entry, attribute: str) -> object:
     values = entry.get(attribute)
     return values[0] if values else None
 
 
 def build_user_record(
-    entry: dict,
+    entry: Entry,
     guid_by_dn: dict[str, str],
     privileged_groups: dict[str, set[str]],
     domain_netbios_name: str | None = None,
@@ -252,7 +269,7 @@ def build_user_record(
     }
 
 
-def build_computer_record(entry: dict, domain_netbios_name: str | None = None) -> dict:
+def build_computer_record(entry: Entry, domain_netbios_name: str | None = None) -> dict:
     dn = _first(entry, 'distinguishedName')
     uac = _first(entry, 'userAccountControl')
     if uac & UAC_SERVER_TRUST_ACCOUNT:
@@ -298,17 +315,17 @@ class AdsiDirectory:
 
         return adsi.ADsGetObject(f'LDAP://{self._server}/RootDSE').Get(attribute)
 
-    def read_object(self, dn: str, attributes: list[str]) -> dict:
+    def read_object(self, dn: str, attributes: list[str]) -> Entry:
         from win32com.adsi import adsicon
 
         return next(self._search(dn, '(objectClass=*)', attributes, adsicon.ADS_SCOPE_BASE), {})
 
-    def search(self, base_dn: str, ldap_filter: str, attributes: list[str]) -> Iterator[dict]:
+    def search(self, base_dn: str, ldap_filter: str, attributes: list[str]) -> Iterator[Entry]:
         from win32com.adsi import adsicon
 
         return self._search(base_dn, ldap_filter, attributes, adsicon.ADS_SCOPE_SUBTREE)
 
-    def _search(self, base_dn: str, ldap_filter: str, attributes: list[str], scope: int) -> Iterator[dict]:
+    def _search(self, base_dn: str, ldap_filter: str, attributes: list[str], scope: int) -> Iterator[Entry]:
         from win32com import adsi
         from win32com.adsi import adsicon
 
@@ -341,7 +358,9 @@ class AdsiDirectory:
                     if value_range and not value_range.endswith('*'):
                         next_range[attribute] = int(value_range.rsplit('-', 1)[1]) + 1
                 for attribute, start in next_range.items():
-                    rest = self.read_object(entry['distinguishedName'][0], [f'{attribute};range={start}-*'])
+                    # Also read the DN, so a follow-up that is itself partial can read the next range.
+                    dn = entry['distinguishedName'][0]
+                    rest = self.read_object(dn, ['distinguishedName', f'{attribute};range={start}-*'])
                     entry[attribute].extend(rest.get(attribute, []))
                 yield entry
         finally:
@@ -353,16 +372,29 @@ class ActiveDirectoryDirectoryCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
-        # The Agent runs the check every 15s unless `min_collection_interval` is set, so the crawl
-        # interval is enforced here to keep the default at one crawl per hour.
-        self._interval = int(self.instance.get('min_collection_interval', DEFAULT_CRAWL_INTERVAL))
+        interval = self.instance.get('min_collection_interval')
+        self._interval = int(interval or DEFAULT_CRAWL_INTERVAL)
+        # The Agent runs the check every 15s unless `min_collection_interval` is set, so only then is the crawl
+        # interval enforced here. When it is set, the Agent already schedules one run per interval, and a second
+        # gate would skip runs that start a little early.
+        self._throttle = not interval
+        if self._interval < MIN_CRAWL_INTERVAL:
+            # Every crawl reads the whole directory from the PDC emulator.
+            self.log.warning(
+                'min_collection_interval %s is below the minimum of %s seconds for directory collection; using %s',
+                self._interval,
+                MIN_CRAWL_INTERVAL,
+                MIN_CRAWL_INTERVAL,
+            )
+            self._interval = MIN_CRAWL_INTERVAL
+            self._throttle = True
         self._tags = list(self.instance.get('tags', []))
-        self._last_crawl = None
-        self._directory = None
+        self._last_crawl: int | None = None
+        self._directory: Directory | None = None
 
-    def check(self, _):
+    def check(self, _: dict) -> None:
         now = int(time.time())
-        if self._last_crawl is not None and now - self._last_crawl < self._interval:
+        if self._throttle and self._last_crawl is not None and now - self._last_crawl < self._interval:
             return
         # Set before crawling so a failing crawl is retried next interval, not on every run.
         self._last_crawl = now
@@ -380,11 +412,14 @@ class ActiveDirectoryDirectoryCheck(AgentCheck):
         finally:
             pythoncom.CoUninitialize()
 
-    def _crawl(self, directory, now: int):
+    def _crawl(self, directory: Directory, now: int) -> None:
         domain_dn = directory.read_root_dse('defaultNamingContext')
         server = directory.read_root_dse('dsServiceName')
         domain = directory.read_object(domain_dn, ['fSMORoleOwner', 'objectSid'])
         pdc = _first(domain, 'fSMORoleOwner')
+        if not pdc:
+            # Every DC would skip collection, so this must not look like the normal non-PDC case.
+            self.log.warning('Cannot read fSMORoleOwner on %s; directory collection is skipped', domain_dn)
         is_pdc = bool(pdc) and pdc.lower() == server.lower()
         self.gauge('directory.is_pdc_emulator', int(is_pdc), tags=self._tags)
         if not is_pdc:
@@ -397,9 +432,41 @@ class ActiveDirectoryDirectoryCheck(AgentCheck):
         crossref = next(directory.search(f'CN=Partitions,{config_dn}', crossref_filter(domain_dn), ['nETBIOSName']), {})
         netbios_name = _first(crossref, 'nETBIOSName')
 
+        privileged_groups, privileged_by_primary_rid = self._privileged_groups(directory, domain_dn, domain_sid)
+
+        users = list(directory.search(domain_dn, USER_FILTER, USER_ATTRIBUTES))
+        guid_by_dn = {}
+        for entry in users:
+            dn, object_guid = _first(entry, 'distinguishedName'), _first(entry, 'objectGUID')
+            if not dn or not object_guid:
+                continue  # Logged and skipped when its record is built below.
+            user_id = guid_to_str(object_guid)
+            guid_by_dn[dn.lower()] = user_id
+            privileged_groups[user_id] |= privileged_by_primary_rid.get(_first(entry, 'primaryGroupID'), set())
+
+        def build_user(entry: Entry) -> dict:
+            return build_user_record(entry, guid_by_dn, privileged_groups, netbios_name)
+
+        def build_computer(entry: Entry) -> dict:
+            return build_computer_record(entry, netbios_name)
+
+        sent_users = sum(self._submit(USER_TYPE, entry, build_user, now, expire_at) for entry in users)
+        computers = directory.search(domain_dn, COMPUTER_FILTER, COMPUTER_ATTRIBUTES)
+        sent_computers = sum(self._submit(COMPUTER_TYPE, entry, build_computer, now, expire_at) for entry in computers)
+
+        self.gauge('directory.records', sent_users, tags=self._tags + [f'record_type:{USER_TYPE}'])
+        self.gauge('directory.records', sent_computers, tags=self._tags + [f'record_type:{COMPUTER_TYPE}'])
+        self.gauge('directory.crawl.duration', time.time() - now, tags=self._tags)
+
+    def _privileged_groups(
+        self, directory: Directory, domain_dn: str, domain_sid: str
+    ) -> tuple[defaultdict[str, set[str]], defaultdict[int, set[str]]]:
+        """Return the privileged groups of each user GUID, and of each primary group RID.
+
+        Primary group memberships are absent from memberOf, so the RID of each privileged group, and of every
+        group nested in it, maps to the privileged group; users are then matched on primaryGroupID.
+        """
         privileged_groups = defaultdict(set)
-        # Primary group memberships are absent from memberOf, so map the RID of each privileged group, and of
-        # every group nested in it, to the privileged group; users are matched on primaryGroupID below.
         privileged_by_primary_rid = defaultdict(set)
         groups = directory.search(
             domain_dn, privileged_group_filter(domain_sid), ['distinguishedName', 'sAMAccountName', 'objectSid']
@@ -413,29 +480,23 @@ class ActiveDirectoryDirectoryCheck(AgentCheck):
             for group_with_rid in [group, *nested]:
                 rid = int(sid_to_str(_first(group_with_rid, 'objectSid')).rsplit('-', 1)[1])
                 privileged_by_primary_rid[rid].add(group_name)
+        return privileged_groups, privileged_by_primary_rid
 
-        users = list(directory.search(domain_dn, USER_FILTER, USER_ATTRIBUTES))
-        for entry in users:
-            primary_groups = privileged_by_primary_rid.get(_first(entry, 'primaryGroupID'), set())
-            if primary_groups:
-                privileged_groups[guid_to_str(_first(entry, 'objectGUID'))] |= primary_groups
-        guid_by_dn = {_first(u, 'distinguishedName').lower(): guid_to_str(_first(u, 'objectGUID')) for u in users}
-        for entry in users:
-            self._submit(
-                USER_TYPE, build_user_record(entry, guid_by_dn, privileged_groups, netbios_name), now, expire_at
-            )
+    def _submit(
+        self, record_type: str, entry: Entry, build: Callable[[Entry], dict], seen_at: int, expire_at: int
+    ) -> bool:
+        """Build and send one record, returning whether it was sent.
 
-        computers = 0
-        for entry in directory.search(domain_dn, COMPUTER_FILTER, COMPUTER_ATTRIBUTES):
-            self._submit(COMPUTER_TYPE, build_computer_record(entry, netbios_name), now, expire_at)
-            computers += 1
-
-        self.gauge('directory.records', len(users), tags=self._tags + [f'record_type:{USER_TYPE}'])
-        self.gauge('directory.records', computers, tags=self._tags + [f'record_type:{COMPUTER_TYPE}'])
-        self.gauge('directory.crawl.duration', time.time() - now, tags=self._tags)
-
-    def _submit(self, record_type: str, record: dict, seen_at: int, expire_at: int):
+        An entry the Agent account can't fully read, for example because an ACL hides an attribute, is logged
+        and skipped so it doesn't stop the rest of the snapshot.
+        """
+        try:
+            record = build(entry)
+        except Exception as e:
+            self.log.warning('Skipping %s %s: %s', record_type, _first(entry, 'distinguishedName'), e)
+            return False
         # Records are built field by field from the attribute allow-lists above, never from raw entries.
         self.submit_generic_resource(
             type=record_type, key=record['id'], fields=record, include=INCLUDE_ALL, seen_at=seen_at, expire_at=expire_at
         )
+        return True
