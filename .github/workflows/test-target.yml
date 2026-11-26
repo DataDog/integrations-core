@@ -65,7 +65,7 @@ on:
         type: string
       agent-image-py2:
         required: false
-        default: "datadog/agent-dev:master-py2"
+        default: "registry.datadoghq.com/agent-dev:master-py2"
         type: string
       agent-image-windows:
         required: false
@@ -73,7 +73,7 @@ on:
         type: string
       agent-image-windows-py2:
         required: false
-        default: "datadog/agent-dev:master-py2-win-servercore"
+        default: "registry.datadoghq.com/agent-dev:master-py2-win-servercore"
         type: string
       setup-env-vars:
         required: false
