@@ -88,14 +88,10 @@ class QueryExecutor(object):
                 else:
                     rows = self.execute_query(query.query, query.params)
             except Exception as e:
-                if self.error_handler:
-                    self.logger.error('Error querying %s: %s', query_name, self.error_handler(str(e)))
-                else:
-                    self.logger.error('Error querying %s: %s', query_name, e)
-
+                self._log_query_error(query_name, e)
                 continue
 
-            for row in rows:
+            for row in self._iter_rows(rows, query_name):
                 if not self._is_row_valid(query, row):
                     continue
 
@@ -139,6 +135,18 @@ class QueryExecutor(object):
                     else:
                         if result is not None:
                             sources[name] = result
+
+    def _log_query_error(self, query_name, error):
+        if self.error_handler:
+            self.logger.error('Error querying %s: %s', query_name, self.error_handler(str(error)))
+        else:
+            self.logger.error('Error querying %s: %s', query_name, error)
+
+    def _iter_rows(self, rows, query_name):
+        try:
+            yield from rows
+        except Exception as e:
+            self._log_query_error(query_name, e)
 
     def _is_row_valid(self, query, row):
         # type: (Query, List) -> bool
