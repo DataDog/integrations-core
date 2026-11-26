@@ -38,6 +38,7 @@ class PostgresAutodiscovery(Discovery):
         self.db_pool = self._check.db_pool
         self._max_databases = autodiscovery_config.max_databases
         self._cache_filtered = []
+        self.remote_query_databases: tuple[str, ...] | None = None
 
     def get_items(self) -> List[str]:
         """
@@ -69,6 +70,8 @@ class PostgresAutodiscovery(Discovery):
 
         items_parsed = [item[1] for item in items][: self._max_databases]
         self._cache_filtered = items_parsed
+        # Publish only a fully filtered, bounded list; resolving must never refresh discovery.
+        self.remote_query_databases = tuple(items_parsed)
         return items_parsed
 
     def _get_databases(self) -> List[str]:

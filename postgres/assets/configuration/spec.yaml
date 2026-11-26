@@ -59,6 +59,18 @@ files:
       value:
         type: string
         display_default: postgres
+    - name: remote_queries
+      description: Settings for remote queries requested by the Agent.
+      options:
+        - name: timeout_ms
+          description: |
+            Maximum statement time for a remote query, in milliseconds. When unset, the run's
+            remaining time applies. This setting can shorten, but never extend, that time.
+          value:
+            type: integer
+            minimum: 1
+            example: 5000
+            display_default: null
     - name: dbm
       display_priority: 0
       fleet_configurable: true
