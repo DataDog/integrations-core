@@ -3,11 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
-from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.config.models import PhaseConfig
-from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
+from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.phases.notices import PhaseErrored, PhaseFinished, PhaseStarted
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointTokenInfo,
@@ -39,6 +41,7 @@ def _make_stub_phase(
     phase_id="p1",
     dependencies=None,
     outcome=None,
+    events: RunEvents | None = None,
 ):
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
     phase = _StubPhase(
@@ -47,6 +50,7 @@ def _make_stub_phase(
         config=PhaseConfig(name=phase_id),
         checkpoint_manager=checkpoint_manager,
         context=flow_context,
+        events=events or RunEvents(),
         outcome=outcome,
     )
     phase.bus = StubBus(message_queue)
@@ -58,33 +62,28 @@ def _make_stub_phase(
 # ---------------------------------------------------------------------------
 
 
-def test_build_creates_properly_initialized_instance(flow_dir):
+async def test_built_phase_sends_lifecycle_notices_to_run(flow_dir, flow_context):
+    events = RunEvents()
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    context = FlowContext(
-        runtime_variables={"var1": "val1"},
-        flow_variables={"var2": "val2"},
-    )
-    config = PhaseConfig(name="p1")
+    received: list[tuple[PhaseStarted | PhaseFinished, bool]] = []
 
+    async def record(notice: PhaseStarted | PhaseFinished) -> None:
+        received.append((notice, notice.phase_id in checkpoint_manager.read()))
+
+    events.subscribe(PhaseStarted, record)
+    events.subscribe(PhaseFinished, record)
     phase = _StubPhase.build(
         phase_id="p1",
-        config=config,
-        deps=["dep1", "dep2"],
-        resources=object(),
+        config=PhaseConfig(name="p1"),
+        deps=[],
+        resources=SimpleNamespace(events=events),
         checkpoint_manager=checkpoint_manager,
-        context=context,
+        context=flow_context,
     )
 
-    assert isinstance(phase, _StubPhase)
-    assert phase._phase_id == "p1"
-    assert phase._remaining_dependencies == {"dep1", "dep2"}
-    assert phase._config is config
-    assert phase._checkpoint_manager is checkpoint_manager
-    assert phase._runtime_variables == {"var1": "val1"}
-    assert phase._flow_variables == {"var2": "val2"}
-    assert phase._callbacks is context.callbacks
-    assert phase._logger is context.logger
-    assert phase._executed is False
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert received == [(PhaseStarted("p1"), False), (PhaseFinished("p1"), True)]
 
 
 # ---------------------------------------------------------------------------
@@ -145,26 +144,21 @@ async def test_on_error_writes_failed_checkpoint_after_start(flow_dir, flow_cont
     assert checkpoint.started_at is not None
 
 
-async def test_on_error_fires_phase_error_callback(flow_dir, message_queue):
-    callback_set = CallbackSet()
-    received: list[tuple[str, BaseException]] = []
+async def test_on_error_notifies_run_of_failed_phase(flow_dir, flow_context, message_queue):
+    events = RunEvents()
+    received: list[PhaseErrored] = []
 
-    @callback_set.on_phase_error
-    async def handler(phase_id: str, error: BaseException) -> None:
-        received.append((phase_id, error))
+    async def record(notice: PhaseErrored) -> None:
+        received.append(notice)
 
-    context = FlowContext(
-        runtime_variables={},
-        flow_variables={},
-        callbacks=Callbacks([callback_set]),
-    )
-    phase, _ = _make_stub_phase(flow_dir, context, message_queue)
+    events.subscribe(PhaseErrored, record)
+    phase, _ = _make_stub_phase(flow_dir, flow_context, message_queue, events=events)
     original_error = RuntimeError("boom")
     wrapped = MessageProcessingError("p1", PhaseTrigger(id="start", phase_id=None), original_error)
 
     await phase.on_error(wrapped)
 
-    assert received == [("p1", original_error)]
+    assert received == [PhaseErrored("p1", original_error)]
 
 
 # ---------------------------------------------------------------------------

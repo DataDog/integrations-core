@@ -13,7 +13,10 @@ from typing import Any
 
 @dataclass(frozen=True)
 class Notice:
-    """An observation that doesn't require an answer."""
+    """An observation that doesn't require an answer.
+
+    Define concrete notices in `notices.py` next to the code that publishes them.
+    """
 
 
 @dataclass(frozen=True)

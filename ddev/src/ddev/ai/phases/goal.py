@@ -10,11 +10,12 @@ from dataclasses import dataclass
 
 from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
-from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import AgentConfig, TaskConfig
+from ddev.ai.phases.notices import AfterGoalCheck, BeforeGoalCheck
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
+from ddev.ai.run_events import RunEvents
 from ddev.ai.tools.registry import filter_read_only
 
 GOAL_REVIEWER_RESET_THRESHOLD_PCT = 75.0
@@ -328,7 +329,7 @@ async def _drive_goal_loop(
     worker_process: ReActProcess,
     initial_result: ReActResult,
     reviewer_process: ReActProcess,
-    callbacks: Callbacks,
+    events: RunEvents,
     compact_if_needed: Callable[[ReActResult], Awaitable[tuple[int, int]]],
 ) -> GoalLoopOutcome:
     total_in = total_out = 0
@@ -339,7 +340,7 @@ async def _drive_goal_loop(
     try:
         while True:
             attempts += 1
-            await callbacks.fire_before_goal_check(phase_id, task.name, attempts)
+            await events.notify(BeforeGoalCheck(phase_id, task.name, attempts))
 
             worker_summary = worker_result.final_response.text or "(no summary provided)"
             user_message, needs_reset = _select_reviewer_message(
@@ -356,7 +357,7 @@ async def _drive_goal_loop(
             total_in += check.input_tokens
             total_out += check.output_tokens
 
-            await callbacks.fire_after_goal_check(phase_id, task.name, attempts, check.valid, check.reason)
+            await events.notify(AfterGoalCheck(phase_id, task.name, attempts, check.valid, check.reason))
 
             if check.valid:
                 return GoalLoopOutcome(
@@ -403,15 +404,14 @@ async def run_goal_loop(
     initial_result: ReActResult,
     parent_agent_config: AgentConfig,
     process_factory: ReActProcessFactory,
-    callbacks: Callbacks,
+    events: RunEvents,
     phase_id: str,
     compact_if_needed: Callable[[ReActResult], Awaitable[tuple[int, int]]],
 ) -> GoalLoopOutcome:
     """Drive the reviewer + worker-retry loop for a single task with a goal.
 
     The reviewer runs as a scoped ``GOAL_REVIEWER`` process; its per-run activity
-    is captured by the run-wide logging callbacks bound to ``process_factory``.
-    The phase callbacks see only the bracketing before/after_goal_check events.
+    is captured by the agent logger. Goal-check notices bracket each review attempt.
     """
     reviewer_scope = AgentScope(
         owner_id=f"{phase_id}.goal.{task.name}",
@@ -436,6 +436,6 @@ async def run_goal_loop(
         worker_process=worker_process,
         initial_result=initial_result,
         reviewer_process=reviewer_process,
-        callbacks=callbacks,
+        events=events,
         compact_if_needed=compact_if_needed,
     )

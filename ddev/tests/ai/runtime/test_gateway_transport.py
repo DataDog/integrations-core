@@ -9,6 +9,7 @@ from unittest.mock import AsyncMock, Mock, call
 import httpx2
 import pytest
 
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.errors import CredentialRefreshError, RefreshFailureCause
 from ddev.ai.runtime.gateway_auth import GatewayAuthError, GatewayTokenProducer
 from ddev.ai.runtime.gateway_transport import GATEWAY_BASE_URL, GatewayTransport
@@ -44,7 +45,7 @@ async def test_gateway_reuses_replacement_when_an_old_request_is_rejected_late(m
     acquire_pat = AsyncMock(side_effect=["ddpat_old", "ddpat_new"])
     monkeypatch.setattr(dd_auth, "find_dd_auth", lambda: "/auth-bin/dd-auth")
     monkeypatch.setattr(dd_auth, "acquire_datadog_pat", acquire_pat)
-    tokens = GatewayTokenProducer()
+    tokens = GatewayTokenProducer(RunEvents())
     late_request_started = asyncio.Event()
     deliver_late_rejection = asyncio.Event()
     requests = []

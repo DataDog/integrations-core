@@ -10,9 +10,10 @@ from typing import Protocol
 from textual.message import Message
 from textual.message_pump import MessagePump
 
-from ddev.ai.callbacks.callbacks import CallbackSet
+from ddev.ai.phases import notices as phase_notices
 from ddev.ai.react import notices
 from ddev.ai.run_events import RunEvents
+from ddev.ai.runtime.notices import RunErrored as RunErroredNotice
 from ddev.cli.meta.ai.tui.messages import (
     AfterCompact,
     AfterGoalCheck,
@@ -33,48 +34,34 @@ from ddev.cli.meta.ai.tui.messages import (
 
 
 class BridgeApp(Protocol):
-    """App contract required by callback-to-message bridging."""
+    """App contract required by forwarding notices to Textual."""
 
     bridge_target: MessagePump
 
     def post_message(self, message: Message) -> bool: ...
 
 
-def build_app_callback_set(app: BridgeApp) -> CallbackSet:
-    """Forward the remaining phase, goal-check and run callbacks."""
-    cb = CallbackSet()
+def subscribe_run_notices(events: RunEvents, app: BridgeApp) -> None:
+    async def phase_start(notice: phase_notices.PhaseStarted) -> None:
+        app.bridge_target.post_message(PhaseStarted(notice.phase_id))
 
-    def _target() -> MessagePump:
-        return app.bridge_target
+    async def phase_finish(notice: phase_notices.PhaseFinished) -> None:
+        app.bridge_target.post_message(PhaseFinished(notice.phase_id))
 
-    @cb.on_phase_start
-    async def _(phase_id: str) -> None:
-        _target().post_message(PhaseStarted(phase_id))
+    async def phase_error(notice: phase_notices.PhaseErrored) -> None:
+        app.bridge_target.post_message(PhaseErrored(notice.phase_id, notice.error))
 
-    @cb.on_phase_finish
-    async def _(phase_id: str) -> None:
-        _target().post_message(PhaseFinished(phase_id))
+    async def run_error(notice: RunErroredNotice) -> None:
+        app.bridge_target.post_message(RunErrored())
 
-    @cb.on_phase_error
-    async def _(phase_id: str, error: BaseException) -> None:
-        _target().post_message(PhaseErrored(phase_id, error))
+    async def before_goal_check(notice: phase_notices.BeforeGoalCheck) -> None:
+        app.bridge_target.post_message(BeforeGoalCheck(notice.phase_id, notice.task_name, notice.attempt))
 
-    @cb.on_run_error
-    async def _() -> None:
-        _target().post_message(RunErrored())
+    async def after_goal_check(notice: phase_notices.AfterGoalCheck) -> None:
+        app.bridge_target.post_message(
+            AfterGoalCheck(notice.phase_id, notice.task_name, notice.attempt, notice.valid, notice.reason)
+        )
 
-    @cb.on_before_goal_check
-    async def _(phase_id: str, task_name: str, attempt: int) -> None:
-        _target().post_message(BeforeGoalCheck(phase_id, task_name, attempt))
-
-    @cb.on_after_goal_check
-    async def _(phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None:
-        _target().post_message(AfterGoalCheck(phase_id, task_name, attempt, valid, reason))
-
-    return cb
-
-
-def subscribe_agent_notices(events: RunEvents, app: BridgeApp) -> None:
     async def before_agent_send(notice: notices.AgentBeforeSend) -> None:
         app.bridge_target.post_message(AgentBeforeSend(notice.scope, notice.prompt, notice.iteration))
 
@@ -102,6 +89,12 @@ def subscribe_agent_notices(events: RunEvents, app: BridgeApp) -> None:
     async def agent_error(notice: notices.AgentErrored) -> None:
         app.bridge_target.post_message(AgentErrored(notice.scope, notice.error))
 
+    events.subscribe(phase_notices.PhaseStarted, phase_start)
+    events.subscribe(phase_notices.PhaseFinished, phase_finish)
+    events.subscribe(phase_notices.PhaseErrored, phase_error)
+    events.subscribe(RunErroredNotice, run_error)
+    events.subscribe(phase_notices.BeforeGoalCheck, before_goal_check)
+    events.subscribe(phase_notices.AfterGoalCheck, after_goal_check)
     events.subscribe(notices.AgentBeforeSend, before_agent_send)
     events.subscribe(notices.AgentStarted, agent_start)
     events.subscribe(notices.AgentResponded, agent_response)

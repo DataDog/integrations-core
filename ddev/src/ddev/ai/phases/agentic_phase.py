@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from ddev.ai.phases.resources import PhaseResources
     from ddev.ai.react.factory import ReActProcessFactory
     from ddev.ai.react.types import ReActResult
+    from ddev.ai.run_events import RunEvents
 
 
 RESUME_NOTICE = """
@@ -68,6 +69,7 @@ class AgenticPhase(Phase):
         config: PhaseConfig,
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
+        events: RunEvents,
         agent_config: AgentConfig,
         process_factory: ReActProcessFactory,
     ) -> None:
@@ -77,6 +79,7 @@ class AgenticPhase(Phase):
             config=config,
             checkpoint_manager=checkpoint_manager,
             context=context,
+            events=events,
         )
         self._agent_config = agent_config
         self._process_factory = process_factory
@@ -115,6 +118,7 @@ class AgenticPhase(Phase):
             config=config,
             checkpoint_manager=checkpoint_manager,
             context=context,
+            events=resources.events,
             agent_config=agent_config,
             process_factory=process_factory,
         )
@@ -232,7 +236,7 @@ class AgenticPhase(Phase):
                 initial_result=result,
                 parent_agent_config=self._agent_config,
                 process_factory=self._process_factory,
-                callbacks=self._callbacks,
+                events=self._events,
                 phase_id=self._phase_id,
                 compact_if_needed=lambda r: self._compact_if_needed(process, r),
             )

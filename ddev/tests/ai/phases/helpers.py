@@ -10,7 +10,6 @@ from typing import Any
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
-from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import FlowContext
@@ -151,7 +150,6 @@ def make_agent_phase(
     flow_variables: dict[str, str] | None = None,
     runtime_variables: dict[str, str] | None = None,
     context_compact_threshold_pct: int = 80,
-    callbacks=None,
     captured_worker_kwargs: dict[str, Any] | None = None,
     goal_runtime_builder: Callable[[str], AgentRuntime] | None = None,
     agent_config: AgentConfig | None = None,
@@ -173,7 +171,6 @@ def make_agent_phase(
     context = FlowContext(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
-        callbacks=callbacks or Callbacks(),
         resume_frontier=resume_frontier,
     )
 
@@ -189,6 +186,7 @@ def make_agent_phase(
         config=config,
         checkpoint_manager=checkpoint_manager,
         context=context,
+        events=events,
         agent_config=effective_agent_config,
         process_factory=process_factory,
     )

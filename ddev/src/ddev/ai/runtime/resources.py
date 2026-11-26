@@ -71,6 +71,10 @@ class RunResources:
         self._connection: RouteConnection | None = None
         self._route: RunRoute | None = None
 
+    @property
+    def events(self) -> RunEvents:
+        return self._events
+
     async def prepare(
         self, report_route: Callable[[RunRoute], None], *, initial_agent: AgentConfig | None
     ) -> ModelAccessCheck | None:
@@ -80,7 +84,7 @@ class RunResources:
         """
         requested = self._configured_registry.requested_route
         reason = None
-        gateway_tokens = GatewayTokenProducer() if requested is Route.AI_GATEWAY else None
+        gateway_tokens = GatewayTokenProducer(self._events) if requested is Route.AI_GATEWAY else None
         if gateway_tokens is not None and not gateway_tokens.available:
             gateway_tokens = None
             reason = "dd-auth was not found on PATH."

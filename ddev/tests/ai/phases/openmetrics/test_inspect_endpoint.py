@@ -27,6 +27,7 @@ from ddev.ai.phases.openmetrics.inspect_endpoint import (
     _parse_exposition,
     normalize_endpoint_name,
 )
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointTokenInfo, FailedCheckpoint, SuccessCheckpoint
 from ddev.event_bus.exceptions import MessageProcessingError
 
@@ -138,6 +139,7 @@ def _make_phase(
         config=PhaseConfig(name=phase_id),
         checkpoint_manager=checkpoint_mgr,
         context=context,
+        events=RunEvents(),
     )
     phase.bus = StubBus(message_queue)
     return phase, checkpoint_mgr

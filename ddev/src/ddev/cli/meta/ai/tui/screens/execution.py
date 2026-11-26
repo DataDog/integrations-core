@@ -18,7 +18,6 @@ from textual.widget import Widget
 from textual.widgets import Static
 from textual.worker import Worker
 
-from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
 from ddev.ai.run_events import RunEvents
@@ -71,7 +70,7 @@ if TYPE_CHECKING:
     from ddev.ai.runtime.resources import RunRoute
 
 
-OrchestratorBuilder = Callable[[Callbacks, RunEvents], OrchestratorLike]
+OrchestratorBuilder = Callable[[RunEvents], OrchestratorLike]
 
 BANNER_ERROR_MAX_CHARS = 200
 
@@ -183,19 +182,17 @@ class ExecutionScreen(TogoScreen):
     @work(exit_on_error=False)
     async def _run_orchestrator(self) -> None:
         from ddev.ai.runtime.orchestrator import RUN_LOGGER
-        from ddev.cli.meta.ai.tui.bridge import build_app_callback_set, subscribe_agent_notices
+        from ddev.cli.meta.ai.tui.bridge import subscribe_run_notices
 
         orchestrator: OrchestratorLike | None = None
         try:
             async with asyncio.TaskGroup() as notice_task_group:
-                # The next PR moves phase, goal-check, and run callbacks to notices.
-                callbacks = Callbacks([build_app_callback_set(self.togo_app)])
                 events = RunEvents(logger=RUN_LOGGER, notice_task_group=notice_task_group)
-                subscribe_agent_notices(events, self.togo_app)
+                subscribe_run_notices(events, self.togo_app)
                 if self._orchestrator_builder is not None:
-                    orchestrator = self._orchestrator_builder(callbacks, events)
+                    orchestrator = self._orchestrator_builder(events)
                 else:
-                    orchestrator = self._build_real_orchestrator(callbacks, events)
+                    orchestrator = self._build_real_orchestrator(events)
                 self._orchestrator = orchestrator
                 await orchestrator.run_async()
             self.togo_app.execution_status = ExecutionStatus.COMPLETED
@@ -210,7 +207,7 @@ class ExecutionScreen(TogoScreen):
             if isinstance(error, CredentialRefreshError) or orchestrator is None or orchestrator.failed_phase is None:
                 self.post_message(ExecutionFailed(error))
 
-    def _build_real_orchestrator(self, callbacks: Callbacks, events: RunEvents) -> PhaseOrchestrator:
+    def _build_real_orchestrator(self, events: RunEvents) -> PhaseOrchestrator:
         """Construct the real PhaseOrchestrator for production use."""
         from ddev.ai.runtime.orchestrator import PhaseOrchestrator
         from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -245,7 +242,6 @@ class ExecutionScreen(TogoScreen):
             runtime_variables=runtime_variables,
             provider_registry=self.togo_app.provider_registry,
             file_access_policy=FileAccessPolicy(write_root=write_root, integration_name=integration),
-            callbacks=callbacks,
             events=events,
             resume=self.resume,
             report_route=self._show_route,
