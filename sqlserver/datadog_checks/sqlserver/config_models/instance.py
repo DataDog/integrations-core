@@ -231,6 +231,14 @@ class AoMetrics(BaseModel):
     only_emit_local: Optional[bool] = Field(None, examples=[False])
 
 
+class CpuMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[True])
+
+
 class DbBackupMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -371,6 +379,7 @@ class DatabaseMetrics(BaseModel):
         frozen=True,
     )
     ao_metrics: Optional[AoMetrics] = None
+    cpu_metrics: Optional[CpuMetrics] = None
     db_backup_metrics: Optional[DbBackupMetrics] = None
     db_files_metrics: Optional[DbFilesMetrics] = None
     db_fragmentation_metrics: Optional[DbFragmentationMetrics] = None

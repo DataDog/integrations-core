@@ -63,6 +63,13 @@ SERVER_METRICS = [
     'sqlserver.server.virtual_memory',
 ]
 
+CPU_METRICS = [
+    'sqlserver.cpu.online_schedulers',
+    'sqlserver.cpu.scheduler_delay_ms',
+    'sqlserver.cpu.signal_wait_ms',
+    'sqlserver.cpu.usage_ms',
+]
+
 SQLSERVER_YEAR = int(os.environ.get('SQLSERVER_YEAR'))
 SQLSERVER_ENGINE_EDITION = os.environ.get('SQLSERVER_ENGINE_EDITION')
 SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
@@ -119,7 +126,7 @@ EXPECTED_METRICS = (
 )
 
 DBM_MIGRATED_METRICS_NAMES = {m[0] for m in DBM_MIGRATED_METRICS}
-EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES]
+EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES] + CPU_METRICS
 DB_PERF_COUNT_METRICS_NAMES_SINGLE = {m[0] for m in INSTANCE_METRICS_DATABASE_SINGLE}
 DB_PERF_COUNT_METRICS_NAMES_AO = {m[0] for m in INSTANCE_METRICS_DATABASE_AO}
 
@@ -283,7 +290,7 @@ def assert_metrics(
     # if dbm is enabled, the integration does not emit certain metrics
     # as they are emitted from the DBM backend
     if dbm_enabled:
-        expected_metrics = [m for m in expected_metrics if m not in DBM_MIGRATED_METRICS_NAMES]
+        expected_metrics = [m for m in expected_metrics if m not in DBM_MIGRATED_METRICS_NAMES] + CPU_METRICS
 
     if database_autodiscovery:
         # when autodiscovery is enabled, we should not double emit metrics,
