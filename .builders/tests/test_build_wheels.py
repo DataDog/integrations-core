@@ -161,16 +161,29 @@ def placeholder():
         assert path.read_bytes() == source.replace('\n', newline).encode('utf-8')
 
 
-def test_kubernetes_api_docstrings_are_kept_for_watch(tmp_path: Path):
-    # `kubernetes.watch.Watch` reads the API method docstrings to pick the event type and the streaming
-    # argument, so only the model docstrings may be emptied.
+def test_kubernetes_api_docstrings_keep_only_watch_directives(tmp_path: Path):
+    # `kubernetes.watch.Watch` reads `:param bool follow:` and `:return:` from API method docstrings
+    # to pick the streaming argument and event type, so those directive lines must remain while the
+    # surrounding API prose and model docstrings are stripped.
     api = tmp_path / 'kubernetes/client/api/core_v1_api.py'
     api_source = '''class CoreV1Api:
+    """Generated API client prose that Watch does not read."""
+
     def read_namespaced_pod_log(self, name, namespace, **kwargs):
         """read log of the specified Pod
 
+        This method makes a synchronous HTTP request by default.
+        :param str name: name of the Pod
         :param bool follow: Follow the log stream of the pod.
         :return: str
+                 If the method is called asynchronously, returns the request thread.
+        """
+
+    def list_namespaced_pod(self, namespace, **kwargs):
+        """list or watch objects of kind Pod
+
+        :param str namespace: object name and auth scope
+        :return: V1PodList
         """
 '''
     model = tmp_path / 'kubernetes/client/models/v1_pod.py'
@@ -184,7 +197,16 @@ def test_kubernetes_api_docstrings_are_kept_for_watch(tmp_path: Path):
     rules = build_wheels._get_matching_rules('kubernetes-35.0.0-py2.py3-none-any.whl')
 
     assert build_wheels._strip_lines_from_dir(tmp_path, rules)
-    assert api.read_text(encoding='utf-8') == api_source
+    updated_api = api.read_text(encoding='utf-8')
+    namespace: dict[str, Any] = {}
+    exec(compile(updated_api, str(api), 'exec'), namespace)
+    api_cls = namespace['CoreV1Api']
+    assert api_cls.__doc__ == ''
+    assert (
+        api_cls.read_namespaced_pod_log.__doc__ == ':param bool follow: Follow the log stream of the pod.\n:return: str'
+    )
+    assert api_cls.list_namespaced_pod.__doc__ == ':return: V1PodList'
+    assert 'synchronous HTTP request' not in updated_api
     assert 'collection of containers' not in model.read_text(encoding='utf-8')
 
 
@@ -194,6 +216,7 @@ def test_kubernetes_api_docstrings_are_kept_for_watch(tmp_path: Path):
         ('cm_client-45.0.4-py3-none-manylinux2014_x86_64.whl', True),
         ('ddtrace-4.16.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl', True),
         ('hazelcast_python_client-5.7.0-py3-none-any.whl', True),
+        ('kubernetes-35.0.0-py2.py3-none-any.whl', True),
         ('openstacksdk-4.18.0-py3-none-any.whl', True),
         ('redis-8.1.0-py3-none-any.whl', True),
         # A separate distribution whose docstrings were not reviewed

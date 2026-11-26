@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 import tomllib
+from collections.abc import Sequence
 from functools import cache
 from hashlib import sha256
 from itertools import accumulate
@@ -290,6 +291,9 @@ def _load_line_removal_rules() -> list[dict]:
     rules = config.get("rules", [])
     for rule in rules:
         rule['_compiled_patterns'] = [re.compile(p) for p in rule.get('line_patterns', [])]
+        rule['_compiled_keep_docstring_patterns'] = [
+            re.compile(p) for p in rule.get('keep_docstring_line_patterns', [])
+        ]
     return rules
 
 
@@ -306,25 +310,42 @@ def _get_matching_rules(wheel_name: str) -> list[dict]:
     return matching
 
 
-def _strip_docstrings(source: str, filename: str) -> str:
-    """Empty Python docstrings without rewriting executable code or license comments."""
+def _strip_docstrings(
+    source: str,
+    filename: str,
+    keep_line_patterns: Sequence[re.Pattern[str]] = (),
+) -> str:
+    """Empty Python docstrings without rewriting executable code or license comments.
+
+    When `keep_line_patterns` is provided, matching lines are kept (stripped) inside the
+    docstring literal so runtime parsers (such as `kubernetes.watch.Watch`) continue to work
+    while the remaining prose is dropped.
+    """
     data = source.encode('utf-8')
     offsets = list(accumulate((len(line) + 1 for line in data.split(b'\n')), initial=0))
-    spans = []
+    spans: list[tuple[int, int, bytes]] = []
     for node in ast.walk(ast.parse(source, filename=filename)):
         if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-            if ast.get_docstring(node, clean=False) is not None:
+            docstring = ast.get_docstring(node, clean=False)
+            if docstring is not None:
                 doc = node.body[0]
                 assert doc.end_lineno is not None and doc.end_col_offset is not None
+                kept = [
+                    line.strip()
+                    for line in docstring.splitlines()
+                    if any(pattern.search(line) for pattern in keep_line_patterns)
+                ]
+                replacement = repr('\n'.join(kept)).encode('utf-8') if kept else b'""'
                 spans.append(
                     (
                         offsets[doc.lineno - 1] + doc.col_offset,
                         offsets[doc.end_lineno - 1] + doc.end_col_offset,
+                        replacement,
                     )
                 )
-    for start, end in sorted(spans, reverse=True):
+    for start, end, replacement in sorted(spans, reverse=True):
         # An empty literal preserves docstring-only bodies and leading __future__ imports.
-        data = data[:start] + b'""' + data[end:]
+        data = data[:start] + replacement + data[end:]
     return data.decode('utf-8')
 
 
@@ -367,7 +388,11 @@ def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
 
             updated_content = ''.join(kept_lines)
             if rule.get('strip_docstrings', False):
-                updated_content = _strip_docstrings(updated_content, str(py_file))
+                updated_content = _strip_docstrings(
+                    updated_content,
+                    str(py_file),
+                    keep_line_patterns=rule.get('_compiled_keep_docstring_patterns', ()),
+                )
             if updated_content != original_content:
                 py_file.write_text(updated_content, encoding='utf-8')
                 modified = True

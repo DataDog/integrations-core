@@ -1,6 +1,7 @@
 # Rules for stripping specific lines from wheel contents
 # Each rule specifies a package pattern and line patterns to remove, `strip_docstrings = true`
-# to empty Python docstrings, or both
+# to empty Python docstrings (optionally retaining lines matching `keep_docstring_line_patterns`),
+# or both
 
 # Example: add another rule like this
 # [[rules]]
@@ -34,11 +35,21 @@ line_patterns = [
 ]
 
 [[rules]]
-# kubernetes.watch.Watch parses the `:return:` and `:param bool follow:` lines of the
-# kubernetes/client/api docstrings, so only the model docstrings are emptied.
+# Generated Kubernetes model classes do not read their docstrings at runtime.
 package_pattern = "kubernetes-*"
 file_pattern = "kubernetes/client/models/*.py"
 strip_docstrings = true
+
+[[rules]]
+# kubernetes.watch.Watch parses only `:return:` and `:param bool follow:` from API docstrings.
+# Retain those directive lines so Watch keeps working while dropping the rest of the prose.
+package_pattern = "kubernetes-*"
+file_pattern = "kubernetes/client/api/*.py"
+strip_docstrings = true
+keep_docstring_line_patterns = [
+    "^\\s*:return:",
+    "^\\s*:param bool follow:",
+]
 
 [[rules]]
 # The generated Cloudera Manager API client does not read its docstrings at runtime.
