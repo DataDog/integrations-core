@@ -500,13 +500,12 @@ class GoodputTracker:
                 continue
             gpus = observation.gpus
             if gpus is None:
-                # Pods can be briefly missing, such as between an eviction and the replacement pod: keep the request.
+                # Pods can be briefly missing, such as between an eviction and the replacement pod: keep the request
+                # and the GPU model, so that the series of a PodGroup do not change meanwhile. With active pods, their
+                # own model is the current one, unset when they require several.
                 gpus = previous.gpus if previous is not None and previous.gpus is not None else 0.0
-                observation = observation._replace(gpus=gpus)
-            if observation.gpu_type is None and previous is not None and previous.gpu_type:
-                # Keep the GPU model once known, so that the series of a PodGroup do not change while its pods are
-                # briefly missing.
-                observation = observation._replace(gpu_type=previous.gpu_type)
+                gpu_type = previous.gpu_type if previous is not None else None
+                observation = observation._replace(gpus=gpus, gpu_type=gpu_type)
             if gpus <= 0 and previous is None:
                 continue
             # A tracked PodGroup whose active pods need no GPU, such as CPU pods still running after the GPU ones

@@ -953,3 +953,17 @@ def test_gpu_type_tags_both_metrics_when_the_pods_require_a_model_and_is_unset_o
     assert not any(tag.startswith('gpu_type:') for tag in badput_tags([contribution])[0])
     points = workload_points(pending)
     assert all('gpu_type:a100' in tags for _, _, tags in points)
+
+
+def test_gpu_type_is_unset_once_the_active_pods_require_different_models():
+    # GPU-hours of pods requiring different models must not be reported under the model seen first.
+    t, clock = tracker()
+    pg = kind_podgroup()
+    a100 = kind_pod(pg, phase='Pending', node_selector={'nvidia.com/gpu.product': 'NVIDIA-A100-SXM4-80GB'})
+    h100 = kind_pod(pg, phase='Pending', index=1, node_selector={'nvidia.com/gpu.product': 'NVIDIA-H100-80GB-HBM3'})
+    t.update([pg], [a100])
+    clock.now = 10
+    t.update([pg], [a100, h100])
+    clock.now = 20
+    [mixed] = t.update([pg], [a100, h100])
+    assert mixed.gpu_type is None
