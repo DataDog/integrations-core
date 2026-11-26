@@ -69,3 +69,201 @@ strip_docstrings = true
 package_pattern = "hazelcast_python_client-*"
 file_pattern = "*.py"
 strip_docstrings = true
+
+[[rules]]
+# aerospike does not read its docstrings at runtime.
+package_pattern = "aerospike-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# azure-core does not read its docstrings at runtime.
+package_pattern = "azure_core-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# azure-identity does not read its docstrings at runtime.
+package_pattern = "azure_identity-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# backports.zstd does not read its docstrings at runtime.
+package_pattern = "backports_zstd-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# beautifulsoup4 does not read its docstrings at runtime.
+package_pattern = "beautifulsoup4-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# boto3 does not read its docstrings at runtime.
+package_pattern = "boto3-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# botocore does not read its docstrings at runtime.
+package_pattern = "botocore-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# clickhouse-connect does not read its docstrings at runtime.
+package_pattern = "clickhouse_connect-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# confluent-kafka does not read its docstrings at runtime.
+package_pattern = "confluent_kafka-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# dogpile.cache does not read its docstrings at runtime.
+package_pattern = "dogpile_cache-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# in-toto does not read its docstrings at runtime.
+package_pattern = "in_toto-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# keystoneauth1 does not read its docstrings at runtime.
+package_pattern = "keystoneauth1-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# ldap3 does not read its docstrings at runtime.
+package_pattern = "ldap3-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# oauthlib does not read its docstrings at runtime.
+package_pattern = "oauthlib-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# opentelemetry-api does not read its docstrings at runtime.
+package_pattern = "opentelemetry_api-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# packaging does not read its docstrings at runtime.
+package_pattern = "packaging-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# paramiko does not read its docstrings at runtime.
+package_pattern = "paramiko-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# pathspec does not read its docstrings at runtime.
+package_pattern = "pathspec-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# platformdirs does not read its docstrings at runtime.
+package_pattern = "platformdirs-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# protobuf does not read its docstrings at runtime.
+package_pattern = "protobuf-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# psycopg does not read its docstrings at runtime; trailing hyphen avoids matching psycopg_c.
+package_pattern = "psycopg-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# pydantic only reads docstrings of user-defined models/fields/enums, never its own.
+package_pattern = "pydantic-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# pydantic-core does not read its docstrings at runtime.
+package_pattern = "pydantic_core-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# PyNaCl does not read its docstrings at runtime.
+package_pattern = "pynacl-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# pyOpenSSL does not read its docstrings at runtime.
+package_pattern = "pyopenssl-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# pysnmp does not read its docstrings at runtime; trailing hyphen avoids matching pysnmp_mibs.
+package_pattern = "pysnmp-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# pyspnego does not read its docstrings at runtime.
+package_pattern = "pyspnego-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# requests-toolbelt does not read its docstrings at runtime.
+package_pattern = "requests_toolbelt-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# s3transfer does not read its docstrings at runtime.
+package_pattern = "s3transfer-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# securesystemslib does not read its docstrings at runtime.
+package_pattern = "securesystemslib-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# setuptools does not read its docstrings at runtime.
+package_pattern = "setuptools-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# tuf does not read its docstrings at runtime.
+package_pattern = "tuf-*"
+file_pattern = "*.py"
+strip_docstrings = true
+
+[[rules]]
+# urllib3 does not read its docstrings at runtime.
+package_pattern = "urllib3-*"
+file_pattern = "*.py"
+strip_docstrings = true
