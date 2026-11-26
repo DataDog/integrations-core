@@ -1,0 +1,142 @@
+name: Sync Dependency Pins
+
+# ADMS bumps only agent_requirements.in, so its PRs fail `ddev validate dep`
+# until each check's pyproject.toml pin matches. This copies the new pins into
+# the checks, adds a `.security` changelog fragment for every check that
+# changed, and pushes both to the ADMS branch.
+#
+# The same ADMS push also starts resolve-build-deps.yaml; GitHub has no way to
+# order two workflows triggered by one push. Our sync push starts a new
+# resolve-build-deps run, whose concurrency group cancels the earlier one long
+# before it reaches the build. Check pyproject.toml files are not resolution
+# inputs, so the sync commit does not change what gets resolved.
+on:
+  push:
+    branches:
+    - engraver-auto-version-upgrade/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSION: "3.13"
+  SYNC_COMMIT_MESSAGE: Sync check dependency pins and changelog
+  FRAGMENTS_COMMIT_MESSAGE: Add changelog fragments for synced dependency pins
+
+jobs:
+  sync:
+    name: Sync check dependency pins
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: read  # Find the ADMS PR number for changelog fragment names
+      id-token: write  # Required for OIDC token federation with dd-octo-sts
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        # ddev finds changed checks from the merge base with origin/master. A
+        # blobless clone keeps full history without downloading every file version.
+        fetch-depth: 0
+        filter: blob:none
+        persist-credentials: false
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install ddev from local folder
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev
+
+    - name: Sync check dependency pins
+      run: |
+        ddev config set upgrade_check false
+        ddev config set repos.core .
+        ddev config set repo core
+        ddev dep sync
+
+    # Fragments are best effort: a failure here must not stop the pin sync push.
+    # `ddev release changelog new` writes a fragment for every changed check, but
+    # it adds `<PR>.security.1` next to an existing fragment, and it guesses the
+    # next issue number when the search API hasn't indexed the PR yet. So only
+    # the files it creates are kept: dropped where the check already has a
+    # fragment for the PR, and otherwise renamed to the real PR number.
+    - name: Write changelog fragments
+      continue-on-error: true
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        pr=""
+        for _ in $(seq 18); do
+          pr=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty' || true)
+          [ -n "$pr" ] && break
+          sleep 10
+        done
+        if [ -z "$pr" ]; then
+          echo "::warning::No open PR for $GITHUB_REF_NAME after 3 minutes; skipping changelog fragments."
+          exit 0
+        fi
+
+        list_fragments() { git ls-files --cached --others --exclude-standard -- '*/changelog.d/*' | sort; }
+        before=$(list_fragments)
+
+        ddev release changelog new security -m "Update dependencies to address security vulnerabilities."
+
+        comm -13 <(echo "$before") <(list_fragments) | while read -r file; do
+          dir=$(dirname "$file")
+          if grep -q "^${dir}/${pr}\." <<< "$before"; then
+            rm "$file"
+          elif [ "$file" != "${dir}/${pr}.security" ]; then
+            mv "$file" "${dir}/${pr}.security"
+          fi
+        done
+
+    # Created only after the branch's own ddev code has run, so that code never
+    # has access to a write token.
+    - name: Create token
+      uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+      id: token-generator
+      with:
+        scope: DataDog/integrations-core
+        policy: self.sync-dependency-pins.push
+
+    # Pushing to the exact ref fails if the branch moved since this run started;
+    # the run for the newer commit does the sync instead. The loop guard refuses
+    # to change pins on top of our own sync commit, in case `ddev dep sync` stops
+    # being idempotent, and allows at most one fragments-only follow-up, for when
+    # the PR did not exist yet on the first run.
+    - name: Commit synced pins to branch
+      env:
+        TOKEN: ${{ steps.token-generator.outputs.token }}
+      run: |
+        git config user.name "dd-agent-integrations-bot[bot]"
+        git config user.email "dd-agent-integrations-bot[bot]@users.noreply.github.com"
+        git add '*/pyproject.toml' '*/changelog.d/*'
+        last_subject=$(git log -1 --format=%s)
+        if git diff --cached --quiet; then
+          echo "No pin or changelog changes to commit."
+          exit 0
+        elif git diff --cached --quiet -- '*/pyproject.toml'; then
+          message=$FRAGMENTS_COMMIT_MESSAGE
+          if [ "$last_subject" = "$FRAGMENTS_COMMIT_MESSAGE" ]; then
+            echo "::warning::Changelog fragments changed again right after a fragments commit; not pushing."
+            exit 0
+          fi
+        else
+          message=$SYNC_COMMIT_MESSAGE
+          if [ "$last_subject" = "$SYNC_COMMIT_MESSAGE" ] || [ "$last_subject" = "$FRAGMENTS_COMMIT_MESSAGE" ]; then
+            echo "::warning::ddev dep sync changed pins again right after a sync commit; not pushing."
+            exit 0
+          fi
+        fi
+        git commit -m "$message"
+        git push "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF}"
