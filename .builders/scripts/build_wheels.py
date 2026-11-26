@@ -6,9 +6,11 @@ import email.message
 import fnmatch
 import json
 import os
+import platform
 import re
 import shutil
 import stat
+import struct
 import subprocess
 import sys
 import time
@@ -56,6 +58,19 @@ CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
 ELF_MAGIC = b'\x7fELF'
+ELF_HEADER_SIZE = 64
+ELF_CLASS_64 = 2
+ELF_DATA_LSB = 1
+ELF_VERSION_CURRENT = 1
+ELF_TYPE_DYN = 3
+# (e_ident[EI_CLASS], e_ident[EI_DATA], e_machine) per Linux builder architecture
+ELF_HOST_TARGETS: dict[str, tuple[int, int, int]] = {
+    'x86_64': (ELF_CLASS_64, ELF_DATA_LSB, 62),  # EM_X86_64
+    'amd64': (ELF_CLASS_64, ELF_DATA_LSB, 62),
+    'aarch64': (ELF_CLASS_64, ELF_DATA_LSB, 183),  # EM_AARCH64
+    'arm64': (ELF_CLASS_64, ELF_DATA_LSB, 183),
+}
+SHARED_LIBRARY_NAME_RE = re.compile(r'\.so(?:\.[0-9]+)*$')
 ELF_DEBUG_SECTION_RE = re.compile(r'^\s*\[\s*\d+\]\s+(?:\.z?debug_|\.gdb_index\b)')
 
 
@@ -378,17 +393,52 @@ def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
 
 
 def _is_shared_library_name(name: str) -> bool:
-    """Return True if `name` looks like a Linux ELF shared object (`.so` or `.so.*`)."""
-    filename = PurePosixPath(name).name
-    return filename.endswith('.so') or '.so.' in filename
+    """Return True if `name` has a shared-library suffix (`.so` or `.so.<digits>`)."""
+    return SHARED_LIBRARY_NAME_RE.search(PurePosixPath(name).name) is not None
 
 
-def _is_elf_file(path: Path) -> bool:
-    """Return True if `path` is a regular file starting with the ELF magic bytes."""
+def _host_elf_target() -> tuple[int, int, int] | None:
+    """Return the expected `(class, data, machine)` ELF header fields for the current Linux host."""
+    return ELF_HOST_TARGETS.get(platform.machine().lower())
+
+
+def _is_host_elf_shared_object_header(header: bytes, host_target: tuple[int, int, int]) -> bool:
+    """Return True if `header` is a valid ELF64 shared-object header matching `host_target`."""
+    if len(header) < ELF_HEADER_SIZE or header[:4] != ELF_MAGIC:
+        return False
+    expected_class, expected_data, expected_machine = host_target
+    if header[4] != expected_class or header[5] != expected_data or header[6] != ELF_VERSION_CURRENT:
+        return False
+    e_type, e_machine = struct.unpack_from('<HH', header, 16)
+    return e_type == ELF_TYPE_DYN and e_machine == expected_machine
+
+
+def _is_host_elf_shared_object(path: Path, host_target: tuple[int, int, int]) -> bool:
+    """Return True if `path` is a regular file with a host-architecture ELF shared-object header."""
     if path.is_symlink() or not path.is_file():
         return False
     with path.open('rb') as f:
-        return f.read(len(ELF_MAGIC)) == ELF_MAGIC
+        header = f.read(ELF_HEADER_SIZE)
+    return _is_host_elf_shared_object_header(header, host_target)
+
+
+def _wheel_has_host_elf_shared_objects(wheel_path: Path, zf: ZipFile) -> bool:
+    """Return True if `wheel_path` is a Linux platform wheel containing a host ELF shared object."""
+    if sys.platform != 'linux' or wheel_path.name.endswith('-none-any.whl'):
+        return False
+    host_target = _host_elf_target()
+    if host_target is None:
+        return False
+    for info in zf.infolist():
+        if info.is_dir() or stat.S_ISLNK(info.external_attr >> 16):
+            continue
+        if not _is_shared_library_name(info.filename):
+            continue
+        with zf.open(info) as f:
+            header = f.read(ELF_HEADER_SIZE)
+        if _is_host_elf_shared_object_header(header, host_target):
+            return True
+    return False
 
 
 def _elf_has_debug_sections(path: Path) -> bool:
@@ -404,13 +454,16 @@ def _elf_has_debug_sections(path: Path) -> bool:
 
 
 def _strip_debug_info_from_dir(unpacked_dir: Path) -> bool:
-    """Strip DWARF debug sections from Linux ELF shared libraries in an unpacked wheel."""
+    """Strip DWARF debug sections from host-architecture ELF shared objects in an unpacked wheel."""
     if sys.platform != 'linux':
+        return False
+    host_target = _host_elf_target()
+    if host_target is None:
         return False
 
     stripped_any = False
     for path in sorted(unpacked_dir.rglob('*')):
-        if not _is_shared_library_name(path.name) or not _is_elf_file(path):
+        if not _is_shared_library_name(path.name) or not _is_host_elf_shared_object(path, host_target):
             continue
         if not _elf_has_debug_sections(path):
             continue
@@ -437,8 +490,8 @@ def clean_wheel(wheel_path: Path) -> bool:
     """
     with ZipFile(wheel_path, 'r') as zf:
         member_names = zf.namelist()
+        has_shared_libs = _wheel_has_host_elf_shared_objects(wheel_path, zf)
     has_excluded_files = any(is_excluded_from_wheel(name) for name in member_names)
-    has_shared_libs = sys.platform == 'linux' and any(_is_shared_library_name(name) for name in member_names)
 
     line_removal_rules = _get_matching_rules(wheel_path.name)
 
