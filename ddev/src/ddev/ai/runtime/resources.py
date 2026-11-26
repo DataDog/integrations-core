@@ -148,6 +148,10 @@ class RunResources:
             if connection is not None:
                 await connection.aclose()
 
+    @property
+    def file_access_policy(self) -> FileAccessPolicy:
+        return self._file_access_policy
+
     @cached_property
     def file_registry(self) -> FileRegistry:
         """Lazily-built, run-wide singleton FileRegistry."""
