@@ -16,6 +16,7 @@ from textual.widget import Widget
 from textual.widgets import Footer
 
 from ddev.cli.meta.ai.tui.app import TogoApp
+from ddev.cli.meta.ai.tui.login_prompt import LoginPendingNotice
 from ddev.cli.meta.ai.tui.widgets.header import TogoHeader
 
 
@@ -29,6 +30,7 @@ class TogoScreen(Screen):
     def compose(self) -> ComposeResult:
         yield TogoHeader(title=self._togo_title or self.TITLE or "")
         with Container(id="screen-body"):
+            yield LoginPendingNotice()
             yield from self.compose_body()
         yield Footer()
 

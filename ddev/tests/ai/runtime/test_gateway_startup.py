@@ -28,10 +28,12 @@ from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus
 from ddev.ai.runtime.connections import DirectConnection, GatewayConnection
 from ddev.ai.runtime.errors import CredentialRefreshError, RefreshFailureCause
 from ddev.ai.runtime.gateway_auth import LOGIN_HELP, GatewayAuthError, GatewayTokenProducer, gateway_refresh_error
+from ddev.ai.runtime.login_prompt import LoginAction, LoginProblem, LoginPrompt
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
+from ddev.event_bus.shutdown import ShutdownKind
 from ddev.utils import dd_auth
 
 from .helpers import make_success_checkpoint
@@ -148,6 +150,8 @@ def _orchestrator(
     flow: ResolvedFlow | None = None,
     resume: bool = False,
     callbacks: Callbacks | None = None,
+    gateway_login_prompt: LoginPrompt | None = None,
+    max_timeout: str | None = None,
 ) -> PhaseOrchestrator:
     _stub_dd_auth(monkeypatch, available=has_dd_auth)
     monkeypatch.setattr("ddev.ai.runtime.resources.GatewayConnection", partial(GatewayConnection, transport=transport))
@@ -167,10 +171,11 @@ def _orchestrator(
         resolved_flow=flow,
         phase_registry=phases,
         checkpoint_path=tmp_path / "checkpoints.yaml",
-        runtime_variables={},
+        runtime_variables={"max_timeout": max_timeout} if max_timeout is not None else {},
         provider_registry=registry,
         file_access_policy=FileAccessPolicy(tmp_path, "demo"),
         callbacks=callbacks,
+        gateway_login_prompt=gateway_login_prompt,
         prepare_run_directory=None if resume else lambda: (tmp_path / "checkpoints.yaml").unlink(missing_ok=True),
         grace_period=0,
         resume=resume,
@@ -285,14 +290,15 @@ async def test_subagent_gateway_denial_ends_run_and_keeps_completed_phase_checkp
         nonlocal subagent_running
         subagent_running = scope.role is AgentRole.SUBAGENT
 
-    async def token_for(provider: str) -> str:
+    async def token_for(provider: str, *, startup: bool = False) -> str:
         if denial == "refresh" and subagent_running:
             raise gateway_refresh_error(RefreshFailureCause.LOGIN_TIMED_OUT)
         return "ddpat_testing_secret"
 
     producer = Mock(spec=GatewayTokenProducer, available=True)
     producer.token_for.side_effect = token_for
-    monkeypatch.setattr("ddev.ai.runtime.resources.GatewayTokenProducer", lambda: producer)
+    producer.token_for_probe.return_value = "ddpat_testing_secret"
+    monkeypatch.setattr("ddev.ai.runtime.resources.GatewayTokenProducer", lambda _: producer)
     message = _message("claude-haiku-4-5-20251001")
 
     def handle(request: httpx2.Request) -> httpx2.Response:
@@ -326,16 +332,27 @@ async def test_subagent_gateway_denial_ends_run_and_keeps_completed_phase_checkp
     assert checkpoints.read()["plan"] == completed_checkpoint
 
 
-@pytest.mark.parametrize("status", [401, 403])
-async def test_gateway_denial_stops_startup_and_does_not_expose_tokens(tmp_path, monkeypatch, caplog, status):
+@pytest.mark.parametrize(
+    ("status", "replacement", "attempts", "message"),
+    [
+        (401, "ddpat_testing_secret", 1, "returned the same unusable credential"),
+        (401, "ddpat_replacement", 2, r"rejected the replacement credential \(HTTP 401\)"),
+        (403, "ddpat_replacement", 1, r"denied access \(HTTP 403\)"),
+    ],
+    ids=["same-pat", "replacement-denied", "forbidden"],
+)
+async def test_gateway_denial_stops_startup_and_does_not_expose_tokens(
+    tmp_path, monkeypatch, caplog, status, replacement, attempts, message
+):
     run_dir = tmp_path / "run"
     run_dir.mkdir()
     checkpoint = run_dir / "checkpoints.yaml"
     checkpoint.write_text("previous run")
-    handle = AsyncMock(return_value=httpx2.Response(status, text="ddpat_testing_secret"))
+    handle = AsyncMock(side_effect=lambda _: httpx2.Response(status, text="ddpat_testing_secret"))
     transport = TrackingTransport(handle)
     orchestrator = _orchestrator(run_dir, transport, monkeypatch)
-    message = "returned the same unusable credential" if status == 401 else r"denied access \(HTTP 403\)"
+    acquire = AsyncMock(side_effect=["ddpat_testing_secret", replacement])
+    monkeypatch.setattr(dd_auth, "acquire_datadog_pat", acquire)
     with pytest.raises(FatalProcessingError, match=message) as caught:
         await orchestrator.run_async()
 
@@ -344,8 +361,76 @@ async def test_gateway_denial_stops_startup_and_does_not_expose_tokens(tmp_path,
         assert "dd-auth --no-cache" in str(caught.value)
     assert list(run_dir.iterdir()) == [checkpoint]
     assert checkpoint.read_text() == "previous run"
-    handle.assert_awaited_once()
+    assert handle.await_count == attempts
+    assert acquire.await_count == (2 if status == 401 else 1)
     assert transport.closed
+
+
+@pytest.mark.parametrize("rejected", [False, True], ids=["initial-acquisition", "probe-reacquisition"])
+async def test_startup_login_failure_guides_user_to_retry_original_action(tmp_path, monkeypatch, rejected):
+    handle = AsyncMock(return_value=httpx2.Response(401))
+    prompt = Mock(spec=LoginPrompt)
+    prompt.resolve.return_value = LoginAction.CANCEL
+    orchestrator = _orchestrator(tmp_path, TrackingTransport(handle), monkeypatch, gateway_login_prompt=prompt)
+    problem = dd_auth.DdAuthNoBrowserError()
+    acquire = AsyncMock(side_effect=["ddpat_old", problem] if rejected else [problem])
+    monkeypatch.setattr(dd_auth, "acquire_datadog_pat", acquire)
+
+    with pytest.raises(CredentialRefreshError) as caught:
+        await orchestrator.run_async()
+
+    assert caught.value.login_cancelled
+    command = "dd-auth --no-cache -- true" if rejected else "dd-auth -- true"
+    assert f"Run {command} in a terminal" in str(caught.value)
+    assert "choose the same action as before (Launch or Resume)" in str(caught.value)
+    assert not (tmp_path / "checkpoints.yaml").exists()
+    assert handle.await_count == int(rejected)
+
+
+async def test_startup_probe_reacquires_outside_probe_before_retry(tmp_path, monkeypatch):
+    acquire = _stub_dd_auth(monkeypatch)
+    acquire.side_effect = ["ddpat_old", dd_auth.DdAuthNoBrowserError(), "ddpat_new"]
+    tokens_sent = []
+    model = "claude-haiku-4-5-20251001"
+
+    def handle(request: httpx2.Request) -> httpx2.Response:
+        tokens_sent.append(request.headers["Authorization"])
+        return httpx2.Response(401) if len(tokens_sent) == 1 else httpx2.Response(200, json=_message(model))
+
+    transport = TrackingTransport(handle)
+    monkeypatch.setattr("ddev.ai.runtime.resources.GatewayConnection", partial(GatewayConnection, transport=transport))
+    registry = _gateway_registry()
+    agent = _agent(registry, "haiku")
+    check_access = AgentProviderRegistry.check_access
+    inside_probe = False
+
+    async def probe(registry: AgentProviderRegistry, config: AgentConfig) -> ModelAccessCheck:
+        nonlocal inside_probe
+        inside_probe = True
+        try:
+            return await check_access(registry, config)
+        finally:
+            inside_probe = False
+
+    async def retry(_: LoginProblem) -> LoginAction:
+        assert not inside_probe
+        return LoginAction.RETRY
+
+    monkeypatch.setattr(AgentProviderRegistry, "check_access", probe)
+    prompt = Mock(spec=LoginPrompt)
+    prompt.resolve.side_effect = retry
+    resources = RunResources(
+        registry, FileAccessPolicy(tmp_path, "demo"), {"agent": agent}, Callbacks(), gateway_login_prompt=prompt
+    )
+    try:
+        check = await resources.prepare(lambda _: None, initial_agent=agent)
+    finally:
+        await resources.close()
+
+    assert check is not None and check.status == 200
+    assert tokens_sent == ["Bearer ddpat_old", "Bearer ddpat_new"]
+    assert [call.kwargs["rejected_pat"] for call in acquire.await_args_list] == [None, "ddpat_old", "ddpat_old"]
+    prompt.resolve.assert_awaited_once()
 
 
 @pytest.mark.parametrize(
@@ -406,10 +491,11 @@ async def test_gateway_probes_first_pending_agent_in_dependency_order(tmp_path, 
 
 
 @pytest.mark.parametrize("cancel_at", ["acquisition", "probe", "refresh"])
-async def test_gateway_startup_cancellation_leaves_run_state_untouched(tmp_path, monkeypatch, cancel_at):
+async def test_gateway_startup_cancellation_leaves_run_state_untouched(tmp_path, monkeypatch, caplog, cancel_at):
+    caplog.set_level("INFO")
     started = asyncio.Event()
 
-    async def wait_until_cancelled(_: object, *, rejected_pat: str | None = None) -> Never:
+    async def wait_until_cancelled(_: object, **kwargs: object) -> Never:
         started.set()
         await asyncio.Future()
         raise AssertionError("Startup should have been cancelled")
@@ -425,7 +511,7 @@ async def test_gateway_startup_cancellation_leaves_run_state_untouched(tmp_path,
         handle.side_effect = None
         handle.return_value = httpx2.Response(401)
 
-        async def acquire_pat(_: str, *, rejected_pat: str | None) -> str:
+        async def acquire_pat(_: str, **kwargs: object) -> str:
             if not handle.await_count:
                 return "ddpat_old"
             return await wait_until_cancelled(None)
@@ -439,10 +525,53 @@ async def test_gateway_startup_cancellation_leaves_run_state_untouched(tmp_path,
             await run
 
     assert checkpoint.read_text() == "previous run"
+    if cancel_at in {"acquisition", "refresh"}:
+        assert "choose the same action as before (Launch or Resume)" in caplog.text
     if cancel_at == "acquisition":
         handle.assert_not_awaited()
     else:
         assert transport.closed
+
+
+async def test_gateway_login_does_not_extend_run_timeout(tmp_path, monkeypatch):
+    prompt_open = asyncio.Event()
+    prompt_closed = asyncio.Event()
+    now = 0.0
+
+    def startup_check(_: httpx2.Request) -> httpx2.Response:
+        nonlocal now
+        now += gateway_auth.TOKEN_USE_WINDOW
+        return httpx2.Response(200, json=_message("claude-haiku-4-5-20251001"))
+
+    async def resolve(_: LoginProblem) -> LoginAction:
+        prompt_open.set()
+        try:
+            await asyncio.Future()
+        finally:
+            prompt_closed.set()
+        raise AssertionError("Login prompt should have been cancelled")
+
+    prompt = Mock(spec=LoginPrompt)
+    prompt.resolve.side_effect = resolve
+    transport = TrackingTransport(startup_check)
+    orchestrator = _orchestrator(tmp_path, transport, monkeypatch, gateway_login_prompt=prompt, max_timeout="60")
+    monkeypatch.setattr(gateway_auth, "time", SimpleNamespace(time=lambda: now))
+    monkeypatch.setattr(
+        dd_auth, "acquire_datadog_pat", AsyncMock(side_effect=["ddpat_old", dd_auth.DdAuthNoBrowserError()])
+    )
+    remaining_time = orchestrator._remaining_time
+    monkeypatch.setattr(
+        orchestrator, "_remaining_time", lambda start: remaining_time(start - 60 if prompt_open.is_set() else start)
+    )
+    async with asyncio.timeout(3):
+        await orchestrator.run_async()
+
+    assert prompt_closed.is_set() and transport.closed
+    shutdown = orchestrator.shutdown_request
+    assert shutdown is not None and shutdown.kind is ShutdownKind.TIMED_OUT
+    assert (timeout := orchestrator.login_timeout) is not None
+    assert "max_timeout of 60.0s" in str(timeout)
+    assert any("waiting for the dd-auth login" in note and "choose Resume" in note for note in timeout.__notes__)
 
 
 async def test_gateway_stream_failure_closes_connection_without_replaying_generation(tmp_path, monkeypatch):

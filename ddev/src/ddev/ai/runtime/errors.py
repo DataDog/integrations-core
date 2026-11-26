@@ -11,13 +11,17 @@ from ddev.ai.model_catalog import Route
 class RefreshFailureCause(StrEnum):
     LOGIN_TIMED_OUT = "dd-auth timed out before login completed."
     LOGIN_FAILED = "dd-auth requires login or could not complete it."
+    NO_BROWSER = "dd-auth could not open a browser on this machine."
+    CALLBACK_PORTS_UNAVAILABLE = "The dd-auth callback ports are unavailable."
+    LAUNCH_FAILED = "Could not launch dd-auth."
+    PAT_MISSING = "dd-auth did not return DD_PAT."
     ACQUISITION_FAILED = "dd-auth did not return a usable credential."
     CREDENTIAL_UNCHANGED = "dd-auth returned the same unusable credential."
     REPLACEMENT_REJECTED = "The AI Gateway rejected the replacement credential (HTTP 401)."
 
 
 class CredentialRefreshError(RunAbortError):
-    """No usable replacement was found for a credential past its use cutoff or rejected by the route.
+    """A usable credential could not be acquired at startup or replaced during refresh.
 
     The cause and recovery steps let callers show credential-specific guidance.
     """
@@ -30,9 +34,11 @@ class CredentialRefreshError(RunAbortError):
         recovery_steps: tuple[str, ...],
         *,
         startup: bool = False,
+        login_cancelled: bool = False,
     ) -> None:
         self.route = route
         self.cause = cause
         self.recovery_steps = recovery_steps
         self.startup = startup
+        self.login_cancelled = login_cancelled
         super().__init__("\n\n".join((f"{summary} {cause}", *recovery_steps)))

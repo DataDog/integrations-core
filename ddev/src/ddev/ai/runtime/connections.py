@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -50,9 +51,22 @@ class GatewayConnection:
     route = Route.AI_GATEWAY
     max_retries = 0
 
-    def __init__(self, tokens: TokenProducer, *, transport: httpx2.AsyncBaseTransport | None = None) -> None:
+    def __init__(
+        self,
+        tokens: TokenProducer,
+        *,
+        transport: httpx2.AsyncBaseTransport | None = None,
+        token_for_probe: Callable[[], str] | None = None,
+    ) -> None:
         self._tokens = tokens
         self._transport = transport
+        self._probe_token = token_for_probe
+
+    def finish_startup(self) -> None:
+        self._probe_token = None
+
+    def _token_for_probe(self) -> str | None:
+        return self._probe_token() if self._probe_token is not None else None
 
     def base_url(self, protocol: str) -> str:
         return GATEWAY_BASE_URL
@@ -60,7 +74,13 @@ class GatewayConnection:
     def transport(self, provider: str, *, direct_auth: DirectAuthScheme) -> httpx2.AsyncBaseTransport:
         if self._transport is None:
             self._transport = httpx2.AsyncHTTPTransport(trust_env=False)
-        return GatewayTransport(self._tokens, self._transport, provider=provider, direct_auth_header=direct_auth.header)
+        return GatewayTransport(
+            self._tokens,
+            self._transport,
+            provider=provider,
+            direct_auth_header=direct_auth.header,
+            token_for_probe=self._token_for_probe,
+        )
 
     async def aclose(self) -> None:
         if self._transport is not None:

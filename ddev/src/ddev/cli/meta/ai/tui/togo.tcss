@@ -490,6 +490,12 @@ MarkdownH3 {
     margin: 0 0 1 0;
 }
 
+#gateway-login-notice {
+    height: auto;
+    color: $warning;
+    margin: 0 0 1 0;
+}
+
 #pipeline {
     layers: connectors nodes;
     width: 1fr;

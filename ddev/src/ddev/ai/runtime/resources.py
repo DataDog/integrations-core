@@ -19,7 +19,7 @@ from ddev.ai.model_catalog import Route
 from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.runtime.connections import DirectConnection, GatewayConnection, RouteConnection
-from ddev.ai.runtime.errors import CredentialRefreshError
+from ddev.ai.runtime.errors import CredentialRefreshError, RefreshFailureCause
 from ddev.ai.runtime.gateway_auth import (
     DD_AUTH_INSTALL_HELP,
     LOGIN_HELP,
@@ -27,6 +27,7 @@ from ddev.ai.runtime.gateway_auth import (
     GatewayAuthError,
     GatewayTokenProducer,
 )
+from ddev.ai.runtime.login_prompt import LoginPrompt
 from ddev.ai.runtime.tokens import TokenProducer
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -61,6 +62,8 @@ class RunResources:
         file_access_policy: FileAccessPolicy,
         agents: dict[str, AgentConfig],
         callbacks: Callbacks,
+        *,
+        gateway_login_prompt: LoginPrompt | None = None,
     ) -> None:
         self._configured_registry = provider_registry
         self._run_registry: AgentProviderRegistry | None = None
@@ -68,6 +71,8 @@ class RunResources:
         self._agents = agents
         self._callbacks = callbacks
         self._tokens: TokenProducer | None = None
+        self._gateway_tokens: GatewayTokenProducer | None = None
+        self._gateway_login_prompt = gateway_login_prompt
         self._connection: RouteConnection | None = None
         self._route: RunRoute | None = None
 
@@ -80,11 +85,12 @@ class RunResources:
         """
         requested = self._configured_registry.requested_route
         reason = None
-        gateway_tokens = GatewayTokenProducer() if requested is Route.AI_GATEWAY else None
+        gateway_tokens = GatewayTokenProducer(self._gateway_login_prompt) if requested is Route.AI_GATEWAY else None
         if gateway_tokens is not None and not gateway_tokens.available:
             gateway_tokens = None
             reason = "dd-auth was not found on PATH."
 
+        gateway_connection = None
         if gateway_tokens is None:
             direct_tokens = self._configured_registry.direct_tokens_for_run()
             tokens: TokenProducer = direct_tokens
@@ -92,8 +98,10 @@ class RunResources:
         else:
             direct_tokens = None
             tokens = gateway_tokens
-            connection = GatewayConnection(gateway_tokens)
+            gateway_connection = GatewayConnection(gateway_tokens, token_for_probe=gateway_tokens.token_for_probe)
+            connection = gateway_connection
         self._tokens = tokens
+        self._gateway_tokens = gateway_tokens
         self._connection = connection
         registry = self._configured_registry.for_run(connection)
         self._run_registry = registry
@@ -114,28 +122,52 @@ class RunResources:
 
         self._route = RunRoute(requested, connection.route, reason)
         report_route(self._route)
-        if gateway_tokens is None or initial_agent is None:
+        if gateway_tokens is None or gateway_connection is None:
             return None
+        check = await self._check_gateway_access(registry, gateway_tokens, initial_agent) if initial_agent else None
+        gateway_connection.finish_startup()
+        return check
 
+    @staticmethod
+    async def _check_gateway_access(
+        registry: AgentProviderRegistry, tokens: GatewayTokenProducer, agent: AgentConfig
+    ) -> ModelAccessCheck:
         try:
-            await tokens.token_for(initial_agent.provider)
-            return await registry.check_access(initial_agent)
+            token = await tokens.token_for(agent.provider, startup=True)
+            try:
+                return await registry.check_access(agent)
+            except ModelAccessError as error:
+                if error.status_code != 401:
+                    raise
+            tokens.reject(token)
+            await tokens.token_for(agent.provider, startup=True)
+            return await registry.check_access(agent)
         except CredentialRefreshError as error:
-            # No phase has started; give startup retry guidance instead of interrupted-phase Resume steps.
-            raise GatewayAuthError(f"AI Gateway startup check failed. {error.cause} {REPLACE_PAT_HELP}") from None
+            if error.cause is RefreshFailureCause.CREDENTIAL_UNCHANGED:
+                # No phase has started; give startup retry guidance instead of interrupted-phase Resume steps.
+                raise GatewayAuthError(f"AI Gateway startup check failed. {error.cause} {REPLACE_PAT_HELP}") from None
+            raise
         except AgentConnectionError as error:
             if error.timed_out:
                 raise GatewayAuthError(f"AI Gateway startup check timed out. Retry the run. {LOGIN_HELP}") from None
             raise AgentConnectionError(f"AI Gateway startup connection failed. Retry the run. {LOGIN_HELP}") from None
-        except ModelAccessError:
+        except ModelAccessError as error:
+            if error.status_code == 401:
+                cause = RefreshFailureCause.REPLACEMENT_REJECTED
+                raise GatewayAuthError(f"AI Gateway startup check failed. {cause} {REPLACE_PAT_HELP}") from None
             raise GatewayAuthError(f"AI Gateway startup check failed. Retry the run. {LOGIN_HELP}") from None
         except asyncio.CancelledError as error:
             error.add_note(f"AI Gateway startup cancelled. {LOGIN_HELP}")
             raise
 
+    @property
+    def gateway_login_interrupted(self) -> bool:
+        return self._gateway_tokens is not None and self._gateway_tokens.login_interrupted
+
     async def close(self) -> None:
         """Drop the run's credentials and close its bound providers."""
         tokens, self._tokens = self._tokens, None
+        self._gateway_tokens = None
         if tokens is not None:
             tokens.clear()
         registry, self._run_registry = self._run_registry, None
