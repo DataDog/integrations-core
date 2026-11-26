@@ -312,7 +312,12 @@ def test_collector_submits_one_series_per_podgroup(aggregator, instance, mocker)
         'kai_pod_group:pg',
         'job_scheduler_workload:pg',
     ]
-    aggregator.assert_metric(BADPUT_METRIC, value=30 / 3600, tags=[*tags, 'reason:startup_or_system'], count=1)
+    aggregator.assert_metric(
+        BADPUT_METRIC,
+        value=30 / 3600,
+        tags=[*tags, 'reason:startup_or_system', 'scheduler_reason:PodsPending'],
+        count=1,
+    )
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=0, tags=tags, count=1)
     # Nothing else: one series per PodGroup and metric.
     assert len(aggregator.metrics(BADPUT_METRIC)) == 1
@@ -438,20 +443,26 @@ def test_badput_is_tagged_with_the_category_and_keeps_the_raw_kai_reason(reason,
     assert len([tag for tag in tags if tag.startswith('reason:')]) == 1
 
 
-def test_states_the_check_derives_are_categorized_without_a_kai_reason():
+def test_waits_the_check_derives_are_told_apart_by_scheduler_reason():
+    # Without a KAI reason, partial scheduling and scheduled pods that do not run are both `startup_or_system`;
+    # `scheduler_reason` tells which one it is.
     t, clock = tracker()
-    # KAI scheduled the PodGroup but its pod is not running, and a PodGroup that has no pod yet.
-    pending, empty = podgroup('pending'), podgroup('empty')
-    pods = [pod('pending', phase='Pending', gpus=2)]
-    t.update([pending, empty], pods)
+    partial, pending = podgroup('partial'), podgroup('pending')
+    pods = [
+        pod('partial', gpus=2),
+        pod('partial', phase='Pending', gpus=2, index=1),
+        pod('pending', phase='Pending', gpus=2),
+    ]
+    t.update([partial, pending], pods)
     clock.now = 10
-    contributions = t.update([pending, empty], pods)
-    tags = badput_tags(contributions)
-    assert [c.cause for c in contributions] == ['startup_or_system'] * len(contributions)
-    assert all(
-        'reason:startup_or_system' in tags_ and not any(x.startswith('scheduler_reason') for x in tags_)
-        for tags_ in tags
-    )
+    contributions = t.update([partial, pending], pods)
+    assert {c.name.split('/')[1]: c.reason for c in contributions} == {
+        'partial': 'PartiallyRunning',
+        'pending': 'PodsPending',
+    }
+    for tags in badput_tags(contributions):
+        assert 'reason:startup_or_system' in tags
+        assert sum(tag.startswith('scheduler_reason:') for tag in tags) == 1
 
 
 def test_the_reason_mapping_only_uses_the_six_general_categories():
@@ -476,6 +487,7 @@ def test_the_reason_mapping_only_uses_the_six_general_categories():
         pytest.param(SchedulingState.WAITING, 'PreemptionDelayNotElapsed', 'preemption_or_reclaim', id='delay'),
         pytest.param(SchedulingState.WAITING, 'QueueDoesNotExist', 'configuration_or_request', id='no_queue'),
         pytest.param(SchedulingState.WAITING, 'PodsPending', 'startup_or_system', id='pods_pending'),
+        pytest.param(SchedulingState.WAITING, 'PartiallyRunning', 'startup_or_system', id='partially_running'),
         pytest.param(SchedulingState.WAITING, 'SomethingNew', 'other_or_unknown', id='other_or_unknown'),
         pytest.param(SchedulingState.PREEMPTED, 'Evicted', 'preemption_or_reclaim', id='preempted'),
         pytest.param(SchedulingState.RUNNABLE, None, None, id='not_badput'),
@@ -485,7 +497,7 @@ def test_normalize_reason(state, reason, expected):
     assert normalize_reason(state, reason) == expected
 
 
-def test_badput_is_split_by_reason_and_derived_reasons_are_not_kai_reasons():
+def test_badput_is_split_by_reason():
     t, clock = tracker()
     pgs = [
         podgroup('quota', unschedulable='OverLimit'),
@@ -499,7 +511,7 @@ def test_badput_is_split_by_reason_and_derived_reasons_are_not_kai_reasons():
         QueueKey('ns', 'team-a'): {
             ('quota_or_capacity', 'OverLimit'): 20,
             ('other_or_unknown', 'PodSchedulingErrors'): 320,
-            ('startup_or_system', None): 10,
+            ('startup_or_system', 'PodsPending'): 10,
         }
     }
 
@@ -821,15 +833,13 @@ def test_kind_admitted_but_unable_to_run_keeps_badput_until_all_pods_run():
     t, clock = tracker()
     pg = kind_podgroup()
     partial = [kind_pod(pg), kind_pod(pg, phase='Pending', index=1)]
-    assert classify(pg, partial) == (SchedulingState.WAITING, 'PodsPending')
+    assert classify(pg, partial) == (SchedulingState.WAITING, 'PartiallyRunning')
     t.update([pg], partial)
     clock.now = 10
     contributions = t.update([pg], partial)
     [tags] = badput_tags(contributions)
     assert [(c.category, c.gpu_seconds) for c in contributions] == [(Category.BADPUT, 40)]
-    assert 'reason:startup_or_system' in tags
-    # `PodsPending` is derived by the check, not a KAI reason.
-    assert not any(tag.startswith('scheduler_reason:') for tag in tags)
+    assert {'reason:startup_or_system', 'scheduler_reason:PartiallyRunning'} <= set(tags)
 
     running = [kind_pod(pg), kind_pod(pg, index=1)]
     clock.now = 20

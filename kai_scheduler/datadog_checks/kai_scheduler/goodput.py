@@ -86,10 +86,13 @@ KAI_REASON_CATEGORIES = {
     'QueueDoesNotExist': CONFIGURATION_OR_REQUEST,
     'PodSchedulingErrors': OTHER_OR_UNKNOWN,
 }
-# Reasons the check derives itself when KAI reports none. They are categorized but not submitted as KAI reasons.
+# Reasons the check derives itself when KAI reports none, also submitted as `scheduler_reason` so that the waits they
+# stand for can be told apart.
 DERIVED_REASON_CATEGORIES = {
-    # KAI scheduled the PodGroup, but its pods are not all running yet (image pull, node or kubelet startup).
+    # KAI scheduled the PodGroup, but none of its active pods runs yet (image pull, node or kubelet startup).
     'PodsPending': STARTUP_OR_SYSTEM,
+    # Partial scheduling: some active pods run, others do not, so the PodGroup cannot make progress yet.
+    'PartiallyRunning': STARTUP_OR_SYSTEM,
     # The PodGroup has no pods: the Job controller has not created them yet, or created them again after an eviction.
     'NoPods': STARTUP_OR_SYSTEM,
     # KAI evicted the PodGroup (state `PREEMPTED`): it lost its resources to another workload.
@@ -327,14 +330,17 @@ def pod_finished_at(pod: dict) -> float | None:
 
 
 def waiting_reason(podgroup: dict, pods: list[dict]) -> str | None:
-    """Return the raw KAI reason a PodGroup waits, or `PodsPending` when KAI scheduled it but pods are not running."""
+    """Return the raw KAI reason a PodGroup waits, or, when KAI reports none, whether some of its active pods run
+    (`PartiallyRunning`), none does (`PodsPending`), or it has none (`NoPods`)."""
     for condition in (podgroup.get('status') or {}).get('schedulingConditions') or []:
         if condition.get('type') == UNSCHEDULABLE_CONDITION and condition.get('status') == 'True':
             for explanation in condition.get('reasons') or []:
                 if explanation.get('reason'):
                     return explanation['reason']
             return condition.get('reason') or UNSCHEDULABLE_CONDITION
-    return 'PodsPending' if pods else 'NoPods'
+    if not pods:
+        return 'NoPods'
+    return 'PartiallyRunning' if any(is_running(pod) for pod in pods) else 'PodsPending'
 
 
 def classify(podgroup: dict, pods: list[dict], owner: OwnerStatus | None = None) -> tuple[SchedulingState, str | None]:
@@ -614,9 +620,8 @@ def badput_by_reason(contributions: Iterable[Contribution]) -> dict[QueueKey, di
     sums: dict[QueueKey, dict[tuple[str, str | None], float]] = defaultdict(lambda: defaultdict(float))
     for contribution in contributions:
         if contribution.category == Category.BADPUT:
-            # Reasons the check derived itself are not KAI reasons, so only the normalized one is kept.
-            raw = None if contribution.reason in DERIVED_REASON_CATEGORIES else contribution.reason
-            sums[contribution.queue][(contribution.cause or OTHER_OR_UNKNOWN, raw)] += contribution.gpu_seconds
+            key = (contribution.cause or OTHER_OR_UNKNOWN, contribution.reason)
+            sums[contribution.queue][key] += contribution.gpu_seconds
     return {queue: dict(reasons) for queue, reasons in sums.items()}
 
 
@@ -643,18 +648,7 @@ def workload_points(contributions: Iterable[Contribution]) -> list[tuple[str, fl
         hours = contribution.gpu_seconds / SECONDS_PER_HOUR
         if contribution.category == Category.BADPUT:
             reason = contribution.cause or OTHER_OR_UNKNOWN
-            points.append(
-                (
-                    BADPUT_METRIC,
-                    hours,
-                    [
-                        *tags,
-                        *reason_tags(
-                            reason, None if contribution.reason in DERIVED_REASON_CATEGORIES else contribution.reason
-                        ),
-                    ],
-                )
-            )
+            points.append((BADPUT_METRIC, hours, [*tags, *reason_tags(reason, contribution.reason)]))
             points.append((FULLY_ADMITTED_METRIC, 0.0, tags))
         else:
             points.append((FULLY_ADMITTED_METRIC, hours, tags))

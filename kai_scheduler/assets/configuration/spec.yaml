@@ -66,9 +66,10 @@ files:
 
         - `gpu.scheduling.badput_time`: GPU time that GPU PodGroups spent waiting to become fully runnable, tagged with
           one of six general `reason` categories (`quota_or_capacity`, `placement_or_topology`,
-          `configuration_or_request`, `preemption_or_reclaim`, `startup_or_system`, `other_or_unknown`) and, when KAI
-          reports one, the raw `scheduler_reason`. It doesn't stop when KAI allocates a PodGroup, but when all its active
-          pods run. After a preemption it is tagged `reason:preemption_or_reclaim` until KAI starts the PodGroup again.
+          `configuration_or_request`, `preemption_or_reclaim`, `startup_or_system`, `other_or_unknown`) and a
+          `scheduler_reason`: the raw KAI reason, or one the check derives, such as `PartiallyRunning` for partial
+          scheduling. It doesn't stop when KAI allocates a PodGroup, but when all its active pods run. After a
+          preemption it is tagged `reason:preemption_or_reclaim` until KAI starts the PodGroup again.
         - `gpu.scheduling.fully_admitted_time`: GPU time that GPU PodGroups spent with all their active pods running.
 
         Goodput is `fully_admitted_time / (fully_admitted_time + badput_time)`. The metrics have no `kai.` prefix so
