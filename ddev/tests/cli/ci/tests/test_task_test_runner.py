@@ -1605,6 +1605,32 @@ async def test_process_message_reports_completed_workflow_status(
     assert finished.status is expected
 
 
+async def test_batch_passes_when_only_teardown_fails(tmp_path: Path):
+    batch = make_batch("batch-01")
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", make_workflow_run(status="in_progress", run_attempt=1), once=True)
+    fake.mock_response("get_workflow_run", make_workflow_run(conclusion="failure", run_attempt=2))
+    mock_artifacts(fake, [])
+    teardown = make_workflow_job(id=3, name="teardown", conclusion=WorkflowJobConclusion.FAILURE, run_attempt=2)
+    mock_jobs(
+        fake,
+        [
+            make_workflow_job(id=1, name="setup", run_attempt=2),
+            make_workflow_job(id=2, name=batch.job_list[0].name, run_attempt=2),
+            teardown,
+        ],
+    )
+    handler = RecordingJsonHandler()
+    runner = make_runner(fake, tmp_path, handler=handler)
+
+    await runner.process_message(batch)
+
+    [finished] = finished_messages(runner)
+    assert finished.status is Status.SUCCESS
+    [warning] = [event for event in handler.events if event["level"] == "warning"]
+    assert (warning["batch_id"], warning["run_id"], warning["job_id"]) == (batch.batch_id, teardown.run_id, teardown.id)
+
+
 @pytest.mark.asyncio
 async def test_process_message_polls_until_completed(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
