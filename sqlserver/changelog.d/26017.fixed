@@ -1,1 +1,0 @@
-Fix metric collection for full database-name and table-name batches by leaving headroom for driver parameters.

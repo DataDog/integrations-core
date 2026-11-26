@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 10.0.0 / 2026-11-25
+
+***Changed***:
+
+* Bump minimum version of base check to 38.11.0. ([#26079](https://github.com/DataDog/integrations-core/pull/26079))
+
+***Fixed***:
+
+* Use the shared malloc_trim helper from datadog_checks_base instead of a local copy. ([#26079](https://github.com/DataDog/integrations-core/pull/26079))
+
 ## 9.4.0 / 2026-10-29 / Agent 7.86.0
 
 ***Added***:

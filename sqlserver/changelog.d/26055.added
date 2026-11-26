@@ -1,1 +1,0 @@
-Send column `max_length`, `precision` and `scale` in schema collection for the types that use them.
