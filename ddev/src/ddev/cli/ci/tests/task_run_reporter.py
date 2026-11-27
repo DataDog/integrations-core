@@ -6,7 +6,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Protocol
 
 import httpx
@@ -45,7 +45,12 @@ class CommentRenderer(Protocol):
     """Renders a whole report from a snapshot. Every tier takes the same arguments."""
 
     def __call__(
-        self, progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+        self,
+        progress: DispatcherProgress,
+        *,
+        shutdown: ShutdownRequest | None = None,
+        now: datetime | None = None,
+        elapsed: timedelta | None = None,
     ) -> str: ...
 
 
@@ -81,6 +86,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         *,
         monitor: ComponentMonitor,
         clock: Callable[[], datetime] | None = None,
+        started_at: datetime | None = None,
     ):
         super().__init__(name)
         self._client = client
@@ -88,6 +94,8 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         # Read once per report, so the fallback tiers of one write pass stay byte-identical when the
         # snapshot has nothing to shed.
         self._clock: Callable[[], datetime] = clock or (lambda: datetime.now(timezone.utc))
+        # When the run began, so the terminal report can say how long it took.
+        self._started_at = started_at or self._clock()
         self._comment_id: int | None = None
         # Exclude rejected comments from subsequent marker lookups.
         self._unusable_comment_ids: set[int] = set()
@@ -120,7 +128,8 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
     async def process_message(self, message: UpdatePRComment):
         # Rendering is pure, so it happens outside the lock.
         now = self._clock()
-        body = render_comment(message.progress, now=now)
+        elapsed = now - self._started_at
+        body = render_comment(message.progress, now=now, elapsed=elapsed)
 
         # Serialize revision checks and writes so older updates cannot overwrite newer ones.
         async with self._lock:
@@ -146,7 +155,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     self._pr_comment_failed = True
                     try:
                         published = await self._write(
-                            pr_number, body, message.progress, revision=message.revision, now=now
+                            pr_number, body, message.progress, revision=message.revision, now=now, elapsed=elapsed
                         )
                     except Exception:
                         op.fail("Failed to publish PR comment for revision %s", message.revision)
@@ -165,11 +174,12 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         """
         async with asyncio.timeout(SHUTDOWN_WRITE_TIMEOUT), self._lock:
             now = self._clock()
+            elapsed = now - self._started_at
             progress = self._latest_progress
             body = (
                 render_shutdown_notice(request, now=now)
                 if progress is None
-                else render_comment(progress, shutdown=request, now=now)
+                else render_comment(progress, shutdown=request, now=now, elapsed=elapsed)
             )
             # Shutdown runs outside message processing, so it carries its own revision and reason.
             with self.monitor.scope(revision=self._latest_revision, shutdown=request.kind.value):
@@ -185,7 +195,9 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 self._pr_comment_failed = True
                 with self._metrics.operation(Operation.PUBLISH_REPORT) as op:
                     try:
-                        published = await self._write(pr_number, body, progress, shutdown=request, now=now)
+                        published = await self._write(
+                            pr_number, body, progress, shutdown=request, now=now, elapsed=elapsed
+                        )
                     except Exception:
                         op.fail("Failed to publish the shutdown PR comment")
                         raise
@@ -204,6 +216,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         revision: int | None = None,
         shutdown: ShutdownRequest | None = None,
         now: datetime | None = None,
+        elapsed: timedelta | None = None,
     ) -> bool:
         """Return whether publication succeeded, using smaller bodies or a replacement comment.
 
@@ -213,7 +226,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         rendered = body
         # Render fallback tiers only when needed, skipping duplicate bodies.
         tiers = (
-            (render(progress, shutdown=shutdown, now=now) for render in FALLBACK_TIERS)
+            (render(progress, shutdown=shutdown, now=now, elapsed=elapsed) for render in FALLBACK_TIERS)
             if progress is not None
             else iter(())
         )

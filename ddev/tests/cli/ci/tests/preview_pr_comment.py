@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import os
 import sys
+from datetime import timedelta
 from pathlib import Path
 
 from ddev.cli.ci.tests.pr_comment import (
@@ -34,6 +35,9 @@ from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import attempt, batch_progress, failing_report, job_progress
 
 RUN_URL = "https://github.com/DataDog/integrations-core/actions/runs"
+
+# Only terminal reports show it, so the running scenario renders the same with or without it.
+ELAPSED = timedelta(minutes=18, seconds=33)
 
 
 def running_with_failures() -> DispatcherProgress:
@@ -227,14 +231,14 @@ def main(destination: Path):
         ("04-batch-only-failure", batch_only_failure()),
     ):
         path = destination / f"{name}.md"
-        path.write_text(render_comment(progress), encoding="utf-8")
+        path.write_text(render_comment(progress, elapsed=ELAPSED), encoding="utf-8")
         written.append(path)
 
     # The three terminal states together, so their wording can be compared at a glance.
     terminal = destination / "05-terminal-states.md"
     terminal.write_text(
         "\n\n---\n\n".join(
-            render_comment(running_with_failures(), shutdown=request)
+            render_comment(running_with_failures(), shutdown=request, elapsed=ELAPSED)
             for request in (
                 ShutdownRequest.cancelled(),
                 ShutdownRequest.failed(RuntimeError("a batch response failed validation")),
@@ -253,7 +257,7 @@ def main(destination: Path):
     fallbacks = at_scale()
     for name, render in (("06-compact", render_compact_comment), ("07-truncated", render_truncated_comment)):
         path = destination / f"{name}.md"
-        path.write_text(render(fallbacks), encoding="utf-8")
+        path.write_text(render(fallbacks, elapsed=ELAPSED), encoding="utf-8")
         written.append(path)
 
     for path in written:
