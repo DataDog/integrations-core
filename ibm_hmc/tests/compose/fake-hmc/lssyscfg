@@ -1,0 +1,3 @@
+#!/bin/sh
+# Fake HMC `lssyscfg -r sys` for e2e tests: one managed POWER system.
+echo 'e2eServer,9119-MHE,1001CFD'

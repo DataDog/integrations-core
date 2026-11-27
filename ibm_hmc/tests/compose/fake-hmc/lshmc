@@ -1,0 +1,8 @@
+#!/bin/sh
+# Fake HMC `lshmc -v` for e2e tests.
+echo 'vpd=*FC ????????'
+echo '*VC 20.0'
+echo '*DS Hardware Management Console'
+echo '*TM 7042-CR7'
+echo '*OS Embedded Operating Systems'
+echo '*RM V8R8.4.0.0'

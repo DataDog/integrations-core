@@ -1,0 +1,86 @@
+name: IBM HMC
+files:
+- name: ibm_hmc.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: host
+      description: Hostname or IP address of the HMC appliance to connect to.
+      required: true
+      value:
+        type: string
+        example: hmc.example.com
+    - name: port
+      description: SSH port of the HMC appliance.
+      required: false
+      value:
+        type: integer
+        example: 22
+    - name: username
+      description: |
+        SSH username to the HMC appliance. Use a read-only account, such as one with the
+        HMC Viewer role; `hscroot` is the HMC super-administrator account.
+      required: true
+      value:
+        type: string
+        example: hmc-readonly
+    - name: password
+      description: |
+        SSH password for the HMC appliance.
+        If an encrypted SSH private key is specified in `private_key_file`,
+        the given password is used to decrypt the key.
+      required: false
+      secret: true
+      value:
+        type: string
+    - name: private_key_file
+      description: |
+        File path to an SSH private key. If the key is encrypted, `password` is used to decrypt it.
+        See: http://docs.paramiko.org/en/stable/api/keys.html#paramiko.pkey.PKey.from_private_key_file
+      required: false
+      value:
+        type: string
+        require_trusted_provider: true
+    - name: private_key_type
+      description: Type of the private key, either `rsa` or `ecdsa`.
+      required: false
+      value:
+        type: string
+        example: rsa
+        enum: [rsa, ecdsa]
+    - name: known_hosts_file
+      description: |
+        Path to a known hosts file containing the HMC's host key. The check rejects connections
+        to hosts whose key is unknown. Defaults to the Agent user's `~/.ssh/known_hosts`.
+      required: false
+      value:
+        type: string
+    - name: timeout
+      description: |
+        Timeout in seconds for connecting to the HMC and for each command it runs. A stalled
+        HMC otherwise blocks the collection indefinitely.
+      required: false
+      value:
+        type: number
+        example: 10
+    - name: force_sha1
+      description: |
+        Some older HMC appliances only support SHA1 encryption and do not advertise it
+        to SSH clients, which assume SHA2 and fail to connect. Enable this to force the
+        SSH client to use SHA1. Datadog recommends upgrading the HMC firmware instead.
+      required: false
+      value:
+        type: boolean
+        example: false
+    - template: instances/default
+      overrides:
+        min_collection_interval.value.example: 60
+        min_collection_interval.value.display_default: 60
+        min_collection_interval.description: |
+          Changes the collection interval of the check. For more information, see
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
+          60 seconds is recommended: the HMC only produces new `lslparutil` samples at its
+          own configured sample rate, typically 60 seconds or more.
