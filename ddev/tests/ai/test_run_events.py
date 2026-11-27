@@ -5,6 +5,7 @@
 import asyncio
 import logging
 from dataclasses import dataclass
+from typing import Any
 
 import pytest
 
@@ -17,6 +18,11 @@ class Progress(Notice):
 
 
 @dataclass(frozen=True)
+class ProgressWithTotal(Progress):
+    total: int
+
+
+@dataclass(frozen=True)
 class Confirm(Question[bool]):
     label: str
 
@@ -26,23 +32,22 @@ class Choose(Question[int]):
     pass
 
 
-async def test_notice_subscribers_run_in_order_even_if_one_fails(caplog: pytest.LogCaptureFixture):
+async def test_inline_subscriber_failure_does_not_stop_delivery(caplog: pytest.LogCaptureFixture):
     logger = logging.getLogger(__name__)
     events = RunEvents(logger=logger)
     seen: list[int] = []
 
-    async def first(notice: Progress) -> None:
-        seen.append(notice.completed)
+    async def fail(notice: Progress) -> None:
         raise ValueError("cannot record progress")
 
-    async def second(notice: Progress) -> None:
-        seen.append(notice.completed + 1)
+    async def record(notice: Progress) -> None:
+        seen.append(notice.completed)
 
-    events.subscribe(Progress, first)
-    events.subscribe(Progress, second)
+    events.subscribe(Progress, fail)
+    events.subscribe(Progress, record)
     await events.notify(Progress(4))
 
-    assert seen == [4, 5]
+    assert seen == [4]
     assert (logger.name, logging.ERROR, "Subscriber failed for Progress") in caplog.record_tuples
     assert "cannot record progress" in caplog.text
 
@@ -119,6 +124,44 @@ async def test_background_delivery_is_cancelled_when_run_fails():
 async def test_background_notice_requires_run_task_group():
     with pytest.raises(RuntimeError, match="Background notices require a run-owned task group"):
         await RunEvents().notify(Progress(4), block=False)
+
+
+async def test_inline_subscribers_receive_notices_in_send_order():
+    events = RunEvents()
+    exact_progress: list[Progress] = []
+    all_progress: list[Progress] = []
+
+    async def record_exact_progress(notice: Progress) -> None:
+        exact_progress.append(notice)
+
+    async def record_all_progress(notice: Progress) -> None:
+        all_progress.append(notice)
+
+    events.subscribe(Progress, record_exact_progress)
+    events.subscribe(Progress, record_all_progress, exact=False)
+    first, detailed, last = Progress(1), ProgressWithTotal(2, total=5), Progress(3)
+    await events.notify(first)
+    await events.notify(detailed)
+    await events.notify(last)
+
+    assert exact_progress == [first, last]
+    assert all_progress == [first, detailed, last]
+
+
+async def test_question_subscriber_can_observe_all_question_types():
+    events = RunEvents()
+    seen: list[Question[Any]] = []
+
+    async def observe(question: Question[Any]) -> None:
+        seen.append(question)
+
+    events.subscribe(Question, observe, exact=False)
+    confirm, choose = Confirm("retry"), Choose()
+    await events.ask(confirm, timeout=0)
+    await events.notify(Progress(1))
+    await events.ask(choose, timeout=0)
+
+    assert seen == [confirm, choose]
 
 
 @pytest.mark.parametrize("has_responder", [False, True])

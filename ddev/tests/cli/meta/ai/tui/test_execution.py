@@ -32,6 +32,7 @@ from ddev.ai.react import notices
 from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.notices import RunErrored as RunErroredNotice
 from ddev.cli.meta.ai.tui.app import TogoApp
+from ddev.cli.meta.ai.tui.messages import NoticeMessage
 from ddev.cli.meta.ai.tui.status import RunStatus
 
 from .conftest import StaticConfigurationEngine, export_screenshot_text
@@ -483,18 +484,17 @@ async def test_pipeline_failed_phase_shows_failed_status():
 def test_interleaved_phase_error_only_mutates_scoped_phase() -> None:
     """An error from phase A cannot be attributed to concurrently running phase B."""
     from ddev.ai.agent.scope import AgentRole, AgentScope
-    from ddev.cli.meta.ai.tui.messages import AgentBeforeSend, AgentErrored, PhaseStarted
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
     screen = ExecutionScreen(_make_flow())
-    screen.on_phase_started(PhaseStarted("phase_1"))
-    screen.on_phase_started(PhaseStarted("phase_2"))
+    screen.on_notice_message(NoticeMessage(phase_notices.PhaseStarted("phase_1")))
+    screen.on_notice_message(NoticeMessage(phase_notices.PhaseStarted("phase_2")))
     phase_a_scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
     phase_b_scope = AgentScope(owner_id="phase_2", role=AgentRole.PHASE, phase_id="phase_2")
-    screen.on_agent_before_send(AgentBeforeSend(phase_a_scope, "phase A prompt", 1))
-    screen.on_agent_before_send(AgentBeforeSend(phase_b_scope, "phase B prompt", 1))
+    screen.on_notice_message(NoticeMessage(notices.AgentBeforeSend(phase_a_scope, "phase A prompt", 1)))
+    screen.on_notice_message(NoticeMessage(notices.AgentBeforeSend(phase_b_scope, "phase B prompt", 1)))
 
-    screen.on_agent_errored(AgentErrored(phase_a_scope, RuntimeError("phase A failed")))
+    screen.on_notice_message(NoticeMessage(notices.AgentErrored(phase_a_scope, RuntimeError("phase A failed"))))
 
     assert screen._phase_statuses["phase_1"] is RunStatus.FAILED
     assert screen._task_statuses[("phase_1", "task_one")] is RunStatus.FAILED
@@ -505,13 +505,12 @@ def test_interleaved_phase_error_only_mutates_scoped_phase() -> None:
 
 
 def test_phase_error_is_written_in_full_to_failed_phase_log() -> None:
-    from ddev.cli.meta.ai.tui.messages import PhaseErrored
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
     screen = ExecutionScreen(_make_flow())
     error = RuntimeError("first line\nfull validation detail\nhttps://errors.example.test/noise")
 
-    screen.on_phase_errored(PhaseErrored("phase_1", error))
+    screen.on_notice_message(NoticeMessage(phase_notices.PhaseErrored("phase_1", error)))
 
     assert screen._phase_statuses["phase_1"] is RunStatus.FAILED
     rendered = str(screen._phase_logs["phase_1"][-1])
@@ -522,22 +521,21 @@ def test_phase_error_is_written_in_full_to_failed_phase_log() -> None:
 
 def test_scoped_goal_event_only_mutates_identified_phase() -> None:
     """A goal verdict for phase A cannot update the same-named task in phase B."""
-    from ddev.cli.meta.ai.tui.messages import AfterGoalCheck, BeforeGoalCheck, PhaseStarted
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
     flow = _make_flow(phases=[("phase_1", ["shared_task"]), ("phase_2", ["shared_task"])])
     screen = ExecutionScreen(flow)
-    screen.on_phase_started(PhaseStarted("phase_1"))
-    screen.on_phase_started(PhaseStarted("phase_2"))
+    screen.on_notice_message(NoticeMessage(phase_notices.PhaseStarted("phase_1")))
+    screen.on_notice_message(NoticeMessage(phase_notices.PhaseStarted("phase_2")))
 
-    screen.on_before_goal_check(BeforeGoalCheck("phase_1", "shared_task", 1))
-    screen.on_before_goal_check(BeforeGoalCheck("phase_2", "shared_task", 1))
-    screen.on_after_goal_check(AfterGoalCheck("phase_1", "shared_task", 1, True, "done"))
+    screen.on_notice_message(NoticeMessage(phase_notices.BeforeGoalCheck("phase_1", "shared_task", 1)))
+    screen.on_notice_message(NoticeMessage(phase_notices.BeforeGoalCheck("phase_2", "shared_task", 1)))
+    screen.on_notice_message(NoticeMessage(phase_notices.AfterGoalCheck("phase_1", "shared_task", 1, True, "done")))
 
     assert screen._task_statuses[("phase_1", "shared_task")] is RunStatus.DONE
     assert screen._task_statuses[("phase_2", "shared_task")] is RunStatus.RUNNING
 
-    screen.on_after_goal_check(AfterGoalCheck("phase_2", "shared_task", 1, False, "failed"))
+    screen.on_notice_message(NoticeMessage(phase_notices.AfterGoalCheck("phase_2", "shared_task", 1, False, "failed")))
 
     assert screen._task_statuses[("phase_1", "shared_task")] is RunStatus.DONE
     assert screen._task_statuses[("phase_2", "shared_task")] is RunStatus.FAILED
@@ -545,14 +543,13 @@ def test_scoped_goal_event_only_mutates_identified_phase() -> None:
 
 def test_context_cleared_notice_is_written_to_scoped_phase_log() -> None:
     from ddev.ai.agent.scope import AgentRole, AgentScope
-    from ddev.cli.meta.ai.tui.messages import ContextCleared
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
     flow = _make_flow()
     screen = ExecutionScreen(flow)
     scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
 
-    screen.on_context_cleared(ContextCleared(scope))
+    screen.on_notice_message(NoticeMessage(notices.ContextCleared(scope)))
 
     assert len(screen._phase_logs["phase_1"]) == 1
     assert "context cleared" in screen._phase_logs["phase_1"][0].plain.lower()
@@ -613,7 +610,6 @@ async def test_execution_phase_activation_opens_config_for_pending_phase():
 
 async def test_execution_enter_opens_focused_phase_after_status_update():
     """A status update preserves keyboard activation of the focused phase."""
-    from ddev.cli.meta.ai.tui.messages import PhaseStarted
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen
     from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseNode
@@ -627,7 +623,7 @@ async def test_execution_enter_opens_focused_phase_after_status_update():
         await pilot.pause()
 
         screen.query_one(PhaseNode).focus()
-        screen.post_message(PhaseStarted("phase_1"))
+        screen.post_message(NoticeMessage(phase_notices.PhaseStarted("phase_1")))
         await pilot.pause()
         await pilot.press("enter")
         await pilot.pause()
@@ -662,7 +658,6 @@ async def test_execution_phase_activation_opens_log_for_started_phase(status: Ru
 async def test_execution_failed_phase_activation_opens_error_modal() -> None:
     from textual.widgets import Static
 
-    from ddev.cli.meta.ai.tui.messages import PhaseErrored
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.main import MainScreen
     from ddev.cli.meta.ai.tui.screens.phase_error_modal import PhaseErrorModal
@@ -677,7 +672,7 @@ async def test_execution_failed_phase_activation_opens_error_modal() -> None:
         await app.push_screen(screen)
         await pilot.pause()
         error = RuntimeError("first line\nfull validation detail")
-        screen.on_phase_errored(PhaseErrored("phase_1", error))
+        screen.on_notice_message(NoticeMessage(phase_notices.PhaseErrored("phase_1", error)))
 
         screen.on_phase_selected(PhaseSelected("phase_1"))
         await pilot.pause()
@@ -697,7 +692,6 @@ async def test_execution_cancelled_phase_falls_back_to_log() -> None:
     import asyncio
 
     from ddev.ai.agent.scope import AgentRole, AgentScope
-    from ddev.cli.meta.ai.tui.messages import AgentErrored
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen
     from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected
@@ -710,7 +704,7 @@ async def test_execution_cancelled_phase_falls_back_to_log() -> None:
         await app.push_screen(screen)
         await pilot.pause()
         scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
-        screen.on_agent_errored(AgentErrored(scope, asyncio.CancelledError()))
+        screen.on_notice_message(NoticeMessage(notices.AgentErrored(scope, asyncio.CancelledError())))
 
         assert screen._phase_statuses["phase_1"] is RunStatus.FAILED
         assert "phase_1" not in screen._phase_errors
@@ -865,7 +859,6 @@ async def test_agent_output_routes_to_phase_logs_by_scope_phase_id():
 async def test_phase_log_shows_thinking_block_until_agent_response():
     """Open phase logs show a transient component while an agent response is pending."""
     from ddev.ai.agent.scope import AgentRole, AgentScope
-    from ddev.cli.meta.ai.tui.messages import AgentBeforeSend, AgentResponseReceived
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen, ThinkingBlock
 
@@ -886,14 +879,14 @@ async def test_phase_log_shows_thinking_block_until_agent_response():
         await pilot.pause()
 
         scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
-        screen.on_agent_before_send(AgentBeforeSend(scope, "do the work", 1))
+        screen.on_notice_message(NoticeMessage(notices.AgentBeforeSend(scope, "do the work", 1)))
         await pilot.pause()
 
         thinking_blocks = phase_log.query(ThinkingBlock)
         assert len(thinking_blocks) == 1
         assert "phase_1:phase:1" in screen._active_thinking["phase_1"]
 
-        screen.on_agent_response_received(AgentResponseReceived(scope, _make_agent_response("done"), 1))
+        screen.on_notice_message(NoticeMessage(notices.AgentResponded(scope, _make_agent_response("done"), 1)))
         await pilot.pause()
 
         assert len(phase_log.query(ThinkingBlock)) == 0
@@ -904,7 +897,6 @@ async def test_sentinel_send_shows_thinking_without_prompt_block():
     """Sending tool results back to the model shows thinking without logging a fake prompt."""
     from ddev.ai.agent.scope import AgentRole, AgentScope
     from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
-    from ddev.cli.meta.ai.tui.messages import AgentBeforeSend, AgentResponseReceived
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen, ThinkingBlock
 
@@ -925,13 +917,13 @@ async def test_sentinel_send_shows_thinking_without_prompt_block():
         await pilot.pause()
 
         scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
-        screen.on_agent_before_send(AgentBeforeSend(scope, TOOL_RESULTS_SENTINEL, 2))
+        screen.on_notice_message(NoticeMessage(notices.AgentBeforeSend(scope, TOOL_RESULTS_SENTINEL, 2)))
         await pilot.pause()
 
         assert screen._phase_logs["phase_1"] == []
         assert len(phase_log.query(ThinkingBlock)) == 1
 
-        screen.on_agent_response_received(AgentResponseReceived(scope, _make_agent_response("done"), 2))
+        screen.on_notice_message(NoticeMessage(notices.AgentResponded(scope, _make_agent_response("done"), 2)))
         await pilot.pause()
 
         assert len(phase_log.query(ThinkingBlock)) == 0
@@ -940,7 +932,6 @@ async def test_sentinel_send_shows_thinking_without_prompt_block():
 async def test_phase_log_replays_entries_before_active_thinking_block():
     """Opening a log mid-turn appends transient state after historical entries."""
     from ddev.ai.agent.scope import AgentRole, AgentScope
-    from ddev.cli.meta.ai.tui.messages import AgentBeforeSend
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogBlock, PhaseLogScreen, ThinkingBlock
 
@@ -957,7 +948,7 @@ async def test_phase_log_replays_entries_before_active_thinking_block():
         await pilot.pause()
 
         scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
-        screen.on_agent_before_send(AgentBeforeSend(scope, "do the work", 1))
+        screen.on_notice_message(NoticeMessage(notices.AgentBeforeSend(scope, "do the work", 1)))
         await pilot.pause()
 
         phase_log = PhaseLogScreen(flow, "phase_1", screen._phase_logs["phase_1"], source=screen)
@@ -1600,7 +1591,6 @@ async def test_orchestrator_exception_without_failed_phase_is_not_attributed() -
 async def test_run_error_banner_is_compact_and_points_to_phase_log() -> None:
     from textual.widgets import Static
 
-    from ddev.cli.meta.ai.tui.messages import PhaseErrored, RunErrored
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
     flow = _make_flow()
@@ -1611,13 +1601,15 @@ async def test_run_error_banner_is_compact_and_points_to_phase_log() -> None:
         await app.push_screen(screen)
         await pilot.pause()
 
-        screen.on_phase_errored(
-            PhaseErrored(
-                "phase_1",
-                RuntimeError("invalid input\nfull validation detail\nhttps://errors.example"),
+        screen.on_notice_message(
+            NoticeMessage(
+                phase_notices.PhaseErrored(
+                    "phase_1",
+                    RuntimeError("invalid input\nfull validation detail\nhttps://errors.example"),
+                )
             )
         )
-        screen.on_run_errored(RunErrored())
+        screen.on_notice_message(NoticeMessage(RunErroredNotice()))
 
         banner = str(screen.query_one("#execution-error", Static).render())
         assert "Run failed in phase_1: invalid input" in banner
@@ -1629,7 +1621,6 @@ async def test_run_error_banner_is_compact_and_points_to_phase_log() -> None:
 async def test_run_error_banner_aggregates_parallel_phase_errors() -> None:
     from textual.widgets import Static
 
-    from ddev.cli.meta.ai.tui.messages import PhaseErrored, RunErrored
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
     flow = _make_flow()
@@ -1640,9 +1631,13 @@ async def test_run_error_banner_aggregates_parallel_phase_errors() -> None:
         await app.push_screen(screen)
         await pilot.pause()
 
-        screen.on_phase_errored(PhaseErrored("phase_1", RuntimeError("alpha failed\nalpha details")))
-        screen.on_phase_errored(PhaseErrored("phase_2", RuntimeError("beta failed\nbeta details")))
-        screen.on_run_errored(RunErrored())
+        screen.on_notice_message(
+            NoticeMessage(phase_notices.PhaseErrored("phase_1", RuntimeError("alpha failed\nalpha details")))
+        )
+        screen.on_notice_message(
+            NoticeMessage(phase_notices.PhaseErrored("phase_2", RuntimeError("beta failed\nbeta details")))
+        )
+        screen.on_notice_message(NoticeMessage(RunErroredNotice()))
 
         banner = str(screen.query_one("#execution-error", Static).render())
         assert "Run failed — 2 phases failed" in banner
@@ -1655,7 +1650,6 @@ async def test_run_error_banner_aggregates_parallel_phase_errors() -> None:
 async def test_late_parallel_phase_error_updates_existing_banner() -> None:
     from textual.widgets import Static
 
-    from ddev.cli.meta.ai.tui.messages import PhaseErrored, RunErrored
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
     flow = _make_flow()
@@ -1666,9 +1660,9 @@ async def test_late_parallel_phase_error_updates_existing_banner() -> None:
         await app.push_screen(screen)
         await pilot.pause()
 
-        screen.on_phase_errored(PhaseErrored("phase_1", RuntimeError("alpha failed")))
-        screen.on_run_errored(RunErrored())
-        screen.on_phase_errored(PhaseErrored("phase_2", RuntimeError("beta failed")))
+        screen.on_notice_message(NoticeMessage(phase_notices.PhaseErrored("phase_1", RuntimeError("alpha failed"))))
+        screen.on_notice_message(NoticeMessage(RunErroredNotice()))
+        screen.on_notice_message(NoticeMessage(phase_notices.PhaseErrored("phase_2", RuntimeError("beta failed"))))
 
         banner = str(screen.query_one("#execution-error", Static).render())
         assert "Run failed — 2 phases failed" in banner
