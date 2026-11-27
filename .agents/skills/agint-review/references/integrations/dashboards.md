@@ -21,4 +21,5 @@ Read this when the PR changes `assets/dashboards/`. Scope tags are defined in th
 - Conditional formatting agrees with the metric's direction: red at the bad end (high for errors and latency, low for success rates), no color on counts with no good or bad direction (**Suggestion**, PR scope).
 - Two metrics with different units on one widget (**Suggestion**, PR scope).
 - Structure: About and Overview groups first, About holding content, not data, and not full width; query values with a timeseries background; the title names the integration and has no hyphen (it builds the URL) (**Suggestion**, new only).
+- A new dashboard (in a new or an existing integration) comes with screenshots of it in `<integration>/images/`, light and dark mode, listed under `tile.media` in `manifest.json` so they show on the integration tile (e.g. #26189) (**Request**, PR scope). A changed dashboard whose existing screenshots no longer match it (**Suggestion**, PR scope).
 - Copy: Title Case group titles, sentence case widget titles, no units or integration name in titles, aliased formulas (**Nit**, PR scope).
