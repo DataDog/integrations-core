@@ -61,7 +61,7 @@ The scheduler also exposes an unprefixed copy of each of its metrics that is nev
 
 #### NVIDIA Run:ai
 
-NVIDIA Run:ai installs KAI in the `runai` namespace, with the `runai` metrics namespace and one scheduler service per node pool shard, such as `runai-scheduler-default`. Check the service names and ports with `kubectl -n runai get svc`. Queue fair share and usage metrics carry no node pool label, so tag each scheduler instance with its node pool:
+NVIDIA Run:ai installs KAI in the `runai` namespace, with the `runai` metrics namespace and one scheduler service per node pool shard, such as `runai-scheduler-default`. Check the service names and ports with `kubectl -n runai get svc`. Scheduler queue fair share and usage metrics carry no node pool label, so tag each scheduler instance with the node pool of its shard. Scrape the queue-controller in its own instance, without that tag, because its quota and allocation metrics are not specific to one node pool:
 
 ```yaml
 clusterAgent:
@@ -70,10 +70,12 @@ clusterAgent:
       cluster_check: true
       init_config:
       instances:
+      - queue_controller_endpoint: http://queue-controller.runai.svc:8080/metrics
+        metrics_namespace: runai
       - scheduler_endpoint: http://runai-scheduler-default.runai.svc:8080/metrics
-        queue_controller_endpoint: http://queue-controller.runai.svc:8080/metrics
         metrics_namespace: runai
         tags: [kai_nodepool:default]
+        collect_podgroup_events: false
       - scheduler_endpoint: http://runai-scheduler-<SHARD>.runai.svc:8080/metrics
         metrics_namespace: runai
         tags: [kai_nodepool:<NODE_POOL>]
