@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Custom Textual Message subclasses mirroring the orchestrator callback events.
+"""Custom Textual Message subclasses mirroring the run notices.
 
 No widget imports — this module is safe to import anywhere in the TUI package.
 """

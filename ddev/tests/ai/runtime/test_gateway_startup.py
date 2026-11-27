@@ -294,7 +294,7 @@ async def test_subagent_gateway_denial_ends_run_and_keeps_completed_phase_checkp
 
     producer = Mock(spec=GatewayTokenProducer, available=True)
     producer.token_for.side_effect = token_for
-    monkeypatch.setattr("ddev.ai.runtime.resources.GatewayTokenProducer", lambda: producer)
+    monkeypatch.setattr("ddev.ai.runtime.resources.GatewayTokenProducer", lambda _events: producer)
     message = _message("claude-haiku-4-5-20251001")
 
     def handle(request: httpx2.Request) -> httpx2.Response:

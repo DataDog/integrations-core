@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 
 from ddev.ai.errors import RunAbortError
 from ddev.ai.model_catalog import Route
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.errors import CredentialRefreshError, RefreshFailureCause
 from ddev.utils import dd_auth
 
@@ -47,7 +48,8 @@ class GatewayToken:
 class GatewayTokenProducer:
     """Share one Gateway PAT across providers and refresh it on demand."""
 
-    def __init__(self) -> None:
+    def __init__(self, events: RunEvents) -> None:
+        self._events = events
         self._executable = dd_auth.find_dd_auth()
         self._token: GatewayToken | None = None
         self._rejected = False

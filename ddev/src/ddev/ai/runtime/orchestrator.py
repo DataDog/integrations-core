@@ -8,7 +8,6 @@ from collections.abc import Callable
 from pathlib import Path
 
 from ddev.ai.agent.registry import AgentProviderRegistry
-from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -16,6 +15,7 @@ from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
+from ddev.ai.runtime.notices import RunErrored
 from ddev.ai.runtime.resources import RunResources, RunRoute
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError, OrchestratorHookError
@@ -35,7 +35,6 @@ class PhaseOrchestrator(EventBusOrchestrator):
         runtime_variables: RuntimeVariables,
         provider_registry: AgentProviderRegistry,
         file_access_policy: FileAccessPolicy,
-        callbacks: Callbacks | None = None,
         resume: bool = False,
         grace_period: float = DEFAULT_GRACE_PERIOD,
         logger: logging.Logger | None = None,
@@ -74,7 +73,6 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._runtime_variables = runtime_variables
         self._provider_registry = provider_registry
         self._file_access_policy = file_access_policy
-        self._callbacks: Callbacks = callbacks or Callbacks()
         self._events = events
         self._resume = resume
         self._report_route = report_route
@@ -143,7 +141,6 @@ class PhaseOrchestrator(EventBusOrchestrator):
         context = FlowContext(
             runtime_variables=self._runtime_variables,
             flow_variables=self._resolved_flow.variables,
-            callbacks=self._callbacks,
             logger=self._logger,
             resume_frontier=frozenset(frontier),
         )
@@ -173,7 +170,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         if isinstance(message, PhaseFailedMessage):
             self._failed_phase = message.phase_id
             self._failed_error = message.error
-            await self._callbacks.fire_run_error()
+            await self._events.notify(RunErrored())
             self.request_shutdown(ShutdownRequest.failed(message.error))
 
     async def on_error(self, error: OrchestratorHookError) -> None:

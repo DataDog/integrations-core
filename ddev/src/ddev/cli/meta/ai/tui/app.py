@@ -61,7 +61,7 @@ class TogoApp(App):
 
     - ``engine``: the configuration engine whose validated flow results are displayed.
     - ``execution_status``: the app-wide reactive lifecycle of the active flow.
-    - ``bridge_target``: the MessagePump that bridge callbacks post to.
+    - ``bridge_target``: the MessagePump that the event bridge posts to.
       Defaults to the app itself; later phases can swap in a screen.
     - ``run_flow(orchestrator)``: async worker that awaits
       ``orchestrator.run_async()``.
