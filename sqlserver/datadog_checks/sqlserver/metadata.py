@@ -18,7 +18,12 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_VERSION,
 )
-from datadog_checks.sqlserver.schemas import SQLServerObjectCollector, SQLServerSchemaCollector
+from datadog_checks.sqlserver.schemas import (
+    SQLServerObjectCollector,
+    SQLServerSchemaCollector,
+    SQLServerTableCollector,
+    create_schema_collector_config,
+)
 from datadog_checks.sqlserver.utils import raise_if_cancelled
 from datadog_checks.sqlserver.views import SQLServerViewCollector
 
@@ -106,23 +111,24 @@ class SqlserverMetadata(DBMAsyncJob):
         self._settings_query = None
         self._time_since_last_settings_query = 0
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
-        self._schema_collectors = self._build_schema_collectors(check)
+        self._schema_collector = self._build_schema_collector(check)
         self._column_statistics_collector = (
             SqlserverColumnStatisticsCollector(check, config, self._cancel_event) if column_statistics_enabled else None
         )
         self._last_collection_times: dict[str, float] = {}
 
-    def _build_schema_collectors(self, check) -> list[SQLServerObjectCollector]:
+    def _build_schema_collector(self, check) -> SQLServerSchemaCollector | None:
         if not self._schema_config.get('enabled', False):
-            return []
-        collectors: list[SQLServerObjectCollector] = [SQLServerSchemaCollector(check)]
+            return None
+        config = create_schema_collector_config(check)
+        object_collectors: list[SQLServerObjectCollector] = [SQLServerTableCollector(check, config)]
         if self._schema_config.get('collect_views', False):
-            collectors.append(SQLServerViewCollector(check))
-        return collectors
+            object_collectors.append(SQLServerViewCollector(check, config))
+        return SQLServerSchemaCollector(check, object_collectors, self._cancel_event)
 
     def shutdown(self) -> None:
         # The schema and column statistics collectors hold the check, so release them during teardown.
-        self._schema_collectors = []
+        self._schema_collector = None
         self._column_statistics_collector = None
         self._check = None
 
@@ -218,16 +224,17 @@ class SqlserverMetadata(DBMAsyncJob):
         return True
 
     def collect_schemas(self, tick: float | None = None):
-        if not self._schema_collectors or not self._is_due('schemas', self._schema_collection_interval, tick):
+        collector = self._schema_collector
+        if not collector or not self._is_due('schemas', self._schema_collection_interval, tick):
             return
-        for collector in self._schema_collectors:
+        raise_if_cancelled(self._cancel_event)
+        # A failed run must not stop the job loop, but a cancel still has to end the tick. The collector already
+        # logs the error and reports it through its status:error telemetry.
+        try:
+            collector.collect_schemas()
+        except Exception as e:
             raise_if_cancelled(self._cancel_event)
-            # Each collector is a separate run, so one failing must not skip the others or stop the job loop.
-            # The collector already logs the error and reports it through its status:error telemetry.
-            try:
-                collector.collect_schemas()
-            except Exception as e:
-                self.log.debug("Skipped remaining %s collection after error: %s", collector.kind, e)
+            self.log.debug("Skipped remaining schema collection after error: %s", e)
 
     def collect_column_statistics(self, tick: float | None = None):
         collector = self._column_statistics_collector
