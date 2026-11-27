@@ -55,13 +55,20 @@ See the [sample kai_scheduler.d/conf.yaml][4] for all available configuration op
 
 #### Metrics namespace
 
-KAI prefixes the names of its scheduler and queue-controller metrics with its metrics namespace, `kai` by default, which can be changed with the `--metrics-namespace` flag or the `queueController.metricsNamespace` setting. When KAI uses another namespace, set `metrics_namespace` in every instance to the same value, without the trailing `_`. The metrics are submitted with the same names whatever the namespace.
+KAI prefixes the names of its scheduler and queue-controller metrics with its metrics namespace. The default is `kai`, which you can change with the `--metrics-namespace` flag or the `queueController.metricsNamespace` setting. When KAI uses another metrics namespace, set `metrics_namespace` in every instance to the same value, without the trailing `_`. The check submits the metrics under the same names, whatever the metrics namespace.
 
-The scheduler also exposes an unprefixed copy of each of its metrics that is never updated, so the check only collects the prefixed names. Do not use `raw_metric_prefix` to remove the namespace.
+The scheduler also exposes an unprefixed copy of each of its metrics. KAI never updates these copies, so the check collects only the prefixed names. Do not use `raw_metric_prefix` to remove the namespace.
 
 #### NVIDIA Run:ai
 
-NVIDIA Run:ai installs KAI in the `runai` namespace, with the `runai` metrics namespace and one scheduler service per node pool shard, such as `runai-scheduler-default`. Check the service names and ports with `kubectl -n runai get svc`. Scheduler queue fair share and usage metrics carry no node pool label, so tag each scheduler instance with the node pool of its shard. Use the node pool name as KAI reports it, because eviction metrics already carry a `kai_nodepool` tag from KAI. Scrape the queue-controller in its own instance, without that tag, because its quota and allocation metrics are not specific to one node pool:
+NVIDIA Run:ai installs KAI in the `runai` Kubernetes namespace, with the `runai` metrics namespace and one scheduler service per node pool shard, such as `runai-scheduler-default`. To find the service names and ports, run `kubectl -n runai get svc`.
+
+Configure the instances as follows:
+
+- **Scheduler**: Add one instance per shard, and tag each instance with the node pool of its shard. Scheduler queue fair share and usage metrics carry no node pool label. Use the node pool name as KAI reports it, so that your tag matches the `kai_nodepool` tag that the check adds to eviction metrics from KAI's node pool label.
+- **Queue-controller**: Scrape it in its own instance, without the `kai_nodepool` tag, because its quota and allocation metrics are not specific to one node pool.
+
+In the following example, replace `<SHARD>` with the shard name from the scheduler service name, and `<NODE_POOL>` with the node pool name that KAI reports:
 
 ```yaml
 clusterAgent:
