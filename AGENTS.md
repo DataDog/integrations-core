@@ -261,7 +261,9 @@ The valid types are defined in `ddev/src/ddev/release/constants.py` (`ENTRY_TYPE
 
 ### Choosing `.changed`
 
-Before writing a `.changed` entry, stop and confirm the change is genuinely breaking for an existing user — something that would break their current configuration, dashboards, monitors, or ingested data. If you cannot name specifically what breaks, it is **not** a `.changed` entry: use `added` for new capability or `fixed` for a bug fix. When in doubt, prefer the non-breaking type or ask the reviewer rather than defaulting to `.changed`.
+Before writing a `.changed` entry, stop and confirm the change is genuinely breaking for an existing user. For example, it might break their current configuration, dashboards, monitors, or ingested data, or prevent them from installing the new integration version. If you cannot name specifically what breaks, it is **not** a `.changed` entry: use `added` for new capability or `fixed` for a bug fix. When in doubt, prefer the non-breaking type or ask the reviewer rather than defaulting to `.changed`.
+
+Use a `.changed` entry when an integration raises its minimum `datadog-checks-base` version. An Agent that ships a base check below the new minimum cannot install the new integration version, even if the integration's behavior is unchanged.
 
 ### Examples
 

@@ -86,8 +86,10 @@ class WorkflowRun(BaseModel):
     strings rather than modeled as a StrEnum. `status` is also in the schema's
     `required` list, so it is typed `str | None` with no default: the key is
     always present and only its value may be null.
+    The `workflow-run` schema makes `run_attempt` optional.
     Reference:
     https://docs.github.com/en/rest/actions/workflow-runs#get-a-workflow-run
+    https://github.com/github/rest-api-description/blob/main/descriptions/api.github.com/api.github.com.2022-11-28.json
     """
 
     model_config = ConfigDict(extra="ignore")
@@ -103,6 +105,7 @@ class WorkflowRun(BaseModel):
     updated_at: str | None = None
     # Start of the latest attempt, reset on rerun (see the workflow-run schema linked above).
     run_started_at: str | None = None
+    run_attempt: int | None = None
 
     @property
     def is_completed(self) -> bool:
@@ -189,7 +192,7 @@ class WorkflowJob(BaseModel):
     The `job` schema lists `created_at`, `started_at` and `completed_at` in its `required`
     list. Only `completed_at` is nullable, so all three are required keys with no default,
     `created_at` and `started_at` as `str` and `completed_at` as `str | None`, the same
-    pattern as `WorkflowRun.status`.
+    pattern as `WorkflowRun.status`. The schema makes `run_attempt` optional.
     Field reference and pinned schema (`components.schemas.job`):
     https://docs.github.com/en/rest/actions/workflow-jobs#get-a-job-for-a-workflow-run
     https://github.com/github/rest-api-description/blob/main/descriptions/api.github.com/api.github.com.2022-11-28.json
@@ -199,6 +202,7 @@ class WorkflowJob(BaseModel):
 
     id: int
     run_id: int
+    run_attempt: int | None = None
     name: str
     status: WorkflowJobStatus
     conclusion: WorkflowJobConclusion | None = None

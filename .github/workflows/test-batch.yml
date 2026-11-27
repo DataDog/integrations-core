@@ -529,9 +529,15 @@ jobs:
             *)         state=failure; description="A job failed" ;;
           esac
 
-          gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=${STATUS_CONTEXT}" \
-            -f "state=${state}" \
-            -f "description=${description}" \
-            -f "target_url=${RUN_URL}" \
-            --jq '"settled \(.context) as \(.state)"'
+          post_status() {
+            gh api --silent --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+              -f "context=${STATUS_CONTEXT}" \
+              -f "state=${state}" \
+              -f "description=${description}" \
+              -f "target_url=${RUN_URL}"
+          }
+          post_status || {
+            sleep 5
+            post_status
+          }
+          printf 'settled %s as %s\n' "$STATUS_CONTEXT" "$state"
