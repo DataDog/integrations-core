@@ -124,7 +124,9 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_pg_settings_enabled = config.collect_settings.enabled
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
-        self._schema_collector = PostgresSchemaCollector(check) if config.collect_schemas.enabled else None
+        self._schema_collector = (
+            PostgresSchemaCollector(check, self._cancel_event) if config.collect_schemas.enabled else None
+        )
         self._collect_column_statistics_enabled = config.collect_column_statistics.enabled and config.dbm
         self._column_statistics_collector = (
             PostgresColumnStatisticsCollector(check, self._cancel_event)

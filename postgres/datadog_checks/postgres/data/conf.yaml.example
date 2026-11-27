@@ -516,10 +516,22 @@ instances:
         #
         # enabled: true
 
+        ## @param collect_views - boolean - optional - default: false
+        ## Enable collection of PostgreSQL views and materialized views when schema collection is enabled.
+        ## View definitions are sent as written, without obfuscation. Defaults to false.
+        #
+        # collect_views: false
+
         ## @param max_tables - number - optional - default: 300
         ## Maximum amount of tables the Agent collects from the instance.
         #
         # max_tables: 300
+
+        ## @param max_views - number - optional - default: 1000
+        ## Set the maximum number of views and materialized views to collect from each database when
+        ## `collect_views` is enabled. Set to 0 to collect every view. Defaults to 1000.
+        #
+        # max_views: 1000
 
         ## @param max_query_duration - number - optional - default: 60
         ## Maximum duration of the query to collect schema information in seconds.
