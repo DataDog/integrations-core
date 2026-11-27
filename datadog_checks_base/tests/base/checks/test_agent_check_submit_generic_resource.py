@@ -83,7 +83,7 @@ def test_submit_generic_resource_emits_expected_event(aggregator, check):
         },
         "status": {"health": {"status": "Healthy"}},
     }
-    datadog_agent.assert_telemetry("argocd", "datadog.agent.check.genresources.emitted", "count", 1)
+    datadog_agent.assert_telemetry("argocd", "datadog.agent.check.genresources.emitted", "counter", 1)
 
 
 def test_submit_generic_resource_given_include_all_ships_constructed_fields(aggregator, check):
@@ -195,7 +195,7 @@ def test_submit_generic_resource_given_include_all_ships_constructed_fields(aggr
 def test_submit_generic_resource_drops_and_counts_invalid_input(aggregator, check, caplog, kwargs, expected_log):
     check.submit_generic_resource(**kwargs)
     assert aggregator.get_event_platform_events("genresources", parse_json=False) == []
-    datadog_agent.assert_telemetry("argocd", "datadog.agent.check.genresources.dropped", "count", 1)
+    datadog_agent.assert_telemetry("argocd", "datadog.agent.check.genresources.dropped", "counter", 1)
     assert any(expected_log in record.getMessage() for record in caplog.records)
 
 

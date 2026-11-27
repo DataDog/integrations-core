@@ -990,7 +990,9 @@ class AgentCheck(object):
         integration = self.name
 
         def _emit_dropped(count=1):
-            datadog_agent.emit_agent_telemetry(integration, "datadog.agent.check.genresources.dropped", count, "count")
+            datadog_agent.emit_agent_telemetry(
+                integration, "datadog.agent.check.genresources.dropped", count, "counter"
+            )
 
         if not key:
             self.log.warning("genresources: dropping resource with empty key for type=%s", type)
@@ -1102,7 +1104,7 @@ class AgentCheck(object):
             return
 
         self.event_platform_event(payload, GENRESOURCES_TRACK)
-        datadog_agent.emit_agent_telemetry(integration, "datadog.agent.check.genresources.emitted", 1, "count")
+        datadog_agent.emit_agent_telemetry(integration, "datadog.agent.check.genresources.emitted", 1, "counter")
 
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)

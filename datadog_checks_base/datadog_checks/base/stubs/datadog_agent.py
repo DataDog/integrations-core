@@ -174,6 +174,9 @@ class DatadogAgentStub(object):
         return command
 
     def emit_agent_telemetry(self, check_name, metric_name, metric_value, metric_type):
+        # The Agent records only these types and logs a warning for any other, dropping the value.
+        if metric_type not in ('counter', 'histogram', 'gauge'):
+            raise ValueError(f'Unsupported Agent telemetry metric type {metric_type!r} for {metric_name}')
         self._sent_telemetry[(check_name, metric_name, metric_type)].append(metric_value)
 
     def report_issue(self, check_name, report_json):
