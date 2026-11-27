@@ -620,6 +620,23 @@ files:
                   type: number
                   example: 60
                 fleet_configurable: false
+              - name: collect_views
+                description: |
+                  Enable collection of views when schema collection is enabled. View definitions are sent
+                  as written, without obfuscation. Collecting view definitions requires the `SHOW VIEW` privilege.
+                  Defaults to false.
+                value:
+                  type: boolean
+                  example: false
+                fleet_configurable: false
+              - name: max_views
+                description: |
+                  Set the maximum number of views to collect from each database when `collect_views` is enabled.
+                  Set to 0 to collect every view. Defaults to 1000.
+                value:
+                  type: integer
+                  example: 1000
+                fleet_configurable: false
           - name: schemas_collection
             display_priority: 0
             deprecation:
