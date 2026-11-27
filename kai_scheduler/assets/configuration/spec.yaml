@@ -58,6 +58,39 @@ files:
         type: boolean
         example: true
         default: true
+    - name: collect_scheduling_goodput
+      description: |
+        Experimental. Submit the scheduling goodput metrics, in GPU-hours since the previous run, as one series per
+        PodGroup tagged with `kai_pod_group`, `job_scheduler_workload` and its KAI queue, so that they can be summed by
+        queue, cluster or reason:
+
+        - `gpu.scheduling.badput_time`: GPU time that GPU PodGroups spent waiting to become fully runnable, tagged with
+          one of six general `reason` categories (`quota_or_capacity`, `placement_or_topology`,
+          `configuration_or_request`, `preemption_or_reclaim`, `startup_or_system`, `other_or_unknown`) and a
+          `scheduler_reason`: the raw KAI reason, or one the check derives, such as `PartiallyRunning` for partial
+          scheduling. It doesn't stop when KAI allocates a PodGroup, but when all its active pods run. After a
+          preemption it is tagged `reason:preemption_or_reclaim` until KAI starts the PodGroup again.
+        - `gpu.scheduling.fully_admitted_time`: GPU time that GPU PodGroups spent with all their active pods running.
+
+        Goodput is `fully_admitted_time / (fully_admitted_time + badput_time)`. The metrics have no `kai.` prefix so
+        that every scheduler integration submits the same metrics. Both metrics are also tagged with `gpu_type`, when the
+        pods of the PodGroup require a GPU model with the `nvidia.com/gpu.product` node label in their `nodeSelector` or
+        `nodeAffinity`, and the tag is unset otherwise. It works when `collect_podgroup_events` is `false`, such as when
+        the Cluster Agent `job_scheduler_events` check sends the PodGroup events.
+
+        Each GPU PodGroup active in an hour adds at least two custom metric series, plus one per extra badput reason.
+
+        A GPU PodGroup has pods that request `nvidia.com/gpu`, `amd.com/gpu` or a KAI GPU fraction. It is fully admitted
+        once every one of its active pods runs, and at least `minMember` of its pods run or completed. This requires
+        cluster-wide `list` RBAC permission on `podgroups.scheduling.run.ai` and on `pods`, and `get` on `jobs.batch` to
+        tell whether a PodGroup left without pods waits for new ones or is done.
+
+        Every instance with this option enabled counts all the PodGroups of the cluster, so enable it on one instance
+        only, otherwise the metrics are counted several times.
+      value:
+        type: boolean
+        example: false
+        default: false
     - name: kube_config_dict
       fleet_configurable: true
       description: |

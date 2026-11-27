@@ -101,6 +101,46 @@ The first collection run records the current state of each PodGroup. It doesn't 
 
 Collecting events requires `list` role-based access control (RBAC) permission on `podgroups.scheduling.run.ai`, and `list` on `events` for the eviction details. Every instance with `collect_podgroup_events` enabled polls all the PodGroups of the cluster, so when you configure several instances, such as one per scheduling shard, set `collect_podgroup_events: false` on all but one of them. Set it to `false` on every instance to disable events.
 
+### Scheduling goodput (experimental)
+
+Set `collect_scheduling_goodput: true` to measure how much of the GPU time that KAI PodGroups request is spent waiting to become fully runnable. A GPU PodGroup is one whose pods request `nvidia.com/gpu`, `amd.com/gpu`, or a KAI GPU fraction with the `gpu-fraction` annotation. The check doesn't count MIG profiles. On every run, each GPU PodGroup adds the time since the previous run, multiplied by the GPUs that its active pods request, to one of two counts. The check submits both counts in GPU-hours, as one series per PodGroup:
+
+- `gpu.scheduling.badput_time`: the PodGroup waits for quota or for room in the cluster, some of its pods are not running yet, or it was preempted and waits to run again. It is tagged with a `reason`, one of six general categories shared with the other scheduler integrations, such as `quota_or_capacity` or `startup_or_system`, and with a `scheduler_reason`: the raw KAI reason, or one the check derives when KAI reports none.
+- `gpu.scheduling.fully_admitted_time`: every active pod of the PodGroup runs, with at least `minMember` pods running or completed.
+
+Badput doesn't stop when KAI allocates a PodGroup. It stops once every active pod runs, so a PodGroup that KAI scheduled but whose pods are pending or only partly running, such as when the node can't start them, keeps accumulating badput, with `reason:startup_or_system`. `scheduler_reason` tells these waits apart: `PartiallyRunning` when some active pods run and others don't (partial scheduling), and `PodsPending` when none runs yet. After a preemption, the badput is tagged `reason:preemption_or_reclaim` until KAI starts the PodGroup again.
+
+The `reason` tag is derived from the PodGroup `status.schedulingConditions[].reasons[]`. `scheduler_reason` keeps the raw KAI value for detail, so the `reason` tag has a fixed set of six values. KAI doesn't expose a structured reason for other causes, so the check derives the reason from the state of the PodGroup and its pods, and submits it as `scheduler_reason`:
+
+| `reason` | What it means | KAI `scheduler_reason` |
+|---|---|---|
+| `quota_or_capacity` | The PodGroup waits for capacity because of quota or allocation policies. Compare the quota with the fleet to decide whether to rebalance quota or add capacity. | `OverLimit`, `NonPreemptibleOverQuota` |
+| `placement_or_topology` | Capacity may exist, but it can't satisfy the placement requirements. KAI has no structured reason for it, so this value is not used yet. | none |
+| `configuration_or_request` | The PodGroup, queue, or resource configuration prevents the scheduling. Review and correct the request or the configuration. | `QueueDoesNotExist` |
+| `preemption_or_reclaim` | The PodGroup waits for resources to be reclaimed, or KAI evicted it and hasn't started it again. Review the priority and borrowing policies. | `PreemptionDelayNotElapsed`; `Evicted` (derived) |
+| `startup_or_system` | KAI scheduled the PodGroup, or it has no pods yet, but its pods are not all running. Pod and infrastructure data are needed to find the cause. | `PartiallyRunning`, `PodsPending`, `NoPods` (derived) |
+| `other_or_unknown` | There isn't enough context to classify the cause. | `PodSchedulingErrors`, and any other value |
+
+To investigate badput:
+
+1. Detect high scheduling badput and use `reason` to find the type of blocking condition. Use `scheduler_reason` for the exact KAI reason.
+2. Find the PodGroups with the highest waiting time, with `job_scheduler_workload`, and group them by `gpu_type`.
+3. Correlate the result with the state of that GPU fleet. For example, if most affected PodGroups request A100s, inspect the A100 fleet.
+
+**Requirements**: The service account of the Agent that runs the check, such as the cluster check runner, needs cluster-wide `list` on `podgroups.scheduling.run.ai` and `pods`, and `get` on `jobs.batch`. The check uses `jobs.batch` to determine whether a PodGroup without pods is waiting for new pods or is done. Every instance with `collect_scheduling_goodput` enabled counts the whole cluster, so enable it on only one instance.
+
+**Querying**: The scheduling goodput of a group, such as a KAI queue, is `fully_admitted_time / (fully_admitted_time + badput_time)` summed over its series:
+
+```text
+sum:gpu.scheduling.fully_admitted_time{*} by {kai_queue}.as_count().fill(zero) / (sum:gpu.scheduling.fully_admitted_time{*} by {kai_queue}.as_count().fill(zero) + sum:gpu.scheduling.badput_time{*} by {kai_queue}.as_count().fill(zero))
+```
+
+Use `.fill(zero)` so that a group that stops reporting does not repeat its last value. On every run where a PodGroup is counted, it submits both metrics, with a value of 0 for the metric that doesn't apply. This way, a group's goodput is defined even when all its PodGroups are waiting or all are running. The 0 `badput_time` point has no `reason` tag, so grouping badput by `reason` shows an extra group with no reason. A PodGroup name is unique only within a namespace, so group by `kube_namespace` and `kai_pod_group` to look at a single PodGroup.
+
+**Tags**: Both metrics are tagged with `kai_pod_group`, `kai_queue`, `kube_namespace`, and the scheduler tags shared by all batch schedulers: `job_scheduler:kai`, `job_scheduler_queue` (the queue name), and `job_scheduler_workload` (the PodGroup name). The shared tags match the ones on the PodGroup events, so the same queries work for KAI and Kueue. Both metrics also carry `gpu_type` (for example `a100`) when the pods of the PodGroup explicitly require a GPU model in their `nodeSelector` or `nodeAffinity` with the `nvidia.com/gpu.product` node label. KAI PodGroups don't expose the GPU model, so the tag is unset otherwise. The check doesn't add instance tags, including the tags that Autodiscovery adds from the scraped pods, so they don't collide with the PodGroup's tags.
+
+**Cost**: Each PodGroup active in an hour adds at least two custom metric series, plus one per extra badput reason, so the number of series grows with how many PodGroups are created.
+
 ### Service Checks
 
 The KAI Scheduler integration does not include any service checks of its own. The `kai.openmetrics.health` service check, inherited from the OpenMetrics base check, reports whether each endpoint can be scraped.

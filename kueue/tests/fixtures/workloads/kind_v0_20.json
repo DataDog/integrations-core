@@ -1,0 +1,167 @@
+[
+  {
+    "apiVersion": "kueue.x-k8s.io/v1beta2",
+    "kind": "Workload",
+    "metadata": {
+      "name": "job-r-high-ccde1",
+      "namespace": "team-a",
+      "uid": "cacac09e-6c74-46b9-aea5-0315f95443cd"
+    },
+    "spec": {
+      "active": true,
+      "podSets": [
+        {
+          "count": 1,
+          "name": "main",
+          "template": {
+            "metadata": {
+              "labels": {
+                "batch.kubernetes.io/job-name": "r-high"
+              }
+            },
+            "spec": {
+              "containers": [
+                {
+                  "name": "c",
+                  "resources": {
+                    "limits": {
+                      "nvidia.com/gpu": "4"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "queueName": "lq-a"
+    },
+    "status": {
+      "admission": {
+        "clusterQueue": "cq-main",
+        "podSetAssignments": [
+          {
+            "count": 1,
+            "flavors": {
+              "nvidia.com/gpu": "a100"
+            },
+            "name": "main",
+            "resourceUsage": {
+              "nvidia.com/gpu": "4"
+            }
+          }
+        ]
+      },
+      "conditions": [
+        {
+          "lastTransitionTime": "2026-11-24T13:41:40Z",
+          "message": "Quota reserved in ClusterQueue cq-main",
+          "reason": "QuotaReserved",
+          "status": "True",
+          "type": "QuotaReserved"
+        },
+        {
+          "lastTransitionTime": "2026-11-24T13:41:40Z",
+          "message": "The workload is admitted",
+          "reason": "Admitted",
+          "status": "True",
+          "type": "Admitted"
+        },
+        {
+          "lastTransitionTime": "2026-11-24T13:41:39Z",
+          "message": "Not all pods are ready or succeeded",
+          "reason": "WaitForStart",
+          "status": "False",
+          "type": "PodsReady"
+        }
+      ]
+    }
+  },
+  {
+    "apiVersion": "kueue.x-k8s.io/v1beta2",
+    "kind": "Workload",
+    "metadata": {
+      "name": "job-r-low-68302",
+      "namespace": "team-a",
+      "uid": "4c1d86b2-27ea-4557-b75e-3d288b9e2949"
+    },
+    "spec": {
+      "active": true,
+      "podSets": [
+        {
+          "count": 1,
+          "name": "main",
+          "template": {
+            "metadata": {
+              "labels": {
+                "batch.kubernetes.io/job-name": "r-low"
+              }
+            },
+            "spec": {
+              "containers": [
+                {
+                  "name": "c",
+                  "resources": {
+                    "limits": {
+                      "nvidia.com/gpu": "4"
+                    }
+                  }
+                }
+              ],
+              "nodeSelector": {
+                "nvidia.com/gpu.product": "NVIDIA-A100-SXM4-80GB"
+              }
+            }
+          }
+        }
+      ],
+      "queueName": "lq-a"
+    },
+    "status": {
+      "conditions": [
+        {
+          "lastTransitionTime": "2026-11-24T13:41:40Z",
+          "message": "couldn't assign flavors to pod set main: insufficient unused quota for cpu in flavor default-flavor, 1 more needed",
+          "reason": "WaitingForQuota",
+          "status": "False",
+          "type": "QuotaReserved"
+        },
+        {
+          "lastTransitionTime": "2026-11-24T13:41:39Z",
+          "message": "Preempted to accommodate a workload (UID: cacac09e-6c74-46b9-aea5-0315f95443cd, JobUID: 6856f44d-9f9f-48d9-81bb-45b759060734) due to prioritization in the ClusterQueue; preemptor path: /cq-main; preemptee path: /cq-main",
+          "reason": "Preempted",
+          "status": "True",
+          "type": "Evicted"
+        },
+        {
+          "lastTransitionTime": "2026-11-24T13:41:40Z",
+          "message": "The workload has no reservation",
+          "reason": "NoReservation",
+          "status": "False",
+          "type": "Admitted"
+        },
+        {
+          "lastTransitionTime": "2026-11-24T13:41:39Z",
+          "message": "Preempted to accommodate a workload (UID: cacac09e-6c74-46b9-aea5-0315f95443cd, JobUID: 6856f44d-9f9f-48d9-81bb-45b759060734) due to prioritization in the ClusterQueue; preemptor path: /cq-main; preemptee path: /cq-main",
+          "reason": "InClusterQueue",
+          "status": "True",
+          "type": "Preempted"
+        },
+        {
+          "lastTransitionTime": "2026-11-24T13:41:40Z",
+          "message": "Preempted to accommodate a workload (UID: cacac09e-6c74-46b9-aea5-0315f95443cd, JobUID: 6856f44d-9f9f-48d9-81bb-45b759060734) due to prioritization in the ClusterQueue; preemptor path: /cq-main; preemptee path: /cq-main",
+          "reason": "Preempted",
+          "status": "True",
+          "type": "Requeued"
+        },
+        {
+          "lastTransitionTime": "2026-11-24T13:41:19Z",
+          "message": "Not all pods are ready or succeeded",
+          "reason": "WaitForStart",
+          "status": "False",
+          "type": "PodsReady"
+        }
+      ]
+    }
+  }
+]
