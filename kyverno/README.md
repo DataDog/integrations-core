@@ -169,7 +169,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 If you collected CEL-based policy metrics with `extra_metrics` before version 3.6.0 of the Kyverno check, the result depends on how you wrote the entry:
 
-- **Exact metric name** (for example, `kyverno_validating_policy_results`): The metric keeps the name you chose. To use the default names listed in [CEL-based policy metrics](#cel-based-policy-metrics), remove the entry.
+- **Exact metric name** (for example, `kyverno_validating_policy_results`): The metric keeps the name you chose. To use the default names listed in the CEL-based policy metrics section, remove the entry.
 - **Regular expression** (for example, `^kyverno_.*_policy_.*`): The pattern no longer applies to these metrics, which are now reported under the default names. Update dashboards and monitors that reference the old names. To keep the old names instead, add an exact-name `extra_metrics` entry for each metric.
 
 Need help? Contact [Datadog support][9].
