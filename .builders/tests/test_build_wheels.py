@@ -6,11 +6,15 @@ import csv
 import hashlib
 import importlib
 import io
+import shutil
+import stat
+import struct
+import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
-from zipfile import ZIP_DEFLATED, ZipFile
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 import pytest
 
@@ -274,3 +278,209 @@ def test_use_macos_target_wheels_rejects_replacement_declaring_different_depende
 
     with pytest.raises(RuntimeError, match='Requires-Dist'):
         build_wheels.use_macos_target_wheels(tmp_path, Path('python'), {})
+
+
+def _compile_test_shared_library(output_path: Path, *, extra_flags: list[str]) -> None:
+    source = output_path.with_suffix('.c')
+    source.write_text('int add(int a, int b) { return a + b; }\n', encoding='utf-8')
+    subprocess.check_call(['gcc', '-shared', '-fPIC', *extra_flags, str(source), '-o', str(output_path)])
+
+
+def _fake_elf64_header(*, e_type: int, e_machine: int) -> bytes:
+    header = bytearray(build_wheels.ELF_HEADER_SIZE)
+    header[0:4] = build_wheels.ELF_MAGIC
+    header[4] = build_wheels.ELF_CLASS_64
+    header[5] = build_wheels.ELF_DATA_LSB
+    header[6] = build_wheels.ELF_VERSION_CURRENT
+    struct.pack_into('<HH', header, 16, e_type, e_machine)
+    return bytes(header)
+
+
+def _write_elf_wheel(
+    wheel_path: Path,
+    so_bytes: bytes,
+    *,
+    so_relpath: str = 'sample/_ext.cpython-313-x86_64-linux-gnu.so',
+    so_mode: int = 0o755,
+    so_file_type: int = stat.S_IFREG,
+) -> None:
+    dist_info = 'sample-1.0.0.dist-info'
+    record_path = f'{dist_info}/RECORD'
+    files = {
+        so_relpath: so_bytes,
+        f'{dist_info}/METADATA': b'Metadata-Version: 2.1\nName: sample\nVersion: 1.0.0\n',
+        f'{dist_info}/WHEEL': (
+            b'Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: false\n'
+            b'Tag: cp313-cp313-manylinux2014_x86_64\n'
+        ),
+    }
+    with ZipFile(wheel_path, 'w', compression=ZIP_DEFLATED) as wheel:
+        for name, contents in files.items():
+            if name == so_relpath:
+                info = ZipInfo(name)
+                info.compress_type = ZIP_DEFLATED
+                info.external_attr = (so_file_type | so_mode) << 16
+                wheel.writestr(info, contents)
+            else:
+                wheel.writestr(name, contents)
+        wheel.writestr(record_path, _record_contents(files, record_path))
+
+
+@pytest.mark.skipif(
+    sys.platform != 'linux' or not all(shutil.which(tool) for tool in ('gcc', 'readelf', 'strip')),
+    reason='Requires Linux binutils and gcc',
+)
+@pytest.mark.parametrize(
+    'so_relpath',
+    [
+        'sample/_ext.cpython-313-x86_64-linux-gnu.so',
+        'sample.libs/libfoo-deadbeef.so.1.2',
+    ],
+)
+def test_clean_wheel_strips_elf_debug_info_and_updates_record(tmp_path: Path, so_relpath: str):
+    so_path = tmp_path / '_ext.so'
+    _compile_test_shared_library(so_path, extra_flags=['-g'])
+    original_so_bytes = so_path.read_bytes()
+    assert build_wheels._elf_has_debug_sections(so_path)
+
+    wheel_path = tmp_path / 'sample-1.0.0-cp313-cp313-manylinux2014_x86_64.whl'
+    _write_elf_wheel(wheel_path, original_so_bytes, so_relpath=so_relpath, so_mode=0o555)
+
+    assert build_wheels.clean_wheel(wheel_path)
+
+    with ZipFile(wheel_path) as wheel:
+        stripped_so_bytes = wheel.read(so_relpath)
+        so_info = wheel.getinfo(so_relpath)
+        record_rows = {
+            row[0]: row
+            for row in csv.reader(io.TextIOWrapper(wheel.open('sample-1.0.0.dist-info/RECORD'), encoding='utf-8'))
+        }
+
+    assert len(stripped_so_bytes) < len(original_so_bytes)
+    assert stat.S_IMODE(so_info.external_attr >> 16) == 0o555
+
+    stripped_so_path = tmp_path / '_ext_stripped.so'
+    stripped_so_path.write_bytes(stripped_so_bytes)
+    assert not build_wheels._elf_has_debug_sections(stripped_so_path)
+
+    expected_digest = base64.urlsafe_b64encode(hashlib.sha256(stripped_so_bytes).digest()).rstrip(b'=').decode()
+    assert record_rows[so_relpath] == [so_relpath, f'sha256={expected_digest}', str(len(stripped_so_bytes))]
+    assert not build_wheels.clean_wheel(wheel_path)
+
+
+@pytest.mark.skipif(
+    sys.platform != 'linux' or not all(shutil.which(tool) for tool in ('gcc', 'readelf', 'strip')),
+    reason='Requires Linux binutils and gcc',
+)
+def test_clean_wheel_leaves_already_stripped_elf_wheel_unchanged(tmp_path: Path):
+    so_path = tmp_path / '_ext.so'
+    _compile_test_shared_library(so_path, extra_flags=['-Wl,--strip-debug'])
+    assert not build_wheels._elf_has_debug_sections(so_path)
+
+    wheel_path = tmp_path / 'sample-1.0.0-cp313-cp313-manylinux2014_x86_64.whl'
+    _write_elf_wheel(wheel_path, so_path.read_bytes())
+    original_wheel_bytes = wheel_path.read_bytes()
+
+    assert not build_wheels.clean_wheel(wheel_path)
+    assert wheel_path.read_bytes() == original_wheel_bytes
+
+
+@pytest.mark.parametrize(
+    'wheel_name, so_relpath, so_bytes, so_file_type',
+    [
+        pytest.param(
+            'sample-1.0.0-py3-none-any.whl',
+            'sample/_ext.so',
+            _fake_elf64_header(e_type=build_wheels.ELF_TYPE_DYN, e_machine=62),
+            stat.S_IFREG,
+            id='pure-python-wheel',
+        ),
+        pytest.param(
+            'sample-1.0.0-cp313-cp313-manylinux2014_x86_64.whl',
+            'sample/libfoo.so.debug',
+            _fake_elf64_header(e_type=build_wheels.ELF_TYPE_DYN, e_machine=62),
+            stat.S_IFREG,
+            id='non-numeric-so-suffix',
+        ),
+        pytest.param(
+            'sample-1.0.0-cp313-cp313-manylinux2014_x86_64.whl',
+            'sample/_ext.so',
+            b'\x7fELFnot-a-real-elf',
+            stat.S_IFREG,
+            id='truncated-elf-magic',
+        ),
+        pytest.param(
+            'sample-1.0.0-cp313-cp313-manylinux2014_x86_64.whl',
+            'sample/_ext.so',
+            _fake_elf64_header(e_type=build_wheels.ELF_TYPE_DYN, e_machine=183),
+            stat.S_IFREG,
+            id='foreign-architecture-elf',
+        ),
+        pytest.param(
+            'sample-1.0.0-cp313-cp313-manylinux2014_x86_64.whl',
+            'sample/_ext.so',
+            _fake_elf64_header(e_type=1, e_machine=62),
+            stat.S_IFREG,
+            id='non-shared-object-elf',
+        ),
+        pytest.param(
+            'sample-1.0.0-cp313-cp313-manylinux2014_x86_64.whl',
+            'sample/_ext.so',
+            _fake_elf64_header(e_type=build_wheels.ELF_TYPE_DYN, e_machine=62),
+            stat.S_IFLNK,
+            id='symlink-shared-object',
+        ),
+    ],
+)
+def test_clean_wheel_ignores_non_host_shared_objects(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    wheel_name: str,
+    so_relpath: str,
+    so_bytes: bytes,
+    so_file_type: int,
+):
+    wheel_path = tmp_path / wheel_name
+    _write_elf_wheel(wheel_path, so_bytes, so_relpath=so_relpath, so_file_type=so_file_type)
+    original_wheel_bytes = wheel_path.read_bytes()
+
+    monkeypatch.setattr(build_wheels.sys, 'platform', 'linux')
+    monkeypatch.setattr(build_wheels.platform, 'machine', lambda: 'x86_64')
+    monkeypatch.setattr(
+        build_wheels,
+        'unpack_wheel',
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError('should not unpack wheel')),
+    )
+    monkeypatch.setattr(
+        build_wheels.subprocess,
+        'run',
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError('should not run subprocess')),
+    )
+
+    assert not build_wheels.clean_wheel(wheel_path)
+    assert wheel_path.read_bytes() == original_wheel_bytes
+
+
+@pytest.mark.parametrize('platform', ['darwin', 'win32'])
+def test_clean_wheel_skips_elf_stripping_on_non_linux(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, platform: str
+):
+    wheel_path = tmp_path / 'sample-1.0.0-cp313-cp313-manylinux2014_x86_64.whl'
+    _write_elf_wheel(wheel_path, _fake_elf64_header(e_type=build_wheels.ELF_TYPE_DYN, e_machine=62))
+    original_wheel_bytes = wheel_path.read_bytes()
+
+    monkeypatch.setattr(build_wheels.sys, 'platform', platform)
+    monkeypatch.setattr(build_wheels.platform, 'machine', lambda: 'x86_64')
+    monkeypatch.setattr(
+        build_wheels,
+        'unpack_wheel',
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError('should not unpack wheel')),
+    )
+    monkeypatch.setattr(
+        build_wheels.subprocess,
+        'run',
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError('should not run subprocess')),
+    )
+
+    assert not build_wheels.clean_wheel(wheel_path)
+    assert wheel_path.read_bytes() == original_wheel_bytes
