@@ -8,9 +8,10 @@ from typing import Any
 
 import pytest
 from pytest import MonkeyPatch
-from requests.exceptions import HTTPError
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.http import FakeHTTPClient, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import BASE_TAGS, FIXTURE_DIR, _load_job, _make_check, _mock_api, _run_check
@@ -40,12 +41,12 @@ def test_config_invalid(instance: dict[str, Any], match: str) -> None:
 
 
 def test_connect_server_error_emits_critical(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, server_status=500)
+    _mock_api(check, fake_http, server_status=500)
 
-    with pytest.raises(HTTPError, match="500"):
+    with pytest.raises(HTTPClientStatusError, match="500"):
         _run_check(check)
 
     aggregator.assert_metric("control_m.can_connect", value=0, count=1)
@@ -53,10 +54,10 @@ def test_connect_server_error_emits_critical(
 
 
 def test_connect_session_login_ok(
-    session_instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    session_instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     check = _make_check(session_instance)
-    _mock_api(check, monkeypatch, servers=[{"name": "srv1", "state": "Up"}])
+    _mock_api(check, fake_http, servers=[{"name": "srv1", "state": "Up"}])
 
     _run_check(check)
 
@@ -66,12 +67,12 @@ def test_connect_session_login_ok(
 
 
 def test_connect_session_login_failure_emits_critical(
-    session_instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    session_instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     check = _make_check(session_instance)
-    _mock_api(check, monkeypatch, login_status=401)
+    _mock_api(check, fake_http, login_status=401)
 
-    with pytest.raises(HTTPError, match="401"):
+    with pytest.raises(HTTPClientStatusError, match="401"):
         _run_check(check)
 
     aggregator.assert_metric("control_m.can_login", value=0, count=1)
@@ -79,14 +80,14 @@ def test_connect_session_login_failure_emits_critical(
 
 
 def test_connect_static_token_401_falls_back_to_session(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     instance["control_m_username"] = "user"
     instance["control_m_password"] = "pass"
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
+        fake_http,
         servers=[{"name": "srv1", "state": "Up"}],
         reject_first_server_call=True,
     )
@@ -95,15 +96,23 @@ def test_connect_static_token_401_falls_back_to_session(
 
     aggregator.assert_metric("control_m.can_connect", value=1, count=1)
     aggregator.assert_metric_has_tag("control_m.can_connect", "auth_method:session_login")
+    fake_http.assert_has_request(
+        RecordedRequest(
+            "GET",
+            "https://example.com/automation-api/config/servers",
+            {"extra_headers": {"Authorization": "Bearer test-session-token"}},
+        )
+    )
+    fake_http.assert_all_responses_consumed()
 
 
 def test_server_health_up_and_down(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
+        fake_http,
         servers=[
             {"name": "srv_up", "state": "Up"},
             {"name": "srv_down", "state": "Disconnected"},
@@ -125,12 +134,12 @@ def test_server_health_up_and_down(
 
 
 def test_jobs_total_and_returned(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
+        fake_http,
         jobs=[
             _load_job("job_executing.json"),
             _load_job("job_executing.json"),
@@ -145,12 +154,12 @@ def test_jobs_total_and_returned(
 
 
 def test_terminal_ended_ok_with_duration(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
+        fake_http,
         jobs=[
             _load_job(
                 "job_ended_ok.json",
@@ -171,10 +180,10 @@ def test_terminal_ended_ok_with_duration(
 
 
 def test_dedup_same_terminal_job_counted_once(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_ok.json", jobId="d1", name="j1")])
+    _mock_api(check, fake_http, jobs=[_load_job("job_ended_ok.json", jobId="d1", name="j1")])
 
     _run_check(check)
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
@@ -185,16 +194,16 @@ def test_dedup_same_terminal_job_counted_once(
 
 
 def test_dedup_new_run_number_counted_as_new_completion(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     check = _make_check(instance)
-    state = _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_ok.json", jobId="r1", name="j1")])
+    _mock_api(check, fake_http, jobs=[_load_job("job_ended_ok.json", jobId="r1", name="j1")])
 
     _run_check(check)
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
 
     aggregator.reset()
-    state["jobs"] = [_load_job("job_ended_ok.json", jobId="r1", name="j1", numberOfRuns=2)]
+    _mock_api(check, fake_http, jobs=[_load_job("job_ended_ok.json", jobId="r1", name="j1", numberOfRuns=2)])
     _run_check(check)
     aggregator.assert_metric("control_m.job.run.count", value=1, count=1)
 
@@ -214,14 +223,14 @@ def test_dedup_new_run_number_counted_as_new_completion(
 def test_no_events_emitted(
     instance: dict[str, Any],
     aggregator: AggregatorStub,
-    monkeypatch: MonkeyPatch,
+    fake_http: FakeHTTPClient,
     extra_config: dict[str, Any],
     fixture: str,
     fixture_kwargs: dict[str, str],
 ) -> None:
     instance.update(extra_config)
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job(fixture, **fixture_kwargs)])
+    _mock_api(check, fake_http, jobs=[_load_job(fixture, **fixture_kwargs)])
 
     _run_check(check)
 
@@ -230,11 +239,11 @@ def test_no_events_emitted(
 
 
 def test_event_on_terminal_failure(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     instance["emit_job_events"] = True
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_not_ok.json", jobId="e2")])
+    _mock_api(check, fake_http, jobs=[_load_job("job_ended_not_ok.json", jobId="e2")])
 
     _run_check(check)
 
@@ -249,12 +258,12 @@ def test_event_on_terminal_failure(
 
 
 def test_event_success_when_opted_in(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     instance["emit_job_events"] = True
     instance["emit_success_events"] = True
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, jobs=[_load_job("job_ended_ok.json", jobId="e5", name="ok_job")])
+    _mock_api(check, fake_http, jobs=[_load_job("job_ended_ok.json", jobId="e5", name="ok_job")])
 
     _run_check(check)
 
@@ -267,13 +276,13 @@ def test_event_success_when_opted_in(
     )
 
 
-def test_event_slow_run_check(instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch) -> None:
+def test_event_slow_run_check(instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient) -> None:
     instance["emit_job_events"] = True
     instance["slow_run_threshold_ms"] = 60000
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
+        fake_http,
         jobs=[
             _load_job(
                 "job_ended_ok.json",
@@ -315,12 +324,12 @@ def test_event_slow_run_check(instance: dict[str, Any], aggregator: AggregatorSt
 def test_metadata_version_from_servers(
     instance: dict[str, Any],
     datadog_agent: Any,
-    monkeypatch: MonkeyPatch,
+    fake_http: FakeHTTPClient,
     servers: list[dict[str, str]],
     expected_version: str,
 ) -> None:
     check = _make_check(instance)
-    _mock_api(check, monkeypatch, servers=servers)
+    _mock_api(check, fake_http, servers=servers)
 
     _run_check(check)
 
@@ -331,7 +340,7 @@ def test_full_cycle_with_fixture_data(
     instance: dict[str, Any],
     aggregator: AggregatorStub,
     datadog_agent: Any,
-    monkeypatch: MonkeyPatch,
+    fake_http: FakeHTTPClient,
 ) -> None:
     servers = json.loads((FIXTURE_DIR / "config_servers_response.txt").read_text())
     jobs_payload = json.loads((FIXTURE_DIR / "jobs_status_response.txt").read_text())
@@ -339,7 +348,7 @@ def test_full_cycle_with_fixture_data(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
+        fake_http,
         servers=servers,
         jobs=jobs_payload["statuses"],
         jobs_total=jobs_payload.get("total"),
@@ -389,6 +398,7 @@ def test_overrun_gauge_given_executing_job(
     instance: dict[str, Any],
     aggregator: AggregatorStub,
     monkeypatch: MonkeyPatch,
+    fake_http: FakeHTTPClient,
     time_offset: int,
     expected_value: int | None,
 ) -> None:
@@ -398,7 +408,7 @@ def test_overrun_gauge_given_executing_job(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
+        fake_http,
         jobs=[
             _load_job(
                 "job_executing.json",
@@ -434,14 +444,14 @@ def test_overrun_gauge_given_executing_job(
 def test_overrun_histogram_given_terminal_job(
     instance: dict[str, Any],
     aggregator: AggregatorStub,
-    monkeypatch: MonkeyPatch,
+    fake_http: FakeHTTPClient,
     end_time: str,
     expected_value: int | None,
 ) -> None:
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
+        fake_http,
         jobs=[
             _load_job(
                 "job_ended_ok.json",
@@ -465,7 +475,7 @@ def test_overrun_histogram_given_terminal_job(
 
 
 def test_timezone_displayed_in_event_text(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, fake_http: FakeHTTPClient
 ) -> None:
     instance["emit_job_events"] = True
     instance["emit_success_events"] = True
@@ -474,7 +484,7 @@ def test_timezone_displayed_in_event_text(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
+        fake_http,
         jobs=[
             _load_job(
                 "job_ended_ok.json",
@@ -493,7 +503,7 @@ def test_timezone_displayed_in_event_text(
 
 
 def test_timezone_corrects_overrun_for_non_utc_server(
-    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch
+    instance: dict[str, Any], aggregator: AggregatorStub, monkeypatch: MonkeyPatch, fake_http: FakeHTTPClient
 ) -> None:
     # Control-M server in US Eastern reports estimatedEndTime as 19:04:10 local.
     # That's 2026-02-10 19:04:10 EST = 2026-02-11 00:04:10 UTC (epoch 1770768250).
@@ -505,7 +515,7 @@ def test_timezone_corrects_overrun_for_non_utc_server(
     check = _make_check(instance)
     _mock_api(
         check,
-        monkeypatch,
+        fake_http,
         jobs=[
             _load_job(
                 "job_executing.json",

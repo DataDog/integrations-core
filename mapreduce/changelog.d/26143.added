@@ -1,0 +1,1 @@
+Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`.

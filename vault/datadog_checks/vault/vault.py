@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
-import requests
-
 from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientStatusError, HTTPClientTimeoutError
 
 from .check import VaultCheckV2
 from .common import API_METHODS, DEFAULT_API_VERSION, SYS_HEALTH_DEFAULT_CODES, SYS_LEADER_DEFAULT_CODES, Api, Leader
@@ -19,6 +18,7 @@ except ImportError:
 
 
 class Vault(OpenMetricsBaseCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     CHECK_NAME = 'vault'
     EVENT_LEADER_CHANGE = 'vault.leader_change'
@@ -113,7 +113,12 @@ class Vault(OpenMetricsBaseCheck):
                 self.process(self._scraper_config, self._metric_transformers)
             except Exception as e:
                 error = str(e)
-                if self._client_token_path and error.startswith('403 Client Error: Forbidden for url'):
+                if (
+                    self._client_token_path
+                    and isinstance(e, HTTPClientStatusError)
+                    and e.response is not None
+                    and e.response.status_code == 403
+                ):
                     message = 'Permission denied, refreshing the client token...'
                     self.log.warning(message)
                     self.renew_client_token()
@@ -257,11 +262,11 @@ class Vault(OpenMetricsBaseCheck):
             msg = 'The Vault endpoint `{}` returned invalid json data: {}.'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
-        except requests.exceptions.Timeout:
+        except HTTPClientTimeoutError:
             msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.options['timeout'][0])
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
-        except (requests.exceptions.RequestException, requests.exceptions.ConnectionError) as e:
+        except HTTPClientError as e:
             msg = 'Error accessing Vault endpoint `{}`: {}'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
@@ -318,7 +323,7 @@ class Vault(OpenMetricsBaseCheck):
             self.set_client_token(f.read().decode('utf-8'))
 
     def _set_header(self, http_wrapper, header, value):
-        http_wrapper.options['headers'][header] = value
+        http_wrapper.set_header(header, value)
 
     def get_scraper_config(self, instance):
         # This validation is called during `__init__` but we don't need it

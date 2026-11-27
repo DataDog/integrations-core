@@ -1,14 +1,16 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import mock
 import pytest
 
 from datadog_checks.couchbase import Couchbase
+from datadog_checks.couchbase.couchbase_consts import SG_METRICS_PATH, SG_SERVICE_CHECK_NAME
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import MOCKED_COUCHBASE_METRICS, QUERY_STATS
-from .conftest import mock_http_responses
+from .common import MOCKED_COUCHBASE_METRICS, QUERY_STATS, SG_URL
 
 
 def test_camel_case_to_joined_lower(instance):
@@ -124,9 +126,7 @@ def test_extract_index_tags(instance, test_input, expected_tags):
     assert eval(str(test_output)) == expected_tags
 
 
-def test_unit(dd_run_check, check, instance, mocker, aggregator):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
-
+def test_unit(dd_run_check, check, instance, couchbase_api_responses, aggregator):
     dd_run_check(check(instance))
 
     for metric in MOCKED_COUCHBASE_METRICS:
@@ -140,9 +140,7 @@ def test_unit(dd_run_check, check, instance, mocker, aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_unit_query_metrics(dd_run_check, check, instance_query, mocker, aggregator):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
-
+def test_unit_query_metrics(dd_run_check, check, instance_query, couchbase_api_responses, aggregator):
     dd_run_check(check(instance_query))
 
     for metric in MOCKED_COUCHBASE_METRICS + QUERY_STATS:
@@ -154,3 +152,12 @@ def test_unit_query_metrics(dd_run_check, check, instance_query, mocker, aggrega
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_sync_gateway_invalid_json(instance_sg, fake_http_response, aggregator):
+    fake_http_response(SG_URL + SG_METRICS_PATH, b'not json', json_error=json.JSONDecodeError('Expecting value', '', 0))
+    couchbase = Couchbase('couchbase', {}, [instance_sg])
+
+    couchbase._collect_sync_gateway_metrics()
+
+    aggregator.assert_service_check(SG_SERVICE_CHECK_NAME, Couchbase.CRITICAL)

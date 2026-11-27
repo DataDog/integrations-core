@@ -4,10 +4,9 @@
 import copy
 from collections import ChainMap
 
-import requests
-
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
+from datadog_checks.base.utils.http_exceptions import HTTPClientTimeoutError
 from datadog_checks.gitlab.config_models import ConfigMixin
 
 from .common import get_gitlab_version, get_tags
@@ -37,6 +36,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         'redis_check': 'redis',
     }
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
@@ -108,7 +108,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 )
             else:
                 self.service_check(service_check_name, OpenMetricsBaseCheckV2.OK, self._tags)
-        except requests.exceptions.Timeout:
+        except HTTPClientTimeoutError:
             self.service_check(
                 service_check_name,
                 OpenMetricsBaseCheckV2.CRITICAL,

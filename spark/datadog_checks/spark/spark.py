@@ -1,13 +1,19 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from json import JSONDecodeError
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-from simplejson import JSONDecodeError
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientInvalidURLError,
+    HTTPClientReadTimeoutError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 
 from .constants import (
     APPLICATION_STATES,
@@ -48,6 +54,7 @@ from .constants import (
 
 
 class SparkCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
         'ssl_cert': {'name': 'tls_cert'},
@@ -442,7 +449,7 @@ class SparkCheck(AgentCheck):
                 )
                 if response is None:
                     continue
-            except HTTPError:
+            except HTTPClientStatusError:
                 self.log.debug("Got an error collecting %s", property, exc_info=True)
                 continue
             try:
@@ -583,7 +590,7 @@ class SparkCheck(AgentCheck):
                             )
 
                     self._set_metric(metric_name, submission_type, value, tags=tags)
-            except HTTPError as e:
+            except HTTPClientStatusError as e:
                 self.log.debug("No structured streaming metrics to collect from app %s. %s", app_name, e, exc_info=True)
                 pass
 
@@ -666,7 +673,13 @@ class SparkCheck(AgentCheck):
                 response = self.http.get(proxy_redirect_url, cookies=self.proxy_redirect_cookies)
                 response.raise_for_status()
 
-        except Timeout as e:
+        except HTTPClientTimeoutError as e:
+            # The neutral client does not distinguish header and body read timeouts.
+            if isinstance(e, HTTPClientReadTimeoutError) and self._should_suppress_terminal_pod_error(
+                e, self._get_pod_phase(tags)
+            ):
+                return None
+
             self.service_check(
                 service_name,
                 AgentCheck.CRITICAL,
@@ -675,8 +688,8 @@ class SparkCheck(AgentCheck):
             )
             raise
 
-        except (HTTPError, InvalidURL, ConnectionError) as e:
-            if isinstance(e, ConnectionError) and self._should_suppress_connection_error(e, tags):
+        except (HTTPClientStatusError, HTTPClientInvalidURLError, HTTPClientConnectionError) as e:
+            if isinstance(e, HTTPClientConnectionError) and self._should_suppress_connection_error(e, tags):
                 return None
 
             self.service_check(
@@ -740,14 +753,19 @@ class SparkCheck(AgentCheck):
         self._startup_retry_count = 0
         return response_json
 
+    def _should_suppress_terminal_pod_error(self, exception: Exception, pod_phase: str | None) -> bool:
+        if pod_phase in ('failed', 'succeeded', 'unknown'):
+            self.log.debug("Pod phase is terminal, suppressing request error: %s", exception)
+            return True
+        return False
+
     def _should_suppress_connection_error(self, exception, tags):
         """Suppress kubernetes-only connection false positives during pod shutdown."""
         pod_phase = self._get_pod_phase(tags)
         if pod_phase is None:
             return False
 
-        if pod_phase in ('failed', 'succeeded', 'unknown'):
-            self.log.debug("Pod phase is terminal, suppressing request error: %s", exception)
+        if self._should_suppress_terminal_pod_error(exception, pod_phase):
             return True
 
         if (

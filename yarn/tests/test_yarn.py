@@ -2,11 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import re
 
 import pytest
-from requests.exceptions import SSLError
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientInvalidURLError,
+    HTTPClientReadTimeoutError,
+    HTTPClientSSLError,
+    HTTPClientStatusError,
+)
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import (
     APPLICATION_STATUS_SERVICE_CHECK,
@@ -19,11 +28,14 @@ from .common import (
     CUSTOM_TAGS,
     DEPRECATED_YARN_APP_METRICS_VALUES,
     RM_ADDRESS,
+    TEST_PASSWORD,
+    TEST_USERNAME,
     YARN_APP_METRICS_TAGS,
     YARN_APP_METRICS_VALUES,
     YARN_APPS_ALL_STATES,
     YARN_AUTH_CONFIG,
     YARN_CLUSTER_METRICS_TAGS,
+    YARN_CLUSTER_METRICS_URL,
     YARN_CLUSTER_METRICS_VALUES,
     YARN_CLUSTER_TAG,
     YARN_COLLECT_APPS_ALL_STATES_CONFIG,
@@ -249,54 +261,54 @@ def test_disable_legacy_cluster_tag(aggregator, mocked_request):
     )
 
 
-def test_auth(aggregator, mocked_auth_request):
-    instance = YARN_AUTH_CONFIG['instances'][0]
+def test_auth_config():
+    yarn = YarnCheck('yarn', {}, [YARN_AUTH_CONFIG['instances'][0]])
 
-    # Instantiate YarnCheck
+    assert yarn.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)
+
+
+@pytest.mark.parametrize(
+    'config, expected_verify',
+    [
+        pytest.param(YARN_SSL_VERIFY_TRUE_CONFIG, True, id='ssl_verify true'),
+        pytest.param(YARN_SSL_VERIFY_FALSE_CONFIG, False, id='ssl_verify false'),
+    ],
+)
+def test_ssl_verify_config(config, expected_verify):
+    yarn = YarnCheck('yarn', {}, [config['instances'][0]])
+
+    assert yarn.http.options['verify'] is expected_verify
+
+
+@pytest.mark.parametrize(
+    'outcome, expected_message',
+    [
+        pytest.param(HTTPClientConnectTimeoutError('connect timed out'), 'Request timeout: ', id='connect timeout'),
+        pytest.param(HTTPClientReadTimeoutError('read timed out'), 'Request timeout: ', id='read timeout'),
+        pytest.param(HTTPClientConnectionError('connection refused'), 'Request failed: ', id='connection error'),
+        pytest.param(HTTPClientSSLError('certificate verification failed'), 'Request failed: ', id='ssl error'),
+        pytest.param(HTTPClientInvalidURLError('invalid url'), 'Request failed: ', id='invalid url'),
+        pytest.param(FakeHTTPResponse(status_code=500), 'Request failed: ', id='status error'),
+        pytest.param(
+            FakeHTTPResponse(content=b'not json', json_error=json.JSONDecodeError('Expecting value', 'not json', 0)),
+            'Expecting value',
+            id='invalid json',
+        ),
+    ],
+)
+def test_request_failure_service_check(aggregator, fake_http, outcome, expected_message):
+    fake_http.register_response('GET', YARN_CLUSTER_METRICS_URL, outcome)
+    instance = YARN_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
 
-    # Run the check once
-    yarn.check(instance)
-
-    # Make sure check is working
-    aggregator.assert_service_check(
-        SERVICE_CHECK_NAME,
-        status=YarnCheck.OK,
-        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
-        count=4,
-    )
-
-
-def test_ssl_verification(aggregator, mocked_bad_cert_request):
-    instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
-
-    # Instantiate YarnCheck
-    yarn = YarnCheck('yarn', {}, [instance])
-
-    # Run the check on a config with a badly configured SSL certificate
-    try:
+    expected_error = type(outcome) if isinstance(outcome, Exception) else (HTTPClientStatusError, json.JSONDecodeError)
+    with pytest.raises(expected_error):
         yarn.check(instance)
-    except SSLError:
-        aggregator.assert_service_check(
-            SERVICE_CHECK_NAME,
-            status=YarnCheck.CRITICAL,
-            tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
-            count=1,
-        )
-        pass
-    else:
-        raise AssertionError('Should have thrown an SSLError due to a badly configured certificate')
 
-    # Run the check on the same configuration, but with verify=False. We shouldn't get an exception.
-    instance = YARN_SSL_VERIFY_FALSE_CONFIG['instances'][0]
-    yarn = YarnCheck('yarn', {}, [instance])
-    yarn.check(instance)
-    aggregator.assert_service_check(
-        SERVICE_CHECK_NAME,
-        status=YarnCheck.OK,
-        tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
-        count=4,
-    )
+    (service_check,) = aggregator.service_checks(SERVICE_CHECK_NAME)
+    assert service_check.status == YarnCheck.CRITICAL
+    assert set(service_check.tags) == {*EXPECTED_TAGS, f'url:{RM_ADDRESS}'}
+    assert service_check.message.startswith(expected_message)
 
 
 def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):

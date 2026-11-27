@@ -9,10 +9,18 @@ import pytest
 from packaging import version
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientError,
+    HTTPClientReadTimeoutError,
+)
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.marklogic import MarklogicCheck
 
 from .common import (
+    API_URL,
     COMMON_TAGS,
     INSTANCE,
     INSTANCE_FILTERS,
@@ -135,6 +143,26 @@ def test_metadata_integration(aggregator, datadog_agent):
 
     # Service checks
     assert_service_checks(aggregator, COMMON_TAGS)
+
+
+@pytest.mark.parametrize(
+    'outcome',
+    [
+        pytest.param(HTTPClientConnectionError('connection refused'), id='connection error'),
+        pytest.param(HTTPClientConnectTimeoutError('connect timed out'), id='connect timeout'),
+        pytest.param(HTTPClientReadTimeoutError('read timed out'), id='read timeout'),
+        pytest.param(FakeHTTPResponse(status_code=500), id='error status'),
+    ],
+)
+def test_cannot_connect_reports_critical(aggregator, fake_http, outcome):
+    # type: (AggregatorStub, Any, Any) -> None
+    fake_http.register_response('GET', API_URL + '/manage/v2', outcome)
+    check = MarklogicCheck('marklogic', {}, [INSTANCE])
+
+    with pytest.raises(HTTPClientError):
+        check.check(INSTANCE)
+
+    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.CRITICAL, tags=COMMON_TAGS, count=1)
 
 
 def test_submit_health_service_checks(aggregator, caplog):

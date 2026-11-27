@@ -3,11 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientTimeoutError,
+)
 
 from .common import get_gitlab_version, get_tags
 from .gitlab_v2 import GitlabCheckV2
@@ -25,6 +27,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
     DEFAULT_CONNECT_TIMEOUT = 5
     DEFAULT_RECEIVE_TIMEOUT = 15
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     PROMETHEUS_SERVICE_CHECK_NAME = 'gitlab.prometheus_endpoint_up'
 
@@ -63,7 +66,8 @@ class GitlabCheck(OpenMetricsBaseCheck):
         try:
             self.process(scraper_config)
             self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, OpenMetricsBaseCheck.OK, self._tags)
-        except requests.exceptions.ConnectionError as e:
+        # requests reported connect and response-body read timeouts as connection errors.
+        except (HTTPClientConnectionError, HTTPClientTimeoutError) as e:
             # Unable to connect to the metrics endpoint
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
@@ -152,7 +156,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
             else:
                 r.raise_for_status()
 
-        except requests.exceptions.Timeout:
+        except HTTPClientTimeoutError:
             # If there's a timeout
             self.service_check(
                 service_check_name,

@@ -20,6 +20,7 @@ from .common import (
     LOCAL_RATE_LIMIT_METRICS,
     MOCKED_PROMETHEUS_METRICS,
     RATE_LIMIT_STAT_PREFIX_TAG,
+    SERVER_INFO_URL,
     TLS_INSPECTOR_METRICS,
     get_fixture_path,
 )
@@ -37,8 +38,10 @@ def test_unique_metrics():
         duplicated_metrics.add(value)
 
 
-def test_check(aggregator, dd_run_check, check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('./openmetrics/openmetrics.txt'))
+def test_check(aggregator, dd_run_check, check, serve_fixture_file):
+    serve_fixture_file(
+        get_fixture_path('./openmetrics/openmetrics.txt'), DEFAULT_INSTANCE['openmetrics_endpoint'], SERVER_INFO_URL
+    )
 
     c = check(DEFAULT_INSTANCE)
 
@@ -73,12 +76,12 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_collect_metadata(datadog_agent, fixture_path, mock_http_response, check, default_instance):
+def test_collect_metadata(datadog_agent, fixture_path, serve_fixture_file, check, default_instance):
     c = check(default_instance)
     c.check_id = 'test:123'
     c.log = mock.MagicMock()
 
-    mock_http_response(file_path=fixture_path('./legacy/server_info_api_v3'))
+    serve_fixture_file(fixture_path('./legacy/server_info_api_v3'), SERVER_INFO_URL)
 
     c._collect_metadata()
 
@@ -94,9 +97,7 @@ def test_collect_metadata(datadog_agent, fixture_path, mock_http_response, check
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
-def test_collect_metadata_with_invalid_base_url(
-    datadog_agent, fixture_path, mock_http_response, check, default_instance
-):
+def test_collect_metadata_with_invalid_base_url(datadog_agent, fixture_path, fake_http, check, default_instance):
     default_instance["openmetrics_endpoint"] = None
     c = check(default_instance)
     c.check_id = 'test:123'
@@ -118,10 +119,14 @@ def test_collect_metadata_with_invalid_base_url(
         "Envoy >= 1.28",
     ],
 )
-def test_local_rate_limit_metrics(aggregator, dd_run_check, check, mock_http_response, fixture_file):
+def test_local_rate_limit_metrics(aggregator, dd_run_check, check, serve_fixture_file, fixture_file):
     # Envoy 1.28+ fixed this metric by moving the variable stat_prefix into a label which follows the normal
     # OpenMetrics convention. However older versions still have the stat_prefix inside the metric name.
-    mock_http_response(file_path=get_fixture_path('./openmetrics/{}'.format(fixture_file)))
+    serve_fixture_file(
+        get_fixture_path('./openmetrics/{}'.format(fixture_file)),
+        DEFAULT_INSTANCE['openmetrics_endpoint'],
+        SERVER_INFO_URL,
+    )
 
     c = check(DEFAULT_INSTANCE)
 
@@ -139,8 +144,12 @@ def test_local_rate_limit_metrics(aggregator, dd_run_check, check, mock_http_res
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_tags_in_ssl_metrics(aggregator, dd_run_check, check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('./openmetrics/openmetrics_ssl_metrics.txt'))
+def test_tags_in_ssl_metrics(aggregator, dd_run_check, check, serve_fixture_file):
+    serve_fixture_file(
+        get_fixture_path('./openmetrics/openmetrics_ssl_metrics.txt'),
+        DEFAULT_INSTANCE['openmetrics_endpoint'],
+        SERVER_INFO_URL,
+    )
 
     c = check(DEFAULT_INSTANCE)
 
@@ -157,7 +166,7 @@ def test_tags_in_ssl_metrics(aggregator, dd_run_check, check, mock_http_response
 
 
 def test_collect_metadata_with_disabled_collect_server_info(
-    datadog_agent, fixture_path, mock_http_response, check, default_instance
+    datadog_agent, fixture_path, fake_http, check, default_instance
 ):
     default_instance["collect_server_info"] = False
     c = check(default_instance)
