@@ -77,6 +77,25 @@ def test_simple_metrics(_, aggregator, dd_run_check):
     aggregator.assert_service_check('ceph.overall_status', status=Ceph.OK, tags=EXPECTED_SERVICE_TAGS)
 
 
+# https://github.com/DataDog/integrations-core/issues/26158
+def test_tags_do_not_accumulate_between_runs(aggregator, dd_run_check):
+    raw = mock_data("raw.json")
+    raw_leader = copy.deepcopy(raw)
+    raw_leader['mon_status']['state'] = 'leader'
+    ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])
+
+    with mock.patch("datadog_checks.ceph.Ceph._collect_raw", side_effect=[raw, raw_leader]):
+        dd_run_check(ceph_check)
+        aggregator.reset()
+        dd_run_check(ceph_check)
+
+    assert ceph_check.instance['tags'] == BASIC_CONFIG['tags']
+    # Only the tags of this run: no `ceph_mon_state:peon`, and no tags of the cluster on service checks.
+    expected_tags = [tag.replace('peon', 'leader') for tag in EXPECTED_TAGS]
+    aggregator.assert_metric('ceph.num_mons', count=1, tags=expected_tags)
+    aggregator.assert_service_check('ceph.overall_status', count=1, tags=EXPECTED_SERVICE_TAGS)
+
+
 @mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("warn.json"))
 def test_warn_health(_, aggregator, dd_run_check):
     ceph_check = Ceph(CHECK_NAME, {}, [copy.deepcopy(BASIC_CONFIG)])

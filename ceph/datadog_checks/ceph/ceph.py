@@ -96,7 +96,7 @@ class Ceph(AgentCheck):
         return bool(release) and not release.isdigit()
 
     def _extract_tags(self, raw, instance):
-        tags = instance.get('tags', [])
+        tags = list(instance.get('tags', []))
         fsid = None
         try:
             fsid = raw['status']['fsid']
