@@ -24,6 +24,20 @@ files:
         openmetrics_endpoint.display_priority: 1
         openmetrics_endpoint.required: false
         openmetrics_endpoint.enabled: true
+    - name: ai_gateway_endpoint
+      fleet_configurable: true
+      display_priority: 1
+      description: |
+        The Envoy AI Gateway external processor's metrics endpoint, served on its admin port (1064 by default).
+        Set it to collect the gateway's GenAI token usage and latency metrics, submitted under the
+        Open Trajectory names that Datadog's other LLM gateways use, for example
+        `envoy.gen_ai.client.inference.usage.input_tokens` and `envoy.gen_ai.client.inference.duration`.
+        It can be set with or without `openmetrics_endpoint`, and shares the instance's HTTP and tag options.
+        https://aigateway.envoyproxy.io/docs/capabilities/observability/metrics/
+      value:
+        example: http://localhost:1064/metrics
+        display_default: null
+        type: string
     - name: stats_url
       fleet_configurable: true
       legacy: true

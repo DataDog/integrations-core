@@ -50,6 +50,16 @@ instances:
     #
   - openmetrics_endpoint: http://localhost:80/stats/prometheus
 
+    ## @param ai_gateway_endpoint - string - optional
+    ## The Envoy AI Gateway external processor's metrics endpoint, served on its admin port (1064 by default).
+    ## Set it to collect the gateway's GenAI token usage and latency metrics, submitted under the
+    ## Open Trajectory names that Datadog's other LLM gateways use, for example
+    ## `envoy.gen_ai.client.inference.usage.input_tokens` and `envoy.gen_ai.client.inference.duration`.
+    ## It can be set with or without `openmetrics_endpoint`, and shares the instance's HTTP and tag options.
+    ## https://aigateway.envoyproxy.io/docs/capabilities/observability/metrics/
+    #
+    # ai_gateway_endpoint: http://localhost:1064/metrics
+
     ## @param stats_url - string - optional - default: http://localhost:80/stats
     ## The check will collect and parse metrics from the admin /stats/ endpoint.
     ## It must be accessible:

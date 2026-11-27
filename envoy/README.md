@@ -183,6 +183,18 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Envoy AI Gateway
+
+The check can also collect the GenAI token usage and latency metrics of [Envoy AI Gateway][34]. This collection is off by default. To turn it on, set `ai_gateway_endpoint` to the metrics endpoint of the gateway's external processor, served on its admin port (`1064` by default), with or without `openmetrics_endpoint`:
+
+```yaml
+instances:
+  - openmetrics_endpoint: http://localhost:8001/stats/prometheus
+    ai_gateway_endpoint: http://localhost:1064/metrics
+```
+
+The metrics use the names and tags that Datadog's other LLM gateways submit, under the `envoy.` prefix: for example, `envoy.gen_ai.client.inference.usage.input_tokens` (tagged with `gen_ai.provider.name`, `gen_ai.request.model`, `gen_ai.response.model`, and `gen_ai.operation.name`) and the `envoy.gen_ai.client.inference.duration` distribution. Only inference operations (chat, Anthropic messages, OpenAI responses, completions, and embeddings) are collected. A count the gateway did not report is omitted rather than submitted as zero.
+
 ### Validation
 
 [Run the Agent's status subcommand][13] and look for `envoy` under the Checks section.
@@ -264,3 +276,4 @@ Need help? Contact [Datadog support][16].
 [31]: https://docs.datadoghq.com/security/application_security/setup/envoy/?source=envoy-tile-setup
 [32]: https://docs.datadoghq.com/security/application_security/setup/istio/?source=envoy-tile-setup
 [33]: https://www.datadoghq.com/blog/app-api-protection-envoy-istio-nginx-haproxy/
+[34]: https://aigateway.envoyproxy.io/docs/capabilities/observability/metrics/

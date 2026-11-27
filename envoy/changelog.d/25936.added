@@ -1,0 +1,1 @@
+Add the optional `ai_gateway_endpoint` option to collect Envoy AI Gateway GenAI token usage and latency metrics under the Open Trajectory metric names.
