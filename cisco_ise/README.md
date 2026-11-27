@@ -84,6 +84,8 @@ ISE logs unknown users as `INVALID`, so failed logins by non-existing users are 
 
 ISE escapes commas inside some values with a backslash, and the backslash stays in the attribute: for example `cisco_ise.attributes.EndpointOUI` is `Cisco Systems\, Inc`. Search these values with a wildcard, such as `@cisco_ise.attributes.EndpointOUI:Cisco*`.
 
+The integration includes the **Cisco ISE Overview** dashboard, built on these logs. Its widgets query standard indexes: logs stored only in Flex Logs don't appear in it.
+
 #### Finding failed logins
 
 ISE has no single success or failure field, so the pipeline keeps the values ISE sends and doesn't classify them. To find failures, use the message class or the Logging Category; they differ:
