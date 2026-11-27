@@ -7,6 +7,7 @@ import time
 
 import mock
 import pytest
+from confluent_kafka import ConsumerGroupTopicPartitions, TopicPartition
 from confluent_kafka.admin import AdminClient
 from confluent_kafka.cimpl import NewTopic
 
@@ -204,6 +205,37 @@ def check():
 @pytest.fixture
 def kafka_instance():
     return copy.deepcopy(common.E2E_INSTANCE if e2e_testing() else common.INSTANCE)
+
+
+@pytest.fixture
+def batched_consumer_groups(kafka_instance):
+    """Seed consumer groups that take several offset request batches, and an instance that monitors them all.
+
+    The groups are deleted afterwards because other tests assert exact metric counts with
+    `monitor_unlisted_consumer_groups`.
+    """
+    group_ids = [f'batched_group_{i}' for i in range(20)]
+    admin_client = _create_admin_client()
+    for group in group_ids:
+        offsets = ConsumerGroupTopicPartitions(group, [TopicPartition('marvel', 0, 1)])
+        admin_client.alter_consumer_group_offsets([offsets])[group].result(timeout=30)
+    del kafka_instance['consumer_groups']
+    kafka_instance['monitor_unlisted_consumer_groups'] = True
+    kafka_instance['consumer_group_offsets_batch_size'] = 5
+
+    yield kafka_instance, group_ids
+
+    for future in admin_client.delete_consumer_groups(group_ids).values():
+        future.result(timeout=30)
+
+
+def reported_batched_groups(aggregator):
+    return {
+        tag
+        for metric in aggregator.metrics('kafka.consumer_offset')
+        for tag in metric.tags
+        if tag.startswith('consumer_group:batched_group_')
+    }
 
 
 def create_topics():
