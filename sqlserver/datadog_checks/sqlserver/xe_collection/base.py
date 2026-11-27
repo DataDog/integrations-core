@@ -309,14 +309,14 @@ class XESessionBase(DBMAsyncJob):
         except etree.XMLSyntaxError as e:
             current_file = None
             reason = "its target data isn't valid XML: {}".format(e)
-        if current_file is None and not self._event_file_current_file_unknown:
+        if not current_file and not self._event_file_current_file_unknown:
             self._log.warning(
                 "Unable to find the current file of the %s XE session's event_file target, so no %s are collected: %s",
                 self.session_name,
                 self.COLLECTED_DATA_NAME,
                 reason,
             )
-        self._event_file_current_file_unknown = current_file is None
+        self._event_file_current_file_unknown = not current_file
         return current_file
 
     def _report_target_read(self, denied_error: Exception | None) -> None:
