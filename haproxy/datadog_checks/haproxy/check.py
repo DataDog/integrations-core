@@ -10,6 +10,7 @@ from .metrics import METRIC_MAP
 
 class HAProxyCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __new__(cls, name, init_config, instances):
         instance = instances[0]

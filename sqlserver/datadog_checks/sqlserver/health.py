@@ -19,6 +19,12 @@ class SqlServerHealthEvent(Enum):
     """
 
     EXPLAIN_PLAN_ERROR = 'explain_plan_error'
+    COLUMN_STATISTICS_PROCEDURE_NOT_FOUND = 'column_statistics_procedure_not_found'
+    COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE = 'column_statistics_insufficient_privilege'
+    COLUMN_STATISTICS_PROCEDURE_OUTDATED = 'column_statistics_procedure_outdated'
+    QUERY_PLANS_XE_SESSION_MISSING = 'query_plans_xe_session_missing'
+    QUERY_PLANS_XE_TARGET_UNSUPPORTED = 'query_plans_xe_target_unsupported'
+    QUERY_PLANS_XE_TARGET_READ_DENIED = 'query_plans_xe_target_read_denied'
 
 
 class SqlServerHealth(Health):

@@ -65,6 +65,8 @@ def test_success(mocked_query, mocked_time, aggregator, instance, tags):
     integration.check({})
     aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.OK, tags=tags, count=1)
     aggregator.assert_metric('dns.response_time', tags=tags, count=1, value=1)
+    aggregator.assert_metric('dns.can_connect', tags=tags, count=1, value=1)
+    aggregator.assert_metric('dns.cant_connect', tags=tags, count=1, value=0)
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
@@ -79,6 +81,8 @@ def test_success_nxdomain(mocked_query, mocked_time, aggregator):
     tags = ['instance:nxdomain', 'nameserver:127.0.0.1', 'resolved_hostname:www.example.org', 'record_type:NXDOMAIN']
     aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.OK, tags=tags, count=1)
     aggregator.assert_metric('dns.response_time', tags=tags, count=1, value=1)
+    aggregator.assert_metric('dns.can_connect', tags=tags, count=1, value=1)
+    aggregator.assert_metric('dns.cant_connect', tags=tags, count=1, value=0)
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
@@ -100,6 +104,8 @@ def test_default_timeout(mocked_query, mocked_time, aggregator):
         count=1,
         message="DNS resolution of www.example.org timed out",
     )
+    aggregator.assert_metric('dns.can_connect', tags=tags, count=1, value=0)
+    aggregator.assert_metric('dns.cant_connect', tags=tags, count=1, value=1)
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
@@ -119,6 +125,8 @@ def test_instance_timeout(mocked_query, mocked_time, aggregator):
         count=1,
         message="DNS resolution of www.example.org timed out",
     )
+    aggregator.assert_metric('dns.can_connect', tags=tags, count=1, value=0)
+    aggregator.assert_metric('dns.cant_connect', tags=tags, count=1, value=1)
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
@@ -148,4 +156,6 @@ def test_invalid_config(aggregator, instance, message):
     integration = DNSCheck('dns_check', {}, [instance])
     integration.check(instance)
     aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.CRITICAL, count=1, message=message)
+    aggregator.assert_metric('dns.can_connect', count=1, value=0)
+    aggregator.assert_metric('dns.cant_connect', count=1, value=1)
     aggregator.assert_all_metrics_covered()

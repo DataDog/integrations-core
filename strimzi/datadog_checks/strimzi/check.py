@@ -18,6 +18,7 @@ USER_OPERATOR_NAMESPACE = "strimzi.user_operator"
 
 class StrimziCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super(StrimziCheck, self).__init__(name, init_config, instances)

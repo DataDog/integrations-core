@@ -13,14 +13,15 @@ from ..helpers import load_op, load_xml, series
 pytestmark = pytest.mark.unit
 
 # The sensors of `synthetic/environmentals_hw.xml`, which explains each case; None is a series not sent.
-# (sensor, slot, voltage, voltage.min, voltage.max, alarm.high, alarm.low)
+# (sensor, slot, voltage, voltage.min, voltage.max, alarm, alarm.high, alarm.low)
 POWER = [
-    ('Power Supply 1', 1, 12.1, 10.8, 13.2, 0, 0),
-    ('Power Supply 2', 1, 11.9, 10.6, 13.4, 0, 0),
-    ('Power Supply 3', 1, 13.9, 10.8, 13.2, 1, 0),
-    ('Power Supply 4', 1, 13.9, 10.8, 13.2, 0, 0),
-    ('Power Supply 5', 1, 12.0, None, None, None, None),
-    ('Power Supply 6', 2, 10.2, 10.8, 13.2, 0, 1),
+    ('Power Supply 1', 1, 12.1, 10.8, 13.2, 0, 0, 0),
+    ('Power Supply 2', 1, 11.9, 10.6, 13.4, 0, 0, 0),
+    ('Power Supply 3', 1, 13.9, 10.8, 13.2, 1, 1, 0),
+    ('Power Supply 4', 1, 13.9, 10.8, 13.2, 0, 0, 0),
+    ('Power Supply 5', 1, 12.0, None, None, 1, None, None),
+    ('Power Supply 6', 2, 10.2, 10.8, 13.2, 1, 0, 1),
+    ('Power Supply 7', 2, None, None, None, 1, None, None),
 ]
 # (sensor, current, alarm), all in slot 1 with min 0 and max 80.
 THERMAL = [
@@ -37,7 +38,7 @@ def test_vm_series_has_no_sensors():
 def test_hardware_sensors():
     expected = {}
     for sensor, slot, *values in POWER:
-        names = ('voltage', 'voltage.min', 'voltage.max', 'alarm.high', 'alarm.low')
+        names = ('voltage', 'voltage.min', 'voltage.max', 'alarm', 'alarm.high', 'alarm.low')
         for name, value in zip(names, values):
             if value is not None:
                 expected[f'power.{name}', (f'sensor:{sensor}', f'slot:{slot}')] = (value, 'gauge')

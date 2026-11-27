@@ -1,0 +1,1 @@
+Fix Windows performance counters dropping every instance of a counter when its last instance (usually `_Total`) has a negative delta, and skipping the remaining `include_fast` patterns when one of them fails.

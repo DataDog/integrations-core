@@ -8,13 +8,17 @@ import base64
 import dataclasses
 import gzip
 import json
+import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from itertools import count
 from pathlib import Path
 from time import monotonic
 from typing import Any
+from uuid import uuid4
 
+import httpx
 from pydantic import ValidationError
 
 from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, job_fields, test_tag_mapping
@@ -24,6 +28,7 @@ from ddev.cli.ci.tests.progress import ExecutionState
 from ddev.cli.ci.tests.status import (
     Status,
     batch_status,
+    final_batch_status,
     has_started_running,
     is_queued,
     job_status,
@@ -34,7 +39,7 @@ from ddev.monitoring import ComponentMonitor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import Artifact, WorkflowJob, WorkflowRun
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
-from ddev.utils.github_async.retry import SAFE_RETRY, on_status
+from ddev.utils.github_async.retry import PRE_SEND_TRANSPORT_ERRORS, SAFE_RETRY, on_status
 from ddev.utils.platform import PlatformName
 
 # A cancelled job has roughly ten seconds before it is killed, and there may be several runs to stop.
@@ -46,8 +51,21 @@ CANCEL_REQUEST_TIMEOUT = 3.0
 # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
 WORKFLOW_INPUTS_LIMIT = 65535
 
+# Observed ~10 s timeouts at 100 jobs/page; smaller pages may avoid them (AI-7507).
+WORKFLOW_JOBS_PER_PAGE = 50
+
 # GitHub can answer 404 while a resource is becoming visible after a successful mutation.
 SAFE_RETRY_WITH_404 = SAFE_RETRY.also_on(on_status(404))
+
+# A failed run read aborts the batch, so give it time to become visible after dispatch (AI-7574).
+# A failed job listing only skips one poll, so it keeps the shorter budget.
+WORKFLOW_RUN_RETRY = SAFE_RETRY_WITH_404.replace(attempts=8)
+
+DISPATCH_LOOKUP_DELAYS = (10, 30, 60)
+DISPATCH_CLOCK_SKEW_SECONDS = 60
+# Filtered workflow searches return at most 1,000 results, even with pagination.
+DISPATCH_LOOKUP_RUN_LIMIT = 1000
+DISPATCH_RUN_TITLE_PATTERN = re.compile(r"Test Batch \[dispatch:[0-9a-f]{32}\] .+")
 
 
 class JobListTooLargeError(Exception):
@@ -63,6 +81,31 @@ class JobListTooLargeError(Exception):
         )
         self.batch_id = batch_id
         self.size = size
+
+
+class DispatchLookupInconclusiveError(Exception):
+    """The run listing cannot prove whether the dispatch created a run."""
+
+
+def _workflow_rejects_dispatch_id(error: Exception) -> bool:
+    if not isinstance(error, httpx.HTTPStatusError) or error.response.status_code != 422:
+        return False
+    try:
+        payload = error.response.json()
+    except ValueError:
+        return False
+    return (
+        isinstance(payload, dict)
+        and isinstance(message := payload.get("message"), str)
+        and message.startswith("Unexpected inputs provided:")
+        and '"dispatch_id"' in message
+    )
+
+
+def _is_ambiguous_dispatch_error(error: Exception) -> bool:
+    return (isinstance(error, httpx.HTTPStatusError) and 500 <= error.response.status_code < 600) or (
+        isinstance(error, httpx.TransportError) and not isinstance(error, PRE_SEND_TRANSPORT_ERRORS)
+    )
 
 
 def _serialize_test_tags(fields: Mapping[str, Any]) -> str:
@@ -173,20 +216,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     async def _dispatch_batch(self, message: TestBatch) -> tuple[int, str]:
         with self._metrics.operation(Operation.DISPATCH_BATCH) as op:
             try:
-                dispatch = await self._client.create_workflow_dispatch(
-                    self._options.owner,
-                    self._options.repo,
-                    self._options.workflow_id,
-                    ref=self._options.ref,
-                    inputs=self._build_inputs(message),
-                    return_run_details=True,
-                )
+                run_id, workflow_url = await self._dispatch_batch_run(message)
             except ValidationError as error:
                 raise self._response_failure(op, "dispatching the batch", message.batch_id, None, error) from error
             except Exception:
                 op.fail("Failed to dispatch batch %s", message.batch_id)
                 raise
-        run_id = dispatch.data.workflow_run_id
         self._runs_in_flight[message.batch_id] = run_id
         message.run_id = run_id
         self._report_launch(message)
@@ -195,12 +230,132 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 id=f"{message.id}-progress-0",
                 batch_id=message.batch_id,
                 run_id=run_id,
-                workflow_url=dispatch.data.html_url,
+                workflow_url=workflow_url,
                 state=ExecutionState.QUEUED,
                 sequence=0,
             )
         )
-        return run_id, dispatch.data.html_url
+        return run_id, workflow_url
+
+    async def _dispatch_batch_run(self, message: TestBatch) -> tuple[int, str]:
+        inputs = self._build_inputs(message)
+        started = datetime.now(UTC) - timedelta(seconds=DISPATCH_CLOCK_SKEW_SECONDS)
+        created = f">={started.isoformat(timespec='seconds')}"
+        redispatched = False
+        while True:
+            try:
+                dispatch = await self._client.create_workflow_dispatch(
+                    self._options.owner,
+                    self._options.repo,
+                    self._options.workflow_id,
+                    ref=self._options.ref,
+                    inputs=inputs,
+                    return_run_details=True,
+                )
+            except Exception as error:
+                if not redispatched and "dispatch_id" in inputs and _workflow_rejects_dispatch_id(error):
+                    self._logger.warning(
+                        "Workflow does not accept dispatch_id; dispatching batch %s without recovery",
+                        message.batch_id,
+                        batch_id=message.batch_id,
+                    )
+                    inputs = {key: value for key, value in inputs.items() if key != "dispatch_id"}
+                    continue
+                if "dispatch_id" not in inputs or not _is_ambiguous_dispatch_error(error):
+                    raise
+                self._logger.warning(
+                    "Ambiguous dispatch failure for batch %s; checking for a created run",
+                    message.batch_id,
+                    batch_id=message.batch_id,
+                    error_kind=type(error).__name__,
+                    status_code=error.response.status_code if isinstance(error, httpx.HTTPStatusError) else None,
+                    dispatch_attempt=2 if redispatched else 1,
+                )
+                try:
+                    run = await self._find_dispatched_run(message, inputs["dispatch_id"], created)
+                except (DispatchLookupInconclusiveError, httpx.HTTPError, ValidationError) as lookup_error:
+                    self._logger.warning(
+                        "Dispatch lookup inconclusive for batch %s; not re-dispatching: %s",
+                        message.batch_id,
+                        lookup_error,
+                        batch_id=message.batch_id,
+                    )
+                    raise error from lookup_error
+                if run is not None:
+                    self._logger.info(
+                        "Batch %s adopted run %s",
+                        message.batch_id,
+                        run.id,
+                        batch_id=message.batch_id,
+                        run_id=run.id,
+                    )
+                    return run.id, run.html_url
+                if redispatched:
+                    self._logger.warning(
+                        "No matching run found after re-dispatching batch %s; no further attempts",
+                        message.batch_id,
+                        batch_id=message.batch_id,
+                    )
+                    raise
+                # The workflow guard suppresses duplicate work. A late winner can still cancel the
+                # tracked retry, failing the batch as it does without recovery.
+                self._logger.info("Re-dispatching batch %s", message.batch_id, batch_id=message.batch_id)
+                redispatched = True
+            else:
+                return dispatch.data.workflow_run_id, dispatch.data.html_url
+
+    async def _find_dispatched_run(self, message: TestBatch, dispatch_id: str, created: str) -> WorkflowRun | None:
+        failed_at = monotonic()
+        title = f"Test Batch [dispatch:{dispatch_id}] {message.batch_id}"
+        for delay in DISPATCH_LOOKUP_DELAYS:
+            await asyncio.sleep(max(0, delay - (monotonic() - failed_at)))
+            seen: set[int] = set()
+            matches: dict[int, WorkflowRun] = {}
+            total_count: int | None = None
+            unidentified_run_id: int | None = None
+            async for page in self._client.list_workflow_runs(
+                self._options.owner,
+                self._options.repo,
+                self._options.workflow_id,
+                event="workflow_dispatch",
+                created=created,
+                per_page=100,
+            ):
+                total_count = max(total_count or 0, page.data.total_count)
+                for run in page.data.workflow_runs:
+                    if not DISPATCH_RUN_TITLE_PATTERN.fullmatch(run.display_title):
+                        unidentified_run_id = run.id
+                    seen.add(run.id)
+                    if run.display_title == title:
+                        matches[run.id] = run
+            if total_count is None or total_count >= DISPATCH_LOOKUP_RUN_LIMIT or len(seen) != total_count:
+                raise DispatchLookupInconclusiveError("Workflow run listing is truncated or incomplete")
+            winner = min(
+                (run for run in matches.values() if run.conclusion != "cancelled"),
+                key=lambda run: run.id,
+                default=None,
+            )
+            if winner is not None:
+                self._logger.info(
+                    "Dispatch lookup for batch %s found run %s",
+                    message.batch_id,
+                    winner.id,
+                    batch_id=message.batch_id,
+                    run_id=winner.id,
+                    matching_runs=len(matches),
+                )
+                return winner
+            if unidentified_run_id is not None:
+                raise DispatchLookupInconclusiveError(
+                    f"Run {unidentified_run_id} lacks a dispatch identity in its title"
+                )
+            self._logger.info(
+                "Dispatch lookup for batch %s found no viable matching run after %s seconds",
+                message.batch_id,
+                round(monotonic() - failed_at, 1),
+                batch_id=message.batch_id,
+            )
+        return None
 
     async def _collect_results(
         self,
@@ -223,7 +378,14 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         )
         jobs = await self._reconcile_final_jobs(run_id, message, jobs)
         batch_jobs = BatchJobResult.correlate(message.job_list, jobs, artifact_dirs)
-        status = batch_status(conclusion, jobs)
+        status = final_batch_status(
+            conclusion,
+            jobs,
+            batch_id=message.batch_id,
+            run_attempt=run.run_attempt,
+            test_job_names={job.name for job in message.job_list},
+            logger=self._logger,
+        )
         self.submit_message(
             BatchFinished(
                 id=message.id,
@@ -363,7 +525,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             with self._metrics.operation(Operation.FETCH_WORKFLOW) as op:
                 try:
                     run = await self._client.get_workflow_run(
-                        self._options.owner, self._options.repo, run_id, retry=SAFE_RETRY_WITH_404
+                        self._options.owner, self._options.repo, run_id, retry=WORKFLOW_RUN_RETRY
                     )
                 except ValidationError as error:
                     raise self._response_failure(
@@ -484,7 +646,11 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         with self._metrics.operation(Operation.REFRESH_JOBS) as op:
             try:
                 async for page in self._client.list_workflow_jobs(
-                    self._options.owner, self._options.repo, run_id, per_page=100, retry=SAFE_RETRY_WITH_404
+                    self._options.owner,
+                    self._options.repo,
+                    run_id,
+                    per_page=WORKFLOW_JOBS_PER_PAGE,
+                    retry=SAFE_RETRY_WITH_404,
                 ):
                     jobs.extend(page.data.jobs)
             except ValidationError as error:
@@ -496,6 +662,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     def _build_inputs(self, message: TestBatch) -> dict[str, str]:
         run = self._options.run_fields
         inputs = {
+            "dispatch_id": uuid4().hex,
             "batch_id": message.batch_id,
             "checkout_sha": str(run["checkout_sha"]),
             # Keys the workflow's cancellation group; see `ResolvedRun.concurrency_key`.
@@ -503,7 +670,6 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             # The batch is dispatched at the default branch, so its own context describes master.
             # These two say which commit the results belong to, for CI Visibility and the check run.
             "head_sha": str(run["head_sha"]),
-            "head_branch": str(run["head_branch"]),
             "context": str(run["context"]),
             # The batch withholds every credential when this is true, so it is sent on every dispatch
             # rather than only when set: an absent input would default the workflow to trusting it.
@@ -511,6 +677,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             "integrations": json.dumps(message.integrations),
             "job_list": encode_job_list([self._job_input(message, job) for job in message.job_list]),
         }
+        # Exactly one of these is set on the run, so the batch is told which ref its results belong
+        # to without having to guess from the other.
+        if run["head_branch"] is not None:
+            inputs["head_branch"] = str(run["head_branch"])
+        if run["head_tag"] is not None:
+            inputs["head_tag"] = str(run["head_tag"])
         # GitHub rejects inputs the workflow does not declare, so unset means absent, not empty.
         if self._options.pytest_args:
             inputs["pytest_args"] = self._options.pytest_args

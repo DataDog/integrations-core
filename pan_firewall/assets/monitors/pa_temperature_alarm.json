@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nTemperature sensor **{{sensor.name}}** in slot {{slot.name}} on firewall **{{device_ip.name}}** is in alarm.\n{{/is_alert}}\n\n{{#is_recovery}}\n## Recovered\n\nTemperature sensor {{sensor.name}} in slot {{slot.name}} on firewall {{device_ip.name}} is no longer in alarm.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nAn overheating firewall can throttle, shut down to protect itself, or suffer hardware damage.\n\n---\n\n## Why?\n\nPossible causes:\n* **A failed or blocked fan.**\n* **Poor airflow** around the device.\n* **A high room temperature.**\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Run `show system environmentals` on the firewall to see the sensor's reading and thresholds.\n2. Check the fans and the airflow around the device.\n3. Check the room temperature.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Metrics Explorer](/metric/explorer?exp_metric=pan_firewall.temperature.current&exp_scope=device_ip:{{device_ip.name}},sensor:{{sensor.name}}&exp_agg=max&exp_type=line)\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Temperature sensor {{sensor.name}} is in alarm on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 1
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_15m):max:pan_firewall.temperature.alarm{*} by {device_namespace,device_ip,slot,sensor} >= 1",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks whether any temperature sensor on the firewall reports an alarm. A temperature alarm points to a cooling failure or an environmental problem that can lead to hardware damage or a shutdown.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Temperature sensor is in alarm",
+  "version": 2
+}

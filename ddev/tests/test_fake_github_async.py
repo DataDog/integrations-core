@@ -353,6 +353,11 @@ MIRROR_CALLS = [
         {'workflow_id': 'wf.yml'},
     ),
     ('get_workflow_run', lambda f, _: f.get_workflow_run('o', 'r', 42), {'run_id': 42}),
+    (
+        'list_workflow_runs',
+        lambda f, _: first_page(f.list_workflow_runs('o', 'r', 'test-batch.yml', branch='master')),
+        {'workflow_id': 'test-batch.yml', 'branch': 'master'},
+    ),
     ('with_rate_limit', lambda f, _: f.with_rate_limit(VIEW_RATE_LIMITER), {'rate_limiter': VIEW_RATE_LIMITER}),
     ('cancel_workflow_run', lambda f, _: f.cancel_workflow_run('o', 'r', 42), {'run_id': 42}),
     (
@@ -383,6 +388,7 @@ MIRROR_CALLS = [
         {'archive_download_url': 'https://x/zip'},
     ),
     ('get_ref', lambda f, _: f.get_ref('o', 'r', 'heads/main'), {'ref': 'heads/main'}),
+    ('get_tag', lambda f, _: f.get_tag('o', 'r', 't' * 40), {'tag_sha': 't' * 40}),
     ('create_ref', lambda f, _: f.create_ref('o', 'r', 'refs/heads/x', 'abc123'), {'sha': 'abc123'}),
     ('get_content', lambda f, _: f.get_content('o', 'r', 'release.json'), {'path': 'release.json'}),
     (

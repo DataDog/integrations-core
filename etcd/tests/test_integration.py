@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-import mock
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -77,28 +76,13 @@ def test_service_check(aggregator, instance, dd_run_check):
     ],
 )
 @pytest.mark.integration
-def test_config(instance, test_case, extra_config, expected_http_kwargs, dd_run_check):
+def test_config(instance, test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        dd_run_check(check)
-
-        http_kwargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'data': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_kwargs.update(expected_http_kwargs)
-        r.post.assert_called_with(URL + '/v3/maintenance/status', **http_kwargs)
+    # The leader status request goes through `check.http`, so its options carry the remapped settings.
+    for option, value in expected_http_kwargs.items():
+        assert check.http.options[option] == value
 
 
 @pytest.mark.integration

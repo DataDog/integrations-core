@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.87.0",
+        "integration": "TensorRT-LLM",
+        "check": "tensorrt_llm.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "TensorRT-LLM OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent cannot connect to the TensorRT-LLM OpenMetrics endpoint or receives an HTTP error, otherwise returns `OK`."
+    }
+]

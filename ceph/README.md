@@ -71,6 +71,8 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 **Note**: If you are running Ceph luminous or later, the `ceph.osd.pct_used` metric is not included.
 
+**Note**: The `ceph_mon_state` tag is only added on Ceph Nautilus and earlier. It comes from the `ceph mon_status` command, which Ceph removed in Octopus. Its value is the state of whichever monitor answered the command, so on clusters with several monitors it can change between check runs.
+
 ### Events
 
 The Ceph check does not include any events.

@@ -29,14 +29,14 @@ class PlatformSpec(NamedTuple):
 PLATFORMS: dict[PlatformName, PlatformSpec] = {
     PlatformName.LINUX: PlatformSpec("Linux", "ubuntu-22.04"),
     PlatformName.WINDOWS: PlatformSpec("Windows", "windows-2022"),
-    PlatformName.MACOS: PlatformSpec("macOS", "macos-14-large"),
+    PlatformName.MACOS: PlatformSpec("macOS", "macos-15-large"),
 }
 
 # The runners a plan may schedule on. Plan content follows the tested tree's `.ddev/config.toml` and
 # `hatch.toml`, so this is the set of places that influence can put a job, and the reason a
 # self-hosted label never goes in it. A `runners` override needs its label adding here. One label
 # per job: `runs-on` with an array is conjunctive, so a hosted image is only schedulable alone.
-ALLOWED_RUNNER_LABELS = frozenset({"ubuntu-22.04", "windows-2022", "macos-14-large"})
+ALLOWED_RUNNER_LABELS = frozenset({"ubuntu-22.04", "windows-2022", "macos-15-large"})
 
 # Targets rendered before everything else, in this order.
 DISPLAY_ORDER_OVERRIDE: dict[str, int] = {

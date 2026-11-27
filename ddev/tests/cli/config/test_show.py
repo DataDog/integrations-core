@@ -230,6 +230,25 @@ def test_show_with_local_overrides(ddev, config_file, helpers, command, expected
     assert result.output == expected_output
 
 
+def test_show_effective_ai_config(ddev, config_file, overrides_config: Path):
+    from ddev.utils.toml import load_toml_data
+
+    config_file.model.ai.flow_dirs = ["global-flows"]
+    config_file.save()
+    overrides_config.write_text('org = "local"\n[ai]\nanthropic_api_key = "local-key"\nflow_dirs = ["local-flows"]\n')
+
+    result = ddev("config", "show", "-a")
+
+    assert result.exit_code == 0, result.output
+    warning, _, config_output = result.output.partition("\n")
+    assert warning == "Ignoring [ai] in .ddev.toml; AI settings must be set in the global config."
+    effective_config = load_toml_data(config_output)
+    assert effective_config["ai"] == {"anthropic_api_key": "sk-test", "flow_dirs": ["global-flows"]}
+    assert effective_config["org"] == "local"
+    ai_output = config_output.split("[ai]", 1)[1]
+    assert all("# GlobalConfig:" in line for line in ai_output.splitlines() if line.strip())
+
+
 def test_verbose_output_without_local_file(ddev):
     """Test that verbose output does not show local override message when no local file exists."""
     result = ddev("-v", "config", "show")

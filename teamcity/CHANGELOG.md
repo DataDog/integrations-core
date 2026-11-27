@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 7.4.3 / 2026-11-25
+
+***Fixed***:
+
+* Add the `collect_histograms_as_distributions` option to the configuration example and config models. ([#25590](https://github.com/DataDog/integrations-core/pull/25590))
+
+## 7.4.2 / 2026-11-03
+
+***Fixed***:
+
+* Collect build configurations whose builds are all hidden by the TeamCity default build filter, such as configurations that only build non-default branches. ([#25782](https://github.com/DataDog/integrations-core/pull/25782))
+
 ## 7.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

@@ -10,17 +10,20 @@ import io
 import logging
 import re
 import zipfile
-from collections.abc import AsyncIterator, Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable, Hashable
 from contextlib import asynccontextmanager, suppress
 from copy import copy
 from dataclasses import dataclass, replace
+from functools import cache
+from json import JSONDecodeError
 from pathlib import Path
 from time import monotonic
-from typing import Any, Literal, Self, overload
+from types import NoneType
+from typing import Any, Literal, Self, cast, overload
 
 import httpx
 import stamina
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
 from ddev.utils.github_errors import (
     GITHUB_AUTHENTICATION_STATUS_CODES,
@@ -47,6 +50,7 @@ from .models import (
     FileCommit,
     FileContent,
     GitReference,
+    GitTag,
     IssueComment,
     Label,
     PullRequest,
@@ -56,11 +60,13 @@ from .models import (
     WorkflowDispatchResult,
     WorkflowJobsList,
     WorkflowRun,
+    WorkflowRunsList,
 )
 from .observer import RequestAttempt, RequestFailure, RequestObserver
 from .retry import (
     DEFAULT_RETRY_POLICIES,
     NO_RETRY,
+    MalformedResponseBody,
     RetryPolicies,
     RetryPolicy,
     RetryPredicate,
@@ -93,6 +99,11 @@ SIGNED_URL_EXPIRED_STATUS = 403
 QUERY_MASK = "***"  # noqa: S105
 
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
+
+
+@cache
+def _response_adapter(model: Hashable) -> TypeAdapter[Any]:
+    return TypeAdapter(model)
 
 
 def _ensure_per_page_valid(per_page: int):
@@ -534,18 +545,21 @@ class AsyncGitHubClient:
                     raise
         raise RuntimeError("unreachable: the rate-limit loop always returns or raises")  # pragma: no cover
 
-    async def _request(
+    async def _request[T](
         self,
         method: str,
         endpoint: str,
+        response_model: type[T],
         timeout: float | None = None,
         *,
         retry: RetryPolicy | None = None,
         expect_redirect: bool = False,
         attempts: RequestAttempts | None = None,
         **kwargs: Any,
-    ) -> httpx.Response:
-        """Send one request, retrying the failures its policy accepts.
+    ) -> GitHubResponse[T]:
+        """Send and validate one request, retrying the failures its policy accepts.
+
+        Pass `NoneType` for a response whose body is not read.
 
         Wraps the rate-limit layer rather than living inside it, so every attempt re-acquires the
         limiter and waits out any pause the governor holds.
@@ -561,25 +575,33 @@ class AsyncGitHubClient:
             async for attempt in retry_attempts(policy, cause):
                 with attempt:
                     self._log_retry(f"{method} {endpoint}", cause, attempt, attempts)
-                    return await self._rate_limited_request(
+                    response = await self._rate_limited_request(
                         method, endpoint, attempts, timeout, expect_redirect=expect_redirect, **kwargs
                     )
+                    try:
+                        return self._parse_response(response, response_model)
+                    except (JSONDecodeError, UnicodeDecodeError, ValidationError) as error:
+                        raise MalformedResponseBody(error) from None
+        except MalformedResponseBody as error:
+            # Keep the observer's HTTP outcome and surface the parse error to the caller as before.
+            raise error.original from None
         except Exception as error:
             if owns_attempts:
                 self._report_failure(attempts, method, endpoint, error)
             raise
         raise RuntimeError("unreachable: the retry loop always returns or raises")  # pragma: no cover
 
-    async def _paginated_request(
+    async def _paginated_request[T](
         self,
         method: str,
         endpoint: str,
+        response_model: type[T],
         timeout: float | None = None,
         *,
         retry: RetryPolicy | None = None,
         **kwargs: Any,
-    ) -> AsyncIterator[httpx.Response]:
-        """Yield one httpx.Response per page, following Link headers.
+    ) -> AsyncIterator[GitHubResponse[T]]:
+        """Yield one validated response per page, following Link headers.
 
         The policy applies per page, so a flaky page is retried on its own without refetching the
         pages already yielded.
@@ -587,22 +609,19 @@ class AsyncGitHubClient:
         url: str | None = endpoint
         first = True
         while url is not None:
-            if first:
-                response = await self._request(method, url, timeout=timeout, retry=retry, **kwargs)
-                first = False
-            else:
-                # Subsequent pages: use the absolute next URL, no extra kwargs
-                response = await self._request(method, url, timeout=timeout, retry=retry)
-            yield response
+            response = await self._request(
+                method, url, response_model, timeout=timeout, retry=retry, **(kwargs if first else {})
+            )
+            first = False
             pagination = PaginationData.from_header(response.headers.get("link"))
+            yield response
             url = pagination.next
 
     @staticmethod
-    def _parse_response[T: BaseModel](response: httpx.Response, model: type[T]) -> GitHubResponse[T]:
-        """Validate the response body against *model* and wrap it in a GitHubResponse."""
-        return GitHubResponse[T].model_validate(
-            {"data": model.model_validate(response.json()), "headers": dict(response.headers)}
-        )
+    def _parse_response[T](response: httpx.Response, model: type[T]) -> GitHubResponse[T]:
+        """Validate the response body against `model` and wrap it in a `GitHubResponse`."""
+        data = None if model is NoneType else _response_adapter(cast(Hashable, model)).validate_python(response.json())
+        return GitHubResponse[T].model_validate({"data": data, "headers": dict(response.headers)})
 
     # ------------------------------------------------------------------
     # Endpoint methods
@@ -674,18 +693,63 @@ class AsyncGitHubClient:
         body: dict[str, Any] = {"ref": ref}
         if inputs is not None:
             body["inputs"] = inputs
+        endpoint = f"/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches"
         if return_run_details:
             body["return_run_details"] = True
-        response = await self._request(
-            "POST",
-            f"/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
+            return await self._request(
+                "POST", endpoint, WorkflowDispatchResult, timeout=timeout, retry=retry, json=body
+            )
+        return await self._request("POST", endpoint, NoneType, timeout=timeout, retry=retry, json=body)
+
+    async def list_workflow_runs(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        per_page: int = 30,
+        timeout: float | None = None,
+        *,
+        branch: str | None = None,
+        event: str | None = None,
+        created: str | None = None,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowRunsList]]:
+        """List runs for one workflow, following pagination.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/actions/workflow-runs#list-workflow-runs-for-a-workflow
+
+        Args:
+            owner: Repository owner.
+            repo: Repository name.
+            workflow_id: Workflow file name or numeric ID.
+            per_page: Results per page, at most 100.
+            timeout: Per-request timeout, defaulting to the client's timeout.
+            branch: Restrict runs to this branch.
+            event: Restrict runs to this event, such as workflow_dispatch.
+            created: Creation date or range in GitHub search syntax.
+            retry: Replayable request policy, applied per page.
+
+        Returns:
+            Pages with a total count and validated runs. Filtered searches return at most 1,000 runs.
+
+        Raises:
+            ValueError: If per_page is outside 1..100.
+        """
+        _ensure_per_page_valid(per_page)
+        params: dict[str, str | int] = {"per_page": per_page}
+        for key, value in (("branch", branch), ("event", event), ("created", created)):
+            if value is not None:
+                params[key] = value
+        async for response in self._paginated_request(
+            "GET",
+            f"/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs",
+            WorkflowRunsList,
             timeout=timeout,
             retry=retry,
-            json=body,
-        )
-        if return_run_details:
-            return self._parse_response(response, WorkflowDispatchResult)
-        return GitHubResponse[None].model_validate({"data": None, "headers": dict(response.headers)})
+            params=params,
+        ):
+            yield response
 
     async def get_workflow_run(
         self,
@@ -712,10 +776,9 @@ class AsyncGitHubClient:
         Returns:
             GitHubResponse[WorkflowRun]: The validated workflow run data and headers.
         """
-        response = await self._request(
-            "GET", f"/repos/{owner}/{repo}/actions/runs/{run_id}", timeout=timeout, retry=retry
+        return await self._request(
+            "GET", f"/repos/{owner}/{repo}/actions/runs/{run_id}", WorkflowRun, timeout=timeout, retry=retry
         )
-        return self._parse_response(response, WorkflowRun)
 
     def enter_shutdown_mode(self, *, rate_limits: RelaxedRateLimits | None = None) -> None:
         """Size every subsequent request for a process that is about to be killed.
@@ -764,6 +827,7 @@ class AsyncGitHubClient:
             await self._request(
                 "POST",
                 endpoint,
+                NoneType,
                 timeout=timeout,
                 retry=retry if retry is not None else self._retry_policies.safe.replace(timeout=CANCEL_RETRY_TIMEOUT),
                 attempts=attempts,
@@ -807,9 +871,9 @@ class AsyncGitHubClient:
         _ensure_per_page_valid(per_page)
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
         async for response in self._paginated_request(
-            "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
+            "GET", endpoint, ArtifactsList, timeout=timeout, retry=retry, params={"per_page": per_page}
         ):
-            yield self._parse_response(response, ArtifactsList)
+            yield response
 
     async def list_workflow_jobs(
         self,
@@ -844,9 +908,9 @@ class AsyncGitHubClient:
         _ensure_per_page_valid(per_page)
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
         async for response in self._paginated_request(
-            "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
+            "GET", endpoint, WorkflowJobsList, timeout=timeout, retry=retry, params={"per_page": per_page}
         ):
-            yield self._parse_response(response, WorkflowJobsList)
+            yield response
 
     async def create_issue_comment(
         self,
@@ -878,10 +942,9 @@ class AsyncGitHubClient:
         Raises:
             GitHubBodyTooLongError: If `body` is too long, measured here or refused by GitHub.
         """
-        response = await self._comment_request(
+        return await self._comment_request(
             "POST", f"/repos/{owner}/{repo}/issues/{issue_number}/comments", body=body, timeout=timeout, retry=retry
         )
-        return self._parse_response(response, IssueComment)
 
     async def update_issue_comment(
         self,
@@ -913,14 +976,13 @@ class AsyncGitHubClient:
         Raises:
             GitHubBodyTooLongError: If `body` is too long, measured here or refused by GitHub.
         """
-        response = await self._comment_request(
+        return await self._comment_request(
             "PATCH",
             f"/repos/{owner}/{repo}/issues/comments/{comment_id}",
             body=body,
             timeout=timeout,
             retry=retry if retry is not None else self._retry_policies.safe,
         )
-        return self._parse_response(response, IssueComment)
 
     async def _comment_request(
         self,
@@ -930,7 +992,7 @@ class AsyncGitHubClient:
         body: str,
         timeout: float | None,
         retry: RetryPolicy | None = None,
-    ) -> httpx.Response:
+    ) -> GitHubResponse[IssueComment]:
         """Send a comment *body*, enforcing the length limit from both sides.
 
         Scoped to the comment endpoints rather than `_request`, because a 422 elsewhere has nothing to do
@@ -938,7 +1000,9 @@ class AsyncGitHubClient:
         """
         _ensure_body_fits(body)
         try:
-            return await self._request(method, endpoint, timeout=timeout, retry=retry, json={"body": body})
+            return await self._request(
+                method, endpoint, IssueComment, timeout=timeout, retry=retry, json={"body": body}
+            )
         except httpx.HTTPStatusError as exc:
             if (message := github_body_too_long_message(exc.response)) is not None:
                 raise GitHubBodyTooLongError.from_response(message, limit=COMMENT_BODY_LIMIT) from exc
@@ -976,16 +1040,11 @@ class AsyncGitHubClient:
             ValueError: If `per_page` is outside 1..`MAX_PER_PAGE`.
         """
         _ensure_per_page_valid(per_page)
-        # The response body is a bare JSON array, so there is no wrapper model to validate against
-        # (unlike ``WorkflowJobsList``); each item is validated individually.
         endpoint = f"/repos/{owner}/{repo}/issues/{issue_number}/comments"
         async for response in self._paginated_request(
-            "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
+            "GET", endpoint, list[IssueComment], timeout=timeout, retry=retry, params={"per_page": per_page}
         ):
-            comments = [IssueComment.model_validate(item) for item in response.json()]
-            yield GitHubResponse[list[IssueComment]].model_validate(
-                {"data": comments, "headers": dict(response.headers)}
-            )
+            yield response
 
     async def get_pull_request(
         self,
@@ -1012,10 +1071,9 @@ class AsyncGitHubClient:
         Returns:
             GitHubResponse[PullRequest]: The validated pull request data and headers.
         """
-        response = await self._request(
-            "GET", f"/repos/{owner}/{repo}/pulls/{pull_number}", timeout=timeout, retry=retry
+        return await self._request(
+            "GET", f"/repos/{owner}/{repo}/pulls/{pull_number}", PullRequest, timeout=timeout, retry=retry
         )
-        return self._parse_response(response, PullRequest)
 
     async def list_commit_pulls(
         self,
@@ -1049,15 +1107,11 @@ class AsyncGitHubClient:
             AsyncIterator[GitHubResponse[list[PullRequestSimple]]]: One page of pull requests per
             iteration, in the abbreviated form the list endpoints return.
         """
-        # The response body is a bare JSON array, so there is no wrapper model to validate against.
         endpoint = f"/repos/{owner}/{repo}/commits/{commit_sha}/pulls"
         async for response in self._paginated_request(
-            "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
+            "GET", endpoint, list[PullRequestSimple], timeout=timeout, retry=retry, params={"per_page": per_page}
         ):
-            pulls = [PullRequestSimple.model_validate(item) for item in response.json()]
-            yield GitHubResponse[list[PullRequestSimple]].model_validate(
-                {"data": pulls, "headers": dict(response.headers)}
-            )
+            yield response
 
     async def list_pull_request_files(
         self,
@@ -1091,16 +1145,11 @@ class AsyncGitHubClient:
             AsyncIterator[GitHubResponse[list[PullRequestFile]]]: One page of files per iteration,
             following Link headers until exhausted.
         """
-        # The response body is a bare JSON array, so there is no wrapper model to validate against
-        # (unlike ``WorkflowJobsList``); each item is validated individually.
         endpoint = f"/repos/{owner}/{repo}/pulls/{pull_number}/files"
         async for response in self._paginated_request(
-            "GET", endpoint, timeout=timeout, retry=retry, params={"per_page": per_page}
+            "GET", endpoint, list[PullRequestFile], timeout=timeout, retry=retry, params={"per_page": per_page}
         ):
-            files = [PullRequestFile.model_validate(item) for item in response.json()]
-            yield GitHubResponse[list[PullRequestFile]].model_validate(
-                {"data": files, "headers": dict(response.headers)}
-            )
+            yield response
 
     async def list_pull_requests(
         self,
@@ -1145,12 +1194,8 @@ class AsyncGitHubClient:
             params["head"] = head
         if base is not None:
             params["base"] = base
-        response = await self._request(
-            "GET", f"/repos/{owner}/{repo}/pulls", timeout=timeout, retry=retry, params=params
-        )
-        pulls = [PullRequestSimple.model_validate(item) for item in response.json()]
-        return GitHubResponse[list[PullRequestSimple]].model_validate(
-            {"data": pulls, "headers": dict(response.headers)}
+        return await self._request(
+            "GET", f"/repos/{owner}/{repo}/pulls", list[PullRequestSimple], timeout=timeout, retry=retry, params=params
         )
 
     async def create_pull_request(
@@ -1186,14 +1231,14 @@ class AsyncGitHubClient:
         Returns:
             GitHubResponse[PullRequest]: The validated pull request data and headers.
         """
-        response = await self._request(
+        return await self._request(
             "POST",
             f"/repos/{owner}/{repo}/pulls",
+            PullRequest,
             timeout=timeout,
             retry=retry,
             json={"title": title, "head": head, "base": base, "body": body, "draft": draft},
         )
-        return self._parse_response(response, PullRequest)
 
     async def add_labels_to_issue(
         self,
@@ -1223,15 +1268,14 @@ class AsyncGitHubClient:
             GitHubResponse[list[Label]]: The full label list resulting from the operation (preserves
             any pre-existing labels alongside the newly added ones).
         """
-        response = await self._request(
+        return await self._request(
             "POST",
             f"/repos/{owner}/{repo}/issues/{issue_number}/labels",
+            list[Label],
             timeout=timeout,
             retry=retry if retry is not None else self._retry_policies.safe,
             json={"labels": labels},
         )
-        labels_out = [Label.model_validate(item) for item in response.json()]
-        return GitHubResponse[list[Label]].model_validate({"data": labels_out, "headers": dict(response.headers)})
 
     async def create_pr_review_comment(
         self,
@@ -1281,14 +1325,14 @@ class AsyncGitHubClient:
             payload["line"] = line
         if side is not None:
             payload["side"] = side
-        response = await self._request(
+        return await self._request(
             "POST",
             f"/repos/{owner}/{repo}/pulls/{pull_number}/comments",
+            PullRequestReviewComment,
             timeout=timeout,
             retry=retry,
             json=payload,
         )
-        return self._parse_response(response, PullRequestReviewComment)
 
     async def create_check_run(
         self,
@@ -1329,14 +1373,14 @@ class AsyncGitHubClient:
             payload["details_url"] = details_url
         if output is not None:
             payload["output"] = output
-        response = await self._request(
+        return await self._request(
             "POST",
             f"/repos/{owner}/{repo}/check-runs",
+            CheckRun,
             timeout=timeout,
             retry=retry,
             json=payload,
         )
-        return self._parse_response(response, CheckRun)
 
     async def update_check_run(
         self,
@@ -1384,14 +1428,14 @@ class AsyncGitHubClient:
             payload["details_url"] = details_url
         if output is not None:
             payload["output"] = output
-        response = await self._request(
+        return await self._request(
             "PATCH",
             f"/repos/{owner}/{repo}/check-runs/{check_run_id}",
+            CheckRun,
             timeout=timeout,
             retry=retry if retry is not None else self._retry_policies.safe,
             json=payload,
         )
-        return self._parse_response(response, CheckRun)
 
     async def get_ref(
         self,
@@ -1419,8 +1463,42 @@ class AsyncGitHubClient:
             GitHubResponse[GitReference]: The validated reference (its `object.sha` is the commit it
             points at) and headers.
         """
-        response = await self._request("GET", f"/repos/{owner}/{repo}/git/ref/{ref}", timeout=timeout, retry=retry)
-        return self._parse_response(response, GitReference)
+        return await self._request(
+            "GET", f"/repos/{owner}/{repo}/git/ref/{ref}", GitReference, timeout=timeout, retry=retry
+        )
+
+    async def get_tag(
+        self,
+        owner: str,
+        repo: str,
+        tag_sha: str,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[GitTag]:
+        """
+        Calls the GitHub API to get an annotated tag object.
+
+        A tag reference points at this object rather than at a commit when the tag is annotated, so
+        resolving such a tag to its commit means reading `object.sha` from here.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/git/tags#get-a-tag
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            tag_sha: SHA of the tag object itself, not of the commit it points at.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Defaults to the replayable policy, which does not retry a 404.
+
+        Returns:
+            GitHubResponse[GitTag]: The validated tag object (its `object` is what the tag wraps)
+            and headers.
+        """
+        return await self._request(
+            "GET", f"/repos/{owner}/{repo}/git/tags/{tag_sha}", GitTag, timeout=timeout, retry=retry
+        )
 
     async def create_ref(
         self,
@@ -1450,14 +1528,14 @@ class AsyncGitHubClient:
         Returns:
             GitHubResponse[GitReference]: The validated created reference and headers.
         """
-        response = await self._request(
+        return await self._request(
             "POST",
             f"/repos/{owner}/{repo}/git/refs",
+            GitReference,
             timeout=timeout,
             retry=retry,
             json={"ref": ref, "sha": sha},
         )
-        return self._parse_response(response, GitReference)
 
     async def get_content(
         self,
@@ -1490,10 +1568,9 @@ class AsyncGitHubClient:
             the response would be a list rather than a `content-file`.
         """
         params = {} if ref is None else {"ref": ref}
-        response = await self._request(
-            "GET", f"/repos/{owner}/{repo}/contents/{path}", timeout=timeout, retry=retry, params=params
+        return await self._request(
+            "GET", f"/repos/{owner}/{repo}/contents/{path}", FileContent, timeout=timeout, retry=retry, params=params
         )
-        return self._parse_response(response, FileContent)
 
     async def create_or_update_file_contents(
         self,
@@ -1536,14 +1613,14 @@ class AsyncGitHubClient:
             payload["sha"] = sha
         if branch is not None:
             payload["branch"] = branch
-        response = await self._request(
+        return await self._request(
             "PUT",
             f"/repos/{owner}/{repo}/contents/{path}",
+            FileCommit,
             timeout=timeout,
             retry=retry,
             json=payload,
         )
-        return self._parse_response(response, FileCommit)
 
     async def _resolve_artifact_redirect(
         self,
@@ -1561,6 +1638,7 @@ class AsyncGitHubClient:
         redirect_response = await self._request(
             "GET",
             archive_download_url,
+            NoneType,
             timeout=timeout,
             retry=retry,
             expect_redirect=True,

@@ -1,4 +1,5 @@
 # bypass-global-no-service-config-checks
+# bypass-global-grok-parser-count-per-pipeline-checks
 id: checkpoint-harmony-email-and-collaboration
 metric_id: checkpoint-harmony-email-and-collaboration
 backend_only: false
@@ -43,6 +44,204 @@ facets:
     name: Client IP
     path: network.client.ip
     source: log
+  - groups:
+      - OCSF
+    name: Email Address
+    path: ocsf.actor.user.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: Actor User LDAP Person Job Title
+    path: ocsf.actor.user.ldap_person.job_title
+    source: log
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.actor.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Actor User Organization Name
+    path: ocsf.actor.user.org.name
+    source: log
+  - groups:
+      - OCSF
+    name: Actor User Organization Org Unit Name
+    path: ocsf.actor.user.org.ou_name
+    source: log
+  - groups:
+      - OCSF
+    name: Unique ID
+    path: ocsf.actor.user.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Confidence Score
+    path: ocsf.confidence_score
+    source: log
+  - groups:
+      - OCSF
+    name: Data Security Classifier Details Name
+    path: ocsf.data_security.classifier_details.name
+    source: log
+  - groups:
+      - OCSF
+    name: Data Security Classifier Details Type
+    path: ocsf.data_security.classifier_details.type
+    source: log
+  - groups:
+      - OCSF
+    name: Data Security Detection Pattern
+    path: ocsf.data_security.detection_pattern
+    source: log
+  - groups:
+      - OCSF
+    name: Data Security Policy Unique ID
+    path: ocsf.data_security.policy.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Data Security Size
+    path: ocsf.data_security.size
+    source: log
+  - groups:
+      - OCSF
+    name: Data Security Total
+    path: ocsf.data_security.total
+    source: log
+  - groups:
+      - OCSF
+    name: Dst Endpoint Hostname
+    path: ocsf.dst_endpoint.hostname
+    source: log
+  - groups:
+      - OCSF
+    name: File Extension
+    path: ocsf.file.ext
+    source: log
+  - groups:
+      - OCSF
+    name: File MIME Type
+    path: ocsf.file.mime_type
+    source: log
+  - groups:
+      - OCSF
+    name: File Modified Time
+    path: ocsf.file.modified_time
+    source: log
+  - groups:
+      - OCSF
+    name: File Name
+    path: ocsf.file.name
+    source: log
+  - groups:
+      - OCSF
+    name: File Parent Folder
+    path: ocsf.file.parent_folder
+    source: log
+  - groups:
+      - OCSF
+    name: File Path
+    path: ocsf.file.path
+    source: log
+  - groups:
+      - OCSF
+    name: File Unique ID
+    path: ocsf.file.uid
+    source: log
+  - groups:
+      - OCSF
+    name: File URL String
+    path: ocsf.file.url.url_string
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Info Analytic Name
+    path: ocsf.finding_info.analytic.name
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Information Created Time
+    path: ocsf.finding_info.created_time
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Finding Info Title
+    path: ocsf.finding_info.title
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Information Types
+    path: ocsf.finding_info.types
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Info Unique ID
+    path: ocsf.finding_info.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Finding Info UID Alt
+    path: ocsf.finding_info.uid_alt
+    source: log
+  - groups:
+      - IDE-Shepherd
+    name: Is Alert
+    path: ocsf.is_alert
+    source: log
+  - groups:
+      - OCSF
+    name: Message
+    path: ocsf.message
+    source: log
+  - groups:
+      - OCSF
+    name: Event Code
+    path: ocsf.metadata.event_code
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Original Time
+    path: ocsf.metadata.original_time
+    source: log
+  - groups:
+      - OCSF
+    name: Product Name
+    path: ocsf.metadata.product.name
+    source: log
+  - groups:
+      - OCSF
+    name: Vendor Name
+    path: ocsf.metadata.product.vendor_name
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Tenant UID
+    path: ocsf.metadata.tenant_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Event UID
+    path: ocsf.metadata.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Policy Unique ID
+    path: ocsf.policy.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Event Time
+    path: ocsf.time
+    source: log
+    type: integer
 pipeline:
   type: pipeline
   name: Check Point Harmony Email & Collaboration
@@ -110,7 +309,7 @@ pipeline:
       sourceType: attribute
       target: network.client.ip
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: geo-ip-parser
       name: Extracting geolocation information from the client IP
@@ -216,3 +415,2569 @@ pipeline:
             supportRules: ""
             matchRules: extract_user_email %{regex(".*(?= performed)"):usr.email} performed
               %{data}
+    - type: pipeline
+      name: OCSF pre transformations
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@event.security_event.entity_payload.category:*'
+      processors:
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: Harmony Email & Collaboration
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: Check Point
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `event.security_event.entity_payload.category` to `ocsf.metadata.event_code`
+          enabled: true
+          sources:
+            - event.security_event.entity_payload.category
+          sourceType: attribute
+          target: ocsf.metadata.event_code
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `event.security_event.time` to `ocsf.time`
+          enabled: true
+          source: event.security_event.time
+          samples:
+            - '2025-03-31T05:28:26.530183Z'
+            - '2026-11-09T22:12:21.832445'
+          grok:
+            supportRules: ''
+            matchRules: |
+              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.time}
+              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.time}
+              naive6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS","UTC"):ocsf.time}
+              naive0 %{date("yyyy-MM-dd'T'HH:mm:ss","UTC"):ocsf.time}
+        - type: grok-parser
+          name: Parse `message` to `ocsf.message`
+          enabled: true
+          source: message
+          samples:
+            - Phishing attempt detected in an email from user1@example.com - 'Example subject'
+          grok:
+            supportRules: ''
+            matchRules: |
+              msg %{regex("[\\s\\S]+"):ocsf.message}
+    - type: pipeline
+      name: OCSF sub pipeline for class Detection Finding [2004] (Email and File)
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@event.security_event.entity_payload.category:(phishing OR suspicious_phishing OR suspected_phishing OR user_reported_phishing OR spam OR graymail OR malware OR suspicious_malware OR suspected_malware OR malicious_url OR malicious_url_click OR alert OR shadow_it)'
+      processors:
+        - type: category-processor
+          name: ocsf.is_alert
+          enabled: true
+          categories:
+            - filter:
+                query: '@event.security_event.entity_payload.category:(spam OR graymail)'
+              name: 'false'
+            - filter:
+                query: '@event.security_event.entity_payload.category:*'
+              name: 'true'
+          target: ocsf.is_alert
+        - type: grok-parser
+          name: Parse `ocsf.is_alert` to boolean
+          enabled: true
+          source: ocsf.is_alert
+          samples:
+            - 'true'
+            - 'false'
+          grok:
+            supportRules: ''
+            matchRules: |
+              to_bool %{boolean("true","false"):ocsf.is_alert}
+        - type: array-processor
+          name: Append `event.security_event.entity_payload.category` to `ocsf.finding_info.types`
+          enabled: true
+          operation:
+            source: event.security_event.entity_payload.category
+            target: ocsf.finding_info.types
+            preserveSource: true
+            type: append
+        - type: array-processor
+          name: Append `event.security_event.entity_payload.event_metadata.phishing_category` to `ocsf.finding_info.types`
+          enabled: true
+          operation:
+            source: event.security_event.entity_payload.event_metadata.phishing_category
+            target: ocsf.finding_info.types
+            preserveSource: true
+            type: append
+        - type: grok-parser
+          name: Parse `event.security_event.entity_info.entity_created` to `ocsf.finding_info.created_time`
+          enabled: true
+          source: event.security_event.entity_info.entity_created
+          samples:
+            - '2025-03-31T05:28:24.323007+00:00'
+            - '2025-03-31T06:44:21+00:00'
+          grok:
+            supportRules: ''
+            matchRules: |
+              frac6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.created_time}
+              frac0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.created_time}
+        - type: arithmetic-processor
+          name: Compute `ocsf.finding_info.modified_time` in milliseconds from `event.security_event.entity_payload.latest_change_time`
+          enabled: true
+          expression: event.security_event.entity_payload.latest_change_time * 1000
+          target: ocsf.finding_info.modified_time
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add risk details
+          enabled: true
+          template: '%{event.security_event.entity_payload.event_metadata.ap_detection_reasons}'
+          target: ocsf.risk_details
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.entity_id` to `ocsf.resource.uid`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.entity_id
+          sourceType: attribute
+          target: ocsf.resource.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.entity_type` to `ocsf.resource.type`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.entity_type
+          sourceType: attribute
+          target: ocsf.resource.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.subject` to `ocsf.resource.name`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.subject
+          sourceType: attribute
+          target: ocsf.resource.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Move SaaS entity into resources array
+          enabled: true
+          operation:
+            source: ocsf.resource
+            target: ocsf.resources
+            preserveSource: false
+            type: append
+        - type: attribute-remapper
+          name: Map `event.security_event.entity_payload.shadow_it_application` to `ocsf.resource_app.uid`
+          enabled: true
+          sources:
+            - event.security_event.entity_payload.shadow_it_application
+          sourceType: attribute
+          target: ocsf.resource_app.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.security_event.entity_payload.shadow_it_app_display_name`, `event.security_event.entity_payload.shadow_it_application` to `ocsf.resource_app.name`
+          enabled: true
+          sources:
+            - event.security_event.entity_payload.shadow_it_app_display_name
+            - event.security_event.entity_payload.shadow_it_application
+          sourceType: attribute
+          target: ocsf.resource_app.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Append `event.security_event.entity_payload.shadow_it_app_category` to `ocsf.resource_app.labels`
+          enabled: true
+          operation:
+            source: event.security_event.entity_payload.shadow_it_app_category
+            target: ocsf.resource_app.labels
+            preserveSource: true
+            type: append
+        - type: array-processor
+          name: Move shadow IT app into resources array
+          enabled: true
+          operation:
+            source: ocsf.resource_app
+            target: ocsf.resources
+            preserveSource: false
+            type: append
+        - type: grok-parser
+          name: Parse `event.entity.entity_payload.from_email` to `ocsf.evidence.email.from`
+          enabled: true
+          source: event.entity.entity_payload.from_email
+          samples:
+            - dummy@alerting-services.com
+          grok:
+            supportRules: ''
+            matchRules: |
+              email %{regex("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"):ocsf.evidence.email.from}
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.to` to `ocsf.evidence.email.to`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.to
+          sourceType: attribute
+          target: ocsf.evidence.email.to
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.to` to `ocsf.evidence.email.to_mailboxes`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.to
+          sourceType: attribute
+          target: ocsf.evidence.email.to_mailboxes
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Append `event.entity.entity_payload.orig_recipient` to `ocsf.evidence.email.delivered_to_list`
+          enabled: true
+          operation:
+            source: event.entity.entity_payload.orig_recipient
+            target: ocsf.evidence.email.delivered_to_list
+            preserveSource: true
+            type: append
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.cc` to `ocsf.evidence.email.cc`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.cc
+          sourceType: attribute
+          target: ocsf.evidence.email.cc
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Append `event.entity.entity_payload.reply_to_email` to `ocsf.evidence.email.reply_to_mailboxes`
+          enabled: true
+          operation:
+            source: event.entity.entity_payload.reply_to_email
+            target: ocsf.evidence.email.reply_to_mailboxes
+            preserveSource: true
+            type: append
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.subject` to `ocsf.evidence.email.subject`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.subject
+          sourceType: attribute
+          target: ocsf.evidence.email.subject
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.internet_message_id` to `ocsf.evidence.email.message_uid`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.internet_message_id
+          sourceType: attribute
+          target: ocsf.evidence.email.message_uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.entity_id` to `ocsf.evidence.email.uid`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.entity_id
+          sourceType: attribute
+          target: ocsf.evidence.email.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.size` to `ocsf.evidence.email.size`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.size
+          sourceType: attribute
+          target: ocsf.evidence.email.size
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: true
+        - type: grok-parser
+          name: Parse `event.entity.entity_payload.sender_client_ip` to `ocsf.tmp_xoip`
+          enabled: true
+          source: event.entity.entity_payload.sender_client_ip
+          samples:
+            - 203.0.113.107
+            - 0.0.0.0
+          grok:
+            supportRules: ''
+            matchRules: |
+              sentinel 0\.0\.0\.0
+              valid %{ip:ocsf.tmp_xoip}
+        - type: array-processor
+          name: Move sender client IP into x_originating_ip array
+          enabled: true
+          operation:
+            source: ocsf.tmp_xoip
+            target: ocsf.evidence.email.x_originating_ip
+            preserveSource: false
+            type: append
+        - type: array-map-processor
+          name: Map `event.entity.entity_payload.email_links` to `ocsf.evidence.email.urls`
+          enabled: true
+          source: event.entity.entity_payload.email_links
+          target: ocsf.evidence.email.urls
+          preserveSource: true
+          processors:
+            - type: attribute-remapper
+              name: Map `$sourceElem` to `$targetElem.url_string`
+              sources:
+                - $sourceElem
+              target: $targetElem.url_string
+              preserveSource: true
+              overrideOnConflict: false
+        - type: array-map-processor
+          name: Map `event.entity.entity_payload.attachments` to `ocsf.evidence.email.files`
+          enabled: true
+          source: event.entity.entity_payload.attachments
+          target: ocsf.evidence.email.files
+          preserveSource: true
+          processors:
+            - type: attribute-remapper
+              name: Map `$sourceElem.name` to `$targetElem.name`
+              sources:
+                - $sourceElem.name
+              target: $targetElem.name
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.size` to `$targetElem.size`
+              sources:
+                - $sourceElem.size
+              target: $targetElem.size
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.mimetype` to `$targetElem.mime_type`
+              sources:
+                - $sourceElem.mimetype
+              target: $targetElem.mime_type
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.entity_id` to `$targetElem.uid`
+              sources:
+                - $sourceElem.entity_id
+              target: $targetElem.uid
+              preserveSource: true
+              overrideOnConflict: false
+            - type: string-builder-processor
+              name: Add file type id
+              template: '1'
+              target: $targetElem.type_id
+              replaceMissing: false
+            - type: string-builder-processor
+              name: Add file type
+              template: Regular File
+              target: $targetElem.type
+              replaceMissing: false
+        - type: array-map-processor
+          name: Map `ocsf.evidence.email.files` to `ocsf.evidence.email.files`
+          enabled: true
+          source: ocsf.evidence.email.files
+          target: ocsf.evidence.email.files
+          preserveSource: true
+          processors:
+            - type: attribute-remapper
+              name: Map `$sourceElem.type_id` to `$targetElem.type_id`
+              sources:
+                - $sourceElem.type_id
+              target: $targetElem.type_id
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.saas_actor_payload.entity_id` to `ocsf.evidence.user.uid`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.saas_actor_payload.entity_id
+          sourceType: attribute
+          target: ocsf.evidence.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.saas_actor_payload.full_name` to `ocsf.evidence.user.name`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.saas_actor_payload.full_name
+          sourceType: attribute
+          target: ocsf.evidence.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: grok-parser
+          name: Parse `event.security_event.saas_info.saas_actor_payload.email` to `ocsf.evidence.user.email_addr`
+          enabled: true
+          source: event.security_event.saas_info.saas_actor_payload.email
+          samples:
+            - user23@org3.example.com
+          grok:
+            supportRules: ''
+            matchRules: |
+              email %{regex("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"):ocsf.evidence.user.email_addr}
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.saas_actor_payload.full_name` to `ocsf.evidence.user.full_name`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.saas_actor_payload.full_name
+          sourceType: attribute
+          target: ocsf.evidence.user.full_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: category-processor
+          name: ocsf.evidence.user.type_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@event.security_event.saas_info.saas_actor_payload.entity_type:*_user'
+              name: '1'
+            - filter:
+                query: '@event.security_event.saas_info.saas_actor_payload.entity_type:*'
+              name: '99'
+          target: ocsf.evidence.user.type_id
+        - type: category-processor
+          name: ocsf.evidence.user.type
+          enabled: true
+          categories:
+            - filter:
+                query: '@event.security_event.saas_info.saas_actor_payload.entity_type:*_user'
+              name: User
+          target: ocsf.evidence.user.type
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.saas_actor_payload.entity_type` to `ocsf.evidence.user.type`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.saas_actor_payload.entity_type
+          sourceType: attribute
+          target: ocsf.evidence.user.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.evidence.user.type_id` to `ocsf.evidence.user.type_id`
+          enabled: true
+          sources:
+            - ocsf.evidence.user.type_id
+          sourceType: attribute
+          target: ocsf.evidence.user.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.saas_actor_payload.title` to `ocsf.evidence.user.ldap_person.job_title`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.saas_actor_payload.title
+          sourceType: attribute
+          target: ocsf.evidence.user.ldap_person.job_title
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.saas_actor_payload.city` to `ocsf.evidence.user.ldap_person.location.city`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.saas_actor_payload.city
+          sourceType: attribute
+          target: ocsf.evidence.user.ldap_person.location.city
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.saas_actor_payload.company` to `ocsf.evidence.user.org.name`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.saas_actor_payload.company
+          sourceType: attribute
+          target: ocsf.evidence.user.org.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: string-builder-processor
+          name: Add organization and department
+          enabled: true
+          template: '%{event.security_event.saas_info.saas_actor_payload.company}|%{event.security_event.saas_info.saas_actor_payload.department}'
+          target: ocsf.tmp_org
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse `ocsf.tmp_org` to the user organization
+          enabled: true
+          source: ocsf.tmp_org
+          samples:
+            - Example Foods Co.|Team A
+          grok:
+            supportRules: ''
+            matchRules: |
+              org %{regex("[^|]+"):ocsf.evidence.user.org.name}\|%{regex(".+"):ocsf.evidence.user.org.ou_name}
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_org`
+          enabled: true
+          attributeToExclude: ocsf.tmp_org
+        - type: grok-parser
+          name: Parse `event.entity.entity_payload.report_phishing_actor` to the reporting user
+          enabled: true
+          source: event.entity.entity_payload.report_phishing_actor
+          samples:
+            - Shared Scheduling <user1@org1.example.com>
+            - user23@org3.example.com
+          grok:
+            supportRules: |
+              _email %{regex("[^@\\s<>]+@[^@\\s<>]+\\.[^@\\s<>]+")}
+            matchRules: |
+              named %{regex("[^<]*[^<\\s]"):ocsf.evidence.actor.user.full_name}\s*<%{_email:ocsf.evidence.actor.user.email_addr}>
+              bare %{_email:ocsf.evidence.actor.user.email_addr}
+        - type: attribute-remapper
+          name: Map `ocsf.evidence.actor.user.email_addr` to `ocsf.evidence.actor.user.name`
+          enabled: true
+          sources:
+            - ocsf.evidence.actor.user.email_addr
+          sourceType: attribute
+          target: ocsf.evidence.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: grok-parser
+          name: Parse `event.entity.entity_payload.sender_server_ip` to `ocsf.evidence.src_endpoint.ip`
+          enabled: true
+          source: event.entity.entity_payload.sender_server_ip
+          samples:
+            - 198.51.100.156
+            - 2001:db8::1
+            - 0.0.0.0
+          grok:
+            supportRules: ''
+            matchRules: |
+              sentinel 0\.0\.0\.0
+              valid %{ip:ocsf.evidence.src_endpoint.ip}
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.geo_city` to `ocsf.evidence.src_endpoint.location.city`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.geo_city
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.city
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.geo_region` to `ocsf.evidence.src_endpoint.location.region`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.geo_region
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.location.region
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: category-processor
+          name: ocsf.evidence.src_endpoint.type_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.evidence.src_endpoint.ip:*'
+              name: '1'
+          target: ocsf.evidence.src_endpoint.type_id
+        - type: category-processor
+          name: ocsf.evidence.src_endpoint.type
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.evidence.src_endpoint.ip:*'
+              name: Server
+          target: ocsf.evidence.src_endpoint.type
+        - type: attribute-remapper
+          name: Map `ocsf.evidence.src_endpoint.type_id` to `ocsf.evidence.src_endpoint.type_id`
+          enabled: true
+          sources:
+            - ocsf.evidence.src_endpoint.type_id
+          sourceType: attribute
+          target: ocsf.evidence.src_endpoint.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.file_name` to `ocsf.evidence.file.name`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.file_name
+          sourceType: attribute
+          target: ocsf.evidence.file.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: category-processor
+          name: ocsf.evidence.file.type_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@event.entity.entity_payload.file_name:*'
+              name: '1'
+          target: ocsf.evidence.file.type_id
+        - type: category-processor
+          name: ocsf.evidence.file.type
+          enabled: true
+          categories:
+            - filter:
+                query: '@event.entity.entity_payload.file_name:*'
+              name: Regular File
+          target: ocsf.evidence.file.type
+        - type: attribute-remapper
+          name: Map `ocsf.evidence.file.type_id` to `ocsf.evidence.file.type_id`
+          enabled: true
+          sources:
+            - ocsf.evidence.file.type_id
+          sourceType: attribute
+          target: ocsf.evidence.file.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.mime_type` to `ocsf.evidence.file.mime_type`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.mime_type
+          sourceType: attribute
+          target: ocsf.evidence.file.mime_type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.download_url` to `ocsf.evidence.file.uri`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.download_url
+          sourceType: attribute
+          target: ocsf.evidence.file.uri
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.parent_path` to `ocsf.evidence.file.parent_folder`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.parent_path
+          sourceType: attribute
+          target: ocsf.evidence.file.parent_folder
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: string-builder-processor
+          name: Add file path
+          enabled: true
+          template: '%{event.entity.entity_payload.parent_path}/%{event.entity.entity_payload.file_name}'
+          target: ocsf.evidence.file.path
+          replaceMissing: false
+        - type: array-processor
+          name: Move email evidence into evidences array
+          enabled: true
+          operation:
+            source: ocsf.evidence
+            target: ocsf.evidences
+            preserveSource: false
+            type: append
+        - type: schema-processor
+          name: Apply OCSF schema for 2004
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.entity_id` to `ocsf.metadata.uid`
+              sources:
+                - event.security_event.entity_info.entity_id
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.time` to `ocsf.metadata.original_time`
+              sources:
+                - event.security_event.time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.customer_domain` to `ocsf.metadata.tenant_uid`
+              sources:
+                - event.security_event.entity_info.customer_domain
+              target: ocsf.metadata.tenant_uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: '@event.security_event.entity_payload.category:*'
+                  name: Create
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: -@event.security_event.entity_payload.severity:*
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:1'
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:2'
+                  name: Low
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:3'
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:4'
+                  name: High
+                  id: 4
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:5'
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: '99'
+                sources:
+                  ocsf.severity:
+                    - event.security_event.entity_payload.severity
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: -@event.security_event.entity_payload.current_state:*
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(new OR New OR detected OR Detected)'
+                  name: New
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(pending OR Pending)'
+                  name: In Progress
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(exception OR Exception OR dismissed OR Dismissed)'
+                  name: Suppressed
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(remediated OR Remediated)'
+                  name: Resolved
+                  id: 4
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: '99'
+                sources:
+                  ocsf.status:
+                    - event.security_event.entity_payload.current_state
+            - type: schema-category-mapper
+              name: ocsf.confidence_id
+              categories:
+                - filter:
+                    query: -@event.security_event.entity_payload.confidence_level:* OR @event.security_event.entity_payload.confidence_level:0
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:(1 OR 2)'
+                  name: Low
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:3'
+                  name: Medium
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:(4 OR 5)'
+                  name: High
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.confidence
+                id: ocsf.confidence_id
+              fallback:
+                values:
+                  ocsf.confidence: Other
+                  ocsf.confidence_id: '99'
+                sources:
+                  ocsf.confidence:
+                    - event.security_event.entity_payload.confidence_level
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:block_user OR (@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:auto_restore)'
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:(send_email_to* OR phishing_found_event) OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
+                  name: Observed
+                  id: 3
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:(move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
+                  name: Modified
+                  id: 4
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.action
+                id: ocsf.action_id
+            - type: schema-category-mapper
+              name: ocsf.disposition_id
+              categories:
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore)'
+                  name: Quarantined
+                  id: 3
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:move_to_spam -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
+                  name: Custom Action
+                  id: 7
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Restored
+                  id: 9
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:inline_attachment_change -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam)'
+                  name: Corrected
+                  id: 11
+                - filter:
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:phishing_found_event OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to*)'
+                  name: Detected
+                  id: 15
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change)'
+                  name: Tagged
+                  id: 18
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:send_email_to* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
+                  name: Alert
+                  id: 19
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:block_user'
+                  name: Access Revoked
+                  id: 24
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.disposition
+                id: ocsf.disposition_id
+            - type: schema-category-mapper
+              name: ocsf.risk_level_id
+              categories:
+                - filter:
+                    query: '@event.security_event.entity_payload.shadow_it_app_risk_level:1'
+                  name: Info
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.shadow_it_app_risk_level:2'
+                  name: Low
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.shadow_it_app_risk_level:3'
+                  name: Medium
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.shadow_it_app_risk_level:4'
+                  name: High
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.shadow_it_app_risk_level:5'
+                  name: Critical
+                  id: 4
+                - filter:
+                    query: '@event.security_event.entity_payload.shadow_it_app_risk_level:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.risk_level
+                id: ocsf.risk_level_id
+              fallback:
+                values:
+                  ocsf.risk_level: Other
+                  ocsf.risk_level_id: '99'
+                sources:
+                  ocsf.risk_level:
+                    - event.security_event.entity_payload.shadow_it_app_risk_level
+            - type: schema-category-mapper
+              name: ocsf.finding_info.analytic.type_id
+              categories:
+                - filter:
+                    query: '@event.security_event.entity_payload.matched_security_tool:*'
+                  name: Unknown
+                  id: 0
+              targets:
+                name: ocsf.finding_info.analytic.type
+                id: ocsf.finding_info.analytic.type_id
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.entity_id` to `ocsf.finding_info.uid`
+              sources:
+                - event.security_event.entity_info.entity_id
+              target: ocsf.finding_info.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.aggregation_id` to `ocsf.finding_info.uid_alt`
+              sources:
+                - event.security_event.entity_payload.aggregation_id
+              target: ocsf.finding_info.uid_alt
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.finding_info.title`
+              sources:
+                - ocsf.message
+              target: ocsf.finding_info.title
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.types` to `ocsf.finding_info.types`
+              sources:
+                - ocsf.finding_info.types
+              target: ocsf.finding_info.types
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.created_time` to `ocsf.finding_info.created_time`
+              sources:
+                - ocsf.finding_info.created_time
+              target: ocsf.finding_info.created_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.modified_time` to `ocsf.finding_info.modified_time`
+              sources:
+                - ocsf.finding_info.modified_time
+              target: ocsf.finding_info.modified_time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.risk_details` to `ocsf.risk_details`
+              sources:
+                - ocsf.risk_details
+              target: ocsf.risk_details
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.matched_security_tool` to `ocsf.finding_info.analytic.name`
+              sources:
+                - event.security_event.entity_payload.matched_security_tool
+              target: ocsf.finding_info.analytic.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.is_alert` to `ocsf.is_alert`
+              sources:
+                - ocsf.is_alert
+              target: ocsf.is_alert
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.confidence_level` to `ocsf.confidence_score`
+              sources:
+                - event.security_event.entity_payload.confidence_level
+              target: ocsf.confidence_score
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.policy_rule_id` to `ocsf.policy.uid`
+              sources:
+                - event.security_event.entity_payload.policy_rule_id
+              target: ocsf.policy.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.resources` to `ocsf.resources`
+              sources:
+                - ocsf.resources
+              target: ocsf.resources
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.evidences` to `ocsf.evidences`
+              sources:
+                - ocsf.evidences
+              target: ocsf.evidences
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Detection Finding
+            classUid: 2004
+            extensions: []
+            profiles:
+              - security_control
+    - type: pipeline
+      name: OCSF sub pipeline for class Detection Finding [2004] (Anomaly)
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@event.security_event.entity_payload.category:anomaly'
+      processors:
+        - type: string-builder-processor
+          name: Add alert flag
+          enabled: true
+          template: 'true'
+          target: ocsf.is_alert
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse `ocsf.is_alert` to boolean
+          enabled: true
+          source: ocsf.is_alert
+          samples:
+            - 'true'
+          grok:
+            supportRules: ''
+            matchRules: |
+              to_bool %{boolean("true","false"):ocsf.is_alert}
+        - type: array-processor
+          name: Append `event.security_event.entity_payload.event_metadata.metadata_json.anomaly_type` to `ocsf.finding_info.types`
+          enabled: true
+          operation:
+            source: event.security_event.entity_payload.event_metadata.metadata_json.anomaly_type
+            target: ocsf.finding_info.types
+            preserveSource: true
+            type: append
+        - type: grok-parser
+          name: Parse `event.security_event.entity_info.entity_created` to `ocsf.finding_info.created_time`
+          enabled: true
+          source: event.security_event.entity_info.entity_created
+          samples:
+            - '2025-03-31T05:28:24.323007+00:00'
+            - '2025-03-31T06:44:21+00:00'
+          grok:
+            supportRules: ''
+            matchRules: |
+              frac6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.created_time}
+              frac0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.created_time}
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.entity_id` to `ocsf.tmp_related_event.uid`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.entity_id
+          sourceType: attribute
+          target: ocsf.tmp_related_event.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.entity_type` to `ocsf.tmp_related_event.type`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.entity_type
+          sourceType: attribute
+          target: ocsf.tmp_related_event.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: grok-parser
+          name: Parse `event.security_event.saas_info.saas_creation_time` to `ocsf.tmp_related_event.created_time`
+          enabled: true
+          source: event.security_event.saas_info.saas_creation_time
+          samples:
+            - '2026-11-10T15:51:18.172922Z'
+          grok:
+            supportRules: ''
+            matchRules: |
+              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.tmp_related_event.created_time}
+              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.tmp_related_event.created_time}
+              naive6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS","UTC"):ocsf.tmp_related_event.created_time}
+              naive0 %{date("yyyy-MM-dd'T'HH:mm:ss","UTC"):ocsf.tmp_related_event.created_time}
+        - type: array-processor
+          name: Move related event into related_events array
+          enabled: true
+          operation:
+            source: ocsf.tmp_related_event
+            target: ocsf.finding_info.related_events
+            preserveSource: false
+            type: append
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.account_id.0` to `ocsf.tmp_evidence_actor.actor.user.uid`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.account_id.0
+          sourceType: attribute
+          target: ocsf.tmp_evidence_actor.actor.user.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: grok-parser
+          name: Parse `ocsf.message` to the account and login IPs
+          enabled: true
+          source: ocsf.message
+          samples:
+            - 'user3@org2.example.com performed geo-suspicious events: logged in from Germany (198.51.100.16) and after 12 minutes logged in from Israel (2001:db8::2)'
+            - 'Unusual geo activity for skyler.someone@org24.example.com: logged in for the first time from Canada'
+            - user1@example.com was detected sending phishing emails strongly indicating their account is compromised. First email was New File Shared with You
+            - 'A suspicious login failure for user1@example.com, attempting to login from Germany, failing at the MFA stage'
+            - Detected suspicious login for user user1@example.com from 198.51.100.7 (Canada) - matched a suspicious-activity pattern. First-time login from an often-abused cloud/VPS provider by an established user.
+            - Detected suspicious New-InboxRule for user user1@example.com from 198.51.100.7 (Canada) - matched a suspicious-activity pattern. Inbox rule moves targeted emails to archive
+            - user1@example.com has sent an unusual number of email messages or a few emails to an unusually large number of recipients - a 328 recipients within a few minutes.
+            - 'Account compromise detected in series of activities: login, login, UserLoginFailed for user user1@example.com Last activity from 198.51.100.7 (United States)'
+            - user1@example.com logged in from an unusual country (Nigeria, 198.51.100.7)
+          grok:
+            supportRules: |
+              _email %{regex("[^@\\s]+@[^@\\s]+\\.[^@\\s:]+")}
+              _country %{regex("[A-Z][^\\(\\)]*[^\\(\\) ]")}
+              _gap %{regex("[0-9]+ [a-z]+")}
+            matchRules: |
+              superman_pair %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} performed geo-suspicious events: logged in from %{_country} \(%{ip:ocsf.tmp_evidence_login_1.src_endpoint.ip}\) and after %{_gap} logged in from %{_country} \(%{ip:ocsf.tmp_evidence_login_2.src_endpoint.ip}\)
+              superman_user %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} performed %{data}
+              unusual_geo Unusual geo activity for %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr}: %{data}
+              compromised_sender %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} was detected sending phishing emails%{data}
+              mfa_failure A suspicious login failure for %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr}, attempting to login from %{data}
+              suspicious_activity Detected suspicious %{data} for user %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} from %{ip:ocsf.tmp_evidence_login_1.src_endpoint.ip} \(%{data}
+              mass_mailing %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} has sent an unusual number of email messages%{data}
+              compromise_series Account compromise detected in series of activities: %{data} for user %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} Last activity from %{ip:ocsf.tmp_evidence_login_1.src_endpoint.ip}%{data}
+              unusual_country %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} logged in from an unusual country \(%{data}, %{ip:ocsf.tmp_evidence_login_1.src_endpoint.ip}\)
+        - type: attribute-remapper
+          name: Map `ocsf.tmp_evidence_actor.actor.user.email_addr` to `ocsf.tmp_evidence_actor.actor.user.name`
+          enabled: true
+          sources:
+            - ocsf.tmp_evidence_actor.actor.user.email_addr
+          sourceType: attribute
+          target: ocsf.tmp_evidence_actor.actor.user.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Move account evidence into evidences array
+          enabled: true
+          operation:
+            source: ocsf.tmp_evidence_actor
+            target: ocsf.evidences
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move login 1 evidence into evidences array
+          enabled: true
+          operation:
+            source: ocsf.tmp_evidence_login_1
+            target: ocsf.evidences
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Move login 2 evidence into evidences array
+          enabled: true
+          operation:
+            source: ocsf.tmp_evidence_login_2
+            target: ocsf.evidences
+            preserveSource: false
+            type: append
+        - type: schema-processor
+          name: Apply OCSF schema for 2004
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.entity_id` to `ocsf.metadata.uid`
+              sources:
+                - event.security_event.entity_info.entity_id
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.time` to `ocsf.metadata.original_time`
+              sources:
+                - event.security_event.time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.customer_domain` to `ocsf.metadata.tenant_uid`
+              sources:
+                - event.security_event.entity_info.customer_domain
+              target: ocsf.metadata.tenant_uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: '@event.security_event.entity_payload.category:*'
+                  name: Create
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: -@event.security_event.entity_payload.severity:*
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:1'
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:2'
+                  name: Low
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:3'
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:4'
+                  name: High
+                  id: 4
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:5'
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: '99'
+                sources:
+                  ocsf.severity:
+                    - event.security_event.entity_payload.severity
+            - type: schema-category-mapper
+              name: ocsf.confidence_id
+              categories:
+                - filter:
+                    query: -@event.security_event.entity_payload.confidence_level:* OR @event.security_event.entity_payload.confidence_level:0
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:(1 OR 2)'
+                  name: Low
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:3'
+                  name: Medium
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:(4 OR 5)'
+                  name: High
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.confidence
+                id: ocsf.confidence_id
+              fallback:
+                values:
+                  ocsf.confidence: Other
+                  ocsf.confidence_id: '99'
+                sources:
+                  ocsf.confidence:
+                    - event.security_event.entity_payload.confidence_level
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: -@event.security_event.entity_payload.current_state:*
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(new OR New OR detected OR Detected)'
+                  name: New
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(pending OR Pending)'
+                  name: In Progress
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(exception OR Exception OR dismissed OR Dismissed)'
+                  name: Suppressed
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(remediated OR Remediated)'
+                  name: Resolved
+                  id: 4
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: '99'
+                sources:
+                  ocsf.status:
+                    - event.security_event.entity_payload.current_state
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:block_user OR (@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:auto_restore)'
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:(send_email_to* OR phishing_found_event) OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
+                  name: Observed
+                  id: 3
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:(move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
+                  name: Modified
+                  id: 4
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.action
+                id: ocsf.action_id
+            - type: schema-category-mapper
+              name: ocsf.disposition_id
+              categories:
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore)'
+                  name: Quarantined
+                  id: 3
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:move_to_spam -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
+                  name: Custom Action
+                  id: 7
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Restored
+                  id: 9
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:inline_attachment_change -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam)'
+                  name: Corrected
+                  id: 11
+                - filter:
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:phishing_found_event OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to*)'
+                  name: Detected
+                  id: 15
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change)'
+                  name: Tagged
+                  id: 18
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:send_email_to* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
+                  name: Alert
+                  id: 19
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:block_user'
+                  name: Access Revoked
+                  id: 24
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.disposition
+                id: ocsf.disposition_id
+            - type: schema-category-mapper
+              name: ocsf.finding_info.analytic.type_id
+              categories:
+                - filter:
+                    query: '@event.security_event.entity_payload.matched_security_tool:*'
+                  name: Behavioral
+                  id: 2
+              targets:
+                name: ocsf.finding_info.analytic.type
+                id: ocsf.finding_info.analytic.type_id
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.entity_id` to `ocsf.finding_info.uid`
+              sources:
+                - event.security_event.entity_info.entity_id
+              target: ocsf.finding_info.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.aggregation_id` to `ocsf.finding_info.uid_alt`
+              sources:
+                - event.security_event.entity_payload.aggregation_id
+              target: ocsf.finding_info.uid_alt
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.finding_info.title`
+              sources:
+                - ocsf.message
+              target: ocsf.finding_info.title
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.types` to `ocsf.finding_info.types`
+              sources:
+                - ocsf.finding_info.types
+              target: ocsf.finding_info.types
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.created_time` to `ocsf.finding_info.created_time`
+              sources:
+                - ocsf.finding_info.created_time
+              target: ocsf.finding_info.created_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.matched_security_tool` to `ocsf.finding_info.analytic.name`
+              sources:
+                - event.security_event.entity_payload.matched_security_tool
+              target: ocsf.finding_info.analytic.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.is_alert` to `ocsf.is_alert`
+              sources:
+                - ocsf.is_alert
+              target: ocsf.is_alert
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.confidence_level` to `ocsf.confidence_score`
+              sources:
+                - event.security_event.entity_payload.confidence_level
+              target: ocsf.confidence_score
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.related_events` to `ocsf.finding_info.related_events`
+              sources:
+                - ocsf.finding_info.related_events
+              target: ocsf.finding_info.related_events
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.evidences` to `ocsf.evidences`
+              sources:
+                - ocsf.evidences
+              target: ocsf.evidences
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Detection Finding
+            classUid: 2004
+            extensions: []
+            profiles:
+              - security_control
+    - type: pipeline
+      name: OCSF sub pipeline for class Data Security Finding [2006]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@event.security_event.entity_payload.category:dlp'
+      processors:
+        - type: string-builder-processor
+          name: Add alert flag
+          enabled: true
+          template: 'true'
+          target: ocsf.is_alert
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse `ocsf.is_alert` to boolean
+          enabled: true
+          source: ocsf.is_alert
+          samples:
+            - 'true'
+          grok:
+            supportRules: ''
+            matchRules: |
+              to_bool %{boolean("true","false"):ocsf.is_alert}
+        - type: array-processor
+          name: Append `event.security_event.entity_payload.category` to `ocsf.finding_info.types`
+          enabled: true
+          operation:
+            source: event.security_event.entity_payload.category
+            target: ocsf.finding_info.types
+            preserveSource: true
+            type: append
+        - type: grok-parser
+          name: Parse `event.security_event.entity_info.entity_created` to `ocsf.finding_info.created_time`
+          enabled: true
+          source: event.security_event.entity_info.entity_created
+          samples:
+            - '2025-03-31T05:28:24.323007+00:00'
+            - '2025-03-31T06:44:21+00:00'
+          grok:
+            supportRules: ''
+            matchRules: |
+              frac6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.created_time}
+              frac0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.created_time}
+        - type: arithmetic-processor
+          name: Compute `ocsf.finding_info.modified_time` in milliseconds from `event.security_event.entity_payload.latest_change_time`
+          enabled: true
+          expression: event.security_event.entity_payload.latest_change_time * 1000
+          target: ocsf.finding_info.modified_time
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add DLP rule names
+          enabled: true
+          template: '%{event.entity.entity_security_result.dlp.payload.matches_dlp_rules}'
+          target: ocsf.data_security.classifier_details.name
+          replaceMissing: false
+        - type: category-processor
+          name: ocsf.data_security.classifier_details.type
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.data_security.classifier_details.name:*'
+              name: DLP Rule
+          target: ocsf.data_security.classifier_details.type
+        - type: grok-parser
+          name: Parse `event.security_event.saas_info.saas_actor_payload.email` to `ocsf.actor.user.email_addr`
+          enabled: true
+          source: event.security_event.saas_info.saas_actor_payload.email
+          samples:
+            - wren.magna@org3.example.com
+          grok:
+            supportRules: ''
+            matchRules: |
+              email %{regex("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"):ocsf.actor.user.email_addr}
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.saas_actor_payload.company` to `ocsf.actor.user.org.name`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.saas_actor_payload.company
+          sourceType: attribute
+          target: ocsf.actor.user.org.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: string-builder-processor
+          name: Add organization and department
+          enabled: true
+          template: '%{event.security_event.saas_info.saas_actor_payload.company}|%{event.security_event.saas_info.saas_actor_payload.department}'
+          target: ocsf.tmp_org
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse `ocsf.tmp_org` to the user organization
+          enabled: true
+          source: ocsf.tmp_org
+          samples:
+            - Example Foods Co.|Team A
+          grok:
+            supportRules: ''
+            matchRules: |
+              org %{regex("[^|]+"):ocsf.actor.user.org.name}\|%{regex(".+"):ocsf.actor.user.org.ou_name}
+        - type: exclude-attribute
+          name: Remove intermediate `ocsf.tmp_org`
+          enabled: true
+          attributeToExclude: ocsf.tmp_org
+        - type: grok-parser
+          name: Parse `event.entity.entity_payload.file_hash` to `ocsf.tmp_file_hash.value`
+          enabled: true
+          source: event.entity.entity_payload.file_hash
+          samples:
+            - 5b3e7a9c2d4f6a1e8f0d5b3e7a9c2d4f
+          grok:
+            supportRules: ''
+            matchRules: |
+              md5 %{regex("[0-9a-fA-F]{32}"):ocsf.tmp_file_hash.value}
+        - type: category-processor
+          name: ocsf.tmp_file_hash.algorithm_id
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.tmp_file_hash.value:*'
+              name: '1'
+          target: ocsf.tmp_file_hash.algorithm_id
+        - type: category-processor
+          name: ocsf.tmp_file_hash.algorithm
+          enabled: true
+          categories:
+            - filter:
+                query: '@ocsf.tmp_file_hash.value:*'
+              name: MD5
+          target: ocsf.tmp_file_hash.algorithm
+        - type: attribute-remapper
+          name: Map `ocsf.tmp_file_hash.algorithm_id` to `ocsf.tmp_file_hash.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.tmp_file_hash.algorithm_id
+          sourceType: attribute
+          target: ocsf.tmp_file_hash.algorithm_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Move attributes into file hashes array
+          enabled: true
+          operation:
+            source: ocsf.tmp_file_hash
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: grok-parser
+          name: Parse `event.entity.entity_payload.file_name` to `ocsf.file.ext`
+          enabled: true
+          source: event.entity.entity_payload.file_name
+          samples:
+            - Card_dump_details_2025_test_file_2.csv
+          grok:
+            supportRules: ''
+            matchRules: |
+              ext %{regex("[^\\n]*?\\.(?=[A-Za-z0-9]{1,10}$)"):}%{regex("[A-Za-z0-9]{1,10}"):ocsf.file.ext}
+        - type: string-builder-processor
+          name: Add file path
+          enabled: true
+          template: '%{event.entity.entity_payload.parent_path}/%{event.entity.entity_payload.file_name}'
+          target: ocsf.file.path
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse `event.entity.entity_payload.modify_time` to `ocsf.file.modified_time`
+          enabled: true
+          source: event.entity.entity_payload.modify_time
+          samples:
+            - '2026-11-05T02:23:19Z'
+            - '2025-03-25T10:45:59'
+          grok:
+            supportRules: ''
+            matchRules: |
+              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.file.modified_time}
+              naive0 %{date("yyyy-MM-dd'T'HH:mm:ss","UTC"):ocsf.file.modified_time}
+        - type: array-map-processor
+          name: Map `event.entity.entity_payload.recipients_user` to `ocsf.resources`
+          enabled: true
+          source: event.entity.entity_payload.recipients_user
+          target: ocsf.resources
+          preserveSource: true
+          processors:
+            - type: attribute-remapper
+              name: Map `$sourceElem.entity_id` to `$targetElem.uid`
+              sources:
+                - $sourceElem.entity_id
+              target: $targetElem.uid
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.email` to `$targetElem.name`
+              sources:
+                - $sourceElem.email
+              target: $targetElem.name
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.entity_type` to `$targetElem.type`
+              sources:
+                - $sourceElem.entity_type
+              target: $targetElem.type
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.full_name` to `$targetElem.owner.name`
+              sources:
+                - $sourceElem.full_name
+              target: $targetElem.owner.name
+              preserveSource: true
+              overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.entity_id` to `ocsf.resource.uid`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.entity_id
+          sourceType: attribute
+          target: ocsf.resource.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.security_event.saas_info.entity_type` to `ocsf.resource.type`
+          enabled: true
+          sources:
+            - event.security_event.saas_info.entity_type
+          sourceType: attribute
+          target: ocsf.resource.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `event.entity.entity_payload.file_name`, `event.entity.entity_payload.subject` to `ocsf.resource.name`
+          enabled: true
+          sources:
+            - event.entity.entity_payload.file_name
+            - event.entity.entity_payload.subject
+          sourceType: attribute
+          target: ocsf.resource.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Move scanned entity into resources array
+          enabled: true
+          operation:
+            source: ocsf.resource
+            target: ocsf.resources
+            preserveSource: false
+            type: append
+        - type: grok-parser
+          name: Parse `event.entity.entity_payload.sender_client_ip` to `ocsf.src_endpoint.ip`
+          enabled: true
+          source: event.entity.entity_payload.sender_client_ip
+          samples:
+            - 203.0.113.9
+            - 0.0.0.0
+          grok:
+            supportRules: ''
+            matchRules: |
+              sentinel 0\.0\.0\.0
+              valid %{ip:ocsf.src_endpoint.ip}
+        - type: schema-processor
+          name: Apply OCSF schema for 2006
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.entity_id` to `ocsf.metadata.uid`
+              sources:
+                - event.security_event.entity_info.entity_id
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.time` to `ocsf.metadata.original_time`
+              sources:
+                - event.security_event.time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.customer_domain` to `ocsf.metadata.tenant_uid`
+              sources:
+                - event.security_event.entity_info.customer_domain
+              target: ocsf.metadata.tenant_uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: '@event.security_event.entity_payload.category:*'
+                  name: Create
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: -@event.security_event.entity_payload.severity:*
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:1'
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:2'
+                  name: Low
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:3'
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:4'
+                  name: High
+                  id: 4
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:5'
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: '99'
+                sources:
+                  ocsf.severity:
+                    - event.security_event.entity_payload.severity
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: -@event.security_event.entity_payload.current_state:*
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(new OR New OR detected OR Detected)'
+                  name: New
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(pending OR Pending)'
+                  name: In Progress
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(exception OR Exception OR dismissed OR Dismissed)'
+                  name: Suppressed
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:(remediated OR Remediated)'
+                  name: Resolved
+                  id: 4
+                - filter:
+                    query: '@event.security_event.entity_payload.current_state:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: '99'
+                sources:
+                  ocsf.status:
+                    - event.security_event.entity_payload.current_state
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:block_user OR (@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:auto_restore)'
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:(send_email_to* OR phishing_found_event) OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
+                  name: Observed
+                  id: 3
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:(move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
+                  name: Modified
+                  id: 4
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.action
+                id: ocsf.action_id
+            - type: schema-category-mapper
+              name: ocsf.disposition_id
+              categories:
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore)'
+                  name: Quarantined
+                  id: 3
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:move_to_spam -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
+                  name: Custom Action
+                  id: 7
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Restored
+                  id: 9
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:inline_attachment_change -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam)'
+                  name: Corrected
+                  id: 11
+                - filter:
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:phishing_found_event OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to*)'
+                  name: Detected
+                  id: 15
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change)'
+                  name: Tagged
+                  id: 18
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:send_email_to* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
+                  name: Alert
+                  id: 19
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:block_user'
+                  name: Access Revoked
+                  id: 24
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.disposition
+                id: ocsf.disposition_id
+            - type: schema-category-mapper
+              name: ocsf.confidence_id
+              categories:
+                - filter:
+                    query: -@event.security_event.entity_payload.confidence_level:* OR @event.security_event.entity_payload.confidence_level:0
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:(1 OR 2)'
+                  name: Low
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:3'
+                  name: Medium
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:(4 OR 5)'
+                  name: High
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.confidence_level:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.confidence
+                id: ocsf.confidence_id
+              fallback:
+                values:
+                  ocsf.confidence: Other
+                  ocsf.confidence_id: '99'
+                sources:
+                  ocsf.confidence:
+                    - event.security_event.entity_payload.confidence_level
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.entity_id` to `ocsf.finding_info.uid`
+              sources:
+                - event.security_event.entity_info.entity_id
+              target: ocsf.finding_info.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.aggregation_id` to `ocsf.finding_info.uid_alt`
+              sources:
+                - event.security_event.entity_payload.aggregation_id
+              target: ocsf.finding_info.uid_alt
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.finding_info.title`
+              sources:
+                - ocsf.message
+              target: ocsf.finding_info.title
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.types` to `ocsf.finding_info.types`
+              sources:
+                - ocsf.finding_info.types
+              target: ocsf.finding_info.types
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.created_time` to `ocsf.finding_info.created_time`
+              sources:
+                - ocsf.finding_info.created_time
+              target: ocsf.finding_info.created_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.modified_time` to `ocsf.finding_info.modified_time`
+              sources:
+                - ocsf.finding_info.modified_time
+              target: ocsf.finding_info.modified_time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.matched_security_tool` to `ocsf.finding_info.analytic.name`
+              sources:
+                - event.security_event.entity_payload.matched_security_tool
+              target: ocsf.finding_info.analytic.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.is_alert` to `ocsf.is_alert`
+              sources:
+                - ocsf.is_alert
+              target: ocsf.is_alert
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.confidence_level` to `ocsf.confidence_score`
+              sources:
+                - event.security_event.entity_payload.confidence_level
+              target: ocsf.confidence_score
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.finding_info.analytic.type_id
+              categories:
+                - filter:
+                    query: '@event.security_event.entity_payload.matched_security_tool:*'
+                  name: Rule
+                  id: 1
+              targets:
+                name: ocsf.finding_info.analytic.type
+                id: ocsf.finding_info.analytic.type_id
+            - type: schema-category-mapper
+              name: ocsf.data_security.detection_system_id
+              categories:
+                - filter:
+                    query: '@event.security_event.saas_info.entity_type:*_email'
+                  name: Secure Email Gateway
+                  id: 6
+                - filter:
+                    query: '@event.security_event.entity_payload.category:*'
+                  name: Cloud Access Security Broker
+                  id: 8
+              targets:
+                name: ocsf.data_security.detection_system
+                id: ocsf.data_security.detection_system_id
+            - type: schema-category-mapper
+              name: ocsf.data_security.data_lifecycle_state_id
+              categories:
+                - filter:
+                    query: -@event.security_event.saas_info.entity_type:(*_file OR *_email)
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.saas_info.entity_type:*_file'
+                  name: Data at-Rest
+                  id: 1
+                - filter:
+                    query: '@event.security_event.saas_info.entity_type:*_email'
+                  name: Data in-Transit
+                  id: 2
+              targets:
+                name: ocsf.data_security.data_lifecycle_state
+                id: ocsf.data_security.data_lifecycle_state_id
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.policy_rule_id` to `ocsf.data_security.policy.uid`
+              sources:
+                - event.security_event.entity_payload.policy_rule_id
+              target: ocsf.data_security.policy.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.data_security.classifier_details.name` to `ocsf.data_security.classifier_details.name`
+              sources:
+                - ocsf.data_security.classifier_details.name
+              target: ocsf.data_security.classifier_details.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.data_security.classifier_details.type` to `ocsf.data_security.classifier_details.type`
+              sources:
+                - ocsf.data_security.classifier_details.type
+              target: ocsf.data_security.classifier_details.type
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.data_security.category_id
+              categories:
+                - filter:
+                    query: -@ocsf.data_security.classifier_details.name:*
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@ocsf.data_security.classifier_details.name:(*PII* OR *HIPAA* OR *GDPR* OR *PHI*)'
+                  name: Personal
+                  id: 1
+                - filter:
+                    query: '@ocsf.data_security.classifier_details.name:(*PCI* OR *Financial* OR *GLBA*)'
+                  name: Financial
+                  id: 3
+                - filter:
+                    query: '@ocsf.data_security.classifier_details.name:(*Access\ Control* OR *Credential*)'
+                  name: Security
+                  id: 6
+                - filter:
+                    query: '@ocsf.data_security.classifier_details.name:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.data_security.category
+                id: ocsf.data_security.category_id
+              fallback:
+                values:
+                  ocsf.data_security.category: Other
+                  ocsf.data_security.category_id: '99'
+                sources:
+                  ocsf.data_security.category:
+                    - ocsf.data_security.classifier_details.name
+            - type: schema-remapper
+              name: Map `event.security_event.entity_payload.event_metadata.dlp_detections.0` to `ocsf.data_security.detection_pattern`
+              sources:
+                - event.security_event.entity_payload.event_metadata.dlp_detections.0
+              target: ocsf.data_security.detection_pattern
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.entity.entity_security_result.combined_dlp_hit_count` to `ocsf.data_security.total`
+              sources:
+                - event.entity.entity_security_result.combined_dlp_hit_count
+              target: ocsf.data_security.total
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.entity.entity_payload.size` to `ocsf.data_security.size`
+              sources:
+                - event.entity.entity_payload.size
+              target: ocsf.data_security.size
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.saas_info.saas_actor_payload.full_name` to `ocsf.actor.user.name`
+              sources:
+                - event.security_event.saas_info.saas_actor_payload.full_name
+              target: ocsf.actor.user.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.saas_info.saas_actor_payload.entity_id` to `ocsf.actor.user.uid`
+              sources:
+                - event.security_event.saas_info.saas_actor_payload.entity_id
+              target: ocsf.actor.user.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.email_addr` to `ocsf.actor.user.email_addr`
+              sources:
+                - ocsf.actor.user.email_addr
+              target: ocsf.actor.user.email_addr
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.actor.user.org` to `ocsf.actor.user.org`
+              sources:
+                - ocsf.actor.user.org
+              target: ocsf.actor.user.org
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.saas_info.saas_actor_payload.title` to `ocsf.actor.user.ldap_person.job_title`
+              sources:
+                - event.security_event.saas_info.saas_actor_payload.title
+              target: ocsf.actor.user.ldap_person.job_title
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: '@event.security_event.saas_info.saas_actor_payload.entity_type:*_user'
+                  name: User
+                  id: 1
+                - filter:
+                    query: '@event.security_event.saas_info.saas_actor_payload.entity_type:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: '99'
+                sources:
+                  ocsf.actor.user.type:
+                    - event.security_event.saas_info.saas_actor_payload.entity_type
+            - type: schema-remapper
+              name: Map `event.entity.entity_payload.file_name` to `ocsf.file.name`
+              sources:
+                - event.entity.entity_payload.file_name
+              target: ocsf.file.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.file.type_id
+              categories:
+                - filter:
+                    query: '@event.entity.entity_payload.file_name:*'
+                  name: Regular File
+                  id: 1
+              targets:
+                name: ocsf.file.type
+                id: ocsf.file.type_id
+            - type: schema-remapper
+              name: Map `ocsf.file.hashes` to `ocsf.file.hashes`
+              sources:
+                - ocsf.file.hashes
+              target: ocsf.file.hashes
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.entity.saas_info.saas_entity_id` to `ocsf.file.uid`
+              sources:
+                - event.entity.saas_info.saas_entity_id
+              target: ocsf.file.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.file.ext` to `ocsf.file.ext`
+              sources:
+                - ocsf.file.ext
+              target: ocsf.file.ext
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.entity.entity_payload.parent_path` to `ocsf.file.parent_folder`
+              sources:
+                - event.entity.entity_payload.parent_path
+              target: ocsf.file.parent_folder
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.file.path` to `ocsf.file.path`
+              sources:
+                - ocsf.file.path
+              target: ocsf.file.path
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.entity.entity_payload.download_url` to `ocsf.file.url.url_string`
+              sources:
+                - event.entity.entity_payload.download_url
+              target: ocsf.file.url.url_string
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.entity.entity_payload.mime_type` to `ocsf.file.mime_type`
+              sources:
+                - event.entity.entity_payload.mime_type
+              target: ocsf.file.mime_type
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.file.modified_time` to `ocsf.file.modified_time`
+              sources:
+                - ocsf.file.modified_time
+              target: ocsf.file.modified_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.resources` to `ocsf.resources`
+              sources:
+                - ocsf.resources
+              target: ocsf.resources
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `download_url_details.host` to `ocsf.dst_endpoint.hostname`
+              sources:
+                - download_url_details.host
+              target: ocsf.dst_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.src_endpoint.ip` to `ocsf.src_endpoint.ip`
+              sources:
+                - ocsf.src_endpoint.ip
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Data Security Finding
+            classUid: 2006
+            extensions: []
+            profiles:
+              - security_control
+    - type: pipeline
+      name: OCSF sub pipeline for class Base Event [0]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: '@event.security_event.entity_payload.category:* -@ocsf.class_uid:*'
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 0
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.entity_id` to `ocsf.metadata.uid`
+              sources:
+                - event.security_event.entity_info.entity_id
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.customer_domain` to `ocsf.metadata.tenant_uid`
+              sources:
+                - event.security_event.entity_info.customer_domain
+              target: ocsf.metadata.tenant_uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.time` to `ocsf.metadata.original_time`
+              sources:
+                - event.security_event.time
+              target: ocsf.metadata.original_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.message` to `ocsf.message`
+              sources:
+                - ocsf.message
+              target: ocsf.message
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: '@event.security_event.entity_payload.category:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: '99'
+                sources:
+                  ocsf.activity_name:
+                    - event.security_event.entity_payload.category
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: -@event.security_event.entity_payload.severity:*
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:1'
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:2'
+                  name: Low
+                  id: 2
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:3'
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:4'
+                  name: High
+                  id: 4
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:5'
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: '@event.security_event.entity_payload.severity:*'
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: '99'
+                sources:
+                  ocsf.severity:
+                    - event.security_event.entity_payload.severity
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Base Event
+            classUid: 0
+            extensions: []
+            profiles: []

@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import mock
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.php_fpm.php_fpm import BadConfigError, PHPFPMCheck
 
 
@@ -33,93 +33,66 @@ def test_bad_ping(aggregator, dd_run_check):
     aggregator.all_metrics_asserted()
 
 
-def test_should_not_retry(check, instance):
+def test_should_not_retry(check, instance, fake_http):
     """
     backoff only works when response code is 503, otherwise the error
     should bubble up
     """
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.side_effect = FooException("Generic http error here")
-        with pytest.raises(FooException):
-            check._process_status(instance['status_url'], [], None, False)
+    fake_http.register_response('GET', instance['status_url'], FooException("Generic http error here"))
+    with pytest.raises(FooException):
+        check._process_status(instance['status_url'], [], None, False)
+    assert len(fake_http.requests) == 1
 
 
-def test_should_bail_out(check, instance):
+def test_should_bail_out(check, instance, fake_http, fake_http_response):
     """
     backoff should give up after 3 attempts
     """
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        attrs = {'raise_for_status.side_effect': FooException()}
-        r.get.side_effect = [
-            mock.MagicMock(status_code=503, **attrs),
-            mock.MagicMock(status_code=503, **attrs),
-            mock.MagicMock(status_code=503, **attrs),
-            mock.MagicMock(status_code=200),
-        ]
-        with pytest.raises(FooException):
-            check._process_status(instance['status_url'], [], None, False)
+    for _ in range(3):
+        fake_http_response(instance['status_url'], status_code=503, once=True)
+    fake_http_response(instance['status_url'], status_code=200, once=True)
+
+    with pytest.raises(HTTPClientStatusError):
+        check._process_status(instance['status_url'], [], None, False)
+    assert len(fake_http.requests) == 3
 
 
-def test_backoff_success(check, instance, aggregator, payload):
+def test_backoff_success(check, instance, aggregator, payload, fake_http_response):
     """
     Success after 2 failed attempts
     """
     instance['ping_url'] = None
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        attrs = {'json.return_value': payload}
-        r.get.side_effect = [
-            mock.MagicMock(status_code=503),
-            mock.MagicMock(status_code=503),
-            mock.MagicMock(status_code=200, **attrs),
-        ]
-        pool_name = check._process_status(instance['status_url'], [], None, False)
-        assert pool_name == 'www'
+    fake_http_response(instance['status_url'], status_code=503, once=True)
+    fake_http_response(instance['status_url'], status_code=503, once=True)
+    fake_http_response(instance['status_url'], json_data=payload, once=True)
+
+    pool_name = check._process_status(instance['status_url'], [], None, False)
+    assert pool_name == 'www'
 
 
 @pytest.mark.parametrize(
-    'test_case, extra_config, expected_http_kwargs',
+    'test_case, extra_config, expected_options',
     [
         ("old auth config", {'user': 'old_foo', 'password': 'new_bar'}, {'auth': ('old_foo', 'new_bar')}),
         ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
         ("legacy ssl config True", {'disable_ssl_validation': False}, {'verify': True}),
         ("legacy ssl config False", {'disable_ssl_validation': True}, {'verify': False}),
         ("legacy ssl config unset", {}, {'verify': True}),
-        (
-            "http_host header",
-            {"http_host": "foo"},
-            {
-                'headers': {
-                    'User-Agent': 'Datadog Agent/0.0.0',
-                    'Accept': '*/*',
-                    'Accept-Encoding': 'gzip, deflate',
-                    'Host': 'foo',
-                }
-            },
-        ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check):
+def test_config(test_case, extra_config, expected_options):
+    # Configuration resolves when the client is created, so the check is built without fake_http and never run.
     instance = {'ping_url': 'http://foo:9001/ping'}
     instance.update(extra_config)
     check = PHPFPMCheck('php_fpm', {}, instances=[instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
+    for option, value in expected_options.items():
+        assert check.http.options[option] == value
 
-        dd_run_check(check)
 
-        http_kwargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_kwargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://foo:9001/ping', **http_kwargs)
+@pytest.mark.parametrize('headers', [{}, {'host': 'bar'}], ids=['no user header', 'user host header'])
+def test_http_host_sets_host_header(headers):
+    instance = {'ping_url': 'http://foo:9001/ping', 'http_host': 'foo', 'headers': headers}
+    check = PHPFPMCheck('php_fpm', {}, instances=[instance])
+
+    assert check.http.get_header('Host') == 'foo'

@@ -5,6 +5,7 @@
 import pytest
 
 from datadog_checks.calico import CalicoCheck
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
@@ -12,8 +13,10 @@ from .utils import get_fixture_path
 
 
 @pytest.mark.unit
-def test_check(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('calico.txt'))
+def test_check(aggregator, dd_run_check, fake_http_response):
+    fake_http_response(
+        common.MOCK_CALICO_INSTANCE['openmetrics_endpoint'], read_file_binary(get_fixture_path('calico.txt'))
+    )
     check = CalicoCheck('calico', {}, [common.MOCK_CALICO_INSTANCE])
     dd_run_check(check)
 

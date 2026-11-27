@@ -54,6 +54,7 @@ class HttpCodeClassScraper(OpenMetricsScraper):
 class KrakendCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = "krakend.api"
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     METRICS_MAP = (

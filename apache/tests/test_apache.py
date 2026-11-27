@@ -115,10 +115,14 @@ def test_metadata_in_content(check, datadog_agent):
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
-@pytest.mark.usefixtures("dd_environment")
-def test_metadata_in_header(check, datadog_agent, mock_hide_server_version):
+def test_metadata_in_header(check, datadog_agent, fake_http_response):
     """For older Apache versions, the version is not in the output. This test asserts that
     the check can fallback to the headers."""
+    fake_http_response(
+        AUTO_CONFIG['apache_status_url'],
+        'Total Accesses: 10\nTotal kBytes: 5\nUptime: 100\nBusyWorkers: 1\nIdleWorkers: 4\nScoreboard: _W___\n',
+        headers={'Server': 'Apache/{} (Unix)'.format(APACHE_VERSION)},
+    )
     check = check(AUTO_CONFIG)
     check.check_id = 'test:123'
     major, minor, patch = APACHE_VERSION.split('.')

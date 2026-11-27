@@ -374,8 +374,8 @@ def test_status_emits_matrix_split_by_platform(fake_repo: Path) -> None:
         {'platform': 'linux',   'arch': 'x86_64',  'runner_os': 'ubuntu-22.04'},
         {'platform': 'linux',   'arch': 'aarch64', 'runner_os': 'ubuntu-22.04-arm'},
         {'platform': 'windows', 'arch': 'x86_64',  'runner_os': 'windows-2022'},
-        {'platform': 'macos',   'arch': 'x86_64',  'runner_os': 'macos-14-large'},
-        {'platform': 'macos',   'arch': 'aarch64', 'runner_os': 'macos-14'},
+        {'platform': 'macos',   'arch': 'x86_64',  'runner_os': 'macos-15-large'},
+        {'platform': 'macos',   'arch': 'aarch64', 'runner_os': 'macos-15'},
     ]), encoding='utf-8')
     out = inputs_hash.status(targets_file)
     container = json.loads(out['matrix_container'])

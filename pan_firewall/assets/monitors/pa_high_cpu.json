@@ -1,0 +1,38 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nManagement-plane CPU on firewall **{{device_ip.name}}** has averaged {{value}}% over the last 15 minutes.\n{{/is_alert}}\n\n{{#is_warning}}\n## What's happening?\n\nManagement-plane CPU on firewall **{{device_ip.name}}** has averaged {{value}}% over the last 15 minutes. This monitor alerts above 95%.\n{{/is_warning}}\n\n{{#is_recovery}}\n## Recovered\n\nManagement-plane CPU on firewall {{device_ip.name}} is back below 75%.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nThe web interface, the API, commits, and logging may slow down or fail. Traffic forwarding runs on the dataplane and is not directly affected.\n\n---\n\n## Why?\n\nPossible causes:\n* **Long-running commits or content updates.**\n* **Large log queries or reports.**\n* **Many concurrent admin or API sessions.**\n* **An unusually high logging rate.**\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Run `show system resources` on the firewall to find the busiest management processes.\n2. Run `show jobs all` to look for long-running commits or reports.\n3. Reduce report schedules, log queries, or API polling if they coincide with the spikes.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Metrics Explorer](/metric/explorer?exp_metric=pan_firewall.mgmt.cpu.used&exp_scope=device_ip:{{device_ip.name}}&exp_agg=avg&exp_type=line)\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Management-plane CPU utilization is high on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 95,
+        "critical_recovery": 75,
+        "warning": 80,
+        "warning_recovery": 75
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_15m):avg:pan_firewall.mgmt.cpu.used{*} by {device_namespace,device_ip} > 95",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the management-plane CPU of each firewall. The management plane runs the web interface, the XML API, commits, logging, and reporting; when it stays saturated, admin access, commits, and log processing slow down or fail. It does not forward traffic.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Management-plane CPU utilization is high",
+  "version": 2
+}

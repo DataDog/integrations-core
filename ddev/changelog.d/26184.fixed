@@ -1,0 +1,1 @@
+Don't fail a Dispatcher batch when its tests passed and only teardown failed.

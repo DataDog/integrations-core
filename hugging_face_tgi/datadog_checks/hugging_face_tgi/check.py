@@ -7,6 +7,7 @@ from datadog_checks.hugging_face_tgi.metrics import METRIC_MAP, RENAME_LABELS_MA
 
 class HuggingFaceTgiCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'hugging_face_tgi'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 

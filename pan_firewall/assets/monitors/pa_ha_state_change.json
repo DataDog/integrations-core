@@ -1,0 +1,36 @@
+{
+  "created_at": "2026-11-18",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nFirewall **{{@device_hostname.name}}** logged an HA state change in the last 5 minutes.\n{{/is_alert}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nIf this is a failover, traffic moved to the peer firewall. Sessions that were not synchronized may have been dropped.\n\n---\n\n## Why?\n\nPossible causes:\n* **A link or path monitoring failure** on the previously active firewall.\n* **A device failure or reboot.**\n* **A manual failover or suspend.**\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Check the log sample for the old and new HA state.\n2. Run `show high-availability all` on both peers to confirm their current state.\n3. If this is a failover, find out why the previously active peer gave up the role, and whether it is healthy.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Logs](/logs?query=source:pan.firewall+@type:SYSTEM+@subtype:ha+@device_hostname:{{@device_hostname.name}})\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] HA state changed on {{@device_hostname.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "timeout_h": 0,
+      "enable_logs_sample": true,
+      "on_missing_data": "default",
+      "new_group_delay": 0,
+      "groupby_simple_monitor": false,
+      "thresholds": {
+        "critical": 0
+      }
+    },
+    "priority": null,
+    "query": "logs(\"source:pan.firewall @type:SYSTEM @subtype:ha @evt.name:state-change\").index(\"*\").rollup(\"count\").by(\"@device_hostname\").last(\"5m\") > 0",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "log alert"
+  },
+  "description": "Alerts when a firewall logs an HA state change (system log, subtype `ha`, event `state-change`), such as a failover. Both peers log it, so a failover alerts once per firewall. A reboot or a suspended unit also alerts. Requires Palo Alto Networks Firewall log collection.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "HA state changed",
+  "version": 2
+}

@@ -10,9 +10,11 @@ effect. Rate-limit retries are a different layer, covered in `test_rate_limiting
 from __future__ import annotations
 
 import logging
+from json import JSONDecodeError
 
 import httpx
 import pytest
+from pydantic import ValidationError
 
 from ddev.utils.github_async import AsyncGitHubClient
 from ddev.utils.github_async.observer import RequestAttempt, RequestFailure, RequestFault
@@ -126,6 +128,71 @@ async def test_a_mutation_does_not_replay_a_request_that_may_have_landed(error: 
 
     with pytest.raises(type(error)):
         await client.create_workflow_dispatch("o", "r", "wf.yml", "main")
+
+    assert len(calls) == 1
+
+
+# ---------------------------------------------------------------------------
+# Malformed response bodies
+# ---------------------------------------------------------------------------
+
+
+malformed_bodies = pytest.mark.parametrize(
+    ("malformed", "error_type"),
+    [
+        pytest.param(httpx.Response(200, content=b'{"incomplete":'), JSONDecodeError, id="decode"),
+        pytest.param(json_response("not an object"), ValidationError, id="validation"),
+    ],
+)
+
+
+@malformed_bodies
+async def test_a_malformed_body_is_retried_on_a_safe_get(
+    malformed: httpx.Response, error_type: type[Exception], caplog: pytest.LogCaptureFixture
+):
+    transport, calls = recording_transport([malformed, json_response(workflow_run_payload())])
+    logger = logging.getLogger("test-github-client")
+    client = AsyncGitHubClient(token=TOKEN, transport=transport, logger=logger)
+
+    with caplog.at_level(logging.WARNING, logger=logger.name):
+        result = await client.get_workflow_run("o", "r", 42)
+
+    assert result.data.id == 42
+    assert len(calls) == 2
+    [record] = [record for record in caplog.records if record.name == logger.name]
+    assert error_type.__name__ in record.getMessage()
+    assert record.attempt == 2
+
+
+@malformed_bodies
+async def test_a_persistently_malformed_body_raises_after_the_safe_retry_budget(
+    malformed: httpx.Response, error_type: type[Exception]
+):
+    policy = SAFE_RETRY.also_on(on_status(404)).replace(attempts=4)
+    transport, calls = recording_transport([malformed])
+    observer = RecordingObserver()
+    client = AsyncGitHubClient(token=TOKEN, transport=transport, observer=observer)
+
+    with pytest.raises(error_type):
+        await client.get_workflow_run("o", "r", 42, retry=policy)
+
+    assert len(calls) == policy.attempts
+    assert [(attempt.number, attempt.fault) for attempt in observer.attempts] == [
+        (number, RequestFault.NONE) for number in range(1, policy.attempts + 1)
+    ]
+    assert all(attempt.response is not None and attempt.response.status_code == 200 for attempt in observer.attempts)
+    assert observer.failures == []
+
+
+@malformed_bodies
+async def test_a_mutation_does_not_replay_after_a_malformed_body(
+    malformed: httpx.Response, error_type: type[Exception]
+):
+    transport, calls = recording_transport([malformed])
+    client = AsyncGitHubClient(token=TOKEN, transport=transport)
+
+    with pytest.raises(error_type):
+        await client.create_issue_comment("o", "r", 1, "body")
 
     assert len(calls) == 1
 
@@ -272,19 +339,27 @@ async def test_a_not_modified_response_is_reported_for_what_it_is() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_a_failing_page_is_retried_without_refetching_the_pages_already_read() -> None:
+@pytest.mark.parametrize(
+    "failed_page",
+    [
+        pytest.param(httpx.Response(503), id="server-error"),
+        pytest.param(httpx.Response(200, content=b'{"jobs":'), id="decode"),
+        pytest.param(json_response({"total_count": 2, "jobs": [42]}), id="validation"),
+    ],
+)
+async def test_a_failing_page_is_retried_without_refetching_the_pages_already_read(failed_page: httpx.Response):
     """Pagination is a sequence of requests, so a blip on page two must not restart page one."""
     page_one = json_response(
         {"total_count": 2, "jobs": [workflow_job(1)]},
         headers={"link": '<https://api.github.com/next>; rel="next"'},
     )
     page_two = json_response({"total_count": 2, "jobs": [workflow_job(2)]})
-    transport, calls = recording_transport([page_one, httpx.Response(503), page_two])
+    transport, calls = recording_transport([page_one, failed_page, page_two])
     client = AsyncGitHubClient(token=TOKEN, transport=transport)
 
     pages = [page async for page in client.list_workflow_jobs("o", "r", 42)]
 
-    assert len(calls) == 3
+    assert [call.url.path for call in calls] == ["/repos/o/r/actions/runs/42/jobs", "/next", "/next"]
     assert [job.id for page in pages for job in page.data.jobs] == [1, 2]
 
 

@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.0 / 2026-11-25
+
+***Changed***:
+
+* Bump minimum version of base check to 38.11.0. ([#26128](https://github.com/DataDog/integrations-core/pull/26128))
+
+***Added***:
+
+* Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. ([#26128](https://github.com/DataDog/integrations-core/pull/26128))
+* Collect the current Triton metrics: Time to first response, latency histograms, model load duration, per-model response cache, and pinned memory pool. Additionally, collect the TensorRT-LLM backend metrics, including input and output token length. ([#26174](https://github.com/DataDog/integrations-core/pull/26174))
+
+***Fixed***:
+
+* Add the `collect_histograms_as_distributions` option to the configuration example and config models. ([#25590](https://github.com/DataDog/integrations-core/pull/25590))
+
+## 3.4.2 / 2026-10-29 / Agent 7.86.0
+
+***Fixed***:
+
+* Fix server info URL construction for IPv6 `openmetrics_endpoint` values. ([#25316](https://github.com/DataDog/integrations-core/pull/25316))
+
 ## 3.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

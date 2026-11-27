@@ -11,8 +11,9 @@ from datadog_checks.kubeflow import KubeflowCheck
 from .common import METRICS_MOCK, get_fixture_path
 
 
-def test_check_kubeflow(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('kubeflow_metrics.txt'))
+def test_check_kubeflow(dd_run_check, aggregator, instance, fake_http_response):
+    with open(get_fixture_path('kubeflow_metrics.txt'), 'rb') as f:
+        fake_http_response(instance['openmetrics_endpoint'], f.read())
     check = KubeflowCheck('kubeflow', {}, [instance])
     dd_run_check(check)
 

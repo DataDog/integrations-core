@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 4.6.0 / 2026-11-25
+
+***Added***:
+
+* Add opt-in Query Activity collection for IBM Db2 Database Monitoring, with obfuscated running-query snapshots, execution identifiers, elapsed time, session context, SQL comments, and truncation indicators. ([#26078](https://github.com/DataDog/integrations-core/pull/26078))
+
+## 4.5.0 / 2026-10-29 / Agent 7.86.0
+
+***Added***:
+
+* Add Database Monitoring for IBM Db2 with query metrics and obfuscated full query text. Custom queries now run asynchronously on dedicated connections and submit metrics in the background, even when Database Monitoring is disabled. ([#25329](https://github.com/DataDog/integrations-core/pull/25329))
+
 ## 4.4.0 / 2026-08-05 / Agent 7.83.0
 
 ***Security***:

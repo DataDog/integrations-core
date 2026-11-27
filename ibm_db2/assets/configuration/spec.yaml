@@ -135,6 +135,27 @@ files:
               exclusiveMinimum: 0
               example: 10
 
+      - name: query_activity
+        description: Configure opt-in DBM in-flight query activity snapshots.
+        fleet_configurable: true
+        options:
+          - name: enabled
+            description: |
+              Enable query activity snapshots. Disabled by default. Requires `dbm: true`.
+            fleet_configurable: true
+            value:
+              type: boolean
+              example: false
+          - name: collection_interval
+            description: |
+              The interval between activity snapshots in seconds. Defaults to 10 and must be at least 1.
+            fleet_configurable: true
+            value:
+              type: number
+              minimum: 1
+              default: 10
+              example: 10
+
       - template: instances/db
         overrides:
           custom_queries.description: |

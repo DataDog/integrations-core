@@ -6,6 +6,7 @@ from __future__ import annotations
 import ipaddress
 import json
 import threading
+import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
@@ -39,6 +40,7 @@ from .utils import parse_speed
 
 class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'hpe_aruba_edgeconnect'
+    HA_SUPPORTED = True
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -59,20 +61,29 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     def _get_orch_client(self) -> OrchestratorClient:
         if self._orch_client is not None:
             return self._orch_client
-        client = OrchestratorClient(self.http, self.config.orchestrator_ip, self.config.orchestrator_login_type)
-        client.login(self.config.orchestrator_username, self.config.orchestrator_password)
+        client = OrchestratorClient(
+            self.http,
+            self.config.orchestrator_ip,
+            self.config.orchestrator_login_type,
+            self.config.orchestrator_api_key,
+        )
+        username = self.config.orchestrator_username
+        password = self.config.orchestrator_password
+        if username is not None and password is not None:
+            client.login(username, password)
         self._orch_client = client
         return client
 
     def check(self, _: Any) -> None:
         try:
             orch_client = self._get_orch_client()
+            raw_appliances = orch_client.get_appliances()
         except Exception:
             self.gauge('orchestrator.reachability', 0, tags=self.tags)
             self._orch_client = None
             raise
         self.gauge('orchestrator.reachability', 1, tags=self.tags)
-        appliances = self._collect_appliances_from_orch(orch_client)
+        appliances = self._collect_appliances_from_orch(orch_client, raw_appliances)
         self._remove_stale_appliance_clients({ap.ip for ap in appliances})
         with ThreadPoolExecutor(max_workers=self.config.max_concurrency) as pool:
             futs = {
@@ -128,8 +139,9 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             appliances.append(Appliance(raw))
         return appliances
 
-    def _collect_appliances_from_orch(self, client: OrchestratorClient) -> Appliances:
-        raw_appliances = client.get_appliances()
+    def _collect_appliances_from_orch(
+        self, client: OrchestratorClient, raw_appliances: list[dict[str, Any]]
+    ) -> Appliances:
         if not raw_appliances:
             self.log.warning("No appliances returned from orchestrator %s", self.config.orchestrator_ip)
             return Appliances([], self.log)
@@ -272,6 +284,13 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         traffic_class_map: dict[str, str],
     ) -> None:
         app_ip = appliance.ip
+        if appliance.username is None or appliance.password is None:
+            self.log.warning(
+                "No credentials for appliance %s: add an `appliance_credentials_overrides` entry covering it "
+                "to collect its metrics.",
+                app_ip,
+            )
+            return
         self.log.debug("Starting collection for appliance %s", app_ip)
         client = self._create_appliance_client(app_ip, appliance.username, appliance.password)
 
@@ -478,7 +497,10 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             return
         cache_key = f'last_alarm_ts:{client.app_ip}'
         raw = self.read_persistent_cache(cache_key)
-        last_ts = int(raw) if raw else 0
+        if raw:
+            last_ts = int(raw)
+        else:
+            last_ts = int((time.time() - (self.config.min_collection_interval or 60)) * 1000)
         newest_ts = last_ts
         for alarm in outstanding:
             raised_ms = alarm.get('time')
@@ -487,7 +509,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                     continue
                 newest_ts = max(newest_ts, int(raised_ms))
             self._submit_alarm_event(alarm, client.app_ip, base_tags)
-        if newest_ts > last_ts:
+        if not raw or newest_ts > last_ts:
             self.write_persistent_cache(cache_key, str(newest_ts))
 
     def _submit_alarm_event(self, alarm: dict[str, Any], app_ip: str, base_tags: list[str]) -> None:

@@ -20,6 +20,7 @@ def artifact(idx: int, expired: bool = False, **extra: Any) -> dict[str, Any]:
 def workflow_run_payload(
     id: int = 42,
     name: str = "CI",
+    display_title: str = "CI run",
     status: str | None = "completed",
     conclusion: str | None = "success",
     html_url: str = "https://github.com/owner/repo/actions/runs/42",
@@ -33,6 +34,7 @@ def workflow_run_payload(
         "status": status,
         "conclusion": conclusion,
         "html_url": html_url,
+        "display_title": display_title,
         "created_at": created_at,
         "updated_at": updated_at,
         **extra,
@@ -232,6 +234,30 @@ def check_run_payload(
         "head_sha": head_sha,
         "conclusion": conclusion,
         "html_url": html_url,
+        **extra,
+    }
+
+
+def git_tag_payload(
+    tag: str = "7.85.0",
+    sha: str = "t" * 40,
+    object_sha: str = "c" * 40,
+    object_type: str = "commit",
+    node_id: str = "TAG_kwDOABCD",
+    **extra: Any,
+) -> dict[str, Any]:
+    return {
+        "tag": tag,
+        "sha": sha,
+        "node_id": node_id,
+        "url": f"https://api.github.com/repos/owner/repo/git/tags/{sha}",
+        "message": f"Release {tag}",
+        "tagger": {"name": "a-tagger", "email": "a-tagger@example.com", "date": "2026-01-01T00:00:00Z"},
+        "object": {
+            "type": object_type,
+            "sha": object_sha,
+            "url": f"https://api.github.com/repos/owner/repo/git/commits/{object_sha}",
+        },
         **extra,
     }
 

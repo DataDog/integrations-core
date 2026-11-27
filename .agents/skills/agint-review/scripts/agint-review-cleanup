@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+"""
+agint-review-cleanup — Removes a review round's git worktrees.
+
+Usage:
+    agint-review-cleanup <review_dir> [--review-dir-base NAME]
+
+<review_dir> is a round directory such as .agint-review/<PR>/round-<N>/. The script
+removes the `head` and `base` git worktrees (`git worktree remove --force`, falling back
+to deleting the directory), then runs `git worktree prune`. The orchestrator runs it
+right after synthesis, before posting, so a failed post never leaves worktrees behind.
+
+Every text file stays: findings/, diffs/, challenger.md, diff.full, scout-context.md,
+context.json, review.json and callers/ are small, and keeping them
+lets the user see suppressed comments and retry a failed post. A PR's whole folder is
+deleted by agint-review-setup once the PR is merged or closed.
+
+It refuses any path that is not inside a directory named <NAME> (default
+`.agint-review`). It is idempotent: running it twice, or on a round that has no
+worktrees, does nothing and exits 0.
+
+Exit codes: 0 on success, 1 if something could not be removed (warnings on
+stderr), 2 if the path was refused.
+
+Maintainers (human or agent): scripts/README.md documents the CLI and behavior of
+this script. If you change either, update the README in the same change.
+"""
+
+from __future__ import annotations
+
+import argparse
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+
+WORKTREES: tuple[str, ...] = ("head", "base")
+
+
+def log(msg: str):
+    print(msg, file=sys.stderr, flush=True)
+
+
+def find_base_dir(review_dir: Path, base_name: str) -> Path | None:
+    """Return the closest ancestor of review_dir named base_name, or None.
+
+    review_dir itself does not count: the base dir holds every PR's rounds and
+    must never be cleaned as a whole.
+    """
+    for parent in review_dir.parents:
+        if parent.name == base_name:
+            return parent
+    return None
+
+
+def remove_worktree(repo_root: Path, path: Path) -> bool:
+    """Remove one worktree. Returns False if it is still on disk afterwards."""
+    if not path.exists():
+        return True
+    res = subprocess.run(
+        ["git", "-C", str(repo_root), "worktree", "remove", "--force", str(path)],
+        capture_output=True, text=True,
+    )
+    if res.returncode == 0:
+        log(f"  removed worktree {path}")
+        return True
+    # Not a registered worktree (or git refused): fall back to deleting the
+    # directory, then let git forget any leftover registration.
+    log(f"  git worktree remove failed for {path} ({res.stderr.strip()}); deleting directory")
+    shutil.rmtree(path, ignore_errors=True)
+    subprocess.run(["git", "-C", str(repo_root), "worktree", "prune"], capture_output=True)
+    return not path.exists()
+
+
+def cleanup(review_dir: Path, base_name: str = ".agint-review") -> int:
+    review_dir = review_dir.resolve()
+    base_dir = find_base_dir(review_dir, base_name)
+    if base_dir is None:
+        log(f"error: refusing to clean {review_dir}: it is not inside a {base_name}/ directory")
+        return 2
+
+    if not review_dir.is_dir():
+        log(f"nothing to clean: {review_dir} does not exist")
+        return 0
+
+    repo_root = base_dir.parent
+    ok = True
+    for name in WORKTREES:
+        ok &= remove_worktree(repo_root, review_dir / name)
+    subprocess.run(["git", "-C", str(repo_root), "worktree", "prune"], capture_output=True)
+
+    if ok:
+        log(f"cleaned {review_dir}")
+        return 0
+    log(f"warning: some worktrees in {review_dir} could not be removed")
+    return 1
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Remove the worktrees of an agint-review round directory.")
+    parser.add_argument("review_dir", help="round directory, e.g. .agint-review/<PR>/round-<N>")
+    parser.add_argument("--review-dir-base", default=".agint-review",
+                        help="name of the base directory the path must be inside (default: .agint-review)")
+    args = parser.parse_args()
+    sys.exit(cleanup(Path(args.review_dir), Path(args.review_dir_base).name))
+
+
+if __name__ == "__main__":
+    main()

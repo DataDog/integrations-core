@@ -405,11 +405,12 @@ ADD EVENT sqlserver.rpc_completed (
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE (
-        sql_text <> '' AND
-        duration > 1000000 -- in microseconds, 1 second
+        duration > 1000000 AND -- in microseconds, 1 second
+        statement <> N'' -- not sql_text: it's NULL for stored procedures called by RPC
     )
 ),
 ADD EVENT sqlserver.sql_batch_completed(
@@ -420,11 +421,12 @@ ADD EVENT sqlserver.sql_batch_completed(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE (
-        sql_text <> '' AND
-        duration > 1000000
+        duration > 1000000 AND
+        batch_text <> N''
     )
 ),
 ADD EVENT sqlserver.module_end(
@@ -436,11 +438,12 @@ ADD EVENT sqlserver.module_end(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE (
-        sql_text <> '' AND
-        duration > 1000000
+        duration > 1000000 AND
+        statement <> N''
     )
 )
 ADD TARGET package0.ring_buffer
@@ -469,7 +472,8 @@ ADD EVENT sqlserver.error_reported(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE severity >= 11
 ),
@@ -481,7 +485,8 @@ ADD EVENT sqlserver.attention(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
 )
 ADD TARGET package0.ring_buffer

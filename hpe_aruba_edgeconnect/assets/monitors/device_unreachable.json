@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "title": "Device unreachable",
+  "tags": [
+    "integration:hpe-aruba-edgeconnect"
+  ],
+  "definition": {
+    "name": "[HPE Aruba EdgeConnect] Device unreachable",
+    "type": "query alert",
+    "query": "sum(last_5m):avg:hpe_aruba_edgeconnect.device.reachability{*} by {device_hostname,site_name,device_ip} < 1",
+    "message": "{{#is_alert}}\nEdgeConnect device {{device_hostname.name}} (IP: {{device_ip.name}}) at site: {{site_name.name}} is unreachable.\n\nReachability has been below the critical threshold for the last 5 minutes.\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nEdgeConnect device {{device_hostname.name}} (IP: {{device_ip.name}}) at site: {{site_name.name}} is reachable again.\n\nReachability has recovered.\n{{/is_alert_recovery}}",
+    "tags": [
+      "integration:hpe_aruba_edgeconnect"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 1
+      },
+      "notify_audit": false,
+      "include_tags": true,
+      "on_missing_data": "default",
+      "new_group_delay": 0,
+      "silenced": {}
+    },
+    "priority": 2
+  },
+  "created_at": "2026-05-20",
+  "last_updated_at": "2026-05-20",
+  "description": "Alerts when an EdgeConnect appliance is no longer reachable."
+}

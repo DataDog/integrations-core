@@ -8,6 +8,7 @@ from .metrics import METRIC_MAP
 
 class AerospikeCheckV2(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'aerospike'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 

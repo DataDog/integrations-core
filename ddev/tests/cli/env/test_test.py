@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
-from collections.abc import Callable, Generator, Mapping
+import os
+import shlex
+from collections.abc import Callable, Mapping
 from typing import Any
-from unittest.mock import MagicMock
 
 import pytest
 from click.exceptions import Exit
@@ -14,7 +14,7 @@ from pytest_mock import MockerFixture, MockType
 
 from ddev.e2e.config import EnvData, EnvDataStorage
 from ddev.utils.fs import Path
-from tests.helpers.mocks import MockPopen
+from tests.helpers.environments import make_catalog
 from tests.helpers.runner import CliRunner
 
 BASE_ENV_CONFIG = {
@@ -36,57 +36,12 @@ BASE_ENV_CONFIG = {
 def setup(
     mocker: MockerFixture,
     write_result_file: Callable[[Mapping[str, Any]], None],
-    hatch_json_output: Mapping[str, Any] | str | None = None,
+    hatch_json_output: dict[str, dict[str, Any]] | None = None,
 ):
     mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': {}, 'config': {}}))
 
     if hatch_json_output is not None:
-        if isinstance(hatch_json_output, str):
-            hatch_output = hatch_json_output.encode()
-        elif isinstance(hatch_json_output, dict):
-            hatch_output = json.dumps(hatch_json_output).encode()
-        else:
-            pytest.fail('Invalid hatch_json_output type')
-
-        mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0, stdout=hatch_output))
-
-
-@pytest.fixture()
-def mock_commands(mocker: MockerFixture) -> Generator[tuple[MockType, MockType, MockType]]:
-    start_mock = mocker.patch(
-        'ddev.cli.env.start.start',
-        return_value=Result(
-            return_value=0,
-            runner=MagicMock(),
-            stdout_bytes=b'',
-            stderr_bytes=b'',
-            exit_code=0,
-            exception=None,
-        ),
-    )
-    stop_mock = mocker.patch(
-        'ddev.cli.env.stop.stop',
-        return_value=Result(
-            return_value=0,
-            runner=MagicMock(),
-            stdout_bytes=b'',
-            stderr_bytes=b'',
-            exit_code=0,
-            exception=None,
-        ),
-    )
-    test_mock = mocker.patch(
-        'ddev.cli.test.test',
-        return_value=Result(
-            return_value=0,
-            runner=MagicMock(),
-            stdout_bytes=b'',
-            stderr_bytes=b'',
-            exit_code=0,
-            exception=None,
-        ),
-    )
-    yield start_mock, stop_mock, test_mock
+        mocker.patch('ddev.testing.selection.load_environment_catalog', return_value=make_catalog(hatch_json_output))
 
 
 def assert_commands_run(mock_commands: tuple[MockType, MockType, MockType], call_count: int = 1):
@@ -98,8 +53,8 @@ def assert_commands_run(mock_commands: tuple[MockType, MockType, MockType], call
 @pytest.mark.parametrize(
     'e2e_env, predicate',
     [
-        (False, lambda result: "disabled by e2e-env option" in result.output),
-        (True, lambda result: "disabled by e2e-env option" not in result.output),
+        (False, lambda result: "Excluded postgres:py3.12 by e2e-env option." in result.output),
+        (True, lambda result: "Excluded postgres:py3.12" not in result.output),
     ],
     ids=['e2e-env-false', 'e2e-env-true'],
 )
@@ -115,9 +70,8 @@ def test_env_vars_repo(
     setup(mocker, write_result_file, hatch_json_output={'py3.12': {**BASE_ENV_CONFIG, 'e2e-env': e2e_env}})
     mocker.patch.object(EnvData, 'read_metadata', return_value={})
 
-    result = ddev('env', 'test', 'postgres', 'py3.12')
+    result = ddev('env', 'test', 'postgres', '--envs', 'py3.12')
     assert result.exit_code == 0, result.output
-    # Ensure test was not skipped
     assert predicate(result)
     assert_commands_run(mock_commands, 1 if e2e_env else 0)
 
@@ -142,7 +96,7 @@ def test_environment_runs_for_enabled_environments(
         },
     )
     with mocker.patch.object(EnvData, 'read_metadata', return_value={}):
-        result = ddev('env', 'test', 'postgres', environment)
+        result = ddev('env', 'test', 'postgres', '--envs', environment)
         assert result.exit_code == 0, result.output
         assert_commands_run(mock_commands, command_call_count)
 
@@ -174,7 +128,7 @@ def test_automatic_cleanup_failure(
         mock_commands[2].side_effect = SystemExit(test_exit_code)
 
     args = ('--ignore-teardown-errors',) if ignore_teardown_errors else ()
-    result = ddev('env', 'test', *args, 'postgres', 'py3.12')
+    result = ddev('env', 'test', *args, 'postgres', '--envs', 'py3.12')
 
     assert result.exit_code == expected_exit_code, result.output
     if ignore_teardown_errors:
@@ -197,7 +151,7 @@ def test_automatic_cleanup_failure_in_multi_environment_run(
     mock_commands[1].side_effect = [Exit(1), None]
     mock_commands[2].side_effect = [SystemExit(2)] if first_test_fails else [None, SystemExit(2)]
 
-    result = ddev('env', 'test', '--ignore-teardown-errors', 'postgres', 'all')
+    result = ddev('env', 'test', '--ignore-teardown-errors', 'postgres', '--envs', 'all')
 
     assert result.exit_code == 2, result.output
     assert 'Automatic teardown failed for `postgres:py3.12` (Exit(1)).' in result.output
@@ -209,15 +163,33 @@ def test_automatic_cleanup_failure_in_multi_environment_run(
     assert_commands_run(mock_commands, 1 if first_test_fails else 2)
 
 
-def test_command_errors_out_when_cannot_parse_json_output_from_hatch(
+@pytest.mark.parametrize(
+    'args, message',
+    [
+        (('py3.12',), '--pytest-args'),
+        (('--', '-m', 'not flaky'), '--pytest-args'),
+        (('--envs', 'typo'), 'Unknown environments: typo'),
+        (('--envs', 'py3.12,typo'), 'Unknown environments: typo'),
+        (('--envs', 'all,py3.12'), 'alone'),
+        (('--envs', 'active,py3.12'), 'alone'),
+        (('--pytest-args', '-m'), 'requires a marker expression'),
+        (('--pytest-args', '-m "unit'), 'No closing quotation'),
+    ],
+)
+def test_invalid_requests_do_not_change_lifecycle(
     ddev: CliRunner,
-    data_dir: Path,
-    write_result_file: Callable[[Mapping[str, Any]], None],
     mocker: MockerFixture,
+    mock_commands: tuple[MockType, MockType, MockType],
+    args: tuple[str, ...],
+    message: str,
 ):
-    setup(mocker, write_result_file, hatch_json_output='invalid json')
-    result = ddev('env', 'test', 'postgres', 'py3.12')
-    assert result.exit_code == 1, result.output
+    mocker.patch(
+        'ddev.testing.selection.load_environment_catalog', return_value=make_catalog({'py3.12': BASE_ENV_CONFIG})
+    )
+    result = ddev('env', 'test', 'postgres', '--recreate', *args)
+    assert result.exit_code == 2, result.output
+    assert message in result.output
+    assert_commands_run(mock_commands, 0)
 
 
 def test_runningin_ci_triggers_all_environments_when_not_supplied(
@@ -253,3 +225,55 @@ def test_run_only_active_environments_when_not_running_in_ci_and_active_environm
         result = ddev('env', 'test', 'postgres')
         assert result.exit_code == 0, result.output
         assert_commands_run(mock_commands, 1)
+
+
+@pytest.mark.parametrize('active, recreate', [(False, False), (True, False), (True, True)])
+def test_reuse_and_recreation_preserve_lifecycle(
+    ddev: CliRunner,
+    mocker: MockerFixture,
+    mock_commands: tuple[MockType, MockType, MockType],
+    active: bool,
+    recreate: bool,
+):
+    mocker.patch('ddev.testing.selection.load_environment_catalog', return_value=make_catalog({'selected': {}}))
+    mocker.patch.object(EnvData, 'read_metadata', return_value={})
+    mocker.patch.object(EnvDataStorage, 'get_environments', return_value=['selected'] if active else [])
+    args = ('--recreate',) if recreate else ()
+    result = ddev('env', 'test', 'postgres', '--envs', 'selected', *args)
+    assert result.exit_code == 0, result.output
+    assert mock_commands[0].call_args.kwargs['ignore_state'] == (active and not recreate)
+    assert mock_commands[1].call_args.kwargs['ignore_state'] == active
+    assert mock_commands[1].call_count == (2 if active and recreate else 1)
+    assert mock_commands[2].call_args.kwargs['recreate'] == recreate
+
+
+def test_multiple_selection_forwards_pytest_once(ddev: CliRunner, mocker: MockerFixture):
+    from ddev.e2e.constants import E2EMetadata
+
+    mocker.patch('ddev.cli.env.start.start')
+    mocker.patch('ddev.cli.env.stop.stop')
+    mocker.patch(
+        'ddev.testing.selection.load_environment_catalog',
+        return_value=make_catalog({'first': {}, 'second': {}}, {'default': ['first', 'second']}),
+    )
+    mocker.patch.object(EnvData, 'read_metadata', return_value={E2EMetadata.ENV_VARS: {'DDEV_E2E_TEST_VAR': 'value'}})
+    mocker.patch.dict(os.environ, {'DDEV_TEST_ENABLE_TRACING': '1'})
+    observed: list[tuple[list[str], str | None, str | None]] = []
+
+    def record(command: list[str], **kwargs: Any) -> str:
+        observed.append((command, os.environ.get('DDEV_E2E_TEST_VAR'), os.environ.get('DDEV_REPO')))
+        return ''
+
+    run = mocker.patch('ddev.utils.platform.Platform.check_command_output', side_effect=record)
+    parse = mocker.spy(shlex, 'split')
+    pytest_string = '-m "a or b" --markers "tests/a file.py"'
+    result = ddev('env', 'test', 'postgres', '--envs', 'second,default', '--pytest-args', pytest_string)
+    assert result.exit_code == 0, result.output
+    commands = [call.args[0] for call in run.call_args_list]
+    assert [command[command.index('--env') + 1] for command in commands] == ['second', 'first']
+    for command, metadata_var, repo in observed:
+        assert command[-4:] == ['-m', '(a or b) and e2e', '--markers', 'tests/a file.py']
+        assert '--ddtrace' in command
+        assert metadata_var == 'value'
+        assert repo == 'core'
+    assert [call.args[0] for call in parse.call_args_list].count(pytest_string) == 1

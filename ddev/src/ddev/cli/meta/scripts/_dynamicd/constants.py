@@ -6,7 +6,7 @@
 # LLM Configuration
 # Using Sonnet for good balance of quality and speed. For complex integrations,
 # consider using "claude-opus-4-20250514" for better reasoning.
-DEFAULT_MODEL = "claude-sonnet-4-20250514"
+DEFAULT_MODEL = "claude-sonnet-5"
 MAX_TOKENS = 16000
 MAX_RETRIES = 3
 

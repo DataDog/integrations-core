@@ -11,6 +11,7 @@ class LinkerdCheckV2(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'linkerd'
 
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def check(self, instance):
         # Override the check method to send the health metric, as service checks can be disabled.

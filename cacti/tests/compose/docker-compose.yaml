@@ -15,6 +15,9 @@ services:
       - DB_ROOT_PASS=rootpassword
       - INITIALIZE_DB=1
       - TZ=America/Los_Angeles
+      # With the default PHP_SNMP=1 the container runs `yum install php-snmp` on startup, and the metadata download
+      # can delay startup past the readiness timeout. 0 skips it and uninstalls php-snmp, which the tests don't use.
+      - PHP_SNMP=0
     volumes:
       - cacti-data:/cacti
       - cacti-spine:/spine

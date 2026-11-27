@@ -22,7 +22,6 @@ app = create_app(
     os.environ['PANORAMA_USERNAME'],
     os.environ['PANORAMA_PASSWORD'],
     op_fixture=op_fixture,
-    log_fixtures=lambda _data: None,
     report_fixtures=lambda _data: None,
 )
 

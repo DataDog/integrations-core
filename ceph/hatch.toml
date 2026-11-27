@@ -2,10 +2,16 @@
 
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["4.0", "5.0"]
+version = ["nautilus", "octopus", "pacific", "squid", "tentacle", "umbrella"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "CEPH_VERSION", value = "v4.0.21-stable-4.0-nautilus-centos-7", if = ["4.0"] },
-  { key = "CEPH_VERSION", value = "v5.0.7-stable-5.0-octopus-centos-8", if = ["5.0"] },
+  { key = "CEPH_VERSION", value = "v14.2.22-20210630", if = ["nautilus"] },
+  { key = "CEPH_VERSION", value = "v15.2.17-20220809", if = ["octopus"] },
+  { key = "CEPH_VERSION", value = "v16.2.15-20240529", if = ["pacific"] },
+  { key = "CEPH_VERSION", value = "v19.2.7-20261009", if = ["squid"] },
+  { key = "CEPH_VERSION", value = "v20.2.5-20261028", if = ["tentacle"] },
+  # Every Umbrella build up to 21.2.0 reports `umbrella (dev)`, because `src/ceph_release` at the v21.2.0 tag says `dev`.
+  # 21.2.1 should be the first build that reports `stable`.
+  { key = "CEPH_VERSION", value = "v21.2.0-20261027", if = ["umbrella"] },
 ]

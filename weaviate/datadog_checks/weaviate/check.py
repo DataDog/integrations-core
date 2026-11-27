@@ -23,6 +23,7 @@ NODE_STATUS_VALUES = {'HEALTHY': 0, 'UNHEALTHY': 1, 'UNAVAILABLE': 2, 'UNKNOWN':
 class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'weaviate'
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances=None):
         super(WeaviateCheck, self).__init__(

@@ -11,6 +11,7 @@ from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 
 class Fluentd(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_TIMEOUT = 5
     SERVICE_CHECK_NAME = 'fluentd.is_ok'
     GAUGES = [

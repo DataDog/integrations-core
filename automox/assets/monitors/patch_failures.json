@@ -1,0 +1,36 @@
+{
+    "version": 2,
+    "created_at": "2026-10-04",
+    "last_updated_at": "2026-10-24",
+    "title": "Patch installations are failing on many devices",
+    "description": "An Automox organization reported more than 10 failed patch installations in an hour. A wave of failures usually has one cause, such as a broken package repository, a bad patch or devices short of disk space, and the affected devices stay exposed until it is fixed.",
+    "definition": {
+        "name": "[Automox] Patch installations are failing on many devices",
+        "type": "log alert",
+        "query": "logs(\"source:automox @evt.category:events @evt.name:system.patch.failed\").index(\"*\").rollup(\"count\").by(\"@ocsf.device.org.uid\").last(\"1h\") > 10",
+        "message": "{{#is_alert}}\n{{value}} patch installations failed in the last hour.\n{{/is_alert}}\n{{#is_warning}}\n{{value}} patch installations failed in the last hour.\n{{/is_warning}}\n{{#is_recovery}}\nPatch installation failures are back under {{warn_threshold}} an hour.\n{{/is_recovery}}\n\nOrganization: {{[@ocsf.device.org.uid].name}}\n\nThe Failed Patches widgets on the Automox Overview dashboard show which devices and patches failed.",
+        "tags": [
+            "integration:automox"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 10,
+                "warning": 5
+            },
+            "enable_logs_sample": true,
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "groupby_simple_monitor": false,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": 3,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:automox"
+    ]
+}

@@ -22,6 +22,14 @@ MOCKED_INSTANCE = {
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
 METRICS = [
+    'hicache.host.used_tokens',
+    'hicache.host.total_tokens',
+    'kv_cache.evicted_tokens.count',
+    'hicache.load_back.tokens.count',
+    'kv_cache.swa.available_tokens',
+    'kv_cache.swa.evictable_tokens',
+    'kv_cache.swa.used_tokens',
+    'forward_execution.occupancy',
     'http.requests.active',
     'num_requests.running',
     'num_requests.waiting',
@@ -45,6 +53,7 @@ METRICS = [
 ]
 
 HISTOGRAMS = [
+    'hicache.load_back.seconds',
     'time_to_first_token.seconds',
     'inter_token_latency.seconds',
     'e2e_request_latency.seconds',

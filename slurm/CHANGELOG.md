@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 2.5.3 / 2026-10-26
+## 2.6.0 / 2026-11-25
+
+***Added***:
+
+* Add job lifecycle events, polled from `sacct`, behind the `collect_job_events` option. ([#25723](https://github.com/DataDog/integrations-core/pull/25723))
+
+## 2.5.3 / 2026-10-26 / Agent 7.86.0
 
 ***Fixed***:
 
 * Fix version metadata collection failing when `collect_sinfo_stats` is disabled. ([#25685](https://github.com/DataDog/integrations-core/pull/25685))
 
-## 2.5.2 / 2026-09-25
+## 2.5.2 / 2026-09-25 / Agent 7.85.0
 
 ***Fixed***:
 

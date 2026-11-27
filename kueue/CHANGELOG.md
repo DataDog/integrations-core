@@ -2,6 +2,28 @@
 
 <!-- towncrier release notes start -->
 
+## 3.1.0 / 2026-11-25
+
+***Added***:
+
+* Add the `job_scheduler`, `job_scheduler_queue`, and `job_scheduler_workload` tags to Kueue Workload events. ([#25992](https://github.com/DataDog/integrations-core/pull/25992))
+* Define the fields of `kube_config_dict` and make it configurable through Fleet Automation, with its credentials handled as secrets. ([#26160](https://github.com/DataDog/integrations-core/pull/26160))
+
+***Fixed***:
+
+* Add the `collect_histograms_as_distributions` option to the configuration example and config models. ([#25590](https://github.com/DataDog/integrations-core/pull/25590))
+
+## 3.0.0 / 2026-10-29 / Agent 7.86.0
+
+***Changed***:
+
+* Stop copying check instance tags onto Kueue workload events. ([#25787](https://github.com/DataDog/integrations-core/pull/25787))
+
+***Added***:
+
+* Support HA Kueue: drop follower samples by default, add the `collect_follower_metrics` option, and submit Workload events only from the leader replica. ([#25541](https://github.com/DataDog/integrations-core/pull/25541))
+* Add a per-workload event index so Kueue workload events that share a timestamp can be ordered. ([#25762](https://github.com/DataDog/integrations-core/pull/25762))
+
 ## 2.0.0 / 2026-09-17 / Agent 7.84.0
 
 ***Changed***:

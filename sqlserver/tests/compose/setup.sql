@@ -293,6 +293,53 @@ GRANT EXECUTE on nullCharTest to bob;
 GRANT EXECUTE on nullCharTest to fred;
 GO
 
+-- Column statistics: a database where the datadog user can run the column statistics procedure but can't read
+-- the table. Data is deterministic so tests can assert exact statistics.
+CREATE DATABASE datadog_test_column_stats;
+GO
+-- The procedure runs as the database owner. On Windows the setup connects with Windows authentication, and that
+-- container login can't be impersonated (error 15517), so make sa the owner everywhere.
+ALTER AUTHORIZATION ON DATABASE::datadog_test_column_stats TO sa;
+GO
+USE datadog_test_column_stats;
+GO
+CREATE TABLE dbo.orders (
+    id INT NOT NULL PRIMARY KEY,
+    customer_id INT NOT NULL,
+    status VARCHAR(20) NULL,
+    note NVARCHAR(100) NULL,
+    -- Never filled: every value is NULL, so its histogram has no steps.
+    unused_num INT NULL,
+    -- A CLR type, whose name comes from user_type_id rather than system_type_id.
+    node HIERARCHYID NULL
+);
+CREATE INDEX ix_customer ON dbo.orders (customer_id);
+CREATE INDEX ix_status ON dbo.orders (status);
+CREATE INDEX ix_unused_num ON dbo.orders (unused_num);
+INSERT INTO dbo.orders (id, customer_id, status, note, node)
+SELECT n,
+    CASE WHEN n % 10 < 3 THEN 7 ELSE n % 500 END,
+    CASE WHEN n % 10 = 0 THEN NULL WHEN n % 10 IN (1, 2) THEN 'pending' ELSE 'shipped' END,
+    REPLICATE(N'x', 20 + n % 21),
+    HIERARCHYID::Parse(CONCAT('/', n % 50, '/'))
+FROM (SELECT TOP 10000 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n FROM sys.all_objects a CROSS JOIN sys.all_objects b) numbers;
+CREATE STATISTICS st_note ON dbo.orders (note);
+CREATE STATISTICS st_node ON dbo.orders (node);
+UPDATE STATISTICS dbo.orders WITH FULLSCAN;
+GO
+-- On Windows the user already exists here, copied from model.
+IF USER_ID('datadog') IS NULL
+    CREATE USER datadog FOR LOGIN datadog;
+GO
+CREATE SCHEMA datadog AUTHORIZATION dbo;
+GO
+-- Copied into the image from tests/sql, the procedure as customers install it.
+:r column_statistics.sql
+GRANT EXECUTE ON datadog.column_statistics TO datadog;
+GO
+USE master;
+GO
+
 -- create an offline database to have an unavailable database to test with
 CREATE DATABASE unavailable_db;
 GO
@@ -419,11 +466,12 @@ ADD EVENT sqlserver.rpc_completed (
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE (
-        sql_text <> '' AND
-        duration > 1000000 -- in microseconds, 1 second
+        duration > 1000000 AND -- in microseconds, 1 second
+        statement <> N'' -- not sql_text: it's NULL for stored procedures called by RPC
     )
 ),
 ADD EVENT sqlserver.sql_batch_completed(
@@ -434,11 +482,12 @@ ADD EVENT sqlserver.sql_batch_completed(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE (
-        sql_text <> '' AND
-        duration > 1000000
+        duration > 1000000 AND
+        batch_text <> N''
     )
 ),
 ADD EVENT sqlserver.module_end(
@@ -450,11 +499,12 @@ ADD EVENT sqlserver.module_end(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE (
-        sql_text <> '' AND
-        duration > 1000000
+        duration > 1000000 AND
+        statement <> N''
     )
 )
 ADD TARGET package0.ring_buffer
@@ -483,7 +533,8 @@ ADD EVENT sqlserver.error_reported(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE severity >= 11
 ),
@@ -495,7 +546,8 @@ ADD EVENT sqlserver.attention(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
 )
 ADD TARGET package0.ring_buffer
@@ -508,3 +560,24 @@ WITH (
 
 ALTER EVENT SESSION datadog_query_completions ON SERVER STATE = START;
 ALTER EVENT SESSION datadog_query_errors ON SERVER STATE = START;
+GO
+
+-- 3. Real execution plans, as in the documentation, except for the predicate and the dispatch latency: the tests only
+-- capture their own application's statements, whatever their duration, and read them a second after they ran.
+IF EXISTS (
+    SELECT * FROM sys.server_event_sessions WHERE name = 'datadog_query_plans'
+)
+    DROP EVENT SESSION datadog_query_plans ON SERVER;
+GO
+CREATE EVENT SESSION datadog_query_plans ON SERVER
+ADD EVENT sqlserver.query_post_execution_plan_profile (
+    ACTION (sqlserver.database_name, sqlserver.session_id, sqlserver.request_id, sqlserver.username,
+            sqlserver.client_app_name, sqlserver.client_hostname, sqlserver.query_hash, sqlserver.query_plan_hash,
+            sqlserver.plan_handle, sqlserver.tsql_frame)
+    WHERE sqlserver.client_app_name = N'datadog-query-plans-test'
+)
+ADD TARGET package0.event_file (SET filename = N'datadog_query_plans', max_file_size = 64, max_rollover_files = 4)
+WITH (MAX_MEMORY = 8192 KB, EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS, MAX_DISPATCH_LATENCY = 1 SECONDS,
+      TRACK_CAUSALITY = ON, STARTUP_STATE = ON);
+GO
+ALTER EVENT SESSION datadog_query_plans ON SERVER STATE = START;

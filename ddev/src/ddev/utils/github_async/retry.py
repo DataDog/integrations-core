@@ -41,6 +41,14 @@ DEFAULT_WAIT_JITTER_SECONDS = 1.0
 MUTATION_ATTEMPTS = 2
 
 
+class MalformedResponseBody(Exception):
+    """Retry cause for a body that failed decoding or validation, without logging its contents."""
+
+    def __init__(self, original: Exception) -> None:
+        super().__init__(f"{type(original).__name__}: malformed response body")
+        self.original = original
+
+
 class Unset(Enum):
     """Sentinel for `RetryPolicy.replace`, where `timeout=None` means no timeout, not unchanged."""
 
@@ -68,6 +76,10 @@ def on_transport_error(exc: Exception) -> bool:
 def on_pre_send_transport_error(exc: Exception) -> bool:
     """Only the transport failures that prove the request never left."""
     return isinstance(exc, PRE_SEND_TRANSPORT_ERRORS)
+
+
+def _on_malformed_response_body(exc: Exception) -> bool:
+    return isinstance(exc, MalformedResponseBody)
 
 
 def on_status(*status_codes: int) -> RetryPredicate:
@@ -152,7 +164,9 @@ class RetryPolicy:
 
 # Policy constants. They follow the class because they are instances of it.
 NO_RETRY = RetryPolicy(attempts=1)
-SAFE_RETRY = RetryPolicy(should_retry=any_of(on_transport_error, on_status(*RETRYABLE_SERVER_STATUSES)))
+SAFE_RETRY = RetryPolicy(
+    should_retry=any_of(on_transport_error, on_status(*RETRYABLE_SERVER_STATUSES), _on_malformed_response_body)
+)
 MUTATION_RETRY = RetryPolicy(should_retry=on_pre_send_transport_error, attempts=MUTATION_ATTEMPTS)
 
 

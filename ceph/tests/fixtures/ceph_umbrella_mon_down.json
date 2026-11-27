@@ -1,0 +1,221 @@
+{
+  "df_detail": {
+    "pools": [
+      {
+        "id": 1,
+        "name": "demo",
+        "stats": {
+          "avail_raw": 1019575488,
+          "bytes_used": 0,
+          "compress_bytes_used": 0,
+          "compress_under_bytes": 0,
+          "data_bytes_used": 0,
+          "dirty": 0,
+          "kb_used": 0,
+          "max_avail": 1019575488,
+          "objects": 0,
+          "omap_bytes_used": 0,
+          "percent_used": 0,
+          "quota_bytes": 0,
+          "quota_objects": 0,
+          "rd": 0,
+          "rd_bytes": 0,
+          "stored": 0,
+          "stored_data": 0,
+          "stored_omap": 0,
+          "stored_raw": 0,
+          "wr": 0,
+          "wr_bytes": 0
+        }
+      },
+      {
+        "id": 2,
+        "name": ".mgr",
+        "stats": {
+          "avail_raw": 1019575488,
+          "bytes_used": 459280,
+          "compress_bytes_used": 0,
+          "compress_under_bytes": 0,
+          "data_bytes_used": 459280,
+          "dirty": 0,
+          "kb_used": 449,
+          "max_avail": 1019575488,
+          "objects": 2,
+          "omap_bytes_used": 0,
+          "percent_used": 0.00045025916188023984,
+          "quota_bytes": 0,
+          "quota_objects": 0,
+          "rd": 46,
+          "rd_bytes": 37888,
+          "stored": 459280,
+          "stored_data": 459280,
+          "stored_omap": 0,
+          "stored_raw": 459280,
+          "wr": 57,
+          "wr_bytes": 598016
+        }
+      }
+    ],
+    "stats": {
+      "num_osds": 1,
+      "num_per_pool_omap_osds": 0,
+      "num_per_pool_osds": 0,
+      "total_avail_bytes": 1073263261,
+      "total_bytes": 1073741824,
+      "total_used_bytes": 478563,
+      "total_used_raw_bytes": 478563,
+      "total_used_raw_ratio": 0.00044569652527570724
+    },
+    "stats_by_class": {
+      "hdd": {
+        "total_avail_bytes": 1073263261,
+        "total_bytes": 1073741824,
+        "total_used_bytes": 478563,
+        "total_used_raw_bytes": 478563,
+        "total_used_raw_ratio": 0.00044569652527570724
+      }
+    }
+  },
+  "health_detail": {
+    "checks": {},
+    "mutes": [],
+    "status": "HEALTH_OK"
+  },
+  "osd_metadata": [
+    {
+      "arch": "aarch64",
+      "back_addr": "[v2:172.17.0.3:6804/1797587289,v1:172.17.0.3:6805/1797587289]",
+      "back_iface": "",
+      "ceph_release": "umbrella",
+      "ceph_version": "ceph version 21.2.0 (b060042deb05d33e6cc358970cfb8221240bcf3e) umbrella (dev - RelWithDebInfo)",
+      "ceph_version_short": "21.2.0",
+      "ceph_version_when_created": "ceph version 21.2.0 (b060042deb05d33e6cc358970cfb8221240bcf3e) umbrella (dev - RelWithDebInfo)",
+      "created_at": "2026-11-19T22:30:21.430188Z",
+      "default_device_class": "hdd",
+      "device_ids": "",
+      "device_paths": "",
+      "devices": "",
+      "distro": "rocky",
+      "distro_description": "Rocky Linux 10.2 (Red Quartz)",
+      "distro_version": "10.2",
+      "front_addr": "[v2:172.17.0.3:6802/1797587289,v1:172.17.0.3:6803/1797587289]",
+      "front_iface": "",
+      "hb_back_addr": "[v2:172.17.0.3:6808/1797587289,v1:172.17.0.3:6809/1797587289]",
+      "hb_front_addr": "[v2:172.17.0.3:6806/1797587289,v1:172.17.0.3:6807/1797587289]",
+      "hostname": "607bf1858718",
+      "id": 0,
+      "journal_rotational": "1",
+      "kernel_description": "#100-Ubuntu SMP PREEMPT_DYNAMIC Tue Jan 13 16:39:21 UTC 2026",
+      "kernel_version": "6.8.0-100-generic",
+      "mem_swap_kb": "0",
+      "mem_total_kb": "16343092",
+      "network_numa_unknown_ifaces": "back_iface,front_iface",
+      "os": "Linux",
+      "osd_data": "/var/lib/ceph/micro/osd",
+      "osd_objectstore": "memstore",
+      "osdspec_affinity": "",
+      "rotational": "1"
+    }
+  ],
+  "osd_perf": {
+    "osdstats": {
+      "osd_perf_infos": [
+        {
+          "id": 0,
+          "perf_stats": {
+            "apply_latency_ms": 0,
+            "apply_latency_ns": 0,
+            "commit_latency_ms": 0,
+            "commit_latency_ns": 0
+          }
+        }
+      ]
+    },
+    "pg_ready": true
+  },
+  "osd_pool_stats": [
+    {
+      "client_io_rate": {},
+      "pool_id": 1,
+      "pool_name": "demo",
+      "recovery": {},
+      "recovery_rate": {}
+    },
+    {
+      "client_io_rate": {},
+      "pool_id": 2,
+      "pool_name": ".mgr",
+      "recovery": {},
+      "recovery_rate": {}
+    }
+  ],
+  "status": {
+    "election_epoch": 10,
+    "fsid": "7a9aac50-77cd-4217-9ef7-85b69fc17605",
+    "fsmap": {
+      "btime": "2026-11-19T22:30:19:326356+0000",
+      "by_rank": [],
+      "epoch": 1,
+      "up:standby": 0
+    },
+    "health": {
+      "checks": {},
+      "mutes": [],
+      "status": "HEALTH_OK"
+    },
+    "mgrmap": {
+      "available": true,
+      "modules": [
+        "iostat",
+        "nfs",
+        "nvmeof"
+      ],
+      "num_standbys": 0,
+      "services": {}
+    },
+    "monmap": {
+      "epoch": 1,
+      "min_mon_release_name": "umbrella",
+      "num_mons": 3
+    },
+    "osdmap": {
+      "epoch": 9,
+      "num_in_osds": 1,
+      "num_osds": 1,
+      "num_remapped_pgs": 0,
+      "num_up_osds": 1,
+      "osd_in_since": 1795127420,
+      "osd_up_since": 1795127424
+    },
+    "pgmap": {
+      "bytes_avail": 1073263261,
+      "bytes_total": 1073741824,
+      "bytes_used": 478563,
+      "data_bytes": 459280,
+      "num_objects": 2,
+      "num_pgs": 9,
+      "num_pools": 2,
+      "pgs_by_state": [
+        {
+          "count": 9,
+          "state_name": "active+clean"
+        }
+      ]
+    },
+    "progress_events": {},
+    "quorum": [
+      1,
+      2
+    ],
+    "quorum_age": 13,
+    "quorum_names": [
+      "b",
+      "c"
+    ],
+    "servicemap": {
+      "epoch": 1,
+      "modified": "2026-11-19T22:30:19.328352+0000",
+      "services": {}
+    }
+  }
+}

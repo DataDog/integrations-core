@@ -1,0 +1,86 @@
+{
+  "app_id": "prefect",
+  "app_uuid": "019c8a21-1a64-7aa4-9806-09d4361e0a9b",
+  "manifest_version": "2.0.0",
+  "display_on_public_website": true,
+  "tile": {
+    "title": "Prefect",
+    "description": "A Python-first workflow orchestration platform for data, ML, and automation.",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Prefect dashboard (light mode)",
+        "image_url": "images/Screenshot 2026-04-08 at 11.49.58.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Prefect dashboard (dark mode)",
+        "image_url": "images/Screenshot 2026-04-08 at 11.50.18.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Orchestration",
+      "Category::AI/ML",
+      "Offering::Integration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Submitted Data Type::Events",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "oauth": {},
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com",
+    "vendor_id": "datadog"
+  },
+  "assets": {
+    "dashboards": {
+      "Prefect Overview": "assets/dashboards/prefect_overview.json"
+    },
+    "monitors": {
+      "Deployment not ready": "assets/monitors/deployment_not_ready.json",
+      "Work queue not ready": "assets/monitors/work_queue_not_ready.json",
+      "Backlog size above threshold": "assets/monitors/backlog_size_above_threshold.json",
+      "Work pool not ready": "assets/monitors/work_pool_not_ready.json",
+      "Worker heartbeat stale": "assets/monitors/worker_heartbeat_stale.json",
+      "Backlog age above threshold": "assets/monitors/backlog_age_above_threshold.json",
+      "Flow failure rate high": "assets/monitors/flow_failure_rate_high.json"
+    },
+    "logs": {
+      "source": "prefect"
+    },
+    "integration": {
+      "source_type_name": "prefect",
+      "auto_install": true,
+      "configuration": {},
+      "process_signatures": [],
+      "metrics": {
+        "prefix": "prefect.server",
+        "check": [
+          "prefect.server.ready",
+          "prefect.server.health"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 74263334,
+      "supports_ddr_coordinated_failover": false
+    }
+  },
+  "owner": "agent-integrations"
+}

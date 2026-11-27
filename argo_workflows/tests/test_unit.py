@@ -90,8 +90,9 @@ V3_6_METRICS = {
         ('tests/fixtures/metricsv3-6+.txt', 'Test with new metric names (Argo v3.6+)'),
     ],
 )
-def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_response, fixture_file, description):
-    mock_http_response(file_path=fixture_file)
+def test_check_with_fixtures(dd_run_check, aggregator, instance, fake_http_response, fixture_file, description):
+    with open(fixture_file) as f:
+        fake_http_response(instance['openmetrics_endpoint'], f.read())
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     dd_run_check(check)
 
@@ -132,9 +133,9 @@ def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_respo
     assert_service_checks(aggregator)
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(status_code=404)
+def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, fake_http_response):
+    fake_http_response(instance['openmetrics_endpoint'], status_code=404)
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
-    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match='HTTPClientStatusError'):
         dd_run_check(check)
     aggregator.assert_service_check('argo_workflows.openmetrics.health', ArgoWorkflowsCheck.CRITICAL)

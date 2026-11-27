@@ -13,10 +13,11 @@ RUN apt-get update && apt-get install -y  \
 	apt-transport-https
 
 WORKDIR /
-COPY db-init.sh /
-COPY entrypoint.sh /
-COPY aoag_primary.sql /
-COPY aoag_secondary.sql /
+COPY compose-ha/sql/db-init.sh /
+COPY compose-ha/sql/entrypoint.sh /
+COPY compose-ha/sql/aoag_primary.sql /
+COPY compose-ha/sql/aoag_secondary.sql /
+COPY sql/column_statistics.sql /
 
 RUN chmod +x db-init.sh
 

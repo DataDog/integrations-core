@@ -1,0 +1,90 @@
+# Hand-written samples for the TensorRT-LLM families that the live 1.3.0 and 1.4.0rc4 runs did not emit:
+# disaggregated serving, sparse attention, KV cache connector and disk tiers, perplexity, and multimodal
+# input processing. Names, types and labels come from tensorrt_llm/metrics/collector.py on main (1.4.0rc5).
+# HELP trtllm_kv_cache_iter_connector_reused_blocks_total Total reused KV cache blocks loaded by a KV cache connector 
+# TYPE trtllm_kv_cache_iter_connector_reused_blocks_total counter
+trtllm_kv_cache_iter_connector_reused_blocks_total{engine_type="pytorch",model_name="qwen3-0.6b"} 42.0
+# HELP trtllm_kv_cache_onboard_bytes_total Total bytes transferred from host to GPU (onboard)
+# TYPE trtllm_kv_cache_onboard_bytes_total counter
+trtllm_kv_cache_onboard_bytes_total{engine_type="pytorch",model_name="qwen3-0.6b"} 42.0
+# HELP trtllm_kv_cache_disk_prefetch_blocks_total Process-lifetime total V2 KV-cache blocks migrated from disk 
+# TYPE trtllm_kv_cache_disk_prefetch_blocks_total counter
+trtllm_kv_cache_disk_prefetch_blocks_total{engine_type="pytorch",model_name="qwen3-0.6b"} 42.0
+# HELP trtllm_ctx_chunks_reverted_total Context chunks whose KV growth was given back, by reason
+# TYPE trtllm_ctx_chunks_reverted_total counter
+trtllm_ctx_chunks_reverted_total{engine_type="pytorch",model_name="qwen3-0.6b",dp_rank="0",reason="kv_capacity"} 42.0
+# HELP trtllm_ctx_tokens_reverted_total Context tokens of the chunks whose KV growth was given back
+# TYPE trtllm_ctx_tokens_reverted_total counter
+trtllm_ctx_tokens_reverted_total{engine_type="pytorch",model_name="qwen3-0.6b",dp_rank="0"} 42.0
+# HELP trtllm_gen_receive_ready_wait_seconds_total Host time blocked on KV admission work before posting generation receives
+# TYPE trtllm_gen_receive_ready_wait_seconds_total counter
+trtllm_gen_receive_ready_wait_seconds_total{engine_type="pytorch",model_name="qwen3-0.6b",dp_rank="0"} 42.0
+# HELP trtllm_gen_init_holds_total Generation-init requests left for a later pass, by reason
+# TYPE trtllm_gen_init_holds_total counter
+trtllm_gen_init_holds_total{engine_type="pytorch",model_name="qwen3-0.6b",dp_rank="0",reason="kv_capacity"} 42.0
+# HELP trtllm_ctx_decoder_hold_passes_total Scheduling passes in which decoder-tail batching held final windows
+# TYPE trtllm_ctx_decoder_hold_passes_total counter
+trtllm_ctx_decoder_hold_passes_total{engine_type="pytorch",model_name="qwen3-0.6b",dp_rank="0"} 42.0
+# HELP trtllm_ctx_decoder_held_requests_total Context requests whose final window decoder-tail batching held
+# TYPE trtllm_ctx_decoder_held_requests_total counter
+trtllm_ctx_decoder_held_requests_total{engine_type="pytorch",model_name="qwen3-0.6b",dp_rank="0"} 42.0
+# HELP trtllm_kv_cache_page_table_conversions_total Sparse-attention page-table conversions, by path
+# TYPE trtllm_kv_cache_page_table_conversions_total counter
+trtllm_kv_cache_page_table_conversions_total{engine_type="pytorch",model_name="qwen3-0.6b",dp_rank="0",path="incremental"} 42.0
+# HELP trtllm_kv_cache_page_table_full_build_seconds_total Host time in full sparse page-table rebuilds
+# TYPE trtllm_kv_cache_page_table_full_build_seconds_total counter
+trtllm_kv_cache_page_table_full_build_seconds_total{engine_type="pytorch",model_name="qwen3-0.6b",dp_rank="0"} 42.0
+# HELP trtllm_prefill_perplexity Histogram of prefill perplexity per request.
+# TYPE trtllm_prefill_perplexity histogram
+trtllm_prefill_perplexity_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="1.0"} 2.0
+trtllm_prefill_perplexity_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="2.0"} 5.0
+trtllm_prefill_perplexity_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="5.0"} 8.0
+trtllm_prefill_perplexity_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="10.0"} 11.0
+trtllm_prefill_perplexity_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="+Inf"} 14.0
+trtllm_prefill_perplexity_count{engine_type="pytorch",model_name="qwen3-0.6b"} 14.0
+trtllm_prefill_perplexity_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 68.0
+# HELP trtllm_generation_perplexity Histogram of generation perplexity per request.
+# TYPE trtllm_generation_perplexity histogram
+trtllm_generation_perplexity_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="1.0"} 2.0
+trtllm_generation_perplexity_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="2.0"} 5.0
+trtllm_generation_perplexity_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="5.0"} 8.0
+trtllm_generation_perplexity_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="10.0"} 11.0
+trtllm_generation_perplexity_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="+Inf"} 14.0
+trtllm_generation_perplexity_count{engine_type="pytorch",model_name="qwen3-0.6b"} 14.0
+trtllm_generation_perplexity_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 68.0
+# HELP trtllm_input_processing_seconds Server input processing wall time per stage. Media loading 
+# TYPE trtllm_input_processing_seconds histogram
+trtllm_input_processing_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",stage="tokenize",le="0.001"} 2.0
+trtllm_input_processing_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",stage="tokenize",le="0.01"} 5.0
+trtllm_input_processing_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",stage="tokenize",le="0.1"} 8.0
+trtllm_input_processing_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",stage="tokenize",le="1.0"} 11.0
+trtllm_input_processing_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",stage="tokenize",le="+Inf"} 14.0
+trtllm_input_processing_seconds_count{engine_type="pytorch",model_name="qwen3-0.6b",stage="tokenize"} 14.0
+trtllm_input_processing_seconds_sum{engine_type="pytorch",model_name="qwen3-0.6b",stage="tokenize"} 3.5
+# HELP trtllm_input_processing_queue_seconds Time waiting for a server input-processor thread.
+# TYPE trtllm_input_processing_queue_seconds histogram
+trtllm_input_processing_queue_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="0.001"} 2.0
+trtllm_input_processing_queue_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="0.01"} 5.0
+trtllm_input_processing_queue_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="0.1"} 8.0
+trtllm_input_processing_queue_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="1.0"} 11.0
+trtllm_input_processing_queue_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",le="+Inf"} 14.0
+trtllm_input_processing_queue_seconds_count{engine_type="pytorch",model_name="qwen3-0.6b"} 14.0
+trtllm_input_processing_queue_seconds_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 3.5
+# HELP trtllm_media_processing_seconds Per-media-item download, decode execution and decode 
+# TYPE trtllm_media_processing_seconds histogram
+trtllm_media_processing_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",stage="decode",modality="image",le="0.001"} 2.0
+trtllm_media_processing_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",stage="decode",modality="image",le="0.01"} 5.0
+trtllm_media_processing_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",stage="decode",modality="image",le="0.1"} 8.0
+trtllm_media_processing_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",stage="decode",modality="image",le="1.0"} 11.0
+trtllm_media_processing_seconds_bucket{engine_type="pytorch",model_name="qwen3-0.6b",stage="decode",modality="image",le="+Inf"} 14.0
+trtllm_media_processing_seconds_count{engine_type="pytorch",model_name="qwen3-0.6b",stage="decode",modality="image"} 14.0
+trtllm_media_processing_seconds_sum{engine_type="pytorch",model_name="qwen3-0.6b",stage="decode",modality="image"} 3.5
+# HELP trtllm_multimodal_encoder_gpu_time_seconds Rank-0 GPU elapsed time per completed multimodal encoder 
+# TYPE trtllm_multimodal_encoder_gpu_time_seconds histogram
+trtllm_multimodal_encoder_gpu_time_seconds_bucket{le="0.001"} 2.0
+trtllm_multimodal_encoder_gpu_time_seconds_bucket{le="0.01"} 5.0
+trtllm_multimodal_encoder_gpu_time_seconds_bucket{le="0.1"} 8.0
+trtllm_multimodal_encoder_gpu_time_seconds_bucket{le="1.0"} 11.0
+trtllm_multimodal_encoder_gpu_time_seconds_bucket{le="+Inf"} 14.0
+trtllm_multimodal_encoder_gpu_time_seconds_count 14.0
+trtllm_multimodal_encoder_gpu_time_seconds_sum 3.5

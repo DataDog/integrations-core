@@ -27,6 +27,11 @@ on:
         required: true
         type: string
 
+      ddev-version:
+        description: "PyPI ddev version specifier for non-core callers, for example ==20.1.0"
+        required: false
+        default: ""
+        type: string
       python-version:
         required: false
         default: "3.13"
@@ -79,6 +84,11 @@ on:
         required: false
         type: string
         default: ""
+      exclude-fips:
+        description: "Append the default FIPS test exclusion to unit/integration and E2E pytest arguments"
+        required: false
+        type: boolean
+        default: true
       context:
         description: "Context where the test is run. This is used for CI visibility descovery."
         required: false
@@ -136,26 +146,14 @@ jobs:
 
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-    # When called as a reusable workflow from other repos, `uses: ./` resolves
-    # from the caller's repo where the actions don't exist. We checkout the
-    # actions from integrations-core so they are available locally.
-    # Note: github.workflow_sha/workflow_ref point to the caller, not to
-    # integrations-core, so we cannot dynamically pin the ref.
-    - name: Resolve integrations-core ref
-      if: inputs.repo != 'core'
-      id: ic-ref
-      shell: bash
-      run: |
-        # GITHUB_WORKFLOW_REF is available in the environment automatically
-        echo "GITHUB_WORKFLOW_REF: $GITHUB_WORKFLOW_REF"
-        echo "ref=${GITHUB_WORKFLOW_REF##*@}" >> "$GITHUB_OUTPUT"
-
+    # Local actions resolve from the caller's checkout, so fetch them
+    # from the same commit as this reusable workflow.
     - name: Checkout integrations-core actions
       if: inputs.repo != 'core'
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         repository: "DataDog/integrations-core"
-        ref: master
+        ref: ${{ job.workflow_sha }}
         fetch-depth: 1
         sparse-checkout: .github/actions
         # Use a specific sub-folder
@@ -210,6 +208,7 @@ jobs:
       #   INPUT_PLATFORM
       #   INPUT_MINIMUM_BASE_PACKAGE
       #   INPUT_PYTEST_ARGS
+      #   INPUT_EXCLUDE_FIPS
       #   INPUT_IS_FORK
       run: bash .github/workflows/scripts/setup-test-env.sh
       env:
@@ -228,6 +227,7 @@ jobs:
         INPUT_MINIMUM_BASE_PACKAGE: ${{ inputs.minimum-base-package }}
         INPUT_JOB_NAME: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
         INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
+        INPUT_EXCLUDE_FIPS: ${{ inputs.exclude-fips }}
         INPUT_IS_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
         DD_API_KEY_SECRET: ${{ steps.dd-sts.outputs.api_key }}
         SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
@@ -279,6 +279,7 @@ jobs:
       uses: ./core-temp/.github/actions/setup-ddev
       with:
         install-mode: pypi
+        ddev-version: ${{ inputs.ddev-version }}
 
     - name: Configure ddev
       env:
@@ -336,7 +337,7 @@ jobs:
         TARGET_ENV: ${{ inputs.target-env }}
       run: |-
         if [[ -n "$TARGET_ENV" ]]; then
-          ddev test --bench --junit "${TARGET}:${TARGET_ENV}"
+          ddev test --bench --junit "$TARGET" --envs "$TARGET_ENV"
         else
           ddev test --bench --junit "$TARGET"
         fi
@@ -351,7 +352,7 @@ jobs:
         TARGET_ENV: ${{ inputs.target-env }}
       run: |-
         if [[ -n "$TARGET_ENV" ]]; then
-          ddev test --latest --junit "${TARGET}:${TARGET_ENV}"
+          ddev test --latest --junit "$TARGET" --envs "$TARGET_ENV"
         else
           ddev test --latest --junit "$TARGET"
         fi
@@ -361,8 +362,7 @@ jobs:
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: bash .github/workflows/scripts/run-e2e-tests.sh
       env:
-        # Override INPUT_TARGET to include :latest suffix
-        INPUT_TARGET: "${{ inputs.target }}:latest"
+        INPUT_TARGET_ENV: "latest"
         INPUT_SESSION_NAME: "latest-e2e-tests"
         INPUT_IS_LATEST: "true"
 

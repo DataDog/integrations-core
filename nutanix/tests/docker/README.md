@@ -52,7 +52,7 @@ No setup is needed. The fixtures are already in `../fixtures/` and are shared wi
 ddev test nutanix
 
 # Run only integration tests
-ddev test nutanix -- -k test_integration
+ddev test nutanix --pytest-args='-k test_integration'
 ```
 
 The `dd_environment` pytest fixture automatically:
@@ -77,7 +77,7 @@ To test against a real Nutanix Prism Central instance:
 2. Set the environment variable and run tests:
    ```bash
    export USE_NUTANIX_AWS=true
-   ddev test nutanix -- -k test_integration
+   ddev test nutanix --pytest-args='-k test_integration'
    ```
 
 The tests will connect to `https://nutanix.local:9440` which resolves to the IP you configured in `/etc/hosts`.

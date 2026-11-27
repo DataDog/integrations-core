@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-11-25",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nThe **{{feature.name}}** license on firewall **{{device_ip.name}}** has expired.\n{{/is_alert}}\n\n{{#is_recovery}}\n## Recovered\n\nThe {{feature.name}} license on firewall {{device_ip.name}} is no longer expired.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nThe matching security service, such as threat prevention or URL filtering, no longer receives updates.\n\n---\n\n## Why?\n\nPossible causes:\n* **The subscription reached its end date without being renewed.**\n* **The license was renewed, but the firewall has not retrieved the new license key yet.**\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Run `request license info` on the firewall to check the license status.\n2. Renew the subscription, then retrieve the license keys from the license server (Device > Licenses).\n3. If you don't plan to renew this license, exclude it by adding `!feature:{{feature.name}}` to the monitor query.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Metrics Explorer](/metric/explorer?exp_metric=pan_firewall.license.expired&exp_scope=device_ip:{{device_ip.name}},feature:{{feature.name}}&exp_agg=max&exp_type=line)\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] License for {{feature.name}} has expired on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 1
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_2d):max:pan_firewall.license.expired{*} by {device_namespace,device_ip,feature} >= 1",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks whether any licensed feature on the firewall has expired. An expired subscription stops the matching security service, such as threat prevention or URL filtering, from receiving updates.",
+  "last_updated_at": "2026-11-25",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "License has expired",
+  "version": 2
+}

@@ -8,6 +8,7 @@ import importlib
 import io
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 from zipfile import ZIP_DEFLATED, ZipFile
 
@@ -158,3 +159,118 @@ def placeholder():
     assert namespace['query_async'].__doc__ == ('' if strip_docstrings else 'Async documentation.')
     if not strip_docstrings:
         assert path.read_bytes() == source.replace('\n', newline).encode('utf-8')
+
+
+def test_kubernetes_api_docstrings_are_kept_for_watch(tmp_path: Path):
+    # `kubernetes.watch.Watch` reads the API method docstrings to pick the event type and the streaming
+    # argument, so only the model docstrings may be emptied.
+    api = tmp_path / 'kubernetes/client/api/core_v1_api.py'
+    api_source = '''class CoreV1Api:
+    def read_namespaced_pod_log(self, name, namespace, **kwargs):
+        """read log of the specified Pod
+
+        :param bool follow: Follow the log stream of the pod.
+        :return: str
+        """
+'''
+    model = tmp_path / 'kubernetes/client/models/v1_pod.py'
+    model_source = '''class V1Pod:
+    """Pod is a collection of containers that can run on a host."""
+'''
+    for path, source in ((api, api_source), (model, model_source)):
+        path.parent.mkdir(parents=True)
+        path.write_text(source, encoding='utf-8')
+
+    rules = build_wheels._get_matching_rules('kubernetes-35.0.0-py2.py3-none-any.whl')
+
+    assert build_wheels._strip_lines_from_dir(tmp_path, rules)
+    assert api.read_text(encoding='utf-8') == api_source
+    assert 'collection of containers' not in model.read_text(encoding='utf-8')
+
+
+@pytest.mark.parametrize(
+    'wheel_name, strip_docstrings',
+    [
+        ('cm_client-45.0.4-py3-none-manylinux2014_x86_64.whl', True),
+        ('ddtrace-4.16.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl', True),
+        ('hazelcast_python_client-5.7.0-py3-none-any.whl', True),
+        ('openstacksdk-4.18.0-py3-none-any.whl', True),
+        ('redis-8.1.0-py3-none-any.whl', True),
+        # A separate distribution whose docstrings were not reviewed
+        ('ddtrace_internal-0.1.0-py3-none-any.whl', False),
+    ],
+)
+def test_docstring_rules_match_wheel_filenames(wheel_name: str, strip_docstrings: bool):
+    # Wheel filenames use the normalized project name (`cm-client` becomes `cm_client`), so a rule
+    # written with the project name would never apply.
+    rules = build_wheels._get_matching_rules(wheel_name)
+
+    assert any(rule.get('strip_docstrings', False) for rule in rules) is strip_docstrings
+
+
+ORJSON_MACOS_15 = 'orjson-3.13.0-cp313-cp313-macosx_15_0_arm64.whl'
+ORJSON_UNIVERSAL = 'orjson-3.13.0-cp313-cp313-macosx_10_15_x86_64.macosx_11_0_arm64.macosx_10_15_universal2.whl'
+
+
+def _write_orjson_wheel(path: Path, requires_dist: str = '') -> None:
+    metadata = f'Metadata-Version: 2.1\nName: orjson\nVersion: 3.13.0\nRequires-Python: >=3.10\n{requires_dist}'
+    with ZipFile(path, 'w') as wheel:
+        wheel.writestr('orjson-3.13.0.dist-info/METADATA', metadata)
+        wheel.writestr('orjson/__init__.py', path.name)
+
+
+def _fake_pip_download(monkeypatch: pytest.MonkeyPatch, available: dict[str, str]) -> list[list[str]]:
+    """Answer `pip download` with the wheels in `available`, by platform, as PyPI would for orjson 3.13.0."""
+    calls: list[list[str]] = []
+
+    def run(command_args: list[str], **_kwargs: Any) -> SimpleNamespace:
+        calls.append(command_args)
+        platform = command_args[command_args.index('--platform') + 1]
+        if platform not in available:
+            return SimpleNamespace(returncode=1)
+
+        destination = Path(command_args[command_args.index('--dest') + 1])
+        _write_orjson_wheel(destination / ORJSON_UNIVERSAL, available[platform])
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(build_wheels.subprocess, 'run', run)
+    monkeypatch.setenv('MACOSX_DEPLOYMENT_TARGET', '12.0')
+    # The host CPU architecture is a platform boundary: pin it so the result doesn't depend on the machine
+    monkeypatch.setattr(build_wheels.os, 'uname', lambda: SimpleNamespace(machine='arm64'), raising=False)
+    return calls
+
+
+def test_use_macos_target_wheels_replaces_wheel_needing_newer_macos_with_compatible_wheel_of_same_release(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    compatible = tmp_path / 'six-1.17.0-py2.py3-none-any.whl'
+    compatible.write_bytes(b'untouched')
+    _write_orjson_wheel(tmp_path / ORJSON_MACOS_15)
+    calls = _fake_pip_download(monkeypatch, {'macosx_12_0_arm64': ''})
+
+    build_wheels.use_macos_target_wheels(tmp_path, Path('python'), {'PIP_NO_BINARY': 'ddtrace'})
+
+    assert sorted(path.name for path in tmp_path.iterdir()) == sorted([ORJSON_UNIVERSAL, compatible.name])
+    assert compatible.read_bytes() == b'untouched'
+    assert [call[call.index('download') + 1] for call in calls] == ['orjson==3.13.0']
+
+
+def test_use_macos_target_wheels_keeps_wheel_when_release_has_no_compatible_wheel(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    _write_orjson_wheel(tmp_path / ORJSON_MACOS_15)
+    _fake_pip_download(monkeypatch, {})
+
+    build_wheels.use_macos_target_wheels(tmp_path, Path('python'), {})
+
+    assert [path.name for path in tmp_path.iterdir()] == [ORJSON_MACOS_15]
+
+
+def test_use_macos_target_wheels_rejects_replacement_declaring_different_dependencies(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    _write_orjson_wheel(tmp_path / ORJSON_MACOS_15)
+    _fake_pip_download(monkeypatch, {'macosx_12_0_arm64': 'Requires-Dist: typing-extensions\n'})
+
+    with pytest.raises(RuntimeError, match='Requires-Dist'):
+        build_wheels.use_macos_target_wheels(tmp_path, Path('python'), {})

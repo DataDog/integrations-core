@@ -17,8 +17,8 @@ start_docker() {
 }
 
 # Docker is not available on GitHub-hosted macOS runners:
-# - https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
-# - https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
+# - https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
+# - https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md
 # - https://github.com/actions/runner/issues/1456
 if [ "$RUNNER_OS" == "macOS" ]; then
   echo "::warning::Docker is not available on GitHub-hosted macOS runners. Tests that require Docker will likely fail."

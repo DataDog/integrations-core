@@ -2,13 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 import os
-import time
 
 import pytest
 
 from datadog_checks.dev import docker_run, run_command
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.conditions import WaitFor
 
 from .common import BASIC_CONFIG, HERE
 
@@ -21,22 +21,36 @@ E2E_METADATA = {
 }
 
 
+def ceph(*args: str) -> str:
+    return run_command(['docker', 'exec', 'dd-test-ceph', 'ceph', *args], capture='out', check=True).stdout
+
+
+def wait_for_healthy_cluster() -> None:
+    # The cluster reports HEALTH_OK before its placement groups are active, so both are required.
+    pg_stat = json.loads(ceph('pg', 'stat', '-fjson'))
+    # Newer releases nest the summary under `pg_summary`.
+    pg_summary = pg_stat.get('pg_summary', pg_stat)
+    total = pg_summary['num_pgs']
+    clean = sum(s['num'] for s in pg_summary['num_pg_by_state'] if s['name'] == 'active+clean')
+    if total == 0 or clean != total:
+        raise Exception('Placement groups are not clean yet: {}/{}'.format(clean, total))
+
+    health = ceph('health')
+    if not health.startswith('HEALTH_OK'):
+        raise Exception('Cluster is not healthy yet: {}'.format(health))
+
+    # A monitor can be out of quorum before the cluster reports MON_DOWN.
+    status = json.loads(ceph('status', '-fjson'))
+    if len(status['quorum']) != status['monmap']['num_mons']:
+        raise Exception('Monitors are not all in quorum yet: {}'.format(status['quorum_names']))
+
+
 @pytest.fixture(scope="session")
 def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
-    # We need a custom condition to wait a bit longer
     with docker_run(
         compose_file=compose_file,
-        conditions=[
-            CheckDockerLogs(compose_file, 'spawning ceph --cluster ceph -w', wait=5),
-            CheckDockerLogs(compose_file, 'Running on http://0.0.0.0:5000/'),
-        ],
+        conditions=[WaitFor(wait_for_healthy_cluster, attempts=60, wait=5)],
         attempts=3,
     ):
-        # Clean the disk space warning
-        run_command(
-            ['docker', 'exec', 'dd-test-ceph', 'ceph', 'tell', 'mon.*', 'injectargs', '--mon_data_avail_warn', '5']
-        )
-        # Wait a bit for the change to take effect
-        time.sleep(5)
         yield BASIC_CONFIG, E2E_METADATA

@@ -2,7 +2,32 @@
 
 <!-- towncrier release notes start -->
 
-## 13.4.0 / 2026-10-01
+## 13.7.0 / 2026-11-25
+
+***Added***:
+
+* Add ``fgHwSensorValue`` and ``fgHwSensorAlarmStatus`` metrics from the FortiGate hardware sensor table. ([#25010](https://github.com/DataDog/integrations-core/pull/25010))
+* Add generic interface metrics and metadata to the ``dell-os10`` profile. ([#25031](https://github.com/DataDog/integrations-core/pull/25031))
+* Add ``cbgpPeer3Table`` (VRF-aware BGP peer) metrics to the generic Cisco profile. ([#25032](https://github.com/DataDog/integrations-core/pull/25032))
+* Add ``haStatCode`` and ``haClusterXLFailover`` metrics to the Check Point profile. ([#25034](https://github.com/DataDog/integrations-core/pull/25034))
+
+***Fixed***:
+
+* Document `core` as the default `loader` and explain how the Agent selects between the core and Python SNMP implementations. ([#25459](https://github.com/DataDog/integrations-core/pull/25459))
+
+## 13.6.0 / 2026-11-16 / Agent 7.86.0
+
+***Security***:
+
+* Bump `pyasn1` to 0.6.5 to address CVE-2026-119194, CVE-2026-119195, CVE-2026-119196, and CVE-2026-119197. ([#25968](https://github.com/DataDog/integrations-core/pull/25968))
+
+## 13.5.0 / 2026-10-29
+
+***Added***:
+
+* Add a generic BFD session fragment (``bfdSessTable``/``bfdSessPerfTable``) to the Arista, Juniper, F5 BIG-IP, NEC Univerge, and generic Cisco profiles. ([#25033](https://github.com/DataDog/integrations-core/pull/25033))
+
+## 13.4.0 / 2026-10-01 / Agent 7.85.0
 
 ***Added***:
 

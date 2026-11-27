@@ -1,0 +1,35 @@
+version: "1"
+
+tasks:
+  # Full metric-coverage fixture: a Kong 3.x and a Kong 2.x node (DB-less) behind
+  # one gateway, each proxying a key-auth protected route with the Prometheus
+  # plugin enabled per consumer, plus a built-in workload that keeps request,
+  # bandwidth, and latency counters moving. The 3.x node serves the 3.0 metric
+  # names and stream sessions, the 2.x node the pre-3.0 names, and both serve
+  # `/status`. Port 8200 serves a recorded 2.x scrape for the 2.x stream series.
+  - id: kong-full
+    task: ./compose/full-coverage.compose@gateway
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DB_HOST: "{{ .hostname }}"
+      evalya.io/provides.KONG_PROXY_PORT: "8000"
+      evalya.io/provides.KONG_ADMIN_PORT: "8001"
+      evalya.io/provides.KONG_LEGACY_PROXY_PORT: "8100"
+      evalya.io/provides.KONG_LEGACY_ADMIN_PORT: "8101"
+      evalya.io/provides.KONG_FIXTURE_METRICS_PORT: "8200"
+      evalya.io/provides.KONG_CONSUMER_KEY: "${KONG_CONSUMER_KEY:-devops-best-friend}"
+    env:
+      - name: KONG_VERSION
+        value: "${KONG_VERSION:-3.9.4}"
+      - name: KONG_LEGACY_VERSION
+        value: "${KONG_LEGACY_VERSION:-2.7.2}"
+      - name: KONG_CONSUMER_KEY
+        value: "${KONG_CONSUMER_KEY:-devops-best-friend}"
+      - name: ACTIVITY_GEN
+        value: "${ACTIVITY_GEN:-1}"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8001/metrics >/dev/null && wget -qO- http://127.0.0.1:8101/metrics >/dev/null && wget -qO- http://127.0.0.1:8200/metrics >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s

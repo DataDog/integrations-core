@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "title": "Storage pool is running low on capacity",
+  "tags": [
+    "integration:dell-powerflex"
+  ],
+  "definition": {
+    "name": "[Dell PowerFlex] Storage pool {{storage_pool_name.name}} is running low on capacity",
+    "type": "query alert",
+    "query": "avg(last_15m):avg:dell_powerflex.unused_capacity.in_kb{dell_type:storage_pool} by {storage_pool_id,storage_pool_name} / avg:dell_powerflex.max_capacity.in_kb{dell_type:storage_pool} by {storage_pool_id,storage_pool_name} * 100 < 15",
+    "message": "{{#is_warning}}\nDell PowerFlex storage pool {{storage_pool_name.name}} (ID: {{storage_pool_id.name}}) has {{value}}% free capacity remaining.\n\nConsider planning capacity expansion or migrating volumes to pools with more headroom.\n{{/is_warning}}\n\n{{#is_alert}}\nDell PowerFlex storage pool {{storage_pool_name.name}} (ID: {{storage_pool_id.name}}) is critically low on capacity with only {{value}}% free.\n\nImmediate action is recommended. Add storage devices, delete unused volumes or snapshots, or expand the pool to prevent allocation failures and degraded rebuild performance.\n{{/is_alert}}\n\n{{#is_recovery}}\nFree capacity on Dell PowerFlex storage pool {{storage_pool_name.name}} has recovered above the threshold.\n{{/is_recovery}}",
+    "tags": [
+      "integration:dell-powerflex"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 15,
+        "warning": 25
+      },
+      "notify_audit": false,
+      "include_tags": true,
+      "new_group_delay": 60,
+      "on_missing_data": "default",
+      "silenced": {}
+    },
+    "priority": 2
+  },
+  "created_at": "2026-05-19",
+  "last_updated_at": "2026-11-13",
+  "description": "Storage pool capacity represents the percentage of free space remaining in a Dell PowerFlex storage pool relative to its total capacity. This monitor tracks when free capacity drops below critical thresholds to prevent allocation failures and degraded rebuild performance."
+}

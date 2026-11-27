@@ -917,6 +917,7 @@ class ObservingGatherer(TaskTestGatherer):
                 'repository_url': 'https://github.com/datadog/integrations-core',
                 'head_sha': 'head-sha',
                 'head_branch': 'a-branch',
+                'head_tag': None,
                 'checkout_sha': 'merge-sha-mmm',
                 'is_fork': False,
                 'pr_number': 42,
@@ -944,6 +945,7 @@ class ObservingGatherer(TaskTestGatherer):
                 'repository_url': 'https://github.com/datadog/integrations-core',
                 'head_sha': 'a-master-sha',
                 'head_branch': 'master',
+                'head_tag': None,
                 'checkout_sha': 'a-master-sha',
                 'pr_number': None,
                 'base_branch': None,
@@ -972,6 +974,7 @@ class ObservingGatherer(TaskTestGatherer):
                 'repository_url': 'https://github.com/datadog/integrations-core',
                 'head_sha': 'head-sha',
                 'head_branch': 'a-branch',
+                'head_tag': None,
                 'checkout_sha': 'merge-sha-mmm',
                 'is_fork': False,
                 'pr_number': 42,
@@ -982,8 +985,8 @@ class ObservingGatherer(TaskTestGatherer):
             id='caller-tags',
         ),
         pytest.param(
-            CONTEXT.model_copy(update={'pr_number': None}),
-            ('context:release',),
+            CONTEXT.model_copy(update={'pr_number': None, 'context': 'release'}),
+            ('context:sneaky',),
             {
                 'team': 'agent-integrations',
                 'context': 'release',
@@ -991,13 +994,14 @@ class ObservingGatherer(TaskTestGatherer):
                 'repository_url': 'https://github.com/datadog/integrations-core',
                 'head_sha': 'head-sha',
                 'head_branch': 'a-branch',
+                'head_tag': None,
                 'checkout_sha': 'merge-sha-mmm',
                 'pr_number': None,
                 'is_fork': False,
                 'base_branch': 'master',
                 'base_sha': 'base-sha',
             },
-            id='caller-context',
+            id='run-context',
         ),
     ],
 )
@@ -1010,9 +1014,9 @@ def test_non_pr_runtime_events_carry_the_resolved_custom_context():
     monitoring = MonitoringRuntime(protected_fields=PROTECTED_RUN_FIELDS)
     monitoring.add_log_handler(handler)
     monitoring.set_run_fields(pr_number='999', base_branch='caller-base', base_sha='caller-sha')
-    run = CONTEXT.model_copy(update={'pr_number': None, 'base_branch': None, 'base_sha': None})
+    run = CONTEXT.model_copy(update={'pr_number': None, 'base_branch': None, 'base_sha': None, 'context': 'test-agent'})
 
-    monitoring.set_run_fields(**run_fields(run, tags=('context:test-agent',)))
+    monitoring.set_run_fields(**run_fields(run))
     monitoring.component('dispatcher').logger.info('Resolved run')
 
     [event] = handler.events

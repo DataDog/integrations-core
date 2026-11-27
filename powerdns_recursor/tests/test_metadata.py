@@ -2,17 +2,28 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+from typing import Any
+
 import mock
 import pytest
-import requests
 
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientReadTimeoutError
 from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
 from . import common
 
 
-def test_metadata_unit(datadog_agent):
+def _register_metadata_outcome(
+    fake_http: FakeHTTPClient, instance: dict[str, Any], outcome: FakeHTTPResponse | Exception
+):
+    # Version 3 asks the statistics endpoint first and falls back to the v4 API root.
+    base = 'http://{}:{}'.format(instance['host'], instance['port'])
+    for url in ('{}/servers/localhost/statistics'.format(base), '{}/api'.format(base)):
+        fake_http.register_response('GET', url, outcome)
+
+
+def test_metadata_unit(datadog_agent, fake_http):
     version = common._get_pdns_version()
     if version == 3:
         instance = common.CONFIG
@@ -24,24 +35,22 @@ def test_metadata_unit(datadog_agent):
 
     config_obj, tags = check._get_config(instance)
 
-    with mock.patch('requests.Session.get', side_effect=requests.exceptions.Timeout()):
-        check._collect_metadata(config_obj)
-        datadog_agent.assert_metadata_count(0)
-        check.log.debug.assert_called_with('Error collecting PowerDNS Recursor version: %s', '')
+    _register_metadata_outcome(fake_http, instance, HTTPClientReadTimeoutError('read timed out'))
+    check._collect_metadata(config_obj)
+    datadog_agent.assert_metadata_count(0)
+    check.log.debug.assert_called_with('Error collecting PowerDNS Recursor version: %s', 'read timed out')
 
     datadog_agent.reset()
-    with mock.patch('requests.Session.get', return_value=MockResponse()):
-        check._collect_metadata(config_obj)
-        datadog_agent.assert_metadata_count(0)
-        check.log.debug.assert_called_with("Couldn't find the PowerDNS Recursor Server version header")
+    _register_metadata_outcome(fake_http, instance, FakeHTTPResponse())
+    check._collect_metadata(config_obj)
+    datadog_agent.assert_metadata_count(0)
+    check.log.debug.assert_called_with("Couldn't find the PowerDNS Recursor Server version header")
 
     datadog_agent.reset()
-    with mock.patch('requests.Session.get', return_value=MockResponse(headers={'Server': 'wrong_stuff'})):
-        check._collect_metadata(config_obj)
-        datadog_agent.assert_metadata_count(0)
-        check.log.debug.assert_called_with(
-            'Error while decoding PowerDNS Recursor version: %s', 'list index out of range'
-        )
+    _register_metadata_outcome(fake_http, instance, FakeHTTPResponse(headers={'Server': 'wrong_stuff'}))
+    check._collect_metadata(config_obj)
+    datadog_agent.assert_metadata_count(0)
+    check.log.debug.assert_called_with('Error while decoding PowerDNS Recursor version: %s', 'list index out of range')
 
 
 @pytest.mark.usefixtures('dd_environment')

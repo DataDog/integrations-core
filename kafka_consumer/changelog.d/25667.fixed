@@ -1,1 +1,0 @@
-Stop creating a librdkafka Consumer on every check run just to read the cluster ID; read it from the AdminClient metadata instead.

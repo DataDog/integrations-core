@@ -21,8 +21,10 @@ V1 = (OpenMetricsBaseCheck, {'prometheus_url': URL, **OPTIONS})
 V2 = (OpenMetricsBaseCheckV2, {'openmetrics_endpoint': URL, **OPTIONS})
 
 
+@pytest.mark.parametrize('agnostic', [False, True], ids=['default', 'agnostic'])
 @pytest.mark.parametrize('check_class, instance', [V1, V2], ids=['v1', 'v2'])
-def test_telemetry_does_not_read_long_lines(check_class, instance, dd_run_check):
+def test_telemetry_does_not_read_long_lines(check_class, instance, agnostic, dd_run_check):
+    check_class = type(check_class.__name__, (check_class,), {'AGNOSTIC_HTTP_CLIENT': agnostic})
     response = requests.Response()
     response.status_code = 200
     response.raw = urllib3.HTTPResponse(

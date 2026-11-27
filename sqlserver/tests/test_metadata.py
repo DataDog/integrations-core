@@ -127,6 +127,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
+                                'max_length': 255,
                                 'default': 'None',
                                 'nullable': True,
                             },
@@ -176,6 +177,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
+                                'max_length': 255,
                                 'default': 'None',
                                 'nullable': True,
                             },
@@ -232,6 +234,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
+                                'max_length': 255,
                                 'default': 'None',
                                 'nullable': True,
                             },
@@ -263,18 +266,21 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'RestaurantName',
                                 'data_type': 'varchar',
+                                'max_length': 255,
                                 'default': 'None',
                                 'nullable': True,
                             },
                             {
                                 'name': 'District',
                                 'data_type': 'varchar',
+                                'max_length': 100,
                                 'default': 'None',
                                 'nullable': True,
                             },
                             {
                                 'name': 'Review',
                                 'data_type': 'varchar',
+                                'max_length': -1,
                                 'default': 'None',
                                 'nullable': True,
                             },
@@ -300,18 +306,21 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'RestaurantName',
                                 'data_type': 'varchar',
+                                'max_length': 255,
                                 'default': 'None',
                                 'nullable': True,
                             },
                             {
                                 'name': 'District',
                                 'data_type': 'varchar',
+                                'max_length': 100,
                                 'default': 'None',
                                 'nullable': True,
                             },
                             {
                                 'name': 'Cuisine',
                                 'data_type': 'varchar',
+                                'max_length': 100,
                                 'default': 'None',
                                 'nullable': True,
                             },

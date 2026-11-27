@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-11-04",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nIPsec tunnel **{{tunnel.name}}** (gateway {{gateway.name}}, peer {{peer_ip.name}}) on firewall **{{device_ip.name}}** has not been active for the last 15 minutes: it is inactive or stuck initializing.\n{{/is_alert}}\n\n{{#is_recovery}}\n## Recovered\n\nIPsec tunnel {{tunnel.name}} (gateway {{gateway.name}}, peer {{peer_ip.name}}) on firewall {{device_ip.name}} is active again.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nTraffic to the remote network or service behind this tunnel is not flowing through it.\n\n---\n\n## Why?\n\nPossible causes:\n* **The peer is unreachable** on its public address.\n* **IKE or IPsec negotiation fails**: mismatched proposals, pre-shared keys, or certificates.\n* **The tunnel only comes up when traffic arrives**, because no tunnel monitor is configured.\n* **This firewall is the passive unit of an active/passive HA pair.**\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Run `show vpn ike-sa` and `show vpn ipsec-sa` on the firewall to see where negotiation stops.\n2. Check reachability to {{peer_ip.name}} from the firewall's outer interface.\n3. Check that both sides use matching proposals and keys.\n4. If this tunnel is down on purpose, or only comes up when traffic arrives, exclude it by adding `!tunnel:{{tunnel.name}}` to the monitor query.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Metrics Explorer](/metric/explorer?exp_metric=pan_firewall.ipsec.tunnel.state&exp_scope=device_ip:{{device_ip.name}},tunnel:{{tunnel.name}}&exp_agg=max&exp_type=line)\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] IPsec tunnel {{tunnel.name}} ({{peer_ip.name}}) is down on {{device_ip.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_15m):1 - abs(max:pan_firewall.ipsec.tunnel.state{*} by {device_namespace,device_ip,tunnel,gateway,peer_ip} - 1) <= 0",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks the state of each IPsec tunnel on the firewall. A tunnel that is inactive, or stuck initializing because IKE or IPsec negotiation never completes, cuts connectivity to the remote site. On an active/passive HA pair, tunnels on the passive firewall can alert until a failover.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "IPsec tunnel is down",
+  "version": 2
+}

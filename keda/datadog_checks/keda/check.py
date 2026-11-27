@@ -9,6 +9,7 @@ from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 class KedaCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'keda'
 
     def __init__(self, name, init_config, instances=None):

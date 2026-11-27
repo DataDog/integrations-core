@@ -13,6 +13,7 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
     """
 
     METRIC_PREFIX = 'coredns.'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 

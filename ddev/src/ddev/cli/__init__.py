@@ -136,6 +136,11 @@ def ddev(
         app.config_file.load()
     except OSError as e:  # no cov
         app.abort(f'Error loading configuration: {e}')
+    if 'ai' in app.config_file.overrides_model.raw_data:
+        app.display_warning(
+            f'Ignoring [ai] in {app.config_file.pretty_overrides_path}; AI settings must be set in the global config.',
+            markup=False,
+        )
     if app.config.upgrade_check:
         upgrade_check.upgrade_check(app, __version__)
 

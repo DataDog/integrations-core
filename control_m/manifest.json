@@ -1,0 +1,91 @@
+{
+  "app_id": "control-m",
+  "app_uuid": "019cbfe6-87fb-757e-8bf8-efd085d7fe9a",
+  "manifest_version": "2.0.0",
+  "display_on_public_website": true,
+  "tile": {
+    "title": "Control-M",
+    "description": "Monitor Control-M servers and jobs",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Control-M Overview",
+        "image_url": "images/test.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Track all jobs",
+        "image_url": "images/test2_4.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Track job completions",
+        "image_url": "images/test2_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Examine job failures",
+        "image_url": "images/test2_2.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Automation",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Queried Data Type::Events",
+      "Queried Data Type::Metrics",
+      "Submitted Data Type::Events",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "oauth": {},
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com",
+    "vendor_id": "datadog"
+  },
+  "assets": {
+    "dashboards": {
+      "Control-M Overview": "assets/dashboards/control_m_overview.json"
+    },
+    "monitors": {
+      "API connectivity drops to 0": "assets/monitors/api_connectivity_drops_to_0.json",
+      "Job failures exceed threshold": "assets/monitors/job_failures_exceed_threshold.json",
+      "Job exceeds estimated run time": "assets/monitors/job_exceeds_estimated_run_time.json"
+    },
+    "integration": {
+      "source_type_name": "control-m",
+      "auto_install": true,
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "process_signatures": [],
+      "metrics": {
+        "prefix": "control_m",
+        "check": [
+          "control_m.can_connect"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 74286066,
+      "supports_ddr_coordinated_failover": false
+    }
+  },
+  "owner": "agent-integrations"
+}

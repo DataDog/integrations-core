@@ -9,6 +9,7 @@ from .metrics import METRIC_MAP, construct_metrics_config
 
 class CoreDNS(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'coredns'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 

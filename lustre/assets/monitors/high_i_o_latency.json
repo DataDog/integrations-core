@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "title": "High I/O latency",
+  "tags": [
+    "integration:lustre"
+  ],
+  "definition": {
+    "name": "[Lustre] High I/O latency",
+    "type": "query alert",
+    "query": "sum(last_15m):monotonic_diff(sum:lustre.filesystem.write.sum{*} by {host,device_uuid}.rollup(max, 60)) / clamp_min(sum:lustre.filesystem.write.count{*} by {host,device_uuid}.as_count().rollup(sum, 60), 1) > 1000000",
+    "message": "Lustre filesystem average write latency over the last 15 minutes is high: warning above 500,000 microseconds per operation (0.5 seconds), critical above 1,000,000 microseconds per operation (1 second). The average divides interval write time by write operations; it is not the maximum since stats were reset. Tune these thresholds to the workload's latency SLO. A filesystem reporting no writes evaluates as healthy; missing telemetry still triggers no-data handling.\n\nHigh latency can indicate:\n* Storage backend performance issues\n* Network connectivity problems\n* Lock contention\n* Resource exhaustion (memory, CPU)\n* Hardware problems (disks, controllers)\n\nAverage write latency: {{value}} microseconds per operation\nHost: {{host.name}}\nDevice: {{device_uuid.name}}\n\nImmediate actions:\n1. Check storage backend performance\n2. Monitor network connectivity and health\n3. Review system resource utilization\n4. Check for lock contention in LDLM\n5. Examine hardware health (disks, RAID controllers)\n6. Review concurrent workload patterns",
+    "tags": [
+      "integration:lustre"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 1000000,
+        "warning": 500000
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "renotify_interval": 120,
+      "include_tags": true,
+      "evaluation_delay": 300,
+      "escalation_message": "",
+      "on_missing_data": "show_and_notify_no_data",
+      "new_group_delay": 0,
+      "silenced": {}
+    },
+    "priority": 2
+  },
+  "created_at": "2025-07-28",
+  "last_updated_at": "2026-11-13",
+  "description": "Lustre filesystem average write latency exceeds 1 second per operation over the last 15 minutes."
+}

@@ -41,6 +41,9 @@
       },
       "source_type_id": 10106,
       "auto_install": true
+    },
+    "dashboards": {
+      "Microsoft Entra ID - Security Overview": "assets/dashboards/azure_active_directory_security_overview.json"
     }
   }
 }

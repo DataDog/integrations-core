@@ -12,6 +12,7 @@ class ExternalDNSCheck(OpenMetricsBaseCheck):
     """
 
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, name, init_config, instances):
         super(ExternalDNSCheck, self).__init__(

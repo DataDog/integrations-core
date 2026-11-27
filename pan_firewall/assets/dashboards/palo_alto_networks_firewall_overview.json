@@ -1,871 +1,2723 @@
 {
   "title": "Palo Alto Networks Firewall Overview",
-  "description": "## Title\n\nThis dashboard displays an overview of the logs forwarded by panos server profile.  The dashboard displays data points captured in each log type. ",
-  "widgets": [
-    {
-      "id": 2258586113552824,
-      "layout": {
-        "x": 1,
-        "y": 75,
-        "width": 47,
-        "height": 20
-      },
-      "definition": {
-        "title": "Threats by Severity",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "toplist",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:THREAT $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@severity",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 50
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 6318382163800138,
-      "layout": {
-        "x": 67,
-        "y": 25,
-        "width": 30,
-        "height": 20
-      },
-      "definition": {
-        "title": "Top Users",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "cell_display_mode": [
-              "bar"
-            ],
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall $type $deviceName $severity $destinationIp $userId $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@usr.id",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 50
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ],
-        "has_search_bar": "auto"
-      }
-    },
-    {
-      "id": 635332614361456,
-      "layout": {
-        "x": 1,
-        "y": 2,
-        "width": 30,
-        "height": 20
-      },
-      "definition": {
-        "type": "image",
-        "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXUAAACHCAMAAADeDjlcAAAAw1BMVEX///8AAAD6WC0uLi6ysrKWlpbn5+f6VioLCwvV1dWkpKRAQED8/Pzf39/6VCfq6ur09PTCwsJvb2/6Thqurq7h4eE2Njbw8PBpaWnOzs6cnJz8l4C3t7d9fX1bW1tISEiJiYn+2tEaGholJSVSUlJcXFwnJyd7e3tDQ0P/9/T6YDj6ThUVFRXIyMhNTU3+3NP90cf8oo38i3H9zMH6XzX8uKj8lHz6ZT/9xLb7fF39taT8oIz7bEj6cE77g2b+7Oj8q5idmK81AAAKFklEQVR4nO2bD3eiOBfGQZQWAQEVASuCin86VdtOOzOdd+ad9vt/qk1CEkLA2u3aytm9v3PmjCQkgYeHS3KhigIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHCQa3nb+oBBJm3M0Hhve3uYd3DKYzons5+3pe3rq/sPkH2uEjrvbT/M26unPKYz8vBl8CjKbn0dDH6dfhjtH6re/lepPnvstXq/C9mvfw1arcHLycc5uequrZ/kwM7BAxK91eq1ZnT7+g8SHcn+69RB5pSqe5N0f6mq49Md3ecya2HRW9zt11dEdCT7/YlHOqXq9Gf3dEf3qTxQ0ZHsj9jt1Okf4fZTqn7591TXbfe9o34Es0cmeu5264qLfnK3n011Z92Pl+33Dnt6Cqfnbn/4KoiOZL867nbLN4waJ7m+jcodsahOdRe1Nvw6Izq2XPNG1QM8sC4cuD61g0BJGxONZl9E0VsXN9/+X1b9p7x8ytmFfUToI9W6y9FirmVpSV9lEi/N1XyuJWEn4IVV1aM1br0YTeOoPIDf6e81VGNmsccLa1RP+jlrNpmxJv0MN9wsOz5rN/ai0WZs9Rsy4Xm6KIveehDDOhL9+wGr0/P3uBCImNnS3U1VkSXTXVLdam+FveYTPpbdESvUebs8qqg63ydf8LqpWJjRSxkqk7VhBmPpyp6JO8npgydU+Fy4ffCn3un8/Dtd8eSnuezeUpXY0BxAWXWrL+3Wz8v1VJM7GJdGrVN9YeNCOyuXbvOgElreSBsrzVD9qVUW/fGBFF//6bGgfkh0dv6r8kma2K1uRXRE7vaS6npS2SsjUWpS074jjnpQ9ajaMMaH1PF2XSO2wiZEmLtHyekPtOIqLx98paLfvlTatqvnh0lxXbemIiatSqrva3ab4gpnVFPji6Pi3zWq1zbEbteXkYVuoSZkzQ44XVHue2Wnzx5vKqYXVdeEgIDvYYttmNMp0+GSxBhR9Q5vMx/N+e+xWLXaLzMW4NfiqPg3VX0xImiJLV7HhcYvyhYfkh6v4/7koxV9Aw/y7IWJ/jKQnP6716qkwgrV+zvb3q3ZVogrY/wrGUa+ZemTrSCnoLrOrseibdjRkOlu4iBg4zbb1DMCy41o8DddpVb1VLcJvqV47CCSHeqSP1bJIaFV0kekrv8uD5LTv1DRrfuB5HRydeQQz1VP8+0x28aR2VBXfZ5Dp9lZE/8WVGd+NslTUPFNuk0ef3s1G/J5Oq3wlCPzdStkPsj15ReBTyDPzsPjMadTa9z+YPGm1J6dP522FKeMY6fbFd5bpIJSgurM6mxasWNXgWwUmis6rWgrR1S3F3mJxhYOcdkY5+ew0+WYzuNQ2e3s/PkKxpNP0dXtXbvT5w84XFaozmJ/xntMhP3IoTh+5HVTHti7yhHV2QSGH4GtyWOcF1n0mztaccjppPC70AM7fx4sHa10exudaWmhk+9ZqO4LWuawkJM7NWivpQnJUdXZiyZ+n7H7b9OMvNcTWoSWZi9U9EpML6+iRLdX3+ps8oIpnpn7mTSvq6jOAsqk0iMOOW53VWl/VHUWyorMBA0xo3Ku4kw8/z7g9HvZ6YeCPz//y6LXrFC9Ldn8FdWLHAsLUUj1YFrT/qjqLIwHckkzVC+nvPg8ncX03nfm9B/SKupb0UXV6wlXvbRCnLNAcczrbEUaKW4pUyBObt7k9aaqLkaOiwFz+q8jTu/9T+ihonpA1Q0tl+dCVtm6azA1y6obtLRYLrIVrc8DNFI87HjsuXtUddaBzUvEqX4T4G4XnD543em9b2IHYhQmRDSqpNzqoR24VuHhsuou24n3yLI3fFK5aJP24qu6V1XfqVKJTm+TpsxhuNt7F8zp9A3SgIl+e/GK04vzX7OClJ8zXTCZ9JZhFiyrrrDQzxJSbFKzUlyqJ0vvvlV1dvts2LyKjcyP8fzMsJV7zOnXzOlXb3K6sDalgZkvBA2mP03bWmweLqnOrlKY3/48UZkqfq7nNiqPdED1lA6DumDPYJpIZssrtRH5XQrStfcoOZ1nuWa9V50u5mG6yK06T7ObXM8FeYZZPB0iqW6wzMsSi8JfgywMpjrNqUfsaSyrviguuxWNNaOYsKspCu3ukOXkkiYkYDizHyy8VJw+O+L0Us5xVGQWyUyQ3dhJx/PGxVsGSXU+0VPn2bKY3qdIQ7ox77d37ZinI2XVWQpim02TOUklWzz3qaEyPnATUo0Ct5LTez+pKypOr4h+KL8eoh6M6gqpTnVrXrOThvfKaiqqqnvlag35O6obOf4EJd8Bc3rr4ssTKTju9EOqb/GzsfJirl51ZVd5T6dqJATvKuV1qsuvMHBAGlZaqVlTpo1lhO9fLm6wvneD46Lz8y+9HB7RrG1pOT/eH1BdsTeSQps8J2uV3zh36lWXzU4K23ImYR1UDr0JcKcThVtPVafLD1ICz34Vr4RUkyWyI8GGQzYRx6qvSqorTkleNWUKWXFRGDq7A6qXnT3POy2/rt52G/UkLbi/KWl88yLF9Fad08XzN9bEwYtQfGp18udjgj+S6YxMxAif/9QkP4s5tt6Z5nOR1bIjrtujPu0UTdrthDTCq1iPdGWu6F5+nK+DtklcrHGNdJ+vBbR+c788ldKKP2+/i18hHXB62XW+4U0i6eOvwNhNdgYR0tUJ+KeT/xR3dW3Uelf5dszyjcnEIG/dLIc3ol0Vr/p1I5p40gdmSmBHuEu/oT4nPAsRpYe/f3kpZL+4eDrQ6t/1/f4ZKD7QGPx8VsjfaTDRBwecDqr/c55pkOFfelG3H3Y6qH4C8tieO51AYvsrTgfVTwGO7fz7Fwxy+2tO/1TVfUNXLMNH/zBu/p9t6ehZHaCqAFUputf10LzTxVVo00L1lm24ihsNJ+/+O8sP5+7HTeF0zNVN7eKI84mqh2oW6GqoOGTAiHyipI6CIVrrx+pSGaPpf4QXAksnXzhpO8We711PNQOXfB3VzNUp5lb+pu7lNad/supq6CN5HVUbdieuOxmvRt2JZasZWusunFC13UQd27HaR6r3o1RdK/Yq2anbQDFU0/PSBs8g5UM7cqi6l/Nhx1MQqiM1nmPVL0caXmA5Jk6uOGjhNNcuh3stMC6XluKqC6R66KXoHiBfwqBVm7NRL7Mmq95cQnWSqCTCrLrjnYLfzGU4d5BemquhlsxTxV5sdOTrUR5hVgZSXQvVPbKOPUw37/8zqP8yoWoYKokw8zRdR/jD1D1WfYjfoSQkQdNXp+kI/UBeb29HOroM+yBEahtaPA5B9feQmrbS3aRKkGRJYiKzO+EaPyDtLOko4yRDcxR3bWqbrqVESVdpbzqWv1y7TpgYQd/UzDVEmI/Cdeq1PVQOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB/m78ABOK+yRlIFZ0AAAAASUVORK5CYII=",
-        "sizing": "fit",
-        "margin": "small"
-      }
-    },
-    {
-      "id": 5902232448987996,
-      "layout": {
-        "x": 1,
-        "y": 48,
-        "width": 63,
-        "height": 18
-      },
-      "definition": {
-        "title": "",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "log_stream",
-        "indexes": [],
-        "query": "source:pan.firewall $type $deviceName $severity $destinationIp $userId $eventName $subType $countryName $clientIp",
-        "sort": {
-          "column": "time",
-          "order": "desc"
-        },
-        "columns": [
-          "@type",
-          "@evt.name",
-          "@network.client.ip"
-        ],
-        "show_date_column": true,
-        "show_message_column": true,
-        "message_display": "inline"
-      }
-    },
-    {
-      "id": 8810526851950426,
-      "layout": {
-        "x": 34,
-        "y": 2,
-        "width": 30,
-        "height": 20
-      },
-      "definition": {
-        "title": "Events Received",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_value",
-        "requests": [
-          {
-            "aggregator": "avg",
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall $type $deviceName $severity $destinationIp $userId $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ],
-        "precision": 0
-      }
-    },
-    {
-      "id": 7394509681226048,
-      "layout": {
-        "x": 67,
-        "y": 2,
-        "width": 30,
-        "height": 20
-      },
-      "definition": {
-        "title": "Event Count by Event Names",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "cell_display_mode": [
-              "bar"
-            ],
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall $evt.name $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@evt.name",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 50
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 7733449681222254,
-      "layout": {
-        "x": 34,
-        "y": 25,
-        "width": 30,
-        "height": 20
-      },
-      "definition": {
-        "title": "Top Client IPs",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall $network.client.ip $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@network.client.ip",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 50
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 4137633505374790,
-      "layout": {
-        "x": 67,
-        "y": 48,
-        "width": 30,
-        "height": 18
-      },
-      "definition": {
-        "title": "Top Devices Logging Events",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall $deviceName $severity $type $destinationIp $userId $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@device_name",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 50
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 4099139286156066,
-      "layout": {
-        "x": 1,
-        "y": 25,
-        "width": 30,
-        "height": 20
-      },
-      "definition": {
-        "title": "Top Countries",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "cell_display_mode": [
-              "bar"
-            ],
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@network.client.geoip.country.name",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 50
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 6838790413476208,
-      "layout": {
-        "x": 1,
-        "y": 181,
-        "width": 24,
-        "height": 3
-      },
-      "definition": {
-        "type": "free_text",
-        "text": "Authentication Log",
-        "color": "#4d4d4d",
-        "font_size": "36",
-        "text_align": "left"
-      }
-    },
-    {
-      "id": 1056864126671032,
-      "layout": {
-        "x": 1,
-        "y": 187,
-        "width": 30,
-        "height": 20
-      },
-      "definition": {
-        "title": "Top Authentication Protocols and Outcomes",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "cell_display_mode": [
-              "bar"
-            ],
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:AUTHENTICATION $authpolicy $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@evt.name",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 30
-                },
-                {
-                  "facet": "@evt.outcome",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 30
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 2911881343100250,
-      "layout": {
-        "x": 67,
-        "y": 187,
-        "width": 30,
-        "height": 20
-      },
-      "definition": {
-        "title": "Top Clients Authenticating",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:AUTHENTICATION $clienttype $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@clienttype",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 50
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 8818998291693376,
-      "layout": {
-        "x": 1,
-        "y": 121,
-        "width": 24,
-        "height": 3
-      },
-      "definition": {
-        "type": "free_text",
-        "text": "Traffic Logs",
-        "color": "#4d4d4d",
-        "font_size": "36",
-        "text_align": "left"
-      }
-    },
-    {
-      "id": 2240768652529992,
-      "layout": {
-        "x": 51,
-        "y": 127,
-        "width": 47,
-        "height": 18
-      },
-      "definition": {
-        "title": "Bytes Received grouped by Devices",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "type": "timeseries",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:TRAFFIC $type $deviceName $destinationIp $userId $severity $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@device_name",
-                  "sort": {
-                    "facet": "@network.bytes_read",
-                    "order": "desc",
-                    "aggregation": "avg"
-                  },
-                  "limit": 10
-                }
-              ],
-              "compute": {
-                "facet": "@network.bytes_read",
-                "aggregation": "avg"
-              }
-            },
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 1325966497963376,
-      "layout": {
-        "x": 1,
-        "y": 127,
-        "width": 47,
-        "height": 18
-      },
-      "definition": {
-        "title": "Bytes Sent grouped by Devices",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "type": "timeseries",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:TRAFFIC $type $deviceName $destinationIp $userId $severity $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@device_name",
-                  "sort": {
-                    "facet": "@network.bytes_written",
-                    "order": "desc",
-                    "aggregation": "avg"
-                  },
-                  "limit": 50
-                }
-              ],
-              "compute": {
-                "facet": "@network.bytes_written",
-                "aggregation": "avg"
-              }
-            },
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 959100886772332,
-      "layout": {
-        "x": 1,
-        "y": 69,
-        "width": 24,
-        "height": 3
-      },
-      "definition": {
-        "type": "free_text",
-        "text": "Threat Logs",
-        "color": "#4d4d4d",
-        "font_size": "36",
-        "text_align": "left"
-      }
-    },
-    {
-      "id": 7504429782130422,
-      "layout": {
-        "x": 51,
-        "y": 75,
-        "width": 47,
-        "height": 20
-      },
-      "definition": {
-        "title": "Top threats",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:THREAT $type $severity $deviceName $eventName $subType $countryName $destinationIp $userId $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@subtype",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 10
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 6659681923601834,
-      "layout": {
-        "x": 51,
-        "y": 98,
-        "width": 47,
-        "height": 20
-      },
-      "definition": {
-        "title": "Top Flagged Countries",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:THREAT $type $severity $deviceName $eventName $subType $countryName $destinationIp $userId $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@network.client.geoip.country.name",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 50
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 7616667040111438,
-      "layout": {
-        "x": 1,
-        "y": 98,
-        "width": 47,
-        "height": 20
-      },
-      "definition": {
-        "title": "Top Flagged IPs",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "toplist",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:THREAT $type $severity $deviceName $eventName $subType $countryName $destinationIp $userId $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@network.client.ip",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 50
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 6610690836162160,
-      "layout": {
-        "x": 1,
-        "y": 148,
-        "width": 47,
-        "height": 30
-      },
-      "definition": {
-        "title": "Count of Sessions by Countries and Actions",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:TRAFFIC $type $deviceName $destinationIp $userId $severity $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@network.client.geoip.country.name",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 30
-                },
-                {
-                  "facet": "@evt.name",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 30
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "id": 3841490891419320,
-      "layout": {
-        "x": 51,
-        "y": 148,
-        "width": 47,
-        "height": 28
-      },
-      "definition": {
-        "title": "Client Traffic Geomap",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "geomap",
-        "requests": [
-          {
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:TRAFFIC $type $severity $deviceName $eventName $subType $countryName $destinationIp $userId $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@network.client.geoip.country.iso_code",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 10
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ],
-        "style": {
-          "palette": "hostmap_blues",
-          "palette_flip": false
-        },
-        "view": {
-          "focus": "WORLD"
-        }
-      }
-    },
-    {
-      "id": 3630464331397040,
-      "layout": {
-        "x": 34,
-        "y": 187,
-        "width": 30,
-        "height": 20
-      },
-      "definition": {
-        "title": "Top Users Authenticating",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_table",
-        "requests": [
-          {
-            "cell_display_mode": [
-              "bar"
-            ],
-            "log_query": {
-              "index": "*",
-              "search": {
-                "query": "source:pan.firewall @type:AUTHENTICATION $authpolicy $severity $type $deviceName $destinationIp $userId $eventName $subType $countryName $clientIp"
-              },
-              "group_by": [
-                {
-                  "facet": "@usr.id",
-                  "sort": {
-                    "order": "desc",
-                    "aggregation": "count"
-                  },
-                  "limit": 100
-                }
-              ],
-              "compute": {
-                "aggregation": "count"
-              }
-            }
-          }
-        ]
-      }
-    }
-  ],
+  "description": "Palo Alto Networks next-generation firewalls enforce network security policy (traffic, threat, and URL inspection, IPsec VPN, routing) and are managed centrally through Panorama. This dashboard covers firewall reachability, management-plane and dataplane resources, hardware environment, IPsec tunnels, BGP and OSPF routing, licenses, interfaces, HA links, and firewall logs.",
+  "layout_type": "ordered",
+  "reflow_type": "fixed",
+  "notify_list": [],
   "template_variables": [
     {
-      "name": "type",
+      "available_values": [],
       "default": "*",
-      "prefix": "@type"
+      "name": "firewall",
+      "prefix": "device_hostname"
     },
     {
-      "name": "severity",
+      "available_values": [],
       "default": "*",
-      "prefix": "@severity"
-    },
-    {
-      "name": "deviceName",
-      "default": "*",
-      "prefix": "@device_name"
-    },
-    {
-      "name": "eventName",
-      "default": "*",
-      "prefix": "@evt.name"
-    },
-    {
-      "name": "subType",
-      "default": "*",
-      "prefix": "@subtype"
-    },
-    {
-      "name": "countryName",
-      "default": "*",
-      "prefix": "@network.client.geoip.country.name"
-    },
-    {
-      "name": "destinationIp",
-      "default": "*",
-      "prefix": "@network.destination.ip"
-    },
-    {
-      "name": "userId",
-      "default": "*",
-      "prefix": "@usr.id"
-    },
-    {
-      "name": "clientIp",
-      "default": "*",
-      "prefix": "@network.client.ip"
+      "name": "panorama",
+      "prefix": "panorama_host"
     }
   ],
-  "layout_type": "free",
-  "is_read_only": false,
-  "notify_list": [],
-  "template_variable_presets": [
+  "widgets": [
     {
-      "name": "High Severity Issues",
-      "template_variables": [
-        {
-          "name": "severity",
-          "value": "\"high\""
-        }
-      ]
+      "definition": {
+        "background_color": "white",
+        "layout_type": "ordered",
+        "title": "About",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/pan-firewall_large.svg",
+              "url_dark_theme": "/static/images/logos/pan-firewall_reversed_large.svg"
+            },
+            "id": 8041869729475126,
+            "layout": {
+              "height": 2,
+              "width": 4,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "background_color": "white",
+              "content": "Palo Alto Networks next-generation firewalls enforce network security policy (traffic, threat, and URL inspection, IPsec VPN, routing) and are managed centrally through Panorama. This dashboard covers firewall reachability, management-plane and dataplane resources, hardware environment, IPsec tunnels, BGP and OSPF routing, licenses, interfaces, HA links, and firewall logs.\n\n- [Datadog integration documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n- [Palo Alto Networks PAN-OS documentation](https://docs.paloaltonetworks.com/pan-os)",
+              "text_align": "left",
+              "type": "note"
+            },
+            "id": 3803448347928857,
+            "layout": {
+              "height": 9,
+              "width": 4,
+              "x": 0,
+              "y": 2
+            }
+          }
+        ]
+      },
+      "id": 6916998381316108,
+      "layout": {
+        "height": 12,
+        "width": 4,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Overview",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "orange",
+              "content": "Key health and activity signals at a glance for quick detection of problems and drill-down into the relevant section.",
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 1231216677789218,
+            "layout": {
+              "height": 1,
+              "width": 8,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "description": "Number of firewalls the integration reported on in the selected time range, reachable or not.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [],
+                  "formulas": [
+                    {
+                      "alias": "Firewalls",
+                      "formula": "count_not_null(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:pan_firewall.can_connect{$firewall,$panorama} by {device_ip}.rollup(avg)"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Firewalls",
+              "type": "query_value"
+            },
+            "id": 2553726169199628,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Firewalls whose API did not respond to the latest check run in the selected time range. 0 means every firewall currently answers.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Unreachable firewalls",
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:pan_firewall.can_connect{$firewall,$panorama} by {device_ip}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Unreachable firewalls",
+              "type": "query_value"
+            },
+            "id": 5118019230507065,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 2,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "IPsec tunnels that were active for the whole selected time range: both their lowest and highest state readings are active. Tunnels that were inactive or initializing at any point are not counted.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [],
+                  "formulas": [
+                    {
+                      "alias": "Tunnels up the whole range",
+                      "formula": "count_nonzero(clamp_min(1 - abs(qmin - 1) - abs(qmax - 1), 0))"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "min",
+                      "data_source": "metrics",
+                      "name": "qmin",
+                      "query": "min:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}.rollup(min)"
+                    },
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "qmax",
+                      "query": "max:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}.rollup(max)"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Tunnels up the whole range",
+              "type": "query_value"
+            },
+            "id": 4742144319920927,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 4,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "IPsec tunnels that are currently inactive, from their latest state reading in the selected time range. See the IPsec VPN section for which ones.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Inactive tunnels",
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_id,tunnel}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Inactive IPsec tunnels",
+              "type": "query_value"
+            },
+            "id": 3934872870758726,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 6,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Panorama hosts whose latest discovery call in the selected time range failed. Collection continues: the integration keeps polling the firewalls from the last list Panorama returned, but firewalls added to Panorama during the outage are not discovered. Only applies when firewalls are discovered through Panorama; shows No data otherwise. Ignores the firewall filter, since Panorama is not tied to one firewall.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Panoramas unreachable",
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:pan_firewall.panorama.can_connect{$panorama} by {panorama_host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Panorama unreachable",
+              "type": "query_value"
+            },
+            "id": 5035083125879109,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 0,
+              "y": 3
+            }
+          },
+          {
+            "definition": {
+              "description": "BGP peers that are currently not established, from their latest status reading in the selected time range. See the BGP peers table for which ones.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "BGP peers down",
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:pan_firewall.bgp.peer.status{$firewall,$panorama} by {device_id,vr,peer}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "BGP peers down",
+              "type": "query_value"
+            },
+            "id": 8972385225504975,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 2,
+              "y": 3
+            }
+          },
+          {
+            "definition": {
+              "description": "Reachable firewalls by current high-availability state. The HA state is a tag, so after a failover a firewall reports under a new series; this widget uses a fixed 15-minute window so each firewall appears in one slice only. Hover a slice to see which firewalls it contains. Standalone firewalls without HA are not shown.",
+              "hide_total": false,
+              "legend": {
+                "type": "automatic"
+              },
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Reachable firewalls",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.can_connect{$firewall,$panorama,ha_state:*} by {ha_state,device_hostname}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "time": {
+                "type": "live",
+                "unit": "minute",
+                "value": 15
+              },
+              "title": "HA state of reachable firewalls",
+              "type": "sunburst"
+            },
+            "id": 8390790168042178,
+            "layout": {
+              "height": 4,
+              "width": 4,
+              "x": 4,
+              "y": 3
+            }
+          },
+          {
+            "definition": {
+              "description": "The three licenses closest to expiry on the selected firewalls, per firewall and feature, from the latest license reading. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not included.",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Days left",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<=",
+                          "palette": "red_on_white",
+                          "value": 30.0
+                        },
+                        {
+                          "comparator": "<=",
+                          "palette": "yellow_on_white",
+                          "value": 60.0
+                        },
+                        {
+                          "comparator": ">",
+                          "palette": "green_on_white",
+                          "value": 60.0
+                        }
+                      ],
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "day"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 3,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "flat"
+                }
+              },
+              "time": {
+                "type": "live",
+                "unit": "day",
+                "value": 2
+              },
+              "title": "Soonest-expiring licenses",
+              "type": "toplist"
+            },
+            "id": 7814932074117916,
+            "layout": {
+              "height": 2,
+              "width": 4,
+              "x": 0,
+              "y": 5
+            }
+          },
+          {
+            "definition": {
+              "color_preference": "text",
+              "count": 50,
+              "description": "Status of the Datadog monitors tagged `integration:pan-firewall`.",
+              "display_format": "countsAndList",
+              "hide_zero_counts": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:pan-firewall)",
+              "show_investigation": false,
+              "show_last_triggered": false,
+              "show_priority": false,
+              "show_status": true,
+              "sort": "status,asc",
+              "start": 0,
+              "summary_type": "monitors",
+              "title": "Monitors",
+              "type": "manage_status"
+            },
+            "id": 7948550088157360,
+            "layout": {
+              "height": 4,
+              "width": 8,
+              "x": 0,
+              "y": 7
+            }
+          }
+        ]
+      },
+      "id": 397308089443209,
+      "layout": {
+        "height": 12,
+        "width": 8,
+        "x": 4,
+        "y": 0
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Device Health and Environment",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "orange",
+              "content": "Management-plane CPU and memory per firewall, plus the busiest dataplane core, fullest file system, hottest sensor, and sensors in temperature or power alarm across the selected firewalls.",
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 2935454234378039,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "description": "Management-plane CPU used per firewall. The management plane runs the web UI, API, logging, and commits; high values slow management tasks but not traffic forwarding.",
+              "legend_columns": [
+                "avg",
+                "max",
+                "min",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "CPU used",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:pan_firewall.mgmt.cpu.used{$firewall,$panorama} by {device_hostname}"
+                    }
+                  ],
+                  "response_format": "timeseries"
+                }
+              ],
+              "show_legend": true,
+              "title": "Management CPU used",
+              "type": "timeseries"
+            },
+            "id": 8365375260962980,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Management-plane memory in use (not available to processes) and swap used, as a percentage of total, per firewall. Sustained swap use means the management plane is short of memory.",
+              "legend_columns": [
+                "avg",
+                "max",
+                "min",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Memory used",
+                      "formula": "100 * (1 - query1 / query3)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Swap used",
+                      "formula": "query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:pan_firewall.mgmt.memory.available{$firewall,$panorama} by {device_hostname}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:pan_firewall.mgmt.swap.used_pct{$firewall,$panorama} by {device_hostname}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:pan_firewall.mgmt.memory.total{$firewall,$panorama} by {device_hostname}"
+                    }
+                  ],
+                  "response_format": "timeseries"
+                }
+              ],
+              "show_legend": true,
+              "title": "Management memory and swap used",
+              "type": "timeseries"
+            },
+            "id": 1777086319127044,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Highest data-plane core utilization across the selected firewalls in the time range. The data plane forwards traffic, so a saturated core can drop or delay packets.",
+              "precision": 2,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 95.0
+                    },
+                    {
+                      "comparator": ">",
+                      "palette": "yellow_on_white",
+                      "value": 80.0
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "green_on_white",
+                      "value": 80.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Busiest core",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.dataplane.cpu.utilization{$firewall,$panorama}.rollup(max)"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Max dataplane CPU",
+              "type": "query_value"
+            },
+            "id": 8997499763477461,
+            "layout": {
+              "height": 2,
+              "width": 3,
+              "x": 0,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "description": "Fullest file system across the selected firewalls in the time range, excluding the log partition `/opt/panlogs`, which PAN-OS fills up to the log quota and purges by design. Reported every 30 minutes. A full config or root partition can block commits and content updates.",
+              "precision": 2,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 97.0
+                    },
+                    {
+                      "comparator": ">",
+                      "palette": "yellow_on_white",
+                      "value": 90.0
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "green_on_white",
+                      "value": 90.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Fullest file system",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.disk.used_pct{$firewall,$panorama,!mount:/opt/panlogs}.rollup(max)"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Max disk used",
+              "type": "query_value"
+            },
+            "id": 2551401351299121,
+            "layout": {
+              "height": 2,
+              "width": 3,
+              "x": 3,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "description": "Hottest temperature sensor reading across the selected firewalls in the time range. Virtual firewalls (VM-Series) have no sensors and show No data.",
+              "precision": 2,
+              "requests": [
+                {
+                  "conditional_formats": [],
+                  "formulas": [
+                    {
+                      "alias": "Hottest sensor",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "degree celsius"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.temperature.current{$firewall,$panorama}.rollup(max)"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Max temperature",
+              "type": "query_value"
+            },
+            "id": 4654173838917322,
+            "layout": {
+              "height": 2,
+              "width": 3,
+              "x": 6,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "description": "Temperature and power sensors that were in alarm at some point in the selected time range. Virtual firewalls (VM-Series) have no sensors and show 0.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Sensors in alarm",
+                      "formula": "default_zero(count_nonzero(query1)) + default_zero(count_nonzero(default_zero(query4) + default_zero(query2) + default_zero(query3)))"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.temperature.alarm{$firewall,$panorama} by {device_id,sensor,slot}.rollup(max)"
+                    },
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "max:pan_firewall.power.alarm.high{$firewall,$panorama} by {device_id,sensor,slot}.rollup(max)"
+                    },
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "max:pan_firewall.power.alarm.low{$firewall,$panorama} by {device_id,sensor,slot}.rollup(max)"
+                    },
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "max:pan_firewall.power.alarm{$firewall,$panorama} by {device_id,sensor,slot}.rollup(max)"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Sensors in alarm",
+              "type": "query_value"
+            },
+            "id": 5355252387638979,
+            "layout": {
+              "height": 2,
+              "width": 3,
+              "x": 9,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "description": "Management-plane CPU time by category, averaged across the selected firewalls. High iowait points at disk contention; steal (VM-Series only) means the hypervisor is short of CPU.",
+              "legend_columns": [
+                "avg",
+                "max",
+                "min",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "area",
+                  "formulas": [
+                    {
+                      "alias": "user",
+                      "formula": "q0",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "system",
+                      "formula": "q1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "iowait",
+                      "formula": "q2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "steal",
+                      "formula": "q3",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "softirq",
+                      "formula": "q4",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "hardirq",
+                      "formula": "q5",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "nice",
+                      "formula": "q6",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "q0",
+                      "query": "avg:pan_firewall.mgmt.cpu.user{$firewall,$panorama}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "q1",
+                      "query": "avg:pan_firewall.mgmt.cpu.system{$firewall,$panorama}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "q2",
+                      "query": "avg:pan_firewall.mgmt.cpu.iowait{$firewall,$panorama}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "q3",
+                      "query": "avg:pan_firewall.mgmt.cpu.steal{$firewall,$panorama}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "q4",
+                      "query": "avg:pan_firewall.mgmt.cpu.softirq{$firewall,$panorama}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "q5",
+                      "query": "avg:pan_firewall.mgmt.cpu.hardirq{$firewall,$panorama}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "q6",
+                      "query": "avg:pan_firewall.mgmt.cpu.nice{$firewall,$panorama}"
+                    }
+                  ],
+                  "response_format": "timeseries"
+                }
+              ],
+              "show_legend": true,
+              "title": "Management CPU breakdown",
+              "type": "timeseries"
+            },
+            "id": 5295937560294993,
+            "layout": {
+              "height": 3,
+              "width": 12,
+              "x": 0,
+              "y": 6
+            }
+          }
+        ]
+      },
+      "id": 307427762610391,
+      "layout": {
+        "height": 10,
+        "width": 12,
+        "x": 0,
+        "y": 12
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "IPsec VPN",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "orange",
+              "content": "Per-tunnel state and traffic. State: green is active, yellow is initializing, red is inactive. Down in window flags a tunnel that was inactive at any point in the time range. An active tunnel with no received traffic usually points at the peer.",
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 1291677324210577,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "description": "**State** is the tunnel's current state: `1` active (green), `2` initializing (yellow), `0` inactive (red). **Down in window** is `1` (red) if the tunnel was inactive at any point in the selected time range, otherwise `0`. **Received** and **Sent** are average byte rates over the time range; they are empty for tunnels that share a tunnel interface.",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Received",
+                      "formula": "query3",
+                      "number_format": {
+                        "unit": {
+                          "per_unit_name": "second",
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Sent",
+                      "formula": "query4",
+                      "number_format": {
+                        "unit": {
+                          "per_unit_name": "second",
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "State",
+                      "conditional_formats": [
+                        {
+                          "comparator": "=",
+                          "palette": "white_on_green",
+                          "value": 1.0
+                        },
+                        {
+                          "comparator": "=",
+                          "palette": "white_on_yellow",
+                          "value": 2.0
+                        },
+                        {
+                          "comparator": "=",
+                          "palette": "white_on_red",
+                          "value": 0.0
+                        }
+                      ],
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Down in window",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "palette": "white_on_red",
+                          "value": 0.0
+                        }
+                      ],
+                      "formula": "1 - clamp_max(query2, 1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_hostname,tunnel,peer_ip,gateway}"
+                    },
+                    {
+                      "aggregator": "min",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "min:pan_firewall.ipsec.tunnel.state{$firewall,$panorama} by {device_hostname,tunnel,peer_ip,gateway}.rollup(min)"
+                    },
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:pan_firewall.ipsec.tunnel.rx.bytes{$firewall,$panorama} by {device_hostname,tunnel,peer_ip,gateway}.as_rate().rollup(sum, 600)"
+                    },
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:pan_firewall.ipsec.tunnel.tx.bytes{$firewall,$panorama} by {device_hostname,tunnel,peer_ip,gateway}.as_rate().rollup(sum, 600)"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 3,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "title": "Tunnel state",
+              "type": "query_table"
+            },
+            "id": 967033093419409,
+            "layout": {
+              "height": 4,
+              "width": 12,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Received byte rate for the ten busiest IPsec tunnels.",
+              "legend_columns": [
+                "avg",
+                "max",
+                "min",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Received",
+                      "formula": "top(query1, 10, 'mean', 'desc')",
+                      "number_format": {
+                        "unit": {
+                          "per_unit_name": "second",
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.ipsec.tunnel.rx.bytes{$firewall,$panorama} by {device_hostname,tunnel}.as_rate().rollup(sum, 600)"
+                    }
+                  ],
+                  "response_format": "timeseries"
+                }
+              ],
+              "show_legend": true,
+              "title": "Tunnel traffic received (top 10)",
+              "type": "timeseries"
+            },
+            "id": 6155563130788329,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 5
+            }
+          },
+          {
+            "definition": {
+              "description": "Sent byte rate for the ten busiest IPsec tunnels.",
+              "legend_columns": [
+                "avg",
+                "max",
+                "min",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Sent",
+                      "formula": "top(query1, 10, 'mean', 'desc')",
+                      "number_format": {
+                        "unit": {
+                          "per_unit_name": "second",
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.ipsec.tunnel.tx.bytes{$firewall,$panorama} by {device_hostname,tunnel}.as_rate().rollup(sum, 600)"
+                    }
+                  ],
+                  "response_format": "timeseries"
+                }
+              ],
+              "show_legend": true,
+              "title": "Tunnel traffic sent (top 10)",
+              "type": "timeseries"
+            },
+            "id": 2460153564213461,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 5
+            }
+          }
+        ]
+      },
+      "id": 7798026692499196,
+      "layout": {
+        "height": 9,
+        "width": 12,
+        "x": 0,
+        "y": 22
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "BGP and OSPF Routing",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "orange",
+              "content": "BGP peer state and route exchange, and OSPF adjacencies. Down peers are listed first. OSPF widgets need `collect_ospf: true`.",
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 2967975612711428,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "description": "BGP peers that restarted (their session came up less than 30 minutes earlier) at some point in the selected time range. Repeated restarts mean a flapping peer.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "yellow_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Peers restarted",
+                      "formula": "count_nonzero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.bgp.peer.restart{$firewall,$panorama} by {device_id,vr,peer}.rollup(max)"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "BGP peers restarted",
+              "type": "query_value"
+            },
+            "id": 1259245134358090,
+            "layout": {
+              "height": 2,
+              "width": 3,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "BGP connections dropped in the selected time range. Reported only by the Advanced Routing Engine; shows No data for firewalls on the legacy routing engine.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Dropped",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "connection"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.bgp.peer.connections.dropped{$firewall,$panorama}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "BGP connections dropped",
+              "type": "query_value"
+            },
+            "id": 5643431307919705,
+            "layout": {
+              "height": 2,
+              "width": 3,
+              "x": 3,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "OSPF neighbors whose adjacency is not in the Full state. Requires `collect_ospf: true` in the integration configuration; shows No data while OSPF collection is off (the default). On a shared segment with three or more routers, two neighbors that are both DROther stay in 2-Way by design and are counted here.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Neighbors not full",
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "min",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:pan_firewall.ospf.neighbor.status{$firewall,$panorama} by {device_id,vr,neighbor}.rollup(min)"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "OSPF neighbors not full",
+              "type": "query_value"
+            },
+            "id": 2111942934988851,
+            "layout": {
+              "height": 2,
+              "width": 3,
+              "x": 6,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "OSPF neighbor adjacency state changes in the selected time range. Sent only by the Advanced Routing Engine, and requires `collect_ospf: true` in the integration configuration; shows No data while OSPF collection is off (the default).",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "yellow_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "State changes",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.ospf.neighbor.state_changes{$firewall,$panorama}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "OSPF neighbor state changes",
+              "type": "query_value"
+            },
+            "id": 3376100177941512,
+            "layout": {
+              "height": 2,
+              "width": 3,
+              "x": 9,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "One row per BGP peer, down peers first. **Status**: 1 (green) established, 0 (red) not established. **Time in status**: how long the peer has been in its current status; the legacy routing engine reports 0 for a peer that never came up. **Restarted (last 30 min)**: 1 (yellow) if the session came up in the last 30 minutes at any point in the time range; repeated 1s mean the peer is flapping.",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Status",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "palette": "white_on_green",
+                          "value": 1.0
+                        },
+                        {
+                          "comparator": "<",
+                          "palette": "white_on_red",
+                          "value": 1.0
+                        }
+                      ],
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Time in status",
+                      "formula": "query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Restarted (last 30 min)",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "palette": "white_on_yellow",
+                          "value": 0.0
+                        }
+                      ],
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.bgp.peer.status{$firewall,$panorama} by {device_hostname,vr,peer,remote_as}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "max:pan_firewall.bgp.peer.status_duration{$firewall,$panorama} by {device_hostname,vr,peer,remote_as}"
+                    },
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "max:pan_firewall.bgp.peer.restart{$firewall,$panorama} by {device_hostname,vr,peer,remote_as}.rollup(max)"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "title": "BGP peers",
+              "type": "query_table"
+            },
+            "id": 8283406758657743,
+            "layout": {
+              "height": 4,
+              "width": 12,
+              "x": 0,
+              "y": 3
+            }
+          },
+          {
+            "definition": {
+              "description": "Prefixes accepted from each established peer, summed across address families. A sudden drop means the peer withdrew routes.",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Accepted prefixes",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.bgp.peer.prefixes.incoming.accepted{$firewall,$panorama} by {device_hostname,vr,peer}"
+                    }
+                  ],
+                  "response_format": "timeseries"
+                }
+              ],
+              "show_legend": true,
+              "title": "Accepted prefixes by peer",
+              "type": "timeseries"
+            },
+            "id": 5047677649939105,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 7
+            }
+          },
+          {
+            "definition": {
+              "description": "Accepted prefixes as a percentage of each peer's configured limit, highest address family per peer. Above 80% the peer is close to being torn down for exceeding its limit.",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 80.0
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_green",
+                      "value": 80.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Limit used",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.bgp.peer.prefix_limit.utilization{$firewall,$panorama} by {device_hostname,vr,peer}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "title": "Prefix limit used",
+              "type": "toplist"
+            },
+            "id": 4528077736025970,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 7
+            }
+          }
+        ]
+      },
+      "id": 6640967998063961,
+      "layout": {
+        "height": 11,
+        "width": 12,
+        "x": 0,
+        "y": 31
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Interfaces and Security",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "orange",
+              "content": "Interfaces with the most errors and drops, dataplane drops by aspect, HA link errors, and interfaces receiving spoofing and malformed-packet attacks.",
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 2160936764138822,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "description": "Interfaces with the most receive errors, receive drops, forwarding errors, and flow-state drops in the selected time range, combined.",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Errors and drops",
+                      "formula": "query1 + query2 + query3 + query4",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.interface.rx.errors{$firewall,$panorama} by {device_hostname,interface}.as_count()"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:pan_firewall.interface.rx.drops{$firewall,$panorama} by {device_hostname,interface}.as_count()"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:pan_firewall.interface.forward_errors{$firewall,$panorama} by {device_hostname,interface}.as_count()"
+                    },
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:pan_firewall.interface.flow_state{$firewall,$panorama} by {device_hostname,interface}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Interfaces with most errors and drops",
+              "type": "toplist"
+            },
+            "id": 8013010037765786,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Data-plane packet drops by cause (aspect), such as session, resource, or tunnel. A growing resource or session aspect means the firewall is running out of capacity. Requires `collect_global_counters: true` in the integration configuration; shows No data while global counter collection is off (the default).",
+              "legend_columns": [
+                "avg",
+                "max",
+                "min",
+                "sum",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Dropped packets",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.dropped_packets{$firewall,$panorama} by {aspect}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries"
+                }
+              ],
+              "show_legend": true,
+              "title": "Dropped packets by aspect",
+              "type": "timeseries"
+            },
+            "id": 4780099086253625,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Receive errors and drops on the HA1 and HA2 links per firewall. Errors on these links can delay HA state sync or cause a false failover.",
+              "legend_columns": [
+                "avg",
+                "max",
+                "min",
+                "sum",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Receive errors",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Receive drops",
+                      "formula": "query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.ha.interface.rx.errors{$firewall,$panorama} by {device_hostname}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:pan_firewall.ha.interface.rx.drops{$firewall,$panorama} by {device_hostname}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries"
+                }
+              ],
+              "show_legend": true,
+              "title": "HA link errors and drops",
+              "type": "timeseries"
+            },
+            "id": 8215093531978079,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "description": "Packets dropped by zone protection as IP spoofing, MAC spoofing, LAND, ping-of-death, or teardrop attacks. Empty is normal. Requires zone protection profiles on the zones; without them these counters stay at 0 even under attack.",
+              "legend_columns": [
+                "sum",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "bars",
+                  "formulas": [
+                    {
+                      "alias": "IP spoofing",
+                      "formula": "q0",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "MAC spoofing",
+                      "formula": "q1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "LAND",
+                      "formula": "q2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Ping of death",
+                      "formula": "q3",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Teardrop",
+                      "formula": "q4",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "q0",
+                      "query": "sum:pan_firewall.interface.attack.ip_spoof{$firewall,$panorama}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "q1",
+                      "query": "sum:pan_firewall.interface.attack.mac_spoof{$firewall,$panorama}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "q2",
+                      "query": "sum:pan_firewall.interface.attack.land{$firewall,$panorama}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "q3",
+                      "query": "sum:pan_firewall.interface.attack.ping_of_death{$firewall,$panorama}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "q4",
+                      "query": "sum:pan_firewall.interface.attack.teardrop{$firewall,$panorama}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "title": "Attack packets by type",
+              "type": "timeseries"
+            },
+            "id": 5423811770350442,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "description": "Received byte rate for the ten busiest interfaces across the selected firewalls.",
+              "legend_columns": [
+                "avg",
+                "max",
+                "min",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Received",
+                      "formula": "top(query1, 10, 'mean', 'desc')",
+                      "number_format": {
+                        "unit": {
+                          "per_unit_name": "second",
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.interface.rx.bytes{$firewall,$panorama} by {device_hostname,interface}.as_rate().rollup(sum, 600)"
+                    }
+                  ],
+                  "response_format": "timeseries"
+                }
+              ],
+              "show_legend": true,
+              "title": "Interface traffic received (top 10)",
+              "type": "timeseries"
+            },
+            "id": 2555295200238767,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 7
+            }
+          },
+          {
+            "definition": {
+              "description": "Sent byte rate for the ten busiest interfaces across the selected firewalls.",
+              "legend_columns": [
+                "avg",
+                "max",
+                "min",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Sent",
+                      "formula": "top(query1, 10, 'mean', 'desc')",
+                      "number_format": {
+                        "unit": {
+                          "per_unit_name": "second",
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.interface.tx.bytes{$firewall,$panorama} by {device_hostname,interface}.as_rate().rollup(sum, 600)"
+                    }
+                  ],
+                  "response_format": "timeseries"
+                }
+              ],
+              "show_legend": true,
+              "title": "Interface traffic sent (top 10)",
+              "type": "timeseries"
+            },
+            "id": 2794493025316799,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 7
+            }
+          },
+          {
+            "definition": {
+              "description": "Security rules with the most hits in the selected time range, summed across the selected firewalls. Use the firewall filter to see one firewall.",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Hits",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.security_rule.hits{$firewall,$panorama} by {rule}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "title": "Top security rules by hits",
+              "type": "toplist"
+            },
+            "id": 434684128188475,
+            "layout": {
+              "height": 4,
+              "width": 6,
+              "x": 0,
+              "y": 10
+            }
+          },
+          {
+            "definition": {
+              "description": "Security rules sorted by hits, fewest first, summed across the selected firewalls. Rules with 0 hits (yellow) over a long time range, such as 7 or 30 days, may be unused or shadowed by a rule above them. Rules excluded by the integration's rule filter are not listed.",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Hits",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<=",
+                          "palette": "white_on_yellow",
+                          "value": 0.0
+                        }
+                      ],
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "sum",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:pan_firewall.security_rule.hits{$firewall,$panorama} by {rule}.as_count()"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "title": "Least-used security rules",
+              "type": "query_table"
+            },
+            "id": 8380970167953624,
+            "layout": {
+              "height": 4,
+              "width": 6,
+              "x": 6,
+              "y": 10
+            }
+          }
+        ]
+      },
+      "id": 5238858285028655,
+      "layout": {
+        "height": 15,
+        "is_column_break": true,
+        "width": 12,
+        "x": 0,
+        "y": 84
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Licensing and Collection Health",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "orange",
+              "content": "Expired licenses, days until each licensed feature expires, and whether the check can authenticate to the firewall API. Panorama reachability is in the Overview.",
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 3828702134988440,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "description": "Licenses that are currently expired, from the latest license reading in the last 2 days. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. An expired threat or URL filtering license stops content updates for that feature.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Expired licenses",
+                      "formula": "count_nonzero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.license.expired{$firewall,$panorama} by {device_id,feature}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "time": {
+                "type": "live",
+                "unit": "day",
+                "value": 2
+              },
+              "title": "Expired licenses",
+              "type": "query_value"
+            },
+            "id": 130862138267358,
+            "layout": {
+              "height": 2,
+              "width": 6,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Firewalls that rejected the integration's API credentials in the selected time range. Check the API key or user configured for the integration.",
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0.0
+                    },
+                    {
+                      "comparator": "=",
+                      "palette": "green_on_white",
+                      "value": 0.0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Firewalls rejecting credentials",
+                      "formula": "count_nonzero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "max",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:pan_firewall.api.authentication.status{$firewall,$panorama} by {device_ip}.rollup(max)"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "API authentication failures",
+              "type": "query_value"
+            },
+            "id": 2467801624590100,
+            "layout": {
+              "height": 2,
+              "width": 6,
+              "x": 6,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Days until each license expires, per firewall and feature, lowest first, from the latest license reading. License data is reported every 24 hours, so this widget uses a fixed 2-day window instead of the dashboard time range. Perpetual licenses are not listed.",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Days left",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<=",
+                          "palette": "white_on_red",
+                          "value": 30.0
+                        },
+                        {
+                          "comparator": "<=",
+                          "palette": "white_on_yellow",
+                          "value": 60.0
+                        },
+                        {
+                          "comparator": ">",
+                          "palette": "white_on_green",
+                          "value": 60.0
+                        }
+                      ],
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "day"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:pan_firewall.license.days_left{$firewall,$panorama} by {device_hostname,feature}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "time": {
+                "type": "live",
+                "unit": "day",
+                "value": 2
+              },
+              "title": "License days left",
+              "type": "query_table"
+            },
+            "id": 6866719518113554,
+            "layout": {
+              "height": 4,
+              "width": 12,
+              "x": 0,
+              "y": 3
+            }
+          }
+        ]
+      },
+      "id": 1942102131861531,
+      "layout": {
+        "height": 8,
+        "width": 12,
+        "x": 0,
+        "y": 99
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Threats",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "orange",
+              "content": "Threat log events by severity, threat type, and flagged client IP. Threat counts come from logs, not metrics.",
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 8760996467206435,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "description": "Threat log events by severity. Requires Palo Alto Networks Firewall log collection; shows No data without it. Follows the firewall filter through the logs' device_hostname attribute; the Panorama filter does not apply to logs.",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Threats",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "@severity",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:pan.firewall @type:THREAT @device_hostname:$firewall.value"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {
+                "palette": "semantic"
+              },
+              "title": "Threats by severity",
+              "type": "toplist"
+            },
+            "id": 5096945744781460,
+            "layout": {
+              "height": 4,
+              "width": 4,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Most frequent threat log subtypes, such as virus, spyware, or vulnerability. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_hostname attribute; the Panorama filter does not apply to logs.",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Threats",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "@subtype",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:pan.firewall @type:THREAT @device_hostname:$firewall.value"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {
+                "palette": "red"
+              },
+              "title": "Top threat types",
+              "type": "toplist"
+            },
+            "id": 8071593070022420,
+            "layout": {
+              "height": 4,
+              "width": 4,
+              "x": 4,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Client IPs that triggered the most threat log events. Requires Palo Alto Networks Firewall log collection. Follows the firewall filter through the logs' device_hostname attribute; the Panorama filter does not apply to logs.",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Threats",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "@network.client.ip",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:pan.firewall @type:THREAT @device_hostname:$firewall.value"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {
+                "palette": "orange"
+              },
+              "title": "Top flagged client IPs",
+              "type": "toplist"
+            },
+            "id": 3304308938189098,
+            "layout": {
+              "height": 4,
+              "width": 4,
+              "x": 8,
+              "y": 1
+            }
+          }
+        ]
+      },
+      "id": 1683050069563590,
+      "layout": {
+        "height": 6,
+        "width": 12,
+        "x": 0,
+        "y": 107
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Logs",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "orange",
+              "content": "Firewall logs forwarded from PAN-OS: critical-severity entries and log volume by status. For traffic, threat, and authentication log views, open the Palo Alto Networks Firewall Logs dashboard.",
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 3527400720285174,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "description": "Recent Palo Alto Networks Firewall logs with critical status, which the log pipeline sets from PAN-OS critical severity; high and medium severity map to warning and are not listed. The device_name column is the firewall that sent the log. Follows the firewall filter through the logs' device_hostname attribute.",
+              "requests": [
+                {
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "status",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@device_name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ],
+                  "query": {
+                    "data_source": "logs_stream",
+                    "indexes": [],
+                    "query_string": "source:pan.firewall status:critical @device_hostname:$firewall.value",
+                    "sort": {
+                      "column": "timestamp",
+                      "order": "desc"
+                    },
+                    "storage": "hot"
+                  },
+                  "response_format": "event_list"
+                }
+              ],
+              "title": "Critical logs",
+              "type": "list_stream"
+            },
+            "id": 8421795120062092,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "description": "Palo Alto Networks Firewall log volume over time by status. A drop to zero means logs stopped arriving. Follows the firewall filter through the logs' device_hostname attribute; the Panorama filter does not apply to logs.",
+              "legend_columns": [
+                "avg",
+                "max",
+                "min",
+                "sum",
+                "value"
+              ],
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "display_type": "bars",
+                  "formulas": [
+                    {
+                      "alias": "Logs",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "status",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:pan.firewall @device_hostname:$firewall.value"
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "semantic"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "title": "Logs by status",
+              "type": "timeseries"
+            },
+            "id": 6932075307702764,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 1
+            }
+          }
+        ]
+      },
+      "id": 7022862778590967,
+      "layout": {
+        "height": 5,
+        "width": 12,
+        "x": 0,
+        "y": 113
+      }
     }
   ]
 }

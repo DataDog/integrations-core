@@ -25,6 +25,7 @@ from ddev.utils.github_async.models import (
     FileCommit,
     FileContent,
     GitReference,
+    GitTag,
     IssueComment,
     Label,
     PullRequest,
@@ -32,6 +33,7 @@ from ddev.utils.github_async.models import (
     PullRequestReviewComment,
     WorkflowJobsList,
     WorkflowRun,
+    WorkflowRunsList,
 )
 from ddev.utils.github_async.retry import RetryPolicy
 from ddev.utils.github_errors import GitHubBodyTooLongError, github_body_too_long_message
@@ -43,6 +45,7 @@ from .factories import (
     make_file_commit,
     make_file_content,
     make_git_reference,
+    make_git_tag,
     make_issue_comment,
     make_pull_request,
     make_pull_request_review_comment,
@@ -50,6 +53,7 @@ from .factories import (
     make_workflow_dispatch_result,
     make_workflow_jobs_list,
     make_workflow_run,
+    make_workflow_runs_list,
 )
 
 # Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
@@ -135,6 +139,7 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         ),
         # Default to a completed/successful run so happy-path tests don't have to register one.
         'get_workflow_run': lambda: make_response(make_workflow_run()),
+        'list_workflow_runs': lambda: make_response(make_workflow_runs_list()),
         'create_check_run': lambda: make_response(make_check_run(status=CheckRunStatus.IN_PROGRESS)),
         'update_check_run': lambda: make_response(make_check_run()),
         # An empty page; tests that need artifacts register their own ArtifactsList.
@@ -145,6 +150,7 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         'download_artifact': lambda: None,
         # Git data / contents defaults. Tests that care about specific values register their own.
         'get_ref': lambda: make_response(make_git_reference()),
+        'get_tag': lambda: make_response(make_git_tag()),
         'create_ref': lambda: make_response(make_git_reference(ref='refs/heads/feature')),
         'get_content': lambda: make_response(make_file_content()),
         'create_or_update_file_contents': lambda: make_response(make_file_commit()),
@@ -574,6 +580,40 @@ class FakeAsyncGitHubClient:
             timeout=timeout,
         )
 
+    async def list_workflow_runs(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        per_page: int = 30,
+        timeout: float | None = None,
+        *,
+        branch: str | None = None,
+        event: str | None = None,
+        created: str | None = None,
+        retry: RetryPolicy | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowRunsList]]:
+        kwargs = {
+            'owner': owner,
+            'repo': repo,
+            'workflow_id': workflow_id,
+            'per_page': per_page,
+            'timeout': timeout,
+            'branch': branch,
+            'event': event,
+            'created': created,
+        }
+        self._record('list_workflow_runs', **kwargs)
+        response = self._resolve_response('list_workflow_runs', kwargs)
+        if isinstance(response, BaseException):
+            raise response
+        pages = response if isinstance(response, list) else [response]
+        for page in pages:
+            if isinstance(page, GitHubResponse):
+                yield page
+            else:
+                yield GitHubResponse.model_validate({'data': page, 'headers': {}})
+
     async def list_workflow_run_artifacts(
         self,
         owner: str,
@@ -672,6 +712,17 @@ class FakeAsyncGitHubClient:
         retry: RetryPolicy | None = None,
     ) -> GitHubResponse[GitReference]:
         return self._call('get_ref', owner=owner, repo=repo, ref=ref, timeout=timeout)
+
+    async def get_tag(
+        self,
+        owner: str,
+        repo: str,
+        tag_sha: str,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[GitTag]:
+        return self._call('get_tag', owner=owner, repo=repo, tag_sha=tag_sha, timeout=timeout)
 
     async def create_ref(
         self,

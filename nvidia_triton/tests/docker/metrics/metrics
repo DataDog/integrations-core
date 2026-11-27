@@ -1,441 +1,474 @@
 # HELP nv_inference_request_success Number of successful inference requests, all batch sizes
 # TYPE nv_inference_request_success counter
-nv_inference_request_success{model="simple_string",version="1"} 0
-nv_inference_request_success{model="simple_sequence",version="1"} 0
-nv_inference_request_success{model="simple_int8",version="1"} 0
-nv_inference_request_success{model="simple_identity",version="1"} 0
-nv_inference_request_success{model="densenet_onnx",version="1"} 3
-nv_inference_request_success{model="simple_dyna_sequence",version="1"} 0
-nv_inference_request_success{model="inception_graphdef",version="1"} 0
-nv_inference_request_success{model="simple",version="1"} 0
+nv_inference_request_success{model="ensemble",version="1"} 1387
+nv_inference_request_success{model="preprocessing",version="1"} 1403
+nv_inference_request_success{model="postprocessing",version="1"} 1387
+nv_inference_request_success{model="tensorrt_llm",version="1"} 1387
 # HELP nv_inference_request_failure Number of failed inference requests, all batch sizes
 # TYPE nv_inference_request_failure counter
-nv_inference_request_failure{model="simple_string",version="1"} 0
-nv_inference_request_failure{model="simple_sequence",version="1"} 0
-nv_inference_request_failure{model="simple_int8",version="1"} 0
-nv_inference_request_failure{model="simple_identity",version="1"} 0
-nv_inference_request_failure{model="densenet_onnx",version="1"} 0
-nv_inference_request_failure{model="simple_dyna_sequence",version="1"} 0
-nv_inference_request_failure{model="inception_graphdef",version="1"} 0
-nv_inference_request_failure{model="simple",version="1"} 0
+nv_inference_request_failure{model="ensemble",reason="OTHER",version="1"} 0
+nv_inference_request_failure{model="ensemble",reason="BACKEND",version="1"} 0
+nv_inference_request_failure{model="tensorrt_llm",reason="BACKEND",version="1"} 0
+nv_inference_request_failure{model="tensorrt_llm",reason="CANCELED",version="1"} 0
+nv_inference_request_failure{model="preprocessing",reason="OTHER",version="1"} 0
+nv_inference_request_failure{model="tensorrt_llm",reason="OTHER",version="1"} 0
+nv_inference_request_failure{model="postprocessing",reason="REJECTED",version="1"} 0
+nv_inference_request_failure{model="postprocessing",reason="CANCELED",version="1"} 0
+nv_inference_request_failure{model="preprocessing",reason="REJECTED",version="1"} 0
+nv_inference_request_failure{model="postprocessing",reason="BACKEND",version="1"} 0
+nv_inference_request_failure{model="postprocessing",reason="OTHER",version="1"} 0
+nv_inference_request_failure{model="tensorrt_llm",reason="REJECTED",version="1"} 0
+nv_inference_request_failure{model="preprocessing",reason="CANCELED",version="1"} 0
+nv_inference_request_failure{model="preprocessing",reason="BACKEND",version="1"} 0
+nv_inference_request_failure{model="ensemble",reason="CANCELED",version="1"} 0
+nv_inference_request_failure{model="ensemble",reason="REJECTED",version="1"} 0
 # HELP nv_inference_count Number of inferences performed (does not include cached requests)
 # TYPE nv_inference_count counter
-nv_inference_count{model="simple_string",version="1"} 0
-nv_inference_count{model="simple_sequence",version="1"} 0
-nv_inference_count{model="simple_int8",version="1"} 0
-nv_inference_count{model="simple_identity",version="1"} 0
-nv_inference_count{model="densenet_onnx",version="1"} 3
-nv_inference_count{model="simple_dyna_sequence",version="1"} 0
-nv_inference_count{model="inception_graphdef",version="1"} 0
-nv_inference_count{model="simple",version="1"} 0
+nv_inference_count{model="ensemble",version="1"} 1387
+nv_inference_count{model="preprocessing",version="1"} 1403
+nv_inference_count{model="postprocessing",version="1"} 1387
+nv_inference_count{model="tensorrt_llm",version="1"} 1387
 # HELP nv_inference_exec_count Number of model executions performed (does not include cached requests)
 # TYPE nv_inference_exec_count counter
-nv_inference_exec_count{model="simple_string",version="1"} 0
-nv_inference_exec_count{model="simple_sequence",version="1"} 0
-nv_inference_exec_count{model="simple_int8",version="1"} 0
-nv_inference_exec_count{model="simple_identity",version="1"} 0
-nv_inference_exec_count{model="densenet_onnx",version="1"} 3
-nv_inference_exec_count{model="simple_dyna_sequence",version="1"} 0
-nv_inference_exec_count{model="inception_graphdef",version="1"} 0
-nv_inference_exec_count{model="simple",version="1"} 0
+nv_inference_exec_count{model="ensemble",version="1"} 1387
+nv_inference_exec_count{model="preprocessing",version="1"} 1392
+nv_inference_exec_count{model="postprocessing",version="1"} 1387
+nv_inference_exec_count{model="tensorrt_llm",version="1"} 1387
 # HELP nv_inference_request_duration_us Cumulative inference request duration in microseconds (includes cached requests)
 # TYPE nv_inference_request_duration_us counter
-nv_inference_request_duration_us{model="simple_string",version="1"} 0
-nv_inference_request_duration_us{model="simple_sequence",version="1"} 0
-nv_inference_request_duration_us{model="simple_int8",version="1"} 0
-nv_inference_request_duration_us{model="simple_identity",version="1"} 0
-nv_inference_request_duration_us{model="densenet_onnx",version="1"} 1327965
-nv_inference_request_duration_us{model="simple_dyna_sequence",version="1"} 0
-nv_inference_request_duration_us{model="inception_graphdef",version="1"} 0
-nv_inference_request_duration_us{model="simple",version="1"} 0
+nv_inference_request_duration_us{model="ensemble",version="1"} 627522394
+nv_inference_request_duration_us{model="preprocessing",version="1"} 1805453
+nv_inference_request_duration_us{model="postprocessing",version="1"} 496411
+nv_inference_request_duration_us{model="tensorrt_llm",version="1"} 624935561
 # HELP nv_inference_queue_duration_us Cumulative inference queuing duration in microseconds (includes cached requests)
 # TYPE nv_inference_queue_duration_us counter
-nv_inference_queue_duration_us{model="simple_string",version="1"} 0
-nv_inference_queue_duration_us{model="simple_sequence",version="1"} 0
-nv_inference_queue_duration_us{model="simple_int8",version="1"} 0
-nv_inference_queue_duration_us{model="simple_identity",version="1"} 0
-nv_inference_queue_duration_us{model="densenet_onnx",version="1"} 145
-nv_inference_queue_duration_us{model="simple_dyna_sequence",version="1"} 0
-nv_inference_queue_duration_us{model="inception_graphdef",version="1"} 0
-nv_inference_queue_duration_us{model="simple",version="1"} 0
+nv_inference_queue_duration_us{model="ensemble",version="1"} 1379
+nv_inference_queue_duration_us{model="preprocessing",version="1"} 149569
+nv_inference_queue_duration_us{model="postprocessing",version="1"} 82617
+nv_inference_queue_duration_us{model="tensorrt_llm",version="1"} 67836
 # HELP nv_inference_compute_input_duration_us Cumulative compute input duration in microseconds (does not include cached requests)
 # TYPE nv_inference_compute_input_duration_us counter
-nv_inference_compute_input_duration_us{model="simple_string",version="1"} 0
-nv_inference_compute_input_duration_us{model="simple_sequence",version="1"} 0
-nv_inference_compute_input_duration_us{model="simple_int8",version="1"} 0
-nv_inference_compute_input_duration_us{model="simple_identity",version="1"} 0
-nv_inference_compute_input_duration_us{model="densenet_onnx",version="1"} 626
-nv_inference_compute_input_duration_us{model="simple_dyna_sequence",version="1"} 0
-nv_inference_compute_input_duration_us{model="inception_graphdef",version="1"} 0
-nv_inference_compute_input_duration_us{model="simple",version="1"} 0
+nv_inference_compute_input_duration_us{model="ensemble",version="1"} 190276
+nv_inference_compute_input_duration_us{model="preprocessing",version="1"} 47393
+nv_inference_compute_input_duration_us{model="postprocessing",version="1"} 26395
+nv_inference_compute_input_duration_us{model="tensorrt_llm",version="1"} 115606
 # HELP nv_inference_compute_infer_duration_us Cumulative compute inference duration in microseconds (does not include cached requests)
 # TYPE nv_inference_compute_infer_duration_us counter
-nv_inference_compute_infer_duration_us{model="simple_string",version="1"} 0
-nv_inference_compute_infer_duration_us{model="simple_sequence",version="1"} 0
-nv_inference_compute_infer_duration_us{model="simple_int8",version="1"} 0
-nv_inference_compute_infer_duration_us{model="simple_identity",version="1"} 0
-nv_inference_compute_infer_duration_us{model="densenet_onnx",version="1"} 1326831
-nv_inference_compute_infer_duration_us{model="simple_dyna_sequence",version="1"} 0
-nv_inference_compute_infer_duration_us{model="inception_graphdef",version="1"} 0
-nv_inference_compute_infer_duration_us{model="simple",version="1"} 0
+nv_inference_compute_infer_duration_us{model="ensemble",version="1"} 626525554
+nv_inference_compute_infer_duration_us{model="preprocessing",version="1"} 1544065
+nv_inference_compute_infer_duration_us{model="postprocessing",version="1"} 353262
+nv_inference_compute_infer_duration_us{model="tensorrt_llm",version="1"} 624645204
 # HELP nv_inference_compute_output_duration_us Cumulative inference compute output duration in microseconds (does not include cached requests)
 # TYPE nv_inference_compute_output_duration_us counter
-nv_inference_compute_output_duration_us{model="simple_string",version="1"} 0
-nv_inference_compute_output_duration_us{model="simple_sequence",version="1"} 0
-nv_inference_compute_output_duration_us{model="simple_int8",version="1"} 0
-nv_inference_compute_output_duration_us{model="simple_identity",version="1"} 0
-nv_inference_compute_output_duration_us{model="densenet_onnx",version="1"} 61
-nv_inference_compute_output_duration_us{model="simple_dyna_sequence",version="1"} 0
-nv_inference_compute_output_duration_us{model="inception_graphdef",version="1"} 0
-nv_inference_compute_output_duration_us{model="simple",version="1"} 0
+nv_inference_compute_output_duration_us{model="ensemble",version="1"} 195460
+nv_inference_compute_output_duration_us{model="preprocessing",version="1"} 61188
+nv_inference_compute_output_duration_us{model="postprocessing",version="1"} 30686
+nv_inference_compute_output_duration_us{model="tensorrt_llm",version="1"} 102907
 # HELP nv_energy_consumption GPU energy consumption in joules since the Triton Server started
 # TYPE nv_energy_consumption counter
-nv_energy_consumption{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 4879631.328000044
+nv_energy_consumption{gpu_uuid="GPU-d0c0ab98-d350-b387-61b0-a3e70caafe0f"} 12423.583
+# HELP nv_trt_llm_disaggregated_serving_metrics TRT LLM disaggregated serving metrics
+# TYPE nv_trt_llm_disaggregated_serving_metrics counter
+nv_trt_llm_disaggregated_serving_metrics{disaggregated_serving_type="request_count",model="tensorrt_llm",version="1"} 0
+nv_trt_llm_disaggregated_serving_metrics{disaggregated_serving_type="kv_cache_transfer_ms",model="tensorrt_llm",version="1"} 0
 # HELP nv_inference_pending_request_count Instantaneous number of pending requests awaiting execution per-model.
 # TYPE nv_inference_pending_request_count gauge
-nv_inference_pending_request_count{model="simple_string",version="1"} 0
-nv_inference_pending_request_count{model="simple_sequence",version="1"} 0
-nv_inference_pending_request_count{model="simple_int8",version="1"} 0
-nv_inference_pending_request_count{model="simple_identity",version="1"} 0
-nv_inference_pending_request_count{model="densenet_onnx",version="1"} 0
-nv_inference_pending_request_count{model="simple_dyna_sequence",version="1"} 0
-nv_inference_pending_request_count{model="inception_graphdef",version="1"} 0
-nv_inference_pending_request_count{model="simple",version="1"} 0
+nv_inference_pending_request_count{model="ensemble",version="1"} 0
+nv_inference_pending_request_count{model="preprocessing",version="1"} 0
+nv_inference_pending_request_count{model="postprocessing",version="1"} 0
+nv_inference_pending_request_count{model="tensorrt_llm",version="1"} 0
+# HELP nv_model_load_duration_secs Model load time in seconds
+# TYPE nv_model_load_duration_secs gauge
+nv_model_load_duration_secs{model="ensemble",version="1"} 0
+nv_model_load_duration_secs{model="preprocessing",version="1"} 10.059717713
+nv_model_load_duration_secs{model="postprocessing",version="1"} 8.066132902
+nv_model_load_duration_secs{model="tensorrt_llm",version="1"} 2.081871054
+# HELP nv_pinned_memory_pool_total_bytes Pinned memory pool total memory size, in bytes
+# TYPE nv_pinned_memory_pool_total_bytes gauge
+nv_pinned_memory_pool_total_bytes 268435456
+# HELP nv_pinned_memory_pool_used_bytes Pinned memory pool used memory size, in bytes
+# TYPE nv_pinned_memory_pool_used_bytes gauge
+nv_pinned_memory_pool_used_bytes 21088
 # HELP nv_gpu_utilization GPU utilization rate [0.0 - 1.0)
 # TYPE nv_gpu_utilization gauge
-nv_gpu_utilization{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 0
+nv_gpu_utilization{gpu_uuid="GPU-d0c0ab98-d350-b387-61b0-a3e70caafe0f"} 0.9400000000000001
 # HELP nv_gpu_memory_total_bytes GPU total memory, in bytes
 # TYPE nv_gpu_memory_total_bytes gauge
-nv_gpu_memory_total_bytes{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 16106127360
+nv_gpu_memory_total_bytes{gpu_uuid="GPU-d0c0ab98-d350-b387-61b0-a3e70caafe0f"} 85520809984
 # HELP nv_gpu_memory_used_bytes GPU used memory, in bytes
 # TYPE nv_gpu_memory_used_bytes gauge
-nv_gpu_memory_used_bytes{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 266338304
+nv_gpu_memory_used_bytes{gpu_uuid="GPU-d0c0ab98-d350-b387-61b0-a3e70caafe0f"} 27963424768
 # HELP nv_gpu_power_usage GPU power usage in watts
 # TYPE nv_gpu_power_usage gauge
-nv_gpu_power_usage{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 32.09
+nv_gpu_power_usage{gpu_uuid="GPU-d0c0ab98-d350-b387-61b0-a3e70caafe0f"} 279.99
 # HELP nv_gpu_power_limit GPU power management limit in watts
 # TYPE nv_gpu_power_limit gauge
-nv_gpu_power_limit{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 70
+nv_gpu_power_limit{gpu_uuid="GPU-d0c0ab98-d350-b387-61b0-a3e70caafe0f"} 700
 # HELP nv_cpu_utilization CPU utilization rate [0.0 - 1.0]
 # TYPE nv_cpu_utilization gauge
-nv_cpu_utilization 0
+nv_cpu_utilization 0.08594730238393977
 # HELP nv_cpu_memory_total_bytes CPU total memory (RAM), in bytes
 # TYPE nv_cpu_memory_total_bytes gauge
-nv_cpu_memory_total_bytes 33164935168
+nv_cpu_memory_total_bytes 211069931520
 # HELP nv_cpu_memory_used_bytes CPU used memory (RAM), in bytes
 # TYPE nv_cpu_memory_used_bytes gauge
-nv_cpu_memory_used_bytes 2249916416
+nv_cpu_memory_used_bytes 7704592384
+# HELP nv_trt_llm_request_metrics TRT LLM request metrics
+# TYPE nv_trt_llm_request_metrics gauge
+nv_trt_llm_request_metrics{model="tensorrt_llm",request_type="waiting",version="1"} 0
+nv_trt_llm_request_metrics{model="tensorrt_llm",request_type="context",version="1"} 1
+nv_trt_llm_request_metrics{model="tensorrt_llm",request_type="scheduled",version="1"} 16
+nv_trt_llm_request_metrics{model="tensorrt_llm",request_type="max",version="1"} 64
+nv_trt_llm_request_metrics{model="tensorrt_llm",request_type="active",version="1"} 16
+# HELP nv_trt_llm_runtime_memory_metrics TRT LLM runtime memory metrics
+# TYPE nv_trt_llm_runtime_memory_metrics gauge
+nv_trt_llm_runtime_memory_metrics{memory_type="pinned",model="tensorrt_llm",version="1"} 540018240
+nv_trt_llm_runtime_memory_metrics{memory_type="gpu",model="tensorrt_llm",version="1"} 25023161371
+nv_trt_llm_runtime_memory_metrics{memory_type="cpu",model="tensorrt_llm",version="1"} 18732
+# HELP nv_trt_llm_kv_cache_block_metrics TRT LLM KV cache block metrics
+# TYPE nv_trt_llm_kv_cache_block_metrics gauge
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="fraction",model="tensorrt_llm",version="1"} 0.034007
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="reused",model="tensorrt_llm",version="1"} 1381
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="tokens_per",model="tensorrt_llm",version="1"} 32
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="used",model="tensorrt_llm",version="1"} 217
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="free",model="tensorrt_llm",version="1"} 6164
+nv_trt_llm_kv_cache_block_metrics{kv_cache_block_type="max",model="tensorrt_llm",version="1"} 6381
+# HELP nv_trt_llm_inflight_batcher_metrics TRT LLM inflight_batcher-specific metrics
+# TYPE nv_trt_llm_inflight_batcher_metrics gauge
+nv_trt_llm_inflight_batcher_metrics{inflight_batcher_specific_metric="paused_requests",model="tensorrt_llm",version="1"} 0
+nv_trt_llm_inflight_batcher_metrics{inflight_batcher_specific_metric="micro_batch_id",model="tensorrt_llm",version="1"} 0
+nv_trt_llm_inflight_batcher_metrics{inflight_batcher_specific_metric="generation_requests",model="tensorrt_llm",version="1"} 15
+nv_trt_llm_inflight_batcher_metrics{inflight_batcher_specific_metric="total_context_tokens",model="tensorrt_llm",version="1"} 182
+# HELP nv_trt_llm_general_metrics General TRT LLM metrics
+# TYPE nv_trt_llm_general_metrics gauge
+nv_trt_llm_general_metrics{general_type="iteration_counter",model="tensorrt_llm",version="1"} 12430
+nv_trt_llm_general_metrics{general_type="timestamp",model="tensorrt_llm",version="1"} 1795533557074292
+# HELP nv_inference_first_response_histogram_ms Duration from request to first response in milliseconds
+# TYPE nv_inference_first_response_histogram_ms histogram
+nv_inference_first_response_histogram_ms_count{model="ensemble",version="1"} 1387
+nv_inference_first_response_histogram_ms_sum{model="ensemble",version="1"} 626798
+nv_inference_first_response_histogram_ms_bucket{model="ensemble",version="1",le="100"} 1
+nv_inference_first_response_histogram_ms_bucket{model="ensemble",version="1",le="500"} 798
+nv_inference_first_response_histogram_ms_bucket{model="ensemble",version="1",le="2000"} 1387
+nv_inference_first_response_histogram_ms_bucket{model="ensemble",version="1",le="5000"} 1387
+nv_inference_first_response_histogram_ms_bucket{model="ensemble",version="1",le="+Inf"} 1387
+nv_inference_first_response_histogram_ms_count{model="preprocessing",version="1"} 1403
+nv_inference_first_response_histogram_ms_sum{model="preprocessing",version="1"} 1067
+nv_inference_first_response_histogram_ms_bucket{model="preprocessing",version="1",le="100"} 1403
+nv_inference_first_response_histogram_ms_bucket{model="preprocessing",version="1",le="500"} 1403
+nv_inference_first_response_histogram_ms_bucket{model="preprocessing",version="1",le="2000"} 1403
+nv_inference_first_response_histogram_ms_bucket{model="preprocessing",version="1",le="5000"} 1403
+nv_inference_first_response_histogram_ms_bucket{model="preprocessing",version="1",le="+Inf"} 1403
+nv_inference_first_response_histogram_ms_count{model="postprocessing",version="1"} 1387
+nv_inference_first_response_histogram_ms_sum{model="postprocessing",version="1"} 2
+nv_inference_first_response_histogram_ms_bucket{model="postprocessing",version="1",le="100"} 1387
+nv_inference_first_response_histogram_ms_bucket{model="postprocessing",version="1",le="500"} 1387
+nv_inference_first_response_histogram_ms_bucket{model="postprocessing",version="1",le="2000"} 1387
+nv_inference_first_response_histogram_ms_bucket{model="postprocessing",version="1",le="5000"} 1387
+nv_inference_first_response_histogram_ms_bucket{model="postprocessing",version="1",le="+Inf"} 1387
+nv_inference_first_response_histogram_ms_count{model="tensorrt_llm",version="1"} 1387
+nv_inference_first_response_histogram_ms_sum{model="tensorrt_llm",version="1"} 624202
+nv_inference_first_response_histogram_ms_bucket{model="tensorrt_llm",version="1",le="100"} 1
+nv_inference_first_response_histogram_ms_bucket{model="tensorrt_llm",version="1",le="500"} 800
+nv_inference_first_response_histogram_ms_bucket{model="tensorrt_llm",version="1",le="2000"} 1387
+nv_inference_first_response_histogram_ms_bucket{model="tensorrt_llm",version="1",le="5000"} 1387
+nv_inference_first_response_histogram_ms_bucket{model="tensorrt_llm",version="1",le="+Inf"} 1387
+# HELP nv_llm_output_token_len TRT LLM response metrics
+# TYPE nv_llm_output_token_len histogram
+nv_llm_output_token_len_count{model="tensorrt_llm",response_metric_type="total_output_tokens",version="1"} 1387
+nv_llm_output_token_len_sum{model="tensorrt_llm",response_metric_type="total_output_tokens",version="1"} 195452
+nv_llm_output_token_len_bucket{model="tensorrt_llm",response_metric_type="total_output_tokens",version="1",le="10"} 0
+nv_llm_output_token_len_bucket{model="tensorrt_llm",response_metric_type="total_output_tokens",version="1",le="50"} 120
+nv_llm_output_token_len_bucket{model="tensorrt_llm",response_metric_type="total_output_tokens",version="1",le="100"} 465
+nv_llm_output_token_len_bucket{model="tensorrt_llm",response_metric_type="total_output_tokens",version="1",le="500"} 1387
+nv_llm_output_token_len_bucket{model="tensorrt_llm",response_metric_type="total_output_tokens",version="1",le="1000"} 1387
+nv_llm_output_token_len_bucket{model="tensorrt_llm",response_metric_type="total_output_tokens",version="1",le="+Inf"} 1387
+# HELP nv_llm_input_token_len TRT LLM response metrics
+# TYPE nv_llm_input_token_len histogram
+nv_llm_input_token_len_count{model="tensorrt_llm",response_metric_type="total_input_tokens",version="1"} 1387
+nv_llm_input_token_len_sum{model="tensorrt_llm",response_metric_type="total_input_tokens",version="1"} 451126
+nv_llm_input_token_len_bucket{model="tensorrt_llm",response_metric_type="total_input_tokens",version="1",le="10"} 0
+nv_llm_input_token_len_bucket{model="tensorrt_llm",response_metric_type="total_input_tokens",version="1",le="50"} 2
+nv_llm_input_token_len_bucket{model="tensorrt_llm",response_metric_type="total_input_tokens",version="1",le="100"} 109
+nv_llm_input_token_len_bucket{model="tensorrt_llm",response_metric_type="total_input_tokens",version="1",le="500"} 1134
+nv_llm_input_token_len_bucket{model="tensorrt_llm",response_metric_type="total_input_tokens",version="1",le="1000"} 1387
+nv_llm_input_token_len_bucket{model="tensorrt_llm",response_metric_type="total_input_tokens",version="1",le="+Inf"} 1387
+# HELP nv_inference_request_summary_us Summary of inference request duration in microseconds (includes cached requests)
+# TYPE nv_inference_request_summary_us summary
+nv_inference_request_summary_us_count{model="ensemble",version="1"} 1387
+nv_inference_request_summary_us_sum{model="ensemble",version="1"} 627522394
+nv_inference_request_summary_us{model="ensemble",version="1",quantile="0.5"} 436462
+nv_inference_request_summary_us{model="ensemble",version="1",quantile="0.9"} 742632
+nv_inference_request_summary_us{model="ensemble",version="1",quantile="0.95"} 786243
+nv_inference_request_summary_us{model="ensemble",version="1",quantile="0.99"} 814720
+nv_inference_request_summary_us{model="ensemble",version="1",quantile="0.999"} 905066
+nv_inference_request_summary_us_count{model="preprocessing",version="1"} 1403
+nv_inference_request_summary_us_sum{model="preprocessing",version="1"} 1805453
+nv_inference_request_summary_us{model="preprocessing",version="1",quantile="0.5"} 1244
+nv_inference_request_summary_us{model="preprocessing",version="1",quantile="0.9"} 1709
+nv_inference_request_summary_us{model="preprocessing",version="1",quantile="0.95"} 2085
+nv_inference_request_summary_us{model="preprocessing",version="1",quantile="0.99"} 2896
+nv_inference_request_summary_us{model="preprocessing",version="1",quantile="0.999"} 3701
+nv_inference_request_summary_us_count{model="postprocessing",version="1"} 1387
+nv_inference_request_summary_us_sum{model="postprocessing",version="1"} 496411
+nv_inference_request_summary_us{model="postprocessing",version="1",quantile="0.5"} 349
+nv_inference_request_summary_us{model="postprocessing",version="1",quantile="0.9"} 417
+nv_inference_request_summary_us{model="postprocessing",version="1",quantile="0.95"} 474
+nv_inference_request_summary_us{model="postprocessing",version="1",quantile="0.99"} 621
+nv_inference_request_summary_us{model="postprocessing",version="1",quantile="0.999"} 871
+nv_inference_request_summary_us_count{model="tensorrt_llm",version="1"} 1387
+nv_inference_request_summary_us_sum{model="tensorrt_llm",version="1"} 624935561
+nv_inference_request_summary_us{model="tensorrt_llm",version="1",quantile="0.5"} 434422
+nv_inference_request_summary_us{model="tensorrt_llm",version="1",quantile="0.9"} 740773
+nv_inference_request_summary_us{model="tensorrt_llm",version="1",quantile="0.95"} 784562
+nv_inference_request_summary_us{model="tensorrt_llm",version="1",quantile="0.99"} 812454
+nv_inference_request_summary_us{model="tensorrt_llm",version="1",quantile="0.999"} 901457
+# HELP nv_inference_queue_summary_us Summary of inference queuing duration in microseconds (includes cached requests)
+# TYPE nv_inference_queue_summary_us summary
+nv_inference_queue_summary_us_count{model="ensemble",version="1"} 1387
+nv_inference_queue_summary_us_sum{model="ensemble",version="1"} 1379
+nv_inference_queue_summary_us{model="ensemble",version="1",quantile="0.5"} 1
+nv_inference_queue_summary_us{model="ensemble",version="1",quantile="0.9"} 1
+nv_inference_queue_summary_us{model="ensemble",version="1",quantile="0.95"} 1
+nv_inference_queue_summary_us{model="ensemble",version="1",quantile="0.99"} 2
+nv_inference_queue_summary_us{model="ensemble",version="1",quantile="0.999"} 7
+nv_inference_queue_summary_us_count{model="preprocessing",version="1"} 1403
+nv_inference_queue_summary_us_sum{model="preprocessing",version="1"} 149569
+nv_inference_queue_summary_us{model="preprocessing",version="1",quantile="0.5"} 41
+nv_inference_queue_summary_us{model="preprocessing",version="1",quantile="0.9"} 62
+nv_inference_queue_summary_us{model="preprocessing",version="1",quantile="0.95"} 659
+nv_inference_queue_summary_us{model="preprocessing",version="1",quantile="0.99"} 1464
+nv_inference_queue_summary_us{model="preprocessing",version="1",quantile="0.999"} 1791
+nv_inference_queue_summary_us_count{model="postprocessing",version="1"} 1387
+nv_inference_queue_summary_us_sum{model="postprocessing",version="1"} 82617
+nv_inference_queue_summary_us{model="postprocessing",version="1",quantile="0.5"} 43
+nv_inference_queue_summary_us{model="postprocessing",version="1",quantile="0.9"} 58
+nv_inference_queue_summary_us{model="postprocessing",version="1",quantile="0.95"} 241
+nv_inference_queue_summary_us{model="postprocessing",version="1",quantile="0.99"} 342
+nv_inference_queue_summary_us{model="postprocessing",version="1",quantile="0.999"} 442
+nv_inference_queue_summary_us_count{model="tensorrt_llm",version="1"} 1387
+nv_inference_queue_summary_us_sum{model="tensorrt_llm",version="1"} 67836
+nv_inference_queue_summary_us{model="tensorrt_llm",version="1",quantile="0.5"} 45
+nv_inference_queue_summary_us{model="tensorrt_llm",version="1",quantile="0.9"} 59
+nv_inference_queue_summary_us{model="tensorrt_llm",version="1",quantile="0.95"} 65
+nv_inference_queue_summary_us{model="tensorrt_llm",version="1",quantile="0.99"} 79
+nv_inference_queue_summary_us{model="tensorrt_llm",version="1",quantile="0.999"} 147
+# HELP nv_inference_compute_input_summary_us Cumulative compute input duration in microseconds (does not include cached requests)
+# TYPE nv_inference_compute_input_summary_us summary
+nv_inference_compute_input_summary_us_count{model="ensemble",version="1"} 1387
+nv_inference_compute_input_summary_us_sum{model="ensemble",version="1"} 190276
+nv_inference_compute_input_summary_us{model="ensemble",version="1",quantile="0.5"} 136
+nv_inference_compute_input_summary_us{model="ensemble",version="1",quantile="0.9"} 163
+nv_inference_compute_input_summary_us{model="ensemble",version="1",quantile="0.95"} 171
+nv_inference_compute_input_summary_us{model="ensemble",version="1",quantile="0.99"} 193
+nv_inference_compute_input_summary_us{model="ensemble",version="1",quantile="0.999"} 246
+nv_inference_compute_input_summary_us_count{model="preprocessing",version="1"} 1403
+nv_inference_compute_input_summary_us_sum{model="preprocessing",version="1"} 47393
+nv_inference_compute_input_summary_us{model="preprocessing",version="1",quantile="0.5"} 32
+nv_inference_compute_input_summary_us{model="preprocessing",version="1",quantile="0.9"} 43
+nv_inference_compute_input_summary_us{model="preprocessing",version="1",quantile="0.95"} 48
+nv_inference_compute_input_summary_us{model="preprocessing",version="1",quantile="0.99"} 67
+nv_inference_compute_input_summary_us{model="preprocessing",version="1",quantile="0.999"} 107
+nv_inference_compute_input_summary_us_count{model="postprocessing",version="1"} 1387
+nv_inference_compute_input_summary_us_sum{model="postprocessing",version="1"} 26395
+nv_inference_compute_input_summary_us{model="postprocessing",version="1",quantile="0.5"} 20
+nv_inference_compute_input_summary_us{model="postprocessing",version="1",quantile="0.9"} 24
+nv_inference_compute_input_summary_us{model="postprocessing",version="1",quantile="0.95"} 27
+nv_inference_compute_input_summary_us{model="postprocessing",version="1",quantile="0.99"} 34
+nv_inference_compute_input_summary_us{model="postprocessing",version="1",quantile="0.999"} 42
+nv_inference_compute_input_summary_us_count{model="tensorrt_llm",version="1"} 1387
+nv_inference_compute_input_summary_us_sum{model="tensorrt_llm",version="1"} 115606
+nv_inference_compute_input_summary_us{model="tensorrt_llm",version="1",quantile="0.5"} 83
+nv_inference_compute_input_summary_us{model="tensorrt_llm",version="1",quantile="0.9"} 104
+nv_inference_compute_input_summary_us{model="tensorrt_llm",version="1",quantile="0.95"} 110
+nv_inference_compute_input_summary_us{model="tensorrt_llm",version="1",quantile="0.99"} 129
+nv_inference_compute_input_summary_us{model="tensorrt_llm",version="1",quantile="0.999"} 159
+# HELP nv_inference_compute_infer_summary_us Cumulative compute inference duration in microseconds (does not include cached requests)
+# TYPE nv_inference_compute_infer_summary_us summary
+nv_inference_compute_infer_summary_us_count{model="ensemble",version="1"} 1387
+nv_inference_compute_infer_summary_us_sum{model="ensemble",version="1"} 626525554
+nv_inference_compute_infer_summary_us{model="ensemble",version="1",quantile="0.5"} 435799
+nv_inference_compute_infer_summary_us{model="ensemble",version="1",quantile="0.9"} 741984
+nv_inference_compute_infer_summary_us{model="ensemble",version="1",quantile="0.95"} 785509
+nv_inference_compute_infer_summary_us{model="ensemble",version="1",quantile="0.99"} 813993
+nv_inference_compute_infer_summary_us{model="ensemble",version="1",quantile="0.999"} 904217
+nv_inference_compute_infer_summary_us_count{model="preprocessing",version="1"} 1403
+nv_inference_compute_infer_summary_us_sum{model="preprocessing",version="1"} 1544065
+nv_inference_compute_infer_summary_us{model="preprocessing",version="1",quantile="0.5"} 1101
+nv_inference_compute_infer_summary_us{model="preprocessing",version="1",quantile="0.9"} 1505
+nv_inference_compute_infer_summary_us{model="preprocessing",version="1",quantile="0.95"} 1595
+nv_inference_compute_infer_summary_us{model="preprocessing",version="1",quantile="0.99"} 1945
+nv_inference_compute_infer_summary_us{model="preprocessing",version="1",quantile="0.999"} 2741
+nv_inference_compute_infer_summary_us_count{model="postprocessing",version="1"} 1387
+nv_inference_compute_infer_summary_us_sum{model="postprocessing",version="1"} 353262
+nv_inference_compute_infer_summary_us{model="postprocessing",version="1",quantile="0.5"} 257
+nv_inference_compute_infer_summary_us{model="postprocessing",version="1",quantile="0.9"} 299
+nv_inference_compute_infer_summary_us{model="postprocessing",version="1",quantile="0.95"} 320
+nv_inference_compute_infer_summary_us{model="postprocessing",version="1",quantile="0.99"} 397
+nv_inference_compute_infer_summary_us{model="postprocessing",version="1",quantile="0.999"} 681
+nv_inference_compute_infer_summary_us_count{model="tensorrt_llm",version="1"} 1387
+nv_inference_compute_infer_summary_us_sum{model="tensorrt_llm",version="1"} 624645204
+nv_inference_compute_infer_summary_us{model="tensorrt_llm",version="1",quantile="0.5"} 434201
+nv_inference_compute_infer_summary_us{model="tensorrt_llm",version="1",quantile="0.9"} 740580
+nv_inference_compute_infer_summary_us{model="tensorrt_llm",version="1",quantile="0.95"} 784501
+nv_inference_compute_infer_summary_us{model="tensorrt_llm",version="1",quantile="0.99"} 812217
+nv_inference_compute_infer_summary_us{model="tensorrt_llm",version="1",quantile="0.999"} 901190
+# HELP nv_inference_compute_output_summary_us Cumulative inference compute output duration in microseconds (does not include cached requests)
+# TYPE nv_inference_compute_output_summary_us summary
+nv_inference_compute_output_summary_us_count{model="ensemble",version="1"} 1387
+nv_inference_compute_output_summary_us_sum{model="ensemble",version="1"} 195460
+nv_inference_compute_output_summary_us{model="ensemble",version="1",quantile="0.5"} 137
+nv_inference_compute_output_summary_us{model="ensemble",version="1",quantile="0.9"} 164
+nv_inference_compute_output_summary_us{model="ensemble",version="1",quantile="0.95"} 191
+nv_inference_compute_output_summary_us{model="ensemble",version="1",quantile="0.99"} 225
+nv_inference_compute_output_summary_us{model="ensemble",version="1",quantile="0.999"} 250
+nv_inference_compute_output_summary_us_count{model="preprocessing",version="1"} 1403
+nv_inference_compute_output_summary_us_sum{model="preprocessing",version="1"} 61188
+nv_inference_compute_output_summary_us{model="preprocessing",version="1",quantile="0.5"} 43
+nv_inference_compute_output_summary_us{model="preprocessing",version="1",quantile="0.9"} 53
+nv_inference_compute_output_summary_us{model="preprocessing",version="1",quantile="0.95"} 59
+nv_inference_compute_output_summary_us{model="preprocessing",version="1",quantile="0.99"} 76
+nv_inference_compute_output_summary_us{model="preprocessing",version="1",quantile="0.999"} 142
+nv_inference_compute_output_summary_us_count{model="postprocessing",version="1"} 1387
+nv_inference_compute_output_summary_us_sum{model="postprocessing",version="1"} 30686
+nv_inference_compute_output_summary_us{model="postprocessing",version="1",quantile="0.5"} 22
+nv_inference_compute_output_summary_us{model="postprocessing",version="1",quantile="0.9"} 27
+nv_inference_compute_output_summary_us{model="postprocessing",version="1",quantile="0.95"} 29
+nv_inference_compute_output_summary_us{model="postprocessing",version="1",quantile="0.99"} 35
+nv_inference_compute_output_summary_us{model="postprocessing",version="1",quantile="0.999"} 44
+nv_inference_compute_output_summary_us_count{model="tensorrt_llm",version="1"} 1387
+nv_inference_compute_output_summary_us_sum{model="tensorrt_llm",version="1"} 102907
+nv_inference_compute_output_summary_us{model="tensorrt_llm",version="1",quantile="0.5"} 71
+nv_inference_compute_output_summary_us{model="tensorrt_llm",version="1",quantile="0.9"} 88
+nv_inference_compute_output_summary_us{model="tensorrt_llm",version="1",quantile="0.95"} 120
+nv_inference_compute_output_summary_us{model="tensorrt_llm",version="1",quantile="0.99"} 159
+nv_inference_compute_output_summary_us{model="tensorrt_llm",version="1",quantile="0.999"} 188
+# HELP nv_cache_num_hits_per_model Number of cache hits per model
+# TYPE nv_cache_num_hits_per_model counter
+nv_cache_num_hits_per_model{model="identity",version="1"} 4520
+# HELP nv_cache_hit_duration_per_model Total cache hit duration per model, in microseconds
+# TYPE nv_cache_hit_duration_per_model counter
+nv_cache_hit_duration_per_model{model="identity",version="1"} 10863
+# HELP nv_cache_num_misses_per_model Number of cache misses per model
+# TYPE nv_cache_num_misses_per_model counter
+nv_cache_num_misses_per_model{model="identity",version="1"} 3075
+# HELP nv_cache_miss_duration_per_model Total cache miss (insert+lookup) duration per model, in microseconds
+# TYPE nv_cache_miss_duration_per_model counter
+nv_cache_miss_duration_per_model{model="identity",version="1"} 23352
 # HELP nv_cache_util Cache utilization [0.0 - 1.0]
 # TYPE nv_cache_util gauge
-nv_cache_util 0.0001220703125
+nv_cache_util 0.414031982421875
 # HELP nv_cache_num_entries Number of responses stored in response cache
 # TYPE nv_cache_num_entries gauge
-nv_cache_num_entries 0
+nv_cache_num_entries 3014
 # HELP nv_cache_num_hits Number of cache hits in response cache
 # TYPE nv_cache_num_hits gauge
-nv_cache_num_hits 0
+nv_cache_num_hits 4390
 # HELP nv_cache_num_misses Number of cache misses in response cache
 # TYPE nv_cache_num_misses gauge
-nv_cache_num_misses 0
+nv_cache_num_misses 3015
 # HELP nv_cache_num_lookups Number of cache lookups in response cache
 # TYPE nv_cache_num_lookups gauge
-nv_cache_num_lookups 0
+nv_cache_num_lookups 7405
 # HELP nv_cache_num_evictions Number of cache evictions in response cache
 # TYPE nv_cache_num_evictions gauge
 nv_cache_num_evictions 0
 # HELP nv_cache_lookup_duration Total cache lookup duration (hit and miss), in microseconds
 # TYPE nv_cache_lookup_duration gauge
-nv_cache_lookup_duration 0
+nv_cache_lookup_duration 12306
 # HELP nv_cache_insertion_duration Total cache insertion duration, in microseconds
 # TYPE nv_cache_insertion_duration gauge
-nv_cache_insertion_duration 0
-# HELP nv_inference_request_summary_us Summary of inference request duration in microseconds (includes cached requests)
-# TYPE nv_inference_request_summary_us summary
-nv_inference_request_summary_us_count{model="simple_string",version="1"} 0
-nv_inference_request_summary_us_sum{model="simple_string",version="1"} 0
-nv_inference_request_summary_us{model="simple_string",version="1",quantile="0.5"} 3
-nv_inference_request_summary_us{model="simple_string",version="1",quantile="0.9"} 3
-nv_inference_request_summary_us{model="simple_string",version="1",quantile="0.95"} 3
-nv_inference_request_summary_us{model="simple_string",version="1",quantile="0.99"} 3
-nv_inference_request_summary_us{model="simple_string",version="1",quantile="0.999"} 3
-nv_inference_request_summary_us_count{model="simple_sequence",version="1"} 0
-nv_inference_request_summary_us_sum{model="simple_sequence",version="1"} 0
-nv_inference_request_summary_us{model="simple_sequence",version="1",quantile="0.5"} 3
-nv_inference_request_summary_us{model="simple_sequence",version="1",quantile="0.9"} 3
-nv_inference_request_summary_us{model="simple_sequence",version="1",quantile="0.95"} 3
-nv_inference_request_summary_us{model="simple_sequence",version="1",quantile="0.99"} 3
-nv_inference_request_summary_us{model="simple_sequence",version="1",quantile="0.999"} 3
-nv_inference_request_summary_us_count{model="simple_int8",version="1"} 0
-nv_inference_request_summary_us_sum{model="simple_int8",version="1"} 0
-nv_inference_request_summary_us{model="simple_int8",version="1",quantile="0.5"} 3
-nv_inference_request_summary_us{model="simple_int8",version="1",quantile="0.9"} 3
-nv_inference_request_summary_us{model="simple_int8",version="1",quantile="0.95"} 3
-nv_inference_request_summary_us{model="simple_int8",version="1",quantile="0.99"} 3
-nv_inference_request_summary_us{model="simple_int8",version="1",quantile="0.999"} 3
-nv_inference_request_summary_us_count{model="simple_identity",version="1"} 0
-nv_inference_request_summary_us_sum{model="simple_identity",version="1"} 0
-nv_inference_request_summary_us{model="simple_identity",version="1",quantile="0.5"} 3
-nv_inference_request_summary_us{model="simple_identity",version="1",quantile="0.9"} 3
-nv_inference_request_summary_us{model="simple_identity",version="1",quantile="0.95"} 3
-nv_inference_request_summary_us{model="simple_identity",version="1",quantile="0.99"} 3
-nv_inference_request_summary_us{model="simple_identity",version="1",quantile="0.999"} 3
-nv_inference_request_summary_us_count{model="densenet_onnx",version="1"} 3
-nv_inference_request_summary_us_sum{model="densenet_onnx",version="1"} 1327965
-nv_inference_request_summary_us{model="densenet_onnx",version="1",quantile="0.5"} 3
-nv_inference_request_summary_us{model="densenet_onnx",version="1",quantile="0.9"} 3
-nv_inference_request_summary_us{model="densenet_onnx",version="1",quantile="0.95"} 3
-nv_inference_request_summary_us{model="densenet_onnx",version="1",quantile="0.99"} 3
-nv_inference_request_summary_us{model="densenet_onnx",version="1",quantile="0.999"} 3
-nv_inference_request_summary_us_count{model="simple_dyna_sequence",version="1"} 0
-nv_inference_request_summary_us_sum{model="simple_dyna_sequence",version="1"} 0
-nv_inference_request_summary_us{model="simple_dyna_sequence",version="1",quantile="0.5"} 3
-nv_inference_request_summary_us{model="simple_dyna_sequence",version="1",quantile="0.9"} 3
-nv_inference_request_summary_us{model="simple_dyna_sequence",version="1",quantile="0.95"} 3
-nv_inference_request_summary_us{model="simple_dyna_sequence",version="1",quantile="0.99"} 3
-nv_inference_request_summary_us{model="simple_dyna_sequence",version="1",quantile="0.999"} 3
-nv_inference_request_summary_us_count{model="inception_graphdef",version="1"} 0
-nv_inference_request_summary_us_sum{model="inception_graphdef",version="1"} 0
-nv_inference_request_summary_us{model="inception_graphdef",version="1",quantile="0.5"} 3
-nv_inference_request_summary_us{model="inception_graphdef",version="1",quantile="0.9"} 3
-nv_inference_request_summary_us{model="inception_graphdef",version="1",quantile="0.95"} 3
-nv_inference_request_summary_us{model="inception_graphdef",version="1",quantile="0.99"} 3
-nv_inference_request_summary_us{model="inception_graphdef",version="1",quantile="0.999"} 3
-nv_inference_request_summary_us_count{model="simple",version="1"} 0
-nv_inference_request_summary_us_sum{model="simple",version="1"} 0
-nv_inference_request_summary_us{model="simple",version="1",quantile="0.5"} 3
-nv_inference_request_summary_us{model="simple",version="1",quantile="0.9"} 3
-nv_inference_request_summary_us{model="simple",version="1",quantile="0.95"} 3
-nv_inference_request_summary_us{model="simple",version="1",quantile="0.99"} 3
-nv_inference_request_summary_us{model="simple",version="1",quantile="0.999"} 3
-# HELP nv_inference_queue_summary_us Summary of inference queuing duration in microseconds (includes cached requests)
-# TYPE nv_inference_queue_summary_us summary
-nv_inference_queue_summary_us_count{model="simple_string",version="1"} 0
-nv_inference_queue_summary_us_sum{model="simple_string",version="1"} 0
-nv_inference_queue_summary_us{model="simple_string",version="1",quantile="0.5"} 3
-nv_inference_queue_summary_us{model="simple_string",version="1",quantile="0.9"} 3
-nv_inference_queue_summary_us{model="simple_string",version="1",quantile="0.95"} 3
-nv_inference_queue_summary_us{model="simple_string",version="1",quantile="0.99"} 3
-nv_inference_queue_summary_us{model="simple_string",version="1",quantile="0.999"} 3
-nv_inference_queue_summary_us_count{model="simple_sequence",version="1"} 0
-nv_inference_queue_summary_us_sum{model="simple_sequence",version="1"} 0
-nv_inference_queue_summary_us{model="simple_sequence",version="1",quantile="0.5"} 3
-nv_inference_queue_summary_us{model="simple_sequence",version="1",quantile="0.9"} 3
-nv_inference_queue_summary_us{model="simple_sequence",version="1",quantile="0.95"} 3
-nv_inference_queue_summary_us{model="simple_sequence",version="1",quantile="0.99"} 3
-nv_inference_queue_summary_us{model="simple_sequence",version="1",quantile="0.999"} 3
-nv_inference_queue_summary_us_count{model="simple_int8",version="1"} 0
-nv_inference_queue_summary_us_sum{model="simple_int8",version="1"} 0
-nv_inference_queue_summary_us{model="simple_int8",version="1",quantile="0.5"} 3
-nv_inference_queue_summary_us{model="simple_int8",version="1",quantile="0.9"} 3
-nv_inference_queue_summary_us{model="simple_int8",version="1",quantile="0.95"} 3
-nv_inference_queue_summary_us{model="simple_int8",version="1",quantile="0.99"} 3
-nv_inference_queue_summary_us{model="simple_int8",version="1",quantile="0.999"} 3
-nv_inference_queue_summary_us_count{model="simple_identity",version="1"} 0
-nv_inference_queue_summary_us_sum{model="simple_identity",version="1"} 0
-nv_inference_queue_summary_us{model="simple_identity",version="1",quantile="0.5"} 3
-nv_inference_queue_summary_us{model="simple_identity",version="1",quantile="0.9"} 3
-nv_inference_queue_summary_us{model="simple_identity",version="1",quantile="0.95"} 3
-nv_inference_queue_summary_us{model="simple_identity",version="1",quantile="0.99"} 3
-nv_inference_queue_summary_us{model="simple_identity",version="1",quantile="0.999"} 3
-nv_inference_queue_summary_us_count{model="densenet_onnx",version="1"} 3
-nv_inference_queue_summary_us_sum{model="densenet_onnx",version="1"} 145
-nv_inference_queue_summary_us{model="densenet_onnx",version="1",quantile="0.5"} 3
-nv_inference_queue_summary_us{model="densenet_onnx",version="1",quantile="0.9"} 3
-nv_inference_queue_summary_us{model="densenet_onnx",version="1",quantile="0.95"} 3
-nv_inference_queue_summary_us{model="densenet_onnx",version="1",quantile="0.99"} 3
-nv_inference_queue_summary_us{model="densenet_onnx",version="1",quantile="0.999"} 3
-nv_inference_queue_summary_us_count{model="simple_dyna_sequence",version="1"} 0
-nv_inference_queue_summary_us_sum{model="simple_dyna_sequence",version="1"} 0
-nv_inference_queue_summary_us{model="simple_dyna_sequence",version="1",quantile="0.5"} 3
-nv_inference_queue_summary_us{model="simple_dyna_sequence",version="1",quantile="0.9"} 3
-nv_inference_queue_summary_us{model="simple_dyna_sequence",version="1",quantile="0.95"} 3
-nv_inference_queue_summary_us{model="simple_dyna_sequence",version="1",quantile="0.99"} 3
-nv_inference_queue_summary_us{model="simple_dyna_sequence",version="1",quantile="0.999"} 3
-nv_inference_queue_summary_us_count{model="inception_graphdef",version="1"} 0
-nv_inference_queue_summary_us_sum{model="inception_graphdef",version="1"} 0
-nv_inference_queue_summary_us{model="inception_graphdef",version="1",quantile="0.5"} 3
-nv_inference_queue_summary_us{model="inception_graphdef",version="1",quantile="0.9"} 3
-nv_inference_queue_summary_us{model="inception_graphdef",version="1",quantile="0.95"} 3
-nv_inference_queue_summary_us{model="inception_graphdef",version="1",quantile="0.99"} 3
-nv_inference_queue_summary_us{model="inception_graphdef",version="1",quantile="0.999"} 3
-nv_inference_queue_summary_us_count{model="simple",version="1"} 0
-nv_inference_queue_summary_us_sum{model="simple",version="1"} 0
-nv_inference_queue_summary_us{model="simple",version="1",quantile="0.5"} 3
-nv_inference_queue_summary_us{model="simple",version="1",quantile="0.9"} 3
-nv_inference_queue_summary_us{model="simple",version="1",quantile="0.95"} 3
-nv_inference_queue_summary_us{model="simple",version="1",quantile="0.99"} 3
-nv_inference_queue_summary_us{model="simple",version="1",quantile="0.999"} 3
-# HELP nv_inference_compute_input_summary_us Cumulative compute input duration in microseconds (does not include cached requests)
-# TYPE nv_inference_compute_input_summary_us summary
-nv_inference_compute_input_summary_us_count{model="simple_string",version="1"} 0
-nv_inference_compute_input_summary_us_sum{model="simple_string",version="1"} 0
-nv_inference_compute_input_summary_us{model="simple_string",version="1",quantile="0.5"} 3
-nv_inference_compute_input_summary_us{model="simple_string",version="1",quantile="0.9"} 3
-nv_inference_compute_input_summary_us{model="simple_string",version="1",quantile="0.95"} 3
-nv_inference_compute_input_summary_us{model="simple_string",version="1",quantile="0.99"} 3
-nv_inference_compute_input_summary_us{model="simple_string",version="1",quantile="0.999"} 3
-nv_inference_compute_input_summary_us_count{model="simple_sequence",version="1"} 0
-nv_inference_compute_input_summary_us_sum{model="simple_sequence",version="1"} 0
-nv_inference_compute_input_summary_us{model="simple_sequence",version="1",quantile="0.5"} 3
-nv_inference_compute_input_summary_us{model="simple_sequence",version="1",quantile="0.9"} 3
-nv_inference_compute_input_summary_us{model="simple_sequence",version="1",quantile="0.95"} 3
-nv_inference_compute_input_summary_us{model="simple_sequence",version="1",quantile="0.99"} 3
-nv_inference_compute_input_summary_us{model="simple_sequence",version="1",quantile="0.999"} 3
-nv_inference_compute_input_summary_us_count{model="simple_int8",version="1"} 0
-nv_inference_compute_input_summary_us_sum{model="simple_int8",version="1"} 0
-nv_inference_compute_input_summary_us{model="simple_int8",version="1",quantile="0.5"} 3
-nv_inference_compute_input_summary_us{model="simple_int8",version="1",quantile="0.9"} 3
-nv_inference_compute_input_summary_us{model="simple_int8",version="1",quantile="0.95"} 3
-nv_inference_compute_input_summary_us{model="simple_int8",version="1",quantile="0.99"} 3
-nv_inference_compute_input_summary_us{model="simple_int8",version="1",quantile="0.999"} 3
-nv_inference_compute_input_summary_us_count{model="simple_identity",version="1"} 0
-nv_inference_compute_input_summary_us_sum{model="simple_identity",version="1"} 0
-nv_inference_compute_input_summary_us{model="simple_identity",version="1",quantile="0.5"} 3
-nv_inference_compute_input_summary_us{model="simple_identity",version="1",quantile="0.9"} 3
-nv_inference_compute_input_summary_us{model="simple_identity",version="1",quantile="0.95"} 3
-nv_inference_compute_input_summary_us{model="simple_identity",version="1",quantile="0.99"} 3
-nv_inference_compute_input_summary_us{model="simple_identity",version="1",quantile="0.999"} 3
-nv_inference_compute_input_summary_us_count{model="densenet_onnx",version="1"} 3
-nv_inference_compute_input_summary_us_sum{model="densenet_onnx",version="1"} 626
-nv_inference_compute_input_summary_us{model="densenet_onnx",version="1",quantile="0.5"} 3
-nv_inference_compute_input_summary_us{model="densenet_onnx",version="1",quantile="0.9"} 3
-nv_inference_compute_input_summary_us{model="densenet_onnx",version="1",quantile="0.95"} 3
-nv_inference_compute_input_summary_us{model="densenet_onnx",version="1",quantile="0.99"} 3
-nv_inference_compute_input_summary_us{model="densenet_onnx",version="1",quantile="0.999"} 3
-nv_inference_compute_input_summary_us_count{model="simple_dyna_sequence",version="1"} 0
-nv_inference_compute_input_summary_us_sum{model="simple_dyna_sequence",version="1"} 0
-nv_inference_compute_input_summary_us{model="simple_dyna_sequence",version="1",quantile="0.5"} 3
-nv_inference_compute_input_summary_us{model="simple_dyna_sequence",version="1",quantile="0.9"} 3
-nv_inference_compute_input_summary_us{model="simple_dyna_sequence",version="1",quantile="0.95"} 3
-nv_inference_compute_input_summary_us{model="simple_dyna_sequence",version="1",quantile="0.99"} 3
-nv_inference_compute_input_summary_us{model="simple_dyna_sequence",version="1",quantile="0.999"} 3
-nv_inference_compute_input_summary_us_count{model="inception_graphdef",version="1"} 0
-nv_inference_compute_input_summary_us_sum{model="inception_graphdef",version="1"} 0
-nv_inference_compute_input_summary_us{model="inception_graphdef",version="1",quantile="0.5"} 3
-nv_inference_compute_input_summary_us{model="inception_graphdef",version="1",quantile="0.9"} 3
-nv_inference_compute_input_summary_us{model="inception_graphdef",version="1",quantile="0.95"} 3
-nv_inference_compute_input_summary_us{model="inception_graphdef",version="1",quantile="0.99"} 3
-nv_inference_compute_input_summary_us{model="inception_graphdef",version="1",quantile="0.999"} 3
-nv_inference_compute_input_summary_us_count{model="simple",version="1"} 0
-nv_inference_compute_input_summary_us_sum{model="simple",version="1"} 0
-nv_inference_compute_input_summary_us{model="simple",version="1",quantile="0.5"} 3
-nv_inference_compute_input_summary_us{model="simple",version="1",quantile="0.9"} 3
-nv_inference_compute_input_summary_us{model="simple",version="1",quantile="0.95"} 3
-nv_inference_compute_input_summary_us{model="simple",version="1",quantile="0.99"} 3
-nv_inference_compute_input_summary_us{model="simple",version="1",quantile="0.999"} 3
-# HELP nv_inference_compute_infer_summary_us Cumulative compute inference duration in microseconds (does not include cached requests)
-# TYPE nv_inference_compute_infer_summary_us summary
-nv_inference_compute_infer_summary_us_count{model="simple_string",version="1"} 0
-nv_inference_compute_infer_summary_us_sum{model="simple_string",version="1"} 0
-nv_inference_compute_infer_summary_us{model="simple_string",version="1",quantile="0.5"} 3
-nv_inference_compute_infer_summary_us{model="simple_string",version="1",quantile="0.9"} 3
-nv_inference_compute_infer_summary_us{model="simple_string",version="1",quantile="0.95"} 3
-nv_inference_compute_infer_summary_us{model="simple_string",version="1",quantile="0.99"} 3
-nv_inference_compute_infer_summary_us{model="simple_string",version="1",quantile="0.999"} 3
-nv_inference_compute_infer_summary_us_count{model="simple_sequence",version="1"} 0
-nv_inference_compute_infer_summary_us_sum{model="simple_sequence",version="1"} 0
-nv_inference_compute_infer_summary_us{model="simple_sequence",version="1",quantile="0.5"} 3
-nv_inference_compute_infer_summary_us{model="simple_sequence",version="1",quantile="0.9"} 3
-nv_inference_compute_infer_summary_us{model="simple_sequence",version="1",quantile="0.95"} 3
-nv_inference_compute_infer_summary_us{model="simple_sequence",version="1",quantile="0.99"} 3
-nv_inference_compute_infer_summary_us{model="simple_sequence",version="1",quantile="0.999"} 3
-nv_inference_compute_infer_summary_us_count{model="simple_int8",version="1"} 0
-nv_inference_compute_infer_summary_us_sum{model="simple_int8",version="1"} 0
-nv_inference_compute_infer_summary_us{model="simple_int8",version="1",quantile="0.5"} 3
-nv_inference_compute_infer_summary_us{model="simple_int8",version="1",quantile="0.9"} 3
-nv_inference_compute_infer_summary_us{model="simple_int8",version="1",quantile="0.95"} 3
-nv_inference_compute_infer_summary_us{model="simple_int8",version="1",quantile="0.99"} 3
-nv_inference_compute_infer_summary_us{model="simple_int8",version="1",quantile="0.999"} 3
-nv_inference_compute_infer_summary_us_count{model="simple_identity",version="1"} 0
-nv_inference_compute_infer_summary_us_sum{model="simple_identity",version="1"} 0
-nv_inference_compute_infer_summary_us{model="simple_identity",version="1",quantile="0.5"} 3
-nv_inference_compute_infer_summary_us{model="simple_identity",version="1",quantile="0.9"} 3
-nv_inference_compute_infer_summary_us{model="simple_identity",version="1",quantile="0.95"} 3
-nv_inference_compute_infer_summary_us{model="simple_identity",version="1",quantile="0.99"} 3
-nv_inference_compute_infer_summary_us{model="simple_identity",version="1",quantile="0.999"} 3
-nv_inference_compute_infer_summary_us_count{model="densenet_onnx",version="1"} 3
-nv_inference_compute_infer_summary_us_sum{model="densenet_onnx",version="1"} 1326831
-nv_inference_compute_infer_summary_us{model="densenet_onnx",version="1",quantile="0.5"} 3
-nv_inference_compute_infer_summary_us{model="densenet_onnx",version="1",quantile="0.9"} 3
-nv_inference_compute_infer_summary_us{model="densenet_onnx",version="1",quantile="0.95"} 3
-nv_inference_compute_infer_summary_us{model="densenet_onnx",version="1",quantile="0.99"} 3
-nv_inference_compute_infer_summary_us{model="densenet_onnx",version="1",quantile="0.999"} 3
-nv_inference_compute_infer_summary_us_count{model="simple_dyna_sequence",version="1"} 0
-nv_inference_compute_infer_summary_us_sum{model="simple_dyna_sequence",version="1"} 0
-nv_inference_compute_infer_summary_us{model="simple_dyna_sequence",version="1",quantile="0.5"} 3
-nv_inference_compute_infer_summary_us{model="simple_dyna_sequence",version="1",quantile="0.9"} 3
-nv_inference_compute_infer_summary_us{model="simple_dyna_sequence",version="1",quantile="0.95"} 3
-nv_inference_compute_infer_summary_us{model="simple_dyna_sequence",version="1",quantile="0.99"} 3
-nv_inference_compute_infer_summary_us{model="simple_dyna_sequence",version="1",quantile="0.999"} 3
-nv_inference_compute_infer_summary_us_count{model="inception_graphdef",version="1"} 0
-nv_inference_compute_infer_summary_us_sum{model="inception_graphdef",version="1"} 0
-nv_inference_compute_infer_summary_us{model="inception_graphdef",version="1",quantile="0.5"} 3
-nv_inference_compute_infer_summary_us{model="inception_graphdef",version="1",quantile="0.9"} 3
-nv_inference_compute_infer_summary_us{model="inception_graphdef",version="1",quantile="0.95"} 3
-nv_inference_compute_infer_summary_us{model="inception_graphdef",version="1",quantile="0.99"} 3
-nv_inference_compute_infer_summary_us{model="inception_graphdef",version="1",quantile="0.999"} 3
-nv_inference_compute_infer_summary_us_count{model="simple",version="1"} 0
-nv_inference_compute_infer_summary_us_sum{model="simple",version="1"} 0
-nv_inference_compute_infer_summary_us{model="simple",version="1",quantile="0.5"} 3
-nv_inference_compute_infer_summary_us{model="simple",version="1",quantile="0.9"} 3
-nv_inference_compute_infer_summary_us{model="simple",version="1",quantile="0.95"} 3
-nv_inference_compute_infer_summary_us{model="simple",version="1",quantile="0.99"} 3
-nv_inference_compute_infer_summary_us{model="simple",version="1",quantile="0.999"} 3
-# HELP nv_inference_compute_output_summary_us Cumulative inference compute output duration in microseconds (does not include cached requests)
-# TYPE nv_inference_compute_output_summary_us summary
-nv_inference_compute_output_summary_us_count{model="simple_string",version="1"} 0
-nv_inference_compute_output_summary_us_sum{model="simple_string",version="1"} 0
-nv_inference_compute_output_summary_us{model="simple_string",version="1",quantile="0.5"} 3
-nv_inference_compute_output_summary_us{model="simple_string",version="1",quantile="0.9"} 3
-nv_inference_compute_output_summary_us{model="simple_string",version="1",quantile="0.95"} 3
-nv_inference_compute_output_summary_us{model="simple_string",version="1",quantile="0.99"} 3
-nv_inference_compute_output_summary_us{model="simple_string",version="1",quantile="0.999"} 3
-nv_inference_compute_output_summary_us_count{model="simple_sequence",version="1"} 0
-nv_inference_compute_output_summary_us_sum{model="simple_sequence",version="1"} 0
-nv_inference_compute_output_summary_us{model="simple_sequence",version="1",quantile="0.5"} 3
-nv_inference_compute_output_summary_us{model="simple_sequence",version="1",quantile="0.9"} 3
-nv_inference_compute_output_summary_us{model="simple_sequence",version="1",quantile="0.95"} 3
-nv_inference_compute_output_summary_us{model="simple_sequence",version="1",quantile="0.99"} 3
-nv_inference_compute_output_summary_us{model="simple_sequence",version="1",quantile="0.999"} 3
-nv_inference_compute_output_summary_us_count{model="simple_int8",version="1"} 0
-nv_inference_compute_output_summary_us_sum{model="simple_int8",version="1"} 0
-nv_inference_compute_output_summary_us{model="simple_int8",version="1",quantile="0.5"} 3
-nv_inference_compute_output_summary_us{model="simple_int8",version="1",quantile="0.9"} 3
-nv_inference_compute_output_summary_us{model="simple_int8",version="1",quantile="0.95"} 3
-nv_inference_compute_output_summary_us{model="simple_int8",version="1",quantile="0.99"} 3
-nv_inference_compute_output_summary_us{model="simple_int8",version="1",quantile="0.999"} 3
-nv_inference_compute_output_summary_us_count{model="simple_identity",version="1"} 0
-nv_inference_compute_output_summary_us_sum{model="simple_identity",version="1"} 0
-nv_inference_compute_output_summary_us{model="simple_identity",version="1",quantile="0.5"} 3
-nv_inference_compute_output_summary_us{model="simple_identity",version="1",quantile="0.9"} 3
-nv_inference_compute_output_summary_us{model="simple_identity",version="1",quantile="0.95"} 3
-nv_inference_compute_output_summary_us{model="simple_identity",version="1",quantile="0.99"} 3
-nv_inference_compute_output_summary_us{model="simple_identity",version="1",quantile="0.999"} 3
-nv_inference_compute_output_summary_us_count{model="densenet_onnx",version="1"} 3
-nv_inference_compute_output_summary_us_sum{model="densenet_onnx",version="1"} 61
-nv_inference_compute_output_summary_us{model="densenet_onnx",version="1",quantile="0.5"} 3
-nv_inference_compute_output_summary_us{model="densenet_onnx",version="1",quantile="0.9"} 3
-nv_inference_compute_output_summary_us{model="densenet_onnx",version="1",quantile="0.95"} 3
-nv_inference_compute_output_summary_us{model="densenet_onnx",version="1",quantile="0.99"} 3
-nv_inference_compute_output_summary_us{model="densenet_onnx",version="1",quantile="0.999"} 3
-nv_inference_compute_output_summary_us_count{model="simple_dyna_sequence",version="1"} 0
-nv_inference_compute_output_summary_us_sum{model="simple_dyna_sequence",version="1"} 0
-nv_inference_compute_output_summary_us{model="simple_dyna_sequence",version="1",quantile="0.5"} 3
-nv_inference_compute_output_summary_us{model="simple_dyna_sequence",version="1",quantile="0.9"} 3
-nv_inference_compute_output_summary_us{model="simple_dyna_sequence",version="1",quantile="0.95"} 3
-nv_inference_compute_output_summary_us{model="simple_dyna_sequence",version="1",quantile="0.99"} 3
-nv_inference_compute_output_summary_us{model="simple_dyna_sequence",version="1",quantile="0.999"} 3
-nv_inference_compute_output_summary_us_count{model="inception_graphdef",version="1"} 0
-nv_inference_compute_output_summary_us_sum{model="inception_graphdef",version="1"} 0
-nv_inference_compute_output_summary_us{model="inception_graphdef",version="1",quantile="0.5"} 3
-nv_inference_compute_output_summary_us{model="inception_graphdef",version="1",quantile="0.9"} 3
-nv_inference_compute_output_summary_us{model="inception_graphdef",version="1",quantile="0.95"} 3
-nv_inference_compute_output_summary_us{model="inception_graphdef",version="1",quantile="0.99"} 3
-nv_inference_compute_output_summary_us{model="inception_graphdef",version="1",quantile="0.999"} 3
-nv_inference_compute_output_summary_us_count{model="simple",version="1"} 0
-nv_inference_compute_output_summary_us_sum{model="simple",version="1"} 0
-nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.5"} 3
-nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.9"} 3
-nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.95"} 3
-nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.99"} 3
-nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.999"} 3
+nv_cache_insertion_duration 13661
+# HELP nv_cache_hit_summary_per_model Summary of cache hit counts/durations per model, in microseconds.
+# TYPE nv_cache_hit_summary_per_model summary
+nv_cache_hit_summary_per_model_count{model="identity",version="1"} 4520
+nv_cache_hit_summary_per_model_sum{model="identity",version="1"} 10863
+nv_cache_hit_summary_per_model{model="identity",version="1",quantile="0.5"} 2
+nv_cache_hit_summary_per_model{model="identity",version="1",quantile="0.9"} 4
+nv_cache_hit_summary_per_model{model="identity",version="1",quantile="0.95"} 5
+nv_cache_hit_summary_per_model{model="identity",version="1",quantile="0.99"} 6
+nv_cache_hit_summary_per_model{model="identity",version="1",quantile="0.999"} 17
+# HELP nv_cache_miss_summary_per_model Summary of cache miss counts/durations per model, in microseconds.
+# TYPE nv_cache_miss_summary_per_model summary
+nv_cache_miss_summary_per_model_count{model="identity",version="1"} 3075
+nv_cache_miss_summary_per_model_sum{model="identity",version="1"} 23352
+nv_cache_miss_summary_per_model{model="identity",version="1",quantile="0.5"} 7
+nv_cache_miss_summary_per_model{model="identity",version="1",quantile="0.9"} 10
+nv_cache_miss_summary_per_model{model="identity",version="1",quantile="0.95"} 13
+nv_cache_miss_summary_per_model{model="identity",version="1",quantile="0.99"} 18
+nv_cache_miss_summary_per_model{model="identity",version="1",quantile="0.999"} 36
+# HELP nv_inference_request_histogram_us Histogram of request duration in microseconds
+# TYPE nv_inference_request_histogram_us histogram
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_inference_request_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_request_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_inference_request_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_inference_queue_histogram_us Histogram of queue duration in microseconds
+# TYPE nv_inference_queue_histogram_us histogram
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_inference_queue_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_queue_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_inference_queue_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_inference_compute_input_histogram_us Histogram of compute input duration in microseconds
+# TYPE nv_inference_compute_input_histogram_us histogram
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_inference_compute_input_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_compute_input_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_inference_compute_input_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_inference_compute_infer_histogram_us Histogram of compute infer duration in microseconds
+# TYPE nv_inference_compute_infer_histogram_us histogram
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_inference_compute_infer_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_compute_infer_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_inference_compute_infer_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_inference_compute_output_histogram_us Histogram of compute output duration in microseconds
+# TYPE nv_inference_compute_output_histogram_us histogram
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_inference_compute_output_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_inference_compute_output_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_inference_compute_output_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_cache_hit_histogram_us Histogram of cache hit duration in microseconds
+# TYPE nv_cache_hit_histogram_us histogram
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_cache_hit_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_cache_hit_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_cache_hit_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_cache_miss_histogram_us Histogram of cache miss duration in microseconds
+# TYPE nv_cache_miss_histogram_us histogram
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="1"} 0
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="1000"} 4
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="100000"} 15
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="10000000"} 20
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="60000000"} 20
+nv_cache_miss_histogram_us_bucket{model="tensorrt_llm",version="1",le="+Inf"} 20
+nv_cache_miss_histogram_us_sum{model="tensorrt_llm",version="1"} 1530000
+nv_cache_miss_histogram_us_count{model="tensorrt_llm",version="1"} 20
+# HELP nv_trt_llm_v1_metrics TRT LLM v1-specific metrics
+# TYPE nv_trt_llm_v1_metrics gauge
+nv_trt_llm_v1_metrics{model="tensorrt_llm",version="1",v1_specific_metric="total_generation_tokens"} 20
+nv_trt_llm_v1_metrics{model="tensorrt_llm",version="1",v1_specific_metric="empty_generation_slots"} 0
+nv_trt_llm_v1_metrics{model="tensorrt_llm",version="1",v1_specific_metric="total_context_tokens"} 5

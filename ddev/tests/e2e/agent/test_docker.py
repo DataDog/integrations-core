@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import socket
 import subprocess
+from contextlib import ExitStack
 
 import pytest
 
-from ddev.e2e.agent.docker import APT_MIRROR, APT_MIRRORLIST_FILE, DockerAgent
+from ddev.e2e.agent.docker import APT_MIRROR, APT_MIRRORLIST_FILE, CMD_PORT_RANGE, DockerAgent, _find_free_cmd_port
 from ddev.integration.core import Integration
 from ddev.repo.config import RepositoryConfig
 from ddev.utils.fs import Path
@@ -23,7 +25,7 @@ def get_integration(local_repo):
 @pytest.fixture(autouse=True)
 def free_port(mocker):
     port = 9000
-    mocker.patch('ddev.e2e.agent.docker._find_free_port', return_value=port)
+    mocker.patch('ddev.e2e.agent.docker._find_free_cmd_port', return_value=port)
     return port
 
 
@@ -252,7 +254,7 @@ class TestStart:
         mocker,
     ):
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
-        find_free_port = mocker.patch('ddev.e2e.agent.docker._find_free_port')
+        find_free_cmd_port = mocker.patch('ddev.e2e.agent.docker._find_free_cmd_port')
 
         config_file = temp_dir / 'config' / 'config.yaml'
         config_file.parent.mkdir()
@@ -265,7 +267,7 @@ class TestStart:
         agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={})
 
-        find_free_port.assert_not_called()
+        find_free_cmd_port.assert_not_called()
         assert run.call_args_list == [
             mocker.call([docker_path, 'pull', 'registry.datadoghq.com/agent-dev:master-py3'], shell=False),
             mocker.call(
@@ -1500,3 +1502,24 @@ class TestEnterShell:
                 check=True,
             ),
         ]
+
+
+def test_find_free_cmd_port_skips_ports_in_use(mocker):
+    with ExitStack() as stack:
+        candidates = []
+        for port in CMD_PORT_RANGE:
+            s = stack.enter_context(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+            try:
+                s.bind(('127.0.0.1', port))
+            except OSError:
+                continue
+
+            candidates.append((port, s))
+            if len(candidates) == 2:
+                break
+
+        (busy_port, _), (open_port, open_socket) = candidates
+        open_socket.close()
+        mocker.patch('random.sample', return_value=[busy_port, open_port])
+
+        assert _find_free_cmd_port() == open_port

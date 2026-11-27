@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.1 / 2026-11-25
+
+***Fixed***:
+
+* Add the `collect_histograms_as_distributions` option to the configuration example and config models. ([#25590](https://github.com/DataDog/integrations-core/pull/25590))
+
 ## 3.5.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:

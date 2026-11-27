@@ -10,6 +10,7 @@ from datadog_checks.celery.metrics import METRIC_MAP
 class CeleryCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'celery.flower'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0  # No limit on the number of metrics collected
 

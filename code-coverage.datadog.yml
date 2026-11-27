@@ -206,6 +206,9 @@ services:
 - id: crio
   paths:
   - crio/datadog_checks/crio/
+- id: datadog_agent
+  paths:
+  - datadog_agent/datadog_checks/datadog_agent/
 - id: datadog_checks_base
   paths:
   - datadog_checks_base/datadog_checks/base/
@@ -455,6 +458,9 @@ services:
 - id: litellm
   paths:
   - litellm/datadog_checks/litellm/
+- id: llm_d
+  paths:
+  - llm_d/datadog_checks/llm_d/
 - id: lparstats
   paths:
   - lparstats/datadog_checks/lparstats/
@@ -674,6 +680,9 @@ services:
 - id: temporal
   paths:
   - temporal/datadog_checks/temporal/
+- id: tensorrt_llm
+  paths:
+  - tensorrt_llm/datadog_checks/tensorrt_llm/
 - id: teradata
   paths:
   - teradata/datadog_checks/teradata/

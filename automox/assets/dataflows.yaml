@@ -1,0 +1,31 @@
+provides:
+  - id: automox-audit-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: automox-events-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: automox-devices-metrics
+    always_on: true
+    granular: true
+    data_type: metrics
+    direction: inbound
+  - id: automox-policy-compliance-metrics
+    always_on: true
+    granular: true
+    data_type: metrics
+    direction: inbound
+  - id: automox-needs-attention-metrics
+    always_on: true
+    granular: true
+    data_type: metrics
+    direction: inbound
+  - id: automox-policy-runs-metrics
+    always_on: true
+    granular: true
+    data_type: metrics
+    direction: inbound

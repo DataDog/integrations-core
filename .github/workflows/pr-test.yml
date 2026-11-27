@@ -7,6 +7,11 @@ on:
         required: true
         type: string
 
+      ddev-version:
+        description: "PyPI ddev version specifier for non-core callers"
+        required: false
+        default: ""
+        type: string
       setup-env-vars:
         required: false
         default: ""
@@ -60,6 +65,7 @@ jobs:
       setup-env-vars: "${{ inputs.setup-env-vars }}"
       python-version: "${{ inputs.python-version }}"
       pytest-args: ${{ inputs.pytest-args }}
+      ddev-version: ${{ inputs.ddev-version }}
     secrets: inherit
     permissions:
       # needed for compute-matrix in test-target.yml
@@ -96,6 +102,7 @@ jobs:
       setup-env-vars: "${{ inputs.setup-env-vars }}"
       python-version: "${{ inputs.python-version }}"
       pytest-args: ${{ inputs.pytest-args }}
+      ddev-version: ${{ inputs.ddev-version }}
       context: "pr"
     secrets: inherit
     permissions:

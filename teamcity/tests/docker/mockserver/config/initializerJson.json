@@ -52,7 +52,7 @@
       "path": "/guestAuth/app/rest/builds/",
       "queryStringParameters": {
         "locator": [
-          "buildType:SampleProject_Build,project:SampleProject,count:1"
+          "buildType:SampleProject_Build,project:SampleProject,state:finished,defaultFilter:false,count:1"
         ]
       }
     },
@@ -83,17 +83,15 @@
       "path": "/guestAuth/app/rest/builds/",
       "queryStringParameters": {
         "locator": [
-          "buildType:SampleProject_Empty_Builds,project:SampleProject,count:1"
+          "buildType:SampleProject_Empty_Builds,project:SampleProject,state:finished,defaultFilter:false,count:1"
         ]
       }
     },
     "httpResponse": {
       "statusCode": 200,
       "body": {
-        "count": 1,
-        "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Empty_Builds,count:1",
-        "nextHref": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Empty_Builds,count:1,start:1",
-        "build": []
+        "count": 0,
+        "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Empty_Builds,count:1"
       }
     }
   },

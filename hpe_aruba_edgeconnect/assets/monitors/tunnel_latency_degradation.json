@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "title": "Tunnel latency degradation",
+  "tags": [
+    "integration:hpe-aruba-edgeconnect"
+  ],
+  "definition": {
+    "name": "[HPE Aruba EdgeConnect] Tunnel latency degradation",
+    "type": "query alert",
+    "query": "avg(last_10m):avg:hpe_aruba_edgeconnect.tunnel.latency.max{*} by {device_hostname,device_ip,tunnel_name,site_name} > 200",
+    "message": "{{#is_warning}}\nEdgeConnect tunnel {{tunnel_name.name}} on device {{device_hostname.name}} (IP: {{device_ip.name}}) at site: {{site_name.name}} is experiencing elevated latency.\n\nTunnel latency is above the warning threshold.\n{{/is_warning}}\n\n{{#is_alert}}\nEdgeConnect tunnel {{tunnel_name.name}} on device {{device_hostname.name}} (IP: {{device_ip.name}}) at site: {{site_name.name}} is experiencing high latency.\n\nTunnel latency is above the critical threshold and may degrade application performance.\n{{/is_alert}}\n\n{{#is_warning_recovery}}\nLatency on EdgeConnect tunnel {{tunnel_name.name}} on device {{device_hostname.name}} (IP: {{device_ip.name}}) at site: {{site_name.name}} has recovered below the warning threshold.\n{{/is_warning_recovery}}\n\n{{#is_alert_to_warning}}\nLatency on EdgeConnect tunnel {{tunnel_name.name}} on device {{device_hostname.name}} (IP: {{device_ip.name}}) at site: {{site_name.name}} has improved from critical to warning.\n{{/is_alert_to_warning}}\n\n{{#is_alert_recovery}}\nLatency on EdgeConnect tunnel {{tunnel_name.name}} on device {{device_hostname.name}} (IP: {{device_ip.name}}) at site: {{site_name.name}} has fully recovered.\n{{/is_alert_recovery}}",
+    "tags": [
+      "integration:hpe_aruba_edgeconnect"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 200,
+        "warning": 150
+      },
+      "notify_audit": false,
+      "include_tags": true,
+      "on_missing_data": "default",
+      "new_group_delay": 0,
+      "silenced": {}
+    },
+    "priority": 3
+  },
+  "created_at": "2026-05-20",
+  "last_updated_at": "2026-05-20",
+  "description": "Alerts when tunnel latency is high enough to affect application performance."
+}

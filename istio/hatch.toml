@@ -1,10 +1,5 @@
 [env.collectors.datadog-checks]
 
-[envs.default]
-dependencies = [
-  "requests-mock==1.4.0",
-]
-
 # Istio supports two data plane modes: traditional sidecar injection, and ambient
 # (sidecar-less). Ambient mode graduated to GA in Istio 1.24. The matrix below is
 # split into version × mode blocks so each block declares only the (version, mode)

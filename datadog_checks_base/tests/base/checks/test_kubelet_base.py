@@ -12,8 +12,11 @@ import pytest
 import requests
 import urllib3
 
-from datadog_checks.base.checks.kubelet_base.base import KubeletBase, urljoin
+from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
+from datadog_checks.base.stubs.http import RecordedRequest
 from datadog_checks.dev import get_here
+
+pytestmark = pytest.mark.usefixtures('agnostic_http')
 
 HERE = get_here()
 
@@ -39,6 +42,44 @@ def test_retrieve_pod_list_success(monkeypatch, mock_http_response):
     assert json.dumps(retrieved, sort_keys=True) == json.dumps(expected, sort_keys=True)
 
 
+@pytest.mark.parametrize(
+    'credentials, expected_options',
+    [
+        pytest.param(
+            {'token': 'tkn', 'ca_cert': '/ca.pem', 'client_crt': '/crt.pem', 'client_key': '/key.pem'},
+            {'verify': '/ca.pem', 'cert': ('/crt.pem', '/key.pem'), 'headers': None},
+            id='client-cert-wins-over-token',
+        ),
+        pytest.param(
+            {'token': 'tkn'},
+            {'verify': None, 'cert': None, 'headers': {'Authorization': 'Bearer tkn'}},
+            id='bearer-token',
+        ),
+    ],
+)
+@pytest.mark.parametrize('verbose', [True, False], ids=['verbose', 'terse'])
+def test_perform_kubelet_query_forwards_credentials_and_verbosity(
+    fake_http, fake_http_response, credentials, expected_options, verbose
+):
+    url = 'https://kubelet:10250/healthz'
+    response = fake_http_response(url, status_code=200)
+    check = KubeletBase('kubelet', {}, [{}])
+    check.kubelet_credentials = KubeletCredentials(credentials)
+
+    assert check.perform_kubelet_query(url, verbose=verbose) is response
+
+    fake_http.assert_requests(
+        [
+            RecordedRequest(
+                method='GET',
+                url=url,
+                options={**expected_options, 'params': {'verbose': verbose}, 'stream': False},
+            )
+        ]
+    )
+    fake_http.assert_all_responses_consumed()
+
+
 @pytest.mark.parametrize('expiration_duration', ['0', '900'], ids=['no_expiration_filter', 'expiration_filter'])
 def test_retrieve_pod_list_decodes_a_gzip_encoded_body(monkeypatch, expiration_duration):
     pod_list = {'items': [{'metadata': {'name': 'pod'}}]}
@@ -61,16 +102,17 @@ def test_retrieve_pod_list_decodes_a_gzip_encoded_body(monkeypatch, expiration_d
     assert retrieved['items'] == pod_list['items']
 
 
-def test_retrieved_pod_list_failure(monkeypatch):
+def test_retrieved_pod_list_failure(caplog, monkeypatch):
     def mock_perform_kubelet_query(s, stream=False):
         raise Exception("network error")
 
     check = KubeletBase('kubelet', {}, [{}])
-    check.pod_list_url = "dummyurl"
+    check.pod_list_url = 'https://kubelet:10250/pods'
     monkeypatch.setattr(check, 'perform_kubelet_query', mock_perform_kubelet_query)
 
     retrieved = check.retrieve_pod_list()
     assert retrieved == {}
+    assert 'failed to retrieve pod list from the kubelet at https://kubelet:10250/pods : network error' in caplog.text
 
 
 def test_compute_pod_expiration_datetime(monkeypatch):

@@ -39,6 +39,16 @@ def build_config(check: IbmDb2Check) -> InstanceConfig:
             **query_metrics,
         }
 
+    query_activity = instance.get('query_activity')
+    if query_activity is None:
+        query_activity = {}
+    if isinstance(query_activity, Mapping):
+        args['query_activity'] = {
+            'enabled': False,
+            'collection_interval': 10,
+            **{key: value for key, value in query_activity.items() if value is not None},
+        }
+
     custom_queries = list(instance.get('custom_queries', []))
     use_global_custom_queries = instance.get('use_global_custom_queries', True)
     if use_global_custom_queries == 'extend':

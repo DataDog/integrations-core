@@ -6,7 +6,6 @@ import json
 import logging
 import os
 
-import mock
 import pytest
 import requests
 
@@ -19,13 +18,11 @@ log = logging.getLogger(__file__)
 
 
 @pytest.fixture
-def go_expvar_mock():
+def go_expvar_mock(fake_http_response):
     filepath = os.path.join(common.HERE, 'fixtures', 'expvar_output')
     with open(filepath, 'r') as f:
-        data = f.read()
-    json_data = json.loads(data)
-    with mock.patch('datadog_checks.go_expvar.GoExpvar._get_data', return_value=json_data):
-        yield
+        json_data = json.load(f)
+    fake_http_response(common.URL_WITH_PATH, json_data=json_data)
 
 
 @pytest.fixture(scope="session")

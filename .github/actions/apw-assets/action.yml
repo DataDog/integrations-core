@@ -1,0 +1,125 @@
+name: APW assets
+description: >-
+  Package the current commit as an APW source snapshot, or publish it as an
+  immutable apw-assets-<commit> GitHub prerelease. Runs apw_assets.py with the
+  runner's Python standard library and gh.
+
+inputs:
+  mode:
+    description: >-
+      package: export the snapshot into `directory` only (no credentials needed).
+      publish: skip if a complete release exists; otherwise package, create the
+      protected source tag with Octo STS, publish, then clean up expired releases.
+      Publish needs `contents: write` and `id-token: write`, and an Octo STS trust
+      policy in the calling repository.
+    required: true
+  exclude:
+    description: Newline-separated repo-relative Git globs to leave out of the snapshot.
+    required: false
+    default: ""
+  directory:
+    description: Directory that receives the release assets. It must not exist yet.
+    required: false
+    default: dist
+  retention-days:
+    description: Publish only. Delete complete APW releases older than this; the newest one is always kept.
+    required: false
+    default: "7"
+  octo-sts-policy:
+    description: Publish only. Octo STS trust policy in the calling repository that may create the source tag.
+    required: false
+    default: self.apw-assets.schedule
+  github-token:
+    description: >-
+      Publish only. Token for checking, publishing, and cleaning up releases. Keep
+      the default: APW pin approval requires github-actions[bot] as release author.
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Validate inputs
+      shell: bash
+      env:
+        APW_MODE: ${{ inputs.mode }}
+      run: |
+        case "$APW_MODE" in
+          package|publish) ;;
+          *)
+            echo "::error::Invalid mode '$APW_MODE'. Allowed values: package, publish."
+            exit 1
+            ;;
+        esac
+        if ! python3 -c 'import sys; sys.exit(sys.version_info < (3, 11))'; then
+          echo "::error::APW assets requires Python 3.11 or newer as python3."
+          exit 1
+        fi
+
+    - name: Check for a complete release
+      id: check
+      if: inputs.mode == 'publish'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        GH_REPO: ${{ github.repository }}
+      run: python3 "$GITHUB_ACTION_PATH/apw_assets.py" check --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+
+    - name: Export committed assets
+      id: package
+      if: inputs.mode == 'package' || steps.check.outputs.package == 'true'
+      shell: bash
+      env:
+        APW_DIRECTORY: ${{ inputs.directory }}
+        APW_EXCLUDE: ${{ inputs.exclude }}
+      run: |
+        excludes=()
+        while read -r pattern; do
+          if [[ -n "$pattern" ]]; then
+            excludes+=("--exclude=$pattern")
+          fi
+        done <<< "$APW_EXCLUDE"
+        python3 "$GITHUB_ACTION_PATH/apw_assets.py" package --repository "$GITHUB_REPOSITORY" \
+          --commit "$GITHUB_SHA" --directory="$APW_DIRECTORY" "${excludes[@]}"
+
+    - name: Get source tag credentials
+      id: octo-sts
+      if: inputs.mode == 'publish' && steps.package.outcome == 'success'
+      uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+      with:
+        scope: ${{ github.repository }}
+        policy: ${{ inputs.octo-sts-policy }}
+
+    - name: Ensure protected source tag exists
+      if: inputs.mode == 'publish' && steps.package.outcome == 'success'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+        GH_REPO: ${{ github.repository }}
+      run: python3 "$GITHUB_ACTION_PATH/apw_assets.py" tag --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
+
+    # PRApprover requires github-actions[bot] as release author and asset uploader.
+    - name: Verify and publish asset release
+      if: inputs.mode == 'publish' && steps.package.outcome == 'success'
+      shell: bash
+      env:
+        APW_DIRECTORY: ${{ inputs.directory }}
+        GH_TOKEN: ${{ inputs.github-token }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        python3 "$GITHUB_ACTION_PATH/apw_assets.py" publish --repository "$GITHUB_REPOSITORY" \
+          --commit "$GITHUB_SHA" --directory="$APW_DIRECTORY"
+
+    # Runs on unchanged-source checks too; keeps the newest complete release and all Git tags.
+    - name: Clean up expired APW releases
+      if: inputs.mode == 'publish'
+      # A cleanup failure must not fail the producer run that PRApprover relies on.
+      continue-on-error: true
+      shell: bash
+      env:
+        APW_RETENTION_DAYS: ${{ inputs.retention-days }}
+        GH_TOKEN: ${{ inputs.github-token }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        python3 "$GITHUB_ACTION_PATH/apw_assets.py" cleanup --repository "$GITHUB_REPOSITORY" \
+          --commit "$GITHUB_SHA" --retention-days "$APW_RETENTION_DAYS"

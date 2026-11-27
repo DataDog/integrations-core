@@ -135,10 +135,16 @@ def _alarm(entry: Element) -> bool | None:
 
 def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sample]:
     """Power rails and temperature sensors; empty on a VM-Series. The alarms are PAN's own `alarm` field, never a
-    comparison with the thresholds. A power alarm whose direction cannot be told is warned about, once per sensor."""
+    comparison with the thresholds. A power sensor sends `power.alarm` whenever that field is readable, and the
+    direction metrics `power.alarm.high` and `power.alarm.low` only when the voltage tells it; a sensor with a
+    voltage reading whose alarm direction cannot be told is warned about, once per sensor."""
     samples: list[Sample] = []
     for entry, slot, name in _entries(root, 'power'):
         tags = (f'sensor:{name}', f'slot:{slot}')
+        # PAN's alarm does not depend on a voltage reading: a sensor in alarm without one is still reported.
+        alarm = _alarm(entry)
+        if alarm is not None:
+            samples.append(Sample('power.alarm', int(alarm), tags, 'gauge'))
         volts = num(entry, 'Volts')
         if volts is None:
             continue
@@ -149,7 +155,6 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
             samples.append(Sample('power.voltage.min', low, tags, 'gauge'))
         if high is not None:
             samples.append(Sample('power.voltage.max', high, tags, 'gauge'))
-        alarm = _alarm(entry)
         if alarm is None:
             continue
         if not alarm:
@@ -161,7 +166,7 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
         else:
             warn(
                 'power sensor `%s` (slot %s) is in alarm but the voltage is not outside its '
-                'thresholds: power.alarm.high and power.alarm.low are not reported for it',
+                'thresholds: only power.alarm is reported for it, not power.alarm.high or power.alarm.low',
                 name,
                 slot,
             )

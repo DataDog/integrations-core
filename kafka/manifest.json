@@ -21,7 +21,8 @@
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Offering::Integration",
-      "Product::Data Streams Monitoring"
+      "Product::Data Streams Monitoring",
+      "Product::Kafka Console"
     ],
     "resources": [
       {

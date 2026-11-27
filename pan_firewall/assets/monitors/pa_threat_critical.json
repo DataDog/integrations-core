@@ -1,0 +1,36 @@
+{
+  "created_at": "2026-11-18",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nFirewall **{{@device_hostname.name}}** logged {{value}} critical-severity threat log(s) in the last 5 minutes that were detected but not blocked.\n{{/is_alert}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nA critical threat reached its destination, which may indicate an active exploit or compromise.\n\n---\n\n## Why?\n\nPossible causes:\n* **A security profile is set to alert instead of block** for this threat.\n* **A threat exception** lets this threat through.\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Review the source, destination, and threat name in the log sample.\n2. Check which security rule and profile matched the traffic.\n3. Change the profile action to block, or remove the exception, if the threat should be stopped.\n4. Investigate the destination host for signs of compromise.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Logs](/logs?query=source:pan.firewall+@type:THREAT+@severity:critical+@evt.name:alert+@device_hostname:{{@device_hostname.name}})\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Critical threat detected but not blocked on {{@device_hostname.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "timeout_h": 0,
+      "enable_logs_sample": true,
+      "on_missing_data": "default",
+      "new_group_delay": 0,
+      "groupby_simple_monitor": false,
+      "thresholds": {
+        "critical": 0
+      }
+    },
+    "priority": null,
+    "query": "logs(\"source:pan.firewall @type:THREAT @severity:critical @evt.name:alert\").index(\"*\").rollup(\"count\").by(\"@device_hostname\").last(\"5m\") > 0",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "log alert"
+  },
+  "description": "Alerts when a firewall logs a critical-severity threat with action `alert`: detected but not blocked. Blocked critical threats are excluded, since the firewall already stopped them; their volume is on the dashboard. Requires Palo Alto Networks Firewall log collection.",
+  "last_updated_at": "2026-11-18",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Critical threat detected but not blocked",
+  "version": 2
+}

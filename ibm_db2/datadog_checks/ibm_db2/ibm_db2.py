@@ -28,6 +28,7 @@ from .custom_metrics import CustomMetricsCollector
 from .health import Db2Health
 from .metrics import MetricsCollector
 from .query_metrics import QueryMetricsCollector
+from .query_samples import QuerySamplesCollector
 from .utils import get_version
 
 
@@ -66,6 +67,7 @@ class IbmDb2Check(DatabaseCheck):
         if self._config.dbm:
             self.health = Db2Health(self)
             self._query_metrics = self.register_async_job(QueryMetricsCollector(self, self._config))
+            self._query_samples = self.register_async_job(QuerySamplesCollector(self, self._config))
 
     def debug_stats_kwargs(self, tags: list[str] | None = None) -> dict:
         return {
@@ -84,7 +86,16 @@ class IbmDb2Check(DatabaseCheck):
                 cooldown_time=6 * 60 * 60,
                 data={
                     'features': [
-                        {'key': 'query_metrics', 'name': 'Query Metrics', 'enabled': self._config.query_metrics.enabled}
+                        {
+                            'key': 'query_metrics',
+                            'name': 'Query Metrics',
+                            'enabled': self._config.query_metrics.enabled,
+                        },
+                        {
+                            'key': 'query_activity',
+                            'name': 'Query Activity',
+                            'enabled': self._config.query_activity.enabled,
+                        },
                     ],
                 },
             )

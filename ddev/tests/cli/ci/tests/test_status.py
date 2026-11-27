@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
@@ -15,6 +16,7 @@ from ddev.cli.ci.tests.status import (
     Status,
     batch_status,
     conclusion_to_status,
+    final_batch_status,
     has_run,
     has_started_running,
     is_queued,
@@ -24,6 +26,7 @@ from ddev.cli.ci.tests.status import (
 from ddev.utils.github_async.models import WorkflowJob, WorkflowJobConclusion, WorkflowJobStatus
 from tests.cli.ci.tests.helpers import RUNNER_NAME
 from tests.helpers.github_async import make_workflow_job
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
 REPO_ROOT = Path(__file__).parents[5]
 TEST_BATCH_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "test-batch.yml"
@@ -177,3 +180,98 @@ def test_batch_status(conclusion: str, timeout_stop: bool, expected: Status):
     """Only a detected timeout reclassifies a cancelled run; every other conclusion stands."""
     jobs = [_ran_for(WorkflowJobConclusion.CANCELLED, TEST_JOB_TIMEOUT_MINUTES)] if timeout_stop else []
     assert batch_status(conclusion, jobs) is expected
+
+
+LINUX_TEST_JOB = "ddev on Linux (default)"
+WINDOWS_TEST_JOB = "ddev on Windows (default)"
+
+
+@dataclass(frozen=True)
+class BatchStatusScenario:
+    setup: str = "success"
+    second_test: str | None = "success"
+    teardown: str = "failure"
+    run_attempt: int | None = 2
+    second_test_attempt: int | None = None
+    second_test_status: WorkflowJobStatus = WorkflowJobStatus.COMPLETED
+    extra_jobs: tuple[WorkflowJob, ...] = ()
+    test_job_names: frozenset[str] = frozenset({LINUX_TEST_JOB, WINDOWS_TEST_JOB})
+
+
+@pytest.mark.parametrize(
+    ("scenario", "expected"),
+    [
+        pytest.param(BatchStatusScenario(), Status.SUCCESS, id="teardown-only"),
+        pytest.param(BatchStatusScenario(second_test="failure", teardown="success"), Status.FAILURE, id="test-failed"),
+        pytest.param(BatchStatusScenario(second_test="failure"), Status.FAILURE, id="test-and-teardown-failed"),
+        pytest.param(
+            BatchStatusScenario(setup="failure", second_test="skipped", teardown="skipped"),
+            Status.FAILURE,
+            id="setup-failed",
+        ),
+        pytest.param(BatchStatusScenario(setup="cancelled"), Status.FAILURE, id="setup-cancelled"),
+        pytest.param(BatchStatusScenario(second_test="skipped"), Status.FAILURE, id="planned-test-skipped"),
+        pytest.param(BatchStatusScenario(second_test=None), Status.FAILURE, id="planned-test-missing"),
+        pytest.param(
+            BatchStatusScenario(second_test_attempt=1), Status.FAILURE, id="planned-test-from-earlier-attempt"
+        ),
+        pytest.param(BatchStatusScenario(run_attempt=None), Status.FAILURE, id="missing-run-attempt"),
+        # A success conclusion on a job still in progress is not final evidence.
+        pytest.param(
+            BatchStatusScenario(second_test_status=WorkflowJobStatus.IN_PROGRESS),
+            Status.FAILURE,
+            id="test-not-completed",
+        ),
+        pytest.param(
+            BatchStatusScenario(
+                extra_jobs=(
+                    make_workflow_job(id=6, name="extra-test", conclusion=WorkflowJobConclusion.FAILURE, run_attempt=2),
+                )
+            ),
+            Status.FAILURE,
+            id="unplanned-test-failed",
+        ),
+        pytest.param(BatchStatusScenario(test_job_names=frozenset()), Status.FAILURE, id="empty-test-plan"),
+    ],
+)
+def test_final_batch_status(scenario: BatchStatusScenario, expected: Status):
+    observations = {
+        "setup": scenario.setup,
+        LINUX_TEST_JOB: "skipped" if scenario.setup == "failure" else "success",
+        WINDOWS_TEST_JOB: scenario.second_test,
+        "matrix.name": "skipped",
+        "teardown": scenario.teardown,
+    }
+    jobs = [
+        make_workflow_job(
+            id=index,
+            name=name,
+            conclusion=WorkflowJobConclusion(conclusion),
+            run_attempt=(scenario.second_test_attempt or scenario.run_attempt)
+            if name == WINDOWS_TEST_JOB
+            else scenario.run_attempt,
+            status=scenario.second_test_status if name == WINDOWS_TEST_JOB else WorkflowJobStatus.COMPLETED,
+        )
+        for index, (name, conclusion) in enumerate(observations.items(), start=1)
+        if conclusion is not None
+    ]
+    jobs.extend(scenario.extra_jobs)
+    handler = RecordingJsonHandler()
+    logger = make_monitor("test-runner", handler=handler).logger
+
+    status = final_batch_status(
+        "failure",
+        jobs,
+        batch_id="batch-01",
+        run_attempt=scenario.run_attempt,
+        test_job_names=scenario.test_job_names,
+        logger=logger,
+    )
+
+    assert status is expected
+    if expected is Status.SUCCESS:
+        [warning] = handler.events
+        assert warning["level"] == "warning"
+        assert warning["event"] == "Batch batch-01 (run 123) passed its tests, but teardown job 5 failed"
+    else:
+        assert not handler.events

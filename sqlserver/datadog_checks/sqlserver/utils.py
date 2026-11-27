@@ -8,6 +8,7 @@ import sys
 from typing import Dict, Optional, Sequence
 from xml.etree import ElementTree
 
+from datadog_checks.base.utils.db.sql_commenter import generate_sql_comment
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 
@@ -162,6 +163,56 @@ def needs_comment_recovery(full_text: Optional[str], statement_comments: Optiona
     return has_dbm_comment_marker(full_text) and not any(
         has_dbm_comment_marker(comment) for comment in statement_comments or ()
     )
+
+
+DD_QUERY_ATTRIBUTES = {
+    'service': 'datadog-agent',
+}
+AGENT_SERVICE_COMMENT = generate_sql_comment(**DD_QUERY_ATTRIBUTES)
+
+
+def append_agent_service_comment(comments: Sequence[str] | None, full_text: Optional[str]) -> Sequence[str]:
+    """Append the Agent service comment when the batch text has it and the statement comments do not."""
+    if comments is None:
+        comments = []
+    if (
+        not full_text
+        or AGENT_SERVICE_COMMENT not in full_text
+        or any(comment and AGENT_SERVICE_COMMENT in comment for comment in comments)
+    ):
+        return comments
+    merged = list(comments)
+    merged.append(AGENT_SERVICE_COMMENT)
+    return merged
+
+
+_SQLCOMMENTER_COMMENT = re.compile(r"/\*\s*[\w.-]+='[^']*'(?:\s*,\s*[\w.-]+='[^']*')*\s*\*/")
+
+
+def extract_trailing_dbm_comments(text: Optional[str]) -> list[str]:
+    """Return the DBM propagation comments at the end of `text`, in order.
+
+    Scans backward over trailing whitespace, semicolons and `/* ... */` blocks, so it is safe on text cut
+    at an arbitrary position, such as inside a string literal. A backward scan cannot tell whether a
+    delimiter belongs to a string literal or a line comment, so only blocks in the `key='value'` format
+    the tracers emit, with a DBM marker, are accepted, and the scan stops at the first block that is not.
+    """
+    comments = []
+    end = len(text) if text else 0
+    while True:
+        while end > 0 and (text[end - 1].isspace() or text[end - 1] == ';'):
+            end -= 1
+        if end < 4 or text[end - 2 : end] != '*/':
+            break
+        start = text.rfind('/*', 0, end - 2)
+        if start < 0:
+            break
+        comment = text[start:end]
+        if not _SQLCOMMENTER_COMMENT.fullmatch(comment) or not has_dbm_comment_marker(comment):
+            break
+        comments.append(comment)
+        end = start
+    return comments[::-1]
 
 
 def _get_procedure_name(t, idx):

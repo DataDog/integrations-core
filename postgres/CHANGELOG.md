@@ -2,6 +2,33 @@
 
 <!-- towncrier release notes start -->
 
+## 23.15.1 / 2026-11-25
+
+***Fixed***:
+
+* Fix the Postgres query metrics text lookup appearing under several query signatures that differ only in `int2`, `int4` or `int8` array casts. ([#26116](https://github.com/DataDog/integrations-core/pull/26116))
+* Fix the subscription error metrics on PostgreSQL 19, where `pg_stat_subscription_stats.sync_error_count` was renamed. ([#26144](https://github.com/DataDog/integrations-core/pull/26144))
+* Back off query text fetches from `pg_stat_statements` while they keep failing, instead of repeating a full read of the stored query text every collection. ([#26152](https://github.com/DataDog/integrations-core/pull/26152))
+
+## 23.15.0 / 2026-10-29 / Agent 7.86.0
+
+***Added***:
+
+* Add collection of database roles, role memberships and settings, and object privileges, enabled with `collect_roles.enabled`. ([#25279](https://github.com/DataDog/integrations-core/pull/25279))
+* Update dependencies ([#25599](https://github.com/DataDog/integrations-core/pull/25599))
+
+***Fixed***:
+
+* Constrain the `port` option to the valid range 1-65535. ([#25475](https://github.com/DataDog/integrations-core/pull/25475))
+* Fix per-database dynamic queries continuing to query dropped databases and skipping new ones when `database_autodiscovery` is enabled. ([#25624](https://github.com/DataDog/integrations-core/pull/25624))
+* Reconnect when the main database connection is left with a command in progress, which caused every subsequent query to fail with `another command is already in progress`. ([#25644](https://github.com/DataDog/integrations-core/pull/25644))
+
+## 23.14.0 / 2026-10-27 / Agent 7.85.0
+
+***Security***:
+
+* Update boto3 to 1.43.119, which drops the Sectigo root that anchors the compromised eMudhra intermediates. ([#25797](https://github.com/DataDog/integrations-core/pull/25797))
+
 ## 23.13.1 / 2026-10-21
 
 ***Fixed***:

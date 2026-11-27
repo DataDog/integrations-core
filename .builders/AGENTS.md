@@ -11,7 +11,10 @@ file.
 - On Windows, fetch with `Get-RemoteFile -Uri ... -Path ... -Hash '<sha256>'`
   (see `images/helpers.ps1`). The hash is mandatory for these downloads.
 - On Linux, verify with `echo "<sha256>  <file>" | sha256sum --check` (or the
-  `SHA256=` argument to `install-from-source.sh`).
+  `SHA256=` argument to `install-from-source.sh`). Scripts that also run on
+  macOS (`install-from-source.sh` and everything under `images/macos/`) must
+  use `sha256sum -c -` instead: the `sha256sum` that macOS 15 ships rejects
+  GNU's `--check`, and `-c -` works with both.
 
 Existing entries (7-Zip, Git, Rust, Python, OpenSSL, NASM, Perl, PostgreSQL,
 etc.) all follow this pattern; match it for anything new.

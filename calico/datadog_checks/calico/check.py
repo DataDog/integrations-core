@@ -8,6 +8,7 @@ from .metrics import METRIC_MAP
 
 
 class CalicoCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances=None):

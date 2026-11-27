@@ -123,4 +123,10 @@ class DNSCheck(AgentCheck):
 
     def report_as_service_check(self, status, msg=None):
         tags = self._get_tags()
+        if status != AgentCheck.OK:
+            self.gauge("dns.can_connect", 0, tags=tags)
+            self.gauge("dns.cant_connect", 1, tags=tags)
+        else:
+            self.gauge("dns.can_connect", 1, tags=tags)
+            self.gauge("dns.cant_connect", 0, tags=tags)
         self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)

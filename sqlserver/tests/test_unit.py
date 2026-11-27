@@ -43,10 +43,13 @@ from datadog_checks.sqlserver.schemas import (
 )
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
+    AGENT_SERVICE_COMMENT,
     DRIVER_CONFIG_DIR,
     Database,
+    append_agent_service_comment,
     construct_use_statement,
     extract_sql_comments_and_procedure_name,
+    extract_trailing_dbm_comments,
     get_unixodbc_sysconfig,
     needs_comment_recovery,
     parse_sqlserver_major_version,
@@ -1567,6 +1570,57 @@ def test_needs_comment_recovery_recognizes_dbm_comment_markers(marker):
 )
 def test_needs_comment_recovery_requires_missing_dbm_comment(full_text, statement_comments, expected):
     assert needs_comment_recovery(full_text, statement_comments) is expected
+
+
+@pytest.mark.parametrize(
+    'full_text,statement_comments,expected',
+    [
+        pytest.param(None, [], [], id='no_batch'),
+        pytest.param(
+            f"(@P1 int){AGENT_SERVICE_COMMENT} SELECT 1",
+            [],
+            [AGENT_SERVICE_COMMENT],
+            id='offsets_omit_the_comment',
+        ),
+        pytest.param(
+            f"{AGENT_SERVICE_COMMENT} SELECT 1",
+            [AGENT_SERVICE_COMMENT],
+            [AGENT_SERVICE_COMMENT],
+            id='already_in_statement_metadata',
+        ),
+    ],
+)
+def test_append_agent_service_comment(full_text, statement_comments, expected):
+    assert append_agent_service_comment(statement_comments, full_text) == expected
+
+
+@pytest.mark.parametrize(
+    'text,expected',
+    [
+        pytest.param(None, [], id='none'),
+        pytest.param('', [], id='empty'),
+        pytest.param('SELECT 1 FROM t', [], id='no_comment'),
+        pytest.param("SELECT 1 /*ddps='svc'*/", ["/*ddps='svc'*/"], id='single'),
+        pytest.param(
+            "SELECT 1 /*ddps='svc',dde='prod'*/ /*traceparent='00-abc-def-01'*/ ;\n",
+            ["/*ddps='svc',dde='prod'*/", "/*traceparent='00-abc-def-01'*/"],
+            id='multiple_with_trailing_semicolon_and_whitespace',
+        ),
+        pytest.param(
+            "xxxx' AS pad FROM dbo.t /* case */ /*ddps='svc',ddh='db%2C1433'*/",
+            ["/*ddps='svc',ddh='db%2C1433'*/"],
+            id='starts_inside_string_literal_stops_at_non_dbm_comment',
+        ),
+        pytest.param("SELECT 1 /*ddps='svc'*/ /* case */", [], id='non_dbm_comment_last'),
+        pytest.param("/* leading */ SELECT 1 FROM t", [], id='leading_comment_only'),
+        pytest.param("SELECT '/* not a comment */' AS c", [], id='comment_inside_trailing_literal'),
+        pytest.param("SELECT '/*customer-secret' -- */", [], id='delimiters_from_literal_and_line_comment'),
+        pytest.param("SELECT '/*ddps=''x' -- */", [], id='marker_inside_literal_and_line_comment'),
+        pytest.param("ps='svc',dde='prod'*/", [], id='starts_inside_comment'),
+    ],
+)
+def test_extract_trailing_dbm_comments(text, expected):
+    assert extract_trailing_dbm_comments(text) == expected
 
 
 @pytest.mark.parametrize(

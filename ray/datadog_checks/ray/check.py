@@ -10,6 +10,7 @@ from .metrics import METRIC_MAP
 
 class RayCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'ray'
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     def get_default_config(self):

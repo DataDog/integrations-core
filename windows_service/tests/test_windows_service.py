@@ -32,6 +32,12 @@ def assert_service_check_and_metrics(aggregator, services):
             count=service.count,
         )
         aggregator.assert_metric(
+            'windows_service.status',
+            tags=service.tags,
+            value=service.check_status,
+            count=service.count,
+        )
+        aggregator.assert_metric(
             'windows_service.uptime',
             tags=service.tags,
             count=service.count,

@@ -1,0 +1,1 @@
+Retry safe GitHub requests when the response body is malformed.

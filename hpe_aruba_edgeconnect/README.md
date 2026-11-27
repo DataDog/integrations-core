@@ -35,6 +35,8 @@ No additional installation is needed on your server.
 
    **Note**: Monitor permissions are enough to collect most metrics. Admin permissions are required to collect the `hpe_aruba_edgeconnect.device.cpu.usage` metric on the appliances. If the configured credentials do not have admin access, the Agent skips this metric, but collects the rest of the metrics.
 
+   To authenticate to the Orchestrator with an API key instead of a username and password, set `orchestrator_api_key` and leave `orchestrator_username` and `orchestrator_password` unset. Create the key in Orchestrator under **Users & Authentication > API Keys**; Read-Only permission is enough. Appliances do not accept API keys, so configure their credentials in `appliance_credentials_overrides`. To use the same credentials for every appliance, add a single entry with `cidr: 0.0.0.0/0`. Appliances that no entry covers are skipped with a warning on every run. If that is intended, exclude them with `appliance_ips`. API keys expire, so rotate the key before its expiration date to avoid collection failures.
+
    It is recommended to configure `appliance_ips` with an explicit include list that matches your known appliance IP ranges. This helps ensure that the check only connects to expected appliances.
 
 2. [Restart the Agent][5].
@@ -64,7 +66,7 @@ The recommended way to collect logs from HPE Aruba EdgeConnect is to configure t
     logs:
       - type: tcp
         port: 10514
-        source: hpe_aruba_edgeconnect
+        source: hpe-aruba-edgeconnect
         service: <SERVICE>
     ```
 
@@ -72,12 +74,18 @@ The recommended way to collect logs from HPE Aruba EdgeConnect is to configure t
 
 The HPE Aruba EdgeConnect integration includes alarm event support. Events are disabled by default; to enable them, set `collect_events` to `true` in the configuration.
 
+**First run.** Each Agent keeps its own record of the last alarm it reported. When an Agent runs the check without that record, such as on its first run or when it takes over collection from another Agent, it sends only the alarms raised during the last collection interval as events. Older outstanding alarms are not sent as events, but the `hpe_aruba_edgeconnect.device.hardware.ok` metric still reflects current hardware alarms.
+
 
 ### Service Checks
 
 The HPE Aruba EdgeConnect integration does not include any service checks.
 
-## Troubleshooting
+## Uninstallation
+
+To disable the integration, rename the configuration file from `hpe_aruba_edgeconnect.d/conf.yaml` to `hpe_aruba_edgeconnect.d/conf.yaml.example`. Alternatively, if you are running a containerized environment, you can remove the annotation used to enable the integration.
+
+## Support
 
 Need help? Contact [Datadog support][9].
 

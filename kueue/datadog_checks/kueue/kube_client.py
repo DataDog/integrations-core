@@ -7,14 +7,16 @@ from typing import Any
 
 from kubernetes import client, config
 from kubernetes.client.exceptions import ApiException
+from pydantic import BaseModel
 
 
 class KubernetesAPIClient:
-    def __init__(self, log=None, kube_config_dict: Mapping[str, Any] | None = None):
+    def __init__(self, log=None, kube_config_dict: BaseModel | Mapping[str, Any] | None = None):
         self.log = log
 
+        kube_config_dict = to_mutable_config(kube_config_dict)
         if kube_config_dict:
-            api_client = config.new_client_from_config_dict(to_mutable_config(kube_config_dict))
+            api_client = config.new_client_from_config_dict(kube_config_dict)
             self.custom_obj_client = client.CustomObjectsApi(api_client=api_client)
         else:
             if self.log:
@@ -47,6 +49,10 @@ class KubernetesAPIClient:
 
 
 def to_mutable_config(value: Any) -> Any:
+    # The configuration models turn the kubeconfig into frozen models, mappings and tuples, which the kubernetes
+    # client cannot load. Dump the models with their kubeconfig key names, and only the keys that were set.
+    if isinstance(value, BaseModel):
+        value = value.model_dump(by_alias=True, exclude_unset=True)
     if isinstance(value, Mapping):
         return {key: to_mutable_config(item) for key, item in value.items()}
     if isinstance(value, tuple):

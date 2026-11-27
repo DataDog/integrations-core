@@ -31,7 +31,7 @@ from ddev.utils.github_async import COMMENT_BODY_LIMIT
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from datetime import datetime
+    from datetime import datetime, timedelta
 
     from ddev.cli.ci.tests.progress import (
         BatchProgress,
@@ -168,36 +168,49 @@ def _code(text: str) -> str:
 
 
 def render_comment(
-    progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+    progress: DispatcherProgress,
+    *,
+    shutdown: ShutdownRequest | None = None,
+    now: datetime | None = None,
+    elapsed: timedelta | None = None,
 ) -> str:
     """The report, at the most detail that fits GitHub's limit.
 
     The tiers are walked here rather than only on a rejection, so local measurement and a refusal
     from GitHub degrade through the same structure instead of through two. The message's `revision`
     is deliberately not rendered: internal ordering metadata, already logged. `now` fixes the
-    footer's log-link window, so tiers from one snapshot render identically.
+    footer's log-link window, so tiers from one snapshot render identically. `elapsed` is how long
+    the run has taken, shown only once the report is terminal.
     """
-    body = _render(progress, DetailLevel.FULL, shutdown=shutdown, now=now)
+    body = _render(progress, DetailLevel.FULL, shutdown=shutdown, now=now, elapsed=elapsed)
     for level in (DetailLevel.COMPACT, DetailLevel.TRUNCATED):
         if _size(body) <= COMMENT_BODY_LIMIT:
             return body
-        body = _render(progress, level, shutdown=shutdown, now=now)
+        body = _render(progress, level, shutdown=shutdown, now=now, elapsed=elapsed)
     # The last tier packs its rows against the real budget, so it fits by construction.
     return body
 
 
 def render_compact_comment(
-    progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+    progress: DispatcherProgress,
+    *,
+    shutdown: ShutdownRequest | None = None,
+    now: datetime | None = None,
+    elapsed: timedelta | None = None,
 ) -> str:
     """Every target keeps its row and its link, and no failure is named. For the rejection path."""
-    return _render(progress, DetailLevel.COMPACT, shutdown=shutdown, now=now)
+    return _render(progress, DetailLevel.COMPACT, shutdown=shutdown, now=now, elapsed=elapsed)
 
 
 def render_truncated_comment(
-    progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, now: datetime | None = None
+    progress: DispatcherProgress,
+    *,
+    shutdown: ShutdownRequest | None = None,
+    now: datetime | None = None,
+    elapsed: timedelta | None = None,
 ) -> str:
     """As many linked target rows as the budget holds, and a notice counting the rest."""
-    return _render(progress, DetailLevel.TRUNCATED, shutdown=shutdown, now=now)
+    return _render(progress, DetailLevel.TRUNCATED, shutdown=shutdown, now=now, elapsed=elapsed)
 
 
 def _render(
@@ -206,13 +219,16 @@ def _render(
     *,
     shutdown: ShutdownRequest | None = None,
     now: datetime | None = None,
+    elapsed: timedelta | None = None,
 ) -> str:
     """Assemble one report: the header, the affected integrations, then the footer.
 
     Every state uses this order. A section is absent when it has nothing to report and never moves,
     so a queued run and a failed one differ in what they say rather than in where they say it.
     """
-    header = _header(progress, shutdown=shutdown)
+    # A duration on an unfinished run would be stale between updates, so only the last word has one.
+    terminal = shutdown is not None or progress.done
+    header = _header(progress, shutdown=shutdown, elapsed=elapsed if terminal else None)
     footer = _footer(progress, shutdown=shutdown, now=now)
 
     # The header and footer always survive; only the affected integrations are budgeted, and only the
@@ -267,13 +283,15 @@ def summary_line(progress: DispatcherProgress, *, shutdown: ShutdownRequest | No
 # ---------------------------------------------------------------------------
 
 
-def _header(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
+def _header(
+    progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None, elapsed: timedelta | None = None
+) -> str:
     """Marker, heading, notice, alert, totals and the batch strip: never truncated."""
     blocks = [COMMENT_MARKER, _heading(progress, shutdown=shutdown), SHADOW_NOTICE]
     alert = _alert(progress, shutdown=shutdown)
     if alert is not None:
         blocks.append(alert)
-    blocks.append(_totals(progress))
+    blocks.append(_totals(progress, elapsed=elapsed))
     blocks.append(_batch_strip(progress))
     return "\n\n".join(blocks)
 
@@ -376,8 +394,8 @@ def _outstanding(progress: DispatcherProgress) -> str:
     return outstanding
 
 
-def _totals(progress: DispatcherProgress) -> str:
-    """The bar, and the counts behind it as a paragraph of its own.
+def _totals(progress: DispatcherProgress, *, elapsed: timedelta | None = None) -> str:
+    """The bar, and the counts behind it as a paragraph of its own, ending with how long the run took.
 
     A zero is left out rather than printed: a queued run reads as "855 pending", not as three zeroes
     with the pending count hidden at the end of them.
@@ -407,10 +425,23 @@ def _totals(progress: DispatcherProgress) -> str:
         and not any(_uncollected_counts(progress))
     ):
         counts.append("nothing failed")
+    if elapsed is not None:
+        counts.append(f"⏱️ {_duration(elapsed)}")
 
     # A non-breaking space, so Markdown does not collapse the gap after the bar.
     jobs = f"{_progress_bar(progress)}&nbsp; **{progress.complete}/{progress.total} jobs**"
     return f"{jobs}\n\n{' · '.join(counts)}" if counts else jobs
+
+
+def _duration(elapsed: timedelta) -> str:
+    """Whole seconds, starting at the largest unit that is not zero: `45s`, `18m 33s`, `1h 0m 12s`."""
+    hours, rest = divmod(max(0, int(elapsed.total_seconds())), 3600)
+    minutes, seconds = divmod(rest, 60)
+    if hours:
+        return f"{hours}h {minutes}m {seconds}s"
+    if minutes:
+        return f"{minutes}m {seconds}s"
+    return f"{seconds}s"
 
 
 def _progress_bar(progress: DispatcherProgress) -> str:
@@ -485,10 +516,9 @@ def _batch_link(batch: BatchProgress) -> str:
 def _batch_chip(batch: BatchProgress) -> str:
     """The batch's state, in one glyph.
 
-    `status` is the workflow's own conclusion and is not re-derived from `jobs_progress`: a batch
-    can fail while every job inside it passed (a setup or upload step). The exception is a failed
-    batch where no job confirmed a failure and some job is inconclusive: that job may be the
-    failure, so the batch is a warning rather than a confirmed failure.
+    `status` comes from the runner and is not re-derived from `jobs_progress`. A failed batch
+    where no job confirmed a failure and some job is inconclusive shows a warning: that job may
+    have failed, but we can't confirm it.
     """
     if batch.state is ExecutionState.ARTIFACT_DOWNLOAD:
         return "📥"

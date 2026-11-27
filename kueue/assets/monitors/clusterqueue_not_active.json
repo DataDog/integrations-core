@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "title": "ClusterQueue not active",
+  "tags": [
+    "integration:kueue"
+  ],
+  "definition": {
+    "name": "[Kueue] ClusterQueue is not active",
+    "type": "query alert",
+    "query": "avg(last_5m):(max:kueue.cluster_queue.status{status:pending} by {kueue_cluster_queue} + max:kueue.cluster_queue.status{status:terminating} by {kueue_cluster_queue}) >= 1",
+    "message": "{{#is_alert}}\n## What's happening?\n\nClusterQueue **{{kueue_cluster_queue.name}}** is not active (status value {{value}}, threshold {{threshold}}) — it is reporting `pending` or `terminated` instead of `active`.\n{{/is_alert}}\n\n{{#is_recovery}}\n## Recovered\n\nClusterQueue on {{kueue_cluster_queue.name}} has resolved and is now active. Current value: {{value}}.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nWhile a ClusterQueue is not active, it cannot admit any workloads, so jobs targeting it will remain queued indefinitely and never start running.\n\n---\n\n## Why?\n\nPossible causes:\n* **Missing ResourceFlavor** — the ClusterQueue references a ResourceFlavor that does not exist in the cluster, so Kueue cannot resolve the quota it needs to admit workloads.\n* **Missing or failing AdmissionCheck** — the ClusterQueue requires an AdmissionCheck that is not yet Active, preventing admission until the check is satisfied.\n* **ClusterQueue being terminated** — the ClusterQueue is in the process of being deleted (finalizing pending workloads) and will stop admitting new work until deletion completes or is cancelled.\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. **Identify the scope** — Check which `{{kueue_cluster_queue.name}}` is affected.\n2. **Review recent metrics** — Inspect `kueue.cluster_queue.status` in [Metrics Explorer](https://app.datadoghq.com/metric/explorer?exp_metric=kueue.cluster_queue.status&exp_scope=kueue_cluster_queue:{{kueue_cluster_queue.name}},env:{{env.name}}&exp_agg=avg&exp_type=line) to confirm whether the queue is stuck in `pending` or `terminated`.\n3. Run `kubectl describe clusterqueue {{kueue_cluster_queue.name}}` and check the `Active` condition's reason/message for the specific misconfiguration (missing ResourceFlavor, missing AdmissionCheck, etc.).\n4. If a ResourceFlavor is missing, create it or update the ClusterQueue spec to reference an existing one. If an AdmissionCheck is not active, investigate and fix the corresponding check controller.\n\n| Cause | Resolution |\n| ----- | ---------- |\n| Missing ResourceFlavor | Create the referenced ResourceFlavor or correct the ClusterQueue's `spec.resourceGroups` to reference a flavor that exists. |\n| Missing/failing AdmissionCheck | Ensure the required AdmissionCheck and its controller are deployed and reporting `Active`. |\n| ClusterQueue terminating | Confirm whether deletion is intentional; if not, remove the deletion request and verify no lingering finalizers block workload cleanup. |\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/kueue/)\n* [Metrics Explorer](https://app.datadoghq.com/metric/explorer?exp_metric=kueue.cluster_queue.status&exp_scope=kueue_cluster_queue:{{kueue_cluster_queue.name}},env:{{env.name}}&exp_agg=avg&exp_type=line)\n* [Infrastructure](https://app.datadoghq.com/infrastructure?filters=env:{{env.name}})\n* [Logs](https://app.datadoghq.com/logs?query=kueue_cluster_queue:{{kueue_cluster_queue.name}}+env:{{env.name}})\n{{/is_recovery}}",
+    "tags": [
+      "integration:kueue",
+      "$env",
+      "$kueue_cluster_queue"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 1
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "include_tags": true,
+      "new_group_delay": 60,
+      "on_missing_data": "default",
+      "silenced": {}
+    }
+  },
+  "created_at": "2026-07-23",
+  "last_updated_at": "2026-08-04",
+  "description": "Alerts when a Kueue ClusterQueue reports pending or terminated status instead of active, meaning it cannot admit workloads."
+}

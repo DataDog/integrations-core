@@ -1,0 +1,19 @@
+{
+  "name": "Dell PowerFlex MDM logs",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:dell-powerflex -@logger.name:* -@powerflex.object_id:*",
+  "timerange": {
+    "interval_ms": 900000
+  },
+  "options": {
+    "columns": [
+      "host",
+      "status"
+    ],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}

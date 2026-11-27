@@ -21,6 +21,7 @@ class TorchserveManagementAPICheck(AgentCheck):
     __NAMESPACE__ = 'torchserve.management_api'
     SERVICE_CHECK_NAME = 'health'
     CHECK_NAME = "torchserve"
+    AGNOSTIC_HTTP_CLIENT = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

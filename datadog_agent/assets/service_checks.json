@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.86.0",
+        "integration": "Datadog Agent",
+        "check": "datadog.agent.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Datadog Agent OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the check is unable to connect to the Datadog Agent's telemetry endpoint, otherwise returns `OK`."
+    }
+]

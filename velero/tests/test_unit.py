@@ -20,8 +20,9 @@ def test_default_metric_limit():
     assert VeleroCheck.DEFAULT_METRIC_LIMIT == 0
 
 
-def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path("velero_payload.txt"))
+def test_check(dd_run_check, aggregator, instance, fake_http_response):
+    with open(get_fixture_path("velero_payload.txt"), "rb") as f:
+        fake_http_response(instance["openmetrics_endpoint"], f.read())
 
     check = VeleroCheck("velero", {}, [instance])
     dd_run_check(check)

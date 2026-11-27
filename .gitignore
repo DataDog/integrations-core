@@ -148,6 +148,12 @@ treemap*.png
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/onboard-evalya/
+!.claude/skills/agint-review
+!.claude/agents/
+.claude/agents/*
+!.claude/agents/agint-review-*.md
+.agents/skills/*
+!.agents/skills/agint-review/
 
 # Claude Code PR review artifacts
 .agint-review/

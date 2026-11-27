@@ -1,0 +1,8 @@
+:8000 {
+  route /prometheus/metrics {
+    rewrite * /metrics
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+}

@@ -130,6 +130,7 @@ class InstanceConfig(BaseModel):
     collect_aggregates_only: Optional[Union[bool, str]] = None
     collect_counters_with_distributions: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_histograms_as_distributions: Optional[bool] = None
     collect_status_metrics: Optional[bool] = None
     collect_status_metrics_by_host: Optional[bool] = None
     connect_timeout: Optional[float] = None

@@ -10,8 +10,9 @@ from datadog_checks.hugging_face_tgi import HuggingFaceTgiCheck
 from .common import RENAMED_LABELS, TEST_METRICS, get_fixture_path
 
 
-def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('payload.txt'))
+def test_check(dd_run_check, aggregator, instance, fake_http_response):
+    with open(get_fixture_path('payload.txt'), 'rb') as f:
+        fake_http_response(instance['openmetrics_endpoint'], f.read())
 
     check = HuggingFaceTgiCheck('hugging_face_tgi', {}, [instance])
     dd_run_check(check)

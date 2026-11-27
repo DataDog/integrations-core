@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2026-10-04",
+    "last_updated_at": "2026-10-04",
+    "title": "Critical-severity patches are stuck on failing devices",
+    "description": "Devices in Automox's Needs Attention report are failing at least one policy. This alerts when those devices have had critical-severity patches outstanding for a full day.",
+    "definition": {
+        "name": "[Automox] Critical-severity patches are stuck on failing devices",
+        "type": "query alert",
+        "query": "min(last_1d):sum:automox.needs_attention.package_count{severity:critical} by {organization_id} > 0",
+        "message": "{{#is_alert}}\nFor the past day, devices failing their Automox policies have had at least {{value}} critical-severity patches outstanding.\n{{/is_alert}}\n{{#is_recovery}}\nNo device failing an Automox policy has a critical-severity patch outstanding.\n{{/is_recovery}}\n\nOrganization: {{organization_id.name}}\n\nThe Needs Attention section of the Automox Overview dashboard names the failing devices and policies. Fix the failure first: the policy's output in the Automox console usually says why it could not install.",
+        "tags": [
+            "integration:automox"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 0
+            },
+            "notify_audit": false,
+            "on_missing_data": "resolve",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": 2,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:automox"
+    ]
+}

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import re
 from contextlib import contextmanager
 
 import pytest
@@ -730,3 +731,147 @@ def test_per_database_view_state_skipped_on_azure_sql_database(instance_minimal_
     diagnoses = _get_diagnoses(check)
 
     assert not _by_name(diagnoses, SQLServerConfigurationError.missing_per_database_view_state.value)
+
+
+QUERY_PLANS_FILE = "/var/opt/mssql/log/datadog_query_plans_0_134080000000000000.xel"
+QUERY_PLANS_BLOB_FILE = "https://account.blob.core.windows.net/xe/datadog_query_plans_0_134080000000000000.xel"
+QUERY_PLANS_ACTIONS = ("query_hash", "query_plan_hash", "tsql_frame", "plan_handle", "session_id")
+
+
+def _event_file_target(file_name=QUERY_PLANS_FILE):
+    return ("event_file", '<EventFileTarget><File name="{}"/></EventFileTarget>'.format(file_name))
+
+
+EVENT_FILE_TARGET_ROW = _event_file_target()
+
+
+def _query_plans_responses(
+    *,
+    level="",
+    events=(("query_post_execution_plan_profile",),),
+    targets=(EVENT_FILE_TARGET_ROW,),
+    actions=tuple(("query_post_execution_plan_profile", action) for action in QUERY_PLANS_ACTIONS),
+    file_read=((QUERY_PLANS_FILE,),),
+):
+    """The responses of the datadog_query_plans session's DMVs at `level`, which other levels' queries don't match."""
+    return [
+        ("sys.dm_xe_{}session_events".format(level), events),
+        ("sys.dm_xe_{}session_targets".format(level), targets),
+        ("sys.dm_xe_{}session_event_actions".format(level), actions),
+        ("sys.fn_xe_file_target_read_file", file_read),
+    ]
+
+
+def _query_plans_check(instance_minimal_defaults, responses):
+    return _check(instance_minimal_defaults, responses, dbm=True, collect_xe={'query_plans': {'enabled': True}})
+
+
+@pytest.mark.parametrize(
+    "events,targets,result,diagnosis",
+    [
+        pytest.param(
+            [("query_post_execution_plan_profile",)],
+            [EVENT_FILE_TARGET_ROW],
+            Diagnosis.DIAGNOSIS_SUCCESS,
+            "running, with event query_post_execution_plan_profile and target event_file",
+            id="running",
+        ),
+        pytest.param([], [], Diagnosis.DIAGNOSIS_WARNING, "doesn't exist or isn't running", id="not_running"),
+        pytest.param(
+            [("sql_batch_completed",)],
+            [("ring_buffer", None)],
+            Diagnosis.DIAGNOSIS_WARNING,
+            "has none of the events",
+            id="no_plan_event",
+        ),
+        pytest.param(
+            [("query_post_execution_showplan",)],
+            [("histogram", None)],
+            Diagnosis.DIAGNOSIS_WARNING,
+            "no event_file or ring_buffer target",
+            id="unsupported_target",
+        ),
+    ],
+)
+def test_query_plans_xe_session(instance_minimal_defaults, events, targets, result, diagnosis):
+    responses = _query_plans_responses(events=events, targets=targets) + _happy_responses()
+    check = _query_plans_check(instance_minimal_defaults, responses)
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.query_plans_xe_session.value)[0]
+    assert row['result'] == result
+    assert diagnosis in row['diagnosis']
+
+
+@pytest.mark.parametrize(
+    "actions,missing",
+    [
+        pytest.param(QUERY_PLANS_ACTIONS, [], id="all"),
+        pytest.param(("query_hash", "query_plan_hash", "plan_handle"), ["tsql_frame"], id="no_tsql_frame"),
+        pytest.param(("session_id",), ["query_hash", "query_plan_hash", "tsql_frame", "plan_handle"], id="none"),
+    ],
+)
+def test_query_plans_xe_session_actions(instance_minimal_defaults, actions, missing):
+    """A session whose plan events lack recommended actions warns with what each missing action costs."""
+    responses = (
+        _query_plans_responses(actions=[("query_post_execution_plan_profile", action) for action in actions])
+        + _happy_responses()
+    )
+    check = _query_plans_check(instance_minimal_defaults, responses)
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.query_plans_xe_session_actions.value)[0]
+    if not missing:
+        assert row['result'] == Diagnosis.DIAGNOSIS_SUCCESS
+        return
+    assert row['result'] == Diagnosis.DIAGNOSIS_WARNING
+    assert re.findall(r"has no sqlserver\.(\w+) action", row['diagnosis']) == missing
+    if "tsql_frame" in missing:
+        assert "a plan whose query left the cache has no statement" in row['diagnosis']
+
+
+def test_query_plans_xe_file_read_failure(instance_minimal_defaults):
+    """A denied read of the event_file target's file fails with the permissions and credential that fix it."""
+    error = Exception("VIEW SERVER PERFORMANCE STATE permission was denied on object 'server', database 'master'.")
+    responses = _query_plans_responses(file_read=error) + _happy_responses()
+    check = _query_plans_check(instance_minimal_defaults, responses)
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.query_plans_xe_file_read.value)[0]
+    assert row['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert QUERY_PLANS_FILE in row['diagnosis']
+    assert "permission was denied" in row['rawerror']
+    for fix in ("VIEW SERVER STATE", "VIEW SERVER PERFORMANCE STATE on SQL Server 2022", "credential"):
+        assert fix in row['remediation']
+
+
+def test_query_plans_xe_session_on_azure_sql_database(instance_minimal_defaults):
+    """On Azure SQL Database, the session is read from the database-scoped DMVs, and its blob file is read."""
+    responses = _query_plans_responses(
+        level="database_",
+        targets=[_event_file_target(QUERY_PLANS_BLOB_FILE)],
+        file_read=[(QUERY_PLANS_BLOB_FILE,)],
+    ) + _happy_responses(engine_edition=ENGINE_EDITION_SQL_DATABASE)
+    check = _query_plans_check(instance_minimal_defaults, responses)
+
+    diagnoses = _get_diagnoses(check)
+
+    for code in (
+        SQLServerConfigurationError.query_plans_xe_session,
+        SQLServerConfigurationError.query_plans_xe_session_actions,
+        SQLServerConfigurationError.query_plans_xe_file_read,
+    ):
+        _assert_result(diagnoses, code, Diagnosis.DIAGNOSIS_SUCCESS)
+    assert (
+        QUERY_PLANS_BLOB_FILE
+        in _by_name(diagnoses, SQLServerConfigurationError.query_plans_xe_file_read.value)[0]['diagnosis']
+    )
+
+
+def test_query_plans_xe_session_skipped_when_disabled(instance_minimal_defaults):
+    check = _check(instance_minimal_defaults, _happy_responses(), dbm=True)
+
+    assert not _by_name(_get_diagnoses(check), SQLServerConfigurationError.query_plans_xe_session.value)

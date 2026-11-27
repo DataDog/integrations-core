@@ -26,6 +26,9 @@ if TYPE_CHECKING:
 APT_MIRRORLIST_FILE = '/etc/apt/mirrorlist.main'
 APT_MIRROR = 'http://archive.ubuntu.com/ubuntu'
 
+CMD_PORT_RANGE = range(20000, 32768)
+CMD_PORT_ATTEMPTS = 100
+
 
 @contextmanager
 def disable_integration_before_install(config_file):
@@ -182,7 +185,7 @@ class DockerAgent(AgentInterface):
 
         uses_host_network = not docker_network or docker_network == 'host'
         if uses_host_network:
-            env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
+            env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_cmd_port())
 
         # Disable trace Agent by default (can be overridden by user-provided env_vars)
         env_vars.setdefault(AgentEnvVars.APM_ENABLED, 'false')
@@ -383,16 +386,29 @@ def _get_hostname():
     return socket.gethostname().lower()
 
 
-def _find_free_port():
+def _find_free_cmd_port() -> int:
+    """
+    Pick a free port for the Agent's CMD API, outside the kernel's ephemeral port range.
+
+    The Agent's other processes (process-agent, security-agent, Agent Data Plane) listen on random
+    loopback ports and can start before the core Agent binds its CMD API. Since the Agent runs on
+    the host network, a CMD port from the ephemeral range can be taken by one of them first, and the
+    core Agent then exits with `address already in use`. Linux starts that range at 32768, and macOS
+    and Windows at 49152.
+    """
+    import random
     import socket
     from contextlib import closing
 
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as s:
-        # doesn't have to be reachable
-        s.connect(('10.255.255.255', 1))
-        ip = s.getsockname()[0]
+    for port in random.sample(CMD_PORT_RANGE, CMD_PORT_ATTEMPTS):
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+            try:
+                s.bind(('127.0.0.1', port))
+            except OSError:
+                continue
 
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind((ip, 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]
+            return port
+
+    raise RuntimeError(
+        f'Unable to find a free port for the Agent CMD API between {CMD_PORT_RANGE.start} and {CMD_PORT_RANGE.stop - 1}'
+    )

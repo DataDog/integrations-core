@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+from pathlib import Path
 
 import pytest
 
@@ -13,8 +15,10 @@ from .common import API_METRICS, MOCKED_INSTANCE, OM_METRICS, OM_MOCKED_INSTANCE
 pytestmark = pytest.mark.unit
 
 
-def test_check_mock_weaviate_openmetrics(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('weaviate_openmetrics.txt'))
+def test_check_mock_weaviate_openmetrics(dd_run_check, aggregator, fake_http_response):
+    fake_http_response(
+        OM_MOCKED_INSTANCE['openmetrics_endpoint'], Path(get_fixture_path('weaviate_openmetrics.txt')).read_bytes()
+    )
     check = WeaviateCheck('weaviate', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
@@ -27,8 +31,11 @@ def test_check_mock_weaviate_openmetrics(dd_run_check, aggregator, mock_http_res
     aggregator.assert_service_check('weaviate.openmetrics.health', ServiceCheck.OK)
 
 
-def test_check_mock_weaviate_nodes(aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('weaviate_nodes_api.json'))
+def test_check_mock_weaviate_nodes(aggregator, fake_http_response):
+    fake_http_response(
+        'http://weaviate:8080/v1/nodes',
+        json_data=json.loads(Path(get_fixture_path('weaviate_nodes_api.json')).read_text()),
+    )
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     check._submit_node_metrics()
 
@@ -41,8 +48,8 @@ def test_check_mock_weaviate_nodes(aggregator, mock_http_response):
     aggregator.assert_service_check('weaviate.node.status', ServiceCheck.OK)
 
 
-def test_check_failed_liveness(aggregator, mock_http_response):
-    mock_http_response(status_code=404)
+def test_check_failed_liveness(aggregator, fake_http_response):
+    fake_http_response('http://weaviate:8080/v1/.well-known/live', status_code=404)
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     check._submit_liveness_metrics()
 
@@ -77,8 +84,11 @@ def test_custom_validation(dd_run_check, instance):
             dd_run_check(check)
 
 
-def test_check_mock_weaviate_metadata(datadog_agent, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('weaviate_meta_api.json'))
+def test_check_mock_weaviate_metadata(datadog_agent, fake_http_response):
+    fake_http_response(
+        'http://weaviate:8080/v1/meta',
+        json_data=json.loads(Path(get_fixture_path('weaviate_meta_api.json')).read_text()),
+    )
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     check.check_id = 'test:123'
     check._submit_version_metadata()

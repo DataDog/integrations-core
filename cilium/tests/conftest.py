@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from collections.abc import Callable
+from typing import Any
 
-import mock
 import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
@@ -234,29 +235,17 @@ def operator_instance_use_openmetrics():
     }
 
 
-@pytest.fixture()
-def mock_agent_data():
-    f_name = os.path.join(os.path.dirname(__file__), "fixtures", "agent_metrics.txt")
-    with open(f_name, "r") as f:
+def _register_metrics_fixture(fake_http_response: Callable[..., Any], url: str, fixture_name: str) -> None:
+    with open(os.path.join(os.path.dirname(__file__), "fixtures", fixture_name), "r") as f:
         text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={"Content-Type": "text/plain"}
-        ),
-    ):
-        yield
+    fake_http_response(url, text_data, headers={"Content-Type": "text/plain"})
 
 
 @pytest.fixture()
-def mock_operator_data():
-    f_name = os.path.join(os.path.dirname(__file__), "fixtures", "operator_metrics.txt")
-    with open(f_name, "r") as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={"Content-Type": "text/plain"}
-        ),
-    ):
-        yield
+def mock_agent_data(fake_http_response):
+    _register_metrics_fixture(fake_http_response, AGENT_URL, "agent_metrics.txt")
+
+
+@pytest.fixture()
+def mock_operator_data(fake_http_response):
+    _register_metrics_fixture(fake_http_response, OPERATOR_URL, "operator_metrics.txt")

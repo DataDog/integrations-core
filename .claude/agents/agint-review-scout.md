@@ -1,0 +1,1 @@
+../../.agents/skills/agint-review/agents/scout.md

@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 7.0.0 / 2026-11-25
+
+***Changed***:
+
+* Bump minimum version of base check to 38.11.0. ([#26128](https://github.com/DataDog/integrations-core/pull/26128))
+
+***Added***:
+
+* Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. ([#26128](https://github.com/DataDog/integrations-core/pull/26128))
+
 ## 6.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

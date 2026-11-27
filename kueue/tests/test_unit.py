@@ -317,6 +317,9 @@ def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_ht
 
     expected_tags = [
         'kube_namespace:team-a',
+        'job_scheduler:kueue',
+        'job_scheduler_workload:training-job',
+        'job_scheduler_queue:default',
         'kueue_workload:training-job',
         'kueue_workload_uid:workload-uid',
         'kueue_local_queue:gpu',
@@ -518,6 +521,9 @@ def test_workload_events_evicted_and_finished(dd_run_check, aggregator, instance
 
     expected_evicted_tags = [
         'kube_namespace:team-a',
+        'job_scheduler:kueue',
+        'job_scheduler_workload:training-job',
+        'job_scheduler_queue:default',
         'kueue_workload:training-job',
         'kueue_workload_uid:workload-uid',
         'kueue_local_queue:gpu',

@@ -15,7 +15,6 @@ from typing import TYPE_CHECKING
 import ibm_db
 from cachetools import TTLCache
 
-from datadog_checks.base import to_native_string
 from datadog_checks.base.utils.db.query_metrics import (
     ObfuscationLookup,
     ObfuscationResult,
@@ -29,6 +28,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
 from .connection import Db2Connection, Db2ConnectionError
+from .utils import OBFUSCATION_OPTIONS
 
 if TYPE_CHECKING:
     from .config_models import InstanceConfig
@@ -43,18 +43,6 @@ FULL_QUERY_TEXT_CACHE_SIZE = 10_000
 FULL_QUERY_TEXT_REFRESH_INTERVAL = 3600
 NANOSECONDS_PER_MILLISECOND = 1_000_000
 NANOSECONDS_PER_MICROSECOND = 1_000
-OBFUSCATION_OPTIONS = to_native_string(
-    json.dumps(
-        {
-            'obfuscation_mode': 'obfuscate_and_normalize',
-            'dbms': 'ibm_db2',
-            'return_json_metadata': True,
-            'table_names': True,
-            'collect_commands': True,
-            'collect_comments': True,
-        }
-    )
-)
 
 STATEMENT_COUNTERS_QUERY = """
 /* DDIGNORE */

@@ -6,23 +6,39 @@
 from __future__ import annotations
 
 import dataclasses
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.messages import BatchJob
 from ddev.e2e.agent_images import AgentImageError, get_agent_image
+from ddev.utils.platform import PlatformName
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from ddev.cli.ci.tests.batching.units import TestUnit
-    from ddev.utils.platform import PlatformName
 
 
 class AgentImageResolver(Protocol):
     """Resolves the E2E Agent image for a Python version on a platform."""
 
     def __call__(self, python_version: str, platform: PlatformName) -> str: ...
+
+
+@dataclass(frozen=True)
+class AgentImageOverride:
+    """An `AgentImageResolver` that runs every E2E job on a platform against one given image.
+
+    A platform without an override keeps the image `get_agent_image` maps its Python version to.
+    """
+
+    linux: str | None = None
+    windows: str | None = None
+
+    def __call__(self, python_version: str, platform: PlatformName) -> str:
+        image = {PlatformName.LINUX: self.linux, PlatformName.WINDOWS: self.windows}.get(platform)
+        return image or get_agent_image(python_version, platform)
 
 
 def expand_batch_jobs(

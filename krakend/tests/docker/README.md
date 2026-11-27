@@ -86,7 +86,7 @@ Use the e2e tests to validate the complete setup:
 cd tests/docker
 
 # Launch tests through ddev
-ddev env test --base krakend py3.12-2.10
+ddev env test --base krakend --envs py3.12-2.10
 ```
 
 This command automates the entire testing process:

@@ -1,0 +1,327 @@
+# HELP trtllm_prompt_cached_tokens_total Process-lifetime total prompt tokens served from KV cache. Resets only when the serving process restarts, not when the KV cache is flushed or evicted.
+# TYPE trtllm_prompt_cached_tokens_total counter
+trtllm_prompt_cached_tokens_total{engine_type="pytorch",model_name="qwen3-0.6b"} 34786.0
+# HELP trtllm_request_success_total Count of successfully processed requests.
+# TYPE trtllm_request_success_total counter
+trtllm_request_success_total{engine_type="pytorch",finished_reason="length",model_name="qwen3-0.6b"} 213.0
+# HELP trtllm_prompt_tokens_total Cumulative number of prompt (input) tokens processed.
+# TYPE trtllm_prompt_tokens_total counter
+trtllm_prompt_tokens_total{engine_type="pytorch",model_name="qwen3-0.6b"} 79712.0
+# HELP trtllm_generation_tokens_total Cumulative number of generation (output) tokens produced.
+# TYPE trtllm_generation_tokens_total counter
+trtllm_generation_tokens_total{engine_type="pytorch",model_name="qwen3-0.6b"} 30320.0
+# HELP trtllm_kv_cache_missed_blocks_total Cumulative number of KV cache blocks missed (cache misses)
+# TYPE trtllm_kv_cache_missed_blocks_total counter
+trtllm_kv_cache_missed_blocks_total{engine_type="pytorch",model_name="qwen3-0.6b"} 1423.0
+# HELP trtllm_kv_cache_iter_missed_blocks_total Total missed KV cache blocks (context phase)
+# TYPE trtllm_kv_cache_iter_missed_blocks_total counter
+trtllm_kv_cache_iter_missed_blocks_total{engine_type="pytorch",model_name="qwen3-0.6b"} 90205.0
+# HELP trtllm_kv_cache_reused_blocks_total Cumulative number of KV cache blocks reused (cache hits)
+# TYPE trtllm_kv_cache_reused_blocks_total counter
+trtllm_kv_cache_reused_blocks_total{engine_type="pytorch",model_name="qwen3-0.6b"} 1333.0
+# HELP trtllm_kv_cache_iter_reused_blocks_total Total reused KV cache blocks (full + partial)
+# TYPE trtllm_kv_cache_iter_reused_blocks_total counter
+trtllm_kv_cache_iter_reused_blocks_total{engine_type="pytorch",model_name="qwen3-0.6b"} 1333.0
+# HELP trtllm_kv_cache_iter_full_reused_blocks_total Total fully reused KV cache blocks
+# TYPE trtllm_kv_cache_iter_full_reused_blocks_total counter
+trtllm_kv_cache_iter_full_reused_blocks_total{engine_type="pytorch",model_name="qwen3-0.6b"} 1140.0
+# HELP trtllm_kv_cache_iter_partial_reused_blocks_total Total partially reused KV cache blocks
+# TYPE trtllm_kv_cache_iter_partial_reused_blocks_total counter
+trtllm_kv_cache_iter_partial_reused_blocks_total{engine_type="pytorch",model_name="qwen3-0.6b"} 193.0
+# HELP trtllm_kv_cache_intra_device_copy_bytes_total Total bytes copied within GPU (intra-device block copies)
+# TYPE trtllm_kv_cache_intra_device_copy_bytes_total counter
+trtllm_kv_cache_intra_device_copy_bytes_total{engine_type="pytorch",model_name="qwen3-0.6b"} 2.695168e+07
+# HELP trtllm_kv_cache_gen_alloc_blocks_total Total blocks allocated during generation phase
+# TYPE trtllm_kv_cache_gen_alloc_blocks_total counter
+trtllm_kv_cache_gen_alloc_blocks_total{engine_type="pytorch",model_name="qwen3-0.6b"} 972.0
+# HELP trtllm_num_requests_completed_total Total number of completed requests across iterations
+# TYPE trtllm_num_requests_completed_total counter
+trtllm_num_requests_completed_total{engine_type="pytorch",model_name="qwen3-0.6b"} 213.0
+# HELP trtllm_e2e_request_latency_seconds Histogram of end to end request latency in seconds.
+# TYPE trtllm_e2e_request_latency_seconds histogram
+trtllm_e2e_request_latency_seconds_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 687.1026990000391
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="0.3",model_name="qwen3-0.6b"} 0.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="0.5",model_name="qwen3-0.6b"} 5.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="0.8",model_name="qwen3-0.6b"} 17.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="1.0",model_name="qwen3-0.6b"} 23.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="1.5",model_name="qwen3-0.6b"} 45.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="2.0",model_name="qwen3-0.6b"} 62.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="2.5",model_name="qwen3-0.6b"} 76.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="5.0",model_name="qwen3-0.6b"} 180.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="10.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="15.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="20.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="30.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="40.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="50.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="60.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="120.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="240.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="480.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="960.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="1920.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="7680.0",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_bucket{engine_type="pytorch",le="+Inf",model_name="qwen3-0.6b"} 213.0
+trtllm_e2e_request_latency_seconds_count{engine_type="pytorch",model_name="qwen3-0.6b"} 213.0
+# HELP trtllm_time_to_first_token_seconds Histogram of time to first token in seconds.
+# TYPE trtllm_time_to_first_token_seconds histogram
+trtllm_time_to_first_token_seconds_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 13.879548999975668
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.001",model_name="qwen3-0.6b"} 0.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.005",model_name="qwen3-0.6b"} 0.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.01",model_name="qwen3-0.6b"} 0.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.02",model_name="qwen3-0.6b"} 0.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.04",model_name="qwen3-0.6b"} 0.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.06",model_name="qwen3-0.6b"} 33.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.08",model_name="qwen3-0.6b"} 205.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.1",model_name="qwen3-0.6b"} 210.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.25",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.5",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="0.75",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="1.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="2.5",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="5.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="7.5",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="10.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="20.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="40.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="80.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="160.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="640.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="2560.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_bucket{engine_type="pytorch",le="+Inf",model_name="qwen3-0.6b"} 213.0
+trtllm_time_to_first_token_seconds_count{engine_type="pytorch",model_name="qwen3-0.6b"} 213.0
+# HELP trtllm_time_per_output_token_seconds Histogram of time per output token in seconds.
+# TYPE trtllm_time_per_output_token_seconds histogram
+trtllm_time_per_output_token_seconds_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 4.759810273882749
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.01",model_name="qwen3-0.6b"} 0.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.025",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.05",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.075",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.1",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.15",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.2",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.3",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.4",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.5",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="0.75",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="1.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="2.5",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="5.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="7.5",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="10.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="20.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="40.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="80.0",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_bucket{engine_type="pytorch",le="+Inf",model_name="qwen3-0.6b"} 213.0
+trtllm_time_per_output_token_seconds_count{engine_type="pytorch",model_name="qwen3-0.6b"} 213.0
+# HELP trtllm_request_queue_time_seconds Histogram of time spent in WAITING phase for request.
+# TYPE trtllm_request_queue_time_seconds histogram
+trtllm_request_queue_time_seconds_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 3.785309000129928
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="0.3",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="0.5",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="0.8",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="1.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="1.5",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="2.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="2.5",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="5.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="10.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="15.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="20.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="30.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="40.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="50.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="60.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="120.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="240.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="480.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="960.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="1920.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="7680.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_bucket{engine_type="pytorch",le="+Inf",model_name="qwen3-0.6b"} 213.0
+trtllm_request_queue_time_seconds_count{engine_type="pytorch",model_name="qwen3-0.6b"} 213.0
+# HELP trtllm_request_prefill_time_seconds Histogram of prefill (context) phase duration in seconds (first_token_time - first_scheduled_time).
+# TYPE trtllm_request_prefill_time_seconds histogram
+trtllm_request_prefill_time_seconds_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 10.09423999984574
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="0.001",model_name="qwen3-0.6b"} 0.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="0.005",model_name="qwen3-0.6b"} 0.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="0.01",model_name="qwen3-0.6b"} 0.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="0.025",model_name="qwen3-0.6b"} 0.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="0.05",model_name="qwen3-0.6b"} 175.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="0.1",model_name="qwen3-0.6b"} 212.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="0.25",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="0.5",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="1.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="2.5",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="5.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="10.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="20.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="40.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="80.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="160.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="640.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="2560.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_bucket{engine_type="pytorch",le="+Inf",model_name="qwen3-0.6b"} 213.0
+trtllm_request_prefill_time_seconds_count{engine_type="pytorch",model_name="qwen3-0.6b"} 213.0
+# HELP trtllm_request_decode_time_seconds Histogram of decode (generation) phase duration in seconds (last_token_time - first_token_time).
+# TYPE trtllm_request_decode_time_seconds histogram
+trtllm_request_decode_time_seconds_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 673.2231500000635
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="0.3",model_name="qwen3-0.6b"} 0.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="0.5",model_name="qwen3-0.6b"} 7.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="0.8",model_name="qwen3-0.6b"} 18.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="1.0",model_name="qwen3-0.6b"} 23.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="1.5",model_name="qwen3-0.6b"} 46.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="2.0",model_name="qwen3-0.6b"} 64.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="2.5",model_name="qwen3-0.6b"} 79.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="5.0",model_name="qwen3-0.6b"} 183.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="10.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="15.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="20.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="30.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="40.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="50.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="60.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="120.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="240.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="480.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="960.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="1920.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="7680.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_bucket{engine_type="pytorch",le="+Inf",model_name="qwen3-0.6b"} 213.0
+trtllm_request_decode_time_seconds_count{engine_type="pytorch",model_name="qwen3-0.6b"} 213.0
+# HELP trtllm_request_inference_time_seconds Histogram of total inference duration in seconds (last_token_time - first_scheduled_time).
+# TYPE trtllm_request_inference_time_seconds histogram
+trtllm_request_inference_time_seconds_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 683.3173899999092
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="0.3",model_name="qwen3-0.6b"} 0.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="0.5",model_name="qwen3-0.6b"} 5.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="0.8",model_name="qwen3-0.6b"} 18.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="1.0",model_name="qwen3-0.6b"} 23.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="1.5",model_name="qwen3-0.6b"} 45.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="2.0",model_name="qwen3-0.6b"} 62.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="2.5",model_name="qwen3-0.6b"} 76.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="5.0",model_name="qwen3-0.6b"} 180.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="10.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="15.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="20.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="30.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="40.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="50.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="60.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="120.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="240.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="480.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="960.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="1920.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="7680.0",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_bucket{engine_type="pytorch",le="+Inf",model_name="qwen3-0.6b"} 213.0
+trtllm_request_inference_time_seconds_count{engine_type="pytorch",model_name="qwen3-0.6b"} 213.0
+# HELP trtllm_prompt_cached_tokens_per_request Histogram of cached prompt tokens per request.
+# TYPE trtllm_prompt_cached_tokens_per_request histogram
+trtllm_prompt_cached_tokens_per_request_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 34786.0
+trtllm_prompt_cached_tokens_per_request_bucket{engine_type="pytorch",le="0.0",model_name="qwen3-0.6b"} 19.0
+trtllm_prompt_cached_tokens_per_request_bucket{engine_type="pytorch",le="64.0",model_name="qwen3-0.6b"} 105.0
+trtllm_prompt_cached_tokens_per_request_bucket{engine_type="pytorch",le="128.0",model_name="qwen3-0.6b"} 105.0
+trtllm_prompt_cached_tokens_per_request_bucket{engine_type="pytorch",le="256.0",model_name="qwen3-0.6b"} 105.0
+trtllm_prompt_cached_tokens_per_request_bucket{engine_type="pytorch",le="512.0",model_name="qwen3-0.6b"} 213.0
+trtllm_prompt_cached_tokens_per_request_bucket{engine_type="pytorch",le="1024.0",model_name="qwen3-0.6b"} 213.0
+trtllm_prompt_cached_tokens_per_request_bucket{engine_type="pytorch",le="2048.0",model_name="qwen3-0.6b"} 213.0
+trtllm_prompt_cached_tokens_per_request_bucket{engine_type="pytorch",le="4096.0",model_name="qwen3-0.6b"} 213.0
+trtllm_prompt_cached_tokens_per_request_bucket{engine_type="pytorch",le="8192.0",model_name="qwen3-0.6b"} 213.0
+trtllm_prompt_cached_tokens_per_request_bucket{engine_type="pytorch",le="+Inf",model_name="qwen3-0.6b"} 213.0
+trtllm_prompt_cached_tokens_per_request_count{engine_type="pytorch",model_name="qwen3-0.6b"} 213.0
+# HELP trtllm_prefill_batch_tokens Histogram of total context tokens per iteration.
+# TYPE trtllm_prefill_batch_tokens histogram
+trtllm_prefill_batch_tokens_sum{engine_type="pytorch",model_name="qwen3-0.6b"} 47864.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="64.0",model_name="qwen3-0.6b"} 19.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="128.0",model_name="qwen3-0.6b"} 54.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="256.0",model_name="qwen3-0.6b"} 123.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="512.0",model_name="qwen3-0.6b"} 201.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="1024.0",model_name="qwen3-0.6b"} 204.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="2048.0",model_name="qwen3-0.6b"} 204.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="4096.0",model_name="qwen3-0.6b"} 205.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="8192.0",model_name="qwen3-0.6b"} 205.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="16384.0",model_name="qwen3-0.6b"} 205.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="32768.0",model_name="qwen3-0.6b"} 205.0
+trtllm_prefill_batch_tokens_bucket{engine_type="pytorch",le="+Inf",model_name="qwen3-0.6b"} 205.0
+trtllm_prefill_batch_tokens_count{engine_type="pytorch",model_name="qwen3-0.6b"} 205.0
+# HELP trtllm_model_config_info Model configuration info
+# TYPE trtllm_model_config_info gauge
+trtllm_model_config_info{dtype="auto",engine_type="pytorch",gpu_type="NVIDIA H100 80GB HBM3",model="/hf/hub/models--Qwen--Qwen3-0.6B/snapshots/c1899de289a04d12100db370d81485cdf75e47ca",model_name="qwen3-0.6b",pid="1",quantization="none",served_model_name="qwen3-0.6b"} 1.0
+# HELP trtllm_parallel_config_info Parallelism configuration info
+# TYPE trtllm_parallel_config_info gauge
+trtllm_parallel_config_info{context_parallel_size="1",engine_type="pytorch",gpu_count="1",model_name="qwen3-0.6b",pid="1",pipeline_parallel_size="1",tensor_parallel_size="1"} 1.0
+# HELP trtllm_kv_cache_config_info KV cache configuration info
+# TYPE trtllm_kv_cache_config_info gauge
+trtllm_kv_cache_config_info{cache_dtype="auto",enable_block_reuse="True",enable_partial_reuse="True",engine_type="pytorch",free_gpu_memory_fraction="0.25",model_name="qwen3-0.6b",pid="1"} 1.0
+# HELP trtllm_num_requests_running Number of active requests
+# TYPE trtllm_num_requests_running gauge
+trtllm_num_requests_running{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 16.0
+# HELP trtllm_num_requests_waiting Number of queued requests
+# TYPE trtllm_num_requests_waiting gauge
+trtllm_num_requests_waiting{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_max_num_active_requests Maximum number of active requests
+# TYPE trtllm_max_num_active_requests gauge
+trtllm_max_num_active_requests{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 2048.0
+# HELP trtllm_iteration_latency_seconds Iteration latency in seconds
+# TYPE trtllm_iteration_latency_seconds gauge
+trtllm_iteration_latency_seconds{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.04489707946777344
+# HELP trtllm_gpu_memory_usage_bytes GPU memory usage in bytes
+# TYPE trtllm_gpu_memory_usage_bytes gauge
+trtllm_gpu_memory_usage_bytes{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 7.0751551488e+10
+# HELP trtllm_cpu_memory_usage_bytes CPU memory usage in bytes
+# TYPE trtllm_cpu_memory_usage_bytes gauge
+trtllm_cpu_memory_usage_bytes{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_pinned_memory_usage_bytes Pinned memory usage in bytes
+# TYPE trtllm_pinned_memory_usage_bytes gauge
+trtllm_pinned_memory_usage_bytes{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_max_batch_size_static Static maximum batch size
+# TYPE trtllm_max_batch_size_static gauge
+trtllm_max_batch_size_static{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_max_batch_size_runtime Runtime maximum batch size
+# TYPE trtllm_max_batch_size_runtime gauge
+trtllm_max_batch_size_runtime{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_max_num_tokens_runtime Runtime maximum number of tokens
+# TYPE trtllm_max_num_tokens_runtime gauge
+trtllm_max_num_tokens_runtime{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_kv_cache_hit_rate KV cache hit rate
+# TYPE trtllm_kv_cache_hit_rate gauge
+trtllm_kv_cache_hit_rate{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.48367199301719666
+# HELP trtllm_kv_cache_utilization KV cache utilization
+# TYPE trtllm_kv_cache_utilization gauge
+trtllm_kv_cache_utilization{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.10991544965411222
+# HELP trtllm_kv_cache_max_blocks Maximum number of KV cache blocks
+# TYPE trtllm_kv_cache_max_blocks gauge
+trtllm_kv_cache_max_blocks{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 1301.0
+# HELP trtllm_kv_cache_free_blocks Number of free KV cache blocks
+# TYPE trtllm_kv_cache_free_blocks gauge
+trtllm_kv_cache_free_blocks{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 1158.0
+# HELP trtllm_kv_cache_used_blocks Number of used KV cache blocks
+# TYPE trtllm_kv_cache_used_blocks gauge
+trtllm_kv_cache_used_blocks{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 143.0
+# HELP trtllm_kv_cache_tokens_per_block Number of tokens per KV cache block
+# TYPE trtllm_kv_cache_tokens_per_block gauge
+trtllm_kv_cache_tokens_per_block{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 32.0
+# HELP trtllm_num_context_requests Number of context (prefill) requests
+# TYPE trtllm_num_context_requests gauge
+trtllm_num_context_requests{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_num_generation_requests Number of generation (decode) requests
+# TYPE trtllm_num_generation_requests gauge
+trtllm_num_generation_requests{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 16.0
+# HELP trtllm_num_paused_requests Number of paused requests
+# TYPE trtllm_num_paused_requests gauge
+trtllm_num_paused_requests{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_num_scheduled_requests Number of scheduled requests
+# TYPE trtllm_num_scheduled_requests gauge
+trtllm_num_scheduled_requests{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 16.0
+# HELP trtllm_total_context_tokens Total number of context tokens
+# TYPE trtllm_total_context_tokens gauge
+trtllm_total_context_tokens{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_avg_decoded_tokens_per_iter Average number of decoded tokens per iteration
+# TYPE trtllm_avg_decoded_tokens_per_iter gauge
+trtllm_avg_decoded_tokens_per_iter{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_prefill_batch_occupancy Fraction of max active slots occupied by context requests.
+# TYPE trtllm_prefill_batch_occupancy gauge
+trtllm_prefill_batch_occupancy{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.0
+# HELP trtllm_kv_cache_iter_reuse_rate Per-iteration KV cache block reuse rate
+# TYPE trtllm_kv_cache_iter_reuse_rate gauge
+trtllm_kv_cache_iter_reuse_rate{engine_type="pytorch",model_name="qwen3-0.6b",pid="1"} 0.16666666666666666

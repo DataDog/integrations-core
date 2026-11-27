@@ -1,0 +1,119 @@
+# =============================================================================
+# Agent registry for agint-review
+# =============================================================================
+#
+# This file is the source of truth for which review agents run on which files.
+# The setup script (scripts/agint-review-setup) reads it and produces the plan
+# that the orchestrator follows for the rest of the review. Edit this file —
+# not SKILL.md — when adding, removing, or changing the trigger of an agent.
+#
+# Which agents run
+# ----------------
+#
+#   PR touches                                            Agents
+#   an integration, datadog_checks_base, datadog_checks_dev   conventions, integrations, security
+#   datadog_checks_downloader                             conventions, security
+#   ddev/, .ddev/                                         conventions, ddev
+#   .github/workflows/, .github/actions/, .github/chainguard/ conventions, github-actions
+#   <integration>/assets/logs/                            conventions, logs
+#   anything else (.builders/, docs/, root files)         conventions
+#
+# How an agent matches files
+# --------------------------
+#
+# Each agent has one or both of:
+#
+#   matches = "all_files"
+#        Matches every changed file. Used by `conventions`, which runs on
+#        every PR on a repo with an AGENTS.md (setup skips it when the target
+#        branch has none at all).
+#
+#   matches = "integration_roots"
+#        Matches every changed file under a real Datadog integration root.
+#        Roots are resolved by the script from the head worktree:
+#          - integrations-core: every top-level dir not marked false in
+#            `[overrides.is-integration]` of `.ddev/config.toml` (this is
+#            how new integrations like krakend and lustre work without a
+#            manifest.json). datadog_checks_base and datadog_checks_dev are
+#            marked false there, so agents that review them list them in
+#            `globs` too.
+#          - other repos: each directory containing a manifest.json.
+#
+#   globs = [...]
+#        Matches files against the globs (`**` is any number of path
+#        components, `*` is one component). Combined with
+#        `matches = "integration_roots"`, a file matching either is matched.
+#
+#   exclude_globs = [...]
+#        Optional. Same glob syntax as `globs`. A file matching any of them is
+#        never the agent's, whatever `matches` and `globs` say. Used to hand a
+#        path to a more specific agent: `integrations` and `security` exclude
+#        `**/assets/logs/**`, which `logs` reviews.
+#
+# An agent runs when it matches at least one changed file, and reviews only
+# the files it matched: setup writes its filtered diff to
+# <review_dir>/diffs/<name>.diff.
+#
+# Aspects
+# -------
+#
+# Every agent declares an `aspect` keyword. Users can pass `--aspect a,b,c`
+# to the setup script to restrict the run to specific reviewers. The
+# special keyword `all` (the default) runs everything that matches. A run
+# narrowed by aspects is saved but never posted.
+#
+# When you change anything observable here (add an agent, change a glob,
+# rename an aspect), update scripts/README.md, SKILL.md and README.md to
+# match.
+# =============================================================================
+
+[[agents]]
+name = "conventions"
+aspect = "conventions"
+matches = "all_files"
+description = "The repository's AGENTS.md files, cited by file and section"
+
+[[agents]]
+name = "integrations"
+aspect = "integrations"
+matches = "integration_roots"
+globs = ["datadog_checks_base/**", "datadog_checks_dev/**"]
+# The `logs` agent reviews log pipelines.
+exclude_globs = ["**/assets/logs/**"]
+description = "Integration checks, metrics, config spec, compatibility, persistent cache, tests; datadog_checks_base and datadog_checks_dev"
+
+[[agents]]
+name = "security"
+aspect = "security"
+matches = "integration_roots"
+# datadog_checks_downloader ships with the Agent and does the TUF and in-toto
+# verification of integration wheels.
+globs = ["datadog_checks_base/**", "datadog_checks_dev/**", "datadog_checks_downloader/**"]
+# The `logs` agent reviews log pipelines.
+exclude_globs = ["**/assets/logs/**"]
+description = "Untrusted product data, credentials, TLS, commands, parsing, files and queries"
+
+[[agents]]
+name = "ddev"
+aspect = "ddev"
+# `ddev/**` is the source of the ddev CLI tool itself in integrations-core.
+# `.ddev/**` is the repo config only ddev reads: `.ddev/config.toml` (through
+# ddev/src/ddev/repo/config.py) and `.ddev/dispatcher.toml` (through
+# `ddev ci dispatch-tests`).
+globs = ["ddev/**", ".ddev/**"]
+description = "ddev CLI: imports, output, commands, validations, CLI compatibility, tests"
+
+[[agents]]
+name = "github-actions"
+aspect = "github-actions"
+# `.github/chainguard/` holds the octo-sts trust policies: a policy change
+# alone can widen who gets a write token.
+globs = [".github/workflows/**", ".github/actions/**", ".github/chainguard/**"]
+description = "GitHub workflows, local actions and octo-sts trust policies, including callers in other repos"
+
+[[agents]]
+name = "logs"
+aspect = "logs"
+# The log pipeline `<app_id>.yaml` and its tests `<app_id>_tests.yaml`.
+globs = ["**/assets/logs/**"]
+description = "Log pipelines and their tests against the Logs Backend review guide; the config's and README's log source"

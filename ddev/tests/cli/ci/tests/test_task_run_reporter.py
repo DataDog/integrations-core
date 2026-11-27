@@ -8,7 +8,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import httpx
 import pytest
@@ -73,6 +73,7 @@ def _reporter(
     pr_number: int | None = PR_NUMBER,
     handler: logging.Handler | None = None,
     clock: Callable[[], datetime] | None = None,
+    started_at: datetime | None = None,
     monitor: ComponentMonitor | None = None,
 ) -> TaskRunReporter:
     return TaskRunReporter(
@@ -81,6 +82,7 @@ def _reporter(
         RunReporterOptions(owner=OWNER, repo=REPO, pr_number=pr_number),
         monitor=monitor or make_monitor('run-reporter', handler=handler),
         clock=clock,
+        started_at=started_at,
     )
 
 
@@ -158,6 +160,22 @@ def test_created_body_carries_the_marker():
     asyncio.run(_reporter(client).process_message(_update(0)))
 
     assert client.last_call("create_issue_comment").kwargs["body"].startswith(COMMENT_MARKER)
+
+
+@pytest.mark.parametrize("stopped", [False, True], ids=["finished", "stopped"])
+async def test_the_terminal_report_says_how_long_the_run_took_since_it_started(stopped: bool):
+    started_at = datetime(2026, 1, 2, 3, 0, 0, tzinfo=timezone.utc)
+    client = FakeAsyncGitHubClient()
+    reporter = _reporter(client, clock=lambda: started_at + timedelta(minutes=18, seconds=33), started_at=started_at)
+
+    if stopped:
+        await reporter.process_message(_update(1))
+        await reporter.publish_shutdown(_shutdown_request(ShutdownKind.CANCELLED))
+    else:
+        await reporter.process_message(_update(1, done=True))
+
+    assert reporter.latest_body is not None
+    assert "⏱️ 18m 33s" in reporter.latest_body
 
 
 @pytest.mark.parametrize(
@@ -843,10 +861,11 @@ def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypat
     message = _tiered_update(1, done=True)
     # One render instant shared with the reporter, so the bodies below and the ones it sends match.
     now = datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc)
+    elapsed = timedelta(minutes=5)
     rendered = [
-        pr_comment.render_comment(message.progress, now=now),
-        pr_comment.render_compact_comment(message.progress, now=now),
-        pr_comment.render_truncated_comment(message.progress, now=now),
+        pr_comment.render_comment(message.progress, now=now, elapsed=elapsed),
+        pr_comment.render_compact_comment(message.progress, now=now, elapsed=elapsed),
+        pr_comment.render_truncated_comment(message.progress, now=now, elapsed=elapsed),
     ]
     # A tier that renders the same bytes as the one above it is never sent twice, and one that
     # renders larger is not worth a round trip, so neither appears in what the reporter attempts.
@@ -872,7 +891,7 @@ def test_the_ladder_lands_when_github_is_stricter_than_our_measurement(monkeypat
         return await original(owner, repo, issue_number, body, timeout)
 
     monkeypatch.setattr(client, "create_issue_comment", stricter_github)
-    reporter = _reporter(client, clock=lambda: now)
+    reporter = _reporter(client, clock=lambda: now, started_at=now - elapsed)
 
     asyncio.run(reporter.process_message(message))
 

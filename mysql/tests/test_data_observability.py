@@ -253,7 +253,7 @@ def test_closed_connection_propagates_and_cron_query_is_retried(instance_basic, 
     check.data_observability._db = recovered_conn
     check.data_observability.run_job()
 
-    assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
+    assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 2
     assert [call.args[0] for call in recovered_cursor.execute.call_args_list] == [
         'USE `test_db`',
         CRON_QUERY['query'],
@@ -729,3 +729,154 @@ def test_cancelled_job_aborts_query_before_execution(instance_basic):
         job._execute_single_query(conn, job._scheduled_queries[0].query)
 
     cursor.execute.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'code,kind', [(3024, 'statement_timeout'), (1969, 'statement_timeout'), (1205, 'lock_timeout'), (1146, 'sql_error')]
+)
+def test_query_errors_include_sql_and_classification(instance_basic, aggregator, code, kind):
+    queries = deepcopy(MULTI_QUERIES)
+    queries[0]['query'] = 'SELECT COUNT(*) AS dd_abc_42, SUM(n) AS dd_def_43 FROM orders'
+    conn, cursor = _make_mock_conn()
+    cursor.execute.side_effect = [None, pymysql.err.OperationalError(code, 'query failed'), None]
+    with patch.object(MySql, 'event_platform_event') as events:
+        _setup_and_run(instance_basic, queries=queries, mock_conn=conn)
+    payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
+    assert len(payloads) == 2
+    assert payloads[0]['error_kind'] == kind
+    assert payloads[0]['error_code'] == str(code)
+    assert payloads[0]['timeout_ms'] == 30000
+    assert payloads[0]['columns'] == []
+    assert payloads[0]['query'] == queries[0]['query']
+    assert payloads[1]['status'] == 'success'
+    assert f'error_kind:{kind}' in aggregator.metrics('dd.mysql.data_observability.query_errors')[0].tags
+
+
+def _run_attempts(check, monkeypatch, attempts):
+    """Run the job once per (elapsed seconds, connection or error) attempt and return the event payloads."""
+    current_time = [1000.0]
+    monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
+    check.data_observability._get_db_connection = MagicMock(side_effect=[outcome for _, outcome in attempts])
+    with patch.object(MySql, 'event_platform_event') as events:
+        for elapsed, outcome in attempts:
+            current_time[0] = 1000.0 + elapsed
+            if isinstance(outcome, Exception):
+                with pytest.raises(type(outcome)):
+                    check.data_observability.run_job()
+            else:
+                check.data_observability.run_job()
+    return [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
+
+
+def test_unchanged_connection_error_is_reported_once_per_query(instance_basic, aggregator, monkeypatch):
+    check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
+    refused = pymysql.err.OperationalError(2003, 'refused')
+
+    payloads = _run_attempts(check, monkeypatch, [(0, refused), (10, refused), (20, refused)])
+
+    assert [p['query'] for p in payloads] == [q['query'] for q in MULTI_QUERIES]
+    assert all(p['error_kind'] == 'connection_error' for p in payloads)
+    # Every attempt is still counted.
+    assert len(aggregator.metrics('dd.mysql.data_observability.query_errors')) == 6
+
+
+@pytest.mark.parametrize(
+    'second_outcome, expected',
+    [
+        (
+            pymysql.err.OperationalError(1045, 'access denied'),
+            [('error', '2003'), ('error', '2003'), ('error', '1045'), ('error', '1045')],
+        ),
+        (None, [('error', '2003'), ('error', '2003'), ('success', None), ('success', None)]),
+    ],
+    ids=['different_error', 'recovered'],
+)
+def test_connection_error_is_reported_again_after_a_change(instance_basic, monkeypatch, second_outcome, expected):
+    check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
+    refused = pymysql.err.OperationalError(2003, 'refused')
+    if second_outcome is None:
+        second_outcome, _ = _make_mock_conn()
+
+    payloads = _run_attempts(check, monkeypatch, [(0, refused), (200, second_outcome), (400, refused)])
+
+    assert [(p['status'], p.get('error_code')) for p in payloads] == expected + [('error', '2003'), ('error', '2003')]
+
+
+def test_one_outage_is_reported_once_per_query_whatever_the_message(instance_basic, monkeypatch):
+    current_time = [1000.0]
+    monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
+    check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
+    lost_conn, cursor = _make_mock_conn(open=False)
+    cursor.execute.side_effect = [None, pymysql.err.OperationalError(2013, 'Lost connection to MySQL server')]
+    attempts = [
+        # The first query loses the connection mid-execution and the second is blocked behind it.
+        lost_conn,
+        # Same code, different phase and message.
+        pymysql.err.OperationalError(2013, 'Lost connection to MySQL server during handshake'),
+        pymysql.err.OperationalError(2003, "Can't connect to MySQL server (111)"),
+        # Same code, different OS error.
+        pymysql.err.OperationalError(2003, "Can't connect to MySQL server (99)"),
+    ]
+    check.data_observability._get_db_connection = MagicMock(side_effect=attempts)
+    with patch.object(MySql, 'event_platform_event') as events:
+        for elapsed in range(len(attempts)):
+            current_time[0] = 1000.0 + elapsed * 10
+            with pytest.raises(pymysql.err.OperationalError):
+                check.data_observability.run_job()
+
+    payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
+    assert [(p['query'], p['error_code']) for p in payloads] == [
+        (MULTI_QUERIES[0]['query'], '2013'),
+        (MULTI_QUERIES[1]['query'], '2013'),
+        (MULTI_QUERIES[0]['query'], '2003'),
+        (MULTI_QUERIES[1]['query'], '2003'),
+    ]
+
+
+def test_connection_error_is_reported_again_after_a_failed_send(instance_basic, monkeypatch):
+    current_time = [1000.0]
+    monkeypatch.setattr('datadog_checks.mysql.data_observability.time.time', lambda: current_time[0])
+    check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
+    check.data_observability._get_db_connection = MagicMock(side_effect=pymysql.err.OperationalError(2003, 'refused'))
+    with patch.object(MySql, 'event_platform_event', side_effect=[RuntimeError('intake'), None, None]) as events:
+        for elapsed in (0, 10):
+            current_time[0] = 1000.0 + elapsed
+            with pytest.raises(pymysql.err.OperationalError):
+                check.data_observability.run_job()
+
+    sent = [json.loads(c.args[0])['query'] for c in _get_do_event_calls(events)]
+    assert sent == [MULTI_QUERIES[0]['query'], MULTI_QUERIES[1]['query'], MULTI_QUERIES[0]['query']]
+
+
+@pytest.mark.parametrize(
+    'error, code',
+    [
+        (pymysql.err.OperationalError(2013, 'lost connection'), '2013'),
+        (pymysql.err.OperationalError('server closed the connection'), None),
+        (pymysql.err.OperationalError(1205, 'Lock wait timeout exceeded'), '1205'),
+        # pymysql's error for a socket that is already closed.
+        (pymysql.err.InterfaceError(0, ''), None),
+    ],
+    ids=['connection_code', 'no_code', 'lock_timeout_code', 'closed_socket'],
+)
+def test_lost_connection_reports_failed_and_unstarted_queries(instance_basic, aggregator, error, code):
+    check = _create_check(instance_basic, queries=deepcopy(MULTI_QUERIES))
+    conn, cursor = _make_mock_conn(open=False)
+    cursor.execute.side_effect = [None, error]
+    check.data_observability._db = conn
+    with patch.object(MySql, 'event_platform_event') as events:
+        with pytest.raises(type(error)):
+            check.data_observability.run_job()
+    payloads = [json.loads(c.args[0]) for c in _get_do_event_calls(events)]
+    assert [p['error'].startswith('Query not executed:') for p in payloads] == [False, True]
+    assert all(p['error_kind'] == 'connection_error' for p in payloads)
+    assert all(p['error_code'] == code for p in payloads)
+    assert len(aggregator.metrics('dd.mysql.data_observability.query_executions')) == 1
+    recovered, recovered_cursor = _make_mock_conn()
+    check.data_observability._db = recovered
+    check.data_observability.run_job()
+    assert [c.args[0] for c in recovered_cursor.execute.call_args_list] == [
+        'USE `test_db`',
+        MULTI_QUERIES[0]['query'],
+        MULTI_QUERIES[1]['query'],
+    ]

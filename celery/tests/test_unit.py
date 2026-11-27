@@ -13,8 +13,9 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .common import METRICS, get_fixture_path
 
 
-def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('flower_metrics.txt'))
+def test_check(dd_run_check, aggregator, instance, fake_http_response):
+    with open(get_fixture_path('flower_metrics.txt'), 'rb') as f:
+        fake_http_response(instance['openmetrics_endpoint'], f.read())
 
     check = CeleryCheck('celery', {}, [instance])
     dd_run_check(check)
@@ -37,14 +38,14 @@ def test_empty_instance(dd_run_check):
 
 
 def test_emits_critical_openemtrics_service_check_when_service_is_down(
-    dd_run_check, aggregator, instance, mock_http_response
+    dd_run_check, aggregator, instance, fake_http_response
 ):
     """
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
-    mock_http_response(status_code=404)
+    fake_http_response(instance['openmetrics_endpoint'], status_code=404)
     check = CeleryCheck("celery", {}, [instance])
-    with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
+    with pytest.raises(Exception, match="HTTPClientStatusError"):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()

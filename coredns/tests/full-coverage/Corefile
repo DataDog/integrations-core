@@ -1,0 +1,69 @@
+# CoreDNS config for the coredns-full evalya fixture. Self-contained: no query
+# leaves the container. workload.py drives every zone at a fixed rate
+# (../README.md, workload plan) and rewrites this file mid-run, appending
+# Corefile.broken and then Corefile.extra to it. The reload plugin picks up each
+# rewrite.
+
+# Test upstream for example.test: template answers, a 60s TTL for the hot
+# names (cache hits) and a 1s TTL for the miss names (always a cache miss).
+.:1053 {
+    template IN A hot.example.test {
+        answer "{{ .Name }} 60 IN A 10.0.0.1"
+    }
+    template IN A miss.example.test {
+        answer "{{ .Name }} 1 IN A 10.0.0.2"
+    }
+    prometheus :9153
+}
+
+# Slow test upstream for slow.test: erratic delays every query 4s, so queries
+# pile up in flight behind forward's max_concurrent (transient state, held).
+.:1054 {
+    erratic {
+        delay 1 4s
+    }
+    prometheus :9153
+}
+
+# cache + forward to the test upstream. cache 30 caps TTLs at 30s, so the hot
+# names' 60s TTL is served from cache for 30s at a time.
+example.test:53 {
+    errors
+    prometheus :9153
+    cache 30
+    forward . 127.0.0.1:1053
+}
+
+# forward to an upstream nothing listens on: SERVFAIL answers, failed health
+# checks and "all upstreams down" (healthcheck_broken) at the query rate.
+dead.test:53 {
+    prometheus :9153
+    cache 30
+    forward . 127.0.0.1:5399 {
+        health_check 1s
+    }
+}
+
+# forward with max_concurrent 2 to the slow upstream: at 2 queries/s about
+# 4 are in flight, so the rest are rejected (forward_max_concurrent_rejects).
+slow.test:53 {
+    prometheus :9153
+    forward . 127.0.0.1:1054 {
+        max_concurrent 2
+    }
+}
+
+# hosts file (3 names, then 6), re-read every 5s.
+hosts.test:53 {
+    prometheus :9153
+    hosts /etc/coredns/hosts {
+        reload 5s
+    }
+}
+
+.:53 {
+    health :8080
+    reload 5s 2s
+    prometheus :9153
+    whoami
+}

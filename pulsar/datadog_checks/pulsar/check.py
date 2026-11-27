@@ -9,6 +9,7 @@ from .metrics import METRIC_MAP
 
 class PulsarCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'pulsar'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 

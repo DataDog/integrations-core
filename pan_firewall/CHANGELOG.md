@@ -2,6 +2,34 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2026-11-25
+
+***Added***:
+
+* Add a direction-free `power.alarm` metric. ([#26134](https://github.com/DataDog/integrations-core/pull/26134))
+
+***Fixed***:
+
+* Stop sending `license.days_left` for expired licenses. ([#26129](https://github.com/DataDog/integrations-core/pull/26129))
+
+## 4.0.0 / 2026-11-04 / Agent 7.86.0
+
+***Removed***:
+
+* Remove the threat log count metric and the `collect_threats` option. Threat logs are still collected by the log integration. ([#25866](https://github.com/DataDog/integrations-core/pull/25866))
+
+## 3.5.0 / 2026-11-02
+
+***Added***:
+
+* Collect HA link counters, BGP and OSPF metrics on firewalls running the Advanced Routing Engine, and the `bgp.peer.prefixes.incoming.accepted` metric. ([#25806](https://github.com/DataDog/integrations-core/pull/25806))
+
+## 3.4.0 / 2026-10-29
+
+***Added***:
+
+* Add metrics and Network Device Monitoring metadata collection from the PAN-OS XML API. ([#25662](https://github.com/DataDog/integrations-core/pull/25662))
+
 ## 3.3.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:

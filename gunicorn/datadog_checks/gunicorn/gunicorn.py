@@ -149,7 +149,8 @@ class GUnicornCheck(AgentCheck):
         master_procs = []
         for p in psutil.process_iter():
             try:
-                if len(p.cmdline()) > 0 and p.cmdline()[0] == master_name:
+                cmdline = p.cmdline()
+                if cmdline and cmdline[0] == master_name:
                     master_procs.append(p)
             except psutil.NoSuchProcess as e:
                 self.log.debug("Process %s (pid=%s) disappeared while scanning", e.name or "unknown", e.pid)

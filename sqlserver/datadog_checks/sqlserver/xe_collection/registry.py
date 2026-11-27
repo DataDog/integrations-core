@@ -2,8 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.base import is_affirmative
+
 from .error_events import ErrorEventsHandler
 from .query_completion_events import QueryCompletionEventsHandler
+from .query_plan_events import QueryPlanEventsHandler
 
 
 def get_xe_session_handlers(check, config):
@@ -24,6 +27,11 @@ def get_xe_session_handlers(check, config):
     if query_errors_config.get('enabled', False):
         handlers.append(ErrorEventsHandler(check, config))
         check.log.debug("Query errors XE session handler enabled")
+
+    query_plans_config = xe_config.get('query_plans') or {}
+    if is_affirmative(query_plans_config.get('enabled', False)):
+        handlers.append(QueryPlanEventsHandler(check, config))
+        check.log.debug("Query plans XE session handler enabled")
 
     check.log.info("Created %d enabled XE session handlers", len(handlers))
     return handlers

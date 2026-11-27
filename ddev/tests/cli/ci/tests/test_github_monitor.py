@@ -34,7 +34,13 @@ NOW = 1_700_000_000.0
 RUN_PATH = '/repos/o/r/actions/runs/42'
 SIGNATURE = 'sig-secret'
 PIPELINE = {'ci.pipeline.id': '12345'}
-RUN_PAYLOAD = {'id': 42, 'status': 'completed', 'conclusion': 'success', 'html_url': 'https://github.com/o/r/runs/42'}
+RUN_PAYLOAD = {
+    'id': 42,
+    'status': 'completed',
+    'conclusion': 'success',
+    'html_url': 'https://github.com/o/r/runs/42',
+    'display_title': 'Test Batch',
+}
 
 
 def monitored(

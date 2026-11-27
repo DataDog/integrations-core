@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 1.1.0 / 2026-10-01
+## 1.2.0 / 2026-11-25
+
+***Added***:
+
+* Add an `orchestrator_api_key` option to authenticate to the Orchestrator with an API key. ([#25536](https://github.com/DataDog/integrations-core/pull/25536))
+* Add failover support with Agent High Availability feature. ([#25896](https://github.com/DataDog/integrations-core/pull/25896))
+
+***Fixed***:
+
+* Report `orchestrator.reachability` as 0 when the Orchestrator fails to return the appliance list. ([#25536](https://github.com/DataDog/integrations-core/pull/25536))
+* Avoid resending outstanding alarms as events when the alarm cache is empty, such as on a first run or after an HA failover. ([#25896](https://github.com/DataDog/integrations-core/pull/25896))
+* Use `hpe-aruba-edgeconnect` as the log source in the example configuration so logs match the integration log pipeline. ([#25980](https://github.com/DataDog/integrations-core/pull/25980))
+
+## 1.1.0 / 2026-10-01 / Agent 7.85.0
 
 ***Added***:
 

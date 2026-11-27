@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 3.5.0 / 2026-10-01
+## 3.6.1 / 2026-11-25
+
+***Fixed***:
+
+* Add the `collect_histograms_as_distributions` option to the configuration example and config models. ([#25590](https://github.com/DataDog/integrations-core/pull/25590))
+
+## 3.6.0 / 2026-10-29 / Agent 7.86.0
+
+***Added***:
+
+* Collect the vLLM NIXL KV cache transfer metrics. ([#25742](https://github.com/DataDog/integrations-core/pull/25742))
+
+## 3.5.0 / 2026-10-01 / Agent 7.85.0
 
 ***Added***:
 

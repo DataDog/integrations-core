@@ -10,6 +10,7 @@ from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 class ArgoRolloutsCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'argo_rollouts'
+    AGNOSTIC_HTTP_CLIENT = True
 
     def get_default_config(self):
         return {

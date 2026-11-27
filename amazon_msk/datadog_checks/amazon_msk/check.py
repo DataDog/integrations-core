@@ -27,6 +27,7 @@ except ImportError:
 
 class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'aws.msk'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 

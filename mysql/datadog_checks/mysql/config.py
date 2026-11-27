@@ -23,10 +23,19 @@ class MySQLConfig(object):
         self.defaults_file = instance.get('defaults_file', '')
         self.user = instance.get('username', instance.get('user', ''))
         self.password = str(instance.get('password', instance.get('pass', '')))
+        # Only `enabled` is documented, the cache settings are kept configurable for support cases.
+        collect_raw_query_statement_config: dict = instance.get('collect_raw_query_statement', {}) or {}
+        self.collect_raw_query_statement = {
+            "enabled": is_affirmative(collect_raw_query_statement_config.get('enabled', False)),
+            "cache_max_size": int(collect_raw_query_statement_config.get('cache_max_size', 10000)),
+            "samples_per_hour_per_query": int(collect_raw_query_statement_config.get('samples_per_hour_per_query', 1)),
+        }
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
+        if self.collect_raw_query_statement["enabled"]:
+            self.tags.append("raw_query_statement:enabled")
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
         self.disable_innodb_metrics = is_affirmative(self.options.get('disable_innodb_metrics', False))
         self.replication_channel = self.options.get('replication_channel')

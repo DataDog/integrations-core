@@ -134,6 +134,18 @@ sudo lctl changelog_register
 sudo lctl get_param mdd.*.changelog_users
 ```
 
+## Uninstallation
+
+To uninstall this integration from your Agent, run the following command:
+
+```bash
+datadog-agent integration remove datadog-lustre
+```
+
+Alternatively, to disable the integration, rename the `lustre.d/conf.yaml` file to `lustre.d/conf.yaml.example`.
+
+## Support
+
 Need help? Contact [Datadog support][8].
 
 [1]: https://www.lustre.org/

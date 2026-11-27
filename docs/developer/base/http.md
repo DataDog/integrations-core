@@ -2,8 +2,10 @@
 
 -----
 
-Whenever you need to make HTTP requests, the base class provides a convenience member that has the same interface as the
-popular [requests][requests-github] library and ensures consistent behavior across all integrations.
+Whenever you need to make HTTP requests, the base class provides a convenience member that ensures consistent behavior
+across all integrations. Its request methods and response objects follow the shape of the popular
+[requests][requests-github] library, but the member is defined by its own interface rather than by that library.
+Anything this page does not document is an implementation detail and may change.
 
 The wrapper automatically parses and uses configuration from the `instance`, `init_config`, and Agent config. Also, this
 is only done once during initialization and cached to reduce the overhead of every call.
@@ -14,7 +16,8 @@ For example, to make a GET request you would use:
 response = self.http.get(url)
 ```
 
-and the wrapper will pass the right things to `requests`. All methods accept optional keyword arguments like `stream`, etc.
+and the wrapper will pass the right things to the underlying HTTP library. All methods accept the optional keyword
+arguments listed in `HTTPRequestOptions` under [Reference](#reference), such as `stream`.
 
 Any method-level option will override configuration. So for example if `tls_verify` was set to false and you do
 `self.http.get(url, verify=True)`, then SSL certificates will be verified on that particular request. You can
@@ -42,11 +45,127 @@ url = 'unix:///var/run/docker.sock'
 response = self.http.get(url)
 ```
 
+## Backend-neutral mode
+
+Set the `AGNOSTIC_HTTP_CLIENT` class attribute to opt a check into the interface this page describes:
+
+```python
+class MyCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
+```
+
+With it set, every client the check creates through `self.http` or `create_http_client()`, including the clients its
+OpenMetrics and Prometheus scrapers build, returns responses that expose only the documented members and raises the
+errors listed under [Errors](#errors). The `fake_http` test fixture requires it. Without it, clients return `requests`
+responses and raise `requests` exceptions unchanged.
+
+### Testing configuration
+
+The `fake_http` fixture records the configuration each client is created with, but does not apply it: every client it
+creates starts with defaults. Test configuration in one of these ways:
+
+- To test how instance settings, `init_config`, and `HTTP_CONFIG_REMAPPER` aliases resolve, create the check without
+  `fake_http` and assert on `check.http.options`, `check.http.tls_config`, or `check.http.get_header()`. Creating the
+  client sends no request, but running the check would send real ones.
+- To test configuration the check builds and passes to `create_http_client()`, such as a scraper configuration, assert
+  on `fake_http.created_clients`. It holds a `RecordedClient` with the `instance`, `init_config`, and `remapper` of each
+  client, in creation order.
+
+If the check reads `options` or `tls_config` while it runs, set the values on `check.http` before running it.
+
+### Testing TLS configuration
+
+Each `FakeHTTPClient` starts with the real client's canonical TLS defaults. Pass `tls_config=...` to override specific
+fields; overrides, including `False` and `None`, take precedence. Each client gets its own copy of the overrides, so changing
+one client's TLS settings doesn't affect other clients or the caller's mapping.
+
+Calling `fake_http.create_client()` creates a fresh client with defaults, not a copy of the parent's TLS settings.
+Changing the parent fixture's `tls_config` does not configure the clients the check creates.
+
 ## Options
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).
 For complete documentation of every option, see the associated configuration templates for the
 [instances][config-spec-template-instances-http] and [init_config][config-spec-template-init-config-http] sections.
+
+## Disabling authentication
+
+Call `self.http.disable_auth()` to suppress the client's configured `auth` (such as Basic credentials) and automatic `.netrc`
+credentials on subsequent requests, including redirects:
+
+```python
+self.http.disable_auth()
+response = self.http.get(url)
+```
+
+This applies to existing and newly created sessions, including requests with `auth=None`, without disabling other
+environment settings, such as proxies. It does not suppress `auth_token` handling or an `Authorization` entry in `headers`.
+Explicit per-request authentication still overrides client configuration.
+
+## Errors
+
+With `AGNOSTIC_HTTP_CLIENT` set, a failed request raises one of the backend-neutral types from the
+module `datadog_checks.base.utils.http_exceptions`. Catch these instead:
+
+| Exception | Parent | Raised when |
+| --- | --- | --- |
+| `HTTPClientError` | `Exception` | Root of the tree. Catch this to handle any HTTP failure. |
+| `HTTPClientRequestError` | `HTTPClientError` | The request never produced a usable response. |
+| `HTTPClientConnectionError` | `HTTPClientRequestError` | The connection could not be established or was lost. |
+| `HTTPClientSSLError` | `HTTPClientConnectionError` | The TLS handshake or certificate verification failed. |
+| `HTTPClientInvalidURLError` | `HTTPClientRequestError` | The URL was rejected before a connection was attempted. |
+| `HTTPClientLineTooLongError` | `HTTPClientRequestError` | A streamed body contained a line longer than the client's `max_line_size`. Also a `ValueError`. |
+| `HTTPClientTimeoutError` | `HTTPClientRequestError` | The request exceeded its configured timeout. |
+| `HTTPClientConnectTimeoutError` | `HTTPClientTimeoutError` | The timeout elapsed while establishing the connection. |
+| `HTTPClientReadTimeoutError` | `HTTPClientTimeoutError` | The timeout elapsed while waiting for response data. |
+| `HTTPClientStatusError` | `HTTPClientError` | An error status was raised through `raise_for_status()`. |
+
+Unlike in `requests`, a timeout is never a connection error. Catch `HTTPClientRequestError` to handle both.
+
+Errors translated from a `requests` exception also subclass the `requests` exception they replace, and therefore
+`OSError`, so that handlers in checks that have not opted in keep matching. `HTTPClientLineTooLongError` has no
+`requests` counterpart and subclasses `ValueError` instead. Opted-in checks must not rely on those bases.
+
+For example, a check that skips optional data when its endpoint is unavailable looks like this:
+
+```python
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
+
+try:
+    response = self.http.get(url)
+    response.raise_for_status()
+except HTTPClientError as e:
+    self.log.debug('Could not retrieve version metadata: %s', e)
+    return
+```
+
+A few failures fall outside this tree, so handle them separately from the types listed here:
+
+- Calling `response.json()` on a body that is not valid JSON raises the standard library's `json.JSONDecodeError`, a
+  subclass of `ValueError`.
+- Errors that an `auth_token` reader or writer raises, other than HTTP failures, propagate unchanged.
+
+## Reference
+
+Opted-in checks may use the members documented below. To annotate clients and responses, import `HTTPClient`
+and `HTTPResponse` from `datadog_checks.base.utils.http_protocol`.
+
+::: datadog_checks.base.utils.http_protocol.HTTPClient
+    options:
+      heading_level: 3
+
+::: datadog_checks.base.utils.http_protocol.HTTPRequestOptions
+    options:
+      heading_level: 3
+
+::: datadog_checks.base.utils.http_protocol.HTTPResponse
+    options:
+      heading_level: 3
+
+::: datadog_checks.base.utils.http_protocol.HTTPHeaders
+    options:
+      heading_level: 3
+      members: false
 
 ## Future
 

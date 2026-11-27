@@ -1,8 +1,9 @@
 services:
     sqlserver:
         build:
-            context: ./sql
-            dockerfile: Dockerfile
+            # The tests directory, so the image can include the shared column statistics procedure.
+            context: ..
+            dockerfile: compose-ha/sql/Dockerfile
             args:
                 - SQLSERVER_IMAGE_TAG=${SQLSERVER_IMAGE_TAG}
         platform: linux/amd64
@@ -22,8 +23,9 @@ services:
             - sqlaoag
     sqlserver_2:
         build:
-            context: ./sql
-            dockerfile: Dockerfile
+            # The tests directory, so the image can include the shared column statistics procedure.
+            context: ..
+            dockerfile: compose-ha/sql/Dockerfile
             args:
                 - SQLSERVER_IMAGE_TAG=${SQLSERVER_IMAGE_TAG}
         platform: linux/amd64

@@ -13,12 +13,45 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any
 
+from lxml import etree
+
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION
 from datadog_checks.sqlserver.utils import is_azure_database, is_azure_sql_database
+from datadog_checks.sqlserver.xe_collection.base import (
+    EVENT_FILE_TARGET,
+    RING_BUFFER_TARGET,
+    SESSION_TARGETS_QUERY,
+    TARGET_READ_PERMISSIONS,
+    event_file_current_file,
+)
+from datadog_checks.sqlserver.xe_collection.query_plan_events import PLAN_SOURCES, QUERY_PLANS_DOCS_URL
+from datadog_checks.sqlserver.xe_collection.query_plan_events import SESSION_NAME as QUERY_PLANS_SESSION_NAME
 
 CATEGORY_SQLSERVER = "sqlserver"
+# The actions of the plan events that the Agent uses, and what a plan loses without each.
+QUERY_PLANS_RECOMMENDED_ACTIONS = {
+    "query_hash": (
+        "the query hash is read from each plan's XML instead, which takes more CPU, and events read twice are told "
+        "apart by fewer fields"
+    ),
+    "query_plan_hash": (
+        "the plan hash is read from each plan's XML instead, which takes more CPU, and events read twice are told "
+        "apart by fewer fields"
+    ),
+    "tsql_frame": (
+        "the statement is only found in the plan cache, so a plan whose query left the cache has no statement, no "
+        "query signature and no link to query metrics"
+    ),
+    "plan_handle": (
+        "the statement can't be found in the plan cache, so a plan whose batch text left the cache has no statement, "
+        "no query signature and no link to query metrics, and plans have no plan handle"
+    ),
+}
+# A read of the event_file target's current file that opens it, so that it fails without the permission or, on Azure,
+# the blob credential. `TOP 0` checks the permission but doesn't open the file.
+QUERY_PLANS_FILE_READ_QUERY = "SELECT TOP 1 file_name FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)"
 KEY_PREFIX = "sqlserver-diagnose-"
 MIN_SUPPORTED_MAJOR_VERSION = 11
 SQLSERVER_2014_MAJOR_VERSION = 12
@@ -47,6 +80,9 @@ class SQLServerConfigurationError(Enum):
     odbc_driver_not_installed = "odbc-driver-not-installed"
     per_database_access = "per-database-access"
     missing_per_database_view_state = "missing-per-database-view-state"
+    query_plans_xe_session = "query-plans-xe-session"
+    query_plans_xe_session_actions = "query-plans-xe-session-actions"
+    query_plans_xe_file_read = "query-plans-xe-file-read"
 
 
 DIAGNOSTIC_METADATA = {
@@ -124,6 +160,34 @@ DIAGNOSTIC_METADATA = {
         "remediation": ("Grant VIEW DATABASE STATE to the Datadog user on the listed databases."),
         "docs_url": SQLSERVER_DBM_GRANTS_DOCS_URL,
     },
+    SQLServerConfigurationError.query_plans_xe_session: {
+        "description": (
+            "Verifies that the datadog_query_plans XE session is running, with a query_post_execution_plan_profile "
+            "or query_post_execution_showplan event and an event_file or ring_buffer target, when "
+            "`collect_xe.query_plans` is enabled."
+        ),
+        "remediation": (
+            "Create and start the datadog_query_plans XE session as described in the documentation. "
+            "The Agent never creates or starts it."
+        ),
+        "docs_url": QUERY_PLANS_DOCS_URL,
+    },
+    SQLServerConfigurationError.query_plans_xe_session_actions: {
+        "description": (
+            "Verifies that the plan events of the datadog_query_plans XE session have the actions the Agent uses to "
+            "find each plan's statement and group its plans: {}."
+        ).format(", ".join("sqlserver." + action for action in QUERY_PLANS_RECOMMENDED_ACTIONS)),
+        "remediation": "Create the datadog_query_plans XE session again with the actions of the documentation.",
+        "docs_url": QUERY_PLANS_DOCS_URL,
+    },
+    SQLServerConfigurationError.query_plans_xe_file_read: {
+        "description": (
+            "Verifies that the Agent can read the files of the datadog_query_plans XE session's event_file target "
+            "with sys.fn_xe_file_target_read_file."
+        ),
+        "remediation": "Grant the Datadog login {}".format(TARGET_READ_PERMISSIONS),
+        "docs_url": QUERY_PLANS_DOCS_URL,
+    },
 }
 
 
@@ -179,6 +243,8 @@ class SqlserverDiagnose:
                         self._diagnose_msdb_select(cursor)
                     if self._needs_per_database_access():
                         self._diagnose_per_database_access(cursor)
+                    if self._needs_query_plans_xe_session():
+                        self._diagnose_query_plans_xe_session(cursor)
         except (ConfigurationError, SQLConnectionError) as e:
             code = SQLServerConfigurationError.connection_failure
             self._fail(
@@ -475,6 +541,134 @@ class SqlserverDiagnose:
             category=CATEGORY_SQLSERVER,
         )
 
+    def _diagnose_query_plans_xe_session(self, cursor: Any) -> None:
+        code = SQLServerConfigurationError.query_plans_xe_session
+        level = "database_" if is_azure_sql_database(self._current_engine_edition()) else ""
+        try:
+            # sys.dm_xe_sessions only lists running sessions, and needs no more than the Agent's usual grants.
+            cursor.execute(
+                "SELECT e.event_name FROM sys.dm_xe_{level}sessions s "
+                "JOIN sys.dm_xe_{level}session_events e ON s.address = e.event_session_address "
+                "WHERE s.name = ?".format(level=level),
+                (QUERY_PLANS_SESSION_NAME,),
+            )
+            events = {row[0] for row in cursor.fetchall() or []}
+            cursor.execute(SESSION_TARGETS_QUERY.format(level=level), (QUERY_PLANS_SESSION_NAME,))
+            targets = {row[0]: row[1] for row in cursor.fetchall() or [] if row[0]}
+        except Exception as e:
+            self._warn(
+                code,
+                diagnosis="Unable to read the {} XE session: {}".format(QUERY_PLANS_SESSION_NAME, e),
+                rawerror=str(e),
+            )
+            return
+        if not events and not targets:
+            self._warn(
+                code,
+                diagnosis=(
+                    "`collect_xe.query_plans` is enabled, but the {} XE session doesn't exist or isn't running."
+                ).format(QUERY_PLANS_SESSION_NAME),
+            )
+            return
+        plan_events = sorted(events & set(PLAN_SOURCES))
+        if not plan_events:
+            self._warn(
+                code,
+                diagnosis="The {} XE session has none of the events {}.".format(
+                    QUERY_PLANS_SESSION_NAME, ", ".join(sorted(PLAN_SOURCES))
+                ),
+            )
+            return
+        supported_targets = sorted(set(targets) & {EVENT_FILE_TARGET, RING_BUFFER_TARGET})
+        if not supported_targets:
+            self._warn(
+                code,
+                diagnosis="The {} XE session has no event_file or ring_buffer target.".format(QUERY_PLANS_SESSION_NAME),
+            )
+            return
+        self._check.diagnosis.success(
+            name=code.value,
+            diagnosis="The {} XE session is running, with event {} and target {}.".format(
+                QUERY_PLANS_SESSION_NAME, ", ".join(plan_events), ", ".join(supported_targets)
+            ),
+            category=CATEGORY_SQLSERVER,
+        )
+        self._diagnose_query_plans_xe_session_actions(cursor, level, plan_events)
+        if EVENT_FILE_TARGET in targets:
+            self._diagnose_query_plans_xe_file_read(cursor, targets[EVENT_FILE_TARGET])
+
+    def _diagnose_query_plans_xe_session_actions(self, cursor: Any, level: str, plan_events: list[str]) -> None:
+        code = SQLServerConfigurationError.query_plans_xe_session_actions
+        try:
+            cursor.execute(
+                "SELECT a.event_name, a.action_name FROM sys.dm_xe_{level}sessions s "
+                "JOIN sys.dm_xe_{level}session_event_actions a ON s.address = a.event_session_address "
+                "WHERE s.name = ?".format(level=level),
+                (QUERY_PLANS_SESSION_NAME,),
+            )
+            actions: dict[str, set[str]] = {event: set() for event in plan_events}
+            for event_name, action_name in cursor.fetchall() or []:
+                if event_name in actions:
+                    actions[event_name].add(action_name)
+        except Exception as e:
+            self._warn(
+                code,
+                diagnosis="Unable to read the actions of the {} XE session: {}".format(QUERY_PLANS_SESSION_NAME, e),
+                rawerror=str(e),
+            )
+            return
+        missing = []
+        for event in plan_events:
+            for action, cost in QUERY_PLANS_RECOMMENDED_ACTIONS.items():
+                if action not in actions[event]:
+                    missing.append("{} has no sqlserver.{} action: {}.".format(event, action, cost))
+        if missing:
+            self._warn(
+                code,
+                diagnosis="The {} XE session lacks recommended actions. {}".format(
+                    QUERY_PLANS_SESSION_NAME, " ".join(missing)
+                ),
+            )
+            return
+        self._check.diagnosis.success(
+            name=code.value,
+            diagnosis="The {} XE session's plan events have the recommended actions.".format(QUERY_PLANS_SESSION_NAME),
+            category=CATEGORY_SQLSERVER,
+        )
+
+    def _diagnose_query_plans_xe_file_read(self, cursor: Any, target_data: str | None) -> None:
+        code = SQLServerConfigurationError.query_plans_xe_file_read
+        try:
+            current_file = event_file_current_file(target_data)
+        except etree.XMLSyntaxError:
+            current_file = None
+        if not current_file:
+            self._warn(
+                code,
+                diagnosis="Unable to find the current file of the {} XE session's event_file target.".format(
+                    QUERY_PLANS_SESSION_NAME
+                ),
+            )
+            return
+        try:
+            _execute_read_probe(cursor, QUERY_PLANS_FILE_READ_QUERY, (current_file,))
+        except Exception as e:
+            self._fail(
+                code,
+                diagnosis="Unable to read {}, the current file of the {} XE session's event_file target: {}".format(
+                    current_file, QUERY_PLANS_SESSION_NAME, e
+                ),
+                rawerror=str(e),
+            )
+            return
+        self._check.diagnosis.success(
+            name=code.value,
+            diagnosis="The Agent can read {}, the current file of the {} XE session's event_file target.".format(
+                current_file, QUERY_PLANS_SESSION_NAME
+            ),
+            category=CATEGORY_SQLSERVER,
+        )
+
     def _diagnose_msdb_select(self, cursor: Any) -> None:
         code = SQLServerConfigurationError.missing_msdb_select
         failures = []
@@ -558,6 +752,11 @@ class SqlserverDiagnose:
             or database_metrics["secondary_log_shipping_metrics"]["enabled"]
         )
 
+    def _needs_query_plans_xe_session(self) -> bool:
+        config = self._check._config
+        query_plans = config.xe_collection_config.get('query_plans', {}) or {}
+        return config.dbm_enabled and is_affirmative(query_plans.get('enabled', False))
+
     def _msdb_probe_queries(self) -> list[tuple[str, str]]:
         config = self._check._config
         database_metrics = config.database_metrics_config
@@ -629,6 +828,16 @@ class SqlserverDiagnose:
         )
         self._failed.add(code.value)
 
+    def _warn(self, code: SQLServerConfigurationError, diagnosis: str, rawerror: str | None = None) -> None:
+        self._check.diagnosis.warning(
+            name=code.value,
+            diagnosis=diagnosis,
+            category=CATEGORY_SQLSERVER,
+            description=DIAGNOSTIC_METADATA[code]["description"],
+            remediation=build_remediation(code),
+            rawerror=rawerror,
+        )
+
     def _database_desc(self) -> str:
         connection = self._check.connection
         database = self._check.instance.get('database', connection.DEFAULT_DATABASE)
@@ -692,8 +901,11 @@ def _fetchone(cursor: Any, query: str, params: tuple[Any, ...] | None = None) ->
     return cursor.fetchone()
 
 
-def _execute_read_probe(cursor: Any, query: str) -> None:
-    cursor.execute(query)
+def _execute_read_probe(cursor: Any, query: str, params: tuple[Any, ...] | None = None) -> None:
+    if params is None:
+        cursor.execute(query)
+    else:
+        cursor.execute(query, params)
     cursor.fetchall()
 
 

@@ -37,7 +37,7 @@ from tests.utils.github_async.helpers import (
     patch_signed_download,
     recording_transport,
 )
-from tests.utils.github_async.payloads import workflow_run_payload
+from tests.utils.github_async.payloads import workflow_job, workflow_run_payload
 
 LOGGER_NAME = "test-rate-limit-events"
 
@@ -400,17 +400,20 @@ async def test_pagination_retries_only_the_rate_limited_page(monkeypatch: pytest
     advance_clock_on_sleep(clock, monkeypatch)
     transport, calls = recording_transport(
         [
-            httpx.Response(200, json={"page": 1}, headers={"link": '<https://api.github.com/next>; rel="next"'}),
+            json_response(
+                {"total_count": 2, "jobs": [workflow_job(1)]},
+                headers={"link": '<https://api.github.com/next>; rel="next"'},
+            ),
             httpx.Response(403, headers={"retry-after": "5"}),
-            httpx.Response(200, json={"page": 2}),
+            json_response({"total_count": 2, "jobs": [workflow_job(2)]}),
         ]
     )
     client = governed_client(clock, transport)
 
-    pages = [response async for response in client._paginated_request("GET", "/start")]
+    pages = [page async for page in client.list_workflow_jobs("o", "r", 42)]
 
-    assert [page.status_code for page in pages] == [200, 200]
-    assert len(calls) == 3  # page 1, page 2 (rate-limited), page 2 (retry)
+    assert [job.id for page in pages for job in page.data.jobs] == [1, 2]
+    assert [call.url.path for call in calls] == ["/repos/o/r/actions/runs/42/jobs", "/next", "/next"]
 
 
 async def test_endpoint_retries_rate_limit_then_parses(monkeypatch: pytest.MonkeyPatch) -> None:

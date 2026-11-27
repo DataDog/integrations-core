@@ -1325,12 +1325,28 @@ join pg_subscription ON pg_subscription.oid = pg_subscription_rel.srsubid""".str
 }
 
 # Requires PG15+
-STAT_SUBSCRIPTION_STATS_METRICS = {
+STAT_SUBSCRIPTION_STATS_METRICS_LT_19 = {
     'name': 'stat_subscription_stats_metrics',
     'query': """
 SELECT subname,
        apply_error_count,
        sync_error_count
+FROM pg_stat_subscription_stats
+""",
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'subscription.apply_error', 'type': 'monotonic_count'},
+        {'name': 'subscription.sync_error', 'type': 'monotonic_count'},
+    ],
+}
+
+# PG19 renamed sync_error_count to sync_table_error_count; sequence sync errors are counted separately.
+STAT_SUBSCRIPTION_STATS_METRICS = {
+    'name': 'stat_subscription_stats_metrics',
+    'query': """
+SELECT subname,
+       apply_error_count,
+       sync_table_error_count
 FROM pg_stat_subscription_stats
 """,
     'columns': [

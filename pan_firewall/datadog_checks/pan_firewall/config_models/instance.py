@@ -90,7 +90,6 @@ class InstanceConfig(BaseModel):
     collect_ospf: Optional[bool] = None
     collect_reports: Optional[bool] = None
     collect_rule_hits: Optional[bool] = None
-    collect_threats: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None

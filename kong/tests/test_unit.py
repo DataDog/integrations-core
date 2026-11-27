@@ -7,6 +7,7 @@ from collections import namedtuple
 
 import pytest
 
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kong import Kong
 from datadog_checks.kong.check import KongCheck
@@ -53,12 +54,15 @@ EXPECTED_METRICS_v3 = {
 }
 
 
+LEGACY_STATUS_URL = 'http://myhost/status/'
+
+
 def get_fixture_path(filename):
     return os.path.join(HERE, 'fixtures', filename)
 
 
-def test_check_v3(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('prometheus-v3.txt'))
+def test_check_v3(aggregator, dd_run_check, fake_http_response):
+    fake_http_response(METRICS_URL, read_file_binary(get_fixture_path('prometheus-v3.txt')))
     instance = {
         'openmetrics_endpoint': METRICS_URL,
         'extra_metrics': [{'kong_memory_workers_lua_vms_bytes': 'memory.workers.lua.vms.bytes'}],
@@ -79,8 +83,8 @@ def test_check_v3(aggregator, dd_run_check, mock_http_response):
     )
 
 
-def test_check(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('prometheus.txt'))
+def test_check(aggregator, dd_run_check, fake_http_response):
+    fake_http_response(METRICS_URL, read_file_binary(get_fixture_path('prometheus.txt')))
     instance = {
         'openmetrics_endpoint': METRICS_URL,
         'extra_metrics': [{'kong_memory_workers_lua_vms_bytes': 'memory.workers.lua.vms.bytes'}],
@@ -123,12 +127,12 @@ def test_check(aggregator, dd_run_check, mock_http_response):
 
 
 def test_v2_default_metric_limit_is_zero():
-    # Kills the core/NumberReplacer mutant at check.py:12 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    # Guards against the default metric limit changing from 0 (unlimited).
     assert KongCheck.DEFAULT_METRIC_LIMIT == 0
 
 
 def test_v2_transformer_only_processes_sample_with_value_exactly_one(aggregator):
-    # Kills the core/ReplaceComparisonOperator_NotEq_Lt mutant at check.py:28 (sample.value != 1 -> < 1).
+    # Only a sample with value 1 marks the current state; any other value, including above 1, is ignored.
     check = KongCheck('kong', {}, [{'openmetrics_endpoint': METRICS_URL}])
     service_check = check.configure_transformer_upstream_target_health()
 
@@ -139,7 +143,7 @@ def test_v2_transformer_only_processes_sample_with_value_exactly_one(aggregator)
 
 
 def test_v2_transformer_processes_samples_after_skipping_one(aggregator):
-    # Kills the core/ReplaceContinueWithBreak mutant at check.py:29 (continue -> break drops later samples).
+    # Skipping an ignored sample must not stop the samples after it from being reported.
     check = KongCheck('kong', {}, [{'openmetrics_endpoint': METRICS_URL}])
     service_check = check.configure_transformer_upstream_target_health()
 
@@ -155,26 +159,24 @@ def test_v2_transformer_processes_samples_after_skipping_one(aggregator):
 
 
 def test_legacy_new_uses_first_instance_to_choose_check_class():
-    # Kills the core/NumberReplacer mutant at kong.py:25 (instances[0] -> instances[-1]).
+    # The first instance decides between the OpenMetrics check and the legacy status-page check.
     check = Kong('kong', {}, [{'openmetrics_endpoint': METRICS_URL}, {'kong_status_url': STATUS_URL}])
     assert isinstance(check, KongCheck)
 
 
 def test_legacy_fetch_data_raises_when_status_url_missing():
-    # Kills the core/AddNot mutant at kong.py:42 (double negation flips the missing-config check).
+    # A legacy instance without `kong_status_url` fails with a clear configuration error.
     check = Kong('kong', {}, [{'tags': []}])
     with pytest.raises(Exception, match='missing "kong_status_url" value'):
         check._fetch_data()
 
 
 def test_legacy_fetch_data_can_connect_tags_use_default_port_and_appended_tags(
-    aggregator, dd_run_check, mock_http_response
+    aggregator, dd_run_check, fake_http_response
 ):
-    # Kills the core/NumberReplacer and ReplaceOrWithAnd mutants at kong.py:49 (default port 80 -> 79/81 or "or"->"and")
-    # and the ReplaceBinaryOperator_Add_* / ReplaceBinaryOperator_Mod_* mutants at kong.py:51
-    # (tag list "+" and the "%" string formatting inside it).
-    mock_http_response(json_data={'server': {}})
-    instance = {'kong_status_url': 'http://myhost/status/', 'tags': ['env:test']}
+    # A status URL without a port is tagged with port 80, and the instance tags follow the host and port tags.
+    fake_http_response(LEGACY_STATUS_URL, json_data={'server': {}})
+    instance = {'kong_status_url': LEGACY_STATUS_URL, 'tags': ['env:test']}
     check = Kong('kong', {}, [instance])
     dd_run_check(check)
 
@@ -184,8 +186,7 @@ def test_legacy_fetch_data_can_connect_tags_use_default_port_and_appended_tags(
 
 
 def test_legacy_parse_json_defaults_tags_and_prefixes_metric_names():
-    # Kills the core/ReplaceComparisonOperator_Is_IsNot and AddNot mutants at kong.py:70 (tags is None check),
-    # the ZeroIterationForLoop mutant at kong.py:76, and the ReplaceBinaryOperator_Add_* mutants at kong.py:77.
+    # Without tags, every `server` stat becomes a `kong.`-prefixed metric with an empty tag list.
     check = Kong('kong', {}, [{'kong_status_url': 'http://myhost/status/'}])
     raw = json.dumps({'server': {'total_requests': 42}}).encode('utf-8')
 
@@ -194,11 +195,10 @@ def test_legacy_parse_json_defaults_tags_and_prefixes_metric_names():
     assert output == [('kong.total_requests', 42, [])]
 
 
-def test_legacy_check_continues_after_metric_submission_error(aggregator, dd_run_check, mock_http_response):
-    # Kills the core/ZeroIterationForLoop mutant at kong.py:34 and the ExceptionReplacer mutant at kong.py:38
-    # (a bad metric value must not stop later metrics in the loop from being submitted).
-    mock_http_response(json_data={'server': {'bad_metric': 'oops', 'good_metric': 5}})
-    instance = {'kong_status_url': 'http://myhost/status/', 'tags': []}
+def test_legacy_check_continues_after_metric_submission_error(aggregator, dd_run_check, fake_http_response):
+    # A value that can't be submitted is logged and skipped; the metrics after it are still submitted.
+    fake_http_response(LEGACY_STATUS_URL, json_data={'server': {'bad_metric': 'oops', 'good_metric': 5}})
+    instance = {'kong_status_url': LEGACY_STATUS_URL, 'tags': []}
     check = Kong('kong', {}, [instance])
     dd_run_check(check)
 
@@ -206,10 +206,10 @@ def test_legacy_check_continues_after_metric_submission_error(aggregator, dd_run
     aggregator.assert_metric('kong.bad_metric', count=0)
 
 
-def test_legacy_check_submits_critical_service_check_on_http_error(aggregator, mock_http_response):
-    # Kills the core/ExceptionReplacer mutant at kong.py:58 (except Exception -> except CosmicRayTestingException).
-    mock_http_response(status_code=500)
-    instance = {'kong_status_url': 'http://myhost/status/', 'tags': []}
+def test_legacy_check_submits_critical_service_check_on_http_error(aggregator, fake_http_response):
+    # Any HTTP failure reports `kong.can_connect` as CRITICAL before the error propagates.
+    fake_http_response(LEGACY_STATUS_URL, status_code=500)
+    instance = {'kong_status_url': LEGACY_STATUS_URL, 'tags': []}
     check = Kong('kong', {}, [instance])
 
     with pytest.raises(Exception):
@@ -218,20 +218,20 @@ def test_legacy_check_submits_critical_service_check_on_http_error(aggregator, m
     aggregator.assert_service_check('kong.can_connect', status=Kong.CRITICAL, count=1)
 
 
-def test_legacy_check_treats_status_code_below_200_as_critical(aggregator, mock_http_response):
-    # Kills the core/ReplaceComparisonOperator_Eq_LtE mutant at kong.py:62 (status_code == 200 -> <= 200).
-    mock_http_response(status_code=100, json_data={'server': {}})
-    instance = {'kong_status_url': 'http://myhost/status/', 'tags': []}
+def test_legacy_check_treats_status_code_below_200_as_critical(aggregator, fake_http_response):
+    # Only status 200 counts as reachable; a non-error status below 200 is CRITICAL.
+    fake_http_response(LEGACY_STATUS_URL, status_code=100, json_data={'server': {}})
+    instance = {'kong_status_url': LEGACY_STATUS_URL, 'tags': []}
     check = Kong('kong', {}, [instance])
     check.check(None)
 
     aggregator.assert_service_check('kong.can_connect', status=Kong.CRITICAL, count=1)
 
 
-def test_legacy_check_treats_status_code_above_200_as_critical(aggregator, mock_http_response):
-    # Kills the core/ReplaceComparisonOperator_Eq_GtE mutant at kong.py:62 (status_code == 200 -> >= 200).
-    mock_http_response(status_code=204, json_data={'server': {}})
-    instance = {'kong_status_url': 'http://myhost/status/', 'tags': []}
+def test_legacy_check_treats_status_code_above_200_as_critical(aggregator, fake_http_response):
+    # Only status 200 counts as reachable; a non-error status above 200, such as 204, is CRITICAL.
+    fake_http_response(LEGACY_STATUS_URL, status_code=204, json_data={'server': {}})
+    instance = {'kong_status_url': LEGACY_STATUS_URL, 'tags': []}
     check = Kong('kong', {}, [instance])
     check.check(None)
 

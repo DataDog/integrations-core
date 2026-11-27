@@ -38,6 +38,7 @@ class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
 
 class HAProxyCheckLegacy(AgentCheck):
     SERVICE_CHECK_NAME = 'haproxy.backend_up'
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
 
     def __init__(self, name, init_config, instances):

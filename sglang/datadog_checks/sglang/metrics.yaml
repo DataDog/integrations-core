@@ -99,3 +99,14 @@ sglang:kv_transfer_total_mb: disaggregation.kv_transfer.megabytes
 sglang:num_bootstrap_failed_reqs: disaggregation.bootstrap_failures
 sglang:num_transfer_failed_reqs: disaggregation.transfer_failures
 sglang:num_prefill_retries: disaggregation.prefill_retries
+
+# Optional cache diagnostics and forward-pass occupancy.
+sglang:hicache_host_used_tokens: hicache.host.used_tokens
+sglang:hicache_host_total_tokens: hicache.host.total_tokens
+sglang:evicted_tokens: kv_cache.evicted_tokens
+sglang:load_back_tokens: hicache.load_back.tokens
+sglang:load_back_duration_seconds: hicache.load_back.seconds
+sglang:swa_available_tokens: kv_cache.swa.available_tokens
+sglang:swa_evictable_tokens: kv_cache.swa.evictable_tokens
+sglang:swa_used_tokens: kv_cache.swa.used_tokens
+sglang:fwd_occupancy: forward_execution.occupancy

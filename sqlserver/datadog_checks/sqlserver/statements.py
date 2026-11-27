@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
 import binascii
 import copy
 import math
 import time
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING
 
 from cachetools import TTLCache
 from lxml import etree as ET
@@ -24,7 +27,15 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
+from datadog_checks.sqlserver.utils import (
+    append_agent_service_comment,
+    is_azure_sql_database,
+    needs_comment_recovery,
+    raise_if_cancelled,
+)
+
+if TYPE_CHECKING:
+    from datadog_checks.sqlserver import SQLServer
 
 DEFAULT_COLLECTION_INTERVAL = 60
 
@@ -208,12 +219,34 @@ def _row_key(row):
     return (row.get('database_name'), row['query_signature'], row['query_hash'], row.get('procedure_name'))
 
 
+def _plan_row_key(row):
+    """
+    Key at the grain of the collection query's counters. The query omits idle `query_plan_hash` groups, so
+    differencing a sum across plans would report a returning plan's lifetime totals.
+    """
+    return _row_key(row) + (row['query_plan_hash'],)
+
+
+def _sum_rows_by_row_key(rows, metric_columns):
+    rows_by_key = {}
+    for row in rows:
+        key = _row_key(row)
+        if key not in rows_by_key:
+            rows_by_key[key] = row
+            continue
+        merged = rows_by_key[key]
+        for column in metric_columns:
+            merged[column] += row[column]
+    return list(rows_by_key.values())
+
+
 XML_PLAN_OBFUSCATION_ATTRS = frozenset(
     {
         "StatementText",
         "ConstValue",
         "ScalarString",
         "ParameterCompiledValue",
+        "ParameterRuntimeValue",
     }
 )
 
@@ -244,6 +277,81 @@ def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
                 statement = obfuscate_sql_with_metadata(val, obfuscator_options, replace_null_character=True)
                 e.attrib[k] = ensure_unicode(statement['query'])
     return to_native_string(ET.tostring(tree, encoding="UTF-8"))
+
+
+def build_plan_events(
+    check: SQLServer,
+    config: SQLServerConfig,
+    *,
+    raw_plan: str | None,
+    plan: dict,
+    instance: str | None,
+    db: dict,
+    metadata: dict,
+    sqlserver: dict,
+    tags: list[str],
+    collect_raw: bool,
+    log_context: str,
+    on_obfuscation_error: Callable[[Exception], None],
+    collection_errors: Sequence[dict] = (),
+    raw_db: dict | None = None,
+) -> list[dict]:
+    """
+    The plan event of a plan, and before it its raw copy (`rqp`) when `collect_raw` is set, as they're sent: the plan
+    event schema shared by every plan source.
+
+    The event's `db.plan` holds the obfuscated `raw_plan`, then the `plan` fields, then the collection errors: a failed
+    obfuscation, reported to `on_obfuscation_error` and logged with `log_context`, followed by `collection_errors`.
+    The event's `db` holds `instance`, `db.plan`, the `db` fields and `metadata`. The raw copy has the raw plan and
+    the `raw_db` fields, and both events get the raw plan's signature.
+    """
+    obfuscated_plan = None
+    errors = []
+    try:
+        if raw_plan:
+            obfuscated_plan = obfuscate_xml_plan(raw_plan, config.obfuscator_options)
+    except Exception as e:
+        context = "{} err=[{}]".format(log_context, e)
+        if config.log_unobfuscated_plans:
+            check.log.warning("Failed to obfuscate plan=[%s] | %s", repr(raw_plan), context)
+        else:
+            check.log.debug("Failed to obfuscate plan | %s", context)
+        errors.append({'code': "obfuscate_xml_plan_error", 'message': str(e)})
+        on_obfuscation_error(e)
+    errors.extend(collection_errors)
+    plan_event = {
+        "host": check.reported_hostname,
+        "database_instance": check.database_identifier,
+        "ddagentversion": check.agent_version,
+        "ddsource": "sqlserver",
+        "ddtags": ",".join(tags),
+        "timestamp": time.time() * 1000,
+        "dbm_type": "plan",
+        "cloud_metadata": check.cloud_metadata,
+        'sqlserver_version': check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+        'sqlserver_engine_edition': check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+        'service': config.service,
+        "db": {
+            "instance": instance,
+            "plan": {"definition": obfuscated_plan, **plan, "collection_errors": errors if errors else None},
+            **db,
+            "metadata": metadata,
+        },
+        'sqlserver': sqlserver,
+    }
+    if not collect_raw:
+        return [plan_event]
+    raw_plan_event = copy.deepcopy(plan_event)
+    raw_plan_event["dbm_type"] = "rqp"  # raw query plan
+    raw_plan_event["db"]["plan"]["definition"] = raw_plan
+    raw_plan_event["db"].update(raw_db or {})
+    if raw_plan:
+        # add the raw signature to the event so we can use it to look up the raw plan.
+        # query_plan_hash only identifies the plan shape, so hash the raw plan content instead.
+        raw_plan_signature = compute_sql_signature(raw_plan)
+        raw_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
+        plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
+    return [raw_plan_event, plan_event]
 
 
 class SqlserverStatementMetrics(DBMAsyncJob):
@@ -288,6 +396,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
         self._collect_execution_plans = is_affirmative(self._config.statement_metrics_config.get('collect_plans', True))
         self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
+        obfuscator_options = json.loads(self._config.obfuscator_options)
+        self._collect_comments = bool(
+            obfuscator_options.get('return_json_metadata') and obfuscator_options.get('collect_comments')
+        )
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -475,6 +587,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 # convert to lowercase for backward compatibility
                 row['procedure_name'] = f"{row['schema_name']}.{row['procedure_name']}".lower()
 
+            if self._collect_comments:
+                comments = append_agent_service_comment(comments, row.get('text'))
+
             row['dd_comments'] = comments
             row['text'] = obfuscated_statement
             row['query_signature'] = query_signature
@@ -494,8 +609,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if not rows:
             return []
         metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
-        return rows
+        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_plan_row_key)
+        return _sum_rows_by_row_key(rows, metric_columns)
 
     @staticmethod
     def _to_metrics_payload_row(row):
@@ -657,36 +772,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 self._check.count("dd.sqlserver.statements.error", 1, **self._check.debug_stats_kwargs(tags=error_tags))
                 continue
             if self._seen_plans_ratelimiter.acquire(plan_key):
-                obfuscated_plan = None
-                collection_errors = []
-
-                try:
-                    if raw_plan:
-                        obfuscated_plan = obfuscate_xml_plan(raw_plan, self._config.obfuscator_options)
-                except Exception as e:
-                    context = (
-                        "query_signature=[{0}] query_hash=[{1}] query_plan_hash=[{2}] plan_handle=[{3}] err=[{4}]"
-                    ).format(row['query_signature'], row['query_hash'], row['query_plan_hash'], row['plan_handle'], e)
-                    if self._config.log_unobfuscated_plans:
-                        self.log.warning("Failed to obfuscate plan=[%s] | %s", repr(raw_plan), context)
-                    else:
-                        self.log.debug("Failed to obfuscate plan | %s", context)
-                    collection_errors.append({'code': "obfuscate_xml_plan_error", 'message': str(e)})
-                    self._check.count(
-                        "dd.sqlserver.statements.error",
-                        1,
-                        **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))]),
-                    )
-                tags = self._check.tag_manager.get_tags()
-
-                if is_plan_encrypted:
-                    collection_errors.append({'code': "plan_encrypted", 'message': "cannot collect encrypted plan"})
-
-                # Do not submit plan events if no plan is available and there is no collection error.
+                # Do not submit plan events if no plan is available and it isn't encrypted, a collection error.
                 # This avoids sending empty plan events when a plan is not available in the cache.
-                if not raw_plan and not collection_errors:
+                if not raw_plan and not is_plan_encrypted:
                     continue
-
+                tags = self._check.tag_manager.get_tags()
                 # for stored procedures, we want to send the plan
                 # events with the full procedure text, not the text
                 # for the individual statement encapsulated within the proc
@@ -700,36 +790,24 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     query_signature = None
                 if 'database_name' in row:
                     tags += ["db:{}".format(row['database_name'])]
-                obfuscated_plan_event = {
-                    "host": self._check.reported_hostname,
-                    "database_instance": self._check.database_identifier,
-                    "ddagentversion": self._check.agent_version,
-                    "ddsource": "sqlserver",
-                    "ddtags": ",".join(tags),
-                    "timestamp": time.time() * 1000,
-                    "dbm_type": "plan",
-                    "cloud_metadata": self._check.cloud_metadata,
-                    'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-                    'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-                    'service': self._config.service,
-                    "db": {
-                        "instance": row.get("database_name", None),
-                        "plan": {
-                            "definition": obfuscated_plan,
-                            "signature": row['query_plan_hash'],
-                            "collection_errors": collection_errors if collection_errors else None,
-                        },
+                yield from build_plan_events(
+                    self._check,
+                    self._config,
+                    raw_plan=raw_plan,
+                    plan={"signature": row['query_plan_hash']},
+                    instance=row.get("database_name", None),
+                    db={
                         "query_signature": query_signature,
                         "procedure_signature": row.get('procedure_signature', None),
                         "procedure_name": row.get('procedure_name', None),
                         "statement": row.get(text_key),
-                        "metadata": {
-                            "tables": row['dd_tables'],
-                            "commands": row['dd_commands'],
-                            "comments": row['dd_comments'],
-                        },
                     },
-                    'sqlserver': {
+                    metadata={
+                        "tables": row['dd_tables'],
+                        "commands": row['dd_commands'],
+                        "comments": row['dd_comments'],
+                    },
+                    sqlserver={
                         "is_plan_encrypted": is_plan_encrypted,
                         "is_statement_encrypted": row['is_encrypted'],
                         'query_hash': row['query_hash'],
@@ -738,13 +816,22 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         'execution_count': row.get('execution_count', None),
                         'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
-                }
-                if self._collect_raw_query_statement:
-                    raw_plan_event = copy.deepcopy(obfuscated_plan_event)
-                    raw_plan_event["dbm_type"] = "rqp"  # raw query plan
-                    raw_plan_event["db"]["plan"]["definition"] = raw_plan
-                    # add the raw signature to the event so we can use it to look up the raw plan
-                    raw_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
-                    obfuscated_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
-                    yield raw_plan_event
-                yield obfuscated_plan_event
+                    tags=tags,
+                    collect_raw=self._collect_raw_query_statement,
+                    log_context=(
+                        "query_signature=[{0}] query_hash=[{1}] query_plan_hash=[{2}] plan_handle=[{3}]"
+                    ).format(row['query_signature'], row['query_hash'], row['query_plan_hash'], row['plan_handle']),
+                    on_obfuscation_error=self._count_plan_obfuscation_error,
+                    collection_errors=(
+                        [{'code': "plan_encrypted", 'message': "cannot collect encrypted plan"}]
+                        if is_plan_encrypted
+                        else []
+                    ),
+                )
+
+    def _count_plan_obfuscation_error(self, error: Exception) -> None:
+        self._check.count(
+            "dd.sqlserver.statements.error",
+            1,
+            **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(error))]),
+        )

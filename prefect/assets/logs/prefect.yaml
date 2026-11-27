@@ -1,0 +1,54 @@
+id: "prefect"
+# See app_id in your integration's manifest.json file to learn more:
+# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
+metric_id: "prefect"
+# If for some reason id must be different than app_id, add the app_id in this field instead.
+# If id and app_id already match, this field can be left blank.
+backend_only: false
+facets:
+  - description: ""
+    facetType: list
+    groups:
+      - Prefect
+    name: prefect_resource.type
+    path: prefect_resource.type
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: Prefect
+  enabled: true
+  filter:
+    query: source:prefect
+  processors:
+    - type: grok-parser
+      name: Parse Prefect logs
+      enabled: true
+      source: message
+      samples:
+        - "13:42:21.560 | ERROR   | Task run 'fail-23b' - Finished in state
+          Failed('Task run encountered an exception RuntimeError: Intentional
+          fail for testing')"
+        - "13:42:21.560 | ERROR   | prefect.worker - Still processing items: 5
+          items remaining"
+      grok:
+        supportRules: general_message_rule
+          %{data:prefect_resource.type}(\'%{data:prefect_resource.name}')? -
+          %{data}
+        matchRules: state_rule
+          %{date("HH:mm:ss.SSS"):timestamp}\s*\|\s*%{word:level}\s*\|\s*(?<message>%{general_message_rule})
+    - type: date-remapper
+      name: Remap timestamp to date
+      enabled: true
+      sources:
+        - timestamp
+    - type: status-remapper
+      name: Remap level to status
+      enabled: true
+      sources:
+        - level
+    - type: message-remapper
+      name: Remap message
+      enabled: true
+      sources:
+        - message

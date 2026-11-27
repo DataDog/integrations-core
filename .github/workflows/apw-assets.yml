@@ -1,0 +1,59 @@
+name: APW asset release
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/apw-assets.yml
+      - .github/chainguard/self.apw-assets.schedule.sts.yaml
+      - .github/actions/apw-assets/**
+  workflow_dispatch:
+  schedule:
+    # Every 15 minutes, offset from the busiest start-of-hour period.
+    - cron: '7,22,37,52 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apw-assets-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install test dependencies
+        run: pip install pytest==9.1.1 PyYAML==6.0.3
+      - name: Test shared packaging and release handling
+        working-directory: .github/actions/apw-assets
+        run: pytest tests/ -v
+      - uses: ./.github/actions/apw-assets
+        with:
+          mode: package
+
+  publish:
+    # Only scheduled runs and manual dispatches from reviewed master can publish.
+    # This job installs no packages: the action uses the runner's python3 and gh.
+    if: >-
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
+      github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/apw-assets
+        with:
+          mode: publish

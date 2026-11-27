@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-11-19",
+  "definition": {
+    "message": "{{#is_alert}}\n## What's happening?\n\nFirewall **{{device_ip.name}}** has rejected the integration's API credentials.\n{{/is_alert}}\n\n{{#is_recovery}}\n## Recovered\n\nFirewall {{device_ip.name}} accepts the integration's credentials again.\n{{/is_recovery}}\n\n{{^is_recovery}}\n\n---\n\n## Impact\n\nNo metrics are collected from this firewall until the credentials are fixed.\n\n---\n\n## Why?\n\nPossible causes:\n* **The API key expired or was revoked**, for example after an API key lifetime was set or the master key changed.\n* **The configured user was deleted, disabled, or had its password changed.**\n* **The user's admin role lost XML API access.**\n\n---\n\n## How to troubleshoot and resolve the issue?\n\n1. Check that the configured user still exists and can log in.\n2. Check that its admin role allows XML API access, including the operational requests the integration uses.\n3. If the integration uses a pre-generated API key, generate a new one and update the integration configuration.\n4. Restart the Agent and confirm that the alert recovers.\n\n---\n\n## Related links\n\n* [Documentation](https://docs.datadoghq.com/integrations/pan_firewall/)\n* [Metrics Explorer](/metric/explorer?exp_metric=pan_firewall.api.authentication.status&exp_scope=device_ip:{{device_ip.name}}&exp_agg=max&exp_type=line)\n{{/is_recovery}}",
+    "name": "[Palo Alto Networks Firewall] Firewall {{device_ip.name}} rejects the integration's credentials",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 1
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "max(last_10m):max:pan_firewall.api.authentication.status{*} by {device_namespace,device_ip} >= 1",
+    "tags": [
+      "integration:pan-firewall"
+    ],
+    "type": "query alert"
+  },
+  "description": "Tracks whether the firewall's XML API rejects the credentials the integration uses. The firewall still answers, so it is not reported as unreachable, but no other metric is collected from it until the credentials are fixed.",
+  "last_updated_at": "2026-11-19",
+  "tags": [
+    "integration:pan-firewall"
+  ],
+  "title": "Firewall rejects the integration's credentials",
+  "version": 2
+}

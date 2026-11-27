@@ -51,6 +51,14 @@ class Azure(BaseModel):
     fully_qualified_domain_name: Optional[str] = None
 
 
+class CollectRawQueryStatement(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+
+
 class CollectSchemas(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -288,6 +296,7 @@ class InstanceConfig(BaseModel):
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     charset: Optional[str] = None
+    collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     connect_timeout: Optional[float] = None

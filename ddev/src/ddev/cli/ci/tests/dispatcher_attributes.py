@@ -10,6 +10,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from ddev.cli.ci.dispatch_run import run_context
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchProgressUpdate, TestBatch
 from ddev.cli.ci.tests.status import has_run, job_status
 from ddev.event_bus.orchestrator import BaseMessage
@@ -68,6 +69,10 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
     ),
     'head_branch': AttributeSpec(
         'git.branch',
+        metric_tag=True,
+    ),
+    'head_tag': AttributeSpec(
+        'git.tag',
         metric_tag=True,
     ),
     'checkout_sha': AttributeSpec(
@@ -371,6 +376,7 @@ PROTECTED_RUN_FIELDS = frozenset(
         'repo',
         'repository_url',
         'head_branch',
+        'head_tag',
         'head_sha',
         'checkout_sha',
         'context',
@@ -498,11 +504,10 @@ def repository_fields(owner: str, repo: str) -> dict[str, str]:
 
 
 def run_fields(run: ResolvedRun, *, tags: Sequence[str] = ()) -> dict[str, Any]:
-    """Project run identity, retaining caller context only for non-PR runs."""
+    """Project run identity; the context is the run's, never a caller tag's."""
     fields: dict[str, Any] = tag_fields(tags)
     for name in PROTECTED_RUN_FIELDS:
-        if name != 'context':
-            fields.pop(name, None)
+        fields.pop(name, None)
 
     fields.update(
         {
@@ -510,17 +515,15 @@ def run_fields(run: ResolvedRun, *, tags: Sequence[str] = ()) -> dict[str, Any]:
             **repository_fields(run.owner, run.repo),
             'head_sha': run.head_sha,
             'head_branch': run.head_branch,
+            'head_tag': run.head_tag,
             'checkout_sha': run.checkout_sha,
             'pr_number': run.pr_number,
             'base_branch': run.base_branch,
             'base_sha': run.base_sha,
             'is_fork': run.is_fork,
+            'context': run_context(run.context, is_pr=run.pr_number is not None),
         }
     )
-    if run.pr_number is not None:
-        fields['context'] = 'pr'
-    elif 'context' not in fields:
-        fields['context'] = 'master'
     return fields
 
 

@@ -30,6 +30,7 @@ from ddev.utils.github_async.models import (
     GitHubUser,
     GitObject,
     GitReference,
+    GitTag,
     IssueComment,
     JobStep,
     JobStepStatus,
@@ -48,6 +49,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowJobStatus,
     WorkflowRun,
+    WorkflowRunsList,
 )
 
 
@@ -153,6 +155,21 @@ def make_git_reference(
     if url is UNSET:
         url = f'https://api.github.com/repos/DataDog/integrations-core/git/ref/{ref}'
     return GitReference(ref=ref, node_id=node_id, url=url, object=object if object is not None else make_git_object())
+
+
+def make_git_tag(
+    *,
+    tag: str = '7.85.0',
+    sha: str = 't' * 40,
+    node_id: str = 'TAG_kwDO',
+    url: str | Unset = UNSET,
+    object: GitObject | None = None,
+) -> GitTag:
+    if url is UNSET:
+        url = f'https://api.github.com/repos/DataDog/integrations-core/git/tags/{sha}'
+    return GitTag(
+        tag=tag, sha=sha, node_id=node_id, url=url, object=object if object is not None else make_git_object()
+    )
 
 
 def make_file_content(
@@ -355,12 +372,14 @@ def make_workflow_run(
     *,
     id: int = 123,
     name: str | None = 'test-batch',
+    display_title: str = 'Test Batch',
     status: str | None = 'completed',
     conclusion: str | None | Unset = UNSET,
     html_url: str | Unset = UNSET,
     created_at: str | None = None,
     updated_at: str | None = DEFAULT_COMPLETED_AT,
     run_started_at: str | None = DEFAULT_STARTED_AT,
+    run_attempt: int | None = 1,
 ) -> WorkflowRun:
     if conclusion is UNSET:
         conclusion = 'success' if status == 'completed' else None
@@ -369,12 +388,25 @@ def make_workflow_run(
     return WorkflowRun(
         id=id,
         name=name,
+        display_title=display_title,
         status=status,
         conclusion=conclusion,
         html_url=html_url,
         created_at=created_at,
         updated_at=updated_at,
         run_started_at=run_started_at,
+        run_attempt=run_attempt,
+    )
+
+
+def make_workflow_runs_list(
+    workflow_runs: Sequence[WorkflowRun] = (),
+    *,
+    total_count: int | None = None,
+) -> WorkflowRunsList:
+    return WorkflowRunsList(
+        total_count=total_count if total_count is not None else len(workflow_runs),
+        workflow_runs=list(workflow_runs),
     )
 
 
@@ -394,6 +426,7 @@ def make_workflow_job(
     *,
     id: int = 1,
     run_id: int = 123,
+    run_attempt: int | None = 1,
     name: str = 'test-job',
     status: WorkflowJobStatus = WorkflowJobStatus.COMPLETED,
     conclusion: WorkflowJobConclusion | None | Unset = UNSET,
@@ -421,6 +454,7 @@ def make_workflow_job(
     return WorkflowJob(
         id=id,
         run_id=run_id,
+        run_attempt=run_attempt,
         name=name,
         status=status,
         conclusion=conclusion,

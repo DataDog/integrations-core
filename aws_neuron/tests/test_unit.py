@@ -5,13 +5,14 @@
 import pytest
 
 from datadog_checks.aws_neuron import AwsNeuronCheck
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import RENAMED_LABELS, TEST_METRICS, get_fixture_path
 
 
-def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('aws_neuron_metrics.txt'))
+def test_check(dd_run_check, aggregator, instance, fake_http_response):
+    fake_http_response(instance['openmetrics_endpoint'], read_file_binary(get_fixture_path('aws_neuron_metrics.txt')))
 
     check = AwsNeuronCheck('aws_neuron', {}, [instance])
     dd_run_check(check)

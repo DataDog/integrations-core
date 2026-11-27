@@ -8,6 +8,7 @@ from datadog_checks.milvus.metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 class MilvusCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'milvus'
+    AGNOSTIC_HTTP_CLIENT = True
 
     DEFAULT_METRIC_LIMIT = 0
 

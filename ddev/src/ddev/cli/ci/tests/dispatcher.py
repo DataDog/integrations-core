@@ -31,6 +31,7 @@ from ddev.utils.rate_limiting import RelaxedRateLimits
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
+    from datetime import datetime
     from pathlib import Path
 
     from ddev.cli.ci.dispatch_run import ResolvedRun
@@ -225,6 +226,7 @@ def build_dispatcher(
     monitoring: MonitoringRuntime,
     tags: Sequence[str] = (),
     pytest_args: str = '',
+    started_at: datetime | None = None,
 ) -> Dispatcher:
     """Assemble the client, monitored tasks and Dispatcher from a plan and its resolved run.
 
@@ -282,6 +284,7 @@ def build_dispatcher(
         client,
         RunReporterOptions(owner=run.owner, repo=run.repo, pr_number=run.pr_number),
         monitor=monitoring.component('run-reporter'),
+        started_at=started_at,
     )
 
     return Dispatcher(

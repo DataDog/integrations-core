@@ -37,7 +37,8 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "avg:kong.total_requests{$scope} by {host}"
+                "query": "avg:kong.total_requests{$scope} by {host}",
+                "semantic_mode": "combined"
               }
             ],
             "formulas": [
@@ -125,7 +126,8 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "avg:kong.connections_active{$scope} by {host}"
+                "query": "avg:kong.connections_active{$scope} by {host}",
+                "semantic_mode": "combined"
               }
             ],
             "style": {
@@ -168,7 +170,8 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "avg:kong.connections_waiting{$scope} by {host}"
+                "query": "avg:kong.connections_waiting{$scope} by {host}",
+                "semantic_mode": "combined"
               }
             ],
             "style": {
@@ -211,12 +214,14 @@
               {
                 "data_source": "metrics",
                 "name": "query1",
-                "query": "avg:kong.connections_handled{$scope} by {host}"
+                "query": "avg:kong.connections_handled{$scope} by {host}",
+                "semantic_mode": "combined"
               },
               {
                 "data_source": "metrics",
                 "name": "query2",
-                "query": "avg:kong.connections_accepted{$scope} by {host}"
+                "query": "avg:kong.connections_accepted{$scope} by {host}",
+                "semantic_mode": "combined"
               }
             ],
             "formulas": [

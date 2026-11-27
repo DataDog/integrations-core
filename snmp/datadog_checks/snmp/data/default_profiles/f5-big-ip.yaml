@@ -9,6 +9,7 @@ extends:
   - _base.yaml
   - _generic-if.yaml # F5-specific variants of the other metrics are provided in this profile.
   - _generic-bgp4.yaml
+  - _generic-bfd.yaml
   - _generic-ospf.yaml
   - _generic-tcp.yaml
   - _generic-udp.yaml

@@ -190,7 +190,7 @@ def test_hp_ilo4(aggregator):
 We don't have simulation data yet, so the test should fail. Let's make sure it does:
 
 ```console
-$ ddev test -k test_hp_ilo4 snmp:py38
+$ ddev test snmp --envs default --pytest-args='-k test_hp_ilo4'
 [...]
 ======================================= FAILURES ========================================
 _____________________________________ test_hp_ilo4 ______________________________________
@@ -224,7 +224,7 @@ Add lines to the `.snmprec` file to specify the `sysobjectid` and the OID listed
 Run the test again, and make sure it passes this time:
 
 ```console
-$ ddev test -k test_hp_ilo4 snmp:py38
+$ ddev test snmp --envs default --pytest-args='-k test_hp_ilo4'
 [...]
 
 tests/test_profiles.py::test_hp_ilo4 PASSED                                                                                        [100%]

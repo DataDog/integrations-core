@@ -10,14 +10,13 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlsplit
-from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
 
 from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
 
 from .constants import AUTH_ERROR_CODES, PARSE_ERROR_CODE
 from .errors import PanosApiError, PanosAuthError, PanosError, PanosSkipped, PanosUnreachable
-from .xml_utils import check_response, parse_response, text
+from .xml_utils import parse_response, text
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
@@ -25,10 +24,6 @@ if TYPE_CHECKING:
     from .auth import KeyManager
 
 KEY_HEADER = 'X-PAN-KEY'
-STREAM_CHUNK_SIZE = 64 * 1024
-# Paths, from the root, of a log job's entries and status.
-LOG_ENTRY_PATH = ['response', 'result', 'log', 'logs', 'entry']
-LOG_STATUS_PATH = ['response', 'result', 'job', 'status']
 
 
 def api_url(host: str) -> str:
@@ -57,10 +52,9 @@ def post_api(
     data: dict[str, str],
     *,
     key: str | None = None,
-    stream: bool = False,
 ) -> ResponseWrapper:
     """POST form `data` to the XML API. The key, when given, goes only in the `X-PAN-KEY` header."""
-    options: dict[str, Any] = {'data': data, 'stream': stream}
+    options: dict[str, Any] = {'data': data}
     if key is not None:
         options['extra_headers'] = {KEY_HEADER: key}
     with transport_errors(url):
@@ -89,7 +83,7 @@ def _classify(status_code: int, error: PanosApiError) -> PanosApiError:
             return PanosApiError(str(status_code), f'HTTP {status_code}: {error.msg}', panos_response=False)
         return error
     if ROLE_REFUSAL in (error.msg or '').lower():
-        # The key works but the role lacks the permission (Log, Report, config): a new key would be refused too.
+        # The key works but the role lacks the permission (Report, config): a new key would be refused too.
         return error
     if status_code == 403 or error.code in AUTH_ERROR_CODES:
         # PAN's docs say code 16 means the role lacks permission, so a new key may not help. It is treated as an
@@ -142,7 +136,7 @@ class PanosClient:
         return self._send({'type': 'op', 'cmd': cmd}, read_response, renew_on_auth_error=renew_on_auth_error)
 
     def submit_job(self, params: dict[str, str]) -> str:
-        """Submit an asynchronous job (log query, report) and return its job id."""
+        """Submit an asynchronous job (report) and return its job id."""
         root = self._send(params, read_response)
         job_id = text(root, './result/job')
         if job_id is None:
@@ -156,15 +150,6 @@ class PanosClient:
         if status is None:
             raise PanosApiError(PARSE_ERROR_CODE, f'{job_type} job {job_id} response has no status')
         return status, root
-
-    def read_log_job(self, job_id: str, on_entry: Callable[[Element], None]) -> str:
-        """Read a log job with one streamed request and return its status (`ACT`, `FIN`, ...).
-
-        Once `FIN`, `on_entry` gets each entry, which is cleared when it returns. It runs while the call holds an
-        in-flight slot, so it must not call the client.
-        """
-        params = {'type': 'log', 'action': 'get', 'job-id': job_id}
-        return self._send(params, lambda resp: self._read_log(resp, job_id, on_entry), stream=True)
 
     def start_run(self) -> None:
         """Start the stats of a new run, which also ends the fail-fast state and allows one keygen after a rejected one.
@@ -184,7 +169,6 @@ class PanosClient:
         params: dict[str, str],
         read: Callable[[ResponseWrapper], T],
         *,
-        stream: bool = False,
         renew_on_auth_error: bool = True,
     ) -> T:
         """Make one call and `read` its response, renewing a rejected key once (unless `renew_on_auth_error` is off)."""
@@ -197,12 +181,12 @@ class PanosClient:
             try:
                 key = self._keys.key()
                 try:
-                    result = read(post_api(self._http, self._url, params, key=key, stream=stream))
+                    result = read(post_api(self._http, self._url, params, key=key))
                 except PanosAuthError as e:
                     if not renew_on_auth_error:
                         raise PanosApiError(e.code, e.msg) from None
                     self._log.debug('PAN-OS %s rejected the API key (code %s), renewing it', self._host, e.code)
-                    result = read(post_api(self._http, self._url, params, key=self._renew(key), stream=stream))
+                    result = read(post_api(self._http, self._url, params, key=self._renew(key)))
             except PanosError as e:
                 self._record(e)
                 raise
@@ -224,76 +208,3 @@ class PanosClient:
         with self._stats_lock:
             self._stats.key_regenerated = True
         return renewed
-
-    def _read_log(self, resp: ResponseWrapper, job_id: str, on_entry: Callable[[Element], None]) -> str:
-        """Check the response before the first entry, so a rejected key raises while `_send` can still renew it."""
-        with resp:
-            if resp.status_code >= 400:
-                with transport_errors(self._url):
-                    read_response(resp)
-            events = self._stream_events(resp)
-            first = next(events, None)
-            if first is None:
-                raise PanosApiError(PARSE_ERROR_CODE, 'response is empty', panos_response=False)
-            root = first[1]
-            if root.tag != 'response' or root.get('status') == 'error':
-                # The error message is in the body: read all of it first.
-                for _ in events:
-                    pass
-                try:
-                    check_response(root)
-                except PanosApiError as e:
-                    raise _classify(resp.status_code, e) from None
-            # PAN-OS answered, even if the body breaks later on.
-            self._record(None)
-            elements = _log_elements(root, events)
-            status_elem = next(elements, None)
-            if status_elem is None or status_elem.tag != 'status':
-                raise PanosApiError(PARSE_ERROR_CODE, f'log job {job_id} response has no status')
-            status = (status_elem.text or '').strip()
-            if status == 'FIN':
-                for entry in elements:
-                    on_entry(entry)
-            return status
-
-    def _stream_events(self, resp: ResponseWrapper) -> Iterator[tuple[str, Element]]:
-        parser: ET.XMLPullParser[Element] = ET.XMLPullParser(events=('start', 'end'))
-        try:
-            with transport_errors(self._url):
-                for chunk in resp.iter_content(chunk_size=STREAM_CHUNK_SIZE):
-                    parser.feed(chunk)
-                    yield from _element_events(parser)
-            parser.close()
-            yield from _element_events(parser)
-        except ET.ParseError as e:
-            raise PanosApiError(PARSE_ERROR_CODE, f'response is not valid XML: {e}', panos_response=False) from None
-
-
-def _log_elements(root: Element, events: Iterator[tuple[str, Element]]) -> Iterator[Element]:
-    """Yield `result/job/status`, then each log entry, which is cleared once the consumer advances."""
-    path: list[str] = [root.tag]
-    parent: Element | None = None
-    seen_status = False
-    for event, elem in events:
-        if event == 'start':
-            path.append(elem.tag)
-            if path == LOG_ENTRY_PATH[:-1]:
-                parent = elem
-            continue
-        if path == LOG_STATUS_PATH:
-            seen_status = True
-            yield elem
-        elif path == LOG_ENTRY_PATH and parent is not None:
-            if not seen_status:
-                raise PanosApiError(PARSE_ERROR_CODE, 'log job response has entries before its status')
-            yield elem
-            elem.clear()
-            parent.remove(elem)
-        path.pop()
-
-
-def _element_events(parser: ET.XMLPullParser[Element]) -> Iterator[tuple[str, Element]]:
-    # Only `start` and `end` are requested, so every event carries an element; the check narrows the type.
-    for item in parser.read_events():
-        if len(item) == 2 and isinstance(item[1], Element):
-            yield item[0], item[1]

@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "title": "Device hardware unhealthy",
+  "tags": [
+    "integration:hpe-aruba-edgeconnect"
+  ],
+  "definition": {
+    "name": "[HPE Aruba EdgeConnect] Device hardware unhealthy",
+    "type": "query alert",
+    "query": "avg(last_5m):avg:hpe_aruba_edgeconnect.device.hardware.ok{*} by {device_hostname,device_ip,site_name} < 1",
+    "message": "{{#is_alert}}\nEdgeConnect device {{device_hostname.name}} (IP: {{device_ip.name}}) at site: {{site_name.name}} is reporting unhealthy hardware status.\n\nHardware health is below the expected OK state.\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nEdgeConnect device {{device_hostname.name}} (IP: {{device_ip.name}}) at site: {{site_name.name}} is reporting healthy hardware status again.\n{{/is_alert_recovery}}",
+    "tags": [
+      "integration:hpe_aruba_edgeconnect"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 1
+      },
+      "notify_audit": false,
+      "include_tags": true,
+      "on_missing_data": "default",
+      "new_group_delay": 0,
+      "silenced": {}
+    },
+    "priority": 2
+  },
+  "created_at": "2026-05-20",
+  "last_updated_at": "2026-05-20",
+  "description": "Alerts when an EdgeConnect appliance reports an unhealthy hardware status."
+}

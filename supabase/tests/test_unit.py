@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from pathlib import Path
+
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
@@ -19,16 +21,28 @@ from .common import (
 
 
 @pytest.mark.parametrize(
-    'namespace, instance, metrics, fixture_name,',
+    'namespace, instance, metrics, fixture_name, endpoint_option',
     [
-        (PRIVILEGED_METRICS_NAMESPACE, PRIVILEGED_METRICS_INSTANCE, PRIVILEGED_METRICS, 'privileged_metrics.txt'),
-        (STORAGE_API_METRICS_NAMESPACE, STORAGE_API_INSTANCE, STORAGE_API_METRICS, 'storage_api_metrics.txt'),
+        (
+            PRIVILEGED_METRICS_NAMESPACE,
+            PRIVILEGED_METRICS_INSTANCE,
+            PRIVILEGED_METRICS,
+            'privileged_metrics.txt',
+            'privileged_metrics_endpoint',
+        ),
+        (
+            STORAGE_API_METRICS_NAMESPACE,
+            STORAGE_API_INSTANCE,
+            STORAGE_API_METRICS,
+            'storage_api_metrics.txt',
+            'storage_api_endpoint',
+        ),
     ],
 )
 def test_check_mock_supabase_openmetrics(
-    dd_run_check, instance, aggregator, fixture_name, metrics, mock_http_response, namespace
+    dd_run_check, instance, aggregator, fixture_name, endpoint_option, metrics, fake_http_response, namespace
 ):
-    mock_http_response(file_path=get_fixture_path(fixture_name))
+    fake_http_response(instance[endpoint_option], Path(get_fixture_path(fixture_name)).read_bytes())
     check = SupabaseCheck('supabase', {}, [instance])
     dd_run_check(check)
 

@@ -15,12 +15,13 @@ from packaging.version import parse as parse_version
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
-from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.serialization import json, to_json
 from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
 
 from . import common
 from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
+from .utils import obfuscate_exec_plan_literals, obfuscate_sql_literals
 
 logger = logging.getLogger(__name__)
 
@@ -456,6 +457,104 @@ def test_statement_metrics_reused_prepared_statement_instance_id_is_not_merged(d
     assert rows == []
 
 
+@pytest.mark.unit
+def test_statement_metrics_deallocated_prepared_statement_instances_are_not_retained(dbm_instance, datadog_agent):
+    # Clients that re-prepare a statement for every execution produce a new object_instance_begin per run. Once an
+    # instance is gone from prepared_statements_instances its cached row must be dropped, or the cache grows forever
+    # for any signature that stays active.
+    normalized_query = 'SELECT `id` FROM `dbm_order` WHERE `id` = ?'
+    query_signature = compute_sql_signature(normalized_query)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    statement_metrics = mysql_check.statement_metrics
+    runs = 50
+
+    def prepared_row(object_instance_begin, count_star):
+        return {
+            '_dd_statement_id': object_instance_begin,
+            'schema_name': 'personio',
+            'digest': None,
+            'digest_text': 'SELECT id FROM dbm_order WHERE id = ?',
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    def obfuscate_sql(query, options=None):
+        return json.dumps({'query': normalized_query, 'metadata': {}})
+
+    rows_by_run = iter([[prepared_row(1000 + run, 1)] for run in range(runs)])
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
+        mock.patch.object(statement_metrics, '_get_statement_count'),
+        mock.patch.object(statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+    ):
+        mock_agent.side_effect = obfuscate_sql
+
+        for _ in range(runs):
+            statement_metrics._collect_per_statement_metrics([])
+
+    assert len(statement_metrics._statement_rows[('personio', query_signature)]) == 1
+    assert len(statement_metrics._state._previous_statements) == 1
+
+
+@pytest.mark.unit
+def test_statement_metrics_live_prepared_statement_instance_keeps_its_baseline(dbm_instance, datadog_agent):
+    # Dropping deallocated instances must not touch instances that are still allocated, or digests that are absent
+    # from a run: those rows are kept so a statement that returns later is diffed rather than dumped.
+    normalized_query = 'SELECT `id` FROM `dbm_order` WHERE `id` = ?'
+    query_signature = compute_sql_signature(normalized_query)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    statement_metrics = mysql_check.statement_metrics
+
+    def prepared_row(object_instance_begin, count_star):
+        return {
+            '_dd_statement_id': object_instance_begin,
+            'schema_name': 'personio',
+            'digest': None,
+            'digest_text': 'SELECT id FROM dbm_order WHERE id = ?',
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    def digest_row(count_star):
+        return {
+            '_dd_statement_id': None,
+            'schema_name': 'personio',
+            'digest': 'digest-a',
+            'digest_text': 'SELECT id FROM dbm_order WHERE id = ?',
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    rows_by_run = iter(
+        [
+            [digest_row(100), prepared_row(1001, 10), prepared_row(2002, 20)],
+            # the digest row is absent and 2002 was deallocated; 1001 is still allocated
+            [prepared_row(1001, 15)],
+            [digest_row(107), prepared_row(1001, 18)],
+        ]
+    )
+
+    def obfuscate_sql(query, options=None):
+        return json.dumps({'query': normalized_query, 'metadata': {}})
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
+        mock.patch.object(statement_metrics, '_get_statement_count'),
+        mock.patch.object(statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+    ):
+        mock_agent.side_effect = obfuscate_sql
+
+        assert statement_metrics._collect_per_statement_metrics([]) == []
+        second = statement_metrics._collect_per_statement_metrics([])
+        third = statement_metrics._collect_per_statement_metrics([])
+
+    assert [row['count_star'] for row in second] == [5]
+    # digest-a contributes its delta (7) and 1001 contributes 3
+    assert [row['count_star'] for row in third] == [10]
+    assert len(statement_metrics._statement_rows[('personio', query_signature)]) == 2
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
@@ -728,6 +827,110 @@ def test_statement_samples_collect(
             assert event['db']['plan']['collection_errors'] is None
         assert event['timestamp'] is not None
         assert time.time() - event['timestamp'] < 60  # ensure the timestamp is recent
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
+def test_statement_samples_collect_raw_plan(aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent):
+    """A raw plan event pairs with the plan of a statement and carries the literal values the plan hides."""
+    dbm_instance['collect_raw_query_statement'] = {'enabled': True}
+    dbm_instance['query_samples']['collection_interval'] = CLOSE_TO_ZERO_INTERVAL
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    statement = "SELECT id, age FROM testdb.users WHERE name = 'Bob'"
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate_sql_literals),
+        mock.patch.object(datadog_agent, 'obfuscate_sql_exec_plan', side_effect=obfuscate_exec_plan_literals),
+    ):
+        dd_run_check(mysql_check)
+        aggregator.reset()
+        mysql_check.statement_samples._init_caches()
+        # keep the connection open so the statement remains in events_statements_current
+        with closing(bob_conn.cursor()) as cursor:
+            cursor.execute(statement)
+            dd_run_check(mysql_check)
+
+    samples = aggregator.get_event_platform_events("dbm-samples")
+    raw_plan_events = [e for e in samples if e['dbm_type'] == 'rqp' and e['db']['statement'] == statement]
+    assert len(raw_plan_events) == 1
+    raw_plan_event = raw_plan_events[0]
+    plan_events = [
+        e
+        for e in samples
+        if e['dbm_type'] == 'plan' and e['db']['query_signature'] == raw_plan_event['db']['query_signature']
+    ]
+    assert len(plan_events) == 1
+    plan_event = plan_events[0]
+
+    assert 'Bob' not in to_json(plan_event)
+    # the plan conditions hold the literal values, e.g. `attached_condition` on MySQL
+    assert 'Bob' in raw_plan_event['db']['plan']['definition']
+    assert raw_plan_event['db']['plan']['raw_signature'] == plan_event['db']['plan']['raw_signature']
+    assert 'raw_query_statement:enabled' in plan_event['ddtags'].split(',')
+
+
+def _plan_sample_row(sql_text, digest_text):
+    return {
+        'current_schema': 'testdb',
+        'sql_text': sql_text,
+        'digest_text': digest_text,
+        'timer_wait_ns': 12.9,
+        'end_event_id': None,
+        'processlist_host': 'localhost',
+    }
+
+
+RAW_PLAN = to_json(
+    {'query_block': {'table': {'table_name': 'users', 'attached_condition': "(`users`.`name` = 'alice')"}}}
+)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "enabled,sql_text,plan,expect_raw_plan",
+    [
+        pytest.param(True, "SELECT * FROM users WHERE name = 'alice'", RAW_PLAN, True, id='literal_values'),
+        pytest.param(False, "SELECT * FROM users WHERE name = 'alice'", RAW_PLAN, False, id='disabled'),
+        pytest.param(True, "SELECT * FROM users WHERE name = ?", RAW_PLAN, False, id='prepared_statement'),
+        pytest.param(True, "SELECT * FROM users WHERE name = 'alice'", None, False, id='no_plan'),
+    ],
+)
+def test_collect_plan_for_statement_raw_plan(dbm_instance, datadog_agent, enabled, sql_text, plan, expect_raw_plan):
+    """
+    A raw plan event only comes with a plan of a statement with literal values, both sharing the raw signature
+    used to look up the raw plan. Without a raw plan event, the plan has no raw signature to look up.
+    """
+    dbm_instance['collect_raw_query_statement'] = {'enabled': enabled}
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    mysql_check.statement_samples._tags = []
+    mysql_check.statement_samples._tags_str = ''
+    row = _plan_sample_row(sql_text, "SELECT * FROM users WHERE name = ?")
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate_sql_literals),
+        mock.patch.object(datadog_agent, 'obfuscate_sql_exec_plan', side_effect=obfuscate_exec_plan_literals),
+        mock.patch.object(mysql_check.statement_samples, '_get_db_connection'),
+        mock.patch.object(mysql_check.statement_samples, '_explain_statement', return_value=(plan, [])),
+    ):
+        events = mysql_check.statement_samples._collect_plan_for_statement(row)
+
+    plan_events = [e for e in events if e['dbm_type'] == 'plan']
+    raw_plan_events = [e for e in events if e['dbm_type'] == 'rqp']
+    assert len(plan_events) == 1
+    plan_event = plan_events[0]
+    assert 'alice' not in to_json(plan_event)
+    if not expect_raw_plan:
+        assert raw_plan_events == []
+        assert 'raw_signature' not in plan_event['db']['plan']
+        return
+    assert len(raw_plan_events) == 1
+    raw_plan_event = raw_plan_events[0]
+    assert raw_plan_event['db']['statement'] == sql_text
+    assert raw_plan_event['db']['plan']['definition'] == plan
+    assert raw_plan_event['db']['plan']['raw_signature']
+    assert raw_plan_event['db']['plan']['raw_signature'] == plan_event['db']['plan']['raw_signature']
+    assert raw_plan_event['db']['plan']['raw_signature'] != plan_event['db']['plan']['signature']
 
 
 @pytest.mark.parametrize(

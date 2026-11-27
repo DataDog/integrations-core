@@ -1,0 +1,72 @@
+# Full metric-coverage environment for the coredns check (the `coredns-full`
+# evalya task, see ../evalya.yaml and ../README.md).
+#
+# One unmodified CoreDNS 1.8.5 serves several zones, each wired to a plugin
+# state the check reports on: a template upstream behind cache + forward, a
+# forward to a dead upstream, a forward with max_concurrent to a slow upstream,
+# a reloaded hosts file, and a Corefile the reload plugin re-reads. A fixed-rate
+# workload drives every zone and changes each state-like value once mid-run.
+# Nothing reaches the internet: every upstream is loopback in the same process.
+#
+# All images are upstream or mirror images pinned by digest; nothing is built
+# locally.
+services:
+  # Copies the starting Corefile and hosts file into the shared config volume,
+  # writable, so workload can rewrite them mid-run, then exits.
+  seed:
+    image: registry.ddbuild.io/images/mirror/alpine:3.19@sha256:6baf43584bcb78f2e5847d1de515f23499913ac9f12bdf834811a3145eb11ca1
+    command:
+      - sh
+      - -c
+      - |
+        set -eu
+        cp /seed/Corefile /seed/hosts /etc/coredns/
+        chmod 0666 /etc/coredns/Corefile /etc/coredns/hosts
+        chmod 0777 /etc/coredns
+        echo "seeded /etc/coredns"
+    volumes:
+      - ../full-coverage:/seed:ro
+      - coredns-conf:/etc/coredns
+
+  # The entrypoint: DNS on :53, health on :8080, metrics on :9153. The upstream
+  # image is a static binary on scratch, so readiness is an HTTP probe on the
+  # health plugin (../evalya.yaml), not a shell healthcheck.
+  coredns:
+    image: coredns/coredns:1.8.5@sha256:43a9f52f5dce39bf1816afe6141724cc2d08811e466dd46e6628c925e2419bdc
+    command: ["-conf", "/etc/coredns/Corefile"]
+    volumes:
+      - coredns-conf:/etc/coredns
+    expose:
+      - "53"
+      - "8080"
+      - "9153"
+    # Pulls the workload up whenever coredns is requested. workload does not
+    # depend on coredns in turn (it waits for the name to resolve) to avoid a
+    # dependency cycle on the entrypoint service.
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+      workload:
+        condition: service_started
+
+  # Fixed-rate UDP queries per zone, plus one state change per state-like
+  # metric (../full-coverage/workload.py, ../README.md workload plan).
+  workload:
+    image: registry.ddbuild.io/images/mirror/python:3.12-alpine@sha256:236173eb74001afe2f60862de935b74fcbd00adfca247b2c27051a70a6a39a2d
+    command: ["python3", "-u", "/seed/workload.py"]
+    restart: unless-stopped
+    environment:
+      # Service name under plain compose; evalya aliases the entrypoint by its
+      # task id instead. workload.py uses whichever resolves first.
+      DNS_HOSTS: "coredns coredns-full"
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+      T_HOT_GROW: "${T_HOT_GROW:-450}"
+      T_RELOAD_BROKEN: "${T_RELOAD_BROKEN:-500}"
+      T_RELOAD_OK: "${T_RELOAD_OK:-530}"
+      T_HOSTS_GROW: "${T_HOSTS_GROW:-600}"
+    volumes:
+      - ../full-coverage:/seed:ro
+      - coredns-conf:/etc/coredns
+
+volumes:
+  coredns-conf:

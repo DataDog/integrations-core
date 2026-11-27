@@ -1,0 +1,35 @@
+version: "1"
+
+tasks:
+  # Full metric-coverage fixture: an unmodified CoreDNS 1.8.5 with one zone per
+  # plugin state the check reports on (cache + forward, a dead and a slow
+  # upstream, hosts, reload), plus a fixed-rate workload that keeps every
+  # counter moving and changes each state-like value once. Every metric is
+  # emitted live; nothing is recorded or injected. See
+  # ./compose/full-coverage.compose and ./README.md.
+  - id: coredns-full
+    task: ./compose/full-coverage.compose@coredns
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DNS_HOST: "{{ .hostname }}"
+      evalya.io/provides.DNS_PORT: "53"
+      evalya.io/provides.METRICS_PORT: "9153"
+    env:
+      - name: ACTIVITY_GEN
+        value: "${ACTIVITY_GEN:-1}"
+      - name: T_HOT_GROW
+        value: "${T_HOT_GROW:-450}"
+      - name: T_RELOAD_BROKEN
+        value: "${T_RELOAD_BROKEN:-500}"
+      - name: T_RELOAD_OK
+        value: "${T_RELOAD_OK:-530}"
+      - name: T_HOSTS_GROW
+        value: "${T_HOSTS_GROW:-600}"
+    # coredns/coredns has no shell, so readiness is an HTTP probe on the health
+    # plugin instead of a CMD-SHELL healthcheck.
+    probe:
+      httpGet:
+        path: /health
+        port: 8080
+      interval: 2s
+      retries: 30

@@ -12,10 +12,14 @@ for the metrics that measure queueing and execution.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence, Set
 from enum import StrEnum, auto
+from typing import TYPE_CHECKING
 
 from ddev.utils.github_async.models.workflow import WorkflowJob, WorkflowJobConclusion, WorkflowJobStatus
+
+if TYPE_CHECKING:
+    from structlog.stdlib import BoundLogger
 
 # Must match `timeout-minutes` of the `test` and `test_fork` jobs in `.github/workflows/test-batch.yml`.
 TEST_JOB_TIMEOUT_MINUTES = 120
@@ -98,3 +102,57 @@ def batch_status(conclusion: str | None, jobs: Iterable[WorkflowJob]) -> Status:
     if status is Status.CANCELLED and any(timed_out(job) for job in jobs):
         return Status.FAILURE
     return status
+
+
+def final_batch_status(
+    conclusion: str | None,
+    jobs: Sequence[WorkflowJob],
+    *,
+    batch_id: str,
+    run_attempt: int | None,
+    test_job_names: Set[str],
+    logger: BoundLogger,
+) -> Status:
+    """After reconciling jobs, report success if teardown was the only failure."""
+    status = batch_status(conclusion, jobs)
+    if conclusion != WorkflowJobConclusion.FAILURE or run_attempt is None:
+        return status
+
+    setup_passed = False
+    failed_teardown = None
+    passed_tests = set()
+    for job in jobs:
+        if job.status is not WorkflowJobStatus.COMPLETED:
+            return status
+        if (job.name in ("setup", "teardown") or job.name in test_job_names) and job.run_attempt != run_attempt:
+            return status
+        if job.name == "setup":
+            if job.conclusion is not WorkflowJobConclusion.SUCCESS:
+                return status
+            setup_passed = True
+        elif job.name == "teardown":
+            if job.conclusion is not WorkflowJobConclusion.FAILURE:
+                return status
+            failed_teardown = job
+        elif job.conclusion is WorkflowJobConclusion.SUCCESS:
+            passed_tests.add(job.name)
+        elif job.conclusion is not WorkflowJobConclusion.SKIPPED:
+            return status
+
+    # The unused test/test_fork twin is skipped. Require every planned test to have passed,
+    # since a partial job listing can omit a failed test.
+    if not setup_passed or failed_teardown is None or not test_job_names or not test_job_names <= passed_tests:
+        return status
+
+    logger.warning(
+        "Batch %s (run %s) passed its tests, but %s job %s failed",
+        batch_id,
+        failed_teardown.run_id,
+        failed_teardown.name,
+        failed_teardown.id,
+        batch_id=batch_id,
+        run_id=failed_teardown.run_id,
+        job_id=failed_teardown.id,
+        job_url=failed_teardown.html_url,
+    )
+    return Status.SUCCESS

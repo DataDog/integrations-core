@@ -21,6 +21,8 @@ MOCKED_INSTANCE = {
     'queue_controller_endpoint': QUEUE_CONTROLLER_ENDPOINT,
     'binder_endpoint': BINDER_ENDPOINT,
     'tags': ['test:tag'],
+    # The PodGroup event tests build their collector directly instead of calling the Kubernetes API.
+    'collect_podgroup_events': False,
 }
 
 # The fixtures are captured from the e2e environment, which does not configure a UsageDB or leader election and never

@@ -1,0 +1,356 @@
+# Synthesized fixture, NOT a live capture.
+#
+# Coordinator metrics. Names, types, HELP text, label names, and bucket ladders are transcribed from:
+#
+#   llm-d/llm-d-router @ 7bdf81e1b121f730926824d66eee59e6f826a593 (main, after v1.0.0)
+#     pkg/coordinator/metrics/llm_d_coordinator_metrics.go
+#     pkg/coordinator/metrics/metrics.go             CountBuckets and label sets
+#     pkg/common/observability/metrics/metrics.go    shared bucket ladders
+# HELP llm_d_coordinator_conditional_decode_probes_total [ALPHA] Total number of conditional-decode probes by the worker's answer: served inline (2xx/3xx), deferred (HTTP 412) to the full pipeline, error (any other 4xx/5xx), or transport_error (no response received).
+# TYPE llm_d_coordinator_conditional_decode_probes_total counter
+llm_d_coordinator_conditional_decode_probes_total{result="served"} 12
+# HELP llm_d_coordinator_encode_subrequests [ALPHA] Number of Encode subrequests produced by one client request. Observed once per pipeline execution after fan-out is known; 0 when Encode does not run or is skipped. Unit: subrequests.
+# TYPE llm_d_coordinator_encode_subrequests histogram
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="0"} 2
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="1"} 2
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="2"} 3
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="4"} 3
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="8"} 3
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="16"} 3
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="32"} 3
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="64"} 3
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="128"} 3
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="256"} 3
+llm_d_coordinator_encode_subrequests_bucket{route="chat_completions",le="+Inf"} 3
+llm_d_coordinator_encode_subrequests_sum{route="chat_completions"} 2
+llm_d_coordinator_encode_subrequests_count{route="chat_completions"} 3
+# HELP llm_d_coordinator_execution_path_total [ALPHA] Total number of client requests by the set of disaggregation phases actually executed.
+# TYPE llm_d_coordinator_execution_path_total counter
+llm_d_coordinator_execution_path_total{model_name="meta-llama/Llama-3.1-8B-Instruct",path="prefill-decode"} 30
+# HELP llm_d_coordinator_force_stream_buffered_bytes [ALPHA] Bytes currently reserved against the force-stream buffer budget by in-flight forced requests.
+# TYPE llm_d_coordinator_force_stream_buffered_bytes gauge
+llm_d_coordinator_force_stream_buffered_bytes 0
+# HELP llm_d_coordinator_force_stream_total [ALPHA] Total number of force-stream candidate requests by model and outcome: forced (reassembled from a streamed upstream into one reply and written to the client), fallback_budget (budget full), fallback_unbounded (the reply estimate exceeds the per-request cap: a declared token limit too large for it, or an n whose per-choice overhead alone exceeds it), fallback_unsupported (declined before any upstream call: the request declares a field the reassembler drops, the engine would not serve it as a stream, or the kv-sglang connector, whose decode server cannot recompute a prompt on fallback), fallback_lossy_frame (a streamed frame carried a field the reassembler drops, such as reasoning from a server-side parser, so the request is re-sent after one upstream attempt; with a one-shot KV handoff the decode pod recomputes the prompt), fallback_oversize (Responses completed frame larger than the reservation plus the request body), fallback_unreadable (upstream 200 but a stream it could not parse), error_ceiling (buffered reply exceeded its reserved budget, usually a short byte estimate), error_upstream (upstream 4xx/5xx, or an error frame streamed after the 200, forwarded to the client), or error_transport (no upstream response). The fallback outcomes and error_ceiling take the non-forced pass-through; when the forced attempt already consumed a one-shot KV block handoff, the pass-through drops it and decode recomputes the prompt; error_upstream and error_transport are also classified generically by step_errors_total.
+# TYPE llm_d_coordinator_force_stream_total counter
+llm_d_coordinator_force_stream_total{model_name="meta-llama/Llama-3.1-8B-Instruct",result="forced"} 5
+# HELP llm_d_coordinator_info [ALPHA] General information of the current build of the coordinator.
+# TYPE llm_d_coordinator_info gauge
+llm_d_coordinator_info{build_ref="main",commit="7bdf81e1b121f730926824d66eee59e6f826a593"} 1
+# HELP llm_d_coordinator_media_download_duration_seconds [ALPHA] Duration of one outbound media download attempt. Observed at the end of each HTTP fetch, including failed and cancelled attempts. Requests rejected before the dial (invalid URL, disallowed scheme, or host not in allowed_domains) and data URIs are not downloads. Unit: seconds.
+# TYPE llm_d_coordinator_media_download_duration_seconds histogram
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="0.005"} 0
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="0.025"} 0
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="0.05"} 1
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="0.1"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="0.2"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="0.4"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="0.6"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="0.8"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="1"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="1.25"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="1.5"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="2"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="3"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="4"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="5"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="6"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="8"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="10"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="15"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="20"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="30"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="45"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="60"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="120"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="180"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="240"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="300"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="360"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="480"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="600"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="900"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="1200"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="1800"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="2700"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="3600"} 2
+llm_d_coordinator_media_download_duration_seconds_bucket{result="success",le="+Inf"} 2
+llm_d_coordinator_media_download_duration_seconds_sum{result="success"} 0.12
+llm_d_coordinator_media_download_duration_seconds_count{result="success"} 2
+# HELP llm_d_coordinator_media_items [ALPHA] Number of media items of one type found in one client request. Observed once per type after the request's media inventory is known. Unit: items.
+# TYPE llm_d_coordinator_media_items histogram
+llm_d_coordinator_media_items_bucket{media_type="image",le="0"} 1
+llm_d_coordinator_media_items_bucket{media_type="image",le="1"} 2
+llm_d_coordinator_media_items_bucket{media_type="image",le="2"} 3
+llm_d_coordinator_media_items_bucket{media_type="image",le="4"} 3
+llm_d_coordinator_media_items_bucket{media_type="image",le="8"} 3
+llm_d_coordinator_media_items_bucket{media_type="image",le="16"} 3
+llm_d_coordinator_media_items_bucket{media_type="image",le="32"} 3
+llm_d_coordinator_media_items_bucket{media_type="image",le="64"} 3
+llm_d_coordinator_media_items_bucket{media_type="image",le="128"} 3
+llm_d_coordinator_media_items_bucket{media_type="image",le="256"} 3
+llm_d_coordinator_media_items_bucket{media_type="image",le="+Inf"} 3
+llm_d_coordinator_media_items_sum{media_type="image"} 3
+llm_d_coordinator_media_items_count{media_type="image"} 3
+# HELP llm_d_coordinator_orchestration_overhead_seconds [ALPHA] Coordinator wall time outside request parsing and pipeline step execution. Observed once per client request as max(0, total-parse-sum(steps)). Unit: seconds.
+# TYPE llm_d_coordinator_orchestration_overhead_seconds histogram
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="0.005"} 1
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="0.025"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="0.05"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="0.1"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="0.2"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="0.4"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="0.6"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="0.8"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="1"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="1.25"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="1.5"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="2"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="3"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="4"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="5"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="6"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="8"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="10"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="15"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="20"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="30"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="45"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="60"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="120"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="180"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="240"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="300"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="360"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="480"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="600"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="900"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="1200"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="1800"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="2700"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="3600"} 3
+llm_d_coordinator_orchestration_overhead_seconds_bucket{route="chat_completions",le="+Inf"} 3
+llm_d_coordinator_orchestration_overhead_seconds_sum{route="chat_completions"} 0.02
+llm_d_coordinator_orchestration_overhead_seconds_count{route="chat_completions"} 3
+# HELP llm_d_coordinator_prompt_token_mismatch_total [ALPHA] Total number of decode responses, including served conditional-decode hits, whose prompt token count differed from the rendered token count.
+# TYPE llm_d_coordinator_prompt_token_mismatch_total counter
+llm_d_coordinator_prompt_token_mismatch_total{api_type="chat_completions",ids_forwarded="true",model_name="meta-llama/Llama-3.1-8B-Instruct"} 0
+# HELP llm_d_coordinator_request_duration_seconds [ALPHA] End-to-end request latency distribution in seconds.
+# TYPE llm_d_coordinator_request_duration_seconds histogram
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 0
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.025"} 0
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 0
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 0
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.2"} 0
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.4"} 0
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.6"} 0
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.8"} 0
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 1
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.25"} 1
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.5"} 2
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="2"} 2
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="3"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="4"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="5"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="6"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="10"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="15"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="20"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="30"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="45"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="60"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="120"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="180"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="240"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="300"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="360"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="480"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="600"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="900"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1200"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1800"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="2700"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="3600"} 3
+llm_d_coordinator_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_coordinator_request_duration_seconds_sum{model_name="meta-llama/Llama-3.1-8B-Instruct"} 4.7
+llm_d_coordinator_request_duration_seconds_count{model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_coordinator_request_error_total [ALPHA] Total number of failed client requests.
+# TYPE llm_d_coordinator_request_error_total counter
+llm_d_coordinator_request_error_total{error_code="upstream_5xx",model_name="meta-llama/Llama-3.1-8B-Instruct"} 1
+# HELP llm_d_coordinator_request_input_tokens [ALPHA] Prompt token count distribution per client request, measured after render.
+# TYPE llm_d_coordinator_request_input_tokens histogram
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 0
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 0
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="16"} 0
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="32"} 0
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 0
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 1
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 2
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 2
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="16384"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="32768"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="65536"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="131072"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="262144"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="524288"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1048576"} 3
+llm_d_coordinator_request_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_coordinator_request_input_tokens_sum{model_name="meta-llama/Llama-3.1-8B-Instruct"} 970
+llm_d_coordinator_request_input_tokens_count{model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_coordinator_request_running [ALPHA] Requests currently being processed by the coordinator.
+# TYPE llm_d_coordinator_request_running gauge
+llm_d_coordinator_request_running{model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_coordinator_request_size_bytes [ALPHA] Incoming request body size distribution in bytes.
+# TYPE llm_d_coordinator_request_size_bytes histogram
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 0
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 0
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 0
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 1
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 2
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="16384"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="32768"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="65536"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="131072"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="262144"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="524288"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1048576"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="2097152"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="4194304"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="8388608"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="16777216"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="33554432"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="67108864"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="134217728"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="268435456"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="536870912"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="1073741824"} 3
+llm_d_coordinator_request_size_bytes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_coordinator_request_size_bytes_sum{model_name="meta-llama/Llama-3.1-8B-Instruct"} 3460
+llm_d_coordinator_request_size_bytes_count{model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_coordinator_request_total [ALPHA] Total number of inbound client requests, including malformed ones.
+# TYPE llm_d_coordinator_request_total counter
+llm_d_coordinator_request_total{model_name="meta-llama/Llama-3.1-8B-Instruct"} 42
+# HELP llm_d_coordinator_response_size_bytes [ALPHA] Total bytes written to the client for one request, including partial writes on cancellation or disconnect. Observed once per client request. Unit: bytes.
+# TYPE llm_d_coordinator_response_size_bytes histogram
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="16"} 0
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="32"} 0
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="64"} 0
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="128"} 0
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="256"} 0
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="512"} 0
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="1024"} 1
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="2048"} 2
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="4096"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="8192"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="16384"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="32768"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="65536"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="131072"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="262144"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="524288"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="1048576"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="2097152"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="4194304"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="8388608"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="16777216"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="33554432"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="67108864"} 3
+llm_d_coordinator_response_size_bytes_bucket{stream="true",le="+Inf"} 3
+llm_d_coordinator_response_size_bytes_sum{stream="true"} 5200
+llm_d_coordinator_response_size_bytes_count{stream="true"} 3
+# HELP llm_d_coordinator_step_duration_seconds [ALPHA] Per-step wall-time latency distribution in seconds.
+# TYPE llm_d_coordinator_step_duration_seconds histogram
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="0.005"} 0
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="0.025"} 0
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="0.05"} 0
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="0.1"} 1
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="0.2"} 2
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="0.4"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="0.6"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="0.8"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="1"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="1.25"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="1.5"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="2"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="3"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="4"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="5"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="6"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="8"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="10"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="15"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="20"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="30"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="45"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="60"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="120"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="180"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="240"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="300"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="360"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="480"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="600"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="900"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="1200"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="1800"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="2700"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="3600"} 3
+llm_d_coordinator_step_duration_seconds_bucket{step="prefill",le="+Inf"} 3
+llm_d_coordinator_step_duration_seconds_sum{step="prefill"} 0.55
+llm_d_coordinator_step_duration_seconds_count{step="prefill"} 3
+# HELP llm_d_coordinator_step_errors_total [ALPHA] Total number of pipeline-step failures.
+# TYPE llm_d_coordinator_step_errors_total counter
+llm_d_coordinator_step_errors_total{error_code="upstream_5xx",step="prefill"} 1
+# HELP llm_d_coordinator_step_running [ALPHA] Requests currently executing each pipeline step. For decode this stays high while the response streams.
+# TYPE llm_d_coordinator_step_running gauge
+llm_d_coordinator_step_running{step="decode"} 2
+# HELP llm_d_coordinator_upstream_request_duration_seconds [ALPHA] Latency distribution of a single outbound call to an upstream service.
+# TYPE llm_d_coordinator_upstream_request_duration_seconds histogram
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="0.005"} 0
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="0.025"} 0
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="0.05"} 0
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="0.1"} 1
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="0.2"} 2
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="0.4"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="0.6"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="0.8"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="1"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="1.25"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="1.5"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="2"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="3"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="4"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="5"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="6"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="8"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="10"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="15"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="20"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="30"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="45"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="60"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="120"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="180"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="240"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="300"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="360"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="480"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="600"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="900"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="1200"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="1800"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="2700"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="3600"} 3
+llm_d_coordinator_upstream_request_duration_seconds_bucket{upstream="prefill",le="+Inf"} 3
+llm_d_coordinator_upstream_request_duration_seconds_sum{upstream="prefill"} 0.51
+llm_d_coordinator_upstream_request_duration_seconds_count{upstream="prefill"} 3
+# HELP llm_d_coordinator_upstream_request_total [ALPHA] Total number of outbound calls to upstream services, one per call.
+# TYPE llm_d_coordinator_upstream_request_total counter
+llm_d_coordinator_upstream_request_total{upstream="prefill"} 42

@@ -2,7 +2,21 @@
 
 <!-- towncrier release notes start -->
 
-## 3.5.0 / 2026-10-01
+## 4.0.0 / 2026-11-25
+
+***Changed***:
+
+* Bump minimum version of base check to 38.11.0. ([#26073](https://github.com/DataDog/integrations-core/pull/26073))
+
+***Added***:
+
+* Use the backend-neutral HTTP client, so HTTP requests and their errors no longer depend on `requests`. ([#26073](https://github.com/DataDog/integrations-core/pull/26073))
+
+***Fixed***:
+
+* Add the `collect_histograms_as_distributions` option to the configuration example and config models. ([#25590](https://github.com/DataDog/integrations-core/pull/25590))
+
+## 3.5.0 / 2026-10-01 / Agent 7.85.0
 
 ***Added***:
 

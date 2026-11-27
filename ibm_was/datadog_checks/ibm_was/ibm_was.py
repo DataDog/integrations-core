@@ -1,12 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from xml.etree.ElementTree import ParseError
-
 import requests
 from lxml import etree
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
+from datadog_checks.base.utils.native_memory import malloc_trim
 
 from . import metrics, validation
 
@@ -41,14 +40,23 @@ class IbmWasCheck(AgentCheck):
             raise ConfigurationError("Please specify a servlet_url in the configuration file")
 
     def check(self, _):
+        try:
+            self._run_check()
+        finally:
+            malloc_trim()
+
+    def _run_check(self):
         data = self.make_request()
 
         try:
             server_data_xml = etree.fromstring(data)
-        except ParseError as e:
+        except etree.XMLSyntaxError as e:
             self.submit_service_checks(AgentCheck.CRITICAL)
-            self.log.Error("Unable to parse the XML response: {}".format(e))
+            self.log.error("Unable to parse the XML response: %s", e)
             return
+
+        # Reporting OK before this point would pair it with CRITICAL on a malformed response.
+        self.submit_service_checks(AgentCheck.OK)
 
         node_list = self.get_node_from_root(server_data_xml, "Node")
 
@@ -121,11 +129,9 @@ class IbmWasCheck(AgentCheck):
         try:
             resp = self.http.get(self.url)
             resp.raise_for_status()
-            self.submit_service_checks(AgentCheck.OK)
-        except (requests.HTTPError, requests.ConnectionError) as e:
-            self.warning(
-                "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", self.url, e
-            )
+        except requests.RequestException as e:
+            # Broad by design: ReadTimeout descends from Timeout, not ConnectionError.
+            self.warning("Request to %s failed: %s", self.url, e)
             self.submit_service_checks(AgentCheck.CRITICAL)
             raise e
         return resp.content

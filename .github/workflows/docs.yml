@@ -19,6 +19,10 @@ on:
     # broke the docs job (pydantic incompatible with ddev's version) but we didn't find out until later.
     - 'datadog_checks_base/pyproject.toml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest

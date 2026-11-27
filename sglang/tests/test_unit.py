@@ -33,6 +33,27 @@ def test_check_collects_metrics_with_percentiles_enabled(dd_run_check, aggregato
         )
 
     aggregator.assert_metric_has_tag('sglang.http.requests.active', 'http_endpoint:/generate')
+    # Cache diagnostics must preserve worker identity instead of merging DP ranks.
+    for rank, value in (('0', 2048), ('1', 4096)):
+        aggregator.assert_metric(
+            'sglang.hicache.host.used_tokens',
+            value=value,
+            metric_type=aggregator.GAUGE,
+            tags=[
+                'test:test',
+                f'endpoint:{instance["openmetrics_endpoint"]}',
+                'model_name:test-model',
+                'engine_type:unified',
+                f'dp_rank:{rank}',
+                'tp_rank:0',
+            ],
+        )
+    aggregator.assert_metric('sglang.kv_cache.evicted_tokens.count', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('sglang.hicache.load_back.tokens.count', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric_has_tag('sglang.hicache.load_back.tokens.count', 'pool:kv')
+    aggregator.assert_metric('sglang.forward_execution.occupancy', value=75, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('sglang.hicache.load_back.seconds.sum', value=0.5)
+    aggregator.assert_metric('sglang.hicache.load_back.seconds.count', value=2)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('sglang.openmetrics.health', ServiceCheck.OK)

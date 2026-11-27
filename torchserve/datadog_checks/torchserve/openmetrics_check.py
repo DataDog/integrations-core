@@ -11,6 +11,7 @@ from datadog_checks.torchserve.metrics import OPENMETRICS_METRIC_MAP
 class TorchserveOpenMetricsCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'torchserve.openmetrics'
     DEFAULT_METRIC_LIMIT = 0
+    AGNOSTIC_HTTP_CLIENT = True
 
     def create_scraper(self, config):
         # All metrics are prefixed with their endpoint.

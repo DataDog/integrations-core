@@ -10,6 +10,7 @@
        power 4: alarm False while Volts is above max (PAN's alarm field wins)
        power 5: alarm True without thresholds (direction unknown)
        power 6: alarm True, Volts below min
+       power 7: alarm True without a voltage reading (only the alarm is known)
        thermal 1: alarm False
        thermal 2: alarm True
        thermal 3: alarm yes -->
@@ -24,6 +25,7 @@
     </Slot1>
     <Slot2>
       <entry><slot>2</slot><description>Power Supply 6</description><alarm>True</alarm><Volts>10.2</Volts><min>10.8</min><max>13.2</max></entry>
+      <entry><slot>2</slot><description>Power Supply 7</description><alarm>True</alarm></entry>
     </Slot2>
   </power>
   <thermal>

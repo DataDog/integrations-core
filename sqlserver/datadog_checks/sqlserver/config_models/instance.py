@@ -49,6 +49,16 @@ class Azure(BaseModel):
     fully_qualified_domain_name: Optional[str] = None
 
 
+class CollectColumnStatistics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_tables: Optional[int] = None
+
+
 class CollectDeadlocks(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -109,6 +119,18 @@ class QueryErrors(BaseModel):
     max_events: Optional[int] = Field(None, examples=[1000])
 
 
+class QueryPlans(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, examples=[10])
+    enabled: Optional[bool] = Field(None, examples=[False])
+    max_events: Optional[int] = Field(None, examples=[1000])
+    max_plan_size_bytes: Optional[int] = Field(None, examples=[1000000])
+    samples_per_hour_per_query: Optional[int] = Field(None, examples=[4])
+
+
 class CollectXe(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -117,6 +139,7 @@ class CollectXe(BaseModel):
     debug_sample_events: Optional[int] = None
     query_completions: Optional[QueryCompletions] = None
     query_errors: Optional[QueryErrors] = None
+    query_plans: Optional[QueryPlans] = None
 
 
 class CustomQuery(BaseModel):
@@ -494,6 +517,7 @@ class InstanceConfig(BaseModel):
     autodiscovery_include: Optional[tuple[str, ...]] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
+    collect_column_statistics: Optional[CollectColumnStatistics] = None
     collect_deadlocks: Optional[CollectDeadlocks] = None
     collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_schemas: Optional[CollectSchemas] = None

@@ -2,12 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
+import re
 import time
 from contextlib import closing
 from enum import Enum
 
 import pymysql
 
+from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql.cursor import CommenterCursor
 
 # First version exposing the `explain_json_format_version` system variable
@@ -50,6 +55,94 @@ def get_truncation_state(statement):
     # a statement is truncated
     truncated = statement[-3:] == '...'
     return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+
+
+# The field of `EXTRACT(field FROM ...)` that the obfuscator replaces with a placeholder even though it is no
+# literal value, as listed by go-sqllexer (`extractFieldKeywords`)
+EXTRACT_FIELD_PATTERN = re.compile(
+    r'(\bEXTRACT\s*\(\s*)(?:CENTURY|DAY|DECADE|DOW|DOY|EPOCH|HOUR|ISODOW|ISOYEAR|JULIAN|MICROSECONDS|MILLENNIUM'
+    r'|MILLISECONDS|MINUTE|MONTH|QUARTER|SECOND|TIMEZONE|TIMEZONE_HOUR|TIMEZONE_MINUTE|WEEK|YEAR)\b',
+    re.IGNORECASE,
+)
+# A quoted user variable name such as `@'id'`, whose name the obfuscator replaces like a string literal
+QUOTED_USER_VARIABLE_PATTERN = re.compile(r"@(?:'(?:[^'\\]|\\.|'')*'|\"(?:[^\"\\]|\\.|\"\")*\")")
+# The quoted texts and comments of a statement, read from left to right as the obfuscator does, so that comment
+# markers inside quotes or line comments are not taken for block comments. An unterminated token runs to the end.
+QUOTED_TEXT_OR_COMMENT_PATTERN = re.compile(
+    r"'(?:[^'\\]|\\.|'')*'?"
+    r'|"(?:[^"\\]|\\.|"")*"?'
+    r'|`(?:[^`]|``)*`?'
+    r'|/\*(?:[^*]|\*(?!/))*(?:\*/)?'
+    r'|(?:--|#)[^\n]*',
+    re.DOTALL,
+)
+
+
+def get_obfuscate_only_options(obfuscator_options: dict) -> str:
+    """Serialize the obfuscator options used by `has_literal_values`."""
+    return to_native_string(
+        json.dumps(
+            {
+                **obfuscator_options,
+                'obfuscation_mode': 'obfuscate_only',
+                # Only string and number literals carry values, so turn off the replacements of
+                # identifier digits, NULL, booleans, positional parameters and JSON paths.
+                'replace_digits': False,
+                'keep_null': True,
+                'keep_boolean': True,
+                'keep_positional_parameter': True,
+                'keep_json_path': True,
+            }
+        )
+    )
+
+
+def has_literal_values(raw_statement: str, obfuscate_only_options: str, log: logging.Logger) -> bool:
+    """
+    Whether the raw statement has string or number literals that obfuscation hides, making it worth
+    collecting as raw text.
+
+    Statement texts holding only `?` placeholders, such as prepared statement texts, carry no values.
+    Comparing the raw text with its regular obfuscated form is unreliable because normalization also
+    rewrites it (whitespace, comments, grouped placeholders). With the options of `get_obfuscate_only_options`,
+    the obfuscator only replaces literal tokens, the `EXTRACT` fields and quoted user variable names, keeping
+    every other token as is. So once the block comments of both texts are removed and their `EXTRACT` fields
+    and quoted user variable names are replaced the same way, the raw text has literal values exactly when
+    that obfuscation changes it. Doing this to both texts also leaves alike any text that only looks like
+    these tokens, such as a comment mentioning `EXTRACT`.
+
+    Returns True when the obfuscation fails, since raw statement collection is explicitly enabled.
+    """
+    try:
+        obfuscated = obfuscate_sql_with_metadata(raw_statement, obfuscate_only_options)['query']
+    except Exception as e:
+        log.debug("Failed to obfuscate raw statement to detect literal values | err=[%s]", e)
+        return True
+    # obfuscate_sql_with_metadata removes null characters and the obfuscator trims surrounding whitespace
+    raw_statement = raw_statement.replace('\x00', '').strip()
+    return _replace_nonliteral_placeholders(obfuscated) != _replace_nonliteral_placeholders(raw_statement)
+
+
+def _replace_nonliteral_placeholders(statement: str) -> str:
+    """Replace the tokens that the obfuscator turns into placeholders although they carry no values."""
+    statement = EXTRACT_FIELD_PATTERN.sub(r'\1?', _remove_block_comments(statement))
+    return QUOTED_USER_VARIABLE_PATTERN.sub('@?', statement)
+
+
+def _remove_block_comments(statement: str) -> str:
+    """
+    Replace each terminated `/* ... */` comment with a space, keeping quoted texts, line comments and an
+    unterminated block comment as they are. The statement is read once: an unterminated token runs to its end
+    instead of being searched for a terminator again from every later position.
+    """
+    return QUOTED_TEXT_OR_COMMENT_PATTERN.sub(_blank_block_comment, statement)
+
+
+def _blank_block_comment(match: re.Match) -> str:
+    token = match.group()
+    if len(token) >= 4 and token.startswith('/*') and token.endswith('*/'):
+        return ' '
+    return token
 
 
 def supports_explain_json_format_version(version):

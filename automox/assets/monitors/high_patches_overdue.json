@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "created_at": "2026-10-04",
+    "last_updated_at": "2026-10-04",
+    "title": "High-severity patches are overdue",
+    "description": "A high-severity patch, CVSS 7 to 8.9, has been outstanding on a device for more than 30 days since Automox first listed it.",
+    "definition": {
+        "name": "[Automox] High-severity patches are overdue",
+        "type": "query alert",
+        "query": "max(last_13h):max:automox.device.packages.oldest_pending_days{severity:high} by {organization_id,automox_device} > 30",
+        "message": "{{#is_alert}}\n{{automox_device.name}} has had a high-severity patch outstanding for {{value}} days, past the {{threshold}}-day deadline.\n{{/is_alert}}\n{{#is_warning}}\n{{automox_device.name}} has had a high-severity patch outstanding for {{value}} days. The deadline is {{threshold}} days.\n{{/is_warning}}\n{{#is_recovery}}\n{{automox_device.name}} has no high-severity patch outstanding for longer than {{warn_threshold}} days.\n{{/is_recovery}}\n\nOrganization: {{organization_id.name}}\n\nFind out why the patch has not installed: a disconnected agent, a failing or missing patch policy, a manual approval still pending, or a package that is ignored or deferred.",
+        "tags": [
+            "integration:automox"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 30,
+                "warning": 21
+            },
+            "notify_audit": false,
+            "on_missing_data": "resolve",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "renotify_interval": 1440,
+            "silenced": {}
+        },
+        "priority": 3,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:automox"
+    ]
+}

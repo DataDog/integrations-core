@@ -1,8 +1,9 @@
 services:
   sqlserver:
     build:
-      context: .
-      dockerfile: Dockerfile
+      # The tests directory, so the image can include the shared column statistics procedure.
+      context: ..
+      dockerfile: compose-windows/Dockerfile
       args:
         - SQLSERVER_BASE_IMAGE=${SQLSERVER_BASE_IMAGE}
     ports:

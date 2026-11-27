@@ -89,7 +89,8 @@
                       "query": "avg:mongodb.uptime{$scope,$replset_name}.rollup(avg, 60)",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "last"
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -146,7 +147,8 @@
                       "query": "sum:mongodb.replset.health{sharding_cluster_role:shardsvr}",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "max"
+                      "aggregator": "max",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -181,7 +183,8 @@
                       "query": "sum:mongodb.replset.health{sharding_cluster_role:shardsvr,replset_state:primary}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "max"
+                      "aggregator": "max",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -216,7 +219,8 @@
                       "query": "sum:mongodb.replset.health{sharding_cluster_role:shardsvr,replset_state:secondary}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "max"
+                      "aggregator": "max",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -251,7 +255,8 @@
                       "query": "sum:mongodb.replset.health{sharding_cluster_role:configsvr}",
                       "data_source": "metrics",
                       "name": "query2",
-                      "aggregator": "max"
+                      "aggregator": "max",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -318,12 +323,14 @@
                     {
                       "query": "avg:mongodb.oplog.logsizemb{$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query4"
+                      "name": "query4",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mongodb.oplog.usedsizemb{$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query6"
+                      "name": "query6",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -374,7 +381,8 @@
                     {
                       "query": "max:mongodb.replset.optime_lag{$scope,$replset_name} by {replset_name}.fill(zero).rollup(avg, 15)",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -454,7 +462,8 @@
                       "query": "max:mongodb.replset.optime_lag{$scope,$replset_name} by {replset_name}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "last"
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -533,12 +542,14 @@
                     {
                       "query": "sum:mongodb.connections.current{*,*,$scope,$replset_name} by {replset_name}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:mongodb.connections.available{*,*,$scope,$replset_name} by {replset_name}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -595,7 +606,8 @@
                     {
                       "query": "avg:mongodb.mem.resident{$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -689,7 +701,8 @@
                     {
                       "query": "sum:mongodb.extra_info.page_faultsps{$scope,$replset_name} by {host}",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query3",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -738,7 +751,8 @@
                     {
                       "query": "avg:mongodb.stats.datasize{$scope,$replset_name} by {replset_name}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -817,12 +831,14 @@
                     {
                       "query": "sum:mongodb.opcounters.getmoreps{$scope,$replset_name}",
                       "data_source": "metrics",
-                      "name": "query4"
+                      "name": "query4",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:mongodb.opcounters.queryps{$scope,$replset_name}",
                       "data_source": "metrics",
-                      "name": "query6"
+                      "name": "query6",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -879,7 +895,8 @@
                     {
                       "query": "avg:mongodb.network.bytesinps{*,*,$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -902,7 +919,8 @@
                     {
                       "query": "avg:mongodb.network.bytesoutps{*,*,$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -967,17 +985,20 @@
                     {
                       "query": "sum:mongodb.opcounters.deleteps{$scope,$replset_name}",
                       "data_source": "metrics",
-                      "name": "query5"
+                      "name": "query5",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:mongodb.opcounters.insertps{$scope,$replset_name}",
                       "data_source": "metrics",
-                      "name": "query7"
+                      "name": "query7",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:mongodb.opcounters.updateps{$scope,$replset_name}",
                       "data_source": "metrics",
-                      "name": "query9"
+                      "name": "query9",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1054,32 +1075,38 @@
                     {
                       "query": "sum:mongodb.opcounters.queryps{$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query8"
+                      "name": "query8",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:mongodb.opcounters.deleteps{$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query10"
+                      "name": "query10",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:mongodb.opcounters.insertps{$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query12"
+                      "name": "query12",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:mongodb.opcounters.updateps{$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query14"
+                      "name": "query14",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:mongodb.opcounters.getmoreps{$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query16"
+                      "name": "query16",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "sum:mongodb.opcounters.commandps{$scope,$replset_name}.fill(zero)",
                       "data_source": "metrics",
-                      "name": "query18"
+                      "name": "query18",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1155,7 +1182,8 @@
                       "query": "sum:mongodb.opcounters.getmoreps{$scope,$replset_name} by {replset_name}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -1199,7 +1227,8 @@
                       "query": "sum:mongodb.opcounters.deleteps{$scope,$replset_name} by {replset_name}",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "sum"
+                      "aggregator": "sum",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -1259,7 +1288,8 @@
                     {
                       "query": "max:mongodb.oplatencies.commands.latency{$scope,$replset_name}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1307,7 +1337,8 @@
                     {
                       "query": "max:mongodb.oplatencies.reads.latency{$scope,$replset_name}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1355,7 +1386,8 @@
                     {
                       "query": "max:mongodb.oplatencies.writes.latency{$scope,$replset_name}",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query3",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1423,7 +1455,8 @@
                     {
                       "query": "avg:mongodb.sessions.count{$scope,$replset_name}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1465,7 +1498,8 @@
                       "query": "sum:mongodb.chunks.total{$scope,$replset_name}.rollup(avg, 60).fill(zero)",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "last"
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -1496,7 +1530,8 @@
                       "query": "sum:mongodb.chunks.jumbo{$scope,$replset_name}.rollup(avg, 60).fill(zero)",
                       "data_source": "metrics",
                       "name": "query1",
-                      "aggregator": "last"
+                      "aggregator": "last",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }

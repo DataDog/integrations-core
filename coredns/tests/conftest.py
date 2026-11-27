@@ -56,10 +56,11 @@ def omv2_instance():
 
 
 @pytest.fixture
-def mock_get(mock_http_response):
+def mock_get(fake_http_response):
     if COREDNS_VERSION[:2] == [1, 8]:
         metric_file = 'metrics_18.txt'
     elif COREDNS_VERSION[:2] == [1, 2]:
         metric_file = 'metrics_12.txt'
     metric_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', metric_file)
-    yield mock_http_response(file_path=metric_file_path)
+    with open(metric_file_path, 'rb') as f:
+        return fake_http_response(URL, f.read())

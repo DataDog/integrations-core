@@ -18,17 +18,17 @@ install-from-source() {
 # RUST_VERSION bumps on its own; the hashes are rustup-init's, so they only change with RUSTUP_VERSION:
 # https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${RUST_TARGET}/rustup-init.sha256
 # renovate: datasource=github-releases depName=rust-lang/rust
-RUST_VERSION="1.91.0"
+RUST_VERSION="1.99.1"
 # renovate: datasource=github-tags depName=rust-lang/rustup
-RUSTUP_VERSION="1.26.0"
+RUSTUP_VERSION="1.29.2"
 case "$(uname -m)" in
     x86_64)
         RUST_TARGET="x86_64-apple-darwin"
-        RUSTUP_SHA256="f6d1a9fac1a0d0802d87c254f02369a79973bc8c55aa0016d34af4fcdbd67822"
+        RUSTUP_SHA256="b9610730ddeef52765723847866fd1e3540b2bf7d5ab0c324aa143a5edf25ba0"
         ;;
     arm64)
         RUST_TARGET="aarch64-apple-darwin"
-        RUSTUP_SHA256="ed299a8fe762dc28161a99a03cf62836977524ad557ad70e13882d2f375d3983"
+        RUSTUP_SHA256="f7c7e11eb2e07f006e532a8aaac77b32f4527d305ac386c0c633ca6133d35ca9"
         ;;
     *)
         echo "Unsupported architecture for the Rust toolchain: $(uname -m)" >&2
@@ -37,11 +37,11 @@ case "$(uname -m)" in
 esac
 export RUSTUP_HOME="${DD_PREFIX_PATH}/rustup" CARGO_HOME="${DD_PREFIX_PATH}/cargo"
 curl --retry 5 --fail "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${RUST_TARGET}/rustup-init" -o /tmp/rustup-init
-echo "${RUSTUP_SHA256}  /tmp/rustup-init" | sha256sum --check
+echo "${RUSTUP_SHA256}  /tmp/rustup-init" | sha256sum -c -
 chmod +x /tmp/rustup-init
 /tmp/rustup-init -y --no-modify-path --profile minimal --default-toolchain "${RUST_VERSION}"
 # The shims are copies of the rustup binary we just verified, so they carry the same hash
-echo "${RUSTUP_SHA256}  ${CARGO_HOME}/bin/rustc" | sha256sum --check
+echo "${RUSTUP_SHA256}  ${CARGO_HOME}/bin/rustc" | sha256sum -c -
 rm /tmp/rustup-init
 mkdir -p "${DD_PREFIX_PATH}/bin"
 ln -sf "${CARGO_HOME}"/bin/* "${DD_PREFIX_PATH}/bin/"
@@ -56,8 +56,8 @@ cp -R /opt/mqm "${DD_PREFIX_PATH}"
 
 # openssl
 DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
-VERSION="3.6.4" \
-SHA256="9bffaa1ad1e07b354c21bd3324ec02fa15579f45a7d0494b3e74bc449b7333ef" \
+VERSION="3.6.5" \
+SHA256="a2157c2830efdec3788939b00c9b0638306d3f0bbb76dc4832ee503bb397df98" \
 RELATIVE_PATH="openssl-{{version}}" \
 CONFIGURE_SCRIPT="./config" \
   install-from-source \
@@ -104,8 +104,8 @@ RELATIVE_PATH="libxslt-{{version}}" \
 
 # curl
 DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
-VERSION="8.21.0" \
-SHA256="d9b327997999045a24cda50f3983e69e51c516bd8be6ef9842fc7f99135e33bb" \
+VERSION="8.23.0" \
+SHA256="e3de77cfa6367083c776a26647fc9f633b538c06c3baa73d931a252ac8f72b49" \
 RELATIVE_PATH="curl-{{version}}" \
   install-from-source \
     --disable-manual \
@@ -129,8 +129,8 @@ rm "${DD_PREFIX_PATH}/bin/curl"
 
 # libpq and pg_config as needed by psycopg
 DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
-VERSION="18.6" \
-SHA256="555610c24d53e4316da5b7d3fc25c279d96856d5e0e23ee308c328c5fa881d9f" \
+VERSION="18.7" \
+SHA256="441dfae4280cae3e0425e5f876f80559fb0731c140f1aae22b3e5a54d0411bfd" \
 RELATIVE_PATH="postgresql-{{version}}" \
   install-from-source --without-readline --with-openssl --without-icu
 # pg_config is reached through ${DD_PREFIX_PATH}/bin, which build.py already puts on PATH. Writing PATH

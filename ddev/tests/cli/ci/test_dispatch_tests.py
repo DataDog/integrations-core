@@ -16,25 +16,30 @@ import httpx
 import pytest
 
 from ddev.cli.application import Application
-from ddev.cli.ci.dispatch_run import resolve_run
 from ddev.cli.ci.dispatch_tests import RUN_OUTCOME_METRICS, attach_datadog_log_handler
 from ddev.cli.ci.tests.batching.exceptions import PlanningError
+from ddev.cli.ci.tests.batching.jobs import AgentImageOverride
 from ddev.cli.ci.tests.changes import ChangeResolutionError
 from ddev.cli.ci.tests.dispatcher_attributes import metric_tag_mapping
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
 from ddev.cli.ci.tests.dispatcher_logging import dispatcher_datadog_formatter
+from ddev.cli.ci.tests.execution_metrics import ExecutionOutcome
 from ddev.monitoring import MonitoringRuntime
 from ddev.monitoring.datadog import DatadogLogHandler
 from ddev.monitoring.datadog_metrics import DatadogMetricsSink
 from ddev.utils.git import ChangedFile, ChangeType, GitCommit
 from ddev.utils.github_async import async_github_client
 from ddev.utils.github_async.models import PullRequest, PullRequestState
+from ddev.utils.platform import PlatformName
 from ddev.utils.rate_limiting import BudgetGovernor
 from tests.cli.ci.helpers import HEAD_SHA, PR_NUMBER, decode_job_list, listed_pull_request, mock_job_result, pulls_page
 from tests.cli.ci.tests.helpers import make_batch, make_job
 from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.datadog import FakeLogSubmitter, FakeMetricsSubmitter
 from tests.helpers.github_async import (
+    make_git_object,
+    make_git_reference,
+    make_git_tag,
     make_pull_request,
     make_pull_request_ref,
     make_pull_request_repo,
@@ -49,7 +54,6 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from ddev.cli.application import Application
-    from ddev.cli.ci.dispatch_run import ResolvedRun
     from ddev.cli.ci.tests.messages import TestBatch
     from ddev.config.file import ConfigFileWithOverrides
     from ddev.monitoring import ComponentMonitor
@@ -508,8 +512,8 @@ def test_invocation_options_reach_the_plan_and_batch_workflow(
 
 @pytest.mark.parametrize(
     'mode_options',
-    [[], ['--dry-run'], ['--resolve-only']],
-    ids=['executing', 'dry-run', 'resolve-only'],
+    [[], ['--dry-run']],
+    ids=['executing', 'dry-run'],
 )
 def test_metric_delivery_follows_the_dispatch_mode(
     ddev: CliRunner,
@@ -518,7 +522,7 @@ def test_metric_delivery_follows_the_dispatch_mode(
     config_file: ConfigFileWithOverrides,
     mode_options: list[str],
 ):
-    """A mode that dispatches nothing reports no metrics; an executing run delivers them."""
+    """Dry runs skip metric delivery; executing runs deliver operation and outcome metrics."""
     config_file.model.orgs['default']['api_key'] = 'test-api-key'
     config_file.save()
     submitter = FakeMetricsSubmitter()
@@ -527,11 +531,6 @@ def test_metric_delivery_follows_the_dispatch_mode(
         partial(DatadogMetricsSink, submitter=submitter),
     )
 
-    def resolve(*args: Any, monitor: ComponentMonitor, **kwargs: Any) -> ResolvedRun | None:
-        monitor.metrics.count('probe')
-        return resolve_run(*args, monitor=monitor, **kwargs)
-
-    mocker.patch('ddev.cli.ci.dispatch_tests.resolve_run', resolve)
     mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', return_value=[])
 
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), *mode_options)
@@ -542,13 +541,87 @@ def test_metric_delivery_follows_the_dispatch_mode(
         assert submitter.distributions == []
     else:
         assert {
-            'agent_integrations.test_dispatcher.probe',
+            'agent_integrations.test_dispatcher.operations.count',
             'agent_integrations.test_dispatcher.runs.count',
         } <= {series['metric'] for series in submitter.series}
         assert {series['metric'] for series in submitter.distributions} == {
             'agent_integrations.test_dispatcher.operation.duration',
             'agent_integrations.test_dispatcher.run.duration',
         }
+
+
+@pytest.mark.parametrize('api_key', ['', 'test-api-key'], ids=['without-key', 'with-key'])
+@pytest.mark.parametrize(
+    ('scenario', 'exit_code', 'outcome', 'operation_failed'),
+    [('resolved', 0, 'resolved', 0), ('superseded', 0, 'no-op', 0), ('failed', 1, 'failed', 1)],
+)
+def test_resolve_only_exports_its_own_component(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    mocker: MockerFixture,
+    config_file: ConfigFileWithOverrides,
+    tmp_path: Path,
+    api_key: str,
+    scenario: str,
+    exit_code: int,
+    outcome: str,
+    operation_failed: int,
+):
+    config_file.model.orgs['default']['api_key'] = api_key
+    config_file.save()
+    metrics = FakeMetricsSubmitter()
+    logs = FakeLogSubmitter()
+    mocker.patch(
+        'ddev.monitoring.datadog_metrics.DatadogMetricsSink',
+        partial(DatadogMetricsSink, submitter=metrics),
+    )
+    mocker.patch('ddev.monitoring.datadog.DatadogLogHandler', partial(DatadogLogHandler, submitter=logs))
+    if scenario == 'superseded':
+        github.mock_response('get_pull_request', pull_request(head_sha='a-newer-sha'))
+    elif scenario == 'failed':
+        github.mock_response('get_pull_request', httpx.ConnectError('resolution failed'))
+
+    result = ddev(
+        'ci',
+        'dispatch-tests',
+        '--pr',
+        str(PR_NUMBER),
+        '--pr-head-sha',
+        HEAD_SHA,
+        '--resolve-only',
+        '--output-dir',
+        str(tmp_path),
+    )
+
+    assert result.exit_code == exit_code, result.output
+    assert 'component=run-resolution' in result.output
+    assert f'outcome={outcome}' in result.output
+    if not api_key:
+        assert logs.logs == []
+        assert metrics.series == []
+        assert metrics.distributions == []
+        return
+
+    messages = {log['message'] for log in logs.logs}
+    assert {'Dispatcher invocation started', 'Dispatcher run finished', 'Resolving pull request'} <= messages
+    assert {log['dispatcher.component'] for log in logs.logs} == {'run-resolution'}
+    [finished] = [log for log in logs.logs if log['message'] == 'Dispatcher run finished']
+    assert finished['dispatcher.outcome'] == outcome
+    if scenario == 'superseded':
+        [no_op] = [log for log in logs.logs if log['message'] == 'Nothing to test']
+        assert no_op['dispatcher.reason'] == 'no open pull request matches the requested revision'
+    assert {series['metric'] for series in metrics.series} == {
+        'agent_integrations.test_dispatcher.operations.count',
+        'agent_integrations.test_dispatcher.operations.failed',
+    }
+    [failed] = [series for series in metrics.series if series['metric'].endswith('.failed')]
+    assert failed['points'][0]['value'] == operation_failed
+    assert {series['metric'] for series in metrics.distributions} == {
+        'agent_integrations.test_dispatcher.operation.duration'
+    }
+    assert all(
+        'dispatcher.component:run-resolution' in series['tags'] for series in [*metrics.series, *metrics.distributions]
+    )
 
 
 def test_early_exit_disables_monitoring(
@@ -657,7 +730,10 @@ def test_metrics_are_tagged_with_the_workflow_running_the_dispatcher(
     assert {record.tags.get('ci.pipeline.id') for record in sink.records} == {pipeline_id}
 
 
-def test_pull_request_resolution_meters_the_rate_limit_wait_it_sits_out(ddev, resolved_changes, mocker, monkeypatch):
+@pytest.mark.parametrize('resolve_only', [False, True], ids=['executing', 'resolve-only'])
+def test_pull_request_resolution_meters_the_rate_limit_wait_it_sits_out(
+    ddev, resolved_changes, mocker, monkeypatch, resolve_only: bool
+):
     """Resolution builds its own client before the Dispatcher's exists, so its waits need their own wiring."""
     clock = FakeClock()
     advance_clock_on_sleep(clock, monkeypatch)
@@ -675,13 +751,23 @@ def test_pull_request_resolution_meters_the_rate_limit_wait_it_sits_out(ddev, re
     handler = RecordingJsonHandler()
     sink = recording_runtime(mocker, handler)
 
-    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
+    options = ['--resolve-only'] if resolve_only else []
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), *options)
 
     assert result.exit_code == 0, result.output
     # The 30 seconds GitHub asked for, plus the governor's one-second buffer.
     assert [(record.value, dict(record.tags)) for record in sink.records_named('throttle.wait.duration')] == [
-        (31, {'ci.pipeline.id': '12345', 'dispatcher.reason': 'secondary_limit', 'dispatcher.rate_limiter': 'github'})
+        (
+            31,
+            {
+                'ci.pipeline.id': '12345',
+                'dispatcher.reason': 'secondary_limit',
+                'dispatcher.rate_limiter': 'github',
+            },
+        )
     ]
+    if resolve_only:
+        assert {event['component'] for event in handler.events} == {'run-resolution'}
     # Resolution's own requests are observed too, under the same pipeline ID.
     assert [
         (record.value, record.tags.get('ci.pipeline.id')) for record in sink.records_named('requests.throttled')
@@ -793,13 +879,14 @@ def test_a_failing_datadog_metrics_constructor_leaves_the_dispatcher_usable(
     assert 'Nothing to test' in result.output
 
 
+@pytest.mark.parametrize('resolve_only', [False, True], ids=['executing', 'resolve-only'])
 def test_sink_failures_are_reported_through_the_dedicated_exporter_component(
     ddev: CliRunner,
     github: FakeAsyncGitHubClient,
     mocker: MockerFixture,
     config_file: ConfigFileWithOverrides,
+    resolve_only: bool,
 ):
-    """One HTTP batch carries several components' metrics, so its failures are not any one of theirs."""
     config_file.model.orgs['default']['api_key'] = 'test-api-key'
     config_file.save()
     submitter = FakeMetricsSubmitter()
@@ -831,14 +918,19 @@ def test_sink_failures_are_reported_through_the_dedicated_exporter_component(
     mocker.patch('ddev.monitoring.MonitoringRuntime', make_runtime)
     mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
 
-    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
+    options = ['--resolve-only'] if resolve_only else []
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), *options)
 
     assert result.exit_code == 0, result.output
     # The submission fails while the runtime drains the sink, and the report still reaches the
     # runtime's handlers before they detach.
-    exporter_events = [event for event in json_handler.events if event.get('component') == 'datadog-metrics']
+    component = 'run-resolution' if resolve_only else 'datadog-metrics'
+    exporter_events = [
+        event
+        for event in json_handler.events
+        if event.get('component') == component and event.get('category') == 'submission'
+    ]
     assert exporter_events
-    assert all(event['category'] == 'submission' for event in exporter_events)
     assert any(event['event'].startswith('submitting') for event in exporter_events)
 
 
@@ -1013,6 +1105,92 @@ def test_an_executed_run_reports_its_execution_metrics(
         'gather_batch_results',
         'publish_report',
     }
+
+
+@pytest.mark.parametrize(
+    'outcome',
+    [
+        ExecutionOutcome.PASSED,
+        ExecutionOutcome.TESTS_FAILED,
+        ExecutionOutcome.FAILED,
+        ExecutionOutcome.TIMED_OUT,
+        ExecutionOutcome.CANCELLED,
+    ],
+)
+def test_dispatcher_execution_outcome_reaches_actions_output(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    planned: MagicMock,
+    mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    outcome: ExecutionOutcome,
+):
+    output = tmp_path / 'actions-output'
+    monkeypatch.setenv('GITHUB_OUTPUT', str(output))
+    dispatcher = mocker.Mock(
+        outcome=mocker.Mock(execution_outcome=outcome, progress=None, final_report_published=False)
+    )
+    mocker.patch('ddev.cli.ci.tests.dispatcher.build_dispatcher', return_value=dispatcher)
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--output-dir', str(tmp_path))
+
+    assert result.exit_code == int(outcome is not ExecutionOutcome.PASSED), result.output
+    assert output.read_text(encoding='utf-8') == f'outcome={outcome}\nno-op-reason=\n'
+
+
+@pytest.mark.parametrize(
+    ('scenario', 'options', 'outcome', 'reason'),
+    [
+        ('superseded', (), 'no-op', 'no open pull request matches the requested revision'),
+        ('superseded', ('--resolve-only',), 'no-op', 'no open pull request matches the requested revision'),
+        ('empty-plan', (), 'no-op', 'the plan covers no target'),
+        ('planning-error', (), 'planning-failed', ''),
+        ('resolution-error', (), 'failed', ''),
+        ('interrupted', (), 'cancelled', ''),
+        ('resolved', ('--resolve-only',), 'resolved', ''),
+        ('dry-run', ('--dry-run',), 'dry-run', ''),
+    ],
+)
+def test_predispatch_outcome_reaches_actions_output(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    planned: MagicMock,
+    mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    scenario: str,
+    options: tuple[str, ...],
+    outcome: str,
+    reason: str,
+):
+    output = tmp_path / 'actions-output'
+    monkeypatch.setenv('GITHUB_OUTPUT', str(output))
+    if scenario == 'superseded':
+        github.mock_response('get_pull_request', pull_request(head_sha='a-newer-sha'))
+    elif scenario == 'empty-plan':
+        planned.return_value = []
+    elif scenario == 'planning-error':
+        planned.side_effect = PlanningError('invalid plan')
+    elif scenario == 'resolution-error':
+        github.mock_response('get_pull_request', httpx.ConnectError('resolution failed'))
+    elif scenario == 'interrupted':
+        mocker.patch('ddev.cli.ci.dispatch_tests.changes_for_run', side_effect=KeyboardInterrupt)
+
+    result = ddev(
+        'ci',
+        'dispatch-tests',
+        '--pr',
+        str(PR_NUMBER),
+        '--pr-head-sha',
+        HEAD_SHA,
+        '--output-dir',
+        str(tmp_path),
+        *options,
+    )
+
+    assert result.exit_code == int(scenario in {'planning-error', 'resolution-error', 'interrupted'}), result.output
+    assert output.read_text(encoding='utf-8') == f'outcome={outcome}\nno-op-reason={reason}\n'
 
 
 def test_a_run_with_failed_tests_is_counted_as_a_test_failure(
@@ -1230,26 +1408,53 @@ def test_a_change_comparison_failure_fails_its_operation(
     assert operation_error['event'] == 'Operation resolve_changes failed: Could not compare a-sha with its parent'
 
 
-@pytest.mark.parametrize('from_manifest', [False, True], ids=['resolution', 'manifest'])
+@pytest.mark.parametrize(
+    ('source', 'content', 'message', 'context'),
+    [
+        pytest.param('--pr', None, 'reports no merge commit', 'pr', id='resolution'),
+        pytest.param('--run-manifest', None, 'Could not read run manifest', 'unresolved', id='missing-file'),
+        pytest.param('--run-manifest', '{not json', 'is not a valid run', 'unresolved', id='malformed-json'),
+        pytest.param(
+            '--run-manifest',
+            {'repository': 'DataDog/integrations-extras'},
+            'describes repository DataDog/integrations-extras, not DataDog/integrations-core.',
+            'unresolved',
+            id='other-repository',
+        ),
+    ],
+)
 def test_a_resolution_failure_keeps_unresolved_metric_dimensions(
     ddev: CliRunner,
     fake_async_github: FakeAsyncGitHubClient,
     mocker: MockerFixture,
     monkeypatch: pytest.MonkeyPatch,
+    planned: MagicMock,
     tmp_path: Path,
-    from_manifest: bool,
+    source: str,
+    content: str | dict[str, str] | None,
+    message: str,
+    context: str,
 ):
     monkeypatch.setenv('GITHUB_RUN_ID', '12345')
-    mocker.patch('ddev.cli.ci.dispatch_run.MERGE_COMMIT_REFRESH_SECONDS', 0.0)
-    fake_async_github.mock_response('get_pull_request', pull_request(merge_commit_sha=None))
+    if source == '--pr':
+        mocker.patch('ddev.cli.ci.dispatch_run.MERGE_COMMIT_REFRESH_SECONDS', 0.0)
+        fake_async_github.mock_response('get_pull_request', pull_request(merge_commit_sha=None))
+        value = str(PR_NUMBER)
+    else:
+        manifest = tmp_path / 'run.json'
+        if isinstance(content, dict):
+            content = json.dumps({**PULL_REQUEST_RUN_MANIFEST, **content})
+        if content is not None:
+            manifest.write_text(content, encoding='utf-8')
+        value = str(manifest)
     handler = RecordingJsonHandler()
     sink = recording_runtime(mocker, handler=handler)
-    options = ['--run-manifest', str(tmp_path / 'missing.json')] if from_manifest else ['--pr', str(PR_NUMBER)]
 
     result = ddev(
         'ci',
         'dispatch-tests',
-        *options,
+        source,
+        value,
         '--output-dir',
         str(tmp_path),
         '--tags',
@@ -1257,41 +1462,50 @@ def test_a_resolution_failure_keeps_unresolved_metric_dimensions(
     )
 
     assert result.exit_code == 1, result.output
-    assert ('Could not read run manifest' if from_manifest else 'reports no merge commit') in result.output
+    assert message in result.output
+    planned.assert_not_called()
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.failed')] == [1]
     assert [record.value for record in sink.records_named('runs.no_op')] == [0]
     assert not any(record.name.startswith('jobs.') for record in sink.records)
     [failed] = sink.records_named('runs.failed')
+    assert failed.value == 1
     assert failed.tags == {
         'team': 'agent-integrations',
         'git.repository.id_v2': 'github.com/datadog/integrations-core',
-        'dispatcher.context': 'unresolved',
+        'dispatcher.context': context,
         'git.branch': 'unresolved',
         'dispatcher.base_branch': 'unresolved',
         'dispatcher.run.is_fork': 'unresolved',
         'ci.pipeline.id': '12345',
         'dispatcher.component': 'dispatcher',
     }
-    [started] = [event for event in handler.events if event['event'] == 'Dispatcher invocation started']
-    assert started['team'] == 'agent-integrations'
-    assert all(started[name] == 'unresolved' for name in ('context', 'head_branch', 'base_branch', 'is_fork'))
+    lifecycle = ('Dispatcher invocation started', 'Dispatcher run finished')
+    events = [event for event in handler.events if event['event'] in lifecycle]
+    assert [event['event'] for event in events] == list(lifecycle)
+    for event in events:
+        assert event['team'] == 'agent-integrations'
+        assert event['context'] == context
+        assert all(event[name] == 'unresolved' for name in ('head_branch', 'base_branch', 'is_fork'))
 
 
 def test_a_superseded_revision_is_a_no_op_run_not_a_failure(
     ddev: CliRunner, github: FakeAsyncGitHubClient, planned: MagicMock, mocker: MockerFixture
 ):
     github.mock_response('list_pull_requests', pulls_page())
-    sink = recording_runtime(mocker)
+    handler = RecordingJsonHandler()
+    sink = recording_runtime(mocker, handler=handler)
 
     result = ddev('ci', 'dispatch-tests', *HEAD_LOOKUP_OPTIONS)
 
     assert result.exit_code == 0, result.output
     assert 'No open pull request matches the requested revision' in result.output
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.no_op')] == [1]
+    [no_op] = sink.records_named('runs.no_op')
+    assert no_op.value == 1
+    assert no_op.tags['dispatcher.context'] == 'pr'
     assert [record.value for record in sink.records_named('runs.failed')] == [0]
     assert not any(record.name.startswith('jobs.') for record in sink.records)
+    assert {event['context'] for event in handler.events} == {'pr'}
 
 
 @pytest.mark.usefixtures('resolved_changes')
@@ -1390,16 +1604,20 @@ def test_console_lines_show_operational_context_without_large_payloads(ddev: Cli
 
 
 PULL_REQUEST_RUN_MANIFEST = {
-    'schema_version': 2,
+    'schema_version': 4,
     'repository': 'DataDog/integrations-core',
     'checkout_sha': MERGE_SHA,
     'head_sha': HEAD_SHA,
     'head_branch': 'hs/a-branch',
+    'head_tag': None,
     'all_targets': False,
     'pr_number': PR_NUMBER,
     'base_branch': 'a-target-branch',
     'base_sha': BASE_SHA,
     'is_fork': False,
+    'targets': [],
+    'exclude_targets': [],
+    'context': 'pr',
 }
 
 COMMIT_RUN_MANIFEST = {
@@ -1410,6 +1628,7 @@ COMMIT_RUN_MANIFEST = {
     'pr_number': None,
     'base_branch': None,
     'base_sha': None,
+    'context': 'master',
 }
 
 
@@ -1430,6 +1649,24 @@ def merge_checkout(mocker, head: str = MERGE_SHA, parents: dict[str, str] | None
     ('options', 'pr_head_repo', 'expected'),
     [
         pytest.param(['--commit', 'a-sha'], None, COMMIT_RUN_MANIFEST, id='commit'),
+        pytest.param(
+            ['--commit', 'a-sha', '--targets', 'ntp,redis', '--tags', 'context:nightly team:platform'],
+            None,
+            {**COMMIT_RUN_MANIFEST, 'targets': ['ntp', 'redis'], 'context': 'nightly'},
+            id='commit-with-targets-and-context',
+        ),
+        pytest.param(
+            ['--commit', 'a-sha', '--all', '--exclude-targets', 'ddev'],
+            None,
+            {**COMMIT_RUN_MANIFEST, 'all_targets': True, 'exclude_targets': ['ddev']},
+            id='commit-with-exclusions',
+        ),
+        pytest.param(
+            ['--pr', str(PR_NUMBER), '--tags', 'context:nightly'],
+            None,
+            PULL_REQUEST_RUN_MANIFEST,
+            id='pull-request-context-is-always-pr',
+        ),
         pytest.param(
             ['--pr', str(PR_NUMBER)],
             'contributor/integrations-core',
@@ -1484,9 +1721,16 @@ def test_a_pull_request_round_trips_through_its_manifest(
 
     merge_checkout(mocker)
     github_calls = len(fake_async_github.requests)
+    handler = RecordingJsonHandler()
+    recording_runtime(mocker, handler=handler)
     second = ddev('ci', 'dispatch-tests', '--run-manifest', str(tmp_path / 'run.json'), '--dry-run')
 
     assert second.exit_code == 0, second.output
+    [started] = [event for event in handler.events if event['event'] == 'Dispatcher invocation started']
+    assert started['context'] == 'pr'
+    assert started['head_branch'] == 'hs/a-branch'
+    assert started['base_branch'] == 'a-target-branch'
+    assert started['is_fork'] is False
     assert len(fake_async_github.requests) == github_calls
     local_changes.assert_called_once_with(ANY, MERGE_SHA)
     assert planned.call_args.kwargs['changed_files'] == local_changes.return_value
@@ -1549,26 +1793,40 @@ def test_an_all_target_run_round_trips_through_its_recorded_scope(
 @pytest.mark.parametrize(
     ('content', 'message'),
     [
-        pytest.param(None, 'Could not read run manifest', id='missing-file'),
-        pytest.param('{not json', 'is not a valid run', id='malformed-json'),
         pytest.param(b'\xff', 'is not a valid run', id='invalid-utf8'),
         pytest.param(
-            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 3}),
+            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 5}),
             'is not a valid run',
             id='newer-schema',
         ),
         pytest.param(
-            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'repository': 'DataDog/integrations-extras'}),
-            'describes repository',
-            id='other-repository',
+            json.dumps(
+                {
+                    key: value
+                    for key, value in {**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 2}.items()
+                    if key not in ('targets', 'exclude_targets', 'context', 'head_tag')
+                }
+            ),
+            'is not a valid run',
+            id='older-schema',
+        ),
+        pytest.param(
+            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'head_tag': '7.85.0'}),
+            'is not a valid run',
+            id='both-branch-and-tag',
+        ),
+        pytest.param(
+            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'head_branch': None}),
+            'is not a valid run',
+            id='neither-branch-nor-tag',
         ),
     ],
 )
-def test_an_unusable_manifest_is_refused(ddev, planned, tmp_path, content: str | bytes | None, message: str):
+def test_an_unusable_manifest_is_refused(ddev, planned, tmp_path, content: str | bytes, message: str):
     """Whatever is wrong with the file, planning never starts from a run that could not be read."""
     if isinstance(content, bytes):
         (tmp_path / 'run.json').write_bytes(content)
-    elif content is not None:
+    else:
         (tmp_path / 'run.json').write_text(content, encoding='utf-8')
 
     result = ddev('ci', 'dispatch-tests', '--run-manifest', str(tmp_path / 'run.json'), '--dry-run')
@@ -1579,7 +1837,18 @@ def test_an_unusable_manifest_is_refused(ddev, planned, tmp_path, content: str |
 
 
 @pytest.mark.parametrize(
-    'option', ['--pr', '--commit', '--all', '--pr-head-sha', '--pr-head-repo', '--pr-head-branch', '--pr-base-branch']
+    'option',
+    [
+        '--pr',
+        '--commit',
+        '--all',
+        '--pr-head-sha',
+        '--pr-head-repo',
+        '--pr-head-branch',
+        '--pr-base-branch',
+        '--targets',
+        '--exclude-targets',
+    ],
 )
 def test_a_manifest_cannot_also_select_the_run(ddev, github, planned, option: str):
     """The manifest decides the run; also passing a selection option would leave the choice ambiguous."""
@@ -1615,3 +1884,277 @@ def test_resolve_only_warns_when_dry_run_is_redundant(ddev, planned, tmp_path):
     assert '`--dry-run` has no effect with `--resolve-only`.' in result.output
     assert (tmp_path / 'run.json').exists()
     planned.assert_not_called()
+
+
+def test_explicit_targets_reach_the_plan_and_are_shown(ddev, planned, resolved_changes):
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--targets', 'ntp,redis', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    kwargs = planned.call_args.kwargs
+    assert (kwargs['all_targets'], kwargs['targets'], kwargs['exclude_targets']) == (False, ('ntp', 'redis'), ())
+    assert 'ntp, redis' in result.output
+
+
+@pytest.mark.parametrize(
+    ('options', 'all_targets'),
+    [
+        pytest.param(['--all'], True, id='all'),
+        pytest.param([], False, id='change-based'),
+    ],
+)
+def test_exclusions_filter_the_selection_without_changing_it(
+    ddev, planned, resolved_changes, options: list[str], all_targets: bool
+):
+    """`--exclude-targets` alone keeps the change-based selection; only `--all` asks for everything."""
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', *options, '--exclude-targets', 'ddev,ntp', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    kwargs = planned.call_args.kwargs
+    assert (kwargs['all_targets'], kwargs['targets'], kwargs['exclude_targets']) == (all_targets, (), ('ddev', 'ntp'))
+    assert 'ddev, ntp' in result.output
+
+
+def test_without_target_options_the_selection_is_unchanged(ddev, planned, resolved_changes):
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    kwargs = planned.call_args.kwargs
+    assert (kwargs['all_targets'], kwargs['targets'], kwargs['exclude_targets']) == (False, (), ())
+    assert kwargs['changed_files'] == resolved_changes.return_value
+
+
+def test_all_and_explicit_targets_cannot_be_combined(ddev, planned, resolved_changes):
+    """Neither option silently wins: the caller may not have meant the combination."""
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--all', '--targets', 'ntp', '--dry-run')
+
+    assert result.exit_code == 2
+    assert '`--all` and `--targets` cannot be combined' in result.output
+    planned.assert_not_called()
+    resolved_changes.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'pr_option', ['--pr', '--pr-head-sha', '--pr-head-repo', '--pr-head-branch', '--pr-base-branch']
+)
+def test_explicit_targets_cannot_be_combined_with_pr_options(ddev, github, planned, pr_option: str):
+    """A pull request run tests what the pull request changed."""
+    result = ddev('ci', 'dispatch-tests', pr_option, 'a-value', '--targets', 'ntp', '--dry-run')
+
+    assert result.exit_code == 2
+    assert '`--targets` cannot be combined with PR options' in result.output
+    planned.assert_not_called()
+
+
+def test_exclusions_apply_to_a_pull_request(ddev, github, planned):
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--exclude-targets', 'ddev', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert planned.call_args.kwargs['exclude_targets'] == ('ddev',)
+
+
+@pytest.mark.parametrize('option', ['--targets', '--exclude-targets'])
+@pytest.mark.parametrize('value', ['', ',', 'ntp,,redis', ',ntp', 'ntp,', 'ntp, redis'])
+def test_a_malformed_target_list_is_refused(ddev, planned, resolved_changes, option: str, value: str):
+    """An empty or padded name would match no target and quietly test less than asked."""
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', option, value, '--dry-run')
+
+    assert result.exit_code == 2
+    assert 'comma-separated list of target names' in result.output
+    planned.assert_not_called()
+
+
+def test_a_target_cannot_be_both_requested_and_excluded(ddev, planned, resolved_changes):
+    result = ddev(
+        'ci', 'dispatch-tests', '--commit', 'a-sha', '--targets', 'ntp,redis', '--exclude-targets', 'redis', '--dry-run'
+    )
+
+    assert result.exit_code == 2
+    assert 'both requested and excluded: redis' in result.output
+    planned.assert_not_called()
+
+
+def test_duplicate_target_names_are_planned_once(ddev, planned, resolved_changes):
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--targets', 'ntp,redis,ntp', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert planned.call_args.kwargs['targets'] == ('ntp', 'redis')
+
+
+@pytest.mark.parametrize(
+    ('options', 'expected'),
+    [
+        pytest.param(
+            ['--agent-image', 'registry/agent:7.85.0', '--agent-image-windows', 'registry/agent:7.85.0-servercore'],
+            AgentImageOverride(linux='registry/agent:7.85.0', windows='registry/agent:7.85.0-servercore'),
+            id='both',
+        ),
+        pytest.param(
+            ['--agent-image', 'registry/agent:7.85.0'],
+            AgentImageOverride(linux='registry/agent:7.85.0'),
+            id='linux-only',
+        ),
+        pytest.param([], None, id='none'),
+    ],
+)
+def test_agent_image_overrides_reach_the_planner(
+    ddev, planned, resolved_changes, options: list[str], expected: AgentImageOverride | None
+):
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', *options, '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert planned.call_args.kwargs['agent_image_resolver'] == expected
+
+
+def test_a_dry_run_shows_the_images_the_plan_actually_carries(ddev, mocker, resolved_changes):
+    """The images come from the planned jobs, so a dry run reports what will really be pulled."""
+    batches = [
+        make_batch(
+            make_job(target='ntp', platform=PlatformName.LINUX, e2e_tests=True, agent_image='registry/agent:7.85.0'),
+            make_job(
+                target='ntp',
+                platform=PlatformName.WINDOWS,
+                e2e_tests=True,
+                agent_image='registry/agent:7.85.0-servercore',
+            ),
+        )
+    ]
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', return_value=batches)
+
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert 'Agent image (linux E2E jobs)' in result.output
+    assert 'registry/agent:7.85.0' in result.output
+    assert 'Agent image (windows E2E jobs)' in result.output
+    assert 'registry/agent:7.85.0-servercore' in result.output
+
+
+def test_a_dry_run_shows_no_image_for_an_override_that_never_reached_the_jobs(ddev, planned, resolved_changes):
+    """An override the planner dropped must read as absent, or the dry run would confirm a lie."""
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--agent-image', 'registry/agent:7.85.0', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert 'Agent image' not in result.output
+    assert 'registry/agent:7.85.0' not in result.output
+
+
+@pytest.mark.parametrize(
+    'object_type',
+    [
+        pytest.param('tag', id='annotated-tag'),
+        pytest.param('commit', id='lightweight-tag'),
+    ],
+)
+def test_a_tag_run_tests_the_commit_the_tag_points_at(
+    ddev, planned, resolved_changes, fake_async_github, mocker, tmp_path, object_type: str
+):
+    """The commit comes from the tag, so no second input can name a different revision."""
+    current_branch = mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='a-branch')
+    fake_async_github.mock_response(
+        'get_ref',
+        make_git_reference(ref='refs/tags/7.85.0-rc.8', object=make_git_object(type=object_type, sha='t' * 40)),
+    )
+    fake_async_github.mock_response('get_tag', make_git_tag(object=make_git_object(type='commit', sha='c' * 40)))
+
+    result = ddev('ci', 'dispatch-tests', '--head-tag', '7.85.0-rc.8', '--resolve-only', '--output-dir', str(tmp_path))
+
+    assert result.exit_code == 0, result.output
+    manifest = json.loads((tmp_path / 'run.json').read_text())
+    # An annotated tag wraps its commit, so resolution follows one more step to reach it.
+    assert manifest['checkout_sha'] == ('c' * 40 if object_type == 'tag' else 't' * 40)
+    assert manifest['head_sha'] == manifest['checkout_sha']
+    assert manifest['head_tag'] == '7.85.0-rc.8'
+    assert manifest['head_branch'] is None
+    # A release tag has no branch, so none is read off the checkout to stand in for it.
+    current_branch.assert_not_called()
+
+
+def test_a_tag_that_does_not_exist_stops_the_run(ddev, planned, resolved_changes, fake_async_github, tmp_path):
+    """Planning against a typo'd tag would test whatever the checkout happened to be."""
+    request = httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core/git/ref/tags/7.85.0')
+    fake_async_github.mock_response(
+        'get_ref',
+        httpx.HTTPStatusError('404', request=request, response=httpx.Response(404, request=request)),
+    )
+
+    result = ddev('ci', 'dispatch-tests', '--head-tag', '7.85.0', '--resolve-only', '--output-dir', str(tmp_path))
+
+    assert result.exit_code == 1
+    assert 'Tag 7.85.0 does not exist' in result.output
+    planned.assert_not_called()
+
+
+def test_a_tag_that_does_not_lead_to_a_commit_stops_the_run(
+    ddev, planned, resolved_changes, fake_async_github, tmp_path
+):
+    fake_async_github.mock_response('get_ref', make_git_reference(object=make_git_object(type='tree')))
+
+    result = ddev('ci', 'dispatch-tests', '--head-tag', '7.85.0', '--resolve-only', '--output-dir', str(tmp_path))
+
+    assert result.exit_code == 1
+    assert 'points at a tree, which is not a commit to test' in result.output
+    planned.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'conflicting',
+    [
+        pytest.param(['--commit', 'a-sha'], id='commit'),
+        pytest.param(['--pr', '42'], id='pr'),
+        pytest.param(['--pr-head-repo', 'DataDog/integrations-core'], id='pr-head-repo'),
+        pytest.param(['--pr-head-branch', 'a-branch'], id='pr-head-branch'),
+        pytest.param(['--pr-head-sha', 'a-sha'], id='pr-head-sha'),
+        pytest.param(['--pr-base-branch', 'master'], id='pr-base-branch'),
+    ],
+)
+def test_a_tag_is_the_whole_selection(ddev, planned, resolved_changes, conflicting: list[str]):
+    """Two inputs for one revision could disagree, so the second is refused rather than checked."""
+    result = ddev('ci', 'dispatch-tests', '--head-tag', '7.85.0', *conflicting, '--dry-run')
+
+    assert result.exit_code == 2
+    assert '`--head-tag` supplies the commit to test' in result.output
+    planned.assert_not_called()
+
+
+@pytest.mark.parametrize(('tags', 'context'), [((), 'master'), (('--tags', 'context:nightly'), 'nightly')])
+def test_a_called_run_round_trips_its_scope_and_context(
+    ddev, planned, resolved_changes, mocker, tmp_path, tags, context
+):
+    """Both phases start with the same context, even though only phase one takes the caller's tags."""
+    mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.85.x')
+    handler = RecordingJsonHandler()
+    recording_runtime(mocker, handler=handler)
+    first = ddev(
+        'ci',
+        'dispatch-tests',
+        '--commit',
+        'a-sha',
+        '--targets',
+        'ntp',
+        *tags,
+        '--resolve-only',
+        '--output-dir',
+        str(tmp_path),
+    )
+    assert first.exit_code == 0, first.output
+
+    second = ddev(
+        'ci',
+        'dispatch-tests',
+        '--run-manifest',
+        str(tmp_path / 'run.json'),
+        '--agent-image',
+        'registry/agent:7.85.0',
+        '--dry-run',
+        '--output-dir',
+        str(tmp_path),
+    )
+
+    assert second.exit_code == 0, second.output
+    assert [event['context'] for event in handler.events if event['event'] == 'Dispatcher invocation started'] == [
+        context,
+        context,
+    ]
+    kwargs = planned.call_args.kwargs
+    assert (kwargs['targets'], kwargs['all_targets']) == (('ntp',), False)
+    assert kwargs['agent_image_resolver'] == AgentImageOverride(linux='registry/agent:7.85.0')

@@ -11,7 +11,8 @@ ddev config find
 
 !!! info "Config overrides"
     When running `ddev`, if the current working directory (or a parent directory) contains a `.ddev.toml` file, any options defined in this file will override those in the global
-    configuration file. This allows easy configuration sets depending on the working directory `ddev` is run from.
+    configuration file, except for `[ai]`. AI settings are only read from the global configuration; an `[ai]` table in an override file is ignored with a warning.
+    This allows easy configuration sets depending on the working directory `ddev` is run from.
     See the [Multi-repo/Worktrees](multirepo.md) documentation for more details on how overrides work and affect commands.
 
 ## Repository

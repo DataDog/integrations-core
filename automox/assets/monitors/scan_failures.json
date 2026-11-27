@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2026-10-04",
+    "last_updated_at": "2026-10-10",
+    "title": "Device inventory scans are failing",
+    "description": "Automox could not complete the last inventory scan on a device, so it cannot see that device's outstanding patches or vulnerabilities, and the patch monitors cannot alert on it.",
+    "definition": {
+        "name": "[Automox] Device inventory scans are failing",
+        "type": "query alert",
+        "query": "max(last_13h):sum:automox.device.last_scan_failed{*} by {organization_id,automox_device} > 0",
+        "message": "{{#is_alert}}\nAutomox's last inventory scan of {{automox_device.name}} failed.\n{{/is_alert}}\n{{#is_recovery}}\nAutomox scanned {{automox_device.name}} successfully.\n{{/is_recovery}}\n\nOrganization: {{organization_id.name}}\n\nA failing package manager is the usual cause: a broken repository on Linux, or a stuck Windows Update service. Fix it on the device, then run a scan from the Automox console.",
+        "tags": [
+            "integration:automox"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 0
+            },
+            "notify_audit": false,
+            "on_missing_data": "resolve",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": 4,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:automox"
+    ]
+}
