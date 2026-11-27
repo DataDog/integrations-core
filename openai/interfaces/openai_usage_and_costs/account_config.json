@@ -1,4 +1,8 @@
 {
+  "v2_endpoints": {
+    "enabled": true,
+    "interface_id_slug": "openai-usage-and-costs"
+  },
   "supported_auth_methods": [
     {
       "auth_name": "Admin API Key",
