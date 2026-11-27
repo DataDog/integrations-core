@@ -1,0 +1,1 @@
+Compute count deltas in the check so a leader election, which changes the `is_leader` tag, no longer submits each counter's lifetime total as a single value.
