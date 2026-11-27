@@ -40,14 +40,11 @@ def test_create_invalid_branch_name(ddev, name, mocker):
         pytest.param(False, id='build_agent_yaml_unchanged'),
     ],
 )
-def test_create_branch(ddev, mocker, yaml_updated):
+def test_create_branch(ddev, mocker, yaml_updated, fake_async_github):
     """Test that the full git workflow is executed correctly."""
     run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
     label_mock = mocker.patch('ddev.utils.github.GitHubManager.create_label')
     milestone_mock = mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    pr_mock = mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
-    )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=yaml_updated)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -69,7 +66,8 @@ def test_create_branch(ddev, mocker, yaml_updated):
     # GitHub API calls
     label_mock.assert_called_once_with('backport/5.5.x', '5319e7')
     milestone_mock.assert_called_once_with('5.6.0')
-    pr_mock.assert_called_once()
+    pr = fake_async_github.last_call('create_pull_request').kwargs
+    assert (pr['head'], pr['base']) == ('release/bump-milestone-5.6.0', 'master')
 
     # Milestone bump workflow
     run_mock.assert_any_call('fetch', 'origin', 'master')
@@ -189,11 +187,10 @@ def test_ensure_build_agent_yaml_updated_file_not_found(mocker, tmp_path):
     app_mock.display_warning.assert_called_once()
 
 
-def test_create_branch_confirmation_required(ddev, mocker):
+def test_create_branch_confirmation_required(ddev, mocker, fake_async_github):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=False)
@@ -204,12 +201,11 @@ def test_create_branch_confirmation_required(ddev, mocker):
     assert 'Did not get confirmation' in result.output
 
 
-def test_create_branch_with_suggestion(ddev, mocker):
+def test_create_branch_with_suggestion(ddev, mocker, fake_async_github):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='  origin/7.77.x\n  origin/7.76.x\n')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.prompt', return_value='7.78.x')
@@ -221,12 +217,11 @@ def test_create_branch_with_suggestion(ddev, mocker):
     assert 'Creating the release branch `7.78.x`' in result.output
 
 
-def test_create_branch_with_gap_suggests_missing_branch(ddev, mocker):
+def test_create_branch_with_gap_suggests_missing_branch(ddev, mocker, fake_async_github):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='  origin/7.62.x\n  origin/7.60.x\n')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.prompt', return_value='7.61.x')
@@ -274,11 +269,10 @@ def test_update_release_json_file_not_found(tmp_path):
     assert data == {'current_milestone': '7.80.0'}
 
 
-def test_create_branch_creates_milestone_and_pr(ddev, mocker):
+def test_create_branch_creates_milestone_and_pr(ddev, mocker, fake_async_github):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -290,16 +284,21 @@ def test_create_branch_creates_milestone_and_pr(ddev, mocker):
     assert 'Updating release.json with new milestone `7.80.0`' in result.output
     assert 'Pull request created' in result.output
     assert 'All done' in result.output
+    fake_async_github.assert_called_once_with(
+        'add_labels_to_issue',
+        owner='DataDog',
+        repo='integrations-core',
+        issue_number=1,
+        labels=['qa/skip-qa'],
+        timeout=None,
+    )
 
 
-def test_create_branch_milestone_pr_body_has_template_checklist(ddev, mocker):
+def test_create_branch_milestone_pr_body_has_template_checklist(ddev, mocker, fake_async_github):
     # The pr-description validation fails on bodies missing the template checklist (PR #25844).
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    create_pr = mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
-    )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -307,7 +306,7 @@ def test_create_branch_milestone_pr_body_has_template_checklist(ddev, mocker):
     result = ddev('release', 'branch', 'create', '7.79.x')
 
     assert result.exit_code == 0, result.output
-    body = create_pr.call_args.kwargs['body']
+    body = fake_async_github.last_call('create_pull_request').kwargs['body']
     assert 'Updates `current_milestone` in `release.json` to `7.80.0`' in body
     assert '`7.79.x`' in body
     template = (Path(__file__).parents[5] / '.github' / 'PULL_REQUEST_TEMPLATE.md').read_text()
@@ -319,7 +318,7 @@ def test_create_branch_milestone_pr_body_has_template_checklist(ddev, mocker):
     ]
 
 
-def test_create_branch_milestone_already_exists(ddev, mocker):
+def test_create_branch_milestone_already_exists(ddev, mocker, fake_async_github):
     from httpx import HTTPStatusError, Request, Response
 
     mocker.patch('ddev.utils.git.GitRepository.run')
@@ -329,7 +328,6 @@ def test_create_branch_milestone_already_exists(ddev, mocker):
         request=Request('POST', 'https://api.github.com/repos/test/milestones'),
         response=Response(422),
     )
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -359,7 +357,7 @@ def test_create_branch_milestone_server_error(ddev, mocker):
         ddev('release', 'branch', 'create', '7.79.x')
 
 
-def test_create_branch_push_failure(ddev, mocker):
+def test_create_branch_push_failure(ddev, mocker, fake_async_github):
     def push_fails(*args):
         if args == ('push', 'origin', 'release/bump-milestone-7.80.0'):
             raise OSError('push failed')
@@ -367,9 +365,6 @@ def test_create_branch_push_failure(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.run', side_effect=push_fails)
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    create_pr_mock = mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
-    )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -379,16 +374,16 @@ def test_create_branch_push_failure(ddev, mocker):
     assert result.exit_code == 0, result.output
     assert 'Milestone branch update failed' in result.output
     assert 'git push origin release/bump-milestone-7.80.0' in result.output
-    create_pr_mock.assert_not_called()
+    fake_async_github.assert_not_called('create_pull_request')
 
 
-def test_create_branch_pr_creation_failure(ddev, mocker):
+def test_create_branch_pr_creation_failure(ddev, mocker, fake_async_github):
     from httpx import HTTPError
 
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', side_effect=HTTPError('API error'))
+    fake_async_github.mock_response('create_pull_request', HTTPError('API error'))
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -400,7 +395,7 @@ def test_create_branch_pr_creation_failure(ddev, mocker):
     assert 'All done' in result.output
 
 
-def test_create_branch_pr_authentication_failure_uses_central_handler(ddev, mocker):
+def test_create_branch_pr_authentication_failure_uses_central_handler(ddev, mocker, fake_async_github):
     request = httpx.Request('POST', 'https://api.github.com/repos/DataDog/integrations-core/pulls')
     response = httpx.Response(403, request=request)
     error = httpx.HTTPStatusError('forbidden', request=request, response=response)
@@ -408,10 +403,7 @@ def test_create_branch_pr_authentication_failure_uses_central_handler(ddev, mock
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request',
-        side_effect=GitHubAuthenticationError.from_http_status_error(error),
-    )
+    fake_async_github.mock_response('create_pull_request', GitHubAuthenticationError.from_http_status_error(error))
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -421,3 +413,21 @@ def test_create_branch_pr_authentication_failure_uses_central_handler(ddev, mock
     assert result.exit_code == 1, result.output
     assert 'ddev config set github.token' in result.output
     assert 'Please create one manually from `release/bump-milestone-7.80.0` to `master`' in result.output
+
+
+def test_create_branch_label_failure_keeps_the_created_pr(ddev, mocker, fake_async_github):
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    fake_async_github.mock_response('add_labels_to_issue', httpx.HTTPError('API error'))
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create', '7.79.x')
+
+    assert result.exit_code == 0, result.output
+    assert 'Pull request created' in result.output
+    assert 'Failed to create the pull request' not in result.output
+    assert 'Please add the labels manually' in result.output
+    assert 'All done' in result.output
