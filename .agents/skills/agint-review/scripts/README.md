@@ -503,9 +503,9 @@ This is what the orchestrator writes after synthesis (defined in `references/out
 
 ### Body composition
 
-`compose_body(author, comments, unattached, unattached_note, uncovered_files)` builds the body, top to bottom:
+`compose_body(author, comments, unattached, unattached_note, uncovered_files, own_pr)` builds the body, top to bottom:
 
-1. `REVIEW_BODY_HEADER`: "Hi @author, this review was generated automatically. Feel free to discuss any comment you disagree with."
+1. `REVIEW_BODY_HEADER`: "Hi @author, this review was generated automatically. Feel free to discuss any comment you disagree with." On the poster's own PR (the `gh` account is the PR author), `OWN_PR_REVIEW_BODY_HEADER` instead: "Automated review by the [`agint-review`](…) skill. Feel free to discuss any comment you disagree with." When the account can't be read, the greeting is used.
 2. The count line from `count_line(comments)`, e.g. "2 Requests block merging · 4 Suggestions · 1 Question", or "No comments". When there are no comments and `uncovered_files` is set, "No comments: no reviewer covers the files this PR changes." and the capped file list instead. A body that combines several findings counts each label; a comment with no recognized label counts as "other".
 3. The comments that couldn't be attached to the diff (rejected threads and, in Tier 1, file-level comments; every comment in Tier 2), between horizontal rules. Omitted when there are none.
 4. `REVIEW_BODY_LEGEND`: the collapsed legend for request, suggestion, question, nit and follow-up.

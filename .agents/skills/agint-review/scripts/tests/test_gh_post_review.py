@@ -118,7 +118,16 @@ def test_own_pr_posts_comment_but_keeps_the_request_count(monkeypatch, publisher
     run_main(monkeypatch, publisher, review_data, tmp_path, lambda *args: posted_payloads.append(args[-1]) or {})
 
     assert posted_payloads[0]["event"] == "COMMENT"
+    assert posted_payloads[0]["body"].startswith(publisher.OWN_PR_REVIEW_BODY_HEADER)
     assert posted_payloads[0]["body"].endswith("<!-- agent-integrations-review-skill:requests=1 -->")
+
+
+@pytest.mark.parametrize(("own_pr", "greets_author"), [(False, True), (True, False)])
+def test_header_greets_the_author_only_on_someone_elses_pr(publisher, own_pr, greets_author):
+    header = publisher.compose_body("pr-author", [], own_pr=own_pr).split("\n\n")[0]
+
+    assert ("@pr-author" in header) == greets_author
+    assert "generated automatically" in header or "Automated review" in header
 
 
 def test_legend_lists_the_current_comment_types(publisher):
