@@ -19,6 +19,7 @@ All scripts are pure Python 3.11+ (stdlib only, no extra dependencies) and are i
   - [Helpers worth knowing](#helpers-worth-knowing)
   - [Agent selection](#agent-selection)
   - [Callers in other repos](#callers-in-other-repos)
+  - [Standard metric allowlist](#standard-metric-allowlist)
   - [Integration root detection](#integration-root-detection)
   - [`context.json` schema](#contextjson-schema)
   - [Error handling](#error-handling-agint-review-setup)
@@ -67,8 +68,9 @@ The orchestrator runs this script first, at [SKILL.md Step 1](../SKILL.md#step-1
 9. Writes a per-agent filtered diff to `<review_dir>/diffs/<agent>.diff` so each reviewer only loads what it needs.
 10. Resolves each agent's and the challenger's `instruction_paths`: the bundled tenets, output contract and comment style, the `.claude/agint-review/` overrides, and for `conventions` the `AGENTS.md` files on its changed paths.
 11. If `github-actions` is selected on integrations-core, [downloads the callers' workflows](#callers-in-other-repos) from the other repos that call integrations-core workflows `@master` and adds their index to that agent's `instruction_paths` (and to the challenger's). Best-effort: a repo no `gh` account can read is skipped with a warning.
-12. Detects an optional JIRA key by regex on the title and branch name.
-13. Writes `context.json` (with `post: false` when an aspect filter narrowed the reviewers), prints a summary to stderr and the path to `context.json` on stdout.
+12. If `integrations` is selected on integrations-core, [downloads the standard metric allowlist](#standard-metric-allowlist) from ddoghq/dd-analytics and adds it to that agent's `instruction_paths` (and to the challenger's). Best-effort: when no `gh` account can read it, it's skipped with a warning.
+13. Detects an optional JIRA key by regex on the title and branch name.
+14. Writes `context.json` (with `post: false` when an aspect filter narrowed the reviewers), prints a summary to stderr and the path to `context.json` on stdout.
 
 Re-running the script on the same round starts that round over: existing worktrees are reused and moved to the current SHAs, the earlier run's outputs are deleted, and `.gitignore` lines are de-duped.
 
@@ -88,6 +90,7 @@ filesystem:
   <review_dir>/base/                        (git worktree at base ref)
   <review_dir>/callers/index.md             (only for github-actions on integrations-core)
   <review_dir>/callers/<owner>/<repo>/.github/workflows/*.yml
+  <review_dir>/standard_metric_allowlist.json (only for integrations on integrations-core)
   <repo_root>/.gitignore                    (appended if not already covering the review dir base)
 ```
 
@@ -166,6 +169,10 @@ The result, by what the PR touches:
 Other repos call integrations-core workflows, and only the callers `@master` change when integrations-core does. `github-actions` can't search other orgs, so when it runs on integrations-core, `fetch_master_callers` downloads, from `DataDog/integrations-extras`, `DataDog/marketplace` and `ddoghq/integrations-internal`, every `.github/workflows/` file with a `uses:` of an integrations-core workflow or action at `@master`, to `<review_dir>/callers/<owner>/<repo>/`. It writes `callers/index.md`: per repo, the account used, the files and their calling lines, or why it was skipped. A file that fails to download is listed under "Missing" with a warning, and a repo is only reported as having no callers when every one of its files was read.
 
 DataDog and ddoghq repos need different GitHub accounts, and reading a repo with the wrong one returns 404, not a permission error. So `gh_tokens()` collects a token in `GH_TOKEN`/`GITHUB_TOKEN` if set, then one per account logged in to github.com (`gh auth status --json hosts`, `gh auth token --user <login>`, run with those variables unset), and each repo is read with the first token that can list its workflows. Each `gh` call gets its token through its own environment; the active account is never switched. A repo no token can read (typically `ddoghq/integrations-internal` without a ddoghq account) is skipped with a warning, and the index says so.
+
+### Standard metric allowlist
+
+A metric whose name starts with no `prefix` in dd-analytics' standard metric allowlist is billed to the customer as a custom metric, and `integrations` can't read another org's repo. So when `integrations` runs on integrations-core, `add_metric_allowlist` calls `fetch_metric_allowlist`, which downloads `luigiscripts/billing/usage/standard_metric_allowlist.json` from `ddoghq/dd-analytics` at `master` (raw, about 300 KB) with the first of `gh_tokens()` that can read it, checks that it's a JSON list of entries with a `prefix`, and writes it to `<review_dir>/standard_metric_allowlist.json`. Its `instruction_paths` entry, for `integrations` and the challenger, is labelled with the source, the file's git blob SHA and the account used. When no token can read it (no ddoghq account) or the content isn't that list, nothing is added and setup prints a warning; `integrations` then raises a Question instead of checking (`references/integrations/metric-allowlist.md`). Tokens are only looked up when the file is needed.
 
 ### Integration root detection
 
@@ -319,7 +326,7 @@ A few things worth noting about the schema:
 - **`conventions_only_files`** lists the changed files that only `conventions` reviews, so a gap in coverage is visible.
 - **`uncovered_files`** lists the changed files that no agent in the plan reviews. When `agents_to_run` is empty on a full review, the orchestrator copies it into `review.json`, so the posted clean review says why it's empty.
 - **`skipped_agents`** lists agents that matched but were skipped, with the reason: today only `conventions`, when the target branch has no `AGENTS.md`.
-- **`instruction_paths` is fully resolved.** Setup merges bundled rules (`tenets.md`, `common-agent-instructions.md`, `comment-style.md`, always first) with per-repo overrides under `.claude/agint-review/`, plus the `AGENTS.md` files for `conventions` and the callers' index for `github-actions`, and emits one labelled list per agent. The orchestrator pastes the list verbatim into the reviewer's `<instruction_paths>` block — no Glob, no fan-out logic in the prompt. `challenger_instruction_paths` is the union of everything reviewers in this run were given, so the challenger can validate citations against the same set.
+- **`instruction_paths` is fully resolved.** Setup merges bundled rules (`tenets.md`, `common-agent-instructions.md`, `comment-style.md`, always first) with per-repo overrides under `.claude/agint-review/`, plus the `AGENTS.md` files for `conventions`, the callers' index for `github-actions` and the standard metric allowlist for `integrations`, and emits one labelled list per agent. The orchestrator pastes the list verbatim into the reviewer's `<instruction_paths>` block — no Glob, no fan-out logic in the prompt. `challenger_instruction_paths` is the union of everything reviewers in this run were given, so the challenger can validate citations against the same set.
 - **`paths` and `agent_file` replace harness path substitution.** They're resolved from the script's own location (`scripts/` → skill → `agents/`), so `SKILL.md` needs no `${CLAUDE_SKILL_DIR}` injection and works on harnesses that don't support it. `agent_file` is what a harness without registered subagents reads to run that agent itself.
 - **`post`** is `false` when an aspect filter ran only some reviewers. The orchestrator saves a partial review but doesn't post it, because the Slack coordinator would read it as a complete review.
 - **`round`** is the round setup picked (or the explicit `--round`). It controls the `round-<N>/` segment of `review_dir`, so every other path in the JSON is rooted under it. It does not affect which agents are selected, which files are diffed, or what the worktrees look like.
@@ -342,6 +349,7 @@ Soft failures (continue with reduced functionality):
 - **Agent selection produces an empty list** — `agents_to_run` is `[]`. On a full review the orchestrator posts a clean review listing `uncovered_files`; on a partial run it stops without posting (see [SKILL.md Step 1](../SKILL.md#step-1-setup)).
 - **Older-round cleanup or `git worktree prune` fails** — warning on stderr; setup continues.
 - **A caller repo can't be read with any `gh` account** — it's skipped with a warning, noted in `callers/index.md`, and `github-actions` runs without it.
+- **The standard metric allowlist can't be read with any `gh` account, or isn't the expected list** — it's skipped with a warning, and `integrations` asks whether the metrics are covered instead of checking.
 
 ---
 
@@ -352,7 +360,7 @@ Usage:
   agint-review-cleanup <review_dir> [--review-dir-base NAME]
 ```
 
-Removes the `head` and `base` worktrees of one round dir with `git worktree remove --force` (falling back to deleting the directory if git doesn't know it), then runs `git worktree prune`. Every text file stays: `findings/`, `diffs/`, `challenger.md`, `diff.full`, `callers/`, `scout-context.md`, `context.json` and `review.json` are small, and keeping them lets the user see suppressed comments and retry a failed post. Worktrees are what take the space (a full integrations-core checkout each).
+Removes the `head` and `base` worktrees of one round dir with `git worktree remove --force` (falling back to deleting the directory if git doesn't know it), then runs `git worktree prune`. Every text file stays: `findings/`, `diffs/`, `challenger.md`, `diff.full`, `callers/`, `standard_metric_allowlist.json`, `scout-context.md`, `context.json` and `review.json` are small, and keeping them lets the user see suppressed comments and retry a failed post. Worktrees are what take the space (a full integrations-core checkout each).
 
 - Refuses (exit 2) any path not strictly inside a directory named `NAME` (default `.agint-review`), after resolving `..` and symlinks.
 - Idempotent: a missing dir, or a round with no worktrees, exits 0.

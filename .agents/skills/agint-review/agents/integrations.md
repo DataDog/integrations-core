@@ -21,6 +21,7 @@ The rules below cover every integration PR. These references hold the rest; read
 | The PR changes… | Read |
 |---|---|
 | Check code: anything that runs when the Agent runs the check | `references/integrations/lifecycle.md` |
+| `metadata.csv`, or check code that sends new metrics (integrations-core only) | `references/integrations/metric-allowlist.md` |
 | Code that reads or writes the persistent cache (`read_persistent_cache`, `write_persistent_cache`, `persistent_cache_id`), or state meant to survive an Agent restart | `references/integrations/persistent-cache.md` |
 | Tests, test fixtures, `hatch.toml`, `conftest.py`, or a new integration (it must ship tests) | `references/integrations/tests.md` |
 | `datadog_checks_base/` | `references/integrations/datadog-checks-base.md` and `references/integrations/lifecycle.md` |

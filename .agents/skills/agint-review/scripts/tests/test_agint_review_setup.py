@@ -369,6 +369,65 @@ def test_a_repo_whose_files_all_download_without_master_calls_has_no_callers(set
     assert warnings == []
 
 
+# --- Standard metric allowlist from dd-analytics ------------------------------
+
+ALLOWLIST = json.dumps([
+    {"prefix": "kai.", "origins": [{"product": "agent", "subproduct": "integration", "product_detail": "kai_scheduler"}]},
+])
+
+
+def allowlist_given(setup_script, tmp_path, agents, readable_by="ddoghq-token", repo_name="integrations-core"):
+    """Run the allowlist step for a plan with these agents; return (per_agent, challenger, warnings, tokens looked up)."""
+    gh_api = fake_github(
+        {"ddoghq/dd-analytics": readable_by},
+        {"ddoghq/dd-analytics": {"luigiscripts/billing/usage/standard_metric_allowlist.json?ref=master": ALLOWLIST}},
+    )
+    looked_up = []
+    def tokens():
+        looked_up.append(True)
+        return [("datadog-account", "datadog-token"), ("ddoghq-account", "ddoghq-token")]
+    registry = {a["name"]: a for a in setup_script.load_registry()["agents"]}
+    selected = [{"agent": registry[name], "files": ["kai/metadata.csv"]} for name in agents]
+    per_agent, challenger = setup_script.resolve_instruction_paths(tmp_path / "repo", selected, tmp_path / "base")
+    warnings = setup_script.add_metric_allowlist(tmp_path, repo_name, selected, per_agent, challenger, tokens, gh_api)
+    return per_agent, challenger, warnings, bool(looked_up)
+
+
+def allowlist_entries(paths):
+    return [p for p in paths if p["label"].startswith("Standard metric allowlist")]
+
+
+def test_the_allowlist_is_downloaded_for_integrations_and_the_challenger(setup_script, tmp_path):
+    per_agent, challenger, warnings, _ = allowlist_given(setup_script, tmp_path, ["integrations", "security"])
+
+    [entry] = allowlist_entries(per_agent["integrations"])
+    assert json.loads(Path(entry["path"]).read_text()) == json.loads(ALLOWLIST)
+    assert "ddoghq/dd-analytics@master" in entry["label"] and "read with ddoghq-account" in entry["label"]
+    assert allowlist_entries(challenger) == [entry]
+    assert allowlist_entries(per_agent["security"]) == []
+    assert warnings == []
+
+
+def test_an_allowlist_no_account_can_read_is_skipped_with_a_warning(setup_script, tmp_path):
+    per_agent, challenger, warnings, _ = allowlist_given(setup_script, tmp_path, ["integrations"], readable_by="nobody")
+
+    assert allowlist_entries(per_agent["integrations"]) == allowlist_entries(challenger) == []
+    assert len(warnings) == 1 and "ddoghq/dd-analytics" in warnings[0]
+
+
+@pytest.mark.parametrize(
+    "agents, repo_name",
+    [(["security", "conventions"], "integrations-core"), (["integrations"], "integrations-extras")],
+    ids=["integrations not running", "not integrations-core"],
+)
+def test_the_allowlist_is_not_downloaded_when_integrations_does_not_need_it(setup_script, tmp_path, agents, repo_name):
+    per_agent, challenger, warnings, looked_up = allowlist_given(setup_script, tmp_path, agents, repo_name=repo_name)
+
+    assert not looked_up and warnings == []
+    assert allowlist_entries(challenger) == []
+    assert not (tmp_path / "standard_metric_allowlist.json").exists()
+
+
 def git_tree(path: Path, files: list[str]) -> Path:
     """A git checkout at path with the given files committed."""
     for rel in files:
