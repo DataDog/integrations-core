@@ -38,7 +38,8 @@
         "prefix": "kyverno.",
         "check": [
           "kyverno.policy.results.count",
-          "kyverno.policy.rule.info"
+          "kyverno.policy.rule.info",
+          "kyverno.validating.policy.results.count"
         ],
         "metadata_path": "metadata.csv"
       },

@@ -132,6 +132,27 @@ See the [Autodiscovery Integration Templates][3] for guidance on applying the pa
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+#### CEL-based policy metrics
+
+Kyverno policy types based on Common Expression Language (CEL) each report their own metrics:
+
+| Policy type            | Metric namespace                   |
+| ---------------------- | ---------------------------------- |
+| ValidatingPolicy       | `kyverno.validating.policy.*`       |
+| MutatingPolicy         | `kyverno.mutating.policy.*`         |
+| ImageValidatingPolicy  | `kyverno.image.validating.policy.*` |
+| GeneratingPolicy       | `kyverno.generating.policy.*`       |
+
+These metrics are policy-level rather than rule-level, so their tags differ from those of the older `kyverno.policy.*` metrics. Account for these differences when you migrate dashboards and monitors away from the older metrics:
+
+| Older `kyverno.policy.*` tag | CEL-based policy metric tag |
+| ---------------------------- | --------------------------- |
+| `rule_execution_cause`       | `execution_cause`           |
+| `rule_result`                | `result`                    |
+| `rule_name`                  | Not reported                |
+| `rule_type`                  | Not reported                |
+| `policy_type`                | Not reported                |
+
 ### Events
 
 The kyverno integration does not include any events.
@@ -143,6 +164,13 @@ The kyverno integration does not include any service checks.
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
+
+### CEL-based policy metric names changed after upgrading
+
+If you collected CEL-based policy metrics with `extra_metrics` before version 3.6.0 of the Kyverno check, the result depends on how you wrote the entry:
+
+- **Exact metric name** (for example, `kyverno_validating_policy_results`): The metric keeps the name you chose. To use the default names listed in the CEL-based policy metrics section, remove the entry.
+- **Regular expression** (for example, `^kyverno_.*_policy_.*`): The pattern no longer applies to these metrics, which are now reported under the default names. Update dashboards and monitors that reference the old names. To keep the old names instead, add an exact-name `extra_metrics` entry for each metric.
 
 Need help? Contact [Datadog support][9].
 
