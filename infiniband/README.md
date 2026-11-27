@@ -170,9 +170,14 @@ corresponding sysfs files, metrics are also tagged with:
 - `link_layer`, for example `link_layer:infiniband` or `link_layer:ethernet`
 - `netdev` and `gid_type` from `gid_attrs`, for example `netdev:ens5f0` and `gid_type:roce_v2`
 - `firmware_version`, `hca_type`, `board_id`, and `node_type` from device metadata
+- `pci_bdf` and `numa_node` for the HCA's PCI address and NUMA node, for example `pci_bdf:0000:03:00.0` and `numa_node:0`. Use them to pair HCAs with the GPUs on the same host (`gpu_pci_bus_id`, `gpu_numa_node`)
+- `node_guid` and `sys_image_guid`, and `port_guid` on InfiniBand ports, for example `node_guid:7c8c:0903:0033:e1ae`
 
 The check also submits `infiniband.port.rate` from each port's negotiated link
-rate.
+rate. The link state metrics (`infiniband.port.rate`, `infiniband.port_state` and
+`infiniband.port_phys_state`) are also tagged with the link width and speed, for
+example `port_width:4x` and `port_speed:ndr`, so a link that trained down can be
+found.
 
 ### Events
 

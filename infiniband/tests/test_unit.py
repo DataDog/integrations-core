@@ -10,9 +10,11 @@ from datadog_checks.infiniband import InfinibandCheck
 
 from .common import (
     MOCK_DEVICE,
+    MOCK_DEVICE_METADATA,
     MOCK_IB_COUNTER_DATA,
     MOCK_IB_UNSCALED_COUNTER_DATA,
     MOCK_PORT,
+    MOCK_PORT_DATA,
     MOCK_RDMA_COUNTER_DATA,
     MOCK_STATUS_DATA,
 )
@@ -50,8 +52,17 @@ def _base_tags():
         'hca_type:mt4129',
         'board_id:mt_0000000438',
         'node_type:ca',
+        'pci_bdf:0000:03:00.0',
+        'numa_node:0',
+        'node_guid:7c8c:0903:0033:e1ae',
+        'sys_image_guid:7c8c:0903:0033:e1ae',
+        'port_guid:7c8c:0903:0033:e1ae',
         'custom:tag',
     ]
+
+
+# Only on the link state metrics, not on counters.
+LINK_RATE_TAGS = ['port_width:4x', 'port_speed:edr']
 
 
 def test_check(aggregator, instance, mock_fs):
@@ -66,7 +77,7 @@ def test_check(aggregator, instance, mock_fs):
         'infiniband.port.rate',
         metric_type=aggregator.GAUGE,
         value=100_000_000_000,
-        tags=tags,
+        tags=tags + LINK_RATE_TAGS,
         count=1,
     )
 
@@ -75,7 +86,7 @@ def test_check(aggregator, instance, mock_fs):
     for status_name, expected_state in (('state', 'active'), ('phys_state', 'linkup')):
         value = int(MOCK_STATUS_DATA[status_name].split(':', 1)[0].strip())
 
-        expected_tags = tags + [f'port_{status_name}:{expected_state}']
+        expected_tags = tags + LINK_RATE_TAGS + [f'port_{status_name}:{expected_state}']
         aggregator.assert_metric(
             f'infiniband.port_{status_name}',
             metric_type=aggregator.GAUGE,
@@ -113,7 +124,7 @@ def test_collection_types(aggregator, mock_fs, collection_type, m_type, count):
         'infiniband.port.rate',
         metric_type=aggregator.GAUGE,
         value=100_000_000_000,
-        tags=tags,
+        tags=tags + LINK_RATE_TAGS,
         count=1,
     )
 
@@ -250,7 +261,7 @@ def test_phys_state_tag_is_normalized(aggregator, instance, mock_fs):
         check = InfinibandCheck('infiniband', {}, [instance])
         check.check({})
 
-    expected_tags = _base_tags() + ['port_phys_state:phy_test']
+    expected_tags = _base_tags() + LINK_RATE_TAGS + ['port_phys_state:phy_test']
     aggregator.assert_metric('infiniband.port_phys_state', value=7, tags=expected_tags, count=1)
 
 
@@ -274,3 +285,30 @@ def test_check_skipped_when_gpu_monitoring_disabled(instance, mock_fs):
     with mock.patch.dict(datadog_agent._config, {'gpu.enabled': False}):
         with pytest.raises(SkipInstanceError):
             InfinibandCheck('infiniband', {}, [instance])
+
+
+def test_identity_tags_skipped_when_unknown(aggregator, instance, mock_fs):
+    # A NUMA node of -1, an all-zero GUID or a device symlink that doesn't end in a PCI
+    # address (e.g. a virtual device) must not produce tags.
+    unknown = {'numa_node': '-1', 'node_guid': '0000:0000:0000:0000', 'sys_image_guid': 'not-a-guid'}
+    with (
+        mock.patch.dict(MOCK_DEVICE_METADATA, unknown),
+        mock.patch('os.path.realpath', side_effect=lambda p: '/sys/devices/virtual/infiniband/rxe0'),
+    ):
+        check = InfinibandCheck('infiniband', {}, [instance])
+        check.check({})
+
+    for prefix in ('pci_bdf:', 'numa_node:', 'node_guid:', 'sys_image_guid:'):
+        assert not any(tag.startswith(prefix) for m in aggregator.metrics('infiniband.port.rate') for tag in m.tags)
+
+
+def test_port_guid_only_on_infiniband_ports(aggregator, instance, mock_fs):
+    # On RoCE ports GID 0 is derived from the MAC address, not a port GUID.
+    with mock.patch.dict(MOCK_PORT_DATA, {'link_layer': 'Ethernet'}):
+        check = InfinibandCheck('infiniband', {}, [instance])
+        check.check({})
+
+    tags = aggregator.metrics('infiniband.port.rate')[0].tags
+    assert 'link_layer:ethernet' in tags
+    assert not any(tag.startswith('port_guid:') for tag in tags)
+    assert 'numa_node:0' in tags

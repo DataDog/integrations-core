@@ -34,6 +34,16 @@ MOCK_DEVICE_METADATA = {
     'hca_type': 'MT4129',
     'board_id': 'MT_0000000438',
     'node_type': '1: CA',
+    'numa_node': '0',
+    'node_guid': '7c8c:0903:0033:e1ae',
+    'sys_image_guid': '7c8c:0903:0033:e1ae',
+}
+# Target of the /sys/class/infiniband/<device>/device symlink.
+MOCK_PCI_DEVICE_PATH = '/sys/devices/pci0000:00/0000:00:01.0/0000:03:00.0'
+MOCK_PORT_DATA = {
+    'link_layer': 'InfiniBand',
+    # GID 0 of an InfiniBand port: subnet prefix, then the port GUID.
+    'gid0': 'fe80:0000:0000:0000:7c8c:0903:0033:e1ae',
 }
 MOCK_GID_ATTRS = {
     '0': {
