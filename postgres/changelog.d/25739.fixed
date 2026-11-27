@@ -1,0 +1,1 @@
+Estimate `postgresql.index_bloat` for B-tree indexes from the columns each index stores instead of every column in the table.
