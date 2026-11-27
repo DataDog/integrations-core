@@ -1,0 +1,1 @@
+Add a `--result-file` option that writes a JSON summary of the download, such as the outcome on each repository, for the Agent install telemetry.
