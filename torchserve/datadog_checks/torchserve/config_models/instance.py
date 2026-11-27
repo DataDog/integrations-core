@@ -152,6 +152,7 @@ class InstanceConfig(BaseModel):
     submit_events: Optional[bool] = None
     tag_by_endpoint: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
+    target_info: Optional[bool] = None
     telemetry: Optional[bool] = None
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
