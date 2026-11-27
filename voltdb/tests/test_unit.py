@@ -344,6 +344,50 @@ def test_client_resends_only_once(monkeypatch):
     assert client._client is fake_volt
 
 
+def test_client_resends_once_when_connection_closes_before_send(monkeypatch):
+    """A connection that closes between being picked and the send fails the send
+    itself; the call goes once more to the same pool, which routes around it."""
+    import mock
+    from voltclient import VoltConnectionError
+
+    from datadog_checks.voltdb import client as client_mod
+    from datadog_checks.voltdb.client import Client
+
+    good = mock.MagicMock(status=1)
+    constructions = []
+    fake_volt = mock.MagicMock()
+    fake_volt.call_async.side_effect = [
+        VoltConnectionError('connection to db-2 is closed'),
+        common.completed_future(lambda: good),
+    ]
+    monkeypatch.setattr(client_mod, 'VoltClient', lambda **_: constructions.append(1) or fake_volt)
+
+    client = Client(endpoints=[('h.example', 21212)])
+    assert client.call_procedure('@Ping') is good
+    assert fake_volt.call_async.call_count == 2
+    assert len(constructions) == 1
+    fake_volt.close.assert_not_called()
+
+
+def test_client_send_failure_resends_only_once(monkeypatch):
+    """If the resend can't be sent either, the error surfaces after two sends."""
+    import mock
+    from voltclient import VoltConnectionError
+
+    from datadog_checks.voltdb import client as client_mod
+    from datadog_checks.voltdb.client import Client
+
+    fake_volt = mock.MagicMock()
+    fake_volt.call_async.side_effect = VoltConnectionError('connection to db-2 is closed')
+    monkeypatch.setattr(client_mod, 'VoltClient', lambda **_: fake_volt)
+
+    client = Client(endpoints=[('h.example', 21212)])
+    with pytest.raises(VoltConnectionError, match='is closed'):
+        client.call_procedure_async('@Ping')
+    assert fake_volt.call_async.call_count == 2
+    assert client._client is fake_volt
+
+
 def test_client_does_not_resend_on_timeout(monkeypatch):
     """A timeout means a slow cluster, not a lost connection: resending would only
     double the wait."""

@@ -120,6 +120,14 @@ class Client(object):
                 raise
             self._log_debug('VoltDB pool has no live connections; reconnecting from the seeds.')
             return self._get_client().call_async(procedure, param_types, params)
+        except VoltConnectionError as exc:
+            # The connection picked for this call closed just before the send (a node going
+            # down, or a seed connection being retired); the pool routes around it, so send
+            # once more on the same pool. No pool means no seed answered: don't dial again.
+            if self._client is None:
+                raise
+            self._log_debug('VoltDB call to %s could not be sent (%s); sending it once more.', procedure, exc)
+            return self._client.call_async(procedure, param_types, params)
 
     def result(self, future: Future, procedure: str, params: Optional[list] = None) -> voltdbclient.VoltResponse:
         """Wait for a call sent with call_procedure_async. If its connection was lost while it
