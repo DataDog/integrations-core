@@ -1,0 +1,1 @@
+Fix `redis.key.length` collecting from every database when `db: 0` is configured.

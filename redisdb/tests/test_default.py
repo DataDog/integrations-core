@@ -194,20 +194,21 @@ def test__check_key_lengths_misconfig(aggregator, redis_instance):
     assert len(list(aggregator.metrics('redis.key.length'))) == 0
 
 
-def test__check_key_lengths_single_db(aggregator, redis_instance):
+@pytest.mark.parametrize('target_db, expected_length', [(0, 1), (3, 2)])
+def test__check_key_lengths_single_db(aggregator, redis_instance, target_db, expected_length):
     """
     Keys are stored in multiple databases but we collect data from
-    one database only
+    the configured database only. db 0 is a regression case for #26175.
     """
     redis_check = Redis('redisdb', {}, [redis_instance])
     tmp = deepcopy(redis_instance)
+    redis_instance['keys'].append('missing_key')
 
     # fill db 0
     tmp['db'] = 0
     conn = redis_check._get_conn(tmp)
     conn.flushdb()
     conn.lpush('test_foo', 'value1')
-    conn.lpush('test_foo', 'value2')
 
     # fill db 3
     tmp['db'] = 3
@@ -216,15 +217,15 @@ def test__check_key_lengths_single_db(aggregator, redis_instance):
     conn.lpush('test_foo', 'value3')
     conn.lpush('test_foo', 'value4')
 
-    # collect only from 3
-    redis_instance['db'] = 3
+    redis_instance['db'] = target_db
     redis_check._check_key_lengths(conn, [])
 
-    # metric should be only one, not regarding the number of databases
-    aggregator.assert_metric('redis.key.length', count=1)
-
-    # that single metric should have value=2
-    aggregator.assert_metric('redis.key.length', value=2)
+    db_tag = 'redis_db:db{}'.format(target_db)
+    aggregator.assert_metric('redis.key.length', count=2)
+    aggregator.assert_metric(
+        'redis.key.length', value=expected_length, count=1, tags=['key:test_foo', 'key_type:list', db_tag]
+    )
+    aggregator.assert_metric('redis.key.length', value=0, count=1, tags=['key:missing_key', db_tag])
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
