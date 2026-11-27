@@ -1,0 +1,17 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API Key",
+          "help": "Your Anthropic API key. Generate one in the Anthropic Console under Settings > API Keys.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ]
+}
