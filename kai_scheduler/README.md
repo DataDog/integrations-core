@@ -55,7 +55,39 @@ See the [sample kai_scheduler.d/conf.yaml][4] for all available configuration op
 
 #### Metrics namespace
 
-The check expects KAI's default metrics namespace, `kai`. Do not change it with the `--metrics-namespace` flag or the `queueController.metricsNamespace` setting. The scheduler also exposes an unprefixed copy of each of its metrics that is never updated, so the check only collects the `kai_`-prefixed names.
+KAI prefixes the names of its scheduler and queue-controller metrics with its metrics namespace. The default is `kai`, which you can change with the `--metrics-namespace` flag or the `queueController.metricsNamespace` setting. When KAI uses another metrics namespace, set `metrics_namespace` in every instance to the same value, without the trailing `_`. The check submits the metrics under the same names, whatever the metrics namespace.
+
+The scheduler also exposes an unprefixed copy of each of its metrics. KAI never updates these copies, so the check collects only the prefixed names. Do not use `raw_metric_prefix` to remove the namespace.
+
+#### NVIDIA Run:ai
+
+NVIDIA Run:ai installs KAI in the `runai` Kubernetes namespace, with the `runai` metrics namespace and one scheduler service per node pool shard, such as `runai-scheduler-default`. To find the service names and ports, run `kubectl -n runai get svc`.
+
+Configure the instances as follows:
+
+- **Scheduler**: Add one instance per shard, and tag each instance with the node pool of its shard. Scheduler queue fair share and usage metrics carry no node pool label. Use the node pool name as KAI reports it, so that your tag matches the `kai_nodepool` tag that the check adds to eviction metrics from KAI's node pool label.
+- **Queue-controller**: Scrape it in its own instance, without the `kai_nodepool` tag, because its quota and allocation metrics are not specific to one node pool.
+
+In the following example, replace `<SHARD>` with the shard name from the scheduler service name, and `<NODE_POOL>` with the node pool name that KAI reports:
+
+```yaml
+clusterAgent:
+  confd:
+    kai_scheduler.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+      - queue_controller_endpoint: http://queue-controller.runai.svc:8080/metrics
+        metrics_namespace: runai
+      - scheduler_endpoint: http://runai-scheduler-default.runai.svc:8080/metrics
+        metrics_namespace: runai
+        tags: [kai_nodepool:default]
+        collect_podgroup_events: false
+      - scheduler_endpoint: http://runai-scheduler-<SHARD>.runai.svc:8080/metrics
+        metrics_namespace: runai
+        tags: [kai_nodepool:<NODE_POOL>]
+        collect_podgroup_events: false
+```
 
 ### Validation
 

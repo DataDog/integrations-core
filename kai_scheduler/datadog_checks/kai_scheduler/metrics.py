@@ -5,8 +5,21 @@
 # Some metrics mapping are too long. This turns off the 120 line limit for this file:
 # ruff: noqa: E501
 
-# The scheduler also registers every metric below without the `kai_` prefix. Those copies are never updated, so only
-# the prefixed names are mapped.
+# KAI prefixes the names of its own metrics with its Prometheus metrics namespace, set with the `--metrics-namespace`
+# flag. The mappings use the default namespace, and `with_metrics_namespace` renames them for another one.
+DEFAULT_METRICS_NAMESPACE = 'kai'
+KAI_METRIC_PREFIX = f'{DEFAULT_METRICS_NAMESPACE}_'
+
+
+def with_metrics_namespace(name: str, namespace: str) -> str:
+    """Return the name KAI exposes for the metric `name` when it runs with the metrics namespace `namespace`."""
+    if name.startswith(KAI_METRIC_PREFIX):
+        return f'{namespace}_{name.removeprefix(KAI_METRIC_PREFIX)}'
+    return name
+
+
+# The scheduler also registers every metric below without the metrics namespace prefix. Those copies are never
+# updated, so only the prefixed names are mapped.
 SCHEDULER_METRICS = {
     'kai_action_scheduling_latency_milliseconds': 'action.latency.milliseconds',
     'kai_close_session_latency_milliseconds': 'session.close.latency.milliseconds',

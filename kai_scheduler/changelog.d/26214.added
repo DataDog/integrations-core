@@ -1,0 +1,1 @@
+Add the `metrics_namespace` option to collect the metrics of a KAI Scheduler installed with another Prometheus metrics namespace, such as `runai` on NVIDIA Run:ai.
