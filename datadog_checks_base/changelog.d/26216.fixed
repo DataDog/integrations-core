@@ -1,0 +1,1 @@
+Use the `counter` type for the generic resource Agent telemetry, which the Agent previously rejected with one warning per submitted resource.
