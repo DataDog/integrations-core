@@ -265,6 +265,28 @@ facets:
     path: cisco_ise.attributes.TotalFailedAttempts
     source: log
     type: integer
+  - description: ""
+    facetType: range
+    groups:
+      - Cisco ISE
+    name: Total Authentication Latency
+    path: cisco_ise.attributes.TotalAuthenLatency
+    source: log
+    type: integer
+    unit:
+      family: time
+      name: millisecond
+  - description: ""
+    facetType: range
+    groups:
+      - Cisco ISE
+    name: Client Latency
+    path: cisco_ise.attributes.ClientLatency
+    source: log
+    type: integer
+    unit:
+      family: time
+      name: millisecond
 pipeline:
   type: pipeline
   name: Cisco ISE

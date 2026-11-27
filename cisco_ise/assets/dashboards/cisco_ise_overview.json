@@ -42,8 +42,20 @@
         {
             "available_values": [],
             "default": "*",
+            "name": "access_type",
+            "prefix": "@cisco_ise.attributes.RadiusFlowType"
+        },
+        {
+            "available_values": [],
+            "default": "*",
             "name": "user",
             "prefix": "@usr.name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "endpoint_mac",
+            "prefix": "@cisco_ise.endpoint.mac"
         },
         {
             "available_values": [],
@@ -91,7 +103,7 @@
                             "url_dark_theme": "/static/images/logos/cisco-ise_reversed_large.svg",
                             "vertical_align": "center"
                         },
-                        "id": 6480592162562007,
+                        "id": 7403396878773488,
                         "layout": {
                             "height": 2,
                             "width": 6,
@@ -102,7 +114,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Cisco Identity Services Engine (ISE)** decides which users and devices join the wired, wireless and VPN network, and authenticates administrators on network devices through TACACS+.\n\nThis dashboard shows ISE's logs: logins and failures, where they happen (site and network device), posture, the endpoints ISE profiles, and device administration.\n\n- Filters only apply to the widgets whose events carry that field.\n\n[Integration docs](https://docs.datadoghq.com/integrations/cisco_ise/) \u00b7 [Cisco ISE logs](/logs?query=source%3Acisco-ise) \u00b7 [Cisco ISE syslog messages](https://www.cisco.com/c/en/us/td/docs/security/ise/syslog/Cisco_ISE_Syslogs/m_SyslogsList.html)",
+                            "content": "**Cisco Identity Services Engine (ISE)** decides which users and devices join the wired, wireless and VPN network, and authenticates administrators on network devices through TACACS+.\n\nThis dashboard shows ISE's logs: logins and failures, where they happen (site and network device), posture, the endpoints ISE profiles, and device administration.\n\n- Filters only apply to the widgets whose events carry that field. MAC addresses are written as `aa:bb:cc:dd:ee:ff` (wildcards such as `aa:bb:*` work).\n\n[Integration docs](https://docs.datadoghq.com/integrations/cisco_ise/) \u00b7 [Cisco ISE logs](/logs?query=source%3Acisco-ise) \u00b7 [Cisco ISE syslog messages](https://www.cisco.com/c/en/us/td/docs/security/ise/syslog/Cisco_ISE_Syslogs/m_SyslogsList.html)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -112,7 +124,7 @@
                             "type": "note",
                             "vertical_align": "center"
                         },
-                        "id": 8937627751494308,
+                        "id": 4321865834025477,
                         "layout": {
                             "height": 4,
                             "width": 6,
@@ -122,7 +134,7 @@
                     }
                 ]
             },
-            "id": 6668287174830580,
+            "id": 4381697517336221,
             "layout": {
                 "height": 6,
                 "width": 6,
@@ -151,7 +163,7 @@
                             "type": "note",
                             "vertical_align": "center"
                         },
-                        "id": 3368964003519205,
+                        "id": 3015305046002155,
                         "layout": {
                             "height": 2,
                             "width": 6,
@@ -192,7 +204,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -209,7 +221,7 @@
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 4078537025315902,
+                        "id": 3508760173958689,
                         "layout": {
                             "height": 2,
                             "width": 2,
@@ -250,7 +262,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method"
+                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method"
                                             },
                                             "storage": "hot"
                                         }
@@ -267,7 +279,7 @@
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 6224774445058186,
+                        "id": 4787836364718288,
                         "layout": {
                             "height": 2,
                             "width": 2,
@@ -314,7 +326,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user"
+                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_mac"
                                             },
                                             "storage": "hot"
                                         },
@@ -329,7 +341,7 @@
                                             ],
                                             "name": "query2",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_mac"
                                             },
                                             "storage": "hot"
                                         }
@@ -346,7 +358,7 @@
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 4504400423080862,
+                        "id": 2450339455938648,
                         "layout": {
                             "height": 2,
                             "width": 2,
@@ -388,7 +400,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 -@cisco_ise.attributes.AuthenticationMethod:Lookup $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 -@cisco_ise.attributes.AuthenticationMethod:Lookup $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -405,7 +417,7 @@
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 5760058835937313,
+                        "id": 2265538985123904,
                         "layout": {
                             "height": 2,
                             "width": 2,
@@ -447,7 +459,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -464,7 +476,7 @@
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 1648049143477203,
+                        "id": 3128294614599358,
                         "layout": {
                             "height": 2,
                             "width": 2,
@@ -490,7 +502,7 @@
                                     "formulas": [
                                         {
                                             "alias": "Failed admin logins",
-                                            "formula": "query1"
+                                            "formula": "default_zero(query1)"
                                         }
                                     ],
                                     "queries": [
@@ -522,7 +534,7 @@
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 7058687377226042,
+                        "id": 6126594106056674,
                         "layout": {
                             "height": 2,
                             "width": 2,
@@ -532,7 +544,7 @@
                     }
                 ]
             },
-            "id": 5683674118814687,
+            "id": 3780560345180487,
             "layout": {
                 "height": 6,
                 "width": 6,
@@ -561,7 +573,7 @@
                             "type": "note",
                             "vertical_align": "center"
                         },
-                        "id": 8002152219743014,
+                        "id": 8006218997683759,
                         "layout": {
                             "height": 1,
                             "width": 12,
@@ -598,7 +610,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -631,7 +643,7 @@
                                             ],
                                             "name": "query2",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method"
+                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method"
                                             },
                                             "storage": "hot"
                                         }
@@ -651,7 +663,7 @@
                             "title_size": "16",
                             "type": "timeseries"
                         },
-                        "id": 2630385885953137,
+                        "id": 4513862203901066,
                         "layout": {
                             "height": 3,
                             "width": 8,
@@ -661,7 +673,7 @@
                     },
                     {
                         "definition": {
-                            "description": "Network logins by RADIUS flow type: wired or wireless, 802.1X or MAC Authentication Bypass (MAB).",
+                            "description": "Network logins by RADIUS flow type: wired or wireless, 802.1X, MAC Authentication Bypass (MAB) or web authentication. ISE has no VPN flow type: VPN logins have none.",
                             "requests": [
                                 {
                                     "formulas": [
@@ -693,7 +705,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -722,12 +734,195 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 8199575014158332,
+                        "id": 5067159261600644,
                         "layout": {
                             "height": 3,
                             "width": 4,
                             "x": 8,
                             "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "description": "95th percentile of ISE's total authentication latency (`TotalAuthenLatency`) and of the time spent waiting on the client and network device (`ClientLatency`), for RADIUS network logins. The difference is the time ISE itself spent.",
+                            "legend_columns": [
+                                "avg",
+                                "max",
+                                "value"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Total (p95)",
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "pc95",
+                                                "metric": "@cisco_ise.attributes.TotalAuthenLatency"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                },
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Client side (p95)",
+                                            "formula": "query2",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "pc95",
+                                                "metric": "@cisco_ise.attributes.ClientLatency"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query2",
+                                            "search": {
+                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Authentication latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4572827299126351,
+                        "layout": {
+                            "height": 3,
+                            "width": 8,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "description": "95th percentile of ISE's total authentication latency (`TotalAuthenLatency`) per ISE node, for RADIUS network logins.",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total (p95)",
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "millisecond"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "pc95",
+                                                "metric": "@cisco_ise.attributes.TotalAuthenLatency"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": {
+                                                "fields": [
+                                                    "@cisco_ise.node"
+                                                ],
+                                                "limit": 10,
+                                                "should_exclude_missing": true,
+                                                "sort": {
+                                                    "aggregation": "pc95",
+                                                    "metric": "@cisco_ise.attributes.TotalAuthenLatency",
+                                                    "order": "desc"
+                                                }
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "Authentication latency by ISE node",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 8810703304356200,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 4
                         }
                     },
                     {
@@ -764,7 +959,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method"
+                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method"
                                             },
                                             "storage": "hot"
                                         }
@@ -793,12 +988,12 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 6247023280820549,
+                        "id": 63869445586165,
                         "layout": {
                             "height": 4,
                             "width": 6,
                             "x": 0,
-                            "y": 4
+                            "y": 7
                         }
                     },
                     {
@@ -838,7 +1033,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -864,12 +1059,12 @@
                             "title_size": "16",
                             "type": "sunburst"
                         },
-                        "id": 4621688306662660,
+                        "id": 7880989226558273,
                         "layout": {
                             "height": 4,
                             "width": 6,
                             "x": 6,
-                            "y": 4
+                            "y": 7
                         }
                     },
                     {
@@ -906,7 +1101,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method"
+                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method"
                                             },
                                             "storage": "hot"
                                         }
@@ -935,12 +1130,12 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 5068791094622668,
+                        "id": 3827917091458548,
                         "layout": {
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 8
+                            "y": 11
                         }
                     },
                     {
@@ -977,7 +1172,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method"
+                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1006,12 +1201,12 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 5665536385923155,
+                        "id": 8955057368631002,
                         "layout": {
                             "height": 3,
                             "width": 6,
                             "x": 6,
-                            "y": 8
+                            "y": 11
                         }
                     },
                     {
@@ -1066,7 +1261,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @cisco_ise.message_code:5434 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method"
+                                                "query": "source:cisco-ise @cisco_ise.message_code:5434 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_mac $endpoint_profile $auth_method"
                                             },
                                             "storage": "hot"
                                         },
@@ -1102,7 +1297,7 @@
                                             ],
                                             "name": "query2",
                                             "search": {
-                                                "query": "source:cisco-ise @cisco_ise.message_code:5449 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method"
+                                                "query": "source:cisco-ise @cisco_ise.message_code:5449 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_mac $endpoint_profile $auth_method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1125,12 +1320,12 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 1670476457157045,
+                        "id": 3512788204695487,
                         "layout": {
                             "height": 4,
                             "width": 6,
                             "x": 0,
-                            "y": 11
+                            "y": 14
                         }
                     },
                     {
@@ -1180,7 +1375,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $posture"
                                             },
                                             "storage": "hot"
                                         },
@@ -1207,7 +1402,7 @@
                                             ],
                                             "name": "query2",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $posture"
                                             },
                                             "storage": "hot"
                                         },
@@ -1233,7 +1428,7 @@
                                             ],
                                             "name": "query3",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -1256,12 +1451,12 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 8748092750370864,
+                        "id": 7736529687560127,
                         "layout": {
                             "height": 4,
                             "width": 6,
                             "x": 6,
-                            "y": 11
+                            "y": 14
                         }
                     },
                     {
@@ -1298,7 +1493,7 @@
                                     "query": {
                                         "data_source": "logs_stream",
                                         "indexes": [],
-                                        "query_string": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method",
+                                        "query_string": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method",
                                         "storage": "hot"
                                     },
                                     "response_format": "event_list"
@@ -1309,19 +1504,19 @@
                             "title_size": "16",
                             "type": "list_stream"
                         },
-                        "id": 5324925091839539,
+                        "id": 4260246822122890,
                         "layout": {
                             "height": 4,
                             "width": 12,
                             "x": 0,
-                            "y": 15
+                            "y": 18
                         }
                     }
                 ]
             },
-            "id": 5201043232843719,
+            "id": 6577332866301659,
             "layout": {
-                "height": 20,
+                "height": 23,
                 "width": 12,
                 "x": 0,
                 "y": 6
@@ -1348,7 +1543,7 @@
                             "type": "note",
                             "vertical_align": "center"
                         },
-                        "id": 8221395794897520,
+                        "id": 7040105996682074,
                         "layout": {
                             "height": 1,
                             "width": 12,
@@ -1395,7 +1590,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -1421,7 +1616,7 @@
                             "title_size": "16",
                             "type": "sunburst"
                         },
-                        "id": 5440351604510986,
+                        "id": 4586630223730422,
                         "layout": {
                             "height": 4,
                             "width": 6,
@@ -1475,7 +1670,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         },
@@ -1502,7 +1697,7 @@
                                             ],
                                             "name": "query2",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         },
@@ -1529,7 +1724,7 @@
                                             ],
                                             "name": "query3",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -1552,7 +1747,7 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 6622812602605082,
+                        "id": 3315579504539661,
                         "layout": {
                             "height": 4,
                             "width": 6,
@@ -1612,7 +1807,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         },
@@ -1638,7 +1833,7 @@
                                             ],
                                             "name": "query2",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method"
+                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1661,7 +1856,7 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 3864522037740490,
+                        "id": 6972851838091913,
                         "layout": {
                             "height": 3,
                             "width": 4,
@@ -1703,7 +1898,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method"
+                                                "query": "source:cisco-ise @evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1732,7 +1927,7 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 5817200497144804,
+                        "id": 2702371715940924,
                         "layout": {
                             "height": 3,
                             "width": 4,
@@ -1774,7 +1969,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise ((@evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232) OR (@evt.name:Failed-Attempt -@cisco_ise.attributes.Protocol:Tacacs)) $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -1803,7 +1998,7 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 8391975197659171,
+                        "id": 7562806064532379,
                         "layout": {
                             "height": 3,
                             "width": 4,
@@ -1882,7 +2077,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         },
@@ -1939,7 +2134,7 @@
                                             ],
                                             "name": "query2",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -1962,7 +2157,7 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 7477922070930044,
+                        "id": 6052299680188132,
                         "layout": {
                             "height": 4,
                             "width": 12,
@@ -2026,7 +2221,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @cisco_ise.category:RADIUS_Accounting @network.client.ip:* $ise_node $site_level1 $site_level2 $site_level3 $network_device $user $client_ip"
+                                                "query": "source:cisco-ise @cisco_ise.category:RADIUS_Accounting @network.client.ip:* $ise_node $site_level1 $site_level2 $site_level3 $network_device $user $endpoint_mac $client_ip"
                                             },
                                             "storage": "hot"
                                         }
@@ -2049,7 +2244,7 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 762625963190572,
+                        "id": 8452293951002062,
                         "layout": {
                             "height": 4,
                             "width": 12,
@@ -2059,12 +2254,12 @@
                     }
                 ]
             },
-            "id": 6200318344828232,
+            "id": 6914370968674828,
             "layout": {
                 "height": 17,
                 "width": 12,
                 "x": 0,
-                "y": 26
+                "y": 29
             }
         },
         {
@@ -2088,7 +2283,7 @@
                             "type": "note",
                             "vertical_align": "center"
                         },
-                        "id": 3008342463257241,
+                        "id": 5018402809060324,
                         "layout": {
                             "height": 1,
                             "width": 6,
@@ -2136,7 +2331,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -2156,7 +2351,7 @@
                             "title_size": "16",
                             "type": "timeseries"
                         },
-                        "id": 4557192139232278,
+                        "id": 8543967317967810,
                         "layout": {
                             "height": 3,
                             "width": 6,
@@ -2201,7 +2396,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 -@cisco_ise.attributes.PostureAssessmentStatus:NotApplicable $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 -@cisco_ise.attributes.PostureAssessmentStatus:NotApplicable $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -2227,7 +2422,7 @@
                             "title_size": "16",
                             "type": "sunburst"
                         },
-                        "id": 1776663819988990,
+                        "id": 8337341247127678,
                         "layout": {
                             "height": 4,
                             "width": 6,
@@ -2291,7 +2486,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 @cisco_ise.attributes.PostureAssessmentStatus:NonCompliant $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 @cisco_ise.attributes.PostureAssessmentStatus:NonCompliant $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -2314,7 +2509,7 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 1501373701180521,
+                        "id": 7040189992176168,
                         "layout": {
                             "height": 7,
                             "width": 6,
@@ -2324,12 +2519,12 @@
                     }
                 ]
             },
-            "id": 4128406000212637,
+            "id": 5738177918714837,
             "layout": {
                 "height": 15,
                 "width": 6,
                 "x": 0,
-                "y": 43
+                "y": 46
             }
         },
         {
@@ -2353,7 +2548,7 @@
                             "type": "note",
                             "vertical_align": "center"
                         },
-                        "id": 955624116988506,
+                        "id": 2857624163619045,
                         "layout": {
                             "height": 1,
                             "width": 6,
@@ -2395,7 +2590,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @cisco_ise.message_code:80002 $ise_node $site_level1 $site_level2 $site_level3 $client_ip"
+                                                "query": "source:cisco-ise @cisco_ise.message_code:80002 $ise_node $site_level1 $site_level2 $site_level3 $endpoint_mac $client_ip"
                                             },
                                             "storage": "hot"
                                         }
@@ -2412,7 +2607,7 @@
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 1192644303631196,
+                        "id": 5804676344158079,
                         "layout": {
                             "height": 2,
                             "width": 3,
@@ -2454,7 +2649,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 @cisco_ise.attributes.EndPointMatchedProfile:Unknown $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 @cisco_ise.attributes.EndPointMatchedProfile:Unknown $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -2471,7 +2666,7 @@
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 7587442969466273,
+                        "id": 4227662094247102,
                         "layout": {
                             "height": 2,
                             "width": 3,
@@ -2514,7 +2709,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -2543,7 +2738,7 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 7206344527749936,
+                        "id": 5892351263238642,
                         "layout": {
                             "height": 3,
                             "width": 3,
@@ -2586,7 +2781,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @cisco_ise.message_code:80002 $ise_node $site_level1 $site_level2 $site_level3 $client_ip"
+                                                "query": "source:cisco-ise @cisco_ise.message_code:80002 $ise_node $site_level1 $site_level2 $site_level3 $endpoint_mac $client_ip"
                                             },
                                             "storage": "hot"
                                         }
@@ -2615,7 +2810,7 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 3166595046534900,
+                        "id": 5288872182960821,
                         "layout": {
                             "height": 3,
                             "width": 3,
@@ -2658,7 +2853,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @cisco_ise.message_code:80002 $ise_node $site_level1 $site_level2 $site_level3 $client_ip"
+                                                "query": "source:cisco-ise @cisco_ise.message_code:80002 $ise_node $site_level1 $site_level2 $site_level3 $endpoint_mac $client_ip"
                                             },
                                             "storage": "hot"
                                         }
@@ -2687,7 +2882,7 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 5312149260301103,
+                        "id": 5594462920764082,
                         "layout": {
                             "height": 3,
                             "width": 6,
@@ -2730,7 +2925,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -2759,7 +2954,7 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 8076095875020049,
+                        "id": 2155130295182050,
                         "layout": {
                             "height": 3,
                             "width": 6,
@@ -2823,7 +3018,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 @cisco_ise.attributes.EndPointMatchedProfile:Unknown $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $user $endpoint_profile $auth_method $posture"
+                                                "query": "source:cisco-ise @evt.name:Passed-Authentication -@cisco_ise.attributes.Protocol:Tacacs -@cisco_ise.message_code:5232 @cisco_ise.attributes.EndPointMatchedProfile:Unknown $ise_node $site_level1 $site_level2 $site_level3 $network_device $ssid $access_type $user $endpoint_mac $endpoint_profile $auth_method $posture"
                                             },
                                             "storage": "hot"
                                         }
@@ -2846,7 +3041,7 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 2406808246761314,
+                        "id": 7193702624878919,
                         "layout": {
                             "height": 3,
                             "width": 6,
@@ -2856,12 +3051,12 @@
                     }
                 ]
             },
-            "id": 935196887460956,
+            "id": 659773978750136,
             "layout": {
                 "height": 15,
                 "width": 6,
                 "x": 6,
-                "y": 43
+                "y": 46
             }
         },
         {
@@ -2885,7 +3080,7 @@
                             "type": "note",
                             "vertical_align": "center"
                         },
-                        "id": 3387108791261630,
+                        "id": 4205545701328943,
                         "layout": {
                             "height": 1,
                             "width": 12,
@@ -2975,7 +3170,7 @@
                             "title_size": "16",
                             "type": "timeseries"
                         },
-                        "id": 8642133518886131,
+                        "id": 1027942585724691,
                         "layout": {
                             "height": 3,
                             "width": 8,
@@ -3079,7 +3274,7 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 232878640806779,
+                        "id": 5889714601910764,
                         "layout": {
                             "height": 3,
                             "width": 4,
@@ -3166,7 +3361,7 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 1612914059269628,
+                        "id": 4229668728676847,
                         "layout": {
                             "height": 3,
                             "width": 6,
@@ -3253,7 +3448,7 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 4705696722705438,
+                        "id": 4833072231724558,
                         "layout": {
                             "height": 3,
                             "width": 6,
@@ -3340,7 +3535,7 @@
                             "title_size": "16",
                             "type": "query_table"
                         },
-                        "id": 7371867058786276,
+                        "id": 5831439562392127,
                         "layout": {
                             "height": 3,
                             "width": 6,
@@ -3408,7 +3603,7 @@
                             "title_size": "16",
                             "type": "timeseries"
                         },
-                        "id": 8920054306761971,
+                        "id": 7404538665541177,
                         "layout": {
                             "height": 3,
                             "width": 6,
@@ -3465,7 +3660,7 @@
                             "title_size": "16",
                             "type": "list_stream"
                         },
-                        "id": 6877470965063300,
+                        "id": 4166484419049133,
                         "layout": {
                             "height": 4,
                             "width": 12,
@@ -3519,7 +3714,7 @@
                                     "query": {
                                         "data_source": "logs_stream",
                                         "indexes": [],
-                                        "query_string": "source:cisco-ise @cisco_ise.message_code:(87751 OR 5417) $ise_node",
+                                        "query_string": "source:cisco-ise @cisco_ise.message_code:(87751 OR 5417) $ise_node $endpoint_mac",
                                         "storage": "hot"
                                     },
                                     "response_format": "event_list"
@@ -3530,7 +3725,7 @@
                             "title_size": "16",
                             "type": "list_stream"
                         },
-                        "id": 3916412358396881,
+                        "id": 4696841985352563,
                         "layout": {
                             "height": 3,
                             "width": 12,
@@ -3540,12 +3735,12 @@
                     }
                 ]
             },
-            "id": 1792689357172603,
+            "id": 4026085503883156,
             "layout": {
                 "height": 18,
                 "width": 12,
                 "x": 0,
-                "y": 58
+                "y": 61
             }
         },
         {
@@ -3569,7 +3764,7 @@
                             "type": "note",
                             "vertical_align": "center"
                         },
-                        "id": 1986463829259966,
+                        "id": 6969364142487209,
                         "layout": {
                             "height": 1,
                             "width": 12,
@@ -3637,7 +3832,7 @@
                             "title_size": "16",
                             "type": "timeseries"
                         },
-                        "id": 1810116162426223,
+                        "id": 8606104488990345,
                         "layout": {
                             "height": 3,
                             "width": 8,
@@ -3699,7 +3894,7 @@
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 5559077990733449,
+                        "id": 8046827018317208,
                         "layout": {
                             "height": 3,
                             "width": 4,
@@ -3770,7 +3965,7 @@
                             "title_size": "16",
                             "type": "toplist"
                         },
-                        "id": 2605547281595846,
+                        "id": 3332175018519693,
                         "layout": {
                             "height": 3,
                             "width": 6,
@@ -3815,7 +4010,7 @@
                             "title_size": "16",
                             "type": "list_stream"
                         },
-                        "id": 1502623863693100,
+                        "id": 8895832703983288,
                         "layout": {
                             "height": 3,
                             "width": 6,
@@ -3825,12 +4020,12 @@
                     }
                 ]
             },
-            "id": 6310459122560726,
+            "id": 5093407062160982,
             "layout": {
                 "height": 8,
                 "width": 12,
                 "x": 0,
-                "y": 76
+                "y": 79
             }
         }
     ]
