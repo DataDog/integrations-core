@@ -92,6 +92,10 @@ def instance_log_requests():
     return False
 
 
+def instance_metrics_namespace():
+    return 'kai'
+
+
 def instance_min_collection_interval():
     return 15
 

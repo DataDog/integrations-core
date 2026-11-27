@@ -68,6 +68,17 @@ instances:
     #
     # binder_endpoint: http://binder.kai-scheduler.svc:8080/metrics
 
+    ## @param metrics_namespace - string - optional - default: kai
+    ## Prometheus metrics namespace that KAI prefixes its scheduler and queue-controller metrics with, set in KAI
+    ## with the `--metrics-namespace` flag or the `queueController.metricsNamespace` setting. Set it without the
+    ## trailing `_`.
+    ##
+    ## For example, NVIDIA Run:ai installs KAI with the `runai` namespace, so its queue-controller serves
+    ## `runai_queue_deserved_gpus` instead of `kai_queue_deserved_gpus`. The metrics are submitted with the same
+    ## names whatever the namespace.
+    #
+    # metrics_namespace: kai
+
     ## @param collect_podgroup_events - boolean - optional - default: true
     ## Submit events for KAI PodGroup life cycle transitions by polling PodGroup custom resources from the Kubernetes
     ## API.

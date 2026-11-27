@@ -42,6 +42,20 @@ files:
         display_default: null
         example: http://binder.kai-scheduler.svc:8080/metrics
         type: string
+    - name: metrics_namespace
+      fleet_configurable: true
+      description: |
+        Prometheus metrics namespace that KAI prefixes its scheduler and queue-controller metrics with, set in KAI
+        with the `--metrics-namespace` flag or the `queueController.metricsNamespace` setting. Set it without the
+        trailing `_`.
+
+        For example, NVIDIA Run:ai installs KAI with the `runai` namespace, so its queue-controller serves
+        `runai_queue_deserved_gpus` instead of `kai_queue_deserved_gpus`. The metrics are submitted with the same
+        names whatever the namespace.
+      value:
+        type: string
+        example: kai
+        default: kai
     - name: collect_podgroup_events
       fleet_configurable: true
       description: |

@@ -55,7 +55,30 @@ See the [sample kai_scheduler.d/conf.yaml][4] for all available configuration op
 
 #### Metrics namespace
 
-The check expects KAI's default metrics namespace, `kai`. Do not change it with the `--metrics-namespace` flag or the `queueController.metricsNamespace` setting. The scheduler also exposes an unprefixed copy of each of its metrics that is never updated, so the check only collects the `kai_`-prefixed names.
+KAI prefixes the names of its scheduler and queue-controller metrics with its metrics namespace, `kai` by default, which can be changed with the `--metrics-namespace` flag or the `queueController.metricsNamespace` setting. When KAI uses another namespace, set `metrics_namespace` in every instance to the same value, without the trailing `_`. The metrics are submitted with the same names whatever the namespace.
+
+The scheduler also exposes an unprefixed copy of each of its metrics that is never updated, so the check only collects the prefixed names. Do not use `raw_metric_prefix` to remove the namespace.
+
+#### NVIDIA Run:ai
+
+NVIDIA Run:ai installs KAI in the `runai` namespace, with the `runai` metrics namespace and one scheduler service per node pool shard, such as `runai-scheduler-default`. Check the service names and ports with `kubectl -n runai get svc`. Queue fair share and usage metrics carry no node pool label, so tag each scheduler instance with its node pool:
+
+```yaml
+clusterAgent:
+  confd:
+    kai_scheduler.yaml: |-
+      cluster_check: true
+      init_config:
+      instances:
+      - scheduler_endpoint: http://runai-scheduler-default.runai.svc:8080/metrics
+        queue_controller_endpoint: http://queue-controller.runai.svc:8080/metrics
+        metrics_namespace: runai
+        tags: [kai_nodepool:default]
+      - scheduler_endpoint: http://runai-scheduler-<SHARD>.runai.svc:8080/metrics
+        metrics_namespace: runai
+        tags: [kai_nodepool:<NODE_POOL>]
+        collect_podgroup_events: false
+```
 
 ### Validation
 

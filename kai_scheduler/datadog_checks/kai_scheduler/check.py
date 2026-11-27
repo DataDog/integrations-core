@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from collections import defaultdict
 from typing import NamedTuple
 
@@ -18,11 +19,13 @@ from .evictions import EVICTED_PODS_METRIC, EvictedPodsTransformer
 from .metrics import (
     BYTES_PER_GB,
     CONTROLLER_RUNTIME_METRICS,
+    DEFAULT_METRICS_NAMESPACE,
     FAIR_SHARE_MEMORY_METRIC,
     FAIR_SHARE_MEMORY_NAME,
     GO_PROCESS_METRICS,
     QUEUE_CONTROLLER_METRICS,
     SCHEDULER_METRICS,
+    with_metrics_namespace,
 )
 from .podgroup_events import PodGroupEventCollector
 
@@ -38,6 +41,9 @@ DEFAULT_RENAME_LABELS = {
 # `queue_name` holds the display name on the scheduler but `metadata.name` on the queue-controller, so it cannot join
 # their metrics; `queue_metadata_name` can.
 DEFAULT_EXCLUDE_LABELS = ['queue_name']
+
+# A Prometheus metric name prefix, without the `_` that separates it from the metric name.
+METRICS_NAMESPACE_PATTERN = re.compile(r'[a-zA-Z][a-zA-Z0-9_]*(?<!_)')
 
 
 class Component(NamedTuple):
@@ -92,6 +98,15 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         }
 
     def parse_config(self):
+        self.metrics_namespace = self.instance.get('metrics_namespace') or DEFAULT_METRICS_NAMESPACE
+        if not isinstance(self.metrics_namespace, str) or not METRICS_NAMESPACE_PATTERN.fullmatch(
+            self.metrics_namespace
+        ):
+            raise ConfigurationError(
+                f'`metrics_namespace` must be a Prometheus metric name prefix without the trailing `_`, such as '
+                f'`{DEFAULT_METRICS_NAMESPACE}`, got `{self.metrics_namespace}`'
+            )
+
         endpoints = [
             (component, endpoint)
             for component in COMPONENTS
@@ -115,7 +130,10 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return {
             **self.instance,
             'openmetrics_endpoint': endpoint,
-            'metrics': component.metrics,
+            'metrics': [
+                {with_metrics_namespace(name, self.metrics_namespace): mapping for name, mapping in metrics.items()}
+                for metrics in component.metrics
+            ],
             'tags': [*(self.instance.get('tags') or []), f'kai_component:{component.name}'],
             'exclude_labels': [*DEFAULT_EXCLUDE_LABELS, *(self.instance.get('exclude_labels') or [])],
         }
@@ -133,8 +151,12 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 self.gauge(FAIR_SHARE_MEMORY_NAME, sample.value * BYTES_PER_GB, tags=tags, hostname=hostname)
 
         scraper = self.scrapers[endpoint]
-        scraper.metric_transformer.add_custom_transformer(FAIR_SHARE_MEMORY_METRIC, fair_share_memory_transformer)
-        scraper.metric_transformer.add_custom_transformer(EVICTED_PODS_METRIC, EvictedPodsTransformer(self, scraper))
+        scraper.metric_transformer.add_custom_transformer(
+            with_metrics_namespace(FAIR_SHARE_MEMORY_METRIC, self.metrics_namespace), fair_share_memory_transformer
+        )
+        scraper.metric_transformer.add_custom_transformer(
+            with_metrics_namespace(EVICTED_PODS_METRIC, self.metrics_namespace), EvictedPodsTransformer(self, scraper)
+        )
 
     def configure_podgroup_events(self):
         if self.config.collect_podgroup_events:

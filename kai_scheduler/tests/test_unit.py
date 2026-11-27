@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -34,6 +36,27 @@ def mock_endpoints(mock_http_response_per_endpoint):
         {
             SCHEDULER_ENDPOINT: [MockResponse(file_path=get_fixture_path('scheduler.txt'))],
             QUEUE_CONTROLLER_ENDPOINT: [MockResponse(file_path=get_fixture_path('queue_controller.txt'))],
+            BINDER_ENDPOINT: [MockResponse(file_path=get_fixture_path('binder.txt'))],
+        }
+    )
+
+
+def renamed_fixture(tmp_path: Path, filename: str, namespace: str) -> str:
+    """Write a copy of a fixture as served by KAI with the metrics namespace `namespace`, and return its path."""
+    content = Path(get_fixture_path(filename)).read_text()
+    path = tmp_path / f'{namespace}_{filename}'
+    path.write_text(re.sub(r'(?m)^(# (?:HELP|TYPE) )?kai_', rf'\1{namespace}_', content))
+    return str(path)
+
+
+@pytest.fixture
+def mock_runai_endpoints(mock_http_response_per_endpoint, tmp_path):
+    mock_http_response_per_endpoint(
+        {
+            SCHEDULER_ENDPOINT: [MockResponse(file_path=renamed_fixture(tmp_path, 'scheduler.txt', 'runai'))],
+            QUEUE_CONTROLLER_ENDPOINT: [
+                MockResponse(file_path=renamed_fixture(tmp_path, 'queue_controller.txt', 'runai'))
+            ],
             BINDER_ENDPOINT: [MockResponse(file_path=get_fixture_path('binder.txt'))],
         }
     )
@@ -259,6 +282,38 @@ def test_queue_controller_only(dd_run_check, aggregator, mock_endpoints):
 def test_invalid_endpoints_raise(dd_run_check, instance, error):
     with pytest.raises(Exception, match=error):
         dd_run_check(KaiSchedulerCheck(CHECK_NAME, {}, [instance]))
+
+
+def test_custom_metrics_namespace(dd_run_check, aggregator, instance, mock_runai_endpoints):
+    dd_run_check(KaiSchedulerCheck(CHECK_NAME, {}, [{**instance, 'metrics_namespace': 'runai'}]))
+
+    metadata_metrics, config_gated, _ = live_metadata_metrics()
+    aggregator.assert_metrics_using_metadata(
+        metadata_metrics, check_submission_type=True, check_symmetric_inclusion=True, exclude=config_gated
+    )
+    team_a = ['kai_queue:team-a', 'kai_queue_display_name:Team A']
+    # The custom transformers follow the namespace too.
+    aggregator.assert_metric(
+        'kai.queue.fair_share.memory', value=67108864, tags=[*endpoint_tags(SCHEDULER_ENDPOINT), *team_a]
+    )
+    aggregator.assert_metric('kai.evicted_pods.count')
+    aggregator.assert_metric(
+        'kai.scheduling_cycle.latency.milliseconds', value=2, count=1, tags=endpoint_tags(SCHEDULER_ENDPOINT)
+    )
+
+
+def test_other_metrics_namespace_is_not_collected(dd_run_check, aggregator, instance, mock_runai_endpoints):
+    # With the default namespace, the metrics of a KAI that uses another one are not recognized.
+    dd_run_check(KaiSchedulerCheck(CHECK_NAME, {}, [instance]))
+
+    assert not [name for name in aggregator.metric_names if name.startswith('kai.queue.')]
+    aggregator.assert_metric('kai.go.goroutines')
+
+
+@pytest.mark.parametrize('namespace', ['runai_', '_runai', 'run-ai', '1runai', 42])
+def test_invalid_metrics_namespace_raises(dd_run_check, instance, namespace):
+    with pytest.raises(Exception, match='`metrics_namespace` must be a Prometheus metric name prefix'):
+        dd_run_check(KaiSchedulerCheck(CHECK_NAME, {}, [{**instance, 'metrics_namespace': namespace}]))
 
 
 def test_skipped_when_gpu_monitoring_disabled(instance):
