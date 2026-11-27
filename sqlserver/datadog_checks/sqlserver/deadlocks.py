@@ -94,16 +94,20 @@ class Deadlocks(DBMAsyncJob):
         if process_list is None:
             raise Exception("process-list element not found. The deadlock XML is in an unexpected format.")
         query_signatures = []
+        seen_spids = set()
         for process in process_list.findall('process'):
+            skip_signature = False
             spid = process.get('spid')
             if spid is not None:
                 try:
                     spid = int(spid)
                 except ValueError:
                     self._log.error("spid not an integer. Skipping query signature computation.")
-                    continue
-                if spid in query_signatures:
-                    continue
+                    skip_signature = True
+                else:
+                    # Parallel queries report several processes with the same spid.
+                    skip_signature = spid in seen_spids
+                    seen_spids.add(spid)
             else:
                 self._log.error("spid not found in process element. Skipping query signature computation.")
 
@@ -111,8 +115,9 @@ class Deadlocks(DBMAsyncJob):
             signature = None
             for frame in process.findall('.//frame'):
                 if frame.text is not None and frame.text != "unknown":
+                    is_unknown = frame.text.strip() == "unknown"
                     frame.text = self.obfuscate_no_except_wrapper(frame.text)
-                    if signature is not None and frame.text != OBFUSCATION_ERROR:
+                    if signature is None and not is_unknown and frame.text != OBFUSCATION_ERROR:
                         signature = compute_sql_signature(frame.text)
 
             for inputbuf in process.findall('.//inputbuf'):
@@ -121,7 +126,8 @@ class Deadlocks(DBMAsyncJob):
                     if signature is None and inputbuf.text != OBFUSCATION_ERROR:
                         signature = compute_sql_signature(inputbuf.text)
 
-            query_signatures.append({"spid": spid, "signature": signature})
+            if not skip_signature:
+                query_signatures.append({"spid": spid, "signature": signature})
 
         return query_signatures
 
