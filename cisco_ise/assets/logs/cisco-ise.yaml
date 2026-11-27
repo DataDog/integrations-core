@@ -197,6 +197,70 @@ facets:
     facetType: list
     groups:
       - Cisco ISE
+    name: Posture Status
+    path: cisco_ise.attributes.PostureAssessmentStatus
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Cisco ISE
+    name: Endpoint Profile
+    path: cisco_ise.attributes.EndPointMatchedProfile
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Cisco ISE
+    name: Endpoint Policy
+    path: cisco_ise.attributes.EndpointPolicy
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Cisco ISE
+    name: Operating System
+    path: cisco_ise.attributes.OperatingSystem
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Cisco ISE
+    name: Authorization Profile
+    path: cisco_ise.attributes.SelectedAuthorizationProfiles
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Cisco ISE
+    name: Location
+    path: cisco_ise.attributes.Location
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Cisco ISE
+    name: Endpoint Vendor
+    path: cisco_ise.attributes.EndpointOUI
+    source: log
+    type: string
+  - description: ""
+    facetType: list
+    groups:
+      - Cisco ISE
+    name: Endpoint Identity Group
+    path: cisco_ise.attributes.HostIdentityGroup
+    source: log
+    type: string
+  - description: ""
+    facetType: range
+    groups:
+      - Cisco ISE
     name: Total Failed Attempts
     path: cisco_ise.attributes.TotalFailedAttempts
     source: log
