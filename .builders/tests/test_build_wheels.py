@@ -193,7 +193,6 @@ def test_kubernetes_api_docstrings_are_kept_for_watch(tmp_path: Path):
     [
         ('cm_client-45.0.4-py3-none-manylinux2014_x86_64.whl', True),
         ('ddtrace-4.16.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl', True),
-        ('hazelcast_python_client-5.7.0-py3-none-any.whl', True),
         ('openstacksdk-4.18.0-py3-none-any.whl', True),
         ('redis-8.1.0-py3-none-any.whl', True),
         # A separate distribution whose docstrings were not reviewed

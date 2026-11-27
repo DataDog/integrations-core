@@ -63,9 +63,3 @@ strip_docstrings = true
 package_pattern = "redis-*"
 file_pattern = "*.py"
 strip_docstrings = true
-
-[[rules]]
-# The Hazelcast client does not read its docstrings at runtime.
-package_pattern = "hazelcast_python_client-*"
-file_pattern = "*.py"
-strip_docstrings = true
