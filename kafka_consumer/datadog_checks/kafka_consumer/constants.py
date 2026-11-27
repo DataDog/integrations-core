@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 DEFAULT_KAFKA_TIMEOUT = 5
 
+DEFAULT_CONSUMER_GROUP_OFFSETS_BATCH_SIZE = 50
+
 CONTEXT_UPPER_BOUND = 500
 
 # No sense fetching highwater offsets for internal topics

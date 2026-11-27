@@ -1,0 +1,1 @@
+Send consumer group offset requests in batches, configurable with `consumer_group_offsets_batch_size`, to avoid an Agent crash on clusters with many consumer groups.

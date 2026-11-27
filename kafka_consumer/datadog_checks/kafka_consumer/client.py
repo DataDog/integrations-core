@@ -236,6 +236,56 @@ class KafkaClient:
         1. group id
         2. list of tuples: (topic, partition, offset)
         """
+        batch_size = self.config._consumer_group_offsets_batch_size
+        offsets = []
+        coordinator_error = False
+        # Requests share one AdminClient timer. Thousands of requests expiring together can crash librdkafka,
+        # so each batch is fully resolved before the next one is sent.
+        for start in range(0, len(groups), batch_size):
+            batch = groups[start : start + batch_size]
+            futures = self._request_consumer_group_offsets(batch)
+            timed_out = 0
+            for completed in as_completed(futures):
+                try:
+                    response_offset_info = completed.result()
+                except KafkaException as e:
+                    self.log.debug("Failed to read consumer offsets for future %s: %s", completed, e)
+                    error_code = e.args[0].code()
+                    if error_code in (KafkaError.NOT_COORDINATOR, KafkaError.COORDINATOR_NOT_AVAILABLE):
+                        coordinator_error = True
+                    elif error_code in (KafkaError._TIMED_OUT, KafkaError.REQUEST_TIMED_OUT):
+                        timed_out += 1
+                    continue
+                tpo = []
+                for tp in response_offset_info.topic_partitions:
+                    if tp.error:
+                        self.log.debug(
+                            "Encountered error: %s. Occurred with topic: %s; partition: [%s]",
+                            tp.error.str(),
+                            tp.topic,
+                            str(tp.partition),
+                        )
+                        continue
+                    tpo.append((tp.topic, tp.partition, tp.offset))
+                offsets.append((response_offset_info.group_id, tpo))
+            if futures and timed_out == len(futures):
+                skipped = len(groups) - start - len(batch)
+                if skipped:
+                    self.log.warning(
+                        "Every consumer group offsets request in a batch of %d timed out. "
+                        "Skipping the remaining %d consumer groups for this run.",
+                        len(batch),
+                        skipped,
+                    )
+                break
+        if coordinator_error:
+            # The AdminClient caches each group's coordinator and keeps using it after a coordinator error,
+            # so a group that moved to another broker would fail on every run. A new client looks it up again.
+            self.log.debug("Closing the AdminClient so the next request looks up group coordinators again")
+            self.close_admin_client()
+        return offsets
+
+    def _request_consumer_group_offsets(self, groups):
         futures = []
         for consumer_group, topic_partitions in groups:
             topic_partitions = (
@@ -244,39 +294,13 @@ class KafkaClient:
             try:
                 futures.append(
                     self.kafka_client.list_consumer_group_offsets(
-                        [ConsumerGroupTopicPartitions(group_id=consumer_group, topic_partitions=topic_partitions)]
+                        [ConsumerGroupTopicPartitions(group_id=consumer_group, topic_partitions=topic_partitions)],
+                        request_timeout=self.config._request_timeout,
                     )[consumer_group]
                 )
             except Exception as e:
                 self.log.warning("Failed to request consumer offsets for consumer group %s: %s", consumer_group, e)
-        offsets = []
-        coordinator_error = False
-        for completed in as_completed(futures):
-            try:
-                response_offset_info = completed.result()
-            except KafkaException as e:
-                self.log.debug("Failed to read consumer offsets for future %s: %s", completed, e)
-                if e.args[0].code() in (KafkaError.NOT_COORDINATOR, KafkaError.COORDINATOR_NOT_AVAILABLE):
-                    coordinator_error = True
-                continue
-            tpo = []
-            for tp in response_offset_info.topic_partitions:
-                if tp.error:
-                    self.log.debug(
-                        "Encountered error: %s. Occurred with topic: %s; partition: [%s]",
-                        tp.error.str(),
-                        tp.topic,
-                        str(tp.partition),
-                    )
-                    continue
-                tpo.append((tp.topic, tp.partition, tp.offset))
-            offsets.append((response_offset_info.group_id, tpo))
-        if coordinator_error:
-            # The AdminClient caches each group's coordinator and keeps using it after a coordinator error,
-            # so a group that moved to another broker would fail on every run. A new client looks it up again.
-            self.log.debug("Closing the AdminClient so the next request looks up group coordinators again")
-            self.close_admin_client()
-        return offsets
+        return futures
 
     def describe_consumer_group(self, consumer_group):
         desc = self.kafka_client.describe_consumer_groups([consumer_group])[consumer_group].result()

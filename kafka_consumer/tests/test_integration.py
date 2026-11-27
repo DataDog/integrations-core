@@ -14,6 +14,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 from .common import assert_check_kafka, metrics
+from .conftest import reported_batched_groups
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -41,6 +42,16 @@ def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
     """
     dd_run_check(check(kafka_instance))
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
+
+
+def test_check_kafka_reports_every_consumer_group_when_requests_are_batched(
+    aggregator, check, batched_consumer_groups, dd_run_check
+):
+    instance, group_ids = batched_consumer_groups
+
+    dd_run_check(check(instance, {'max_partition_contexts': 1000}))
+
+    assert reported_batched_groups(aggregator) == {f'consumer_group:{group}' for group in group_ids}
 
 
 def test_can_send_event(aggregator, check, kafka_instance, dd_run_check):

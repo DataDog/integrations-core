@@ -122,6 +122,16 @@ files:
         value:
           type: boolean
           example: false
+      - name: consumer_group_offsets_batch_size
+        description: |
+          Maximum number of consumer group offset requests sent to the Kafka cluster at the same time.
+          The check waits for a batch to complete before sending the next one. Sending thousands of requests
+          at once can crash the Agent on clusters with many consumer groups.
+        value:
+          type: integer
+          minimum: 1
+          example: 50
+          display_default: 50
       - name: consumer_queued_max_messages_kbytes
         description: |
           The consumer very aggressively caches messages in the background (tuned for very high throughput).
