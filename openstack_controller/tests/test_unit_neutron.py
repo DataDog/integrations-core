@@ -5,14 +5,12 @@ import copy
 import logging
 import os
 
-import mock
 import pytest
 
 import tests.configs as configs
 import tests.metrics as metrics
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
 pytestmark = [
@@ -34,15 +32,15 @@ pytestmark = [
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_neutron_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -68,15 +66,15 @@ def test_disable_neutron_metrics(aggregator, dd_run_check, instance, openstack_c
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_neutron_agent_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -104,15 +102,15 @@ def test_disable_neutron_agent_metrics(aggregator, dd_run_check, instance, opens
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            id='clouds.yaml no microversion',
         ),
         pytest.param(
             configs.SDK_NOVA_MICROVERSION_2_93,
-            id='api sdk microversion 2.93',
+            id='clouds.yaml microversion 2.93',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_neutron_quota_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
@@ -128,27 +126,18 @@ def test_disable_neutron_quota_metrics(aggregator, dd_run_check, instance, opens
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'openstack_v3_password', 'instance', 'api_type'),
+    ('mock_http_post', 'instance'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['network'])}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'catalog': []},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_post', 'openstack_v3_password'],
+    indirect=['mock_http_post'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -166,14 +155,11 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         args, kwargs = call
         args_list += list(args)
     assert args_list.count('http://127.0.0.1:9696/networking') == 0
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_post.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
-    if api_type == ApiType.SDK:
-        assert openstack_connection.call_count == 4
+    args_list = []
+    for call in mock_http_post.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     assert '`network` component not found in catalog' in caplog.text
 
 
@@ -188,12 +174,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         pytest.param(
             {'http_error': {'/networking': MockResponse(status_code=500)}},
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -223,12 +209,12 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         pytest.param(
             {'elapsed_total_seconds': {'/networking': 0.30706}},
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_service_check(
@@ -259,40 +245,28 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_network', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {'http_error': {'/networking/v2.0/agents': MockResponse(status_code=500)}},
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {'http_error': {'agents': MockResponse(status_code=500)}},
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_network'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_agents_exception(aggregator, check, dd_run_check, mock_http_get, connection_network, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_agents_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.neutron.agent.count',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/agents') == 3
-    if api_type == ApiType.SDK:
-        assert connection_network.agents.call_count == 3
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:9696/networking/v2.0/agents') == 3
 
 
 @pytest.mark.parametrize(
@@ -304,11 +278,11 @@ def test_agents_exception(aggregator, check, dd_run_check, mock_http_get, connec
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_agents_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -394,11 +368,11 @@ def test_agents_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_network_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "projects": {
@@ -425,11 +399,11 @@ def test_disable_network_collect_for_all_projects(aggregator, dd_run_check, inst
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_networks_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "projects": {
@@ -458,11 +432,11 @@ def test_disable_networks_collect_for_all_projects(aggregator, dd_run_check, ins
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_disable_quotas_collect_for_all_projects(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "projects": {
@@ -483,7 +457,7 @@ def test_disable_quotas_collect_for_all_projects(aggregator, dd_run_check, insta
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_network', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {
@@ -491,61 +465,31 @@ def test_disable_quotas_collect_for_all_projects(aggregator, dd_run_check, insta
                     '/networking/v2.0/networks': MockResponse(status_code=500),
                 }
             },
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {
-                'http_error': {
-                    'networks': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
-                    }
-                }
-            },
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_network'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_networks_exception(aggregator, check, dd_run_check, mock_http_get, connection_network, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_networks_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.neutron.network.count',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id')
-            args_list += [(list(args), project_id)]
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        project_id = kwargs.get('params', {}).get('project_id')
+        args_list += [(list(args), project_id)]
 
-        assert (
-            args_list.count((['http://127.0.0.1:9696/networking/v2.0/networks'], '1e6e233e637d4d55a50a62b63398ad15'))
-            == 1
-        )
-        assert (
-            args_list.count((['http://127.0.0.1:9696/networking/v2.0/networks'], '6e39099cccde4f809b003d9e0dd09304'))
-            == 1
-        )
-
-    if api_type == ApiType.SDK:
-        assert connection_network.networks.call_count == 2
-        assert (
-            connection_network.networks.call_args_list.count(mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15'))
-            == 1
-        )
-        assert (
-            connection_network.networks.call_args_list.count(mock.call(project_id='6e39099cccde4f809b003d9e0dd09304'))
-            == 1
-        )
+    assert (
+        args_list.count((['http://127.0.0.1:9696/networking/v2.0/networks'], '1e6e233e637d4d55a50a62b63398ad15')) == 1
+    )
+    assert (
+        args_list.count((['http://127.0.0.1:9696/networking/v2.0/networks'], '6e39099cccde4f809b003d9e0dd09304')) == 1
+    )
 
 
 @pytest.mark.parametrize(
@@ -557,11 +501,11 @@ def test_networks_exception(aggregator, check, dd_run_check, mock_http_get, conn
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_networks_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
@@ -783,11 +727,11 @@ def test_networks_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_networks_metrics_with_include(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "projects": {
@@ -1028,11 +972,11 @@ def test_networks_metrics_with_include(aggregator, dd_run_check, instance, opens
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_networks_metrics_with_exclude(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "projects": {
@@ -1266,84 +1210,48 @@ def test_networks_metrics_with_exclude(aggregator, dd_run_check, instance, opens
 
 
 @pytest.mark.parametrize(
-    ('instance', 'paginated_limit', 'api_type', 'expected_api_calls'),
+    ('instance', 'paginated_limit', 'expected_api_calls'),
     [
         pytest.param(
             configs.REST,
             1,
-            ApiType.REST,
             3,
             id='api rest small limit',
         ),
         pytest.param(
             configs.REST,
             1000,
-            ApiType.REST,
             2,
             id='api rest high limit',
         ),
-        pytest.param(
-            configs.SDK,
-            1,
-            ApiType.SDK,
-            1,
-            id='api sdk small limit',
-        ),
-        pytest.param(
-            configs.SDK,
-            1000,
-            ApiType.SDK,
-            1,
-            id='api sdk high limit',
-        ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_networks_pagination(
     aggregator,
     instance,
     openstack_controller_check,
     paginated_limit,
     expected_api_calls,
-    api_type,
     dd_run_check,
     mock_http_get,
-    connection_network,
 ):
     paginated_instance = copy.deepcopy(instance)
     paginated_instance['paginated_limit'] = paginated_limit
     dd_run_check(openstack_controller_check(paginated_instance))
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
-            limit = params.get('limit')
-            args_list += [(args[0], limit)]
-        assert (
-            args_list.count(('http://127.0.0.1:9696/networking/v2.0/networks', paginated_limit)) == expected_api_calls
-        )
-
-    else:
-        assert connection_network.networks.call_count == 2
-        assert (
-            connection_network.networks.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=paginated_limit)
-            )
-            == 1
-        )
-        assert (
-            connection_network.networks.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=paginated_limit)
-            )
-            == 1
-        )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+        params = kwargs.get('params', {})
+        limit = params.get('limit')
+        args_list += [(args[0], limit)]
+    assert args_list.count(('http://127.0.0.1:9696/networking/v2.0/networks', paginated_limit)) == expected_api_calls
     test_networks_metrics(aggregator, openstack_controller_check(paginated_instance), dd_run_check)
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'connection_network', 'instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {
@@ -1352,30 +1260,14 @@ def test_networks_pagination(
                     '/networking/v2.0/quotas/6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
                 }
             },
-            None,
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
-        pytest.param(
-            None,
-            {
-                'http_error': {
-                    'quotas': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
-                    }
-                }
-            },
-            configs.SDK,
-            ApiType.SDK,
-            id='api sdk',
-        ),
     ],
-    indirect=['mock_http_get', 'connection_network'],
+    indirect=['mock_http_get'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connection_network, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.nova.quota.floatingip',
@@ -1389,27 +1281,12 @@ def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connec
         'openstack.nova.quota.port',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/quotas/1e6e233e637d4d55a50a62b63398ad15') == 1
-        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/quotas/6e39099cccde4f809b003d9e0dd09304') == 1
-    if api_type == ApiType.SDK:
-        assert connection_network.get_quota.call_count == 2
-        assert (
-            connection_network.get_quota.call_args_list.count(
-                mock.call('1e6e233e637d4d55a50a62b63398ad15', details=True)
-            )
-            == 1
-        )
-        assert (
-            connection_network.get_quota.call_args_list.count(
-                mock.call('6e39099cccde4f809b003d9e0dd09304', details=True)
-            )
-            == 1
-        )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:9696/networking/v2.0/quotas/1e6e233e637d4d55a50a62b63398ad15') == 1
+    assert args_list.count('http://127.0.0.1:9696/networking/v2.0/quotas/6e39099cccde4f809b003d9e0dd09304') == 1
 
 
 @pytest.mark.parametrize(
@@ -1421,12 +1298,12 @@ def test_quotas_exception(aggregator, check, dd_run_check, mock_http_get, connec
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk',
+            id='clouds.yaml',
         ),
     ],
     indirect=[],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
 def test_quotas_metrics(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(

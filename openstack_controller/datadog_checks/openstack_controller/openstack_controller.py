@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Type  # noqa: F401
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.discovery import Discovery
-from datadog_checks.openstack_controller.api.factory import make_api
+from datadog_checks.openstack_controller.api.api_rest import ApiRest
 from datadog_checks.openstack_controller.components.bare_metal import BareMetal
 from datadog_checks.openstack_controller.components.block_storage import BlockStorage
 from datadog_checks.openstack_controller.components.compute import Compute
@@ -44,7 +44,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
 
     def init(self):
         self.openstack_config = OpenstackConfig(self.log, self.config)
-        self.api = make_api(self.openstack_config, self.log, self.http)
+        self.api = ApiRest(self.openstack_config, self.log, self.http)
         self.identity = Identity(self)
         self.external_tags = []
         self.components = [

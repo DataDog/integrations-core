@@ -3596,6 +3596,8 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_hostname:a',
             'instance_name:instance-0000004a',
+            'flavor_id:cirros256',
+            'flavor_name:cirros256',
         ],
         'hostname': '5102fbbf-7156-48dc-8355-af7ab992266f',
     },
@@ -3669,6 +3671,8 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_hostname:test',
             'instance_name:instance-00000049',
+            'flavor_id:cirros256',
+            'flavor_name:cirros256',
         ],
         'hostname': '954441a8-552a-476c-985e-6564e6fe93d6',
     },
@@ -3742,6 +3746,8 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_hostname:server',
             'instance_name:instance-00000004',
+            'flavor_id:cirros256',
+            'flavor_name:cirros256',
         ],
         'hostname': '2c653a68-b520-4582-a05d-41a68067d76c',
     },
@@ -3814,6 +3820,8 @@ COMPUTE_SERVERS_DISABLED_FLAVORS_NOVA_MICROVERSION_2_93 = [
             'hypervisor:agent-integrations-openstack-default',
             'instance_hostname:demo-1',
             'instance_name:instance-0000004c',
+            'flavor_id:cirros256',
+            'flavor_name:cirros256',
         ],
         'hostname': '67ca710a-e73f-4801-a12f-d0c55ccb8955',
     },
@@ -5129,3 +5137,17 @@ CONTAINERS_METRICS_SWIFT = [
         ],
     },
 ]
+
+# Microversion 2.56 (what `clouds.yaml` instances request for quota sets) still returns the `injected_file*` quotas,
+# which 2.57 removed.
+COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_56 = COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_2_93 + [
+    metric for metric in COMPUTE_QUOTA_SETS_NOVA_MICROVERSION_DEFAULT if '.injected_file' in metric['name']
+]
+COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_56 = (
+    COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_2_93
+    + [
+        metric
+        for metric in COMPUTE_QUOTA_SETS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT
+        if '.injected_file' in metric['name']
+    ]
+)
