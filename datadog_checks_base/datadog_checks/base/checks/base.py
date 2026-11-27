@@ -791,6 +791,9 @@ class AgentCheck(object):
                         value = config.get(field_name)
                         if value is not None:
                             validation.security.check_field_trusted_provider(field_name, value, security_config)
+                    validation.security.check_implicit_bearer_token(
+                        config.get('bearer_token_auth'), config.get('bearer_token_path'), security_config
+                    )
                 except ValueError as e:
                     raise ConfigurationError(str(e)) from None
                 return config_model

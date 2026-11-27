@@ -30,10 +30,10 @@ def mock_metrics():
         yield
 
 
-def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
+def test_check_metrics_slis(dd_run_check, aggregator, mock_metrics, mock_request, instance):
     mock_request.get('http://localhost:10257/metrics/slis', status_code=200)
     c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
 
     def assert_metric(name, **kwargs):
         # Wrapper to keep assertions < 120 chars
@@ -157,10 +157,10 @@ def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, instance):
+def test_check_metrics_slis_transform(dd_run_check, aggregator, mock_metrics, mock_request, instance):
     mock_request.get('http://localhost:10257/metrics/slis', status_code=200)
     c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
 
     def assert_metric(name, **kwargs):
         # Wrapper to keep assertions < 120 chars
@@ -176,10 +176,10 @@ def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, in
     )
 
 
-def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, mock_request, instance):
+def test_check_metrics_slis_filter_by_type(dd_run_check, aggregator, mock_metrics, mock_request, instance):
     mock_request.get('http://localhost:10257/metrics/slis', status_code=200)
     c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
 
     def assert_metric(name, **kwargs):
         # Wrapper to keep assertions < 120 chars
@@ -204,25 +204,43 @@ def mock_request():
         yield m
 
 
-def test_detect_sli_endpoint(mock_metrics, instance):
+def test_detect_sli_endpoint(dd_run_check, mock_metrics, instance):
     with mock.patch('requests.Session.get') as mock_request:
         mock_request.return_value.status_code = 200
         c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
+        dd_run_check(c)
         assert instance["slis_available"] is True
 
 
-def test_detect_sli_endpoint_404(mock_metrics, instance):
+def test_detect_sli_endpoint_404(dd_run_check, mock_metrics, instance):
     with mock.patch('requests.Session.get') as mock_request:
         mock_request.return_value.status_code = 404
         c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
+        dd_run_check(c)
         assert instance["slis_available"] is False
 
 
-def test_detect_sli_endpoint_403(mock_metrics, mock_request, instance):
+def test_detect_sli_endpoint_403(dd_run_check, mock_metrics, mock_request, instance):
     with mock.patch('requests.Session.get') as mock_request:
         mock_request.return_value.status_code = 403
         c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
+        dd_run_check(c)
         assert instance["slis_available"] is False
+
+
+def test_sli_probe_skipped_for_untrusted_provider(dd_run_check, datadog_agent, monkeypatch):
+    """The SLI probe sends the bearer token, so it must not run before the trusted-provider validation."""
+    monkeypatch.setitem(datadog_agent._config, 'integration_ignore_untrusted_file_params', True)
+    instance = {'prometheus_url': 'https://localhost:10257/metrics', 'bearer_token_auth': True}
+
+    with (
+        mock.patch.object(KubeControllerManagerCheck, '_get_bearer_token', return_value='token'),
+        mock.patch.object(KubeControllerManagerCheck, 'detect_sli_endpoint') as detect_sli_endpoint,
+    ):
+        check = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
+        check.provider = 'kubernetes'
+
+        with pytest.raises(Exception, match="(?s)ConfigurationError.*bearer_token_auth.*not allowed"):
+            dd_run_check(check)
+
+    detect_sli_endpoint.assert_not_called()

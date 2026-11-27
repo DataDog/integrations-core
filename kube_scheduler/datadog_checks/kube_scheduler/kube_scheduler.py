@@ -185,6 +185,10 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMe
             default_namespace="kube_scheduler",
         )
 
+        # The SLI probe sends authenticated requests, so it must run after the trusted-provider validation.
+        self.check_initializations.append(lambda: self._configure_instances(instances))
+
+    def _configure_instances(self, instances):
         if instances is not None:
             for instance in instances:
                 url = instance.get('health_url')

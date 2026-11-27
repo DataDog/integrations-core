@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
+from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.http_exceptions import HTTPClientError
@@ -110,27 +111,35 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             instances = None
 
         if instances is not None:
-            for instance in instances:
-                possible_urls = instance.get('possible_prometheus_urls')
-                if possible_urls is not None:
-                    for url in possible_urls:
-                        try:
-                            new_instance = deepcopy(instance)
-                            new_instance.update({'prometheus_url': url})
-                            scraper_config = self.get_scraper_config(new_instance)
-                            response = self.send_request(url, scraper_config)
-                            response.raise_for_status()
-                            instance['prometheus_url'] = url
-                            self.get_scraper_config(instance)
-                            break
-                        except (IOError, HTTPClientError) as e:
-                            self.log.info("Couldn't connect to %s: %s, trying next possible URL.", url, str(e))
-                    else:
-                        raise CheckException(
-                            "The agent could not connect to any of the following URLs: %s." % possible_urls
-                        )
+            if datadog_agent.get_config('integration_ignore_untrusted_file_params'):
+                # Probing sends authenticated requests, and the config provider is only known after `__init__`.
+                # Defer it until the trusted-provider validation in `load_configuration_models` has run.
+                self.check_initializations.append(lambda: self._resolve_possible_prometheus_urls(instances))
+            else:
+                self._resolve_possible_prometheus_urls(instances)
+
+    def _resolve_possible_prometheus_urls(self, instances):
+        for instance in instances:
+            possible_urls = instance.get('possible_prometheus_urls')
+            if possible_urls is not None:
+                for url in possible_urls:
+                    try:
+                        new_instance = deepcopy(instance)
+                        new_instance.update({'prometheus_url': url})
+                        scraper_config = self.get_scraper_config(new_instance)
+                        response = self.send_request(url, scraper_config)
+                        response.raise_for_status()
+                        instance['prometheus_url'] = url
+                        self.get_scraper_config(instance)
+                        break
+                    except (IOError, HTTPClientError) as e:
+                        self.log.info("Couldn't connect to %s: %s, trying next possible URL.", url, str(e))
                 else:
-                    self.get_scraper_config(instance)
+                    raise CheckException(
+                        "The agent could not connect to any of the following URLs: %s." % possible_urls
+                    )
+            else:
+                self.get_scraper_config(instance)
 
     def check(self, instance):
         # Get the configuration for this specific instance

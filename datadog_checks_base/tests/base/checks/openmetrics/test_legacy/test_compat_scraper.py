@@ -204,3 +204,21 @@ class TestShareLabels:
         datadog_agent.assert_metadata('test:instance', version_metadata)
         datadog_agent.assert_metadata_count(len(version_metadata))
         aggregator.assert_all_metrics_covered()
+
+
+class TestBearerTokenAuth:
+    @pytest.mark.parametrize(
+        'bearer_token_auth, enabled',
+        [
+            pytest.param(True, True, id='true'),
+            pytest.param('tls_only', True, id='tls_only'),
+            pytest.param(False, False, id='false'),
+            pytest.param('false', False, id='false string'),
+            pytest.param('no', False, id='no string'),
+        ],
+    )
+    def test_enabled(self, bearer_token_auth, enabled):
+        check = get_legacy_check({'bearer_token_auth': bearer_token_auth})
+        check.configure_scrapers()
+
+        assert (check.scrapers['test'].http.auth_token_handler is not None) is enabled

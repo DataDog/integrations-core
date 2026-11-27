@@ -5,9 +5,10 @@
 Tests for security validation of configuration fields marked with `require_trusted_provider: true`.
 """
 
+import mock
 import pytest
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.utils.models.validation.security import SecurityConfig
 
 from .config_models import ConfigMixin
@@ -335,3 +336,80 @@ def test_secure_field_allowed_when_check_excluded(dd_run_check):
     dd_run_check(check)
 
     assert check.config.tls_cert == '/etc/ssl/cert.pem'
+
+
+@pytest.mark.parametrize('bearer_token_auth', [True, 'true', 'tls_only'])
+def test_implicit_bearer_token_blocked_from_untrusted_provider(dd_run_check, bearer_token_auth):
+    """`bearer_token_auth` without `bearer_token_path` would send the Agent's own service account token."""
+    instance = {'bearer_token_auth': bearer_token_auth}
+    security_config = SecurityConfig(check_name='test', provider='kubernetes', ignore_untrusted_file_params=True)
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    with pytest.raises(
+        Exception, match="(?s)ConfigurationError.*bearer_token_auth.*not allowed from untrusted provider"
+    ):
+        dd_run_check(check)
+
+
+@pytest.mark.parametrize(
+    'provider, file_paths_allowlist, bearer_token_auth',
+    [
+        pytest.param('file', [], True, id='trusted provider'),
+        pytest.param('kubernetes', ['/var/run/secrets/kubernetes.io/serviceaccount'], True, id='allowlisted'),
+        pytest.param('kubernetes', [], False, id='disabled'),
+    ],
+)
+def test_implicit_bearer_token_allowed(dd_run_check, provider, file_paths_allowlist, bearer_token_auth):
+    instance = {'bearer_token_auth': bearer_token_auth}
+    security_config = SecurityConfig(
+        check_name='test',
+        provider=provider,
+        ignore_untrusted_file_params=True,
+        file_paths_allowlist=file_paths_allowlist,
+    )
+    check = Check('test', {}, [instance], security_config=security_config)
+    check.check_id = 'test:123'
+
+    dd_run_check(check)
+
+
+class LegacyOpenMetricsCheck(OpenMetricsBaseCheck, ConfigMixin):
+    """Defined here so that `load_configuration_models` resolves the test config models."""
+
+
+POSSIBLE_URLS_INSTANCE = {
+    'possible_prometheus_urls': ['http://localhost:9090/metrics'],
+    'namespace': 'test',
+    'bearer_token_auth': True,
+}
+
+
+@pytest.fixture
+def mock_send_request():
+    with (
+        mock.patch.object(LegacyOpenMetricsCheck, 'send_request') as send_request,
+        mock.patch.object(LegacyOpenMetricsCheck, '_get_bearer_token', return_value='token'),
+    ):
+        yield send_request
+
+
+def test_possible_prometheus_urls_probed_in_init_when_not_enforced(mock_send_request):
+    """Without enforcement, URLs are still resolved in `__init__`, which older subclasses rely on."""
+    LegacyOpenMetricsCheck('test', {}, [dict(POSSIBLE_URLS_INSTANCE)])
+
+    mock_send_request.assert_called_once()
+
+
+def test_possible_prometheus_urls_not_probed_before_validation(
+    dd_run_check, datadog_agent, monkeypatch, mock_send_request
+):
+    """Probing sends the bearer token, so with enforcement on it must wait for the trusted-provider validation."""
+    monkeypatch.setitem(datadog_agent._config, 'integration_ignore_untrusted_file_params', True)
+    check = LegacyOpenMetricsCheck('test', {}, [dict(POSSIBLE_URLS_INSTANCE)])
+    check.provider = 'kubernetes'
+
+    with pytest.raises(Exception, match="(?s)ConfigurationError.*bearer_token_auth.*not allowed"):
+        dd_run_check(check)
+
+    mock_send_request.assert_not_called()
