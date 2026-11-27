@@ -201,6 +201,7 @@ class InstanceConfig(BaseModel):
     tag_service_check_by_host: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     tags_regex: Optional[str] = None
+    target_info: Optional[bool] = None
     telemetry: Optional[bool] = None
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None

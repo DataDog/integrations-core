@@ -147,6 +147,7 @@ class InstanceConfig(BaseModel):
     skip_proxy: Optional[bool] = None
     tag_by_endpoint: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
+    target_info: Optional[bool] = None
     telemetry: Optional[bool] = None
     tenants: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None

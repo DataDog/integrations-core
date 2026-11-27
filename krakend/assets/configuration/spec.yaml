@@ -40,6 +40,8 @@ files:
   - template: instances
     options:
     - template: instances/openmetrics
+      overrides:
+        target_info.value.example: true
     - name: go_metrics
       description: |
         Collect Go runtime metrics exposed by KrakenD's Prometheus endpoint.

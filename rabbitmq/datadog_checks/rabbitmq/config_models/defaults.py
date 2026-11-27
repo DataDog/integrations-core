@@ -128,6 +128,10 @@ def instance_tag_families():
     return False
 
 
+def instance_target_info():
+    return False
+
+
 def instance_telemetry():
     return False
 

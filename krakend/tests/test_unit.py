@@ -9,8 +9,10 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.discovery.discovery import Port, Service
 from datadog_checks.krakend import KrakendCheck
 from datadog_checks.krakend.check import RENAME_LABELS_MAP
+from datadog_checks.krakend.config_models.discovery import candidates
 from tests.helpers import get_metrics_from_metadata
 from tests.types import InstanceBuilder
 
@@ -115,6 +117,23 @@ def test_check_filters_metrics(aggregator: AggregatorStub, expected_metrics: lis
 def test_labels_renaming(ready_check: KrakendCheck, aggregator: AggregatorStub, metric: str, tag: str):
     # All metrics should include the value from target_info with the appropriate tags renamed
     aggregator.assert_metric_has_tag(metric, tag)
+
+
+def test_discovered_instance_applies_target_info_labels(
+    dd_run_check: Callable, fake_http_response: Callable, aggregator: AggregatorStub
+):
+    service = Service(id="krakend", host="localhost", ports=(Port(number=9090),))
+    discovered = next(candidates(service))["instances"][0]
+    check = KrakendCheck("krakend", {}, [discovered])
+    mocked_metrics_path = Path(__file__).parent / "fixtures" / "metrics.txt"
+    fake_http_response(discovered["openmetrics_endpoint"], mocked_metrics_path.read_text())
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    aggregator.assert_metric_has_tag(
+        "krakend.api.http_client.request_timedout.count", "krakend.service_name:krakend-gateway"
+    )
 
 
 @pytest.mark.parametrize(

@@ -395,11 +395,26 @@
           type: array
           items:
             type: string
+- name: target_info
+  display_priority: 0
+  description: |
+    Whether to apply the labels of the `target_info` metric to all other metrics as tags.
+
+    The `target_info` metric is the OpenMetrics convention for exposing metadata about the target,
+    and the way OpenTelemetry SDKs expose resource attributes. For example, with this option enabled,
+    the following payload tags `http_requests_total` with `env:prod` and `region:europe`:
+
+      target_info{env="prod",region="europe"} 1
+      http_requests_total{method="get"} 1027
+  fleet_configurable: true
+  value:
+    type: boolean
+    example: false
 - name: cache_shared_labels
   display_priority: 0
   description: |
-    When `share_labels` is set, it instructs the check to cache labels collected from the first payload
-    for improved performance.
+    When `share_labels` or `target_info` is set, it instructs the check to cache labels collected from the
+    first payload for improved performance.
 
     Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
   fleet_configurable: true

@@ -144,6 +144,10 @@ def instance_tag_by_endpoint():
     return True
 
 
+def instance_target_info():
+    return False
+
+
 def instance_telemetry():
     return False
 

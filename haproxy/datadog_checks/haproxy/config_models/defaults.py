@@ -180,6 +180,10 @@ def instance_tag_service_check_by_host():
     return False
 
 
+def instance_target_info():
+    return False
+
+
 def instance_telemetry():
     return False
 
