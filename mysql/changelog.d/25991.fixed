@@ -1,0 +1,1 @@
+Bound how long `SHOW BINARY LOGS` can block commits by running it with a 2s session `net_write_timeout`.
