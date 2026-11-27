@@ -28,6 +28,7 @@ from ddev.cli.release.port_commit_workflow import (
     derive_backport_bases,
     is_reset_to_target,
     parse_labels,
+    resolve_pr_labels,
     split_commit_subject,
 )
 from ddev.utils.git import GitCommit
@@ -1067,6 +1068,55 @@ def test_derive_backport_bases(label_names: list[str], expected: list[str]) -> N
         labels=[make_label(id=idx, name=name) for idx, name in enumerate(label_names, start=1)],
     )
     assert derive_backport_bases(pr) == expected
+
+
+@pytest.mark.parametrize(
+    'requested,source_labels,expected',
+    [
+        pytest.param(['qa/skip-qa'], ['qa/required'], ['qa/required'], id='source-replaces-requested'),
+        pytest.param(['backport', 'bot'], ['qa/skip-qa', 'bug'], ['backport', 'bot', 'qa/skip-qa'], id='source-added'),
+        pytest.param(['bot', 'qa/skip-qa'], ['bug'], ['bot', 'qa/skip-qa'], id='source-without-qa-label'),
+        pytest.param(['qa/skip-qa'], None, ['qa/skip-qa'], id='no-source-pr'),
+    ],
+)
+def test_resolve_pr_labels(requested: list[str], source_labels: list[str] | None, expected: list[str]) -> None:
+    source_pr = (
+        None
+        if source_labels is None
+        else make_pull_request(
+            number=1,
+            labels=[make_label(id=idx, name=name) for idx, name in enumerate(source_labels, start=1)],
+        )
+    )
+    assert resolve_pr_labels(requested, source_pr) == expected
+
+
+@pytest.mark.parametrize(
+    'args',
+    [
+        pytest.param(['--from-pr', '23703'], id='from-pr'),
+        pytest.param(['PR-23703'], id='pr-input'),
+    ],
+)
+def test_command_carries_over_source_pr_qa_label(
+    args: list[str], ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x'], extra_labels=['qa/required']),
+    )
+    fake_async_github.mock_response(
+        'create_pull_request',
+        make_pull_request(number=1, html_url='https://github.com/x/pr/1'),
+    )
+    mocker.patch('click.confirm', return_value=True)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', *args, '--target-branch', '7.62.x', '--pr-labels', 'bot,qa/skip-qa')
+
+    assert result.exit_code == 0, result.output
+    assert fake_async_github.last_call('add_labels_to_issue').kwargs['labels'] == ['bot', 'qa/required']
 
 
 def test_command_from_pr_ports_every_backport_label(

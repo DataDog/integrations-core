@@ -383,8 +383,8 @@ class CreatePullRequestStep(PortStep):
                 )
 
 
-def _resolve_input(app: Application, raw: str, *, dry_run: bool) -> str:
-    """Resolve the raw user input to a full commit SHA.
+def _resolve_input(app: Application, raw: str, *, dry_run: bool) -> tuple[str, PullRequest | None]:
+    """Resolve the raw user input to `(full_sha, source_pr)`, where `source_pr` is None for commit input.
 
     Handles three input shapes:
     - Explicit PR form (`PR-12345` or a GitHub PR URL) -> looks up the PR.
@@ -397,15 +397,17 @@ def _resolve_input(app: Application, raw: str, *, dry_run: bool) -> str:
     raw = raw.strip()
     pr_number = _extract_explicit_pr_number(raw)
     if pr_number is not None:
-        return _resolve_pr_to_commit(app, pr_number, dry_run=dry_run)
+        pr, full_sha = _resolve_pr(app, pr_number, dry_run=dry_run)
+        return full_sha, pr
 
     is_digits = DIGITS_PATTERN.fullmatch(raw) is not None
     if is_digits and app.config.github.token:
         with contextlib.suppress(_PRNotFound):
-            return _resolve_pr_to_commit(app, int(raw), dry_run=dry_run)
+            pr, full_sha = _resolve_pr(app, int(raw), dry_run=dry_run)
+            return full_sha, pr
 
     try:
-        return _resolve_commit_or_fetch(app, raw, dry_run=dry_run)
+        return _resolve_commit_or_fetch(app, raw, dry_run=dry_run), None
     except _CommitNotResolvable as exc:
         if is_digits:
             raise _CommitNotResolvable(
@@ -479,12 +481,6 @@ def _resolve_pr(
         ) from exc
     _abort_if_merge_commit(app, pr_number, full_sha)
     return pr, full_sha
-
-
-def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) -> str:
-    """Resolve a PR number to the full SHA of its squash-merge commit (see `_resolve_pr`)."""
-    _, full_sha = _resolve_pr(app, pr_number, dry_run=dry_run)
-    return full_sha
 
 
 async def _fetch_pr(token: str, owner: str, repo: str, pr_number: int) -> PullRequest:
@@ -616,6 +612,21 @@ def parse_labels(raw: str) -> list[str]:
     return [label.strip() for label in raw.split(',') if label.strip()]
 
 
+def resolve_pr_labels(requested: list[str], source_pr: PullRequest | None) -> list[str]:
+    """Return the labels for a backport PR, carrying over the source PR's QA decision label.
+
+    The source PR's `qa/skip-qa` / `qa/required` label replaces any QA label in `requested`, so a
+    backport keeps the QA decision made on the original change. When there is no source PR, or it has
+    no QA label, `requested` is returned unchanged.
+    """
+    from ddev.cli.validate.qa_label import REQUIRED_LABELS
+
+    source_qa_labels = [label.name for label in source_pr.labels if label.name in REQUIRED_LABELS] if source_pr else []
+    if not source_qa_labels:
+        return requested
+    return [label for label in requested if label not in REQUIRED_LABELS] + source_qa_labels
+
+
 def derive_backport_bases(pr: PullRequest) -> list[str]:
     """Return the target branches from a PR's `backport/<base>` labels, in order and de-duplicated."""
     bases: list[str] = []
@@ -715,6 +726,7 @@ def build_port_plan(
     original_pr: str | None,
     target_branch: str,
     options: PortOptions,
+    source_pr: PullRequest | None,
 ) -> PortPlan:
     """Assemble a `PortPlan` for an already-resolved commit and a single target branch."""
     user = require_github_user(app)
@@ -738,7 +750,7 @@ def build_port_plan(
             owner=owner,
             repo=repo,
         ),
-        labels=parse_labels(options.pr_labels),
+        labels=resolve_pr_labels(parse_labels(options.pr_labels), source_pr),
         draft=options.draft,
         create_pr=not options.no_pr,
         verify=options.verify,
@@ -769,7 +781,7 @@ def resolve_port_plan(
         commit_hash = head_commit.sha
 
     try:
-        full_sha = _resolve_input(app, commit_hash, dry_run=options.dry_run)
+        full_sha, source_pr = _resolve_input(app, commit_hash, dry_run=options.dry_run)
     except _CommitNotResolvable as exc:
         app.abort(str(exc))
 
@@ -783,6 +795,7 @@ def resolve_port_plan(
         original_pr=original_pr,
         target_branch=target_branch,
         options=options,
+        source_pr=source_pr,
     )
 
     app.output(_format_plan_summary(app, plan), stderr=True)
@@ -992,6 +1005,7 @@ def run_backport_from_pr(
 
     results = _port_to_each_base(
         app,
+        source_pr=pr,
         bases=bases,
         full_sha=full_sha,
         clean_subject=clean_subject,
@@ -1007,6 +1021,7 @@ def run_backport_from_pr(
 def _port_to_each_base(
     app: Application,
     *,
+    source_pr: PullRequest,
     bases: list[str],
     full_sha: str,
     clean_subject: str,
@@ -1024,6 +1039,7 @@ def _port_to_each_base(
             original_pr=original_pr,
             target_branch=base,
             options=options,
+            source_pr=source_pr,
         )
         if not options.dry_run and _backport_pr_exists(app, owner, repo, plan.new_branch):
             app.display_info(f'Backport to `{base}` already has a PR (branch `{plan.new_branch}`); skipping.')

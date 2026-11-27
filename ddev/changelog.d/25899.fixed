@@ -1,0 +1,1 @@
+Carry the source PR's QA label (`qa/skip-qa` or `qa/required`) over to backport PRs opened by `ddev release port-commit`.

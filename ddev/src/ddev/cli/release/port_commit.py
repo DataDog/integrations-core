@@ -22,7 +22,8 @@ if TYPE_CHECKING:
     '--pr-labels',
     default='qa/skip-qa',
     show_default=True,
-    help='Comma-separated PR labels.',
+    help='Comma-separated PR labels. When porting a PR, its `qa/skip-qa` or `qa/required` label replaces '
+    'the QA label given here.',
 )
 @click.option('--no-pr', is_flag=True, default=False, help="Don't create a pull request.")
 @click.option('--draft', is_flag=True, default=False, help='Open the PR as a draft.')
@@ -56,7 +57,9 @@ def port_commit(
     Cherry-picks COMMIT_OR_PR onto `--target-branch` (default `master`) on a new branch named
     `<github-user>/<prefix>-<sha[:10]>-<suffix>`, preserving `.in-toto` and `.deps/` files from the target
     branch so package signatures stay intact. Pushes the branch and, unless `--no-pr` is set,
-    opens a pull request titled `[Backport] <subject>` and labeled with `--pr-labels`.
+    opens a pull request titled `[Backport] <subject>` and labeled with `--pr-labels`. When the
+    input is a PR, its QA decision label (`qa/skip-qa` or `qa/required`) is carried over to the
+    backport in place of any QA label in `--pr-labels`.
 
     COMMIT_OR_PR accepts: a full 40-character commit SHA, a PR number (e.g. `23703`), an
     explicit `PR-<number>` token, or a GitHub PR URL. Pure-digit inputs are tried as a PR
