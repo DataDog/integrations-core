@@ -6,9 +6,11 @@ import json
 import logging
 import marshal
 from collections import defaultdict
+from collections.abc import Callable
 from concurrent.futures import Future
 from contextlib import nullcontext as does_not_raise
 from contextlib import suppress
+from typing import Any
 
 import mock
 import pytest
@@ -670,6 +672,78 @@ def test_highwater_collection_reads_cluster_id_without_a_consumer(kafka_instance
         value=80,
         tags=['topic:marvel', 'partition:0', 'kafka_cluster_id:admin-metadata-cluster', 'optional:tag1'],
     )
+
+
+@pytest.mark.parametrize('override', [None, 'configured-id'], ids=['no override', 'override'])
+@pytest.mark.parametrize(
+    'sharded, monitor_all, topic, regular_topic, context_limit',
+    [
+        pytest.param(True, True, '_schema', True, 500, id='non-zero shard with monitor_all'),
+        pytest.param(False, False, '_schema', True, 500, id='only internal topics selected'),
+        pytest.param(False, True, '_schema', False, 500, id='only internal topics in cluster'),
+        pytest.param(False, True, 'regular', True, 1, id='context limit reached'),
+    ],
+)
+def test_consumer_offsets_keep_cluster_id_without_highwater_offsets(
+    check, kafka_instance, dd_run_check, aggregator, sharded, monitor_all, topic, regular_topic, context_limit, override
+):
+    """
+    Consumer offsets are tagged with the detected cluster ID even when no highwater offsets were queried.
+    Regression test for https://github.com/DataDog/integrations-core/pull/25886.
+    """
+    topics = {'_schema': mock.Mock(partitions={0: None})}
+    if regular_topic:
+        topics['regular'] = mock.Mock(partitions={0: None})
+    admin = FakeAdminClient(mock.Mock(cluster_id='detected-id', topics=topics))
+    kafka_instance.update(
+        {
+            'consumer_groups': {'group-b': {topic: [0]}},
+            'monitor_all_broker_highwatermarks': monitor_all,
+            'kafka_cluster_id_override': override,
+        }
+    )
+    if sharded:
+        # group-b hashes to shard 1 of 3, so this instance fetches only its own groups' partitions.
+        kafka_instance.update({'consumer_groups_shard_count': 3, 'consumer_groups_shard_index': 1})
+
+    with mock.patch('datadog_checks.kafka_consumer.client.AdminClient', return_value=admin):
+        dd_run_check(check(kafka_instance, {'max_partition_contexts': context_limit}))
+
+    tags = [
+        f'topic:{topic}',
+        'partition:0',
+        'consumer_group:group-b',
+        f'kafka_cluster_id:{override or "detected-id"}',
+        'optional:tag1',
+    ]
+    if override:
+        tags.append('original_kafka_cluster_id:detected-id')
+    aggregator.assert_metric('kafka.consumer_offset', value=5, tags=tags, count=1)
+    aggregator.assert_metric('kafka.broker_offset', count=0)
+    aggregator.assert_metric('kafka.consumer_lag', count=0)
+    assert admin.list_topics_calls == 1, "the cluster ID must come from the metadata fetched at the start of the run"
+
+
+@pytest.mark.parametrize('override', [None, 'configured-id'], ids=['no override', 'override'])
+def test_consumer_offsets_keep_empty_cluster_id_when_metadata_has_none(
+    check, kafka_instance, dd_run_check, aggregator, override
+):
+    """
+    A broker that reports no cluster ID must not turn the empty tag into `None`, which would start a new series.
+    Regression test for https://github.com/DataDog/integrations-core/pull/25886.
+    """
+    admin = FakeAdminClient(mock.Mock(cluster_id=None, topics={'regular': mock.Mock(partitions={0: None})}))
+    kafka_instance.update({'consumer_groups': {'group-b': {'regular': [0]}}, 'kafka_cluster_id_override': override})
+
+    with mock.patch('datadog_checks.kafka_consumer.client.AdminClient', return_value=admin):
+        # A context limit of 1 skips highwater collection, so the cluster ID can only come from the fallback.
+        dd_run_check(check(kafka_instance, {'max_partition_contexts': 1}))
+
+    tags = ['topic:regular', 'partition:0', 'consumer_group:group-b', 'optional:tag1']
+    tags.append(f'kafka_cluster_id:{override or ""}')
+    if override:
+        tags.append('original_kafka_cluster_id:')
+    aggregator.assert_metric('kafka.consumer_offset', value=5, tags=tags, count=1)
 
 
 def test_check_clears_cache_on_partial_reset(kafka_instance, check, dd_run_check):
@@ -1555,3 +1629,179 @@ def test_malloc_trim_runs_after_every_run(check, kafka_instance, run_check):
             kafka_check.check(kafka_instance)
 
     trim.assert_called_once_with()
+
+
+SHARDED_GROUPS = ["group-a", "group-b", "group-c", "group-d", "group-e", "group-f"]
+# zlib.crc32(group) % 3, pinned so that a change to the shard hash is caught: every
+# shard of a deployment has to agree on the assignment, across processes and restarts.
+GROUPS_BY_SHARD = {0: ["group-c", "group-d", "group-e"], 1: ["group-b", "group-f"], 2: ["group-a"]}
+
+
+def sharded_instance(
+    kafka_instance: dict[str, Any], shard_index: int, shard_count: int = 3, **options: Any
+) -> dict[str, Any]:
+    kafka_instance.pop("consumer_groups", None)
+    kafka_instance.update(
+        {'consumer_groups_shard_count': shard_count, 'consumer_groups_shard_index': shard_index, **options}
+    )
+    return kafka_instance
+
+
+@pytest.mark.parametrize('shard_index', [0, 1, 2])
+def test_monitor_unlisted_consumer_groups_are_split_across_shards(kafka_instance, shard_index):
+    instance = sharded_instance(kafka_instance, shard_index, monitor_unlisted_consumer_groups=True)
+    with mock.patch(
+        "datadog_checks.kafka_consumer.kafka_consumer.KafkaClient.list_consumer_groups",
+        return_value=SHARDED_GROUPS,
+    ):
+        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+        assert kafka_consumer_check._get_consumer_groups() == GROUPS_BY_SHARD[shard_index]
+
+
+def test_regex_consumer_groups_are_split_across_shards(kafka_instance):
+    instance = sharded_instance(kafka_instance, 1, consumer_groups_regex={'group-.*': {}})
+    with mock.patch(
+        "datadog_checks.kafka_consumer.kafka_consumer.KafkaClient.list_consumer_groups",
+        # "unmatched-b" hashes to shard 1, so it must still be dropped by the regex.
+        return_value=SHARDED_GROUPS + ["unmatched-b"],
+    ):
+        kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+        assert kafka_consumer_check._get_consumer_groups() == GROUPS_BY_SHARD[1]
+
+
+def test_configured_consumer_groups_are_split_across_shards(kafka_instance):
+    instance = sharded_instance(kafka_instance, 0, consumer_groups={group: {'topic1': [0]} for group in SHARDED_GROUPS})
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+
+    assert kafka_consumer_check._get_consumer_groups() == {group: {'topic1': [0]} for group in GROUPS_BY_SHARD[0]}
+
+
+def test_offsets_are_only_fetched_for_consumer_groups_in_shard(check, kafka_instance, dd_run_check):
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = SHARDED_GROUPS
+    kafka_consumer_check = check(sharded_instance(kafka_instance, 2, monitor_unlisted_consumer_groups=True))
+    kafka_consumer_check.client = mock_client
+
+    dd_run_check(kafka_consumer_check)
+
+    mock_client.list_consumer_group_offsets.assert_called_once_with([(group, None) for group in GROUPS_BY_SHARD[2]])
+
+
+@pytest.mark.parametrize(
+    'shard_count, shard_index',
+    [
+        pytest.param(0, 0, id='count zero'),
+        pytest.param(-1, 0, id='count negative'),
+        pytest.param(3, 3, id='index equal to count'),
+        pytest.param(3, -1, id='index negative'),
+        pytest.param(1, 1, id='index without count'),
+        pytest.param(3, '', id='index empty string'),
+        pytest.param(3, -0.5, id='index fractional'),
+        pytest.param(3, '1', id='index string'),
+        pytest.param(3, False, id='index bool'),
+        pytest.param(2.5, 0, id='count fractional'),
+        pytest.param('3', 0, id='count string'),
+        pytest.param(None, 1, id='empty count with index'),
+        pytest.param(3, None, id='empty index with count'),
+    ],
+)
+def test_invalid_consumer_groups_shard_settings_raise(check, kafka_instance, shard_count, shard_index):
+    instance = sharded_instance(kafka_instance, shard_index, shard_count, monitor_unlisted_consumer_groups=True)
+
+    with pytest.raises(ConfigurationError, match='consumer_groups_shard'):
+        check(instance)
+
+
+def run_monitor_all_shard(
+    check: Callable[..., KafkaCheck],
+    kafka_instance: dict[str, Any],
+    dd_run_check: Callable[[KafkaCheck], Any],
+    shard_index: int,
+    partitions: list[str],
+    init_config: dict[str, Any] | None = None,
+) -> tuple[mock.MagicMock, str]:
+    """Run one shard with monitor_all_broker_highwatermarks, its first group consuming `partitions` at offset 4."""
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = SHARDED_GROUPS
+    mock_client.get_partitions_for_topic.return_value = partitions
+    group = GROUPS_BY_SHARD[shard_index][0]
+    mock_client.list_consumer_group_offsets.return_value = [(group, [('topic1', p, 4) for p in partitions])]
+    instance = sharded_instance(
+        kafka_instance, shard_index, monitor_unlisted_consumer_groups=True, monitor_all_broker_highwatermarks=True
+    )
+    kafka_consumer_check = check(instance, init_config)
+    kafka_consumer_check.client = mock_client
+    highwater = ({('topic1', p): 10 for p in partitions}, 'cluster_id')
+    with mock.patch.object(kafka_consumer_check, 'get_highwater_offsets', return_value=highwater) as get_highwater:
+        dd_run_check(kafka_consumer_check)
+    return get_highwater, group
+
+
+@pytest.mark.parametrize('shard_index', [0, 1])
+def test_monitor_all_broker_highwatermarks_fetch_scope_per_shard(
+    check, kafka_instance, dd_run_check, aggregator, shard_index
+):
+    get_highwater, group = run_monitor_all_shard(check, kafka_instance, dd_run_check, shard_index, ['partition1'])
+
+    # Only shard 0 scans the whole cluster; the others request exactly their own groups' partitions.
+    get_highwater.assert_called_once_with(None if shard_index == 0 else {('topic1', 'partition1')})
+    # Every shard reports what it fetched, as in the default mode.
+    aggregator.assert_metric('kafka.broker_offset', value=10, count=1)
+    aggregator.assert_metric('kafka.consumer_lag', value=6, count=1)
+    aggregator.assert_metric_has_tag('kafka.consumer_lag', f'consumer_group:{group}')
+
+
+def test_other_shards_report_broker_offsets_when_shard_zero_hits_the_context_limit(
+    check, kafka_instance, dd_run_check, aggregator
+):
+    partitions = ['partition1', 'partition2', 'partition3']
+    init_config = {'max_partition_contexts': 3}
+
+    # Shard 0's own consumer contexts reach the limit, so it skips the cluster-wide scan.
+    get_highwater, _ = run_monitor_all_shard(check, kafka_instance, dd_run_check, 0, partitions, init_config)
+    get_highwater.assert_not_called()
+    aggregator.assert_metric('kafka.broker_offset', count=0)
+
+    # Shard 1 is under the limit and still reports the broker offsets of the partitions it fetched.
+    aggregator.reset()
+    get_highwater, _ = run_monitor_all_shard(check, kafka_instance, dd_run_check, 1, partitions[:1], init_config)
+    get_highwater.assert_called_once_with({('topic1', 'partition1')})
+    aggregator.assert_metric('kafka.broker_offset', value=10, count=1)
+
+
+def test_shard_broker_and_consumer_contexts_share_the_context_limit(check, kafka_instance, dd_run_check, aggregator):
+    # 2 consumer contexts are under the limit of 3, so highwater offsets are fetched; the 2 broker offsets
+    # reported then leave room for only 1 consumer offset.
+    run_monitor_all_shard(
+        check, kafka_instance, dd_run_check, 1, ['partition1', 'partition2'], {'max_partition_contexts': 3}
+    )
+
+    aggregator.assert_metric('kafka.broker_offset', count=2)
+    aggregator.assert_metric('kafka.consumer_offset', count=1)
+
+
+def test_empty_shard_settings_mean_not_set(check, kafka_instance):
+    kafka_instance.update({'consumer_groups_shard_count': None, 'consumer_groups_shard_index': None})
+    config = check(kafka_instance).config
+
+    assert (config._consumer_groups_shard_count, config._consumer_groups_shard_index) == (1, 0)
+    assert all(config.in_consumer_groups_shard(group) for group in SHARDED_GROUPS)
+
+
+def test_shard_count_without_shard_index_raises(check, kafka_instance):
+    # Defaulting the index to 0 would silently collect only one shard of the groups.
+    kafka_instance.pop("consumer_groups", None)
+    kafka_instance.update({'monitor_unlisted_consumer_groups': True, 'consumer_groups_shard_count': 3})
+
+    with pytest.raises(ConfigurationError, match='`consumer_groups_shard_index` is required'):
+        check(kafka_instance)
+
+
+@pytest.mark.parametrize('kafka_console_option', ['enable_kafka_console', 'enable_cluster_monitoring'])
+def test_sharding_with_kafka_console_raises(check, kafka_instance, kafka_console_option):
+    # Kafka Console collects group metadata cluster-wide, so every shard would emit it.
+    instance = sharded_instance(kafka_instance, 0, monitor_unlisted_consumer_groups=True)
+    instance[kafka_console_option] = True
+
+    with pytest.raises(ConfigurationError, match='`consumer_groups_shard_count` cannot be used with Kafka Console'):
+        check(instance)

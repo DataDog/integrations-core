@@ -93,8 +93,12 @@ class KafkaCheck(AgentCheck):
             if consumer_contexts_count < self._context_limit or self.config._kafka_console_enabled:
                 # Fetch highwater offsets
                 # Build partitions list or use all if configured
-                # If Kafka Console is enabled, always fetch all broker highwater marks
-                if self.config._kafka_console_enabled or self.config._monitor_all_broker_highwatermarks:
+                # If Kafka Console is enabled, always fetch all broker highwater marks.
+                # With sharding, only shard 0 fetches them all, so the cluster-wide scan runs once per set
+                # and the other shards keep their context budget for their own groups' lag.
+                if self.config._kafka_console_enabled or (
+                    self.config._monitor_all_broker_highwatermarks and self.config._consumer_groups_shard_index == 0
+                ):
                     partitions = None
                 else:
                     partitions = set()
@@ -117,6 +121,9 @@ class KafkaCheck(AgentCheck):
                     self._save_broker_timestamps(broker_timestamps, persistent_cache_key)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
+            # Consumer offsets still need the cluster ID when no highwater partitions were queried.
+            if consumer_contexts_count and not cluster_id:
+                cluster_id = self.client.get_cluster_id() or cluster_id
         except Exception:
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
@@ -263,17 +270,19 @@ class KafkaCheck(AgentCheck):
 
     def _get_consumer_groups(self):
         # Get all consumer groups to monitor
+        # Groups outside this instance's shard are dropped here, before any offsets are fetched for them.
+        in_shard = self.config.in_consumer_groups_shard
         if self.config._monitor_unlisted_consumer_groups:
-            return [grp for grp in self.client.list_consumer_groups() if grp]
+            return [grp for grp in self.client.list_consumer_groups() if grp and in_shard(grp)]
 
         if self.config._consumer_groups_compiled_regex:
             return [
                 grp
                 for grp in self.client.list_consumer_groups()
-                if grp and self.config._consumer_groups_compiled_group_regex.fullmatch(grp)
+                if grp and in_shard(grp) and self.config._consumer_groups_compiled_group_regex.fullmatch(grp)
             ]
 
-        return self.config._consumer_groups
+        return {grp: topics for grp, topics in self.config._consumer_groups.items() if in_shard(grp)}
 
     def _get_offsets_for_groups(self, consumer_groups):
         groups = []

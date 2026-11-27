@@ -112,6 +112,41 @@ instances:
     #
     # monitor_unlisted_consumer_groups: false
 
+    ## @param consumer_groups_shard_count - integer - optional - default: 1
+    ## Split the consumer groups selected by `monitor_unlisted_consumer_groups`, `consumer_groups`, or
+    ## the `consumer_groups_regex` option into this many shards, and only collect the shard set by
+    ## the `consumer_groups_shard_index` option. To spread a cluster with many consumer groups across
+    ## several cluster check runners, configure one instance per shard with identical settings and a
+    ## different shard index. Leave it unset, or empty, to collect every selected group in one instance.
+    ##
+    ## Groups are assigned to shards by a stable hash of the group ID before their offsets are fetched,
+    ## so each instance only requests offsets for its own groups. Changing the shard count reassigns
+    ## most groups, so change it on all instances at once.
+    ##
+    ## All instances of a sharded set must use identical settings apart from `consumer_groups_shard_index`,
+    ## including `tags`. A partition consumed by groups in several shards reports `kafka.broker_offset`
+    ## from each of those shards. With identical tags and host, these reports form one series. With a
+    ## per-shard tag, or from different hosts, they form separate series that add up in queries.
+    ##
+    ## Sharding only spreads the load when the shards run on different cluster check runners. Size each
+    ## runner to handle all of the shards that may be scheduled on it at the same time.
+    ##
+    ## With `monitor_all_broker_highwatermarks`, shard 0 fetches the highwater offsets of every partition,
+    ## and the other shards fetch them only for the partitions consumed by their own groups. Each shard
+    ## reports what it fetched within `max_partition_contexts`, like an unsharded instance: shard 0 skips
+    ## the cluster-wide scan when its own consumer contexts reach that limit, and when the cluster has more
+    ## partitions than the limit, shard 0 reports only part of them and can drop its groups' lag.
+    ##
+    ## Sharding cannot be combined with `enable_kafka_console`, which collects cluster-wide metadata.
+    #
+    # consumer_groups_shard_count: 1
+
+    ## @param consumer_groups_shard_index - integer - optional
+    ## The shard of consumer groups this instance collects, from 0 to `consumer_groups_shard_count` - 1.
+    ## Required when `consumer_groups_shard_count` is greater than 1. See `consumer_groups_shard_count`.
+    #
+    # consumer_groups_shard_index: 0
+
     ## @param consumer_queued_max_messages_kbytes - integer - optional - default: 1024
     ## The consumer very aggressively caches messages in the background (tuned for very high throughput).
     ## To reduce memory usage, tune down queued.max.messages.kbytes (maximum cache size per partition).
