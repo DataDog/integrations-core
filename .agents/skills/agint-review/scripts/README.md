@@ -28,7 +28,7 @@ All scripts are pure Python 3.11+ (stdlib only, no extra dependencies) and are i
   - [What it does](#what-it-does-gh-post-review)
   - [Inputs and outputs](#inputs-and-outputs-gh-post-review)
   - [Comment positioning model](#comment-positioning-model)
-  - [Two-tier posting fallback](#two-tier-posting-fallback)
+  - [Posting flow and fallbacks](#posting-flow-and-fallbacks)
   - [`review.json` input schema](#reviewjson-input-schema)
   - [Body composition](#body-composition)
   - [Error handling](#error-handling-gh-post-review)
@@ -43,7 +43,7 @@ All scripts are pure Python 3.11+ (stdlib only, no extra dependencies) and are i
 |--------|-------|---------|
 | [`agint-review-setup`](#agint-review-setup) | Beginning of a review | Parses the PR, creates worktrees, selects which review agents to run, and writes a single `context.json` the orchestrator reads. |
 | [`agint-review-cleanup`](#agint-review-cleanup) | Right after synthesis (before posting), and from setup for leftover worktrees | Removes a round's `head`/`base` worktrees and runs `git worktree prune`. Keeps every text file. |
-| [`gh-post-review`](#gh-post-review) | End of every review | Takes the synthesized `review.json` and posts the review to GitHub as inline comments, with smart line snapping and graceful fallbacks. |
+| [`gh-post-review`](#gh-post-review) | End of every review | Takes the synthesized `review.json` and posts the review to GitHub with every comment in a review thread, anchoring off-diff findings on a related changed line. |
 
 The scripts are **side-effect explicit**: they don't `cd`, and they only touch the review directory, its git worktrees, the repo's `.gitignore` (setup) and the GitHub API (setup reads, `gh-post-review` posts). Setup and cleanup are idempotent. If a step fails, they fail loudly with a useful error rather than continuing silently.
 
@@ -376,7 +376,7 @@ The folder of the PR being reviewed is never touched; non-numeric folders are ig
 
 ### What it does (`gh-post-review`)
 
-At the end of every review ([SKILL.md Step 7](../SKILL.md#step-7-post)), the orchestrator runs this script with the synthesized `review.json`. It first refuses to post if the PR's head SHA no longer matches `review.json`'s `commit_sha`, then posts a single GitHub PR review event (one timeline entry, not N separate comments) with as many inline comments attached at line level as GitHub will accept. It snaps line numbers to the diff, falls back gracefully when GitHub rejects positions, and never abandons the user's content — if all else fails, it inlines the comments into the review body so they're visible at least somewhere.
+At the end of every review ([SKILL.md Step 7](../SKILL.md#step-7-post)), the orchestrator runs this script with the synthesized `review.json`. It first refuses to post if the PR's head SHA no longer matches `review.json`'s `commit_sha`, then posts a single GitHub PR review (one timeline entry, not N separate comments) with every comment in a review thread the author can reply to and resolve: at its line, at the file level, or at its `anchor` when the finding is outside the diff (see [Comment positioning model](#comment-positioning-model)). It never abandons the user's content — when GitHub refuses a thread, or everything else fails, the comments go into the review body so they're visible at least somewhere.
 
 The event is picked from the comments: `REQUEST_CHANGES` when any comment body has a line starting with `**Request**`, `COMMENT` otherwise. Follow-ups and every other type never block. The script never sends `APPROVE`. On the reviewer's own PR (the `gh` account is the PR author) it always sends `COMMENT`, because GitHub rejects `REQUEST_CHANGES` from a PR's author; the marker still carries the Request count. If `gh api user` fails, so the script can't tell, a `REQUEST_CHANGES` that GitHub rejects with its "own pull request" error is retried once as `COMMENT`, in the same tier.
 
@@ -394,50 +394,64 @@ Arguments: the path to `review.json`, plus `--repost` to post a commit that alre
 stdout:   Progress messages and the resulting review URL on success.
 stderr:   Warnings on retries; final error on failure.
 network:  GET user (own-PR check), repos/<repo>/pulls/<N> (head SHA),
-          .../reviews (already posted?) and .../files (diff lines);
-          up to four POST calls to repos/<repo>/pulls/<N>/reviews
-          (two tiers, each retried once as COMMENT on an own-PR rejection).
+          .../reviews (already posted? pending review left behind?) and
+          .../files (diff lines);
+          with file-level threads: POST .../reviews (pending), one GraphQL
+          addPullRequestReviewThread per thread, POST .../reviews/<id>/events,
+          and DELETE/GET .../reviews/<id> if the submit fails;
+          then, if needed, up to four POST calls to .../reviews (two tiers,
+          each retried once as COMMENT on an own-PR rejection).
 exit:     0 on a successful post or when the commit was already posted;
           1 otherwise.
 ```
 
 ### Comment positioning model
 
-GitHub's `POST /pulls/<N>/reviews` endpoint only accepts **line-level** inline comments. Each embedded comment must carry a `line` (or the deprecated `position`) — payloads without one are rejected with `Expected value to not be null`. The `subject_type` field that exists on the standalone `POST /pulls/<N>/comments` endpoint is *not* recognized here; sending it triggers `Field is not defined on DraftPullRequestReviewThread` and the whole batch fails. So this script never sends `subject_type` and never tries to attach file-level inline comments via the create-review path.
+Every comment becomes a review thread. GitHub accepts threads only on files the PR changes, either at a line in the diff on the comment's side (RIGHT for additions and context lines, LEFT for deletions and context lines) or at the file level. A file the PR doesn't touch takes no review comment at all.
 
-The reviewer agents still produce raw comments with a `line` field. `0` is a sentinel meaning "this is a general observation about the file, not tied to any line." Anything else is a 1-based line number where the agent thinks the issue lives.
+A comment's `path`, `line` (and optional `start_line`) are its real target. `0` is a sentinel meaning "a general observation about the file, not tied to any line". `place_comment(comment, diff_lines)` decides where it goes:
 
-`prepare_comments(raw_comments, diff_lines)` turns those raw entries into two lists: **postable** line-level comments (`line > 0`, snapped to the nearest diff line within `SNAP_MAX_DISTANCE`, 5 lines, and sent as `{path, line, side, body}`), and **body_fallback** for everything else (`line == 0`, snap out of range, or file not in the PR diff). The script's docstring lists the cases. Body-fallback entries keep their original `line` as a hint to the reader.
+| Target | Posted as |
+|---|---|
+| `line > 0`, within `SNAP_MAX_DISTANCE` (5) lines of a diff line on its side | Line thread at that diff line |
+| `line == 0`, file in the diff | File-level thread on the file |
+| Anything else, with an `anchor` in the diff | At the anchor: a line thread snapped the same way, or a file-level thread for `anchor.line == 0` |
+| File in the diff, no usable anchor | Line thread at the nearest changed line on its side, however far |
+| File outside the diff, no usable anchor | File-level thread on the changed file sharing the most leading directories with it (`related_diff_file`) |
+| No file of the PR known (the diff fetch failed) | Review body |
 
-The snapping is necessary because reviewer agents read the head worktree to understand context, but GitHub only accepts positions on lines present in the diff on the comment's side: RIGHT for additions and context lines, LEFT for deletions and context lines. Each comment snaps only to lines on its own `side`. A reviewer might say "guard at line 47" while the closest changed line is 45; snapping silently corrects that kind of off-by-one. When the relevant line is genuinely far from the diff, the comment goes to body fallback rather than being relocated to a misleading position.
+The snap within 5 lines silently corrects off-by-one line numbers. In the other re-anchored cases, `target_reference` puts a line at the top of the body naming the real target, linked at `commit_sha`: _About [`path` L228-L256](https://github.com/OWNER/REPO/blob/SHA/path#L228-L256), which this PR doesn't change._ (or _outside the lines this PR changes._ for a file in the diff). LEFT targets aren't linked, since the link shows the head. The label check runs on the bodies as written in `review.json`, so the reference line doesn't affect it. A comment posted on another line than its own, re-anchored or snapped, has its ` ```suggestion ` blocks turned into plain code blocks: GitHub applies a suggestion at the thread's line, so accepting it would overwrite that line instead of the one it was written for. An anchor that isn't in the diff prints a warning and falls through to the script's own choice. The orchestrator is the one that knows which changed line is related, so `output-format.md` asks it to set `anchor` on every off-diff finding; the fallbacks are a guess.
 
-`get_diff_lines(repo, pr_number)` fetches the per-file patches via `gh api repos/.../pulls/<N>/files` and parses each patch with `_parse_patch_lines` to extract the line numbers on each side: RIGHT (additions and context lines, by new-file number) and LEFT (deletions and context lines, by old-file number). The result is `{filename: {"RIGHT": [...], "LEFT": [...]}}` for the snap step. On any fetch failure, an empty dict is returned: with no known files in the diff, every comment goes to body fallback and the review still posts as a body-only message — never blocking on a sub-step.
+`prepare_comments(raw_comments, diff_lines, repo, commit_sha)` returns the line threads (`{path, line, side, body}` for the create-review payload), the file-level threads, and the comments only the body can carry.
 
-#### Future work: pending-review flow for true file-level inline comments
+`get_diff_lines(repo, pr_number)` fetches the per-file patches via `gh api repos/.../pulls/<N>/files` and parses each patch with `_parse_patch_lines` to extract the line numbers on each side: RIGHT (additions and context lines, by new-file number) and LEFT (deletions and context lines, by old-file number). The result is `{filename: {"RIGHT": [...], "LEFT": [...]}}`. On any fetch failure, an empty dict is returned: with no known files in the diff, every comment goes into the body and the review still posts — never blocking on a sub-step.
 
-To preserve `line == 0` and out-of-range comments as actual file-level inline comments (rather than collapsing them into the body), the script would need to switch from the single-call create-review endpoint to the pending-review flow:
+### Posting flow and fallbacks
 
-1. `POST /pulls/<N>/reviews` with no comments and `event` omitted → returns a pending review id.
-2. For each line-level comment: `POST /pulls/<N>/comments` with `pull_request_review_id` and `line`/`side`.
-3. For each file-level comment: `POST /pulls/<N>/comments` with `pull_request_review_id` and `subject_type=file` (which IS valid on this endpoint).
-4. `POST /pulls/<N>/reviews/<id>/events` with the chosen event to submit.
-
-This is a worthwhile refactor when file-level findings become common. Not done here because the body-fallback approach already keeps the content visible.
-
-### Two-tier posting fallback
+`POST /pulls/<N>/reviews` only takes line comments: its `comments[]` items have no `subject_type` (that field exists on the standalone `POST /pulls/<N>/comments`, which publishes each comment on its own, outside any review). Sending it fails the whole batch with `Field is not defined on DraftPullRequestReviewThread`. File-level threads are added through GraphQL instead, which needs the review to exist as pending first:
 
 ```
-Tier 1: post with pre-resolved line-level comments
+File-level threads (only when the review has any):
+  create the review pending (POST /reviews with the line threads and no event)
+  → addPullRequestReviewThread(subjectType: FILE) per thread, on that review's node id
+  → submit (POST /reviews/<id>/events with the event and the body)
+   ↓ (if the pending review can't be created, or the submit fails and it is deleted)
+Tier 1: one create-review call with the line threads; file-level comments in the body
    ↓ (if GitHub rejects)
-Tier 2: post a body-only review with all comments inlined as text
+Tier 2: a body-only review with every comment as text
 ```
 
-- **Tier 1** is the happy path — every postable comment lands at its snapped line; body_fallback content already lives in the review body, above the legend.
-- **Tier 2** doesn't post any inline comments. Every comment is listed as text in the body (in place of the body_fallback list), separated by `---`. The user gets the content even if GitHub refuses to attach it inline.
+- A file-level thread GitHub rejects is listed in the submitted body; the rest of the review still posts.
+- The pending review is created with the body `<!-- agint-review-pending -->`, which the submitted body replaces. Before posting, and when creating it fails (GitHub may have created it and lost the reply), `discard_own_pending_review` deletes any pending review of the poster's that carries it. GitHub allows one pending review per user per PR, so one left behind would make every later post fail. The poster's own draft never carries the marker and is never touched.
+- When the submit fails, the pending review is deleted and Tier 1 runs. If it can't be deleted, the script reads it back: a review GitHub shows as submitted counts as posted (only the response was lost). One still pending stops the script (exit 1) with its id, since GitHub allows one pending review per user per PR and every later post would fail.
+- **Tier 1** is today's single call, used directly when there are no file-level threads.
+- **Tier 2** doesn't post any threads. Every comment is listed as text in the body, separated by `---`.
 
-The script never gives up silently. Once posting starts, the only failure that exits non-zero is "both tiers were rejected by the API," which would mean something fundamental is wrong (missing PR, revoked token, SHA moved between the pre-flight check and the post, etc.). The pre-posting checks are listed under [Error handling](#error-handling-gh-post-review).
+GitHub refuses any new review, pending or not, while the posting account has its own pending review on the PR ("User can only have one pending review per pull request"): every tier then fails and the script prints GitHub's error and the retry command.
 
-Both tiers use the same event (`REQUEST_CHANGES` or `COMMENT`, from the Request count) and the same count line and marker.
+The script never gives up silently. Once posting starts, the only failures that exit non-zero are "both tiers were rejected by the API," which would mean something fundamental is wrong (missing PR, revoked token, a pending review of the poster's own, SHA moved between the pre-flight check and the post, etc.), and a pending review left behind. The pre-posting checks are listed under [Error handling](#error-handling-gh-post-review).
+
+Every path uses the same event (`REQUEST_CHANGES` or `COMMENT`, from the Request count), retried once as `COMMENT` on an own-PR rejection, and the same count line and marker.
 
 ### `review.json` input schema
 
@@ -460,15 +474,25 @@ This is what the orchestrator writes after synthesis (defined in `references/out
       "path": "krakend/manifest.json",
       "line": 0,
       "body": "**Suggestion**: file-level note about the manifest..."
+    },
+    {
+      "path": "krakend/datadog_checks/krakend/config_models/defaults.py",
+      "start_line": 20,
+      "line": 24,
+      "side": "RIGHT",
+      "anchor": {"path": "krakend/datadog_checks/krakend/check.py", "line": 57, "side": "RIGHT"},
+      "body": "**Question**: finding about a file this PR doesn't change..."
     }
   ],
   "uncovered_files": []
 }
 ```
 
-- `path` — file path exactly as it appears in the diff (relative, no leading slash).
+- `path` — the file the finding is about (relative, no leading slash), as it appears in the diff when the PR changes it.
 - `line` — integer; `0` means file-level comment; anything else is a 1-based line number (will be snapped).
+- `start_line` — optional, `1 <= start_line <= line`; the start of the range, used only in the reference line of a re-anchored comment.
 - `side` — `"RIGHT"` for new/changed code (default), `"LEFT"` for deletions; omitted when `line == 0`.
+- `anchor` — optional `{path, line, side}`: where to post when the target isn't in the diff (`line: 0` for a file-level thread). See [Comment positioning model](#comment-positioning-model).
 - `body` — the comment body. The orchestrator already prefixes the type (`**Request**`, `**Suggestion**`, `**Question**`, `**Nit**`, `**Follow-up**`); the script counts these labels and does not modify the body.
 
 `comments` may be empty: that's a clean review, posted with "No comments".
@@ -483,7 +507,7 @@ This is what the orchestrator writes after synthesis (defined in `references/out
 
 1. `REVIEW_BODY_HEADER`: "Hi @author, this review was generated automatically. Feel free to discuss any comment you disagree with."
 2. The count line from `count_line(comments)`, e.g. "2 Requests block merging · 4 Suggestions · 1 Question", or "No comments". When there are no comments and `uncovered_files` is set, "No comments: no reviewer covers the files this PR changes." and the capped file list instead. A body that combines several findings counts each label; a comment with no recognized label counts as "other".
-3. The comments that couldn't go inline (body_fallback in Tier 1, every comment in Tier 2), between horizontal rules. Omitted when there are none.
+3. The comments that couldn't be attached to the diff (rejected threads and, in Tier 1, file-level comments; every comment in Tier 2), between horizontal rules. Omitted when there are none.
 4. `REVIEW_BODY_LEGEND`: the collapsed legend for request, suggestion, question, nit and follow-up.
 5. `MARKER` (`<!-- agent-integrations-review-skill:requests=N -->`), once, last, so it does not alter rendered Markdown.
 
@@ -495,15 +519,18 @@ Hard fails (exit 1), all before anything is posted except the last:
 
 - **`review.json` not found.**
 - **`gh` not installed** — checked via `which gh`.
-- **A comment has a missing or malformed type label** (see [What it does](#what-it-does-gh-post-review)); the problems are listed.
+- **A comment has a missing or malformed type label** (see [What it does](#what-it-does-gh-post-review)), or a `line`, `start_line` or `anchor` of the wrong shape; the problems are listed.
 - **A comment body contains the reserved marker.**
 - **PR head SHA moved** since the review was generated — regenerate the review against the current head.
+- **A pending review left on the PR** — one the script created (after a failed submit, a lost reply or an interrupted run) could not be deleted; the user discards it on GitHub.
 - **Both tiers rejected by the GitHub API** — the final tier prints the API stderr, then the command that posts the saved `review.json` again without reviewing again (`python3 <this script> <review.json>`, or `/agint-review <PR> post` on Claude Code and `/skill:agint-review <PR> post` on pi).
 
 Soft fails (continue with reduced fidelity):
 
-- **Diff fetch fails** — `get_diff_lines` returns `{}`; with no files known to be in the diff, every comment routes to body fallback and the review posts as body-only.
-- **Comment on a file not in the diff** — appended to the review body; never silently dropped.
+- **Diff fetch fails** — `get_diff_lines` returns `{}`; with no files known to be in the diff, every comment goes into the body and the review posts as body-only.
+- **An `anchor` not in the diff** — warning; the script picks the anchor itself.
+- **A file-level thread rejected** — listed in the submitted body.
+- **File-level flow fails** (pending review not created, or submit failed and deleted) — Tier 1 posts with the file-level comments in the body.
 - **Own-PR rejection** — `REQUEST_CHANGES` rejected because the poster is the author: retried as `COMMENT`.
 - **Reviews can't be listed** — the "already posted" check is skipped with a warning.
 - **Tier 1 rejected** — Tier 2 retries body-only with every comment inlined as text; warning logged.

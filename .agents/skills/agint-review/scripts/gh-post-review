@@ -21,21 +21,29 @@ posting. Other people's reviews never count. `--repost` posts
 anyway. A review with no comments is still
 posted, so the author (and the Slack review coordinator) can see it ran.
 
-Comment attachment strategy:
-- line > 0 → snapped to the nearest line present in the diff; the comment is posted as
-  a line-level inline comment.
-- line > 0 but the nearest diff line is more than SNAP_MAX_DISTANCE lines away → the
-  comment is appended to the review body instead, with its original line number kept
-  as a hint to the reader.
-- line == 0 (explicit file-level sentinel) → also routed to the review body. GitHub's
-  `POST /pulls/<N>/reviews` endpoint requires `line` or `position` on every embedded
-  comment, so true file-level inline comments aren't expressible here without
-  switching to the pending-review flow (create pending review, post individual
-  comments via `/comments` with subject_type=file, then submit). That's a follow-up
-  worth doing if file-level inline placement matters; routing them to the body keeps
-  the content visible without extra API surface.
-- File not in the PR diff at all → routed to the review body for the same reason
-  GitHub rejects review comments on unchanged files even at file level.
+Every comment is posted as a review thread, which the author can reply to and resolve.
+`path`/`line` are the finding's real target; an optional `anchor` names the changed
+line (or file, with line 0) to post at when the target itself isn't in the diff:
+- line > 0 within SNAP_MAX_DISTANCE of a diff line on its side → a line thread there.
+- line == 0 on a file in the diff → a file-level thread on that file.
+- Anything else (file outside the diff, or far from a changed line) → posted at the
+  anchor; without a usable anchor, at the nearest changed line of the same file, or as
+  a file-level thread on the changed file nearest in the tree. The body then starts
+  with a line naming the real file and lines, linked at `commit_sha`.
+A comment posted on another line than its own (re-anchored or snapped) has its
+suggestion blocks turned into plain code blocks: GitHub applies a suggestion at the
+thread's line, so accepting it would overwrite that line.
+Only when the diff can't be read, or GitHub rejects a thread, does a comment go into
+the review body.
+
+The create-review endpoint can't carry file-level threads, so a review that has any
+is created pending with its line threads, gets its file-level threads through GraphQL
+`addPullRequestReviewThread` (subjectType FILE), and is then submitted. If that fails,
+the pending review is deleted and the single create-review call runs with the
+file-level comments in the body. Reviews without file-level threads use that single
+call directly. A pending review the script created and never submitted (its reply was
+lost, or a run was interrupted) is found by PENDING_REVIEW_MARKER and deleted before
+posting, since GitHub allows one pending review per user per PR.
 
 Body composition, top to bottom:
     HEADER        greeting that @-mentions the author + "generated automatically" note
@@ -44,13 +52,13 @@ Body composition, top to bottom:
                   no reviewer covers the files this PR changes." and up to
                   UNCOVERED_FILES_SHOWN of those files)
     ---
-    UNATTACHED    comments that couldn't go inline (only when there are any)
+    UNATTACHED    comments that couldn't be attached to the diff (only when there are any)
     ---
     LEGEND        the comment-type details block
     MARKER        invisible proof marker for the Slack review coordinator
 
 Maintainers (human or agent): scripts/README.md documents the CLI, comment positioning
-model, two-tier posting fallback, review.json input schema, and error handling for
+model, posting flow and fallbacks, review.json input schema, and error handling for
 this script. If you change any of those, update the matching section in the README in
 the same change. Pure bugfixes or internal refactors that don't alter observable
 behavior do not need a README update.
@@ -62,8 +70,11 @@ import re
 import subprocess
 import sys
 import tempfile
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
+from urllib.parse import quote
 
 
 class ReviewEvent(StrEnum):
@@ -73,7 +84,7 @@ class ReviewEvent(StrEnum):
     COMMENT = "COMMENT"
 
 
-SNAP_MAX_DISTANCE = 5  # lines; beyond this threshold, fall back to file-level
+SNAP_MAX_DISTANCE = 5  # lines a comment moves silently to reach a diff line; beyond it, it's re-anchored
 
 # Contract with the Agent Integrations Slack review coordinator. This must remain a
 # stable, invisible HTML comment: the coordinator reads it from submitted top-level
@@ -82,6 +93,10 @@ SNAP_MAX_DISTANCE = 5  # lines; beyond this threshold, fall back to file-level
 REVIEW_PROOF_PREFIX = "<!-- agent-integrations-review-skill:"
 REVIEW_PROOF_MARKER = REVIEW_PROOF_PREFIX + "requests={count} -->"
 REQUEST_FINDING_RE = re.compile(r"^\*\*Request\*\*", re.MULTILINE)
+
+# Body of the pending review this script creates for file-level threads, until submit
+# replaces it. It tells the script's own leftover pending review from the poster's draft.
+PENDING_REVIEW_MARKER = "<!-- agint-review-pending -->"
 
 # Comment types in count-line order: (label as written in comment bodies, plural).
 COMMENT_TYPES: tuple[tuple[str, str], ...] = (
@@ -125,10 +140,7 @@ NEAR_MISS_LABEL_RE = re.compile(
 
 OWN_PR_ERROR = "own pull request"  # GitHub's 422 text for REQUEST_CHANGES by the author
 
-UNATTACHED_NOTE = (
-    "_The following comment(s) could not be attached inline "
-    "(file outside diff, file-level finding, or too far from a changed line):_"
-)
+UNATTACHED_NOTE = "_The following comment(s) could not be attached to the diff:_"
 BODY_ONLY_NOTE = "_Inline comments could not be attached. They are listed below:_"
 
 
@@ -147,6 +159,32 @@ def label_problems(comments: list) -> list[str]:
         for line in body.splitlines():
             if NEAR_MISS_LABEL_RE.match(line) and not EXACT_LABEL_START_RE.match(line):
                 problems.append(f"{where} has a malformed label: {line[:40]!r}")
+    return problems
+
+
+def _is_line_number(value, minimum: int) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= minimum
+
+
+def location_problems(comments: list) -> list[str]:
+    """Malformed `line`, `start_line` or `anchor` fields, as readable problems."""
+    problems = []
+    for i, c in enumerate(comments, 1):
+        where = f"comment {i} ({c.get('path', '?')}:{c.get('line', '?')})"
+        line = c.get("line", 0)
+        if not _is_line_number(line, 0):
+            problems.append(f"{where} has a `line` that isn't a line number")
+            continue
+        if "start_line" in c and not (_is_line_number(c["start_line"], 1) and c["start_line"] <= line):
+            problems.append(f"{where} has a `start_line` that isn't a line number between 1 and `line`")
+        anchor = c.get("anchor")
+        if anchor is not None and not (
+            isinstance(anchor, dict)
+            and isinstance(anchor.get("path"), str)
+            and _is_line_number(anchor.get("line", 0), 0)
+            and anchor.get("side", "RIGHT") in ("RIGHT", "LEFT")
+        ):
+            problems.append(f"{where} has an `anchor` that isn't {{path, line, side}}")
     return problems
 
 
@@ -309,94 +347,221 @@ def _parse_patch_lines(patch: str) -> dict[str, list[int]]:
     return sides
 
 
-def _nearest_diff_line(target: int, available: list[int]) -> int | None:
+def _nearest_diff_line(
+    target: int, available: list[int], max_distance: int | None = SNAP_MAX_DISTANCE
+) -> int | None:
     """
-    Return the line in `available` closest to `target`.
-    Returns None if `available` is empty or the closest line is more than
-    SNAP_MAX_DISTANCE lines away (meaning the original line is too far from
-    any changed region to make the comment meaningful at a specific line).
+    Return the line in `available` closest to `target`, or None if `available` is
+    empty or the closest line is more than `max_distance` lines away.
     """
     if not available:
         return None
     closest = min(available, key=lambda ln: abs(ln - target))
-    return closest if abs(closest - target) <= SNAP_MAX_DISTANCE else None
+    return closest if max_distance is None or abs(closest - target) <= max_distance else None
+
+
+def related_diff_file(path: str, diff_lines: DiffLines) -> str | None:
+    """
+    The changed file nearest to `path` in the tree: the one sharing the most leading
+    directories with it, the first in diff order on a tie. None when nothing changed.
+    """
+    parts = Path(path).parent.parts
+
+    def shared_dirs(other: str) -> int:
+        n = 0
+        for a, b in zip(parts, Path(other).parent.parts):
+            if a != b:
+                break
+            n += 1
+        return n
+
+    return max(diff_lines, key=shared_dirs, default=None)
+
+
+# Where a comment is posted: (path, line, side). Line 0 is a file-level thread.
+Placement = tuple[str, int, str]
+
+
+def _place_anchor(anchor: dict, diff_lines: DiffLines) -> Placement | None:
+    path, line, side = anchor["path"], anchor.get("line", 0), anchor.get("side", "RIGHT")
+    if path not in diff_lines:
+        return None
+    if line == 0:
+        return path, 0, side
+    snapped = _nearest_diff_line(line, diff_lines[path].get(side, []))
+    return (path, snapped, side) if snapped is not None else None
+
+
+def place_comment(comment: dict, diff_lines: DiffLines) -> tuple[Placement, bool] | None:
+    """
+    Where in the diff to post a comment, and whether that's away from its real target
+    (so the body must name it). None only when no file of the PR is known.
+
+    The target itself wins when the diff has it: a file-level thread for line 0, or the
+    diff line within SNAP_MAX_DISTANCE. Otherwise the comment's `anchor`, then the
+    nearest changed line of the same file, then a file-level thread on the changed file
+    nearest in the tree.
+    """
+    path, line, side = comment["path"], comment.get("line", 0), comment.get("side", "RIGHT")
+    in_diff = path in diff_lines
+    if in_diff:
+        if line == 0:
+            return (path, 0, side), False
+        snapped = _nearest_diff_line(line, diff_lines[path].get(side, []))
+        if snapped is not None:
+            return (path, snapped, side), False
+
+    if anchor := comment.get("anchor"):
+        if placed := _place_anchor(anchor, diff_lines):
+            return placed, True
+        print(
+            f"Warning: anchor {anchor.get('path')}:{anchor.get('line', 0)} of the comment on {path}:{line} "
+            "isn't in the diff; choosing one.",
+            file=sys.stderr,
+        )
+
+    if in_diff:
+        nearest = _nearest_diff_line(line, diff_lines[path].get(side, []), max_distance=None)
+        return (path, nearest or 0, side), True
+    if related := related_diff_file(path, diff_lines):
+        return (related, 0, "RIGHT"), True
+    return None
+
+
+def target_reference(comment: dict, repo: str, commit_sha: str, in_diff: bool) -> str:
+    """
+    The line that opens a re-anchored comment: the real file and lines, linked at the
+    reviewed commit. Old-file (LEFT) lines aren't linked, since the link shows the head.
+    """
+    path, line, side = comment["path"], comment.get("line", 0), comment.get("side", "RIGHT")
+    start = comment.get("start_line", line)
+    span = "" if not line else f" L{line}" if start == line else f" L{start}-L{line}"
+    where = "outside the lines this PR changes" if in_diff else "which this PR doesn't change"
+    if side == "LEFT":
+        return f"About `{path}`{span} before this PR, {where}."
+    url = f"https://github.com/{repo}/blob/{commit_sha}/{quote(path)}"
+    if line:
+        url += f"#L{line}" if start == line else f"#L{start}-L{line}"
+    return f"About [`{path}`{span}]({url}), {where}."
+
+
+# Opening fence of a GitHub suggested change, which GitHub applies at the thread's line.
+SUGGESTION_FENCE_RE = re.compile(r"^(\s*(?:`{3,}|~{3,}))suggestion\b", re.MULTILINE)
+
+
+@dataclass
+class FileThread:
+    path: str
+    body: str
+    comment: dict  # the review.json entry, listed in the body if the thread is rejected
+
+
+@dataclass
+class PreparedComments:
+    lines: list[dict] = field(default_factory=list)  # {path, line, side, body} for create-review
+    files: list[FileThread] = field(default_factory=list)
+    unattached: list[dict] = field(default_factory=list)  # review.json entries for the body
 
 
 def prepare_comments(
-    raw_comments: list[dict], diff_lines: DiffLines
-) -> tuple[list[dict], list[dict]]:
+    raw_comments: list[dict], diff_lines: DiffLines, repo: str, commit_sha: str
+) -> PreparedComments:
     """
-    Convert raw reviewer comments into GitHub API comment objects, splitting off any
-    that can't be posted as line-level inline comments via the
-    `POST /pulls/<N>/reviews` endpoint.
-
-    GitHub's create-review endpoint requires every embedded comment to have a `line`
-    (or deprecated `position`) — file-level comments can't be expressed here. The
-    `subject_type` field that exists on the standalone `POST /pulls/<N>/comments`
-    endpoint is *not* recognized here and causes the whole batch to be rejected
-    with HTTP 422 ("Field is not defined on DraftPullRequestReviewThread"). So we
-    only emit `path` / `line` / `side` / `body` for line-level comments and route
-    every other case to the body fallback.
-
-    Returns (postable, body_fallback):
-      - postable: line-level comments to attach via the review API.
-          - line > 0 and snap within SNAP_MAX_DISTANCE → posted at the snapped line.
-      - body_fallback: comments that can't be posted inline; the original dicts are
-        kept so the body listing preserves the reviewer's intent. Cases:
-          - file not in the PR diff at all,
-          - line == 0 (explicit file-level sentinel),
-          - line > 0 but the nearest diff line is too far away.
+    Split review.json comments into line threads, file-level threads, and the ones only
+    the review body can carry (when no file of the PR is known). See `place_comment`
+    for where each goes; a re-anchored comment's body starts with `target_reference`.
     """
-    postable: list[dict] = []
-    body_fallback: list[dict] = []
+    prepared = PreparedComments()
     for c in raw_comments:
-        path = c["path"]
+        placed = place_comment(c, diff_lines)
+        if placed is None:
+            prepared.unattached.append(c)
+            continue
+        (path, line, side), moved = placed
         body = c["body"]
-        line = c.get("line", 0)
-        side = c.get("side", "RIGHT")
+        if (path, line) != (c["path"], c.get("line", 0)):
+            # Accepting the suggestion would overwrite the line the thread sits on.
+            body = SUGGESTION_FENCE_RE.sub(r"\1", body)
+        if moved:
+            body = f"{target_reference(c, repo, commit_sha, c['path'] in diff_lines)}\n\n{body}"
+        if line:
+            prepared.lines.append({"path": path, "line": line, "side": side, "body": body})
+        else:
+            prepared.files.append(FileThread(path, body, c))
+    return prepared
 
-        if path not in diff_lines:
-            # File not in the PR diff — GitHub will reject any review comment
-            # targeting it. Surface it in the review body instead.
-            body_fallback.append(c)
-            continue
 
-        if line == 0:
-            # Explicit file-level sentinel. Not expressible on the create-review
-            # endpoint; route to body so the content isn't lost.
-            body_fallback.append(c)
-            continue
-
-        snapped = _nearest_diff_line(line, diff_lines[path].get(side, []))
-        if snapped is None:
-            # Too far from any diff line to attach inline; route to body.
-            body_fallback.append(c)
-            continue
-
-        postable.append({
-            "path": path,
-            "line": snapped,
-            "side": side,
-            "body": body,
-        })
-    return postable, body_fallback
+def _gh_api(endpoint: str, method: str = "GET", payload: dict | None = None) -> dict:
+    """Call gh api, sending `payload` as the JSON body. Raises CalledProcessError on failure."""
+    args = ["gh", "api", "-X", method, endpoint]
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        json.dump(payload or {}, f)
+        tmp_path = f.name
+    try:
+        if payload is not None:
+            args += ["--input", tmp_path]
+        result = subprocess.run(args, capture_output=True, text=True, check=True)
+        return json.loads(result.stdout) if result.stdout.strip() else {}
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
 
 
 def post_review(repo: str, pr_number: int, payload: dict) -> dict:
-    """Call gh api to post the review payload. Raises CalledProcessError on failure."""
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-        json.dump(payload, f)
-        tmp_path = f.name
+    """Create a review; without `event` in the payload, GitHub keeps it pending."""
+    return _gh_api(f"repos/{repo}/pulls/{pr_number}/reviews", "POST", payload)
+
+
+def submit_review(repo: str, pr_number: int, review_id: int, body: str, event: ReviewEvent) -> dict:
+    return _gh_api(
+        f"repos/{repo}/pulls/{pr_number}/reviews/{review_id}/events", "POST", {"body": body, "event": str(event)}
+    )
+
+
+def delete_pending_review(repo: str, pr_number: int, review_id: int) -> bool:
     try:
-        result = subprocess.run(
-            ["gh", "api", "-X", "POST", f"repos/{repo}/pulls/{pr_number}/reviews", "--input", tmp_path],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        return json.loads(result.stdout)
-    finally:
-        Path(tmp_path).unlink(missing_ok=True)
+        _gh_api(f"repos/{repo}/pulls/{pr_number}/reviews/{review_id}", "DELETE")
+    except subprocess.CalledProcessError:
+        return False
+    return True
+
+
+def get_review(repo: str, pr_number: int, review_id: int) -> dict | None:
+    try:
+        return _gh_api(f"repos/{repo}/pulls/{pr_number}/reviews/{review_id}")
+    except (subprocess.CalledProcessError, json.JSONDecodeError):
+        return None
+
+
+ADD_FILE_THREAD = """
+mutation($review: ID!, $path: String!, $body: String!) {
+  addPullRequestReviewThread(
+    input: {pullRequestReviewId: $review, path: $path, body: $body, subjectType: FILE}
+  ) {
+    thread { id }
+  }
+}
+"""
+
+
+def add_file_thread(review_node_id: str, path: str, body: str) -> None:
+    """
+    Add a file-level thread to a pending review. Raises CalledProcessError when GitHub
+    doesn't create it. For a file outside the diff, GitHub answers 200 with a null
+    thread and no error, so the thread itself is checked.
+    """
+    variables = {"review": review_node_id, "path": path, "body": body}
+    response = _gh_api("graphql", "POST", {"query": ADD_FILE_THREAD, "variables": variables})
+    if not ((response.get("data") or {}).get("addPullRequestReviewThread") or {}).get("thread"):
+        reason = json.dumps(response["errors"]) if response.get("errors") else "GitHub created no thread"
+        raise subprocess.CalledProcessError(1, "gh api graphql", stderr=reason)
+
+
+class PendingReviewLeft(Exception):
+    """A pending review this script created could be neither submitted nor deleted."""
+
+    def __init__(self, review_id: int):
+        super().__init__(review_id)
+        self.review_id = review_id
 
 
 def get_pr_head_sha(repo: str, pr_number: int) -> str:
@@ -409,6 +574,36 @@ def get_pr_head_sha(repo: str, pr_number: int) -> str:
     return result.stdout.strip()
 
 
+def list_reviews(repo: str, pr_number: int) -> list[dict]:
+    """The PR's reviews, including the posting account's own pending one."""
+    result = subprocess.run(
+        ["gh", "api", f"repos/{repo}/pulls/{pr_number}/reviews", "--paginate"],
+        capture_output=True, text=True, check=True,
+    )
+    return json.loads(result.stdout)
+
+
+def discard_own_pending_review(repo: str, pr_number: int) -> int | None:
+    """
+    Delete a pending review this script created and never submitted: one whose reply
+    was lost, or left by an interrupted run. GitHub allows one pending review per user
+    per PR, so while it exists every post fails. Only reviews carrying
+    PENDING_REVIEW_MARKER are touched, never the poster's own draft. Returns the id of
+    one it could not delete.
+    """
+    try:
+        reviews = list_reviews(repo, pr_number)
+    except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+        print(f"Warning: Could not check for a pending review left by an earlier attempt: {e}", file=sys.stderr)
+        return None
+    for r in reviews:
+        if r.get("state") == "PENDING" and PENDING_REVIEW_MARKER in (r.get("body") or ""):
+            if not delete_pending_review(repo, pr_number, r["id"]):
+                return r["id"]
+            print(f"Deleted pending review {r['id']}, left unsubmitted by an earlier attempt.")
+    return None
+
+
 def find_posted_review(repo: str, pr_number: int, commit_sha: str, viewer: str | None) -> str | None:
     """
     URL of a review the posting account already left on this PR for commit_sha with
@@ -419,11 +614,7 @@ def find_posted_review(repo: str, pr_number: int, commit_sha: str, viewer: str |
         print("Warning: Could not read the gh account; not checking for an earlier review.", file=sys.stderr)
         return None
     try:
-        result = subprocess.run(
-            ["gh", "api", f"repos/{repo}/pulls/{pr_number}/reviews", "--paginate"],
-            capture_output=True, text=True, check=True,
-        )
-        reviews = json.loads(result.stdout)
+        reviews = list_reviews(repo, pr_number)
     except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
         print(f"Warning: Could not check for an earlier review of this commit: {e}", file=sys.stderr)
         return None
@@ -440,17 +631,67 @@ def find_posted_review(repo: str, pr_number: int, commit_sha: str, viewer: str |
 def post_with_own_pr_fallback(
     repo: str, pr_number: int, data: dict, comments: list, body: str, event: ReviewEvent
 ) -> dict:
+    return with_own_pr_fallback(lambda ev: post_review(repo, pr_number, build_payload(data, comments, body, ev)), event)
+
+
+def with_own_pr_fallback(send: Callable[[ReviewEvent], dict], event: ReviewEvent) -> dict:
     """
-    Post once; if GitHub rejects REQUEST_CHANGES because the poster is the PR author
-    (the account check upstream can fail), retry the same payload as COMMENT.
+    Send once; if GitHub rejects REQUEST_CHANGES because the poster is the PR author
+    (the account check upstream can fail), send again as COMMENT.
     """
     try:
-        return post_review(repo, pr_number, build_payload(data, comments, body, event))
+        return send(event)
     except subprocess.CalledProcessError as e:
         if event != ReviewEvent.REQUEST_CHANGES or OWN_PR_ERROR not in (e.stderr or "").lower():
             raise
         print("Note: GitHub rejected REQUEST_CHANGES on your own PR; posting as COMMENT.")
-        return post_review(repo, pr_number, build_payload(data, comments, body, ReviewEvent.COMMENT))
+        return send(ReviewEvent.COMMENT)
+
+
+def post_with_file_threads(
+    repo: str,
+    pr_number: int,
+    data: dict,
+    prepared: PreparedComments,
+    compose: Callable[[list], str],
+    event: ReviewEvent,
+) -> dict:
+    """
+    Create the review pending with its line threads, add the file-level threads, then
+    submit it. A rejected file-level thread goes into the body instead. `compose` builds
+    the body from the comments that couldn't be attached.
+
+    Raises CalledProcessError when nothing was posted: the pending review couldn't be
+    created, or the submit failed and the pending review was deleted. Raises
+    PendingReviewLeft when a pending review it created couldn't be deleted.
+    """
+    payload = {"commit_id": data["commit_sha"], "body": PENDING_REVIEW_MARKER, "comments": prepared.lines}
+    try:
+        pending = post_review(repo, pr_number, payload)
+    except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+        # GitHub may have created it even though its reply was lost.
+        if (left := discard_own_pending_review(repo, pr_number)) is not None:
+            raise PendingReviewLeft(left) from None
+        raise subprocess.CalledProcessError(1, "gh api", stderr=getattr(e, "stderr", None) or str(e)) from None
+    review_id = pending["id"]
+    unattached = list(prepared.unattached)
+    for thread in prepared.files:
+        try:
+            add_file_thread(pending["node_id"], thread.path, thread.body)
+        except subprocess.CalledProcessError as e:
+            print(f"Warning: GitHub rejected the file-level thread on {thread.path}: {e.stderr}", file=sys.stderr)
+            unattached.append(thread.comment)
+
+    body = compose(unattached)
+    try:
+        return with_own_pr_fallback(lambda ev: submit_review(repo, pr_number, review_id, body, ev), event)
+    except subprocess.CalledProcessError:
+        if delete_pending_review(repo, pr_number, review_id):
+            raise
+        review = get_review(repo, pr_number, review_id)
+        if review and review.get("state") not in (None, "PENDING"):
+            return review  # The submit went through; only its response was lost.
+        raise PendingReviewLeft(review_id) from None
 
 
 def retry_hint(review_json: Path, pr_number: int) -> str:
@@ -502,9 +743,9 @@ def main():
     author = data["author"]
     uncovered = data.get("uncovered_files")
 
-    problems = label_problems(raw_comments)
+    problems = label_problems(raw_comments) + location_problems(raw_comments)
     if problems:
-        print("Error: fix these comment labels in review.json, then post again:", file=sys.stderr)
+        print("Error: fix these comments in review.json, then post again:", file=sys.stderr)
         for problem in problems:
             print(f"  - {problem}", file=sys.stderr)
         sys.exit(1)
@@ -531,29 +772,47 @@ def main():
         print("Not posting again; pass --repost to post anyway.")
         return
 
+    if (left := discard_own_pending_review(repo, pr_number)) is not None:
+        print(pending_left_error(left), file=sys.stderr)
+        sys.exit(1)
+
     own_pr = viewer == author
     event = review_event(raw_comments, own_pr)
     if own_pr and count_requests(raw_comments):
         print("Note: this is your own PR, and GitHub rejects REQUEST_CHANGES from the author; posting as COMMENT.")
     print(f"Posting review to {repo} PR #{pr_number} ({len(raw_comments)} comments, event={event})...")
 
-    # Pre-process: snap line-level comments to the diff; route file-level cases
-    # (line=0, out-of-range snaps, or files outside the diff) to the body,
-    # since GitHub's create-review endpoint can't express file-level comments
-    # inline (it rejects payloads missing `line`/`position`, and rejects the
-    # `subject_type` field that the standalone /comments endpoint accepts).
     print("Fetching diff to resolve comment positions...")
     diff_lines = get_diff_lines(repo, pr_number)
-    comments, body_fallback = prepare_comments(raw_comments, diff_lines)
-    print(f"  {len(comments)} line-level, {len(body_fallback)} body-only")
+    prepared = prepare_comments(raw_comments, diff_lines, repo, review_sha)
+    print(
+        f"  {len(prepared.lines)} line-level, {len(prepared.files)} file-level, "
+        f"{len(prepared.unattached)} body-only"
+    )
 
-    # Tier 1: post with line-level comments
-    body = compose_body(author, raw_comments, body_fallback, uncovered_files=uncovered)
+    def compose(unattached: list) -> str:
+        return compose_body(author, raw_comments, unattached, uncovered_files=uncovered)
+
+    unattached = prepared.unattached
+    if prepared.files:
+        try:
+            result = post_with_file_threads(repo, pr_number, data, prepared, compose, event)
+            report_posted("Review posted successfully.", result)
+            return
+        except subprocess.CalledProcessError as e:
+            print("Warning: Posting file-level threads failed. Listing them in the body...", file=sys.stderr)
+            if e.stderr:
+                print(e.stderr.strip(), file=sys.stderr)
+            unattached = unattached + [thread.comment for thread in prepared.files]
+        except PendingReviewLeft as e:
+            print(pending_left_error(e.review_id), file=sys.stderr)
+            print(retry_hint(input_path, pr_number), file=sys.stderr)
+            sys.exit(1)
+
+    # Tier 1: one create-review call with the line threads
     try:
-        result = post_with_own_pr_fallback(repo, pr_number, data, comments, body, event)
-        print("Review posted successfully.")
-        if url := result.get("html_url"):
-            print(f"  URL: {url}")
+        result = post_with_own_pr_fallback(repo, pr_number, data, prepared.lines, compose(unattached), event)
+        report_posted("Review posted successfully.", result)
         return
     except subprocess.CalledProcessError as e:
         print("Warning: Inline posting failed. Falling back to body-only...", file=sys.stderr)
@@ -564,15 +823,26 @@ def main():
     body_only = compose_body(author, raw_comments, raw_comments, BODY_ONLY_NOTE, uncovered)
     try:
         result = post_with_own_pr_fallback(repo, pr_number, data, [], body_only, event)
-        print("Review posted as body-only (no inline comments attached).")
-        if url := result.get("html_url"):
-            print(f"  URL: {url}")
+        report_posted("Review posted as body-only (no inline comments attached).", result)
     except subprocess.CalledProcessError as e:
         print("Error: All posting attempts failed.", file=sys.stderr)
         if e.stderr:
             print(e.stderr.strip(), file=sys.stderr)
         print(retry_hint(input_path, pr_number), file=sys.stderr)
         sys.exit(1)
+
+
+def pending_left_error(review_id: int) -> str:
+    return (
+        f"Error: Pending review {review_id}, which this script created, could not be deleted. "
+        "Discard it on the PR's Files changed page, then post again."
+    )
+
+
+def report_posted(message: str, result: dict):
+    print(message)
+    if url := result.get("html_url"):
+        print(f"  URL: {url}")
 
 
 if __name__ == "__main__":
