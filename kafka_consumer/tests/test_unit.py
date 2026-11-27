@@ -724,6 +724,28 @@ def test_consumer_offsets_keep_cluster_id_without_highwater_offsets(
     assert admin.list_topics_calls == 1, "the cluster ID must come from the metadata fetched at the start of the run"
 
 
+@pytest.mark.parametrize('override', [None, 'configured-id'], ids=['no override', 'override'])
+def test_consumer_offsets_keep_empty_cluster_id_when_metadata_has_none(
+    check, kafka_instance, dd_run_check, aggregator, override
+):
+    """
+    A broker that reports no cluster ID must not turn the empty tag into `None`, which would start a new series.
+    Regression test for https://github.com/DataDog/integrations-core/pull/25886.
+    """
+    admin = FakeAdminClient(mock.Mock(cluster_id=None, topics={'regular': mock.Mock(partitions={0: None})}))
+    kafka_instance.update({'consumer_groups': {'group-b': {'regular': [0]}}, 'kafka_cluster_id_override': override})
+
+    with mock.patch('datadog_checks.kafka_consumer.client.AdminClient', return_value=admin):
+        # A context limit of 1 skips highwater collection, so the cluster ID can only come from the fallback.
+        dd_run_check(check(kafka_instance, {'max_partition_contexts': 1}))
+
+    tags = ['topic:regular', 'partition:0', 'consumer_group:group-b', 'optional:tag1']
+    tags.append(f'kafka_cluster_id:{override or ""}')
+    if override:
+        tags.append('original_kafka_cluster_id:')
+    aggregator.assert_metric('kafka.consumer_offset', value=5, tags=tags, count=1)
+
+
 def test_check_clears_cache_on_partial_reset(kafka_instance, check, dd_run_check):
     # When the highwater drops, all cached entries are cleared — including those below the new
     # highwater that belong to the previous topic generation and would otherwise poison interpolation.

@@ -123,7 +123,7 @@ class KafkaCheck(AgentCheck):
                 self.warning("Context limit reached. Skipping highwater offset collection.")
             # Consumer offsets still need the cluster ID when no highwater partitions were queried.
             if consumer_contexts_count and not cluster_id:
-                cluster_id = self.client.get_cluster_id()
+                cluster_id = self.client.get_cluster_id() or cluster_id
         except Exception:
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
