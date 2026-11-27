@@ -46,7 +46,8 @@ lost, or a run was interrupted) is found by PENDING_REVIEW_MARKER and deleted be
 posting, since GitHub allows one pending review per user per PR.
 
 Body composition, top to bottom:
-    HEADER        greeting that @-mentions the author + "generated automatically" note
+    HEADER        greeting that @-mentions the author + "generated automatically" note; on
+                  the poster's own PR, "Automated review by the agint-review skill" instead
     COUNT LINE    "2 Requests block merging · 4 Suggestions · 1 Question", or "No comments"
                   (or, when review.json has `uncovered_files` and no comments, "No comments:
                   no reviewer covers the files this PR changes." and up to
@@ -113,6 +114,12 @@ COMMENT_LABEL_RE = re.compile(
 
 REVIEW_BODY_HEADER = (
     "Hi @{author}, this review was generated automatically. "
+    "Feel free to discuss any comment you disagree with."
+)
+# On the poster's own PR, where greeting the author would greet themselves.
+OWN_PR_REVIEW_BODY_HEADER = (
+    "Automated review by the "
+    "[`agint-review`](https://github.com/DataDog/integrations-core/tree/master/.agents/skills/agint-review) skill. "
     "Feel free to discuss any comment you disagree with."
 )
 
@@ -240,9 +247,10 @@ def compose_body(
     unattached: list | None = None,
     unattached_note: str = UNATTACHED_NOTE,
     uncovered_files: list[str] | None = None,
+    own_pr: bool = False,
 ) -> str:
     """
-    Build the review body: HEADER, COUNT LINE, the comments that couldn't go inline
+    Build the review body: HEADER (no greeting on the poster's own PR), COUNT LINE, the comments that couldn't go inline
     (if any), LEGEND, then the invisible proof marker. `comments` is every comment in
     the review (inline or not), so the count line and the marker cover all of them.
     A review with no comments and `uncovered_files` (setup found no reviewer for the
@@ -259,7 +267,8 @@ def compose_body(
         summary = f"{UNCOVERED_LINE}\n\n{uncovered_files_text(uncovered_files)}"
     else:
         summary = count_line(comments)
-    parts = [REVIEW_BODY_HEADER.format(author=author), summary]
+    header = OWN_PR_REVIEW_BODY_HEADER if own_pr else REVIEW_BODY_HEADER.format(author=author)
+    parts = [header, summary]
     if unattached:
         parts += ["---", f"{unattached_note}\n\n{comments_as_text(unattached)}", "---"]
     parts += [REVIEW_BODY_LEGEND, REVIEW_PROOF_MARKER.format(count=count_requests(comments))]
@@ -791,7 +800,7 @@ def main():
     )
 
     def compose(unattached: list) -> str:
-        return compose_body(author, raw_comments, unattached, uncovered_files=uncovered)
+        return compose_body(author, raw_comments, unattached, uncovered_files=uncovered, own_pr=own_pr)
 
     unattached = prepared.unattached
     if prepared.files:
@@ -820,7 +829,7 @@ def main():
             print(e.stderr.strip(), file=sys.stderr)
 
     # Tier 2: body-only with all comments listed as text
-    body_only = compose_body(author, raw_comments, raw_comments, BODY_ONLY_NOTE, uncovered)
+    body_only = compose_body(author, raw_comments, raw_comments, BODY_ONLY_NOTE, uncovered, own_pr)
     try:
         result = post_with_own_pr_fallback(repo, pr_number, data, [], body_only, event)
         report_posted("Review posted as body-only (no inline comments attached).", result)
