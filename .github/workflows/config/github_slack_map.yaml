@@ -109,13 +109,6 @@
   review:
     name: '#ml-obs'
     id: 'C05BF5NSM5Z'
-'@datadog/ndm-integrations':
-  notification:
-    name: '#ndm-integrations'
-    id: 'C07S0UH4R0C'
-  review:
-    name: '#ndm-integrations'
-    id: 'C07S0UH4R0C'
 '@datadog/network-device-monitoring-core':
   notification:
     name: '#ndm-core'
@@ -123,6 +116,13 @@
   review:
     name: '#ndm-core'
     id: 'C07RHJTEFRD'
+'@datadog/network-device-monitoring-integrations':
+  notification:
+    name: '#ndm-integrations'
+    id: 'C07S0UH4R0C'
+  review:
+    name: '#ndm-integrations'
+    id: 'C07S0UH4R0C'
 '@datadog/network-path':
   notification:
     name: '#network-path-dev'

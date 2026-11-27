@@ -16,8 +16,8 @@
 '@datadog/logs-core': LB
 '@datadog/logs-integrations-reviewers': AI
 '@datadog/ml-observability': MLOS
-'@datadog/ndm-integrations': NDINT
 '@datadog/network-device-monitoring-core': NDMC
+'@datadog/network-device-monitoring-integrations': NDINT
 '@datadog/network-path': NETPATH
 '@datadog/new-workloads': NWL
 '@datadog/opentelemetry': OTAGENT
