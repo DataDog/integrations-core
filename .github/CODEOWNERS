@@ -122,6 +122,8 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /snmp/                                                             @DataDog/network-device-monitoring-core @DataDog/agent-integrations
 /snmp/*.md                                                         @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
 /snmp/manifest.json                                                @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
+/snmp/AGENTS.md                                                    @DataDog/network-device-monitoring-core @DataDog/agent-integrations
+/snmp/CLAUDE.md                                                    @DataDog/network-device-monitoring-core @DataDog/agent-integrations
 /snmp_*/                                                           @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/*.md                                                       @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/manifest.json                                              @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
@@ -184,6 +186,8 @@ datadog_checks_base/tests/**/test_sql_commenter.py  @DataDog/database-monitoring
 /clickhouse/                                        @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /clickhouse/*.md                                    @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /clickhouse/manifest.json                           @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/clickhouse/AGENTS.md                               @DataDog/database-monitoring-agent @DataDog/agent-integrations
+/clickhouse/CLAUDE.md                               @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /ibm_db2/                                           @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /ibm_db2/*.md                                       @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /ibm_db2/manifest.json                              @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
@@ -554,6 +558,10 @@ docs/developer/process/integration-release.md                         @DataDog/a
 # Dev container
 /.devcontainer/                                                        @DataDog/agent-integrations @DataDog/container-integrations
 /.devcontainer/dbm                                                     @DataDog/database-monitoring-agent
+
+# AI agent instructions and skills (internal tooling, not published docs)
+/.agents/                                                             @DataDog/agent-integrations
+/.claude/                                                             @DataDog/agent-integrations
 
 # LEAVE THE FOLLOWING LOG OWNERSHIP LAST IN THE FILE
 # Make sure logs team is the full owner for all logs related files
