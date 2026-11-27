@@ -9,11 +9,13 @@ from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from confluent_kafka import ConsumerGroupTopicPartitions, TopicPartition
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 from .common import assert_check_kafka, metrics
+from .conftest import _create_admin_client
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -41,6 +43,36 @@ def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
     """
     dd_run_check(check(kafka_instance))
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
+
+
+def _delete_groups(admin_client, group_ids):
+    for future in admin_client.delete_consumer_groups(group_ids).values():
+        future.result(timeout=30)
+
+
+def test_check_kafka_reports_every_consumer_group_when_requests_are_batched(
+    request, aggregator, check, kafka_instance, dd_run_check
+):
+    group_ids = [f'batched_group_{i}' for i in range(20)]
+    admin_client = _create_admin_client()
+    for group in group_ids:
+        offsets = ConsumerGroupTopicPartitions(group, [TopicPartition('marvel', 0, 1)])
+        admin_client.alter_consumer_group_offsets([offsets])[group].result(timeout=30)
+    # Other tests assert exact metric counts with monitor_unlisted_consumer_groups, so remove the seeded groups.
+    request.addfinalizer(lambda: _delete_groups(admin_client, group_ids))
+    del kafka_instance['consumer_groups']
+    kafka_instance['monitor_unlisted_consumer_groups'] = True
+    kafka_instance['consumer_group_offsets_batch_size'] = 5
+
+    dd_run_check(check(kafka_instance, {'max_partition_contexts': 1000}))
+
+    reported = {
+        tag
+        for metric in aggregator.metrics('kafka.consumer_offset')
+        for tag in metric.tags
+        if tag.startswith('consumer_group:batched_group_')
+    }
+    assert reported == {f'consumer_group:{group}' for group in group_ids}
 
 
 def test_can_send_event(aggregator, check, kafka_instance, dd_run_check):

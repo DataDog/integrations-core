@@ -5,7 +5,11 @@ import os
 import re
 
 from datadog_checks.base import ConfigurationError, is_affirmative
-from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
+from datadog_checks.kafka_consumer.constants import (
+    CONTEXT_UPPER_BOUND,
+    DEFAULT_CONSUMER_GROUP_OFFSETS_BATCH_SIZE,
+    DEFAULT_KAFKA_TIMEOUT,
+)
 
 # https://github.com/confluentinc/librdkafka/blob/e03d3bb91ed92a38f38d9806b8d8deffe78a1de5/src/rd.h#L78-L89
 LIBRDKAFKA_LOG_ERR = 3
@@ -19,6 +23,9 @@ class KafkaConfig:
         self.log = log
         self._custom_tags = instance.get('tags', [])
         self._monitor_unlisted_consumer_groups = is_affirmative(instance.get('monitor_unlisted_consumer_groups', False))
+        self._consumer_group_offsets_batch_size = int(
+            instance.get('consumer_group_offsets_batch_size', DEFAULT_CONSUMER_GROUP_OFFSETS_BATCH_SIZE)
+        )
         self._collect_consumer_group_state = instance.get('collect_consumer_group_state', False)
         self._monitor_all_broker_highwatermarks = is_affirmative(
             instance.get('monitor_all_broker_highwatermarks', False)

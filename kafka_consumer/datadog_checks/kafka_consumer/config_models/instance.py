@@ -12,7 +12,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -95,6 +95,7 @@ class InstanceConfig(BaseModel):
     )
     close_admin_client: Optional[bool] = None
     collect_consumer_group_state: Optional[bool] = None
+    consumer_group_offsets_batch_size: Optional[int] = Field(None, ge=1)
     consumer_groups: Optional[MappingProxyType[str, Any]] = None
     consumer_groups_regex: Optional[MappingProxyType[str, Any]] = None
     consumer_queued_max_messages_kbytes: Optional[int] = None

@@ -112,6 +112,13 @@ instances:
     #
     # monitor_unlisted_consumer_groups: false
 
+    ## @param consumer_group_offsets_batch_size - integer - optional - default: 50
+    ## Maximum number of consumer group offset requests sent to the Kafka cluster at the same time.
+    ## The check waits for a batch to complete before sending the next one. Sending thousands of requests
+    ## at once can crash the Agent on clusters with many consumer groups.
+    #
+    # consumer_group_offsets_batch_size: 50
+
     ## @param consumer_queued_max_messages_kbytes - integer - optional - default: 1024
     ## The consumer very aggressively caches messages in the background (tuned for very high throughput).
     ## To reduce memory usage, tune down queued.max.messages.kbytes (maximum cache size per partition).

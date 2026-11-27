@@ -5,8 +5,10 @@ import base64
 import json
 import logging
 import marshal
+import threading
+import time
 from collections import defaultdict
-from concurrent.futures import Future
+from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import nullcontext as does_not_raise
 from contextlib import suppress
 
@@ -627,7 +629,7 @@ class FakeAdminClient:
         self.list_topics_calls += 1
         return self.metadata
 
-    def list_consumer_group_offsets(self, requests):
+    def list_consumer_group_offsets(self, requests, **kwargs):
         return {
             r.group_id: self._done(
                 mock.Mock(
@@ -1524,7 +1526,9 @@ def test_list_consumer_group_offsets_given_coordinator_error_returns_offsets_on_
     stale_admin_client.list_consumer_group_offsets.return_value = {'consumer_group1': stale_offsets}
     fresh_admin_client = mock.MagicMock()
     fresh_admin_client.list_consumer_group_offsets.return_value = {'consumer_group1': fresh_offsets}
-    client = KafkaClient(mock.MagicMock(), logging.getLogger(__name__))
+    config = mock.MagicMock()
+    config._consumer_group_offsets_batch_size = 50
+    client = KafkaClient(config, logging.getLogger(__name__))
     groups = [('consumer_group1', [('topic1', 0)])]
 
     with mock.patch(
@@ -1534,6 +1538,68 @@ def test_list_consumer_group_offsets_given_coordinator_error_returns_offsets_on_
         offsets = client.list_consumer_group_offsets(groups)
 
     assert offsets == [('consumer_group1', [('topic1', 0, 5)])]
+
+
+class _BatchTrackingAdminClient:
+    """AdminClient fake that resolves each request on a worker thread and records the peak of unresolved requests."""
+
+    def __init__(self, error=None):
+        self._error = error
+        self._lock = threading.Lock()
+        self._unresolved = 0
+        self.peak_unresolved = 0
+        self.requested = []
+        self._executor = ThreadPoolExecutor(max_workers=64)
+
+    def list_consumer_group_offsets(self, requests, request_timeout=None):
+        (request,) = requests
+        with self._lock:
+            self._unresolved += 1
+            self.peak_unresolved = max(self.peak_unresolved, self._unresolved)
+            self.requested.append(request.group_id)
+        return {request.group_id: self._executor.submit(self._resolve, request)}
+
+    def _resolve(self, request):
+        time.sleep(0.01)
+        with self._lock:
+            self._unresolved -= 1
+        if self._error is not None:
+            raise KafkaException(KafkaError(self._error))
+        return ConsumerGroupTopicPartitions(request.group_id, [TopicPartition('topic1', 0, 5)])
+
+
+def test_list_consumer_group_offsets_never_has_more_requests_in_flight_than_the_batch_size():
+    """Thousands of simultaneous requests can crash librdkafka, so a batch is resolved before the next is sent."""
+    admin_client = _BatchTrackingAdminClient()
+    config = mock.MagicMock()
+    config._consumer_group_offsets_batch_size = 5
+    client = KafkaClient(config, logging.getLogger(__name__))
+    client._kafka_client = admin_client
+    groups = [(f'group{i}', None) for i in range(23)]
+
+    offsets = client.list_consumer_group_offsets(groups)
+
+    assert admin_client.peak_unresolved <= 5
+    assert sorted(group_id for group_id, _ in offsets) == sorted(group_id for group_id, _ in groups)
+    assert all(tpo == [('topic1', 0, 5)] for _, tpo in offsets)
+
+
+@pytest.mark.parametrize('error_code', [KafkaError._TIMED_OUT, KafkaError.REQUEST_TIMED_OUT])
+def test_list_consumer_group_offsets_stops_sending_batches_when_every_request_in_a_batch_times_out(error_code, caplog):
+    """An unresponsive cluster would otherwise cost one full timeout per batch."""
+    admin_client = _BatchTrackingAdminClient(error=error_code)
+    config = mock.MagicMock()
+    config._consumer_group_offsets_batch_size = 5
+    client = KafkaClient(config, logging.getLogger(__name__))
+    client._kafka_client = admin_client
+    groups = [(f'group{i}', None) for i in range(23)]
+
+    with caplog.at_level(logging.WARNING):
+        offsets = client.list_consumer_group_offsets(groups)
+
+    assert offsets == []
+    assert admin_client.requested == [f'group{i}' for i in range(5)]
+    assert 'Skipping the remaining 18 consumer groups' in caplog.text
 
 
 @pytest.mark.parametrize(
