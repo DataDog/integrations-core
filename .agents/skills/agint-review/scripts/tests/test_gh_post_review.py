@@ -23,6 +23,8 @@ def publisher(monkeypatch):
     monkeypatch.setattr(module, "get_viewer_login", lambda: "reviewer")
     # No earlier review of this commit, unless a test says otherwise.
     monkeypatch.setattr(module, "find_posted_review", lambda *_: None)
+    # No pending review left by an earlier attempt, unless a test says otherwise.
+    monkeypatch.setattr(module, "list_reviews", lambda *_: [])
     return module
 
 
@@ -223,27 +225,28 @@ def test_body_only_retry_retains_the_proof_marker(
     assert posted_payloads[1]["body"].count(publisher.REVIEW_PROOF_PREFIX) == 1
 
 
-def test_posted_body_counts_requests_including_body_fallback(
-    monkeypatch, publisher, review_data, tmp_path
-):
+def test_off_diff_finding_posts_as_a_file_thread_in_the_same_review(monkeypatch, publisher, review_data, tmp_path):
     review_data["comments"] = [
         {"path": "check.py", "line": 2, "body": "**Request**: inline."},
-        {"path": "other.py", "line": 9, "body": "**Request**: off-diff, moved to the body."},
+        {"path": "other.py", "line": 9, "body": "**Request**: off-diff."},
     ]
-    review_json = tmp_path / "review.json"
-    review_json.write_text(json.dumps(review_data))
-    posted_payloads = []
+    calls = []
+    monkeypatch.setattr(publisher, "add_file_thread", lambda *args: calls.append(("thread", *args)))
+    monkeypatch.setattr(publisher, "submit_review", lambda *args: calls.append(("submit", *args)) or {})
 
-    monkeypatch.setattr(publisher.subprocess, "run", lambda *args, **kwargs: SimpleNamespace(returncode=0))
-    monkeypatch.setattr(publisher, "get_pr_head_sha", lambda *_: "current-head")
-    monkeypatch.setattr(publisher, "get_diff_lines", lambda *_: {"check.py": {"RIGHT": [2], "LEFT": []}})
-    monkeypatch.setattr(publisher, "post_review", lambda *args: posted_payloads.append(args[-1]) or {})
-    monkeypatch.setattr(sys, "argv", ["gh-post-review", str(review_json)])
+    def post(*args):
+        calls.append(("create", args[-1]))
+        return {"id": 7, "node_id": "PRR_7"}
 
-    publisher.main()
+    run_main(monkeypatch, publisher, review_data, tmp_path, post)
 
-    assert len(posted_payloads[0]["comments"]) == 1
-    assert "<!-- agent-integrations-review-skill:requests=2 -->" in posted_payloads[0]["body"]
+    (_, pending), (_, review_id, path, body), (_, *_, submit_id, submit_body, event) = calls
+    assert "event" not in pending and len(pending["comments"]) == 1
+    assert (review_id, path, submit_id) == ("PRR_7", "check.py", 7)
+    assert body.startswith("About [`other.py` L9](") and body.endswith("**Request**: off-diff.")
+    assert event == "REQUEST_CHANGES"
+    assert "off-diff" not in submit_body
+    assert submit_body.endswith("<!-- agent-integrations-review-skill:requests=2 -->")
 
 
 def test_changed_head_fails_before_posting(monkeypatch, publisher, review_data, tmp_path):
@@ -402,6 +405,249 @@ def test_comments_snap_to_lines_on_their_own_side(publisher, side, line, expecte
     patch = "@@ -10,3 +14,3 @@\n ctx\n-old\n+new\n ctx"
     diff_lines = {"check.py": publisher._parse_patch_lines(patch)}
 
-    postable, _ = publisher.prepare_comments([{"path": "check.py", "line": line, "side": side, "body": "b"}], diff_lines)
+    comment = {"path": "check.py", "line": line, "side": side, "body": "b"}
+    prepared = publisher.prepare_comments([comment], diff_lines, "o/r", "sha")
 
-    assert postable[0]["line"] == expected
+    assert prepared.lines[0]["line"] == expected
+
+
+DIFF = {
+    "pkg/check.py": {"RIGHT": [10, 11, 40], "LEFT": []},
+    "pkg/tests/test_check.py": {"RIGHT": [5], "LEFT": []},
+    "docs/guide.md": {"RIGHT": [1], "LEFT": []},
+}
+
+
+@pytest.mark.parametrize(
+    ("comment", "expected"),
+    [
+        ({"path": "pkg/check.py", "line": 14}, (("pkg/check.py", 11, "RIGHT"), False)),
+        ({"path": "pkg/check.py", "line": 0}, (("pkg/check.py", 0, "RIGHT"), False)),
+        (
+            {"path": "pkg/check.py", "line": 25, "anchor": {"path": "pkg/tests/test_check.py", "line": 5}},
+            (("pkg/tests/test_check.py", 5, "RIGHT"), True),
+        ),
+        (
+            {"path": "pkg/util.py", "line": 3, "anchor": {"path": "docs/guide.md", "line": 0}},
+            (("docs/guide.md", 0, "RIGHT"), True),
+        ),
+        ({"path": "pkg/check.py", "line": 30}, (("pkg/check.py", 40, "RIGHT"), True)),
+        (
+            {"path": "pkg/check.py", "line": 30, "anchor": {"path": "pkg/util.py", "line": 3}},
+            (("pkg/check.py", 40, "RIGHT"), True),
+        ),
+        ({"path": "pkg/tests/conftest.py", "line": 8}, (("pkg/tests/test_check.py", 0, "RIGHT"), True)),
+    ],
+    ids=[
+        "snaps-near-line",
+        "file-level-in-diff",
+        "far-line-uses-anchor",
+        "off-diff-uses-file-anchor",
+        "far-line-without-anchor-nearest-changed-line",
+        "anchor-off-diff-is-ignored",
+        "off-diff-without-anchor-nearest-file-in-tree",
+    ],
+)
+def test_place_comment(publisher, comment, expected):
+    assert publisher.place_comment(comment, DIFF) == expected
+
+
+def test_place_comment_without_a_known_diff_leaves_it_for_the_body(publisher):
+    assert publisher.place_comment({"path": "pkg/check.py", "line": 10}, {}) is None
+
+
+BLOB = "https://github.com/o/r/blob/sha/a/b.py"
+
+
+@pytest.mark.parametrize(
+    ("comment", "in_diff", "expected"),
+    [
+        (
+            {"path": "a/b.py", "line": 256, "start_line": 228},
+            False,
+            f"About [`a/b.py` L228-L256]({BLOB}#L228-L256), which this PR doesn't change.",
+        ),
+        (
+            {"path": "a/b.py", "line": 220},
+            True,
+            f"About [`a/b.py` L220]({BLOB}#L220), outside the lines this PR changes.",
+        ),
+        ({"path": "a/b.py", "line": 0}, False, f"About [`a/b.py`]({BLOB}), which this PR doesn't change."),
+        (
+            {"path": "a/b.py", "line": 30, "side": "LEFT"},
+            True,
+            "About `a/b.py` L30 before this PR, outside the lines this PR changes.",
+        ),
+    ],
+)
+def test_target_reference_names_and_links_the_real_lines(publisher, comment, in_diff, expected):
+    assert publisher.target_reference(comment, "o/r", "sha", in_diff) == expected
+
+
+def test_prepare_comments_names_the_target_only_when_re_anchored(publisher):
+    near = {"path": "pkg/check.py", "line": 10, "body": "**Nit**: near."}
+    far = {"path": "pkg/check.py", "line": 25, "body": "**Nit**: far."}
+
+    prepared = publisher.prepare_comments([near, far], DIFF, "o/r", "sha")
+
+    assert [c["body"] for c in prepared.lines] == [
+        "**Nit**: near.",
+        f"{publisher.target_reference(far, 'o/r', 'sha', True)}\n\n**Nit**: far.",
+    ]
+
+
+SUGGESTION = "**Suggestion**: use this.\n\n```suggestion\nvalue = 1\n```"
+
+
+@pytest.mark.parametrize(
+    ("comment", "keeps_suggestion"),
+    [
+        ({"path": "pkg/check.py", "line": 10}, True),
+        ({"path": "pkg/check.py", "line": 12}, False),
+        ({"path": "pkg/util.py", "line": 3, "anchor": {"path": "pkg/check.py", "line": 10}}, False),
+    ],
+    ids=["at-its-line", "snapped", "re-anchored"],
+)
+def test_suggestions_only_stay_applicable_at_their_own_line(publisher, comment, keeps_suggestion):
+    prepared = publisher.prepare_comments([{**comment, "body": SUGGESTION}], DIFF, "o/r", "sha")
+
+    body = prepared.lines[0]["body"]
+    assert ("```suggestion" in body) == keeps_suggestion
+    assert "value = 1" in body
+
+
+@pytest.mark.parametrize(
+    "comment",
+    [
+        {"path": "a.py", "line": "12"},
+        {"path": "a.py", "line": 5, "start_line": 9},
+        {"path": "a.py", "line": 5, "anchor": "b.py:3"},
+        {"path": "a.py", "line": 5, "anchor": {"path": "b.py", "line": -1}},
+        {"path": "a.py", "line": 5, "anchor": {"path": "b.py", "line": 3, "side": "right"}},
+    ],
+)
+def test_location_problems_catches_malformed_fields(publisher, comment):
+    assert publisher.location_problems([comment])
+
+
+def test_location_problems_accepts_valid_fields(publisher):
+    comment = {"path": "a.py", "line": 9, "start_line": 5, "anchor": {"path": "b.py", "line": 0}}
+    assert publisher.location_problems([comment]) == []
+
+
+def file_thread_review(publisher):
+    comment = {"path": "pkg/util.py", "line": 0, "body": "**Suggestion**: off-diff."}
+    return publisher.PreparedComments(files=[publisher.FileThread("pkg/check.py", "About …", comment)])
+
+
+def test_rejected_file_thread_is_listed_in_the_submitted_body(monkeypatch, publisher):
+    def reject(*_):
+        raise subprocess.CalledProcessError(1, "gh api graphql", stderr="path not in diff")
+
+    monkeypatch.setattr(publisher, "post_review", lambda *_: {"id": 7, "node_id": "PRR_7"})
+    monkeypatch.setattr(publisher, "add_file_thread", reject)
+    submitted = []
+    monkeypatch.setattr(publisher, "submit_review", lambda *args: submitted.append(args[3]) or {})
+
+    publisher.post_with_file_threads(
+        "o/r", 1, {"commit_sha": "sha"}, file_thread_review(publisher),
+        lambda unattached: publisher.comments_as_text(unattached), publisher.ReviewEvent.COMMENT,
+    )
+
+    assert "**Suggestion**: off-diff." in submitted[0]
+
+
+@pytest.mark.parametrize(
+    ("deleted", "state", "outcome"),
+    [(True, None, "not posted"), (False, "COMMENTED", "posted"), (False, "PENDING", "pending left")],
+)
+def test_failed_submit_never_leaves_a_review_unaccounted_for(monkeypatch, publisher, deleted, state, outcome):
+    def fail_submit(*_):
+        raise subprocess.CalledProcessError(1, "gh api", stderr="HTTP 502")
+
+    monkeypatch.setattr(publisher, "post_review", lambda *_: {"id": 7, "node_id": "PRR_7"})
+    monkeypatch.setattr(publisher, "add_file_thread", lambda *_: None)
+    monkeypatch.setattr(publisher, "submit_review", fail_submit)
+    monkeypatch.setattr(publisher, "delete_pending_review", lambda *_: deleted)
+    monkeypatch.setattr(publisher, "get_review", lambda *_: {"state": state, "html_url": "u"})
+    post = lambda: publisher.post_with_file_threads(  # noqa: E731
+        "o/r", 1, {"commit_sha": "sha"}, file_thread_review(publisher), lambda _: "body", publisher.ReviewEvent.COMMENT
+    )
+
+    if outcome == "posted":
+        assert post()["html_url"] == "u"
+    else:
+        error = subprocess.CalledProcessError if outcome == "not posted" else publisher.PendingReviewLeft
+        with pytest.raises(error):
+            post()
+
+
+def test_failed_file_thread_review_falls_back_to_one_call_with_the_finding_in_the_body(
+    monkeypatch, publisher, review_data, tmp_path
+):
+    review_data["comments"] = [{"path": "check.py", "line": 0, "body": "**Suggestion**: whole file."}]
+    posted_payloads = []
+
+    def post(*args):
+        posted_payloads.append(args[-1])
+        if "event" not in args[-1]:
+            raise subprocess.CalledProcessError(1, "gh api", stderr="one pending review per pull request")
+        return {}
+
+    run_main(monkeypatch, publisher, review_data, tmp_path, post)
+
+    assert len(posted_payloads) == 2
+    assert posted_payloads[1]["comments"] == []
+    assert "**Suggestion**: whole file." in posted_payloads[1]["body"]
+
+
+def test_add_file_thread_raises_when_github_creates_no_thread(monkeypatch):
+    module = fresh_publisher()
+    # GitHub's answer for a file outside the diff: HTTP 200, no `errors`.
+    response = {"data": {"addPullRequestReviewThread": {"thread": None}}}
+    monkeypatch.setattr(
+        module.subprocess, "run",
+        lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout=json.dumps(response), stderr=""),
+    )
+
+    with pytest.raises(subprocess.CalledProcessError):
+        module.add_file_thread("PRR_1", "AGENTS.md", "body")
+
+
+def test_discard_own_pending_review_never_touches_the_posters_draft(monkeypatch, publisher):
+    reviews = [
+        {"id": 1, "state": "PENDING", "body": "my own draft"},
+        {"id": 2, "state": "PENDING", "body": publisher.PENDING_REVIEW_MARKER},
+        {"id": 3, "state": "COMMENTED", "body": publisher.PENDING_REVIEW_MARKER},
+    ]
+    deleted = []
+    monkeypatch.setattr(publisher, "list_reviews", lambda *_: reviews)
+    monkeypatch.setattr(
+        publisher, "delete_pending_review", lambda _repo, _pr, review_id: deleted.append(review_id) or True
+    )
+
+    assert publisher.discard_own_pending_review("o/r", 1) is None
+    assert deleted == [2]
+
+
+def test_lost_pending_review_reply_is_cleaned_up_before_falling_back(monkeypatch, publisher, review_data, tmp_path):
+    review_data["comments"] = [{"path": "check.py", "line": 0, "body": "**Suggestion**: whole file."}]
+    pending = []
+    monkeypatch.setattr(publisher, "list_reviews", lambda *_: pending)
+    monkeypatch.setattr(publisher, "delete_pending_review", lambda *_: pending.clear() or True)
+    posted_payloads = []
+
+    def post(*args):
+        posted_payloads.append(args[-1])
+        if "event" not in args[-1]:
+            # GitHub created the pending review, but its reply never arrived.
+            pending.append({"id": 7, "state": "PENDING", "body": args[-1]["body"]})
+            raise subprocess.CalledProcessError(1, "gh api", stderr="connection reset")
+        if pending:
+            raise subprocess.CalledProcessError(1, "gh api", stderr="one pending review per pull request")
+        return {}
+
+    run_main(monkeypatch, publisher, review_data, tmp_path, post)
+
+    assert len(posted_payloads) == 2
+    assert "**Suggestion**: whole file." in posted_payloads[1]["body"]

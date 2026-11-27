@@ -120,7 +120,7 @@ All three scripts are pure Python 3.11+ (stdlib only) and live under [`scripts/`
 | Script | When it runs |
 |---|---|
 | [`agint-review-setup`](./scripts/agint-review-setup) | Start of every review (Step 1). Pure plumbing; produces `context.json`. |
-| [`gh-post-review`](./scripts/gh-post-review) | End of every review (Step 7). Checks the PR head SHA, picks the event from the comment labels, snaps comments to diff lines, and falls back to the review body rather than losing a comment. |
+| [`gh-post-review`](./scripts/gh-post-review) | End of every review (Step 7). Checks the PR head SHA, picks the event from the comment labels, posts every comment as a review thread (at its line, at the file level, or at its anchor when it's outside the diff), and falls back to the review body only when GitHub refuses a thread. |
 | [`agint-review-cleanup`](./scripts/agint-review-cleanup) | Right after synthesis, before posting, and from setup for leftover worktrees. Removes worktrees only. |
 
 ---
