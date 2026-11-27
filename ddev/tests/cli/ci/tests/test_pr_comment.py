@@ -15,7 +15,7 @@ from __future__ import annotations
 import dataclasses
 import re
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from markdown_it import MarkdownIt
@@ -46,6 +46,7 @@ from ddev.cli.ci.tests.status import Status
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import (
+    TOTAL_JOBS,
     attempt,
     batch_progress,
     failing_report,
@@ -1367,6 +1368,37 @@ def test_skipped_and_cancelled_are_shown_only_when_non_zero():
     clean = render_comment(uniform_progress(done=True))
     assert "skipped" not in clean
     assert "cancelled" not in clean
+
+
+@pytest.mark.parametrize(
+    "elapsed, expected",
+    [
+        (timedelta(seconds=45.9), "⏱️ 45s"),
+        (timedelta(minutes=18, seconds=33), "⏱️ 18m 33s"),
+        (timedelta(hours=1, seconds=12), "⏱️ 1h 0m 12s"),
+    ],
+    ids=["seconds", "minutes", "hours"],
+)
+def test_a_finished_run_ends_its_totals_with_how_long_it_took(elapsed: timedelta, expected: str):
+    body = render_comment(uniform_progress(done=True), elapsed=elapsed)
+
+    assert f"✅ {TOTAL_JOBS} passed · nothing failed · {expected}\n" in body
+
+
+@pytest.mark.parametrize(
+    "done, shutdown, shown",
+    [
+        (True, None, True),
+        (False, ShutdownRequest.cancelled(), True),
+        (False, None, False),
+    ],
+    ids=["finished", "stopped", "running"],
+)
+def test_only_a_terminal_report_says_how_long_the_run_took(done: bool, shutdown: ShutdownRequest | None, shown: bool):
+    """Between updates a running report's duration would go stale, so it is the final word's alone."""
+    body = render_comment(uniform_progress(done=done), shutdown=shutdown, elapsed=timedelta(minutes=2))
+
+    assert ("⏱️ 2m 0s" in body) is shown
 
 
 def test_a_cancelled_batch_reads_as_cancelled_neither_passed_nor_failed():

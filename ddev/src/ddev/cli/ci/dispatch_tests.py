@@ -10,6 +10,7 @@ import contextlib
 import logging
 import os
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -292,6 +293,7 @@ def dispatch_tests(
     )
     datadog_handler = attach_datadog_log_handler(app, monitoring, level=output_level)
     started = time.monotonic()
+    started_at = datetime.now(timezone.utc)
     monitor = monitoring.component('dispatcher')
     outcome: ExecutionOutcome | None = None
     no_op_reason: str | None = None
@@ -423,6 +425,7 @@ def dispatch_tests(
             monitoring=monitoring,
             tags=caller_tags,
             pytest_args=pytest_args or '',
+            started_at=started_at,
         )
         # A fatal processor or hook failure leaves the bus by raising out of `run`. `on_finalize` has
         # already published whatever it knew by then, so a message is more use here than a traceback.
