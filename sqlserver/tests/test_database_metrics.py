@@ -12,7 +12,12 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
+    ENGINE_EDITION_AZURE_SYNAPSE_ANALYTICS,
+    ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL,
+    ENGINE_EDITION_ENTERPRISE,
+    ENGINE_EDITION_EXPRESS,
     ENGINE_EDITION_SQL_DATABASE,
+    ENGINE_EDITION_STANDARD,
     SQLSERVER_PARAMETER_LIMIT,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
@@ -23,6 +28,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
     SqlserverAvailabilityGroupsMetrics,
     SqlserverAvailabilityReplicasMetrics,
+    SqlserverCpuMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDatabaseFilesMetrics,
     SqlserverDatabaseReplicationStatsMetrics,
@@ -45,6 +51,7 @@ from datadog_checks.sqlserver.utils import Database
 
 from .common import (
     CHECK_NAME,
+    CPU_METRICS,
     SQLSERVER_ENGINE_EDITION,
     SQLSERVER_MAJOR_VERSION,
     SQLSERVER_YEAR,
@@ -425,7 +432,6 @@ def test_sqlserver_availability_replicas_query_uses_parameterized_queries(init_c
     'engine_edition, major_version, expected',
     [
         (ENGINE_EDITION_AZURE_MANAGED_INSTANCE, 12, True),
-        (ENGINE_EDITION_SQL_DATABASE, 12, False),
         (SQLSERVER_ENGINE_EDITION, 12, False),
         (SQLSERVER_ENGINE_EDITION, 13, True),
     ],
@@ -2314,3 +2320,107 @@ def test_database_metric_operation_time_tracks_enabled_collectors(
         hostname=sqlserver_check.resolved_hostname,
         count=0,
     )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'dbm, configured, expected',
+    [
+        (True, None, True),
+        (False, None, False),
+        (True, False, False),
+        (False, True, True),
+    ],
+)
+def test_cpu_metrics_enabled_by_default_only_with_dbm(init_config, instance_docker_metrics, dbm, configured, expected):
+    instance_docker_metrics['dbm'] = dbm
+    if configured is not None:
+        instance_docker_metrics['database_metrics'] = {'cpu_metrics': {'enabled': configured}}
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    assert sqlserver_check._config.database_metrics_config['cpu_metrics']['enabled'] is expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'engine_edition, major_version, expected',
+    [
+        (ENGINE_EDITION_STANDARD, 13, True),
+        (ENGINE_EDITION_ENTERPRISE, 16, True),
+        (ENGINE_EDITION_EXPRESS, 15, True),
+        (ENGINE_EDITION_AZURE_MANAGED_INSTANCE, 12, True),
+        (ENGINE_EDITION_ENTERPRISE, 12, False),
+        (ENGINE_EDITION_SQL_DATABASE, 12, False),
+        (ENGINE_EDITION_SQL_DATABASE, 16, False),
+        (ENGINE_EDITION_AZURE_SYNAPSE_ANALYTICS, 16, False),
+        (ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL, 16, False),
+        (None, None, False),
+    ],
+)
+def test_cpu_metrics_gating(init_config, instance_docker_metrics, engine_edition, major_version, expected):
+    instance_docker_metrics['database_metrics'] = {'cpu_metrics': {'enabled': True}}
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    cpu_metrics = SqlserverCpuMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info={
+            STATIC_INFO_ENGINE_EDITION: engine_edition,
+            STATIC_INFO_MAJOR_VERSION: major_version,
+        },
+        execute_query_handler=None,
+    )
+
+    assert cpu_metrics.enabled is expected
+
+
+@pytest.mark.unit
+def test_cpu_metrics_emitted_per_instance(aggregator, init_config, instance_docker_metrics):
+    instance_docker_metrics['database_metrics'] = {'cpu_metrics': {'enabled': True}}
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        if 'sys.dm_os_schedulers' in query:
+            return [(52000, 340, 8)]
+        return [(910,)]
+
+    cpu_metrics = SqlserverCpuMetrics(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    cpu_metrics.execute()
+
+    tags = sqlserver_check.tag_manager.get_tags()
+    expected = [
+        ('sqlserver.cpu.usage_ms', 52000, aggregator.MONOTONIC_COUNT),
+        ('sqlserver.cpu.scheduler_delay_ms', 340, aggregator.MONOTONIC_COUNT),
+        ('sqlserver.cpu.online_schedulers', 8, aggregator.GAUGE),
+        ('sqlserver.cpu.signal_wait_ms', 910, aggregator.MONOTONIC_COUNT),
+    ]
+    for metric_name, value, metric_type in expected:
+        aggregator.assert_metric(metric_name, value=value, tags=tags, metric_type=metric_type, count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_cpu_metrics_collected(aggregator, dd_run_check, init_config, instance_docker_metrics):
+    instance_docker_metrics['database_metrics'] = {'cpu_metrics': {'enabled': True}}
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    dd_run_check(sqlserver_check)
+    dd_run_check(sqlserver_check)
+
+    for metric_name in CPU_METRICS:
+        aggregator.assert_metric(metric_name, count=2)
+
+    usage = [m.value for m in aggregator.metrics('sqlserver.cpu.usage_ms')]
+    assert 0 < usage[0] <= usage[1]
+
+    cpu_count = aggregator.metrics('sqlserver.server.cpu_count')[-1].value
+    online_schedulers = aggregator.metrics('sqlserver.cpu.online_schedulers')[-1].value
+    assert online_schedulers == cpu_count

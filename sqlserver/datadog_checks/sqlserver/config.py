@@ -211,6 +211,7 @@ class SQLServerConfig:
         # Set defaults for database metrics
         configurable_metrics = {
             "ao_metrics": {'enabled': False, 'availability_group': None, 'ao_database': None, 'only_emit_local': False},
+            "cpu_metrics": {'enabled': self.dbm_enabled},
             "db_backup_metrics": {'enabled': True, 'collection_interval': DEFAULT_LONG_METRICS_COLLECTION_INTERVAL},
             "db_files_metrics": {'enabled': True},
             "db_stats_metrics": {'enabled': True},

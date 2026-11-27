@@ -219,6 +219,22 @@ files:
             - name: ao_database
               type: string
           fleet_configurable: true
+        - name: cpu_metrics
+          description: |
+            Configure collection of instance-level CPU metrics from `sys.dm_os_schedulers` and `sys.dm_os_wait_stats`.
+
+            Set `cpu_metrics.enabled` to true to enable collection of CPU usage, scheduler delay, signal wait
+            and online scheduler metrics. Defaults to true when `dbm` is true, and to false otherwise.
+
+            These metrics are not collected on Azure SQL Database, Azure Synapse Analytics, or SQL Server
+            versions earlier than 2016.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: true
+          fleet_configurable: true
         - name: db_backup_metrics
           description: |
             Configure collection of database backup metrics.

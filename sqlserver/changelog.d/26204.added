@@ -1,0 +1,1 @@
+Add the `cpu_metrics` database metric group, enabled by default when `dbm` is true, which reports SQL Server CPU usage, scheduler delay, signal wait and online scheduler count.
