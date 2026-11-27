@@ -32,6 +32,7 @@ LOCAL_QUEUE_METRIC_MAP = {
     'kueue_local_queue_ready_wait_time_seconds': 'local_queue.ready_wait_time.seconds',
     'kueue_local_queue_reserving_active_workloads': 'local_queue.reserving.active_workloads',
     'kueue_local_queue_status': 'local_queue.status',
+    'kueue_local_queue_unadmitted_workloads': 'local_queue.unadmitted_workloads',
 }
 
 METRIC_MAP = {
@@ -107,6 +108,7 @@ METRIC_MAP = {
     'kueue_ready_wait_time_seconds': 'ready_wait_time.seconds',
     'kueue_replaced_workload_slices': 'replaced_workload_slices',
     'kueue_reserving_active_workloads': 'reserving.active_workloads',
+    'kueue_unadmitted_workloads': 'unadmitted_workloads',
     'kueue_workload_creation_latency_seconds': 'workload.creation_latency.seconds',
     'kueue_workload_eviction_latency_seconds': 'workload.eviction_latency.seconds',
     'leader_election_master_status': 'leader_election.master_status',

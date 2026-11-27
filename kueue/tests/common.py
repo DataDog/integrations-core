@@ -79,7 +79,11 @@ EXPECTED_METRIC_TAGS = {
 UNIT_E2E_METRICS = tuple(EXPECTED_METRIC_TAGS)
 
 # Extra Datadog metric names covered by tests/fixtures/metrics.txt but not required on the e2e cluster.
-FIXTURE_ONLY_METRICS = ('kueue.cluster_queue.resource_pending.gpu',)
+FIXTURE_ONLY_METRICS = (
+    'kueue.cluster_queue.resource_pending.gpu',
+    'kueue.unadmitted_workloads',
+    'kueue.local_queue.unadmitted_workloads',
+)
 
 # All metrics for unit test_check presence + instance tag assertions.
 UNIT_METRICS = (*UNIT_E2E_METRICS, *FIXTURE_ONLY_METRICS)
@@ -94,6 +98,9 @@ CONFIG_GATED_METRIC_PREFIXES = (
     'kueue.local_queue.admission_checks.wait_time.seconds',
     'kueue.admission_cycle.preemption_skips',
     'kueue.replaced_workload_slices.count',
+    # Kueue 0.20+ (0.19 with the UnadmittedWorkloadsObservability feature gate); the e2e env pins an older version.
+    'kueue.unadmitted_workloads',
+    'kueue.local_queue.unadmitted_workloads',
 )
 
 
