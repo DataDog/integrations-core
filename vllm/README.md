@@ -35,15 +35,29 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 The following metrics are collected only when [GPU Monitoring][8] is enabled:
 
+- `vllm.admission_rejections`
+- `vllm.engine_sleep_state`
 - `vllm.estimated_flops_per_gpu`
+- `vllm.estimated_read_bytes_per_gpu`
+- `vllm.estimated_write_bytes_per_gpu`
 - `vllm.external_prefix_cache`
+- `vllm.iteration_tokens`
+- `vllm.mm_cache`
 - `vllm.nixl` (KV cache transfers between prefill and decode instances, available with the NVIDIA Inference Xfer Library connector)
+- `vllm.num_requests.waiting_by_reason`
 - `vllm.prefix_cache`
+- `vllm.prompt_tokens.by_source`
 - `vllm.prompt_tokens.cached`
+- `vllm.prompt_tokens.cached_by_source`
 - `vllm.request.decode_time`
+- `vllm.request.inference_time`
+- `vllm.request.max_num_generation_tokens`
+- `vllm.request.num_preemptions`
+- `vllm.request.params.max_tokens`
 - `vllm.request.prefill_kv_computed_tokens`
 - `vllm.request.prefill_time`
 - `vllm.request.queue_time`
+- `vllm.request.render_duration`
 - `vllm.spec_decode`
 
 ### Events

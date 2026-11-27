@@ -1,0 +1,1 @@
+Collect the remaining vLLM metrics that vLLM 0.34.0 exposes by default, such as request inference and render time, waiting requests by reason, prompt tokens by source and multimodal cache hits, when GPU Monitoring is enabled.
