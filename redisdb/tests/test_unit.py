@@ -241,6 +241,35 @@ def test_config_get_metrics(
     aggregator.assert_metric('redis.slowlog.micros', value=42, count=2)
 
 
+def test_empty_database_in_keyspace(
+    check: Callable[[dict], Redis],
+    redis_instance: dict,
+    config_connection: mock.Mock,
+    aggregator: AggregatorStub,
+):
+    """
+    Servers such as Dragonfly report empty databases in INFO keyspace; the check must not fail on them.
+    See https://github.com/DataDog/integrations-core/issues/25519
+    """
+    config_connection.info.return_value = {
+        'role': 'master',
+        'connected_clients': 2,
+        'db0': {'keys': 0, 'expires': 0, 'avg_ttl': -1},
+    }
+    config_connection.config_get.return_value = {}
+    redis_check = check(redis_instance)
+
+    redis_check.check(redis_instance)
+
+    db_tags = ['redis_db:db0']
+    aggregator.assert_metric_has_tags('redis.keys', db_tags, count=1)
+    aggregator.assert_metric_has_tags('redis.persist', db_tags, count=1)
+    aggregator.assert_metric('redis.persist.percent', count=0)
+    aggregator.assert_metric('redis.expires.percent', count=0)
+    aggregator.assert_metric('redis.net.clients', value=2, count=1)
+    aggregator.assert_metric('redis.slowlog.micros', value=42, count=1)
+
+
 def test_slowlog_quiet_failure(check, aggregator, redis_instance):
     """
     The check should not fail if the slowlog command fails with redis.ResponseError
