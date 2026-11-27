@@ -1,0 +1,1 @@
+Run the SLI endpoint detection after the trusted-provider validation so the bearer token is not sent from an untrusted configuration.

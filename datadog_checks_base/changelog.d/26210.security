@@ -1,0 +1,1 @@
+Validate the implicit service account token used by `bearer_token_auth` against the trusted-provider settings, and defer `possible_prometheus_urls` probing until that validation when `integration_ignore_untrusted_file_params` is enabled.
