@@ -1,10 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Bridge between the orchestrator callback system and the Textual message pump.
-
-No widget or screen imports — this module only depends on callbacks and messages.
-"""
+"""Forward run events to the active Textual message target."""
 
 from __future__ import annotations
 
@@ -13,11 +10,10 @@ from typing import Protocol
 from textual.message import Message
 from textual.message_pump import MessagePump
 
-from ddev.ai.agent.scope import AgentScope
-from ddev.ai.agent.types import AgentResponse, ToolCall
-from ddev.ai.callbacks.callbacks import CallbackSet
-from ddev.ai.react.types import ReActResult
-from ddev.ai.tools.core.types import ToolResult
+from ddev.ai.phases import notices as phase_notices
+from ddev.ai.react import notices
+from ddev.ai.run_events import RunEvents
+from ddev.ai.runtime.notices import RunErrored as RunErroredNotice
 from ddev.cli.meta.ai.tui.messages import (
     AfterCompact,
     AfterGoalCheck,
@@ -38,87 +34,73 @@ from ddev.cli.meta.ai.tui.messages import (
 
 
 class BridgeApp(Protocol):
-    """App contract required by callback-to-message bridging."""
+    """App contract required by forwarding notices to Textual."""
 
     bridge_target: MessagePump
 
     def post_message(self, message: Message) -> bool: ...
 
 
-def build_app_callback_set(app: BridgeApp) -> CallbackSet:
-    """Return a CallbackSet whose handlers post Textual messages to app.bridge_target.
+def subscribe_run_notices(events: RunEvents, app: BridgeApp) -> None:
+    async def phase_start(notice: phase_notices.PhaseStarted) -> None:
+        app.bridge_target.post_message(PhaseStarted(notice.phase_id))
 
-    ``app.bridge_target`` is read on every callback invocation so the target can be
-    changed at runtime (e.g. a screen registers itself after startup).
+    async def phase_finish(notice: phase_notices.PhaseFinished) -> None:
+        app.bridge_target.post_message(PhaseFinished(notice.phase_id))
 
-    The returned CallbackSet can be composed with others::
+    async def phase_error(notice: phase_notices.PhaseErrored) -> None:
+        app.bridge_target.post_message(PhaseErrored(notice.phase_id, notice.error))
 
-        app_set = build_app_callback_set(app)
-        callbacks = Callbacks([app_set, *extra_sets])
-    """
-    cb = CallbackSet()
+    async def run_error(notice: RunErroredNotice) -> None:
+        app.bridge_target.post_message(RunErrored())
 
-    def _target() -> MessagePump:
-        return app.bridge_target
+    async def before_goal_check(notice: phase_notices.BeforeGoalCheck) -> None:
+        app.bridge_target.post_message(BeforeGoalCheck(notice.phase_id, notice.task_name, notice.attempt))
 
-    @cb.on_phase_start
-    async def _(phase_id: str) -> None:
-        _target().post_message(PhaseStarted(phase_id))
+    async def after_goal_check(notice: phase_notices.AfterGoalCheck) -> None:
+        app.bridge_target.post_message(
+            AfterGoalCheck(notice.phase_id, notice.task_name, notice.attempt, notice.valid, notice.reason)
+        )
 
-    @cb.on_phase_finish
-    async def _(phase_id: str) -> None:
-        _target().post_message(PhaseFinished(phase_id))
+    async def before_agent_send(notice: notices.AgentBeforeSend) -> None:
+        app.bridge_target.post_message(AgentBeforeSend(notice.scope, notice.prompt, notice.iteration))
 
-    @cb.on_phase_error
-    async def _(phase_id: str, error: BaseException) -> None:
-        _target().post_message(PhaseErrored(phase_id, error))
+    async def agent_start(notice: notices.AgentStarted) -> None:
+        app.bridge_target.post_message(AgentStarted(notice.scope, notice.system_prompt, notice.tools))
 
-    @cb.on_run_error
-    async def _() -> None:
-        _target().post_message(RunErrored())
+    async def agent_response(notice: notices.AgentResponded) -> None:
+        app.bridge_target.post_message(AgentResponseReceived(notice.scope, notice.response, notice.iteration))
 
-    @cb.on_before_agent_send
-    async def _(scope: AgentScope, prompt: str, iteration: int) -> None:
-        _target().post_message(AgentBeforeSend(scope, prompt, iteration))
+    async def tool_call(notice: notices.ToolCalled) -> None:
+        app.bridge_target.post_message(AgentToolCalled(notice.scope, notice.tool_call, notice.result, notice.iteration))
 
-    @cb.on_agent_start
-    async def _(scope: AgentScope, system_prompt: str, tools: list[str]) -> None:
-        _target().post_message(AgentStarted(scope, system_prompt, tools))
+    async def before_compact(notice: notices.BeforeCompact) -> None:
+        app.bridge_target.post_message(BeforeCompact(notice.scope))
 
-    @cb.on_agent_response
-    async def _(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
-        _target().post_message(AgentResponseReceived(scope, response, iteration))
+    async def after_compact(notice: notices.AfterCompact) -> None:
+        app.bridge_target.post_message(AfterCompact(notice.scope))
 
-    @cb.on_tool_call
-    async def _(scope: AgentScope, tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
-        _target().post_message(AgentToolCalled(scope, tool_call, result, iteration))
+    async def context_cleared(notice: notices.ContextCleared) -> None:
+        app.bridge_target.post_message(ContextCleared(notice.scope))
 
-    @cb.on_before_compact
-    async def _(scope: AgentScope) -> None:
-        _target().post_message(BeforeCompact(scope))
+    async def agent_finish(notice: notices.AgentFinished) -> None:
+        app.bridge_target.post_message(AgentFinished(notice.scope, notice.result))
 
-    @cb.on_after_compact
-    async def _(scope: AgentScope) -> None:
-        _target().post_message(AfterCompact(scope))
+    async def agent_error(notice: notices.AgentErrored) -> None:
+        app.bridge_target.post_message(AgentErrored(notice.scope, notice.error))
 
-    @cb.on_context_cleared
-    async def _(scope: AgentScope) -> None:
-        _target().post_message(ContextCleared(scope))
-
-    @cb.on_agent_finish
-    async def _(scope: AgentScope, result: ReActResult) -> None:
-        _target().post_message(AgentFinished(scope, result))
-
-    @cb.on_agent_error
-    async def _(scope: AgentScope, error: BaseException) -> None:
-        _target().post_message(AgentErrored(scope, error))
-
-    @cb.on_before_goal_check
-    async def _(phase_id: str, task_name: str, attempt: int) -> None:
-        _target().post_message(BeforeGoalCheck(phase_id, task_name, attempt))
-
-    @cb.on_after_goal_check
-    async def _(phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None:
-        _target().post_message(AfterGoalCheck(phase_id, task_name, attempt, valid, reason))
-
-    return cb
+    events.subscribe(phase_notices.PhaseStarted, phase_start)
+    events.subscribe(phase_notices.PhaseFinished, phase_finish)
+    events.subscribe(phase_notices.PhaseErrored, phase_error)
+    events.subscribe(RunErroredNotice, run_error)
+    events.subscribe(phase_notices.BeforeGoalCheck, before_goal_check)
+    events.subscribe(phase_notices.AfterGoalCheck, after_goal_check)
+    events.subscribe(notices.AgentBeforeSend, before_agent_send)
+    events.subscribe(notices.AgentStarted, agent_start)
+    events.subscribe(notices.AgentResponded, agent_response)
+    events.subscribe(notices.ToolCalled, tool_call)
+    events.subscribe(notices.BeforeCompact, before_compact)
+    events.subscribe(notices.AfterCompact, after_compact)
+    events.subscribe(notices.ContextCleared, context_cleared)
+    events.subscribe(notices.AgentFinished, agent_finish)
+    events.subscribe(notices.AgentErrored, agent_error)

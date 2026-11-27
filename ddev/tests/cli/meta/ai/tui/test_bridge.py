@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for tui/bridge.py: build_app_callback_set delivers the right Textual messages."""
+"""Run events reach the Textual message target with their payloads."""
 
 from __future__ import annotations
 
@@ -10,10 +10,13 @@ import pytest
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse as AgentResponsePayload
 from ddev.ai.agent.types import StopReason, TokenUsage, ToolCall
-from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
+from ddev.ai.phases import notices as phase_notices
+from ddev.ai.react import notices
 from ddev.ai.react.types import ReActResult
+from ddev.ai.run_events import RunEvents
+from ddev.ai.runtime.notices import RunErrored as RunErroredNotice
 from ddev.ai.tools.core.types import ToolResult
-from ddev.cli.meta.ai.tui.bridge import build_app_callback_set
+from ddev.cli.meta.ai.tui.bridge import subscribe_run_notices
 from ddev.cli.meta.ai.tui.messages import (
     AfterCompact,
     AfterGoalCheck,
@@ -65,50 +68,27 @@ def _make_react_result() -> ReActResult:
 
 
 class StubOrchestrator:
-    """Fires one of every callback event so each bridge handler is exercised exactly once."""
-
-    def __init__(self, cb_set: CallbackSet) -> None:
-        self.cb_set = cb_set
+    def __init__(self, events: RunEvents) -> None:
+        self.events = events
 
     async def run_async(self) -> None:
         tool_call = ToolCall(id="tc1", name="bash", input={"cmd": "ls"})
         result = ToolResult(success=True, data="file.txt")
 
-        await self.cb_set.fire_phase_start("phase1")
-        await self.cb_set.fire_phase_finish("phase1")
-        await self.cb_set.fire_phase_error("phase1", ValueError("phase boom"))
-        await self.cb_set.fire_run_error()
-        await self.cb_set.fire_agent_start(SCOPE, "sys_prompt", ["bash", "python"])
-        await self.cb_set.fire_agent_response(SCOPE, _make_response(), 1)
-        await self.cb_set.fire_tool_call(SCOPE, tool_call, result, 1)
-        await self.cb_set.fire_before_compact(SCOPE)
-        await self.cb_set.fire_after_compact(SCOPE)
-        await self.cb_set.fire_context_cleared(SCOPE)
-        await self.cb_set.fire_agent_finish(SCOPE, _make_react_result())
-        await self.cb_set.fire_agent_error(SCOPE, ValueError("boom"))
-        await self.cb_set.fire_before_goal_check("phase1", "task1", 1)
-        await self.cb_set.fire_after_goal_check("phase1", "task1", 1, True, "looks good")
-
-
-# ---------------------------------------------------------------------------
-# Factory: type, composition, and basic wiring
-# ---------------------------------------------------------------------------
-
-
-async def test_build_app_callback_set_wires_correctly(make_togo_app):
-    """build_app_callback_set returns a wired CallbackSet that routes events to the app sink."""
-    app = make_togo_app([])
-    async with app.run_test() as pilot:
-        cb = build_app_callback_set(app)
-        assert isinstance(cb, CallbackSet)
-        combined = Callbacks([cb])
-        assert isinstance(combined, Callbacks)
-        # Fire one real event to confirm the wiring delivers a message
-        await combined.fire_phase_start("wiring_phase")
-        await pilot.pause(0.1)
-    phase_started = [m for m in app.received if isinstance(m, PhaseStarted)]
-    assert len(phase_started) == 1
-    assert phase_started[0].phase_id == "wiring_phase"
+        await self.events.notify(phase_notices.PhaseStarted("phase1"))
+        await self.events.notify(phase_notices.PhaseFinished("phase1"))
+        await self.events.notify(phase_notices.PhaseErrored("phase1", ValueError("phase boom")))
+        await self.events.notify(RunErroredNotice())
+        await self.events.notify(notices.AgentStarted(SCOPE, "sys_prompt", ["bash", "python"]))
+        await self.events.notify(notices.AgentResponded(SCOPE, _make_response(), 1))
+        await self.events.notify(notices.ToolCalled(SCOPE, tool_call, result, 1))
+        await self.events.notify(notices.BeforeCompact(SCOPE))
+        await self.events.notify(notices.AfterCompact(SCOPE))
+        await self.events.notify(notices.ContextCleared(SCOPE))
+        await self.events.notify(notices.AgentFinished(SCOPE, _make_react_result()))
+        await self.events.notify(notices.AgentErrored(SCOPE, ValueError("boom")))
+        await self.events.notify(phase_notices.BeforeGoalCheck("phase1", "task1", 1))
+        await self.events.notify(phase_notices.AfterGoalCheck("phase1", "task1", 1, True, "looks good"))
 
 
 # ---------------------------------------------------------------------------
@@ -121,8 +101,9 @@ async def received_from_stub(make_togo_app):
     """Run StubOrchestrator once and return the full app.received list."""
     app = make_togo_app([])
     async with app.run_test() as pilot:
-        cb = build_app_callback_set(app)
-        stub = StubOrchestrator(cb)
+        events = RunEvents()
+        subscribe_run_notices(events, app)
+        stub = StubOrchestrator(events)
         app.run_flow(stub)
         await pilot.pause(0.3)
     return app.received
@@ -235,8 +216,9 @@ async def test_all_14_messages_delivered(make_togo_app):
     """Every bridge event type delivers exactly one message to the sink."""
     app = make_togo_app([])
     async with app.run_test() as pilot:
-        cb = build_app_callback_set(app)
-        stub = StubOrchestrator(cb)
+        events = RunEvents()
+        subscribe_run_notices(events, app)
+        stub = StubOrchestrator(events)
         app.run_flow(stub)
         await pilot.pause(0.3)
 
@@ -252,9 +234,9 @@ async def test_agent_before_send_non_sentinel_delivered(make_togo_app):
     """AgentBeforeSend is posted when the prompt is not TOOL_RESULTS_SENTINEL."""
     app = make_togo_app([])
     async with app.run_test() as pilot:
-        cb = build_app_callback_set(app)
-        combined = Callbacks([cb])
-        await combined.fire_before_agent_send(SCOPE, "Analyze the metrics.", 1)
+        events = RunEvents()
+        subscribe_run_notices(events, app)
+        await events.notify(notices.AgentBeforeSend(SCOPE, "Analyze the metrics.", 1))
         await pilot.pause(0.2)
 
     msgs = [m for m in app.received if isinstance(m, AgentBeforeSend)]
@@ -270,9 +252,9 @@ async def test_agent_before_send_sentinel_delivered(make_togo_app):
 
     app = make_togo_app([])
     async with app.run_test() as pilot:
-        cb = build_app_callback_set(app)
-        combined = Callbacks([cb])
-        await combined.fire_before_agent_send(SCOPE, TOOL_RESULTS_SENTINEL, 2)
+        events = RunEvents()
+        subscribe_run_notices(events, app)
+        await events.notify(notices.AgentBeforeSend(SCOPE, TOOL_RESULTS_SENTINEL, 2))
         await pilot.pause(0.2)
 
     msgs = [m for m in app.received if isinstance(m, AgentBeforeSend)]
@@ -290,9 +272,9 @@ async def test_agent_before_send_payload_scope_and_iteration(make_togo_app):
 
     app = make_togo_app([])
     async with app.run_test() as pilot:
-        cb = build_app_callback_set(app)
-        combined = Callbacks([cb])
-        await combined.fire_before_agent_send(scope, "Inspect the endpoint.", 3)
+        events = RunEvents()
+        subscribe_run_notices(events, app)
+        await events.notify(notices.AgentBeforeSend(scope, "Inspect the endpoint.", 3))
         await pilot.pause(0.2)
 
     msgs = [m for m in app.received if isinstance(m, AgentBeforeSend)]

@@ -21,9 +21,9 @@ from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall, ToolResultMessage
-from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.react.process import ReActProcess
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -93,7 +93,8 @@ class FakeProcessFactory:
         self._agent_factory = agent_factory or (lambda: MockAgent([_make_response()]))
         self._tool_registry = tool_registry or ToolRegistry([])
         self._build_error = build_error
-        self.callbacks = Callbacks([AgentLogger(root).as_callback_set()])
+        self.events = RunEvents()
+        AgentLogger(root).subscribe(self.events)
         self.calls: list[dict[str, Any]] = []
 
     def create(self, *, scope: AgentScope, agent_config: AgentConfig, system_prompt: str) -> ReActProcess:
@@ -108,7 +109,7 @@ class FakeProcessFactory:
         if self._build_error is not None:
             raise self._build_error
         runtime = AgentRuntime(agent=self._agent_factory(), tool_registry=self._tool_registry)
-        return ReActProcess(runtime, callbacks=self.callbacks, scope=scope)
+        return ReActProcess(runtime, events=self.events, scope=scope)
 
 
 ResponseFactory = Callable[..., AgentResponse]

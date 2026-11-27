@@ -17,12 +17,13 @@ import yaml
 
 from ddev.ai.agent.provider import AgentProvider, ModelAccessCheck
 from ddev.ai.agent.registry import AgentProviderRegistry, build_agent_provider_registry
-from ddev.ai.agent.scope import AgentRole, AgentScope
-from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
+from ddev.ai.agent.scope import AgentRole
 from ddev.ai.config.models import AgentConfig, FlowEntry, PhaseConfig, ResolvedFlow, TaskConfig
 from ddev.ai.model_catalog import Route
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.registry import PhaseRegistry
+from ddev.ai.react.notices import AgentStarted
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime import gateway_auth
 from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus
 from ddev.ai.runtime.connections import DirectConnection, GatewayConnection
@@ -88,7 +89,7 @@ async def test_missing_dd_auth_uses_direct_only_when_all_selected_models_can_run
     registry = _gateway_registry(None if missing == "key" else "direct-secret", catalog)
     agents = {name: _agent(registry, name) for name in ("default", "narrow")}
     acquire_pat = _stub_dd_auth(monkeypatch, available=False)
-    resources = RunResources(registry, FileAccessPolicy(tmp_path, "demo"), agents, Callbacks())
+    resources = RunResources(registry, FileAccessPolicy(tmp_path, "demo"), agents, RunEvents())
     routes = []
     try:
         if missing is None:
@@ -128,7 +129,7 @@ async def test_gateway_startup_probes_the_adapter_for_the_initial_agent(tmp_path
         return expected
 
     bound_adapters["provider-b"].check_access.side_effect = check_access
-    resources = RunResources(registry, FileAccessPolicy(tmp_path, "demo"), agents, Callbacks())
+    resources = RunResources(registry, FileAccessPolicy(tmp_path, "demo"), agents, RunEvents())
 
     try:
         assert await resources.prepare(lambda _: None, initial_agent=agents["provider-b"]) == expected
@@ -147,7 +148,7 @@ def _orchestrator(
     has_dd_auth: bool = True,
     flow: ResolvedFlow | None = None,
     resume: bool = False,
-    callbacks: Callbacks | None = None,
+    events: RunEvents | None = None,
 ) -> PhaseOrchestrator:
     _stub_dd_auth(monkeypatch, available=has_dd_auth)
     monkeypatch.setattr("ddev.ai.runtime.resources.GatewayConnection", partial(GatewayConnection, transport=transport))
@@ -170,7 +171,7 @@ def _orchestrator(
         runtime_variables={},
         provider_registry=registry,
         file_access_policy=FileAccessPolicy(tmp_path, "demo"),
-        callbacks=callbacks,
+        events=events or RunEvents(),
         prepare_run_directory=None if resume else lambda: (tmp_path / "checkpoints.yaml").unlink(missing_ok=True),
         grace_period=0,
         resume=resume,
@@ -278,12 +279,13 @@ async def test_subagent_gateway_denial_ends_run_and_keeps_completed_phase_checkp
     checkpoints = CheckpointManager(tmp_path / "checkpoints.yaml")
     completed_checkpoint = None
     subagent_running = False
-    callback_set = CallbackSet()
+    events = RunEvents()
 
-    @callback_set.on_agent_start
-    async def mark_subagent(scope: AgentScope, _prompt: str, _tools: list[str]) -> None:
+    async def mark_subagent(notice: AgentStarted) -> None:
         nonlocal subagent_running
-        subagent_running = scope.role is AgentRole.SUBAGENT
+        subagent_running = notice.scope.role is AgentRole.SUBAGENT
+
+    events.subscribe(AgentStarted, mark_subagent)
 
     async def token_for(provider: str) -> str:
         if denial == "refresh" and subagent_running:
@@ -292,7 +294,7 @@ async def test_subagent_gateway_denial_ends_run_and_keeps_completed_phase_checkp
 
     producer = Mock(spec=GatewayTokenProducer, available=True)
     producer.token_for.side_effect = token_for
-    monkeypatch.setattr("ddev.ai.runtime.resources.GatewayTokenProducer", lambda: producer)
+    monkeypatch.setattr("ddev.ai.runtime.resources.GatewayTokenProducer", lambda _events: producer)
     message = _message("claude-haiku-4-5-20251001")
 
     def handle(request: httpx2.Request) -> httpx2.Response:
@@ -314,9 +316,7 @@ async def test_subagent_gateway_denial_ends_run_and_keeps_completed_phase_checkp
             return httpx2.Response(403, text="ddpat_testing_secret")
         return _stream_message(message)
 
-    orchestrator = _orchestrator(
-        tmp_path, TrackingTransport(handle), monkeypatch, flow=flow, callbacks=Callbacks([callback_set])
-    )
+    orchestrator = _orchestrator(tmp_path, TrackingTransport(handle), monkeypatch, flow=flow, events=events)
     with pytest.raises(expected_error, match=expected_message) as caught:
         await orchestrator.run_async()
 

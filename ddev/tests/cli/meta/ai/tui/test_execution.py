@@ -26,7 +26,11 @@ from ddev.ai.config.models import (
     ResolvedFlow,
     TaskConfig,
 )
+from ddev.ai.phases import notices as phase_notices
 from ddev.ai.phases.registry import PhaseRegistry
+from ddev.ai.react import notices
+from ddev.ai.run_events import RunEvents
+from ddev.ai.runtime.notices import RunErrored as RunErroredNotice
 from ddev.cli.meta.ai.tui.app import TogoApp
 from ddev.cli.meta.ai.tui.status import RunStatus
 
@@ -160,26 +164,25 @@ def _make_react_result(response: Any) -> Any:
 class _FakeOrchestrator:
     """Scripted fake orchestrator for tests — no API key, no real agents.
 
-    Fires a deterministic sequence of callback events (phase/agent/tool/goal)
-    through a supplied ``Callbacks`` object without any API key or real agents.
+    Publishes run notices without any API key or real agents.
     Tests inject it into ``ExecutionScreen`` via the ``orchestrator_builder``
     parameter to verify pipeline, task, and output rendering.
     """
 
     def __init__(
         self,
-        callbacks: Any,
+        events: RunEvents,
         phases: list[tuple[str, list[str]]],
         *,
         fail_on_phase: str | None = None,
     ) -> None:
-        self._callbacks = callbacks
+        self._events = events
         self._phases = phases
         self._fail_on_phase = fail_on_phase
         self.failed_phase: str | None = None
 
     async def run_async(self) -> None:
-        """Fire the scripted event sequence through the callbacks."""
+        """Send the scripted event sequence."""
         for phase_id, task_names in self._phases:
             await self._run_phase(phase_id, task_names)
 
@@ -190,41 +193,41 @@ class _FakeOrchestrator:
         from ddev.ai.tools.core.types import ToolResult
 
         scope = AgentScope(owner_id=phase_id, role=AgentRole.PHASE, phase_id=phase_id)
-        await self._callbacks.fire_phase_start(phase_id)
-        await self._callbacks.fire_agent_start(scope, f"You are the agent for {phase_id}.", ["bash"])
+        await self._events.notify(phase_notices.PhaseStarted(phase_id))
+        await self._events.notify(notices.AgentStarted(scope, f"You are the agent for {phase_id}.", ["bash"]))
 
         # First iteration: real prompt
-        await self._callbacks.fire_before_agent_send(scope, f"Complete the work for {phase_id}.", 1)
+        await self._events.notify(notices.AgentBeforeSend(scope, f"Complete the work for {phase_id}.", 1))
         resp1 = _make_agent_response("I'll start working on this.")
-        await self._callbacks.fire_agent_response(scope, resp1, 1)
+        await self._events.notify(notices.AgentResponded(scope, resp1, 1))
 
         # Tool call
         tool_call = ToolCall(id=f"{phase_id}_tc1", name="bash", input={"cmd": "echo done"})
         tool_result = ToolResult(success=True, data="done\n")
-        await self._callbacks.fire_tool_call(scope, tool_call, tool_result, 1)
+        await self._events.notify(notices.ToolCalled(scope, tool_call, tool_result, 1))
 
-        # Second iteration: sentinel prompt (bridge skips this, no AgentBeforeSend posted)
-        await self._callbacks.fire_before_agent_send(scope, TOOL_RESULTS_SENTINEL, 2)
+        # Second iteration: model receives tool results instead of a user prompt.
+        await self._events.notify(notices.AgentBeforeSend(scope, TOOL_RESULTS_SENTINEL, 2))
         resp2 = _make_agent_response("Work complete.")
-        await self._callbacks.fire_agent_response(scope, resp2, 2)
+        await self._events.notify(notices.AgentResponded(scope, resp2, 2))
 
         # Failure mode: fire error and raise before goal checks
         if self._fail_on_phase == phase_id:
             error = RuntimeError(f"Simulated failure in phase {phase_id!r}")
-            await self._callbacks.fire_agent_error(scope, error)
+            await self._events.notify(notices.AgentErrored(scope, error))
             self.failed_phase = phase_id
-            await self._callbacks.fire_phase_error(phase_id, error)
-            await self._callbacks.fire_run_error()
+            await self._events.notify(phase_notices.PhaseErrored(phase_id, error))
+            await self._events.notify(RunErroredNotice())
             raise error
 
         # Goal validation for each task
         for task_name in task_names:
-            await self._callbacks.fire_before_goal_check(phase_id, task_name, 1)
-            await self._callbacks.fire_after_goal_check(phase_id, task_name, 1, True, "Goal achieved.")
+            await self._events.notify(phase_notices.BeforeGoalCheck(phase_id, task_name, 1))
+            await self._events.notify(phase_notices.AfterGoalCheck(phase_id, task_name, 1, True, "Goal achieved."))
 
         react_result = _make_react_result(resp2)
-        await self._callbacks.fire_agent_finish(scope, react_result)
-        await self._callbacks.fire_phase_finish(phase_id)
+        await self._events.notify(notices.AgentFinished(scope, react_result))
+        await self._events.notify(phase_notices.PhaseFinished(phase_id))
 
 
 def _make_builder(
@@ -236,8 +239,8 @@ def _make_builder(
     if phases is None:
         phases = DEMO_PHASES
 
-    def builder(callbacks: Any) -> _FakeOrchestrator:
-        return _FakeOrchestrator(callbacks, phases, fail_on_phase=fail_on_phase)
+    def builder(events: RunEvents) -> _FakeOrchestrator:
+        return _FakeOrchestrator(events, phases, fail_on_phase=fail_on_phase)
 
     return builder
 
@@ -271,181 +274,35 @@ class _GraphHarness(Screen):
 
 
 # ---------------------------------------------------------------------------
-# _FakeOrchestrator unit tests (no Textual App needed)
-# ---------------------------------------------------------------------------
-
-
-async def test_fake_orchestrator_success_completes():
-    """_FakeOrchestrator.run_async() completes without raising on success."""
-    from ddev.ai.callbacks.callbacks import Callbacks
-
-    cb = Callbacks()
-    demo = _FakeOrchestrator(cb, DEMO_PHASES)
-    await demo.run_async()
-    assert demo.failed_phase is None
-
-
-async def test_fake_orchestrator_fires_phase_events():
-    """_FakeOrchestrator fires phase_start and phase_finish for each phase."""
-    from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-
-    started: list[str] = []
-    finished: list[str] = []
-    cb_set = CallbackSet()
-
-    @cb_set.on_phase_start
-    async def _(phase_id: str) -> None:
-        started.append(phase_id)
-
-    @cb_set.on_phase_finish
-    async def _(phase_id: str) -> None:
-        finished.append(phase_id)
-
-    demo = _FakeOrchestrator(Callbacks([cb_set]), DEMO_PHASES)
-    await demo.run_async()
-    assert started == ["phase_1", "phase_2"]
-    assert finished == ["phase_1", "phase_2"]
-
-
-async def test_fake_orchestrator_fires_agent_events():
-    """_FakeOrchestrator fires agent_start, agent_response, agent_finish per phase."""
-    from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-
-    owner_ids: list[str] = []
-    cb_set = CallbackSet()
-
-    @cb_set.on_agent_start
-    async def _(scope: Any, system_prompt: str, tools: list[str]) -> None:
-        owner_ids.append(scope.owner_id)
-
-    demo = _FakeOrchestrator(Callbacks([cb_set]), DEMO_PHASES)
-    await demo.run_async()
-    assert owner_ids == ["phase_1", "phase_2"]
-
-
-async def test_fake_orchestrator_fires_before_agent_send_non_sentinel():
-    """_FakeOrchestrator fires before_agent_send with a non-sentinel prompt."""
-    from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-    from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
-
-    non_sentinel_prompts: list[str] = []
-    cb_set = CallbackSet()
-
-    @cb_set.on_before_agent_send
-    async def _(scope: Any, prompt: str, iteration: int) -> None:
-        if prompt != TOOL_RESULTS_SENTINEL:
-            non_sentinel_prompts.append(prompt)
-
-    demo = _FakeOrchestrator(Callbacks([cb_set]), DEMO_PHASES)
-    await demo.run_async()
-    assert len(non_sentinel_prompts) >= len(DEMO_PHASES)
-
-
-async def test_fake_orchestrator_fires_sentinel_prompt():
-    """_FakeOrchestrator fires before_agent_send with TOOL_RESULTS_SENTINEL."""
-    from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-    from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
-
-    all_prompts: list[str] = []
-    cb_set = CallbackSet()
-
-    @cb_set.on_before_agent_send
-    async def _(scope: Any, prompt: str, iteration: int) -> None:
-        all_prompts.append(prompt)
-
-    demo = _FakeOrchestrator(Callbacks([cb_set]), DEMO_PHASES)
-    await demo.run_async()
-    assert TOOL_RESULTS_SENTINEL in all_prompts
-
-
-async def test_fake_orchestrator_fires_goal_check_events():
-    """_FakeOrchestrator fires before/after_goal_check for each task."""
-    from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-
-    goal_results: list[tuple[str, str, bool]] = []
-    cb_set = CallbackSet()
-
-    @cb_set.on_after_goal_check
-    async def _(phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None:
-        goal_results.append((phase_id, task_name, valid))
-
-    demo = _FakeOrchestrator(Callbacks([cb_set]), DEMO_PHASES)
-    await demo.run_async()
-    assert ("phase_1", "task_one", True) in goal_results
-    assert ("phase_2", "task_two", True) in goal_results
-
-
-async def test_fake_orchestrator_failure_raises():
-    """_FakeOrchestrator in failure mode raises from run_async()."""
-    from ddev.ai.callbacks.callbacks import Callbacks
-
-    demo = _FakeOrchestrator(Callbacks(), DEMO_PHASES, fail_on_phase="phase_1")
-    with pytest.raises(RuntimeError):
-        await demo.run_async()
-
-
-async def test_fake_orchestrator_failure_sets_failed_phase():
-    """_FakeOrchestrator sets failed_phase on failure."""
-    from ddev.ai.callbacks.callbacks import Callbacks
-
-    demo = _FakeOrchestrator(Callbacks(), DEMO_PHASES, fail_on_phase="phase_1")
-    try:
-        await demo.run_async()
-    except RuntimeError:
-        pass
-    assert demo.failed_phase == "phase_1"
-
-
-async def test_fake_orchestrator_failure_fires_agent_error():
-    """_FakeOrchestrator in failure mode fires on_agent_error before raising."""
-    from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-
-    errors: list[BaseException] = []
-    cb_set = CallbackSet()
-
-    @cb_set.on_agent_error
-    async def _(scope: Any, error: BaseException) -> None:
-        errors.append(error)
-
-    demo = _FakeOrchestrator(Callbacks([cb_set]), DEMO_PHASES, fail_on_phase="phase_1")
-    try:
-        await demo.run_async()
-    except RuntimeError:
-        pass
-    assert len(errors) == 1
-    assert isinstance(errors[0], RuntimeError)
-
-
-# ---------------------------------------------------------------------------
 # ExecutionScreen: builder injection and wiring
 # ---------------------------------------------------------------------------
 
 
-async def test_execution_screen_uses_injectable_builder():
-    """ExecutionScreen passes Callbacks to the provided builder."""
-    from ddev.ai.callbacks.callbacks import Callbacks
+async def test_execution_screen_supports_background_notices():
+    import asyncio
+
+    from ddev.ai.run_events import Notice
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
-    received_callbacks: list[Callbacks] = []
+    delivered = asyncio.Event()
 
-    def _builder(cb: Callbacks) -> Any:
-        received_callbacks.append(cb)
+    async def receive(notice: Notice) -> None:
+        delivered.set()
 
-        class _Noop:
-            async def run_async(self) -> None:
-                pass
+    class Orchestrator:
+        def __init__(self, events: RunEvents) -> None:
+            self.events = events
+            events.subscribe(Notice, receive)
 
-        return _Noop()
+        async def run_async(self) -> None:
+            await self.events.notify(Notice(), block=False)
 
     flow = _make_flow()
     app = _app(flow)
-    async with app.run_test() as pilot:
-        await pilot.pause()
-        await app.push_screen(ExecutionScreen(flow, orchestrator_builder=_builder))
-        await pilot.pause(0.3)
-
-    assert len(received_callbacks) == 1
-    assert isinstance(received_callbacks[0], Callbacks)
+    async with app.run_test():
+        await app.push_screen(ExecutionScreen(flow, orchestrator_builder=Orchestrator))
+        async with asyncio.timeout(5):
+            await delivered.wait()
 
 
 async def test_execution_screen_sets_bridge_target_on_mount():
@@ -704,26 +561,22 @@ def test_context_cleared_notice_is_written_to_scoped_phase_log() -> None:
 
 async def test_pipeline_phase_running_during_execution():
     """A phase being run by _FakeOrchestrator transitions through 'running'."""
-    from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
     flow = _make_flow()
 
-    cb_seen: list[str] = []
+    seen: list[str] = []
 
-    def _builder_with_tracking(cb: Callbacks) -> Any:
-        tracking = CallbackSet()
+    def _builder_with_tracking(events: RunEvents) -> _FakeOrchestrator:
+        async def record_start(notice: phase_notices.PhaseStarted) -> None:
+            seen.append(f"start:{notice.phase_id}")
 
-        @tracking.on_phase_start
-        async def _(phase_id: str) -> None:
-            cb_seen.append(f"start:{phase_id}")
+        async def record_finish(notice: phase_notices.PhaseFinished) -> None:
+            seen.append(f"finish:{notice.phase_id}")
 
-        @tracking.on_phase_finish
-        async def _(phase_id: str) -> None:
-            cb_seen.append(f"finish:{phase_id}")
-
-        combined = Callbacks([*cb._sets, tracking])  # type: ignore[attr-defined]
-        return _FakeOrchestrator(combined, DEMO_PHASES)
+        events.subscribe(phase_notices.PhaseStarted, record_start)
+        events.subscribe(phase_notices.PhaseFinished, record_finish)
+        return _FakeOrchestrator(events, DEMO_PHASES)
 
     app = _app(flow)
     async with app.run_test() as pilot:
@@ -732,10 +585,10 @@ async def test_pipeline_phase_running_during_execution():
         await app.push_screen(screen)
         await pilot.pause(0.5)
 
-    assert "start:phase_1" in cb_seen
-    assert "finish:phase_1" in cb_seen
-    assert "start:phase_2" in cb_seen
-    assert "finish:phase_2" in cb_seen
+    assert "start:phase_1" in seen
+    assert "finish:phase_1" in seen
+    assert "start:phase_2" in seen
+    assert "finish:phase_2" in seen
 
 
 async def test_execution_phase_activation_opens_config_for_pending_phase():
@@ -1024,7 +877,7 @@ async def test_phase_log_shows_thinking_block_until_agent_response():
     app = _app(flow)
     async with app.run_test() as pilot:
         await pilot.pause()
-        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _IdleOrchestrator())
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _events: _IdleOrchestrator())
         await app.push_screen(screen)
         await pilot.pause()
 
@@ -1063,7 +916,7 @@ async def test_sentinel_send_shows_thinking_without_prompt_block():
     app = _app(flow)
     async with app.run_test() as pilot:
         await pilot.pause()
-        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _IdleOrchestrator())
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _events: _IdleOrchestrator())
         await app.push_screen(screen)
         await pilot.pause()
 
@@ -1099,7 +952,7 @@ async def test_phase_log_replays_entries_before_active_thinking_block():
     app = _app(flow)
     async with app.run_test() as pilot:
         await pilot.pause()
-        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _IdleOrchestrator())
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _events: _IdleOrchestrator())
         await app.push_screen(screen)
         await pilot.pause()
 
@@ -1295,12 +1148,12 @@ async def test_execution_finishes_phases_before_reporting_success() -> None:
     class ControlledOrchestrator:
         failed_phase = None
 
-        def __init__(self, callbacks: Any) -> None:
-            self.callbacks = callbacks
+        def __init__(self, events: RunEvents) -> None:
+            self.events = events
 
         async def run_async(self) -> None:
             for phase_id, _ in DEMO_PHASES:
-                await self.callbacks.fire_phase_finish(phase_id)
+                await self.events.notify(phase_notices.PhaseFinished(phase_id))
             await release.wait()
 
     flow = _make_flow()
@@ -1334,12 +1187,12 @@ async def test_execution_failure_during_finalization_never_reports_success() -> 
     class FailingFinalizer:
         failed_phase = None
 
-        def __init__(self, callbacks: Any) -> None:
-            self.callbacks = callbacks
+        def __init__(self, events: RunEvents) -> None:
+            self.events = events
 
         async def run_async(self) -> None:
             for phase_id, _ in DEMO_PHASES:
-                await self.callbacks.fire_phase_finish(phase_id)
+                await self.events.notify(phase_notices.PhaseFinished(phase_id))
             await release.wait()
             raise RuntimeError("finalization failed")
 
@@ -1375,11 +1228,11 @@ async def test_phase_log_header_keeps_running_status() -> None:
     class RunningPhase:
         failed_phase = None
 
-        def __init__(self, callbacks: Any) -> None:
-            self.callbacks = callbacks
+        def __init__(self, events: RunEvents) -> None:
+            self.events = events
 
         async def run_async(self) -> None:
-            await self.callbacks.fire_phase_start("phase_1")
+            await self.events.notify(phase_notices.PhaseStarted("phase_1"))
             await release.wait()
 
     flow = _make_flow()
@@ -1421,9 +1274,6 @@ async def test_cancel_stops_worker_without_crash():
     class _InfiniteDemo:
         failed_phase = None
 
-        def __init__(self, cb: Any) -> None:
-            self._cb = cb
-
         async def run_async(self) -> None:
             try:
                 await asyncio.sleep(999)
@@ -1436,7 +1286,7 @@ async def test_cancel_stops_worker_without_crash():
     async with app.run_test() as pilot:
         await pilot.pause()
         assert isinstance(pilot.app.screen, MainScreen)
-        screen = ExecutionScreen(flow, orchestrator_builder=lambda cb: _InfiniteDemo(cb))
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _events: _InfiniteDemo())
         await app.push_screen(screen)
         await pilot.pause(0.05)
         await pilot.press("ctrl+c")
@@ -1463,7 +1313,7 @@ async def test_execution_ctrl_c_copies_selection_before_cancelling(monkeypatch):
     app = _app(flow)
     async with app.run_test() as pilot:
         await pilot.pause()
-        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _InfiniteDemo())
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _events: _InfiniteDemo())
         await app.push_screen(screen)
         await pilot.pause()
         assert screen._run_worker is not None
@@ -1487,9 +1337,6 @@ async def test_unmount_cancels_worker():
     class _InfiniteDemo:
         failed_phase = None
 
-        def __init__(self, cb: Any) -> None:
-            self._cb = cb
-
         async def run_async(self) -> None:
             await asyncio.sleep(999)
 
@@ -1498,7 +1345,7 @@ async def test_unmount_cancels_worker():
     async with app.run_test() as pilot:
         await pilot.pause()
         assert isinstance(pilot.app.screen, MainScreen)
-        screen = ExecutionScreen(flow, orchestrator_builder=lambda cb: _InfiniteDemo(cb))
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _events: _InfiniteDemo())
         await app.push_screen(screen)
         await pilot.pause(0.05)
         app.pop_screen()
@@ -1532,7 +1379,7 @@ async def test_escape_requires_confirmation_before_cancelling_active_run():
     app.animation_level = "none"
     async with app.run_test() as pilot:
         await pilot.pause()
-        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _InfiniteDemo())
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _events: _InfiniteDemo())
         await app.push_screen(screen)
         await pilot.pause()
 
@@ -1570,7 +1417,7 @@ async def test_back_pops_immediately_after_run_finishes():
     app = _app(flow)
     async with app.run_test() as pilot:
         await pilot.pause()
-        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _FinishedDemo())
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _events: _FinishedDemo())
         await app.push_screen(screen)
         await pilot.pause()
         await pilot.press("escape")
@@ -1611,7 +1458,7 @@ async def test_orchestrator_build_failure_is_visible_and_screen_stays_stable() -
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
 
-    def fail_to_build(_callbacks: Any) -> Any:
+    def fail_to_build(_events: RunEvents) -> Any:
         raise RuntimeError("constructor exploded")
 
     flow = _make_flow()
@@ -1630,8 +1477,8 @@ async def test_orchestrator_build_failure_is_visible_and_screen_stays_stable() -
         assert app.is_running
 
 
-async def test_phase_error_callback_only_marks_reported_failed_phase() -> None:
-    """A phase callback fails its phase without attributing the error to a concurrent sibling."""
+async def test_phase_error_notice_only_marks_reported_failed_phase() -> None:
+    """A phase failure notice fails its phase without attributing the error to a concurrent sibling."""
     from textual.widgets import Static
 
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
@@ -1639,15 +1486,15 @@ async def test_phase_error_callback_only_marks_reported_failed_phase() -> None:
     class ConcurrentFailure:
         failed_phase = "phase_1"
 
-        def __init__(self, callbacks: Any) -> None:
-            self.callbacks = callbacks
+        def __init__(self, events: RunEvents) -> None:
+            self.events = events
 
         async def run_async(self) -> None:
-            await self.callbacks.fire_phase_start("phase_1")
-            await self.callbacks.fire_phase_start("phase_2")
+            await self.events.notify(phase_notices.PhaseStarted("phase_1"))
+            await self.events.notify(phase_notices.PhaseStarted("phase_2"))
             error = RuntimeError("phase 1 crashed")
-            await self.callbacks.fire_phase_error("phase_1", error)
-            await self.callbacks.fire_run_error()
+            await self.events.notify(phase_notices.PhaseErrored("phase_1", error))
+            await self.events.notify(RunErroredNotice())
             raise error
 
     flow = _make_flow()
@@ -1673,7 +1520,6 @@ async def test_phase_error_callback_only_marks_reported_failed_phase() -> None:
 async def test_gateway_credential_failure_opens_recovery_modal(startup, title):
     from textual.widgets import Static
 
-    from ddev.ai.callbacks.callbacks import Callbacks
     from ddev.ai.model_catalog import Route
     from ddev.ai.runtime.errors import CredentialRefreshError, RefreshFailureCause
     from ddev.ai.runtime.gateway_auth import gateway_refresh_error
@@ -1683,17 +1529,17 @@ async def test_gateway_credential_failure_opens_recovery_modal(startup, title):
     class FailedCredentialAcquisition:
         failed_phase = None if startup else "phase_1"
 
-        def __init__(self, callbacks: Callbacks) -> None:
-            self.callbacks = callbacks
+        def __init__(self, events: RunEvents) -> None:
+            self.events = events
 
         async def run_async(self) -> None:
             cause = RefreshFailureCause.LOGIN_TIMED_OUT
             if self.failed_phase is None:
                 raise CredentialRefreshError(Route.AI_GATEWAY, cause, "AI Gateway startup failed.", (), startup=True)
-            await self.callbacks.fire_phase_start(self.failed_phase)
+            await self.events.notify(phase_notices.PhaseStarted(self.failed_phase))
             error = gateway_refresh_error(cause)
-            await self.callbacks.fire_phase_error(self.failed_phase, error)
-            await self.callbacks.fire_run_error()
+            await self.events.notify(phase_notices.PhaseErrored(self.failed_phase, error))
+            await self.events.notify(RunErroredNotice())
             raise error
 
     flow = _make_flow()
@@ -1728,12 +1574,12 @@ async def test_orchestrator_exception_without_failed_phase_is_not_attributed() -
     class UnknownFailure:
         failed_phase = None
 
-        def __init__(self, callbacks: Any) -> None:
-            self.callbacks = callbacks
+        def __init__(self, events: RunEvents) -> None:
+            self.events = events
 
         async def run_async(self) -> None:
-            await self.callbacks.fire_phase_start("phase_1")
-            await self.callbacks.fire_phase_start("phase_2")
+            await self.events.notify(phase_notices.PhaseStarted("phase_1"))
+            await self.events.notify(phase_notices.PhaseStarted("phase_2"))
             raise RuntimeError("scheduler crashed")
 
     flow = _make_flow()
@@ -1841,7 +1687,7 @@ async def test_resume_flag_passed_to_orchestrator():
 
     flow = _make_flow()
 
-    def _builder(cb: Any) -> Any:
+    def _builder(_events: RunEvents) -> Any:
         class _Noop:
             async def run_async(self) -> None:
                 pass
@@ -1885,7 +1731,7 @@ final_review:
     app = _app(flow)
     async with app.run_test() as pilot:
         await pilot.pause()
-        screen = ExecutionScreen(flow, resume=True, runs_dir=tmp_path, orchestrator_builder=lambda _: Noop())
+        screen = ExecutionScreen(flow, resume=True, runs_dir=tmp_path, orchestrator_builder=lambda _events: Noop())
         await app.push_screen(screen)
         await pilot.pause()
 
@@ -1917,11 +1763,11 @@ async def test_resume_transitions_to_finishing_after_remaining_phase(tmp_path: P
     class ResumeOrchestrator:
         failed_phase = None
 
-        def __init__(self, callbacks: Any) -> None:
-            self.callbacks = callbacks
+        def __init__(self, events: RunEvents) -> None:
+            self.events = events
 
         async def run_async(self) -> None:
-            await self.callbacks.fire_phase_finish("phase_2")
+            await self.events.notify(phase_notices.PhaseFinished("phase_2"))
             await release.wait()
 
     app = _app(flow)

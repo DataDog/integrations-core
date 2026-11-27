@@ -9,6 +9,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from ddev.ai.model_catalog import Route
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime import gateway_auth
 from ddev.ai.runtime.errors import CredentialRefreshError, RefreshFailureCause
 from ddev.utils import dd_auth
@@ -35,7 +36,7 @@ async def test_gateway_producer_shares_refresh_at_use_cutoff(monkeypatch, find_d
 
     acquire_pat = AsyncMock(return_value="ddpat_old")
     monkeypatch.setattr(dd_auth, "acquire_datadog_pat", acquire_pat)
-    producer = gateway_auth.GatewayTokenProducer()
+    producer = gateway_auth.GatewayTokenProducer(RunEvents())
 
     assert await producer.token_for("provider-a") == "ddpat_old"
     clock.now = 100.0 + gateway_auth.TOKEN_USE_WINDOW - 1
@@ -63,7 +64,7 @@ async def test_gateway_producer_shares_refresh_at_use_cutoff(monkeypatch, find_d
 async def test_gateway_producer_shares_one_token_and_drops_it_on_clear(monkeypatch, find_dd_auth):
     acquire_pat = AsyncMock(return_value="ddpat_developer")
     monkeypatch.setattr(dd_auth, "acquire_datadog_pat", acquire_pat)
-    producer = gateway_auth.GatewayTokenProducer()
+    producer = gateway_auth.GatewayTokenProducer(RunEvents())
 
     assert producer.available
     assert await producer.token_for("provider-a") == "ddpat_developer"
@@ -87,7 +88,7 @@ async def test_gateway_auth_adds_recovery_guidance(monkeypatch, find_dd_auth, er
     monkeypatch.setattr(dd_auth, "acquire_datadog_pat", AsyncMock(side_effect=error))
 
     with pytest.raises(gateway_auth.GatewayAuthError) as caught:
-        await gateway_auth.GatewayTokenProducer().token_for("provider-a")
+        await gateway_auth.GatewayTokenProducer(RunEvents()).token_for("provider-a")
 
     assert str(error) in str(caught.value)
     assert guidance in str(caught.value)
@@ -104,7 +105,7 @@ async def test_gateway_auth_adds_recovery_guidance(monkeypatch, find_dd_auth, er
 async def test_gateway_refresh_failure_is_actionable_and_not_retried(monkeypatch, find_dd_auth, error_type, cause):
     acquire_pat = AsyncMock(side_effect=["ddpat_old", error_type("private login detail")])
     monkeypatch.setattr(dd_auth, "acquire_datadog_pat", acquire_pat)
-    producer = gateway_auth.GatewayTokenProducer()
+    producer = gateway_auth.GatewayTokenProducer(RunEvents())
 
     producer.reject(await producer.token_for("provider-a"))
     for provider in ("provider-a", "provider-b"):

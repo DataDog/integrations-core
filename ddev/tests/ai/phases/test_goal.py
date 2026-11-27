@@ -10,7 +10,6 @@ import pytest
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import FlowStopRequested
 from ddev.ai.agent.scope import AgentRole, AgentScope
-from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.phases.goal import (
     GOAL_REVIEWER_RESET_THRESHOLD_PCT,
@@ -23,8 +22,10 @@ from ddev.ai.phases.goal import (
     parse_reviewer_verdict,
     run_goal_loop,
 )
+from ddev.ai.phases.notices import AfterGoalCheck, BeforeGoalCheck
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.registry import ToolRegistry
 from tests.ai.config.utils import make_agent_config
@@ -188,16 +189,18 @@ def _make_worker_process(responses):
     """ReActProcess wired to a MockAgent — used as the worker."""
     agent = MockAgent(list(responses))
     scope = AgentScope(owner_id="worker", role=AgentRole.PHASE, phase_id="worker")
-    return ReActProcess(AgentRuntime(agent=agent, tool_registry=ToolRegistry([])), scope=scope), agent
+    return ReActProcess(
+        AgentRuntime(agent=agent, tool_registry=ToolRegistry([])), scope=scope, events=RunEvents()
+    ), agent
 
 
 class ReviewerProcessFactory:
     """Process factory returning a fixed reviewer agent wrapped in a ReActProcess."""
 
-    def __init__(self, responses, callbacks: Callbacks | None = None) -> None:
+    def __init__(self, responses, events: RunEvents | None = None) -> None:
         self.agent = MockAgent(list(responses))
         self.calls: list[dict[str, object]] = []
-        self._callbacks = callbacks or Callbacks()
+        self._events = events or RunEvents()
 
     def create(self, *, scope, agent_config: AgentConfig, system_prompt: str) -> ReActProcess:
         self.calls.append(
@@ -210,16 +213,16 @@ class ReviewerProcessFactory:
         )
         return ReActProcess(
             AgentRuntime(agent=self.agent, tool_registry=ToolRegistry([])),
-            callbacks=self._callbacks,
+            events=self._events,
             scope=scope,
         )
 
 
 def _reviewer_factory(
-    responses, callbacks: Callbacks | None = None
+    responses, events: RunEvents | None = None
 ) -> tuple[ReviewerProcessFactory, list[dict[str, object]], MockAgent]:
     """Return a reviewer process factory plus its captured calls and agent."""
-    factory = ReviewerProcessFactory(responses, callbacks)
+    factory = ReviewerProcessFactory(responses, events)
     return factory, factory.calls, factory.agent
 
 
@@ -242,9 +245,11 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
         context_usage=None,
     )
     run_logger = AgentLogger(tmp_path)
+    events = RunEvents()
+    run_logger.subscribe(events)
     factory, builder_calls, _ = _reviewer_factory(
         [make_response(make_goal_verdict(True), 20, 10)],
-        callbacks=Callbacks([run_logger.as_callback_set()]),
+        events=events,
     )
 
     outcome = await run_goal_loop(
@@ -255,7 +260,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
         initial_result=initial_result,
         parent_agent_config=make_agent_config(tools=[]),
         process_factory=factory,
-        callbacks=Callbacks(),
+        events=RunEvents(),
         phase_id="p1",
         compact_if_needed=_noop_compact,
     )
@@ -300,7 +305,7 @@ async def test_run_goal_loop_inherits_parent_config_with_read_only_tools(tmp_pat
         initial_result=initial_result,
         parent_agent_config=parent_config,
         process_factory=factory,
-        callbacks=Callbacks(),
+        events=RunEvents(),
         phase_id="p1",
         compact_if_needed=_noop_compact,
     )
@@ -340,7 +345,7 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
         initial_result=initial_result,
         parent_agent_config=make_agent_config(tools=[]),
         process_factory=factory,
-        callbacks=Callbacks(),
+        events=RunEvents(),
         phase_id="p1",
         compact_if_needed=_noop_compact,
     )
@@ -387,7 +392,7 @@ async def test_run_goal_loop_resets_large_reviewer_context_before_retry(tmp_path
         initial_result=initial_result,
         parent_agent_config=make_agent_config(tools=[]),
         process_factory=factory,
-        callbacks=Callbacks(),
+        events=RunEvents(),
         phase_id="p1",
         compact_if_needed=_noop_compact,
     )
@@ -430,7 +435,7 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
             initial_result=initial_result,
             parent_agent_config=make_agent_config(tools=[]),
             process_factory=factory,
-            callbacks=Callbacks(),
+            events=RunEvents(),
             phase_id="p1",
             compact_if_needed=_noop_compact,
         )
@@ -467,7 +472,7 @@ async def test_run_goal_loop_flow_stop_from_worker_retry_carries_loop_tokens(tmp
             initial_result=initial_result,
             parent_agent_config=make_agent_config(tools=[]),
             process_factory=factory,
-            callbacks=Callbacks(),
+            events=RunEvents(),
             phase_id="p1",
             compact_if_needed=_noop_compact,
         )
@@ -500,7 +505,7 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
         initial_result=initial_result,
         parent_agent_config=make_agent_config(tools=[]),
         process_factory=factory,
-        callbacks=Callbacks(),
+        events=RunEvents(),
         phase_id="p1",
         compact_if_needed=_noop_compact,
     )
@@ -535,7 +540,7 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
             initial_result=initial_result,
             parent_agent_config=make_agent_config(tools=[]),
             process_factory=factory,
-            callbacks=Callbacks(),
+            events=RunEvents(),
             phase_id="p1",
             compact_if_needed=_noop_compact,
         )
@@ -545,17 +550,15 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
     assert err.output_tokens == 3 + 4
 
 
-async def test_run_goal_loop_fires_callbacks(tmp_path):
-    events: list = []
-    cb_set = CallbackSet()
+async def test_run_goal_loop_reports_each_attempt():
+    events = RunEvents()
+    received: list[BeforeGoalCheck | AfterGoalCheck] = []
 
-    @cb_set.on_before_goal_check
-    async def _before(phase_id: str, task_name: str, attempt: int) -> None:
-        events.append(("before", phase_id, task_name, attempt))
+    async def record(notice: BeforeGoalCheck | AfterGoalCheck) -> None:
+        received.append(notice)
 
-    @cb_set.on_after_goal_check
-    async def _after(phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None:
-        events.append(("after", phase_id, task_name, attempt, valid, reason))
+    events.subscribe(BeforeGoalCheck, record)
+    events.subscribe(AfterGoalCheck, record)
 
     worker_process, _ = _make_worker_process([make_response("attempt 2", 0, 0)])
     initial_result = ReActResult(
@@ -580,13 +583,13 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
         initial_result=initial_result,
         parent_agent_config=make_agent_config(tools=[]),
         process_factory=factory,
-        callbacks=Callbacks([cb_set]),
+        events=events,
         phase_id="p1",
         compact_if_needed=_noop_compact,
     )
-    assert events == [
-        ("before", "p1", "t1", 1),
-        ("after", "p1", "t1", 1, False, "fix X"),
-        ("before", "p1", "t1", 2),
-        ("after", "p1", "t1", 2, True, ""),
+    assert received == [
+        BeforeGoalCheck("p1", "t1", 1),
+        AfterGoalCheck("p1", "t1", 1, False, "fix X"),
+        BeforeGoalCheck("p1", "t1", 2),
+        AfterGoalCheck("p1", "t1", 2, True, ""),
     ]

@@ -11,9 +11,10 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import PhaseConfig, RuntimeVariables
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.phases.notices import PhaseErrored, PhaseFinished, PhaseStarted
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointTokenInfo,
@@ -34,7 +35,6 @@ class FlowContext:
 
     runtime_variables: RuntimeVariables
     flow_variables: dict[str, str]
-    callbacks: Callbacks = field(default_factory=Callbacks)
     logger: logging.Logger = field(default_factory=lambda: logging.getLogger(__name__))
     resume_frontier: frozenset[str] = frozenset()
 
@@ -62,6 +62,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         config: PhaseConfig,
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
+        events: RunEvents,
     ) -> None:
         super().__init__(name=phase_id)
         self._phase_id = phase_id
@@ -70,7 +71,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._checkpoint_manager = checkpoint_manager
         self._runtime_variables = context.runtime_variables
         self._flow_variables = context.flow_variables
-        self._callbacks = context.callbacks
+        self._events = events
         self._logger = context.logger
         self._is_resume_frontier = phase_id in context.resume_frontier
         self._started_at: datetime | None = None
@@ -121,6 +122,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             config=config,
             checkpoint_manager=checkpoint_manager,
             context=context,
+            events=resources.events,
         )
 
     @abstractmethod
@@ -129,7 +131,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
     async def process_message(self, message: PhaseTrigger) -> None:
         """Immutable pipeline skeleton. Not intended to be overridden — implement execute() instead."""
         self._started_at = datetime.now(UTC)
-        await self._callbacks.fire_phase_start(self._phase_id)
+        await self._events.notify(PhaseStarted(self._phase_id))
 
         context: dict[str, Any] = {
             **self._flow_variables,
@@ -155,7 +157,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
         self._checkpoint_manager.write_memory(self._phase_id, outcome.memory_text)
         self._checkpoint_manager.write_phase_checkpoint(self._phase_id, checkpoint)
-        await self._callbacks.fire_phase_finish(self._phase_id)
+        await self._events.notify(PhaseFinished(self._phase_id))
 
     async def on_success(self, message: PhaseTrigger) -> None:
         """Emit PhaseTrigger to unblock dependent phases."""
@@ -186,7 +188,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         except Exception:
             self._logger.exception("Failed to write failure checkpoint for phase %s", self._phase_id)
         finally:
-            await self._callbacks.fire_phase_error(self._phase_id, original_error)
+            await self._events.notify(PhaseErrored(self._phase_id, original_error))
             self.submit_message(
                 PhaseFailedMessage(
                     id=f"{self._phase_id}_failed",

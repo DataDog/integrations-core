@@ -8,8 +8,9 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import AgentError, FlowStopRequested
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, ToolCall, ToolResultMessage
-from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.react import notices
 from ddev.ai.react.types import ReActResult
+from ddev.ai.run_events import RunEvents
 from ddev.ai.runtime.parallel import gather_until_run_abort
 from ddev.ai.tools.core.types import ToolResult
 
@@ -45,27 +46,27 @@ class ReActProcess:
         runtime: AgentRuntime,
         *,
         scope: AgentScope,
-        callbacks: Callbacks | None = None,
+        events: RunEvents,
         compact_threshold_pct: float | None = 75.0,
     ) -> None:
         """
         Args:
             runtime: Agent runtime containing the agent and its tool registry.
-            scope: Identity stamped onto every agent-tier callback event.
-            callbacks: Optional Callbacks instance to observe loop events.
+            scope: Identity attached to every agent notice.
+            events: The run's event pipe.
             compact_threshold_pct: Context usage percentage at which the loop auto-compacts.
                 None disables auto-compaction entirely.
         """
         self._agent = runtime.agent
         self._tool_registry = runtime.tool_registry
-        self._callbacks: Callbacks = callbacks or Callbacks()
+        self._events = events
         self._scope = scope
         self._compact_threshold_pct = compact_threshold_pct
 
     async def reset(self) -> None:
         """Clear the agent's conversation history."""
         self._agent.reset()
-        await self._callbacks.fire_context_cleared(self._scope)
+        await self._events.notify(notices.ContextCleared(self._scope))
 
     async def compact(self, response: AgentResponse | None = None) -> tuple[int, int]:
         """Compact the agent's conversation history unconditionally.
@@ -76,7 +77,7 @@ class ReActProcess:
         Returns (total_input_tokens, output_tokens) from the compaction API call.
         Returns (0, 0) if history was already compact and no API call was made.
         """
-        await self._callbacks.fire_before_compact(self._scope)
+        await self._events.notify(notices.BeforeCompact(self._scope))
 
         compact_response = None
         if response is None or not response.tool_calls:
@@ -84,7 +85,7 @@ class ReActProcess:
         else:
             compact_response = await self._agent.compact_preserving_last_turn()
 
-        await self._callbacks.fire_after_compact(self._scope)
+        await self._events.notify(notices.AfterCompact(self._scope))
         if compact_response is None:
             return 0, 0
         return compact_response.usage.total_input_tokens, compact_response.usage.output_tokens
@@ -133,19 +134,19 @@ class ReActProcess:
             A ReActResult summarising the final response, token counts, and iteration count.
 
         Raises:
-            Every exception is forwarded after notifying callbacks.
+            Every exception is re-raised after notifying observers.
         """
         try:
             tool_names = [d["name"] for d in self._tool_registry.definitions]
-            await self._callbacks.fire_agent_start(self._scope, self._agent.system_prompt, tool_names)
-            await self._callbacks.fire_before_agent_send(self._scope, prompt, 1)
+            await self._events.notify(notices.AgentStarted(self._scope, self._agent.system_prompt, tool_names))
+            await self._events.notify(notices.AgentBeforeSend(self._scope, prompt, 1))
 
             response = await self._agent.send(prompt, allowed_tools)
             iterations = 1
             total_input = response.usage.total_input_tokens
             total_output = response.usage.output_tokens
 
-            await self._callbacks.fire_agent_response(self._scope, response, iterations)
+            await self._events.notify(notices.AgentResponded(self._scope, response, iterations))
 
             # No iteration cap — this is an interactive CLI tool; the user can Ctrl+C to stop.
             # Loop while a tool call is pending. A MAX_TOKENS turn can also carry a (truncated)
@@ -172,7 +173,7 @@ class ReActProcess:
                 tool_call_results = list(zip(response.tool_calls, tool_results, strict=True))
 
                 for tc, result in tool_call_results:
-                    await self._callbacks.fire_tool_call(self._scope, tc, result, iterations)
+                    await self._events.notify(notices.ToolCalled(self._scope, tc, result, iterations))
 
                 stop_reason = next((result.stop_reason for _, result in tool_call_results if result.stop_reason), None)
                 if stop_reason is not None:
@@ -184,14 +185,14 @@ class ReActProcess:
 
                 messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
 
-                await self._callbacks.fire_before_agent_send(self._scope, TOOL_RESULTS_SENTINEL, iterations + 1)
+                await self._events.notify(notices.AgentBeforeSend(self._scope, TOOL_RESULTS_SENTINEL, iterations + 1))
 
                 response = await self._agent.send(messages, allowed_tools)
                 iterations += 1
                 total_input += response.usage.total_input_tokens
                 total_output += response.usage.output_tokens
 
-                await self._callbacks.fire_agent_response(self._scope, response, iterations)
+                await self._events.notify(notices.AgentResponded(self._scope, response, iterations))
 
                 if self._is_compact_needed(response):
                     compact_in, compact_out = await self.compact(response)
@@ -209,23 +210,22 @@ class ReActProcess:
                 context_usage=response.usage.context_usage,
             )
 
-            await self._callbacks.fire_agent_finish(self._scope, react_result)
+            await self._events.notify(notices.AgentFinished(self._scope, react_result))
 
             return react_result
 
         except BaseException as e:
-            await self._callbacks.fire_agent_error(self._scope, e)
+            await self._events.notify(notices.AgentErrored(self._scope, e))
             raise
 
     async def run_once(self, prompt: str) -> AgentResponse:
-        """Run a single agent turn with no tools available, firing scoped callbacks.
-        Does not fire on_agent_start/on_agent_finish callbacks.
+        """Run one turn without tools or agent start and finish notices.
         The caller is responsible for token accounting."""
         try:
-            await self._callbacks.fire_before_agent_send(self._scope, prompt, 1)
+            await self._events.notify(notices.AgentBeforeSend(self._scope, prompt, 1))
             response = await self._agent.send(prompt, allowed_tools=[])
-            await self._callbacks.fire_agent_response(self._scope, response, 1)
+            await self._events.notify(notices.AgentResponded(self._scope, response, 1))
             return response
         except BaseException as e:
-            await self._callbacks.fire_agent_error(self._scope, e)
+            await self._events.notify(notices.AgentErrored(self._scope, e))
             raise
