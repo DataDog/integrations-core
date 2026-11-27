@@ -12,6 +12,10 @@ def shared_use_localized_counters():
     return False
 
 
+def instance_collect_directory():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 

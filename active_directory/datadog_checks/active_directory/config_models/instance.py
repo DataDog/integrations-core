@@ -90,6 +90,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     additional_metrics: Optional[tuple[tuple[str, ...], ...]] = None
+    collect_directory: Optional[bool] = None
     counter_data_types: Optional[tuple[str, ...]] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None

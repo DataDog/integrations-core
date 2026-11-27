@@ -9,6 +9,22 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: collect_directory
+      description: |
+        Send Active Directory user and computer records to Datadog instead of collecting performance metrics.
+
+        Use a dedicated instance for this, and set it on every domain controller. Only the domain controller
+        holding the PDC emulator role collects, so each domain is read once. Records are read with the
+        Agent's own Windows account.
+
+        The whole directory is read every `min_collection_interval` seconds, or every 3600 seconds (1 hour)
+        if `min_collection_interval` is not set. Keep `min_collection_interval` at 3600 or higher: every crawl
+        reads the whole directory from the PDC emulator. The minimum supported value is 1800 (30 minutes);
+        lower values are raised to 1800.
+      value:
+        type: boolean
+        example: false
+      fleet_configurable: true
     - template: instances/perf_counters
       overrides:
         extra_metrics.value.example:
@@ -19,3 +35,11 @@ files:
     - template: instances/pdh_legacy
       hidden: true
     - template: instances/default
+      overrides:
+        min_collection_interval.description: |
+          This changes the collection interval of the check. For more information, see:
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+
+          When `collect_directory` is true, the default is 3600 seconds (1 hour). Keep it at 3600 or higher,
+          since every run reads the whole directory from the PDC emulator. The minimum supported value is
+          1800 (30 minutes); lower values are raised to 1800.
