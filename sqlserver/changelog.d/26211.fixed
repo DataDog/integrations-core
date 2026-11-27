@@ -1,0 +1,1 @@
+Warn when the current file of the `datadog_query_plans` XE session's `event_file` target can't be determined.

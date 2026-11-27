@@ -219,6 +219,8 @@ class XESessionBase(DBMAsyncJob):
         self._session_problem: SqlServerHealthEvent | None = None
         # Whether the last read of the session or its target was denied, so its warning is logged once.
         self._target_read_denied = False
+        # Whether the current file of the event_file target was unknown at the last run, so its warning is logged once.
+        self._event_file_current_file_unknown = False
 
     # Methods to allow subclasses to extend field definitions
     def get_numeric_fields(self, event_type=None):
@@ -300,11 +302,22 @@ class XESessionBase(DBMAsyncJob):
         return None, None
 
     def _event_file_current_file(self, target_data: str | None) -> str | None:
+        """The current file of the event_file target, with a warning logged once when it can't be determined."""
         try:
-            return event_file_current_file(target_data)
+            current_file = event_file_current_file(target_data)
+            reason = "its target data is {!r}".format(target_data)
         except etree.XMLSyntaxError as e:
-            self._log.debug("Failed to parse the event_file target data of %s: %s", self.session_name, e)
-            return None
+            current_file = None
+            reason = "its target data isn't valid XML: {}".format(e)
+        if not current_file and not self._event_file_current_file_unknown:
+            self._log.warning(
+                "Unable to find the current file of the %s XE session's event_file target, so no %s are collected: %s",
+                self.session_name,
+                self.COLLECTED_DATA_NAME,
+                reason,
+            )
+        self._event_file_current_file_unknown = not current_file
+        return current_file
 
     def _report_target_read(self, denied_error: Exception | None) -> None:
         """

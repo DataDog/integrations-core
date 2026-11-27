@@ -1237,6 +1237,53 @@ def test_session_health_events(aggregator, xe_instance, caplog):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    'target_data, reason',
+    [
+        pytest.param(None, 'its target data is None', id='no_target_data'),
+        pytest.param('<EventFileTarget/>', "its target data is '<EventFileTarget/>'", id='no_file'),
+        pytest.param(
+            '<EventFileTarget><File name=""/></EventFileTarget>',
+            "its target data is '<EventFileTarget><File name=\"\"/></EventFileTarget>'",
+            id='empty_file_name',
+        ),
+        pytest.param('<EventFileTarget', "its target data isn't valid XML", id='invalid_xml'),
+    ],
+)
+def test_event_file_current_file_unknown_warning(xe_instance, caplog, target_data, reason):
+    """
+    An event_file target whose current file can't be determined logs a warning once, until the file is found again,
+    and isn't read until then.
+    """
+    unknown_file_targets = [('event_file', target_data)]
+    server = FakeServer(targets=unknown_file_targets)
+    handler = make_handler(xe_instance, server)
+    caplog.set_level(logging.WARNING)
+
+    def warnings() -> list[str]:
+        return [r.getMessage() for r in caplog.records if 'datadog_query_plans' in r.getMessage()]
+
+    handler.run_job()
+    handler.run_job()
+
+    [warning] = warnings()
+    assert warning.startswith(
+        "Unable to find the current file of the datadog_query_plans XE session's event_file target, so no real "
+        "execution plans are collected: " + reason
+    )
+    assert not server.executed(EVENT_FILE_LAST_BUFFER_QUERY)
+
+    server.targets = None
+    handler.run_job()
+    assert server.executed(EVENT_FILE_LAST_BUFFER_QUERY) == [(CURRENT_FILE,)]
+
+    server.targets = unknown_file_targets
+    handler.run_job()
+    handler.run_job()
+    assert len(warnings()) == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     'engine_edition,tab',
     [
         pytest.param(ENGINE_EDITION_ENTERPRISE, 'selfhosted', id='self_hosted'),

@@ -26,9 +26,10 @@ ORDER BY file_offset DESC
 # keeps the row for the checkpoint without sending the event; its buffer; and the event's name.
 EVENT_FILE_READ_COLUMNS = """\
 CASE WHEN DATALENGTH(event_data) <= ? THEN event_data END AS event_data, file_name, file_offset, object_name"""
-# The reads and checkpoints rely on `sys.fn_xe_file_target_read_file` returning rows in (file_name, file_offset) order,
-# as it reads the files and their buffers one after the other. The documentation doesn't guarantee it, but
-# `ORDER BY file_name, file_offset` could sort every row after the checkpoint before `TOP` applies.
+# The reads, the checkpoints and the lookup of the oldest file rely on `sys.fn_xe_file_target_read_file` returning rows
+# in (file_name, file_offset) order, as it reads the files and their buffers one after the other. The documentation
+# doesn't guarantee it, but `ORDER BY file_name, file_offset` could sort every row after the checkpoint before `TOP`
+# applies.
 EVENT_FILE_READ_QUERY = f"""\
 SELECT TOP (?) {EVENT_FILE_READ_COLUMNS}
 FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
@@ -48,7 +49,9 @@ FROM sys.fn_xe_file_target_read_file(?, NULL, ?, ?)
 """
 # The rows fetched at a time. A read holds one batch of events, rather than its `max_events` events.
 EVENT_FILE_FETCH_BATCH_SIZE = 10
-# The oldest file the target still retains, as the files are read oldest first.
+# The oldest file the target still retains: the file of the first row, as the files are read oldest first. `MIN` or
+# `ORDER BY` would read every event of every file. Were a newer file returned, a checkpoint whose file is retained could
+# be taken as gone, and the reading would start over at the oldest file, skipping only the latest events read before.
 EVENT_FILE_OLDEST_FILE_QUERY = """\
 SELECT TOP 1 file_name
 FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
