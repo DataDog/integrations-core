@@ -1,14 +1,14 @@
 {
     "version": 2,
     "created_at": "2025-08-08",
-    "last_updated_at": "2025-08-08",
+    "last_updated_at": "2026-11-26",
     "title": "ECS Fargate network received error rate exceeds threshold",
-    "description": "Network received error rate represents the percentage of network packets that failed to be received successfully. This monitor tracks when the error rate exceeds the configured threshold to identify network connectivity issues that could lead to data transmission failures and service degradation.",
+    "description": "Network received error rate is the share of received packets that failed. This monitor divides the per-second rate of the cumulative `ecs.fargate.net.rcvd_errors` counter by the received packet rate per task and interface, so errors counted once at task start do not keep it alerting.",
     "definition": {
-        "name": "[ECS Fargate] Network received error rate is high for service: {{ecs_service.name}} in cluster: {{ecs_cluster.name}}",
+        "name": "[ECS Fargate] Network received error rate is high for task: {{task_arn.name}} in service: {{ecs_service.name}}",
         "type": "query alert",
-        "query": "sum(last_5m):sum:ecs.fargate.net.rcvd_errors{*} by {ecs_service,ecs_cluster} / sum:ecs.fargate.net.bytes_rcvd{*} by {ecs_service,ecs_cluster} * 100 > 5",
-        "message": "ECS Fargate service {{ecs_service.name}} in cluster {{ecs_cluster.name}} has a network received error rate of {{value}}%, which exceeds the 5% threshold.\n\nThis indicates potential network connectivity issues. To investigate further, view the affected service in the [ECS Explorer](/orchestration/explorer/ecsService?query=ecs_service:{{ecs_service.name}}+ecs_cluster:{{ecs_cluster.name}})",
+        "query": "avg(last_5m):per_second(avg:ecs.fargate.net.rcvd_errors{*} by {ecs_cluster_name,ecs_service,task_arn,interface}) / avg:container.net.rcvd.packets{*} by {ecs_cluster_name,ecs_service,task_arn,interface} * 100 > 5",
+        "message": "Task {{task_arn.name}} of ECS Fargate service {{ecs_service.name}} in cluster {{ecs_cluster_name.name}} has a network received error rate of {{value}}% on interface {{interface.name}}, which exceeds the 5% threshold.\n\nThis indicates potential network connectivity issues. To investigate further, view the affected service in the [ECS Explorer](/orchestration/explorer/ecsService?query=ecs_service:{{ecs_service.name}}+ecs_cluster:{{ecs_cluster_name.name}})",
         "tags": ["integration:ecs_fargate"],
         "options": {
             "thresholds": {
@@ -17,7 +17,7 @@
             "notify_audit": false,
             "on_missing_data": "default",
             "include_tags": true,
-            "new_group_delay": 60
+            "new_group_delay": 300
         }
     },
     "tags": [
