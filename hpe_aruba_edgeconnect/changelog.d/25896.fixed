@@ -1,1 +1,0 @@
-Avoid resending outstanding alarms as events when the alarm cache is empty, such as on a first run or after an HA failover.

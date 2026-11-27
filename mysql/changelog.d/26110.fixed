@@ -1,1 +1,0 @@
-Mark query activity text read from `PROCESSLIST_INFO` as truncated when it reaches the 1024-byte limit.

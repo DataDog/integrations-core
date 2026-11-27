@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 2.2.0 / 2026-11-25
+
+***Added***:
+
+* Support combined basic authentication credentials in the Prefect check. ([#25596](https://github.com/DataDog/integrations-core/pull/25596))
+
+***Fixed***:
+
+* Add the missing license headers. ([#25983](https://github.com/DataDog/integrations-core/pull/25983))
+* Fix the work queue backlog size and age metrics dropping flow runs that stay overdue for more than one collection interval. ([#26025](https://github.com/DataDog/integrations-core/pull/26025))
+
 ## 2.1.0 / 2026-10-29 / Agent 7.86.0
 
 ***Added***:

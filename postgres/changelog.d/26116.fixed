@@ -1,1 +1,0 @@
-Fix the Postgres query metrics text lookup appearing under several query signatures that differ only in `int2`, `int4` or `int8` array casts.

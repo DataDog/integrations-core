@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 23.15.1 / 2026-11-25
+
+***Fixed***:
+
+* Fix the Postgres query metrics text lookup appearing under several query signatures that differ only in `int2`, `int4` or `int8` array casts. ([#26116](https://github.com/DataDog/integrations-core/pull/26116))
+* Fix the subscription error metrics on PostgreSQL 19, where `pg_stat_subscription_stats.sync_error_count` was renamed. ([#26144](https://github.com/DataDog/integrations-core/pull/26144))
+* Back off query text fetches from `pg_stat_statements` while they keep failing, instead of repeating a full read of the stored query text every collection. ([#26152](https://github.com/DataDog/integrations-core/pull/26152))
+
 ## 23.15.0 / 2026-10-29 / Agent 7.86.0
 
 ***Added***:
