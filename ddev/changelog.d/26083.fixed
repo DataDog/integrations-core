@@ -1,0 +1,1 @@
+Apply the `-o`/`--org` override after loading the configuration so commands can use the selected organization.
