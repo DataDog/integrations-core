@@ -1,0 +1,36 @@
+version: "1"
+
+tasks:
+  # Full metric-coverage fixture: a single authenticated Scylla node with a
+  # seeded schema and a built-in workload that keeps every metric on the OOTB
+  # dashboard and recommended monitor non-zero. Presents the metrics endpoint
+  # on 9180 and CQL on 9042 through a plain TCP pass-through. Configure the
+  # check with `prometheus_url: http://$DB_HOST:$DB_PORT/metrics`: the
+  # dashboard uses the legacy metric names. See ./README.md.
+  - id: scylla-full
+    task: ./compose/full-coverage.compose@scylla-proxy
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DB_HOST: "{{ .hostname }}"
+      evalya.io/provides.DB_PORT: "9180"
+      evalya.io/provides.CQL_PORT: "9042"
+      evalya.io/provides.DB_USERNAME: "${DB_USERNAME:-cassandra}"
+      evalya.io/provides.DB_PASSWORD: "${DB_PASSWORD:-cassandra}"
+    env:
+      - name: SCYLLA_VERSION
+        value: "${SCYLLA_VERSION:-5.2.6}"
+      - name: DB_USERNAME
+        value: "${DB_USERNAME:-cassandra}"
+      - name: DB_PASSWORD
+        value: "${DB_PASSWORD:-cassandra}"
+      - name: ACTIVITY_GEN
+        value: "${ACTIVITY_GEN:-1}"
+    # The entrypoint is only reachable once seed has verified DB_USERNAME and
+    # DB_PASSWORD can log in, so readiness here is the metrics endpoint the
+    # check scrapes reporting NORMAL operation mode.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9180/metrics | grep -q '^scylla_node_operation_mode{shard=\"0\"} 3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
