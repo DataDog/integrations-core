@@ -123,6 +123,10 @@ class KubeAPIServerMetricsCheck(SliMetricsScraperMixin, OpenMetricsBaseCheck):
         }
         self.kube_apiserver_config = None
 
+        # Make the default explicit so the trusted-provider validation of the base class sees it.
+        for instance in instances or []:
+            instance.setdefault('bearer_token_auth', self.DEFAULT_BEARER_TOKEN_AUTH)
+
         super(KubeAPIServerMetricsCheck, self).__init__(
             name,
             init_config,
@@ -132,21 +136,25 @@ class KubeAPIServerMetricsCheck(SliMetricsScraperMixin, OpenMetricsBaseCheck):
         )
 
         if instances is not None:
-            for instance in instances:
-                url = instance.get('health_url')
-                prometheus_url = instance.get('prometheus_url')
+            # The SLI probe sends authenticated requests, so it must run after the trusted-provider validation.
+            self.check_initializations.append(lambda: self._configure_instances(instances))
 
-                if url is None and search(r'/metrics$', prometheus_url):
-                    url = sub(r'/metrics$', '/healthz', prometheus_url)
+    def _configure_instances(self, instances):
+        for instance in instances:
+            url = instance.get('health_url')
+            prometheus_url = instance.get('prometheus_url')
 
-                instance['health_url'] = url
+            if url is None and search(r'/metrics$', prometheus_url):
+                url = sub(r'/metrics$', '/healthz', prometheus_url)
 
-                slis_instance = self.create_sli_prometheus_instance(instance)
-                instance['sli_scraper_config'] = self.get_scraper_config(slis_instance)
-                if instance.get('slis_available') is None:
-                    instance['slis_available'] = self.detect_sli_endpoint(
-                        self.get_http_handler(instance['sli_scraper_config']), slis_instance.get('prometheus_url')
-                    )
+            instance['health_url'] = url
+
+            slis_instance = self.create_sli_prometheus_instance(instance)
+            instance['sli_scraper_config'] = self.get_scraper_config(slis_instance)
+            if instance.get('slis_available') is None:
+                instance['slis_available'] = self.detect_sli_endpoint(
+                    self.get_http_handler(instance['sli_scraper_config']), slis_instance.get('prometheus_url')
+                )
 
     def check(self, instance):
         if self.kube_apiserver_config is None:

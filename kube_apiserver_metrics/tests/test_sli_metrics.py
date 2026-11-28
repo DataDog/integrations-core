@@ -32,9 +32,9 @@ def mock_metrics():
         yield
 
 
-def test_check_metrics_slis(aggregator, mock_metrics, instance):
+def test_check_metrics_slis(dd_run_check, aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
     SLIMetric = namedtuple("SLIMetric", ["name", "value", "tags"])
 
     expected_metrics = [
@@ -66,9 +66,9 @@ def test_check_metrics_slis(aggregator, mock_metrics, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_metrics_slis_transform(aggregator, mock_metrics, instance):
+def test_check_metrics_slis_transform(dd_run_check, aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
 
     SLIMetric = namedtuple("SLIMetric", ["name", "count", "tags"])
 
@@ -81,9 +81,9 @@ def test_check_metrics_slis_transform(aggregator, mock_metrics, instance):
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count, tags=metric.tags)
 
 
-def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, instance):
+def test_check_metrics_slis_filter_by_type(dd_run_check, aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
 
     SLIMetric = namedtuple("SLIMetric", ["name", "count", "tags"])
 
@@ -98,9 +98,9 @@ def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, instance):
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count, tags=metric.tags)
 
 
-def test_detect_sli_endpoint(aggregator, mock_metrics, instance):
+def test_detect_sli_endpoint(dd_run_check, aggregator, mock_metrics, instance):
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    dd_run_check(c)
     SLIMetric = namedtuple("SLIMetric", ["name", "count"])
 
     expected_metrics = [
@@ -112,11 +112,11 @@ def test_detect_sli_endpoint(aggregator, mock_metrics, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_detect_sli_endpoint_404(aggregator, instance, mock_http_response):
+def test_detect_sli_endpoint_404(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(status_code=404)
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     mock_http_response(status_code=200)
-    c.check(instance)
+    dd_run_check(c)
     SLIMetric = namedtuple("SLIMetric", ["name", "count"])
 
     expected_metrics = [
@@ -127,11 +127,11 @@ def test_detect_sli_endpoint_404(aggregator, instance, mock_http_response):
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count)
 
 
-def test_detect_sli_endpoint_403(aggregator, instance, mock_http_response):
+def test_detect_sli_endpoint_403(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(status_code=403)
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     mock_http_response(status_code=200)
-    c.check(instance)
+    dd_run_check(c)
     SLIMetric = namedtuple("SLIMetric", ["name", "count"])
 
     expected_metrics = [
@@ -140,3 +140,21 @@ def test_detect_sli_endpoint_403(aggregator, instance, mock_http_response):
     ]
     for metric in expected_metrics:
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count)
+
+
+def test_sli_probe_skipped_for_untrusted_provider(dd_run_check, datadog_agent, monkeypatch):
+    """`bearer_token_auth` defaults to true, so the SLI probe must not send the token before validation."""
+    monkeypatch.setitem(datadog_agent._config, 'integration_ignore_untrusted_file_params', True)
+    instance = {'prometheus_url': 'https://localhost:443/metrics'}
+
+    with (
+        mock.patch.object(KubeAPIServerMetricsCheck, '_get_bearer_token', return_value='token'),
+        mock.patch.object(KubeAPIServerMetricsCheck, 'detect_sli_endpoint') as detect_sli_endpoint,
+    ):
+        check = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
+        check.provider = 'kubernetes'
+
+        with pytest.raises(Exception, match="(?s)ConfigurationError.*bearer_token_auth.*not allowed"):
+            dd_run_check(check)
+
+    detect_sli_endpoint.assert_not_called()

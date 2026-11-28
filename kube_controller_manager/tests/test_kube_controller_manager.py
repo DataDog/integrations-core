@@ -137,6 +137,7 @@ def test_service_check_ok(monkeypatch):
     instance_tags = []
 
     check = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
+    check.run_check_initializations()
 
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 

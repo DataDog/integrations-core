@@ -6,7 +6,12 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 
+from datadog_checks.base.config import is_affirmative
+
 DEFAULT_TRUSTED_PROVIDERS: tuple[str, ...] = ('file', 'remote-config')
+
+# Token that the OpenMetrics checks read when `bearer_token_auth` is enabled without `bearer_token_path`.
+KUBERNETES_SERVICE_ACCOUNT_TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
 
 
 @dataclass
@@ -90,3 +95,20 @@ def check_field_trusted_provider(
     """Raise ValueError if the field value is not allowed from an untrusted provider."""
     if not validate_require_trusted_provider(field_name, value, security_config):
         raise ValueError(f"Field '{field_name}' is not allowed from untrusted provider '{security_config.provider}'")
+
+
+def check_implicit_bearer_token(
+    bearer_token_auth: object,
+    bearer_token_path: str | None,
+    security_config: SecurityConfig | None,
+) -> None:
+    """
+    Raise ValueError if `bearer_token_auth` would send the Agent's own service account token from an untrusted provider.
+
+    Without `bearer_token_path` there is no configured path field for the field-level checks to gate,
+    so the implicit default path is validated instead.
+    """
+    if bearer_token_path is not None:
+        return
+    if bearer_token_auth == 'tls_only' or is_affirmative(bearer_token_auth):
+        check_field_trusted_provider('bearer_token_auth', KUBERNETES_SERVICE_ACCOUNT_TOKEN_PATH, security_config)

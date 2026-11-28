@@ -1,0 +1,1 @@
+Stop treating strings such as `false` as enabled for `bearer_token_auth` in the OpenMetrics compatibility scraper.

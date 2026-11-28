@@ -614,7 +614,8 @@ class OpenMetricsCompatibilityScraper(OpenMetricsScraper):
 
         bearer_token_auth = new_config.pop('bearer_token_auth', False)
         bearer_token_path = new_config.pop('bearer_token_path', '/var/run/secrets/kubernetes.io/serviceaccount/token')
-        if bearer_token_auth:
+        # Match the legacy implementation: strings such as 'false' must not enable the token.
+        if bearer_token_auth == 'tls_only' or is_affirmative(bearer_token_auth):
             new_config.setdefault(
                 'auth_token',
                 {
