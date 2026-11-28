@@ -1,0 +1,44 @@
+{
+  "name": "Automox worklet policy reaches many devices",
+  "product": [
+    "security_monitoring"
+  ],
+  "defaultRuleId": "def-000-wrm",
+  "tags": [
+    "source:automox",
+    "security:attack",
+    "tactic:TA0002-execution",
+    "technique:T1072-software-deployment-tools",
+    "mitre_platform:windows",
+    "mitre_platform:macos",
+    "mitre_platform:linux"
+  ],
+  "isEnabled": true,
+  "isShadowDeployed": true,
+  "isBeta": true,
+  "options": {
+    "detectionMethod": "threshold",
+    "evaluationWindow": 900,
+    "keepAlive": 3600,
+    "maxSignalDuration": 86400
+  },
+  "queries": [
+    {
+      "name": "automox_wide_reach_worklet",
+      "query": "source:automox @ocsf.class_uid:6001 @ocsf.message:(\"Policy Created\" OR \"Policy Configuration Updated\" OR \"Policy Activated\") @ocsf.web_resources.data.policy_type_name:(custom OR required_software) @ocsf.web_resources.data.server_count:>=25",
+      "groupByFields": [
+        "@ocsf.web_resources.uid"
+      ],
+      "distinctFields": [],
+      "aggregation": "count"
+    }
+  ],
+  "cases": [
+    {
+      "name": "",
+      "status": "Medium",
+      "notifications": [],
+      "condition": "automox_wide_reach_worklet > 0"
+    }
+  ]
+}

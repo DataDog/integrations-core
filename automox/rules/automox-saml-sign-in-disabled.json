@@ -1,0 +1,43 @@
+{
+  "name": "Automox SAML sign-in disabled",
+  "product": [
+    "security_monitoring"
+  ],
+  "defaultRuleId": "def-000-smd",
+  "tags": [
+    "source:automox",
+    "security:attack",
+    "tactic:TA0005-defense-evasion",
+    "technique:T1556-modify-authentication-process",
+    "mitre_platform:cloud",
+    "mitre_platform:saas"
+  ],
+  "isEnabled": true,
+  "isShadowDeployed": true,
+  "isBeta": true,
+  "options": {
+    "detectionMethod": "threshold",
+    "evaluationWindow": 900,
+    "keepAlive": 3600,
+    "maxSignalDuration": 86400
+  },
+  "queries": [
+    {
+      "name": "automox_saml_disabled",
+      "query": "source:automox @ocsf.class_uid:3004 @ocsf.message:\"Zone SAML Disabled\"",
+      "groupByFields": [
+        "@ocsf.entity.uid"
+      ],
+      "distinctFields": [],
+      "aggregation": "count"
+    }
+  ],
+  "cases": [
+    {
+      "name": "",
+      "status": "Medium",
+      "notifications": [],
+      "condition": "automox_saml_disabled > 0"
+    }
+  ]
+}

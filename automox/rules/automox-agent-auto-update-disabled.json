@@ -1,0 +1,44 @@
+{
+  "name": "Automox agent auto-update turned off",
+  "product": [
+    "security_monitoring"
+  ],
+  "defaultRuleId": "def-000-aau",
+  "tags": [
+    "source:automox",
+    "security:attack",
+    "tactic:TA0005-defense-evasion",
+    "technique:T1562-impair-defenses",
+    "mitre_platform:windows",
+    "mitre_platform:macos",
+    "mitre_platform:linux"
+  ],
+  "isEnabled": true,
+  "isShadowDeployed": true,
+  "isBeta": true,
+  "options": {
+    "detectionMethod": "threshold",
+    "evaluationWindow": 900,
+    "keepAlive": 3600,
+    "maxSignalDuration": 86400
+  },
+  "queries": [
+    {
+      "name": "automox_agent_auto_update_off",
+      "query": "source:automox @ocsf.class_uid:6001 @ocsf.message:\"Agent Auto Update Switched From On to Off\"",
+      "groupByFields": [
+        "@ocsf.web_resources.uid"
+      ],
+      "distinctFields": [],
+      "aggregation": "count"
+    }
+  ],
+  "cases": [
+    {
+      "name": "",
+      "status": "Low",
+      "notifications": [],
+      "condition": "automox_agent_auto_update_off > 0"
+    }
+  ]
+}
