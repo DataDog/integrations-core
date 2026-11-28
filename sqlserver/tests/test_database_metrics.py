@@ -2253,6 +2253,52 @@ def test_sqlserver_database_metrics_init(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize('failed_batches', [1, 2])
+def test_database_metric_query_failures_warn_without_stopping_collection(
+    aggregator,
+    init_config,
+    instance_docker_metrics,
+    failed_batches: int,
+):
+    databases = ['first', 'second', 'third']
+    failing_databases = set(databases[:failed_batches])
+    queries = [
+        {
+            'name': 'sys.databases',
+            'query': 'SELECT name, state FROM sys.databases WHERE name = ?',
+            'params': (database,),
+            'columns': [{'name': 'db', 'type': 'tag'}, {'name': 'database.state', 'type': 'gauge'}],
+        }
+        for database in databases
+    ]
+
+    def execute_query(query: str, params: tuple[str, ...]) -> list[tuple[str, int]]:
+        database = params[0]
+        if database in failing_databases:
+            raise RuntimeError('Database metric query failed')
+        return [(database, 0)]
+
+    check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    executor = check._new_query_executor(queries, execute_query)
+    executor.compile_queries()
+    executor.execute()
+
+    for database in databases[failed_batches:]:
+        aggregator.assert_metric_has_tag('sqlserver.database.state', f'db:{database}')
+    warnings = check.get_warnings()
+    assert len(warnings) == 1
+    assert 'sys.databases' in warnings[0]
+
+    failing_databases.clear()
+    aggregator.reset()
+    executor.execute()
+
+    for database in databases:
+        aggregator.assert_metric_has_tag('sqlserver.database.state', f'db:{database}')
+    assert check.get_warnings() == []
+
+
+@pytest.mark.unit
 def test_database_metric_operation_tags_are_not_metric_tags(aggregator, init_config, instance_docker_metrics):
     query = {
         'name': 'test_query',

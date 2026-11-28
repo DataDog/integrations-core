@@ -7,7 +7,7 @@ from __future__ import annotations, division
 import functools
 import time
 from collections import defaultdict
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from typing import Any
 
 from cachetools import TTLCache
@@ -134,6 +134,21 @@ KEY_PREFIX = "dbm-sqlserver-"
 # What a metric class's `fetch_all_values` hands back: the rows it fetched, in whatever shape that class
 # dispatches from, and their column names. Classes that index their own rows return None for the columns.
 MetricFetchResult = tuple[Any, list[str] | None]
+
+
+class SqlserverQueryExecutor(QueryExecutor):
+    def execute_query(self, query: str, params: tuple | None = None) -> Iterator[tuple]:
+        try:
+            return super().execute_query(query, params=params)
+        except Exception:
+            query_name = next((item.name for item in self.queries if item.query == query), 'database metric query')
+            message = (
+                f"Failed to collect SQL Server metrics from {query_name}; "
+                "some metrics may be missing. See the Agent logs for details."
+            )
+            if message not in self.submitter.warnings:
+                self.submitter.warning(message)
+            raise
 
 
 class SQLServer(DatabaseCheck):
@@ -288,7 +303,7 @@ class SQLServer(DatabaseCheck):
             executor = execute_tracked_query
             track_operation_time = False
 
-        return QueryExecutor(
+        return SqlserverQueryExecutor(
             executor,
             self,
             queries=queries,
