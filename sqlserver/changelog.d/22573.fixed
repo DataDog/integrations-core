@@ -1,0 +1,1 @@
+Fix parsing of SQL Server major versions for Azure SQL version strings.
