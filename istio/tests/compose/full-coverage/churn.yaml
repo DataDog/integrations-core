@@ -1,0 +1,52 @@
+# Applied by ../../activity-gen.sh on every iteration with __N__ replaced, so
+# each pass is a real spec change. istiod records the drill gauges
+# (drills.yaml) per push context and only for what that push recomputed. The
+# bundle lands within one debounce window (seed.sh sets it to 1s), so a single
+# full push re-merges the destination rules, recomputes the mesh proxies'
+# service targets (the `notready` service change), and regenerates every
+# proxy's listeners and clusters, recording all of them together. The ghost
+# endpoint behind endpoint_no_pod is not part of the bundle: activity-gen.sh
+# touches it after this push lands (see there).
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: web
+  namespace: mesh
+spec:
+  hosts:
+    - web.mesh.svc.cluster.local
+  http:
+    - timeout: __N__s
+      route:
+        - destination:
+            host: web.mesh.svc.cluster.local
+            subset: v1
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: web-duplicate-subset
+  namespace: mesh
+spec:
+  host: web.mesh.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: __N__
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notready
+  namespace: mesh
+spec:
+  ports:
+    - name: http
+      port: 80
+    - name: http-churn
+      port: 1__N__
+      targetPort: 80
