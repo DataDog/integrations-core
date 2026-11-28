@@ -33,6 +33,9 @@
         "spec": "assets/configuration/spec.yaml"
       }
     },
+    "dashboards": {
+      "Cisco ISE Overview": "assets/dashboards/cisco_ise_overview.json"
+    },
     "logs": {
       "source": "cisco-ise"
     }
